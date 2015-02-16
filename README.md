@@ -20,8 +20,7 @@ types along with their associated invokation method:
 * TCP Server   : Uses standard 'telnet' client to invoke functions
 * UDP Server   : Uses included 'pshell' client to invoke functions
 * UNIX Server  : Uses included 'pshell' client to invoke functions
-* LOCAL Server : No client program needed, functions invoked directly<br>
-                 from within application itself
+* LOCAL Server : No client program needed, functions invoked directly from within application itself
 
 The functions are dispatched via its registered command name (keyword), along
 with 0 or more command line arguments, similar to command line shell processing.
