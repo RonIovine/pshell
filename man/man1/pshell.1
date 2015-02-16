@@ -1,0 +1,59 @@
+.TH pshell 1 "Sep 2012" "PSHELL" "PSHELL - Process Specific Embedded Command Line Shell" 
+.SH NAME
+pshell/pshell.exp - PSHELL UDP/UNIX client program/Telnet TCP client 'expect' script wrapper
+.SH DESCRIPTION
+The PSHELL API framework provides the ability to embed a shell type Command Line Interface
+.br
+(CLI) into any C/C++ application that can then be accessed via either the provided UDP/UNIX
+.br
+client program (called 'pshell') or via a standard 'telnet' based client.
+.br
+
+The 'pshell' program provides the client side command line interface (CLI) functionality
+.br
+to perform remote diagnostics and debug of any process running the UDP based PshellServer.
+.br
+The corresponding 'pshell'exp' 'expect' script provides a wrapper around a 'telnet' client
+.br
+to give a similar UI as the 'pshell' UDP/UNIX client program.
+.SH USAGE
+Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<serverName> | <portNum>}
+              [-h | ? | {<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]
+
+  where:
+
+    -h,?       - show pshell usage or command set of specified PSHELL server
+    -s         - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file
+    -f         - run commands from a batch file
+    -t         - change the default server response timeout
+    hostName   - hostname of desired PSHELL server (UDP only)
+    ipAddress  - IP address of desired PSHELL server (UDP only)
+    unix       - Specifies server is a UNIX domain server
+    serverName - name of desired PSHELL server (UDP or UNIX)
+    portNum    - port number of desired PSHELL server (UDP only)
+    timeout    - value in seconds to use for server response timeout
+    command    - optional command to execute
+    fileName   - optional batch file to execute
+    rate       - optional rate to repeat command or batch file (in seconds)
+    clear      - clear screen between commands or batch file passes
+
+    NOTE: If no <command> is given, pshell will be started
+          up in interactive mode, commands issued in command
+          line mode that require arguments must be enclosed 
+          in double quotes, commands issued in interactive
+          mode that require arguments do not require double
+          quotes.
+
+          To get help on a command in command line mode, type
+          "<command> ?" or "<command> -h".  To get help in
+          interactive mode type 'help' or '?' at the prompt to
+          see all available commands, to get help on a single
+          command, type '<command> {? | -h}'.  Use TAB completion
+          to fill out partial commands and up-arrow to recall
+          the last entered command.
+.SH EXAMPLES
+See the 'README' file that is distributed with this package for detailed instructions
+.br
+on using this framework.
+.SH SEE ALSO
+PshellServer(3C), PshellControl(3C), TraceFilter(3C)

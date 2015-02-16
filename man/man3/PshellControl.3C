@@ -1,0 +1,57 @@
+.TH PshellControl 3C "Sep 2012" "PSHELL" "PSHELL - External client control of pshell" 
+.SH NAME
+PshellControl - External Client Program Control of Remote PSHELL Server
+.SH DESCRIPTION
+This API provides the ability for an external client program to invoke functions
+.br
+that are registered in a remote program running a pshell server.  This API will
+.br
+only work on remote programs that are running either a UDP or UNIX pshell server.
+
+.SH SYNOPSIS
+
+#include "PshellControl.h"
+
+/* on success, function returns valid Server ID (sid) to be used as input to other functions */
+
+int pshell_connectServer(const char *controlName_,
+                         const char *remoteServer_,
+                         unsigned port_ = PSHELL_UNIX_SERVER,
+                         unsigned defaultTimeout_ = PSHELL_NO_WAIT);
+                         
+/* release resources for this connection */
+
+void pshell_disconnectServer(int sid_);
+
+/* issue remote command, function returns status of command */
+
+int pshell_sendCommand1(int sid_, const char *command_, ...);
+.br
+int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...);
+
+/*
+.br
+ * issue remote command and extract results, function returns number
+.br
+ * of bytes extracted, must use non-0 wait time to extract results,
+.br
+ * extracted results is ascii formatted raw character data
+.br
+ */
+
+int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command_, ...);
+.br
+int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...);
+
+The above synposis is just a summary of the most relevant part of the API,
+.br
+to see the full API refer to the include file 'PshellControl.h'
+.SH EXAMPLES
+See the file pshellControlDemo.c in the pshell distribution package for a complete 
+.br
+list of examples of invoking functions in a remote pshell via a local client program.
+.SH MT-LEVEL
+Safe
+
+.SH SEE ALSO
+pshell(1), PshellServer(3C)

@@ -1,0 +1,318 @@
+#!/usr/bin/expect
+
+#################################################################################
+# 
+# Copyright (c) 2009, Ron Iovine, All rights reserved.  
+#  
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Ron Iovine nor the names of its contributors 
+#       may be used to endorse or promote products derived from this software 
+#       without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE. 
+#
+#################################################################################
+
+#################################################################################
+#
+# This is an expect script that wraps a telnet session for the TCP based PSHELL
+# server to provide for a similar command line usage as the UDP based "pshell"
+# client program that is used for the UDP based PSHELL server
+#
+#################################################################################
+
+# if the terminal title bar and prompt are changed in the PshellServers.c file
+# from these defaults below, make sure the following two variables are changed
+# accordingly
+
+set title "PSHELL"
+set prompt "PSHELL>"
+
+proc showUsage {} {
+  puts ""
+  puts "Usage: pshell.exp -h | ? | -s | {<hostName> | <ipAddress>} {<serverName> | <portNum>}"
+  puts "                 \[-h | ? | {<command> \[<rate> \[clear\]\]} | {-f <fileName> \[<rate> \[clear\]}\]"
+  puts ""
+  puts "  where:"
+  puts ""
+  puts "    -h,?       - show pshell.exp usage or command set of specified PSHELL server"
+  puts "    -s         - show named servers in \$PSHELL_CONFIG_DIR/pshell-client.conf file"
+  puts "    -f         - run commands from a batch file"
+  puts "    -t         - change the default server response timeout"
+  puts "    hostName   - hostname of desired PSHELL server"
+  puts "    ipAddress  - IP address of desired PSHELL server"
+  puts "    serverName - name of desired PSHELL server"
+  puts "    portNum    - port number of desired PSHELL server"
+  puts "    command    - optional command to execute"
+  puts "    fileName   - optional batch file to execute"
+  puts "    rate       - optional rate to repeat command or batch file (in seconds)"
+  puts "    clear      - clear screen between commands or batch file passes"
+  puts ""
+  puts "    NOTE: If no <command> is given, pshell will be started"
+  puts "          up in interactive mode, commands issued in command"
+  puts "          line mode that require arguments must be enclosed "
+  puts "          in double quotes, commands issued in interactive"
+  puts "          mode that require arguments do not require double"
+  puts "          quotes."
+  puts ""
+  puts "          To get help on a command in command line mode, type"
+  puts "          \"<command> ?\" or \"<command> -h\".  To get help in"
+  puts "          interactive mode type 'help' or '?' at the prompt to"
+  puts "          see all available commands, to get help on a single"
+  puts "          command, type '<command> {? | -h}'.  Use TAB completion"
+  puts "          to fill out partial commands and up-arrow to recall"
+  puts "          the last entered command."
+  puts ""
+  exit
+}
+
+proc setTitle {title} {
+  puts -nonewline "\033\]0;$title\007"
+  flush stdout
+}
+
+proc clearScreen {} {
+  variable clearScreen
+  puts -nonewline $clearScreen
+  flush stdout
+}
+
+# validate our command line argument count
+if {[llength $argv] < 1 || [llength $argv] > 6} {
+  showUsage
+}
+
+set timeout 30
+#log_user 0
+if {[llength $argv] == 1} {
+  if {[lindex $argv 0] == "-s"} {
+    # see if our env variable exists
+    if { [info exists env(PSHELL_CONFIG_DIR) ] } {
+      set serversFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
+    } else {
+      set serversFile /etc/pshell-client.conf
+    }
+    # check if our source file exists
+    if ![file exists $serversFile] {
+      puts "PSHELL_ERROR: Server file '$serversFile' not found"
+      exit
+    }
+    # scan the file to get our mas server name length so we can have a prettily aligned output
+    set maxServerNameLength 11
+    set file [open $serversFile r]
+    while {[gets $file line] != -1} {
+      if {[string index $line 0] != "#" && [string length $line] > 0} {
+        set list [split $line ":"]
+        if {[llength $list] == 2 && [string length [lindex $list 0]] > $maxServerNameLength} {
+          set maxServerNameLength [string length [lindex $list 0]]
+        }
+      }
+    }
+    # now display our servers, print out our banner
+    puts ""
+    puts "**************************************"
+    puts "*      Available PSHELL Servers      *"
+    puts "**************************************"
+    puts ""
+    puts -nonewline "Server Name"
+    for {set count 11} {$count < $maxServerNameLength} {incr count 1} {
+      puts -nonewline " "
+    }
+    puts "  Port Number"
+    for {set count 0} {$count < $maxServerNameLength} {incr count 1} {
+      puts -nonewline "-"
+    }
+    puts "  -----------"
+    # got the max server name length, now reset the file pointer and read it again
+    seek $file 0
+    while {[gets $file line] != -1} {
+      if {[string index $line 0] != "#" && [string length $line] > 0} {
+        set list [split $line ":"]
+        if {[llength $list] == 2} {
+          set serverName [lindex $list 0]
+          set portNum [lindex $list 1]
+          puts -nonewline $serverName
+          for {set count [string length $serverName]} {$count < $maxServerNameLength} {incr count 1} {
+            puts -nonewline " "
+          }
+          puts "  $portNum"
+        }
+      }
+    }
+    puts ""
+    exit
+  } else {
+    showUsage
+  }
+} 
+
+# dropped through to here, try to connect to the specified server
+set hostOrIpAddr [lindex $argv 0]
+set serverName [lindex $argv 1]
+set portNum $serverName
+
+# open any servers file to get the port number
+if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/pshell-client.conf] } {
+  set serversFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
+} else {
+  set serversFile /etc/pshell-client.conf
+}
+if { [file exists $serversFile] } {
+  set file [open $serversFile r]
+  while {[gets $file line] != -1} {
+    if {[string index $line 0] != "#" && [string length $line] > 0} {
+      set list [split $line ":"]
+      if {[llength $list] == 2 && [string compare $serverName [lindex $list 0]] == 0} {
+        set portNum [lindex $list 1]
+        break
+      }
+    }
+  }
+}
+
+set rate 0
+set command ""
+set batchFile ""
+set clearScreen ""
+
+# parse our command line
+if {[llength $argv] == 3} {
+  if {[lindex $argv 2] == "-h" || [lindex $argv 2] == "?"} {
+    set command "help"
+  } else {
+    set command [lindex $argv 2]
+  }
+} elseif {[llength $argv] == 4} {
+  if {[lindex $argv 2] == "-f"} {
+    set batchFile [lindex $argv 3]
+  } else {
+    set command [lindex $argv 2]
+    set rate [lindex $argv 3]
+  }
+} elseif {[llength $argv] == 5} {
+  if {[lindex $argv 2] == "-f"} {
+    set batchFile [lindex $argv 3]
+    set rate [lindex $argv 4]
+  } else {
+    set command [lindex $argv 2]
+    set rate [lindex $argv 3]
+    if {[lindex $argv 4] == "clear"} {
+      set clearScreen "\033\[H\033\[J"
+    } else {
+      showUsage
+    }
+  }
+} elseif {[llength $argv] == 6} {
+  if {[lindex $argv 2] == "-f"} {
+    set batchFile [lindex $argv 3]
+    set rate [lindex $argv 4]
+    if {[lindex $argv 5] == "clear"} {
+      set clearScreen "\033\[H\033\[J"
+    } else {
+      showUsage
+    }
+  } else {
+    showUsage
+  }
+}
+
+# connect to our server
+spawn -noecho telnet $hostOrIpAddr $portNum
+expect {
+  "Connection refused" { exit }
+  "Unknown host" { exit }
+  "Connection timed out" { exit }
+  "bad port" { exit }
+  timeout { 
+    puts "telnet: connect to address $hostOrIpAddr: Connection timed out" 
+    exit 
+  }
+  $prompt 
+}
+
+# get our actual server name & ip address based on the prompt
+set welcome [split $expect_out(buffer) "\n"]
+set serverNameAndIpAddress [split  [lindex $welcome [expr [llength $welcome]-1]] ":"]
+set serverName [lindex [split $serverNameAndIpAddress "\["] 0]
+set serverName [lindex [split $serverName "\r"] 1]
+set ipAddress [lindex [split $serverNameAndIpAddress "\]"] 0]
+set ipAddress [lindex [split $ipAddress "\["] 1]
+
+# process our request    
+if {$command != ""} {
+  if {$rate > 0} {
+    set keyword $command
+    set keyword [split $keyword " "]
+    set keyword [lindex $keyword 0]
+    # setup our terminal title bar
+    setTitle "$title: $serverName\[$ipAddress\], Mode: COMMAND LINE\[$keyword\], Rate: $rate SEC"
+    while {1} {
+      clearScreen
+      send "$command\r"
+      expect $prompt
+      sleep $rate
+    }
+  } else {
+    send "$command\r"
+    expect $prompt
+    send "quit\r"
+    puts ""
+    exit
+  }
+} elseif {$batchFile != ""} {
+  set filename $batchFile
+  if { [info exists env(PSHELL_BATCH_DIR)] && [file exists $env(PSHELL_BATCH_DIR)/$batchFile] } {
+    set batchFile $env(PSHELL_BATCH_DIR)/$batchFile
+  }
+  if {[file exists $batchFile]} {
+    if {$rate > 0} {
+      # setup our terminal title bar
+      setTitle "$title: $serverName\[$ipAddress\], Mode: BATCH\[$filename\], Rate: $rate SEC"
+      set file [open $batchFile r]
+      while {1} {
+        # rewind file
+        seek $file 0
+        clearScreen
+        while {[gets $file command] != -1} {
+          if {[string index $command 0] != "#" && [string length $command] > 0} {
+            send "$command\r"
+            expect $prompt      
+          }
+        }
+        sleep $rate        
+      }
+    } else {
+      set file [open $batchFile r]
+      while {[gets $file command] != -1} {
+        if {[string index $command 0] != "#" && [string length $command] > 0} {
+          send "$command\r"
+          expect $prompt      
+        }
+      }
+      send "quit\r"
+      puts ""
+    }
+  } else {
+    puts "PSHELL_ERROR: Batch file '$batchFile' not found"
+  }
+  exit
+} else {
+  # setup our terminal title bar
+  setTitle "$title: $serverName\[$ipAddress\], Mode: INTERACTIVE"
+  interact
+}
