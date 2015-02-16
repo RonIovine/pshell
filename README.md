@@ -1,7 +1,7 @@
 # pshell
-Process Specific Embedded Command Line Shell for C/C++ Applications
+**Process Specific Embedded Command Line Shell for C/C++ Applications**
 
-INTRODUCTION:
+##### INTRODUCTION:
 
 This package contains all the necessary code, documentation and examples for
 building C/C++ applications that incorporate a Process Specific Embedded
@@ -11,16 +11,16 @@ invoked either via a separate client program or directly from the within applica
 itself.  The signature for the embedded functions are identical to the 'main' in
 'C' as follows:
 
-int myFunc(int argc, char *argv[]);
+`int myFunc(int argc, char *argv[]);`
 
 These functions can be invoked in several ways depending on how the internal
 PSHELL server is configured.  The following shows the various PSHELL server
 types along with their associated invokation method:
 
-TCP Server   : Uses standard 'telnet' client to invoke functions
-UDP Server   : Uses included 'pshell' client to invoke functions
-UNIX Server  : Uses included 'pshell' client to invoke functions
-LOCAL Server : No client program needed, functions invoked directly
+* TCP Server   : Uses standard 'telnet' client to invoke functions
+* UDP Server   : Uses included 'pshell' client to invoke functions
+* UNIX Server  : Uses included 'pshell' client to invoke functions
+* LOCAL Server : No client program needed, functions invoked directly
                from within application itself
 
 The functions are dispatched via its registered command name (keyword), along
