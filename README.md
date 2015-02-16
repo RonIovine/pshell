@@ -30,5 +30,5 @@ There is also a control mechanism API provided by where any external program
 can make calls into another program that is running a PSHELL that is configured
 for a UDP or UNIX server.
 
-This package also provides an integrated trace filtering mechanism that can be incorporated into any software that uses an existing trace logging system that uses the __FILE__, __LINE__, __FUNCTION__, and level paradigm. The trace filtering mechanism does not provide the actual logging service itself, only the filtering mechanism that can be dynamically controlled via the embedded CLI. 
+This package also provides an integrated trace filtering mechanism that can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`, `__LINE__`, `__FUNCTION__`, and `level` paradigm. The trace filtering mechanism does not provide the actual logging service itself, only the filtering mechanism that can be dynamically controlled via the embedded CLI. 
 
