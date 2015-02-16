@@ -5,12 +5,11 @@ PSHELL - Process Specific Embedded Command Line Shell
 INTRODUCTION:
 
 This package contains all the necessary code, documentation and examples for
-building C/C++ applications that incorporate a Process Specific Embedded
-Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
-framework and API to embed functions within a C/C++ application that can be
-invoked either via a separate client program or directly from the within application
-itself.  The signature for the embedded functions are identical to the 'main' in
-'C' as follows:
+building C/C++ applications that incorporate a Process Specific Embedded Command 
+Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight, framework 
+and API to embed functions within a C/C++ application that can be invoked either 
+via a separate client program or directly from the within application itself.  The 
+signature for the embedded functions are identical to the 'main' in 'C' as follows:
 
 int myFunc(int argc, char *argv[]);
 
@@ -34,8 +33,8 @@ for a UDP or UNIX server.
 GETTING STARTED:
 
 This package consists of one library (4 versions), one stand-alone UDP/UNIX
-client application (pshell), three utility shell scripts, one expect script, one
-build script and one demo program.  The rest of this README will assume
+client application (pshell), three utility shell scripts, one expect script, 
+one build script and one demo program.  The rest of this README will assume
 that this package has been unzipped with the current directory structure
 preserved.  It is understood that not all installations will follow this
 directory scheme.  Environment variables and the buildPshell, setPshellLib
@@ -50,18 +49,26 @@ The following lists all the pieces of this package along with a brief descriptio
   4.  libpshell-stub.so     -- Stub version of libpshell server library (shared)
   5   libpshell-control.so  -- External program control library (shared)
   6   libpshell-control.a   -- External program control library (static)
-  7.  pshell                -- Stand-alone PSHELL UDP/UNIX client remote access program
-  8.  pshell.exp            -- Expect script to provide interface similar to UDP/UNIX
-                               pshell client when using the TCP server with a telnet client
-  9.  buildPshell           -- Shell script to build the entire package or individual pieces
-  10. archivePshell         -- Shell script to creates a pshell-vX.Y.tar.gz archive of the
-                               install directory
-  11. setPshellLib          -- Shell script to set the libpshell.so softlink to desired library
-  12. showPshelllLib        -- Shell script to show the current libpshell.so softlink setting
-  13. pshellServerDemo      -- Demo application using the pshell server library features
-  14. pshellControlDemo     -- Demo application using the pshell control library features
-  15. traceFilterDemo       -- Demo application using the optional trace filter feature of
-                               the pshell server library
+  7.  pshell                -- Stand-alone PSHELL UDP/UNIX client remote access 
+                               program
+  8.  pshell.exp            -- Expect script to provide interface similar to 
+                               UDP/UNIX
+                               pshell client when using the TCP server with a 
+                               telnet client
+  9.  buildPshell           -- Shell script to build the entire package or 
+                               individual pieces
+  10. archivePshell         -- Shell script to creates a pshell-vX.Y.tar.gz 
+                               archive of the install directory
+  11. setPshellLib          -- Shell script to set the libpshell.so softlink to 
+                               desired library
+  12. showPshelllLib        -- Shell script to show the current libpshell.so 
+                               softlink setting
+  13. pshellServerDemo      -- Demo application using the pshell server library 
+                               features
+  14. pshellControlDemo     -- Demo application using the pshell control library 
+                               features
+  15. traceFilterDemo       -- Demo application using the optional trace filter 
+                               feature of the pshell server library
 
 ENVIRONMENT:
 
@@ -217,7 +224,8 @@ In most cases the defaults can be used and the flags don't need to be modified.
         is defined).  Set all the other "CHUNK" sizes to 1, and do not set the
         PSHELL_COPY_ADD_COMMAND_STRINGS flag.
 
-  TF_FAST_FILENAME_LOOKUP: for TraceFilter and application  (-lib & -demo build switch)
+  TF_FAST_FILENAME_LOOKUP: for TraceFilter and application  
+                           (-lib & -demo build switch)
 
     This flag specifies whether to use fast filename lookup just using a quick
     pointer compare rather than a full "strcmp".  When using this flag every file
@@ -225,7 +233,8 @@ In most cases the defaults can be used and the flags don't need to be modified.
     typically right after all the include directives.  This will preclude file
     filtering on '.h' files.
 
-  TF_MAX_TRACE_SYMBOLS: for TraceFilter and application  (-lib & -demo build switch)
+  TF_MAX_TRACE_SYMBOLS: for TraceFilter and application  
+                        (-lib & -demo build switch)
 
     If the TF_FAST_FILENAME_LOOKUP flag is set, this value specifies the max number
     of files in the filename symbol table, if not specified defaults to 5000
@@ -267,9 +276,9 @@ EXECUTION:
 
 To run the demo programs and any associated client programs, run "pshellServerDemo"
 and connect to it with the "pshell" client program (for the UDP/UNIX server) or
-telnet or the pshell.exp telnet expect script wrapper (for the TCP server).  Note, to
-use the "pshell.exp" expect script you need to have "expect" installed on your host in
-/usr/bin.
+telnet or the pshell.exp telnet expect script wrapper (for the TCP server).  Note, 
+to use the "pshell.exp" expect script you need to have "expect" installed on your 
+host in /usr/bin.
 
 (NOTE: To see the features of the dynamically configurable optional TraceFilter
 mechanism, run the program "traceFilterDemo".  It can be controlled via the same
@@ -289,23 +298,25 @@ Usage: pshellServerDemo -udp | -unix | -tcp | -local
     -local - Local command dispatching server
 
 Execute "pshellServerDemo -udp" or "pshellServerDemo -unix" at the command line,
-either in the foreground or background.  You can now interact with the pshellServerDemo
-program via the "pshell" client program.  Note, you can also run the "pshellServerDemo"
-program with the "-tcp" option and connect with the expect script "pshell.exp" which
-wraps a telnet session to make the look and feel be similar to the UDP/UNIX "pshell" client
-program.  The usage of the "pshell.exp" script is the same as the "pshell" UDP/UNIX client
-program shown below with the exception of the "-t <timeout>" option and the "batch" interactive
-command not being supported.  Also note that the TCP server is a single session server with a
-10 minute idle session timeout, whereas the UDP/UNIX server is a multi-session server with no
-idle session timeout.  Conversly, you can also connect to the TCP server by using telnet
-directly (i.e. "telnet localhost 6001") instead of the "pshell.exp" expect script telnet
-wrapper.
+either in the foreground or background.  You can now interact with the 
+"pshellServerDemo" program via the "pshell" client program.  Note, you can also run 
+the "pshellServerDemo" program with the "-tcp" option and connect with the expect 
+script "pshell.exp" which wraps a telnet session to make the look and feel be 
+similar to the UDP/UNIX "pshell" client program.  The usage of the "pshell.exp" 
+script is the same as the "pshell" UDP/UNIX client program shown below with the 
+exception of the "-t <timeout>" option and the "batch" interactive command not 
+being supported.  Also note that the TCP server is a single session server with a
+10 minute idle session timeout, whereas the UDP/UNIX server is a multi-session 
+server with no idle session timeout.  Conversly, you can also connect to the TCP 
+server by using telnet directly (i.e. "telnet localhost 6001") instead of the 
+"pshell.exp" expect script telnet wrapper.
 
 The usage of the "pshell" and "pshell.exp" (see NOTE) command line client programs
 are as follows:
 
-Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<serverName> | <portNum>}
-               [-h | ? | {<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]]}]
+Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} 
+               {<serverName> | <portNum>} [-h | ? | {<command> [<rate> [clear]]} | 
+               {-f <fileName> [<rate> [clear]]}]
 
   where:
 
@@ -431,9 +442,9 @@ $ pshell -s
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
-$PSHELL_INSTALL/demo/pshellServerDemo.cc   --  Server demo with user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc  --  Sample pshell control client
-$PSHELL_INSTALL/demo/traceFilterDemo.cc    --  Server demo dynamic trace filtering
+$PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control client
+$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo dynamic trace filtering
 
 SECURITY:
 
