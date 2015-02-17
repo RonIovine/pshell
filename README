@@ -91,6 +91,182 @@ PshellServer(3C)   - Describes the API and usage of the PshellServer
 PshellControl(3C)  - Describes the API and usage of the PshellControl
 TraceFilter(3C)    - Described the API and usage of the TraceFilter
 
+EXECUTION:
+
+To run the demo programs and any associated client programs, you must first setup
+the softlink to the pshell-server library.  After the3 abouve environment variables
+have been sourced, run "setPshellLib -full" to setup the softlink.  Now you can run
+"pshellServerDemo" and connect to it with the "pshell" client program (for the
+UDP/UNIX server) or telnet or the pshell.exp telnet expect script wrapper (for the
+TCP server).  Note, to use the "pshell.exp" expect script you need to have "expect"
+installed on your host in /usr/bin.
+
+(NOTE: To see the features of the dynamically configurable optional TraceFilter
+mechanism, run the program "traceFilterDemo".  It can be controlled via the same
+command line 'pshell' or 'telnet' client as "pshellServerDemo", so all following
+usage descriptions also apply to that)
+
+The usage of the "pshellServerDemo" program is as follows:
+
+$ pshellServerDemo -h
+
+Usage: pshellServerDemo -udp | -unix | -tcp | -local
+
+  where:
+    -udp   - Multi-session UDP server
+    -unix  - Multi-session UNIX server
+    -tcp   - Single session TCP server
+    -local - Local command dispatching server
+
+Execute "pshellServerDemo -udp" or "pshellServerDemo -unix" at the command line,
+either in the foreground or background.  You can now interact with the 
+"pshellServerDemo" program via the "pshell" client program.  Note, you can also run 
+the "pshellServerDemo" program with the "-tcp" option and connect with the expect 
+script "pshell.exp" which wraps a telnet session to make the look and feel be 
+similar to the UDP/UNIX "pshell" client program.  The usage of the "pshell.exp" 
+script is the same as the "pshell" UDP/UNIX client program shown below with the 
+exception of the "-t <timeout>" option and the "batch" interactive command not 
+being supported.  Also note that the TCP server is a single session server with a
+10 minute idle session timeout, whereas the UDP/UNIX server is a multi-session 
+server with no idle session timeout.  Conversly, you can also connect to the TCP 
+server by using telnet directly (i.e. "telnet localhost 6001") instead of the 
+"pshell.exp" expect script telnet wrapper.
+
+The usage of the "pshell" and "pshell.exp" (see NOTE) command line client programs
+are as follows:
+
+Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} 
+               {<serverName> | <portNum>} [-h | ? | {<command> [<rate> [clear]]} | 
+               {-f <fileName> [<rate> [clear]]}]
+
+  where:
+
+    -h,?       - show pshell usage or command set of specified PSHELL server
+    -s         - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file
+    -f         - run commands from a batch file
+    -t         - change the default server response timeout
+    hostName   - hostname of desired PSHELL server (UDP only)
+    ipAddress  - IP address of desired PSHELL server (UDP only)
+    unix       - Specifies server is a UNIX domain server
+    serverName - name of desired PSHELL server (UDP or UNIX)
+    portNum    - port number of desired PSHELL server (UDP only)
+    timeout    - value in seconds to use for server response timeout
+    command    - optional command to execute
+    fileName   - optional batch file to execute
+    rate       - optional rate to repeat command or batch file (in seconds)
+    clear      - clear screen between commands or batch file passes
+
+    NOTE: If no <command> is given, pshell will be started
+          up in interactive mode, commands issued in command
+          line mode that require arguments must be enclosed
+          in double quotes, commands issued in interactive
+          mode that require arguments do not require double
+          quotes.
+
+          To get help on a command in command line mode, type
+          "<command> ?" or "<command> -h".  To get help in
+          interactive mode type 'help' or '?' at the prompt to
+          see all available commands, to get help on a single
+          command, type '<command> {? | -h}'.  Use TAB completion
+          to fill out partial commands and up-arrow to recall
+          the last entered command.
+
+NOTE: The "-t <timeout>" option,the "unix" specifier, and the "batch" interative
+      command are only supported on the UDP/UNIX client/server.
+
+Invoke the pshell client program per the above usage.  The pshellServerDemo
+program uses the identifier "localhost" for the hostname, this name
+name should be used for the hostname given to the pshell client.
+
+EXAMPLES:
+
+The following is an example of how to enter into interactive mode
+with the pshellServerDemo program:
+
+$ pshell localhost pshellServerDemo
+
+Once this command is invoked, an interactive command line prompt is
+given as follows:
+
+pshellServerDemo[127.0.0.1]:PSHELL>
+
+The following is an example of specifying a different server response
+timeout value.  If a value is given, the default response timeout of
+5 seconds will be replaced by this value (UDP/UNIX client only).
+
+$ pshell -t20 localhost pshellServerDemo
+
+Commands can then be entered interactivley.  The following example shows
+how to display the command list in interactive mode (note that "?" also work):
+
+pshellServerDemo[127.0.0.1]:PSHELL> help
+
+The following shows the same command entered in command line mode:
+
+$ pshell localhost pshellServerDemo -h
+
+The following shows an example of executing a command with arguments:
+
+pshellServerDemo[127.0.0.1]:PSHELL> hello 1 2 3
+
+The following shows the same command entered in command line mode:
+
+$ pshell localhost pshellServerDemo "hello 1 2 3"
+
+The following shows how to execute command from a batch file in
+interactive mode (UDP/UNIX client only):
+
+pshellServerDemo[127.0.0.1]:PSHELL> batch pshellServerDemo.batch
+
+The following shows the same command entered in command line mode:
+
+$ pshell localhost pshellServerDemo -f pshellServerDemo.batch
+
+The following example shows how to display the usage of a given command
+in ineractive mode (note that "-h" also works)
+
+pshellServerDemo[127.0.0.1]:PSHELL> hello ?
+
+The following shows the same command entered in command line mode,
+note that "-h" will also accomplish the same thing:
+
+$ pshell localhost pshellServerDemo "hello ?"
+
+The following example shows executing a command at a periodic rate
+(every 1 second), this feature is available only in command line mode
+(note, if no arguments are given for the command, the double quotes
+are not necessary):
+
+$ pshell localhost pshellServerDemo "hello 1 2 3" 1
+
+The following example shows the same command as above but clearing the
+screen before each command
+
+$ pshell localhost pshellServerDemo "hello 1 2 3" 1 clear
+
+The following example shows executing a batch file at a periodic rate
+(every 1 second), this feature is available only in command line mode.
+
+$ pshell localhost pshellServerDemo -f pshellServerDemo.batch 1
+
+The following example shows the same command as above but clearing the
+screen before each invocation of the batch file
+
+$ pshell localhost pshellServerDemo -f pshellServerDemo.batch 1 clear
+
+The final example shows how to list all the named PSHELL servers in the
+$PSHELL_CONFIG_DIR/pshell-client.conf file, this is also only available
+in command line mode:
+
+$ pshell -s
+
+A complete code example of application programs that use all the
+main features of the PSHELL library can be found in the files:
+
+$PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control client
+$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo dynamic trace filtering
+
 BUILDING:
 
 This package includes binaries and libraries that were built and tested on
@@ -271,180 +447,6 @@ In most cases the defaults can be used and the flags don't need to be modified.
     Specifies whether to use colors for the 'ON/OFF/NONE' identifiers for the
     "trace show config" command and for the highlighting of the found substrings
     for the "trace show symbols" command
-
-EXECUTION:
-
-To run the demo programs and any associated client programs, run "pshellServerDemo"
-and connect to it with the "pshell" client program (for the UDP/UNIX server) or
-telnet or the pshell.exp telnet expect script wrapper (for the TCP server).  Note, 
-to use the "pshell.exp" expect script you need to have "expect" installed on your 
-host in /usr/bin.
-
-(NOTE: To see the features of the dynamically configurable optional TraceFilter
-mechanism, run the program "traceFilterDemo".  It can be controlled via the same
-command line 'pshell' or 'telnet' client as "pshellServerDemo", so all following
-usage descriptions also apply to that)
-
-The usage of the "pshellServerDemo" program is as follows:
-
-$ pshellServerDemo -h
-
-Usage: pshellServerDemo -udp | -unix | -tcp | -local
-
-  where:
-    -udp   - Multi-session UDP server
-    -unix  - Multi-session UNIX server
-    -tcp   - Single session TCP server
-    -local - Local command dispatching server
-
-Execute "pshellServerDemo -udp" or "pshellServerDemo -unix" at the command line,
-either in the foreground or background.  You can now interact with the 
-"pshellServerDemo" program via the "pshell" client program.  Note, you can also run 
-the "pshellServerDemo" program with the "-tcp" option and connect with the expect 
-script "pshell.exp" which wraps a telnet session to make the look and feel be 
-similar to the UDP/UNIX "pshell" client program.  The usage of the "pshell.exp" 
-script is the same as the "pshell" UDP/UNIX client program shown below with the 
-exception of the "-t <timeout>" option and the "batch" interactive command not 
-being supported.  Also note that the TCP server is a single session server with a
-10 minute idle session timeout, whereas the UDP/UNIX server is a multi-session 
-server with no idle session timeout.  Conversly, you can also connect to the TCP 
-server by using telnet directly (i.e. "telnet localhost 6001") instead of the 
-"pshell.exp" expect script telnet wrapper.
-
-The usage of the "pshell" and "pshell.exp" (see NOTE) command line client programs
-are as follows:
-
-Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} 
-               {<serverName> | <portNum>} [-h | ? | {<command> [<rate> [clear]]} | 
-               {-f <fileName> [<rate> [clear]]}]
-
-  where:
-
-    -h,?       - show pshell usage or command set of specified PSHELL server
-    -s         - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file
-    -f         - run commands from a batch file
-    -t         - change the default server response timeout
-    hostName   - hostname of desired PSHELL server (UDP only)
-    ipAddress  - IP address of desired PSHELL server (UDP only)
-    unix       - Specifies server is a UNIX domain server
-    serverName - name of desired PSHELL server (UDP or UNIX)
-    portNum    - port number of desired PSHELL server (UDP only)
-    timeout    - value in seconds to use for server response timeout
-    command    - optional command to execute
-    fileName   - optional batch file to execute
-    rate       - optional rate to repeat command or batch file (in seconds)
-    clear      - clear screen between commands or batch file passes
-
-    NOTE: If no <command> is given, pshell will be started
-          up in interactive mode, commands issued in command
-          line mode that require arguments must be enclosed
-          in double quotes, commands issued in interactive
-          mode that require arguments do not require double
-          quotes.
-
-          To get help on a command in command line mode, type
-          "<command> ?" or "<command> -h".  To get help in
-          interactive mode type 'help' or '?' at the prompt to
-          see all available commands, to get help on a single
-          command, type '<command> {? | -h}'.  Use TAB completion
-          to fill out partial commands and up-arrow to recall
-          the last entered command.
-
-NOTE: The "-t <timeout>" option,the "unix" specifier, and the "batch" interative
-      command are only supported on the UDP/UNIX client/server.
-
-Invoke the pshell client program per the above usage.  The pshellServerDemo
-program uses the identifier "localhost" for the hostname, this name
-name should be used for the hostname given to the pshell client.
-
-EXAMPLES:
-
-The following is an example of how to enter into interactive mode
-with the pshellServerDemo program:
-
-$ pshell localhost pshellServerDemo
-
-Once this command is invoked, an interactive command line prompt is
-given as follows:
-
-pshellServerDemo[127.0.0.1]:PSHELL>
-
-The following is an example of specifying a different server response
-timeout value.  If a value is given, the default response timeout of
-5 seconds will be replaced by this value (UDP/UNIX client only).
-
-$ pshell -t20 localhost pshellServerDemo
-
-Commands can then be entered interactivley.  The following example shows
-how to display the command list in interactive mode (note that "?" also work):
-
-pshellServerDemo[127.0.0.1]:PSHELL> help
-
-The following shows the same command entered in command line mode:
-
-$ pshell localhost pshellServerDemo -h
-
-The following shows an example of executing a command with arguments:
-
-pshellServerDemo[127.0.0.1]:PSHELL> hello 1 2 3
-
-The following shows the same command entered in command line mode:
-
-$ pshell localhost pshellServerDemo "hello 1 2 3"
-
-The following shows how to execute command from a batch file in
-interactive mode (UDP/UNIX client only):
-
-pshellServerDemo[127.0.0.1]:PSHELL> batch pshellServerDemo.batch
-
-The following shows the same command entered in command line mode:
-
-$ pshell localhost pshellServerDemo -f pshellServerDemo.batch
-
-The following example shows how to display the usage of a given command
-in ineractive mode (note that "-h" also works)
-
-pshellServerDemo[127.0.0.1]:PSHELL> hello ?
-
-The following shows the same command entered in command line mode,
-note that "-h" will also accomplish the same thing:
-
-$ pshell localhost pshellServerDemo "hello ?"
-
-The following example shows executing a command at a periodic rate
-(every 1 second), this feature is available only in command line mode
-(note, if no arguments are given for the command, the double quotes
-are not necessary):
-
-$ pshell localhost pshellServerDemo "hello 1 2 3" 1
-
-The following example shows the same command as above but clearing the
-screen before each command
-
-$ pshell localhost pshellServerDemo "hello 1 2 3" 1 clear
-
-The following example shows executing a batch file at a periodic rate
-(every 1 second), this feature is available only in command line mode.
-
-$ pshell localhost pshellServerDemo -f pshellServerDemo.batch 1
-
-The following example shows the same command as above but clearing the
-screen before each invocation of the batch file
-
-$ pshell localhost pshellServerDemo -f pshellServerDemo.batch 1 clear
-
-The final example shows how to list all the named PSHELL servers in the
-$PSHELL_CONFIG_DIR/pshell-client.conf file, this is also only available
-in command line mode:
-
-$ pshell -s
-
-A complete code example of application programs that use all the
-main features of the PSHELL library can be found in the files:
-
-$PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control client
-$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo dynamic trace filtering
 
 SECURITY:
 
