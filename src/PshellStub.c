@@ -67,14 +67,14 @@ void pshell_addCommand(PshellFunction function_,
                        unsigned char maxArgs_,
                        bool showUsage_){}
 
-int pshell_runCommand(const char *command_, ...){return (PSHELL_COMMAND_SUCCESS);}
+void pshell_runCommand(const char *command_, ...){}
 
 void pshell_printf(const char *format_, ...){}
 void pshell_flush(void){}
 void pshell_wheel(const char *string_){}
 void pshell_march(const char *string_){}
 bool pshell_isHelp(void){return (true);}
-int pshell_showUsage(void){return (0);}
+void pshell_showUsage(void){}
 PshellTokens *pshell_tokenize(const char *string_, const char *delimeter_){return (&_dummyTokens);}
 unsigned pshell_getLength(const char *string_){return (0);}
 bool pshell_isEqual(const char *string1_, const char *string2_){return (true);}

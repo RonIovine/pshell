@@ -86,33 +86,6 @@ enum PshellServerMode
   PSHELL_NON_BLOCKING 
 };
 
-/*
- * the following enum values are returned by the pshell_runCommand
- * function as well as the actual registered callback itself, these
- * must match their corresponding values in PshellControl.h, all of
- * these values except for PSHELL_COMMAND_NOT_FOUND can be returned
- * by the registered pshell callback function, if the callback function
- * is designed to be called via the remote PshellControl client API
- * mechanism, it is recommended that the full compliment of return
- * codes be used as appropriate in order to give the remote control
- * client as much visibility as possible as to the results of the call,
- * however if the callback if only to be used from an interactive CLI
- * client program (either 'telnet' or 'pshell'), then the command can
- * just return PSHELL_COMMAND_SUCCESS
- */
-enum PshellCommandResults
-{
-  PSHELL_COMMAND_SUCCESS,        
-  PSHELL_COMMAND_FAILURE,        
-  PSHELL_COMMAND_TIMEOUT,        
-  PSHELL_COMMAND_NOT_FOUND,      
-  PSHELL_COMMAND_INVALID_ARG_USAGE,  
-  PSHELL_COMMAND_INVALID_ARG_COUNT,  
-  PSHELL_COMMAND_INVALID_ARG_VALUE,  
-  PSHELL_COMMAND_INVALID_ARG_FORMAT,   
-  PSHELL_COMMAND_USAGE_REQUESTED,  
-};
-
 
 /******************************
  * public typedefs structures
@@ -164,7 +137,7 @@ void pshell_registerLogFunction(PshellLogFunction logFunction_);
  * PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST
  * 
  */
-typedef int (*PshellFunction) (int argc, char *argv[]); 
+typedef void (*PshellFunction) (int argc, char *argv[]); 
 
 /*
  * this is the function used to register pshell commands, if the command
@@ -198,13 +171,9 @@ void pshell_addCommand(PshellFunction function_,
  * registered callback function, the passed in string command should be the
  * exact same format as when calling the same desired command interactively
  * via the pshell command line client, this function uses a 'printf' type
- * vararg interface,the valid return values are defined in the enum
- * PshellCommandResults
+ * vararg interface
  */
-int pshell_runCommand(const char *command_, ...);
-
-/* map the PshellCommandResults enums to their corresponding strings */
-const char *pshell_getResultsString(int results_);
+void pshell_runCommand(const char *command_, ...);
 
 /*
  * this is the command used to invoke the pshell server, this function can
@@ -272,7 +241,7 @@ bool pshell_isHelp(void);
  * this function is used to show the usage the command was registered with,
  * it will return PSHELL_COMMAND_USAGE_REQUESTED
  */
-int pshell_showUsage(void);
+void pshell_showUsage(void);
 
 /*
  * the following functions are some simple helper functions

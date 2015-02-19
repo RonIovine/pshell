@@ -128,7 +128,7 @@ struct RegisteredThread
  
 static void showConfig(void);
 static void showUsage(void);
-static int configureFilter(int argc, char *argv[]);
+static void configureFilter(int argc, char *argv[]);
 static void loadConfigFile(const char *file_, bool interactive_);
 static void addLevelFilter(char *name_, unsigned &level_);
 static void addFileFilter(const char *file_, bool interactive_);
@@ -914,7 +914,7 @@ void showUsage(void)
 
 /******************************************************************************/
 /******************************************************************************/
-int configureFilter(int argc, char *argv[])
+void configureFilter(int argc, char *argv[])
 {
 
   if (pshell_isHelp())
@@ -1187,7 +1187,6 @@ int configureFilter(int argc, char *argv[])
   {
     showUsage();
   }
-  return (0);
 }
 
 /******************************************************************************/

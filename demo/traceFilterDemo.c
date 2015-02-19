@@ -117,7 +117,7 @@ void showUsage(void)
   printf("\n");
 }
 
-int setTriggers(int argc, char *argv[])
+void setTriggers(int argc, char *argv[])
 {
   if (pshell_isSubString(argv[0], "callback", 1))
   {
@@ -149,7 +149,6 @@ int setTriggers(int argc, char *argv[])
   {
     pshell_showUsage();
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /*

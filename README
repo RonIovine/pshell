@@ -5,13 +5,14 @@ PSHELL - Process Specific Embedded Command Line Shell
 INTRODUCTION:
 
 This package contains all the necessary code, documentation and examples for
-building C/C++ applications that incorporate a Process Specific Embedded Command 
-Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight, framework 
-and API to embed functions within a C/C++ application that can be invoked either 
-via a separate client program or directly from the within application itself.  The 
-signature for the embedded functions are identical to the 'main' in 'C' as follows:
+building C/C++ applications that incorporate a Process Specific Embedded Command
+Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
+framework and API to embed functions within a C/C++ application that can be
+invoked either via a separate client program or directly from the within
+application itself.  The signature for the embedded functions are similar to
+the 'main' in 'C' as follows:
 
-int myFunc(int argc, char *argv[]);
+void myFunc(int argc, char *argv[]);
 
 These functions can be invoked in several ways depending on how the internal
 PSHELL server is configured.  The following shows the various PSHELL server
@@ -32,43 +33,34 @@ for a UDP or UNIX server.
 
 GETTING STARTED:
 
-This package consists of one library (4 versions), one stand-alone UDP/UNIX
-client application (pshell), three utility shell scripts, one expect script, 
-one build script and one demo program.  The rest of this README will assume
-that this package has been unzipped with the current directory structure
-preserved.  It is understood that not all installations will follow this
-directory scheme.  Environment variables and the buildPshell, setPshellLib
-and showPshellLib shell scripts will need to be modified accordingly for a
-different install directory scheme.
+This package consists of 6 libraries (each library has both a shared and static
+version, in addition, the pshell-server libraray has a full and stub version),
+one stand-alone UDP/UNIX client application (pshell), three utility shell
+scripts, one expect script, one build script and three demo programs.  The rest
+of this README will assume that this package has been unzipped with the current
+directory structure preserved.  It is understood that not all installations will
+follow this directory scheme.  Environment variables and the buildPshell,
+setPshellLib and showPshellLib shell scripts will need to be modified
+accordingly for a different install directory scheme.
 
 The following lists all the pieces of this package along with a brief description:
 
-  1.  libpshell-full.a      -- Full version of libpshell server library (static)
-  2.  libpshell-full.so     -- Full version of libpshell server library (shared)
-  3.  libpshell-stub.a      -- Stub version of libpshell server library (static)
-  4.  libpshell-stub.so     -- Stub version of libpshell server library (shared)
-  5   libpshell-control.so  -- External program control library (shared)
-  6   libpshell-control.a   -- External program control library (static)
-  7.  pshell                -- Stand-alone PSHELL UDP/UNIX client remote access 
-                               program
-  8.  pshell.exp            -- Expect script to provide interface similar to 
-                               UDP/UNIX
-                               pshell client when using the TCP server with a 
-                               telnet client
-  9.  buildPshell           -- Shell script to build the entire package or 
-                               individual pieces
-  10. archivePshell         -- Shell script to creates a pshell-vX.Y.tar.gz 
-                               archive of the install directory
-  11. setPshellLib          -- Shell script to set the libpshell.so softlink to 
-                               desired library
-  12. showPshelllLib        -- Shell script to show the current libpshell.so 
-                               softlink setting
-  13. pshellServerDemo      -- Demo application using the pshell server library 
-                               features
-  14. pshellControlDemo     -- Demo application using the pshell control library 
-                               features
-  15. traceFilterDemo       -- Demo application using the optional trace filter 
-                               feature of the pshell server library
+  1.  libpshell-server-full.a  -- Full version of libpshell-server library (static)
+  2.  libpshell-server-full.so -- Full version of libpshell-server library (shared)
+  3.  libpshell-server-stub.a  -- Stub version of libpshell-server library (static)
+  4.  libpshell-server-stub.so -- Stub version of libpshell-server library (shared)
+  5   libpshell-control.so     -- External pshell program control libpshell-control library (shared)
+  6   libpshell-control.a      -- External pshell program control libpshell-control library (static)
+  7.  pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
+  8.  pshell.exp               -- Expect script to provide interface similar to UDP/UNIX pshell
+                                  client when using the TCP server with a telnet client
+  9.  buildPshell              -- Shell script to build the entire package or individual pieces
+  10. archivePshell            -- Shell script to creates a pshell-vX.Y.tar.gz archive
+  11. setPshellLib             -- Shell script to set the libpshell.so softlink to desired library
+  12. showPshelllLib           -- Shell script to show the current libpshell.so softlink setting
+  13. pshellServerDemo         -- Demo application using the pshell server library features
+  14. pshellControlDemo        -- Demo application using the pshell control library features
+  15. traceFilterDemo          -- Demo application using the optional trace filter feature
 
 ENVIRONMENT:
 
@@ -86,25 +78,25 @@ DOCUMENTATION:
 
 The following manpages are available from the above configured MANPATH:
 
-pshell(1)          - Described the framework as well as the client programs
+pshell(1)          - Describes the framework as well as the client program
 PshellServer(3C)   - Describes the API and usage of the PshellServer
 PshellControl(3C)  - Describes the API and usage of the PshellControl
 TraceFilter(3C)    - Described the API and usage of the TraceFilter
 
 EXECUTION:
 
-To run the demo programs and any associated client programs, you must first setup
-the softlink to the pshell-server library.  After the3 abouve environment variables
-have been sourced, run "setPshellLib -full" to setup the softlink.  Now you can run
-"pshellServerDemo" and connect to it with the "pshell" client program (for the
-UDP/UNIX server) or telnet or the pshell.exp telnet expect script wrapper (for the
-TCP server).  Note, to use the "pshell.exp" expect script you need to have "expect"
-installed on your host in /usr/bin.
+To run the demo programs and any associated client programs, you must first
+setup the softlink to the pshell-server library.  After the aboue environment
+variables have been sourced, run "setPshellLib -full" to setup the softlink.
+Now you can run "pshellServerDemo" and connect to it with the "pshell" client
+program (for the UDP/UNIX server) or telnet or the pshell.exp telnet expect
+script wrapper (for the TCP server).  Note, to use the "pshell.exp" expect
+script you need to have "expect" installed on your host in /usr/bin.
 
 (NOTE: To see the features of the dynamically configurable optional TraceFilter
 mechanism, run the program "traceFilterDemo".  It can be controlled via the same
 command line 'pshell' or 'telnet' client as "pshellServerDemo", so all following
-usage descriptions also apply to that)
+usage descriptions also apply to that.
 
 The usage of the "pshellServerDemo" program is as follows:
 
@@ -120,20 +112,21 @@ Usage: pshellServerDemo -udp | -unix | -tcp | -local
 
 Execute "pshellServerDemo -udp" or "pshellServerDemo -unix" at the command line,
 either in the foreground or background.  You can now interact with the 
-"pshellServerDemo" program via the "pshell" client program.  Note, you can also run 
-the "pshellServerDemo" program with the "-tcp" option and connect with the expect 
-script "pshell.exp" which wraps a telnet session to make the look and feel be 
-similar to the UDP/UNIX "pshell" client program.  The usage of the "pshell.exp" 
-script is the same as the "pshell" UDP/UNIX client program shown below with the 
-exception of the "-t <timeout>" option and the "batch" interactive command not 
-being supported.  Also note that the TCP server is a single session server with a
-10 minute idle session timeout, whereas the UDP/UNIX server is a multi-session 
-server with no idle session timeout.  Conversly, you can also connect to the TCP 
-server by using telnet directly (i.e. "telnet localhost 6001") instead of the 
-"pshell.exp" expect script telnet wrapper.
+"pshellServerDemo" program via the "pshell" client program.  Note, you can also
+run the "pshellServerDemo" program with the "-tcp" option and connect with the
+expect script "pshell.exp" which wraps a telnet session to make the look and
+feel be similar to the UDP/UNIX "pshell" client program.  The usage of the
+"pshell.exp" script is the same as the "pshell" UDP/UNIX client program shown
+below with the exception of the "-t<timeout>" option and the "batch"
+interactive command not being supported.  Also note that the TCP server is a
+single session server with a 10 minute idle session timeout, whereas the
+UDP/UNIX server is a multi-session server with no idle session timeout.
+Conversly, you can also connect to the TCP server by using telnet directly
+(i.e. "telnet localhost 6001") instead of the "pshell.exp" expect script telnet
+wrapper.
 
-The usage of the "pshell" and "pshell.exp" (see NOTE) command line client programs
-are as follows:
+The usage of the "pshell" and "pshell.exp" (see NOTE) command line client
+programs are as follows:
 
 Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} 
                {<serverName> | <portNum>} [-h | ? | {<command> [<rate> [clear]]} | 
@@ -300,6 +293,14 @@ pshell client program and the PshellServer common library.  These flags need
 to be manually added/removed from the buildPshell script as deemed necessary.
 In most cases the defaults can be used and the flags don't need to be modified.
 
+  PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST: for PshellServer (-lib build switch)
+
+    This flag is used to make the argc/argv interface into the pshell callback
+    functions behave in EXACTLY the same as the argc/argv in a 'C' "main".
+    That is, the actual command itself will be included in the argc argument
+    count and argv[0] will be the actual command.  If not set, argc/argv will
+    ONLY include the actual arguments typed after the command.
+
   PSHELL_CONFIG_DIR: for PshellServer, PshellClient, and PshellControl
 
     This is the default directory that contains the pshell-server.conf,
@@ -385,14 +386,6 @@ In most cases the defaults can be used and the flags don't need to be modified.
     set, the pointers to these strings will be used as-is for the command's
     command table entry.
 
-  PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST: for PshellServer (-lib build switch)
-
-    This flag is used to make the argc/argv interface into the pshell callback
-    functions behave in EXACTLY the same as the argc/argv in a 'C' "main".
-    That is, the actual command itself will be included in the argc argument
-    count and argv[0] will be the actual command.  If not set, argc/argv will
-    ONLY include the actual arguments typed after the command.
-
   NOTE: For minimal memory usage, set the PSHELL_PAYLOAD_CHUNK to a fairly
         modest value (it's been tested with a value as low as 20 when using
         the VSNPRINTF compile flag) and do NOT set the PSHELL_GROW_PAYLOAD_IN_CHUNKS
@@ -412,18 +405,19 @@ In most cases the defaults can be used and the flags don't need to be modified.
   TF_MAX_TRACE_SYMBOLS: for TraceFilter and application  
                         (-lib & -demo build switch)
 
-    If the TF_FAST_FILENAME_LOOKUP flag is set, this value specifies the max number
-    of files in the filename symbol table, if not specified defaults to 5000
+    If the TF_FAST_FILENAME_LOOKUP flag is set, this value specifies the max
+    number of files in the filename symbol table, if not specified defaults to
+    5000
 
   TF_MAX_LINE_FILTERS: for TraceFilter (-lib build switch)
 
-    Specifies the max number of line specifications (not lines) that can be placed
-    in a file filter, defaults to 50
+    Specifies the max number of line specifications (not lines) that can be
+    placed in a file filter, defaults to 50
 
   TF_MAX_FILE_FILTERS: for TraceFilter (-lib build switch)
 
-    Specifies the maximum number of files that can have an active filter, defaults
-    to 500
+    Specifies the maximum number of files that can have an active filter,
+    defaults to 500
 
   TF_MAX_FUNCTION_FILTERS: for TraceFilter (-lib build switch)
 

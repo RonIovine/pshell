@@ -81,17 +81,11 @@ enum PshellControlResults
 {
   /*
    * the following "COMMAND" enums are returned by the remote pshell server
-   * and must match their corresponding values in PshellServer.h
+   * and must match their corresponding values in PshellServer.c
    */
   PSHELL_COMMAND_SUCCESS,        
-  PSHELL_COMMAND_FAILURE,        
-  PSHELL_COMMAND_TIMEOUT,        
   PSHELL_COMMAND_NOT_FOUND,      
-  PSHELL_COMMAND_INVALID_ARG_USAGE,  
-  PSHELL_COMMAND_INVALID_ARG_COUNT,  
-  PSHELL_COMMAND_INVALID_ARG_VALUE,  
-  PSHELL_COMMAND_INVALID_ARG_FORMAT,   
-  PSHELL_COMMAND_USAGE_REQUESTED,  
+  PSHELL_COMMAND_INVALID_ARG_COUNT,
   /* the following "SOCKET" enums are generated internally by the pshell_sendCommandN functions */
   PSHELL_SOCKET_SEND_FAILURE,
   PSHELL_SOCKET_SELECT_FAILURE,

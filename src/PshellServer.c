@@ -156,6 +156,19 @@ static int _defaultIdleTimeout = 10;
 #define PSHELL_COMMAND_CHUNK 50
 #endif
 
+/*
+ * the following enum values are returned in the msgType field of the
+ * PshellMsg by processCommand function when the command is an external
+ * control type command, these must match their corresponding values in
+ * PshellControl.h
+ */
+enum PshellControlResults
+{
+  PSHELL_COMMAND_SUCCESS,        
+  PSHELL_COMMAND_NOT_FOUND,      
+  PSHELL_COMMAND_INVALID_ARG_COUNT
+};
+
 /* structure entry for an individual pshell command */
 
 struct PshellCmd
@@ -363,12 +376,12 @@ static void runServer(void);
 
 /* native callback commands (TCP and LOCAL server only) */
 
-static int help(int argc, char *argv[]);
-static int quit(int argc, char *argv[]);
+static void help(int argc, char *argv[]);
+static void quit(int argc, char *argv[]);
 
 /* native callback commands (LOCAL server only) */
 
-static int batch(int argc, char *argv[]);
+static void batch(int argc, char *argv[]);
 
 /* output display macros */
 static void _printf(const char *format_, ...);
@@ -611,12 +624,11 @@ void pshell_addCommand(PshellFunction function_,
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_runCommand(const char *command_, ...)
+void pshell_runCommand(const char *command_, ...)
 {
   char *commandName;
   char fullCommand[256];
   char command[256];
-  int retCode = PSHELL_COMMAND_SUCCESS;
   /* only dispatch command if we are not already in the middle of
    * dispatching an interactive command
    */
@@ -644,7 +656,7 @@ int pshell_runCommand(const char *command_, ...)
        * function pointer because the validation in the addCommand
        * function will catch that and not add the command
        */
-      retCode = _foundCommand->function(_argc, _argv);
+      _foundCommand->function(_argc, _argv);
     }
     /*
      * set this to false to be sure nobody calls pshell_tokenize outside the context
@@ -656,36 +668,6 @@ int pshell_runCommand(const char *command_, ...)
 
     /* set back to interactive mode */
     _isCommandInteractive = true;
-  }
-  return (retCode);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-const char *pshell_getResultsString(int results_)
-{
-  switch (results_)
-  {
-    case PSHELL_COMMAND_SUCCESS:
-      return ("PSHELL_COMMAND_SUCCESS");
-    case PSHELL_COMMAND_FAILURE:
-      return ("PSHELL_COMMAND_FAILURE");
-    case PSHELL_COMMAND_TIMEOUT:
-      return ("PSHELL_COMMAND_TIMEOUT");
-    case PSHELL_COMMAND_INVALID_ARG_USAGE:
-      return ("PSHELL_COMMAND_INVALID_ARG_USAGE");
-    case PSHELL_COMMAND_INVALID_ARG_COUNT:
-      return ("PSHELL_COMMAND_INVALID_ARG_COUNT");
-    case PSHELL_COMMAND_INVALID_ARG_VALUE:
-      return ("PSHELL_COMMAND_INVALID_ARG_VALUE");
-    case PSHELL_COMMAND_INVALID_ARG_FORMAT:
-      return ("PSHELL_COMMAND_INVALID_ARG_FORMAT");
-    case PSHELL_COMMAND_USAGE_REQUESTED:
-      return ("PSHELL_COMMAND_USAGE_REQUESTED");
-    case PSHELL_COMMAND_NOT_FOUND:
-      return ("PSHELL_COMMAND_NOT_FOUND");
-    default:
-      return ("PSHELL_UNKNOWN_RESULT");    
   }
 }
 
@@ -702,12 +684,11 @@ bool pshell_isHelp(void)
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_showUsage(void)
+void pshell_showUsage(void)
 {
   (_foundCommand->usage != NULL) ?
     pshell_printf("Usage: %s %s\n", _foundCommand->command, _foundCommand->usage) :
     pshell_printf("Usage: %s\n", _foundCommand->command);
-  return (PSHELL_COMMAND_USAGE_REQUESTED);
 }
 
 /******************************************************************************/
@@ -1863,19 +1844,18 @@ static void showWelcome(void)
 
 /******************************************************************************/
 /******************************************************************************/
-static int quit(int argc, char *argv[])
+static void quit(int argc, char *argv[])
 {
   _quit = true;
   if (_serverType == PSHELL_LOCAL_SERVER)
   {
     exit(0);
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /******************************************************************************/
 /******************************************************************************/
-static int help(int argc, char *argv[])
+static void help(int argc, char *argv[])
 {
   unsigned i;
   unsigned pad;
@@ -1891,12 +1871,11 @@ static int help(int argc, char *argv[])
     pshell_printf("  -  %s\n", _commandTable[i].description);
   }
   pshell_printf("\n");
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /******************************************************************************/
 /******************************************************************************/
-static int batch(int argc, char *argv[])
+static void batch(int argc, char *argv[])
 {
   unsigned rate = 0;
   unsigned repeat = 1;
@@ -1913,7 +1892,6 @@ static int batch(int argc, char *argv[])
     pshell_printf("    repeat   - number of times to repeat command or 'forever' (default=1)\n");
     pshell_printf("    clear    - clear the screen between batch file runs\n");
     pshell_printf("\n");
-    return (PSHELL_COMMAND_USAGE_REQUESTED);
   }
   else
   {
@@ -1939,13 +1917,11 @@ static int batch(int argc, char *argv[])
           else
           {
             pshell_showUsage();
-            return (PSHELL_COMMAND_INVALID_ARG_VALUE);
           }
         }
         else
         {
           pshell_showUsage();
-          return (PSHELL_COMMAND_INVALID_ARG_VALUE);
         }
       }
       else if ((argAndValue->numTokens == 1) && pshell_isEqual(argAndValue->tokens[0], "clear"))
@@ -1955,12 +1931,10 @@ static int batch(int argc, char *argv[])
       else
       {
         pshell_showUsage();
-        return (PSHELL_COMMAND_INVALID_ARG_VALUE);
       }
     }
     processBatchFile(argv[0], rate, repeat, clear);
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /******************************************************************************/
@@ -3153,30 +3127,27 @@ static void processCommand(char *command_)
         ((numMatches = findCommand(commandName)) == 1))
     {
       /* see if they asked for the command usage */
-      if (pshell_isHelp())
+      if (pshell_isHelp() && _foundCommand->showUsage)
       {
-        /* external control client asked for the usage */
-        retCode = PSHELL_COMMAND_USAGE_REQUESTED;
         pshell_showUsage();
       }
-      else if ((_argc >= _foundCommand->minArgs) && (_argc <= _foundCommand->maxArgs))
+      else if (((_argc >= _foundCommand->minArgs) &&
+                (_argc <= _foundCommand->maxArgs)) ||
+                (pshell_isHelp() && !_foundCommand->showUsage))
       {
         /*
         * dispatch user command, don't need to check for a NULL
         * function pointer because the validation in the addCommand
         * function will catch that and not add the command
         */
-        if ((retCode = _foundCommand->function(_argc, _argv)) >= PSHELL_COMMAND_INVALID_ARG_USAGE)
-        {
-          _pshellMsg->payload[0] = 0;
-          pshell_showUsage();
-        }
+        _foundCommand->function(_argc, _argv);
+        retCode = PSHELL_COMMAND_SUCCESS;
       }
       else
       {
-        /* arg count validation failure, set our return code */
-        retCode = PSHELL_COMMAND_INVALID_ARG_COUNT;
+        /* arg count validation failure, show the usage */
         pshell_showUsage();
+        retCode = PSHELL_COMMAND_INVALID_ARG_COUNT;
       }
     }
     else

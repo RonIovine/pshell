@@ -54,7 +54,7 @@
  * remote client.  The interface to this function is exactly the same as
  * the standard 'printf' function.
  */
-int hello(int argc, char *argv[])
+void hello(int argc, char *argv[])
 {
   pshell_printf("hello command dispatched:\n");
   /* dump out our args */
@@ -62,13 +62,11 @@ int hello(int argc, char *argv[])
   {
     pshell_printf("  argv[%d]: '%s'\n", i, argv[i]);
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
-int world(int argc, char *argv[])
+void world(int argc, char *argv[])
 {
   pshell_printf("world command dispatched:\n");
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /*
@@ -81,7 +79,7 @@ int world(int argc, char *argv[])
  * need a keep alive since the TCP protocol itself
  * handles that
  */
-int keepAlive(int argc, char *argv[])
+void keepAlive(int argc, char *argv[])
 {
   if (pshell_isEqual(argv[0], "dots"))
   {
@@ -124,10 +122,8 @@ int keepAlive(int argc, char *argv[])
   {
     pshell_printf("ERROR: Invalid input\n");
     pshell_showUsage();
-    return (PSHELL_COMMAND_INVALID_ARG_VALUE);
   }
   pshell_printf("\n");
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /*
@@ -144,7 +140,7 @@ int keepAlive(int argc, char *argv[])
  *        "dots" or "wheel" must be enter to be accepted.
  */
 
-int wildcardMatch(int argc, char *argv[])
+void wildcardMatch(int argc, char *argv[])
 {
   if (pshell_isHelp())
   {
@@ -160,7 +156,6 @@ int wildcardMatch(int argc, char *argv[])
     pshell_printf("    se*ttings\n");
     pshell_printf("    d*efault\n");
     pshell_printf("\n");
-    return (PSHELL_COMMAND_USAGE_REQUESTED);
   }
   else if (pshell_isSubString(argv[0], "on", 2))
   {
@@ -200,9 +195,7 @@ int wildcardMatch(int argc, char *argv[])
     pshell_printf("    se*ttings\n");
     pshell_printf("    d*efault\n");
     pshell_printf("\n");
-    return (PSHELL_COMMAND_USAGE_REQUESTED);
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /*
@@ -214,7 +207,7 @@ int wildcardMatch(int argc, char *argv[])
  * registered usage with the pshell_showUsage call and then give some
  * optional enhanced usage with the pshell_printf call
  */
-int enhancedUsage(int argc, char *argv[])
+void enhancedUsage(int argc, char *argv[])
 {
 
   /* see if the user asked for help */
@@ -224,7 +217,6 @@ int enhancedUsage(int argc, char *argv[])
     pshell_showUsage();
     /* give some enhanced usage */
     pshell_printf("Enhanced usage here...\n");
-    return (PSHELL_COMMAND_USAGE_REQUESTED);
   }
   else
   {
@@ -235,14 +227,13 @@ int enhancedUsage(int argc, char *argv[])
       pshell_printf("  argv[%d]: '%s'\n", i, argv[i]);
     }
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /*
  * this function demonstrates the various helper functions that assist
  * in the interpretation and conversion of command line arguments
  */
-int formatChecking(int argc, char *argv[])
+void formatChecking(int argc, char *argv[])
 {
 
   pshell_printf("formatChecking command dispatched:\n");
@@ -274,9 +265,7 @@ int formatChecking(int argc, char *argv[])
   else
   {
     pshell_printf("Unknown arg format: '%s'\n", argv[0]);
-    return (PSHELL_COMMAND_INVALID_ARG_FORMAT);
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 /* function to show advanced command line parsing using the pshell_tokenize function */
@@ -288,7 +277,7 @@ int formatChecking(int argc, char *argv[])
 #define MAX_MINUTE 59
 #define MAX_SECOND 59
 
-int advancedParsing(int argc, char *argv[])
+void advancedParsing(int argc, char *argv[])
 {
   PshellTokens *timestamp = pshell_tokenize(argv[0], ":");
 
@@ -296,7 +285,6 @@ int advancedParsing(int argc, char *argv[])
   {
     pshell_printf("ERROR: Improper timestamp format!!\n");
     pshell_showUsage();
-    return (PSHELL_COMMAND_INVALID_ARG_FORMAT);
   }
   else if (!pshell_isDec(timestamp->tokens[0]) ||
            (pshell_getInt(timestamp->tokens[0]) > MAX_YEAR))
@@ -304,7 +292,6 @@ int advancedParsing(int argc, char *argv[])
     pshell_printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
                   timestamp->tokens[0],
                   MAX_YEAR);
-    return (PSHELL_COMMAND_INVALID_ARG_VALUE);
   }
   else if (!pshell_isDec(timestamp->tokens[1]) ||
            (pshell_getInt(timestamp->tokens[1]) > MAX_MONTH))
@@ -312,7 +299,6 @@ int advancedParsing(int argc, char *argv[])
     pshell_printf("ERROR: Invalid month: %s, must be numeric value <= %d\n",
                   timestamp->tokens[1],
                   MAX_MONTH);
-    return (PSHELL_COMMAND_INVALID_ARG_VALUE);
   }
   else if (!pshell_isDec(timestamp->tokens[2]) ||
            (pshell_getInt(timestamp->tokens[2]) > MAX_DAY))
@@ -320,7 +306,6 @@ int advancedParsing(int argc, char *argv[])
     pshell_printf("ERROR: Invalid day: %s, must be numeric value <= %d\n",
                   timestamp->tokens[2],
                   MAX_DAY);
-    return (PSHELL_COMMAND_INVALID_ARG_VALUE);
   }
   else if (!pshell_isDec(timestamp->tokens[3]) ||
            (pshell_getInt(timestamp->tokens[3]) > MAX_HOUR))
@@ -328,7 +313,6 @@ int advancedParsing(int argc, char *argv[])
     pshell_printf("ERROR: Invalid hour: %s, must be numeric value <= %d\n",
                   timestamp->tokens[3],
                   MAX_HOUR);
-    return (PSHELL_COMMAND_INVALID_ARG_VALUE);
   }
   else if (!pshell_isDec(timestamp->tokens[4]) ||
            (pshell_getInt(timestamp->tokens[4]) > MAX_MINUTE))
@@ -336,7 +320,6 @@ int advancedParsing(int argc, char *argv[])
     pshell_printf("ERROR: Invalid minute: %s, must be numeric value <= %d\n",
                   timestamp->tokens[4],
                   MAX_MINUTE);
-    return (PSHELL_COMMAND_INVALID_ARG_VALUE);
   }
   else if (!pshell_isDec(timestamp->tokens[5]) ||
            (pshell_getInt(timestamp->tokens[5]) > MAX_SECOND))
@@ -344,7 +327,6 @@ int advancedParsing(int argc, char *argv[])
     pshell_printf("ERROR: Invalid second: %s, must be numeric value <= %d\n",
                   timestamp->tokens[5],
                   MAX_SECOND);
-    return (PSHELL_COMMAND_INVALID_ARG_VALUE);
   }
   else
   {
@@ -355,7 +337,6 @@ int advancedParsing(int argc, char *argv[])
     pshell_printf("Minute : %s\n", timestamp->tokens[4]);
     pshell_printf("Second : %s\n", timestamp->tokens[5]);
   }
-  return (PSHELL_COMMAND_SUCCESS);
 }
 
 void showUsage(void)

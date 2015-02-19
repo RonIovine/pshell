@@ -45,6 +45,7 @@ fi
 
 echo "Archiving pshell..."
 echo "Install directory: $PSHELL_INSTALL"
+rm $PSHELL_INSTALL/lib/libpshell-server.so
 #if [ -e "${PSHELL_INSTALL}/bin/pshell" ]
 #then
   #echo "Cleaning directory bin..."
