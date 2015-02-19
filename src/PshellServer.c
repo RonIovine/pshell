@@ -3113,6 +3113,7 @@ static void processCommand(char *command_)
   }
   else if (_pshellMsg->header.msgType == PSHELL_CONTROL_COMMAND)
   {
+    retCode = PSHELL_COMMAND_SUCCESS;
     /*
      * if the caller does not any data back, we set this value to
      * false which will short circuit any calls to pshell_printf
@@ -3141,7 +3142,6 @@ static void processCommand(char *command_)
         * function will catch that and not add the command
         */
         _foundCommand->function(_argc, _argv);
-        retCode = PSHELL_COMMAND_SUCCESS;
       }
       else
       {
