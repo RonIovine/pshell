@@ -7,11 +7,9 @@ This package contains all the necessary code, documentation and examples for
 building C/C++ applications that incorporate a Process Specific Embedded
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
 framework and API to embed functions within a C/C++ application that can be
-invoked either via a separate client program or directly from the within application
-itself.  The signature for the embedded functions are identical to the 'main' in
-'C' as follows:
+invoked either via a separate client program or directly from the within application itself.  The signature for the embedded functions are similar to the 'main' in 'C' as follows:
 
-`int myFunc(int argc, char *argv[]);`
+`void myFunc(int argc, char *argv[]);`
 
 These functions can be invoked in several ways depending on how the internal
 PSHELL server is configured.  The following shows the various PSHELL server
