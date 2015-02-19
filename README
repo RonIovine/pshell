@@ -86,7 +86,7 @@ TraceFilter(3C)    - Described the API and usage of the TraceFilter
 EXECUTION:
 
 To run the demo programs and any associated client programs, you must first
-setup the softlink to the pshell-server library.  After the aboue environment
+setup the softlink to the pshell-server library.  After the above environment
 variables have been sourced, run "setPshellLib -full" to setup the softlink.
 Now you can run "pshellServerDemo" and connect to it with the "pshell" client
 program (for the UDP/UNIX server) or telnet or the pshell.exp telnet expect
@@ -96,7 +96,7 @@ script you need to have "expect" installed on your host in /usr/bin.
 (NOTE: To see the features of the dynamically configurable optional TraceFilter
 mechanism, run the program "traceFilterDemo".  It can be controlled via the same
 command line 'pshell' or 'telnet' client as "pshellServerDemo", so all following
-usage descriptions also apply to that.
+usage descriptions also apply.
 
 The usage of the "pshellServerDemo" program is as follows:
 

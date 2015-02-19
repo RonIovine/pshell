@@ -1,4 +1,4 @@
-.TH PshellControl 3C "Sep 2012" "PSHELL" "PSHELL - External client control of pshell" 
+.TH PshellControl 3C "Sep 2012" "PSHELL" "External Client Control Of Remote Pshell" 
 .SH NAME
 PshellControl - External Client Program Control of Remote PSHELL Server
 .SH DESCRIPTION
@@ -10,7 +10,7 @@ only work on remote programs that are running either a UDP or UNIX pshell server
 
 .SH SYNOPSIS
 
-#include "PshellControl.h"
+#include <PshellControl.h>
 
 /* on success, function returns valid Server ID (sid) to be used as input to other functions */
 

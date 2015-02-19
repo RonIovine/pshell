@@ -51,11 +51,11 @@ program via the 'PshellControl.h' API.  Refer to the documentation on PshellCont
 for details on the API.
 .SH SYNOPSIS
 
-#include "PshellServer.h"
+#include <PshellServer.h>
 
 /* signature prototype of callback function */
 
-typedef int (*PshellFunction) (int argc, char *argv[]); 
+typedef void (*PshellFunction) (int argc, char *argv[]); 
 
 void pshell_addCommand(PshellFunction function_,
                        const char *command_, 

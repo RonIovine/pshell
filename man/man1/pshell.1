@@ -11,11 +11,19 @@ client program (called 'pshell') or via a standard 'telnet' based client.
 
 The 'pshell' program provides the client side command line interface (CLI) functionality
 .br
-to perform remote diagnostics and debug of any process running the UDP based PshellServer.
+to remotely invoke the callback functions that are registered within a program running a
 .br
-The corresponding 'pshell'exp' 'expect' script provides a wrapper around a 'telnet' client
+UDP or UNIX based PshellServer.
+
+The corresponding 'pshell.exp' 'expect' script provides a wrapper around a standard 'telnet'
 .br
-to give a similar UI as the 'pshell' UDP/UNIX client program.
+client to give a similar functionality (i.e. batch mode, command line mode etc) for programs
+.br
+that are running a TCP based PshellServer as the 'pshell' UDP/UNIX client program .  Use of 
+.br
+the 'pshell.exp' script is optional, the 'telnet' client can be used directly to interface
+.br
+to a TCP PshellServer, however, only interactive mode is supported.
 .SH USAGE
 Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<serverName> | <portNum>}
               [-h | ? | {<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]

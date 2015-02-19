@@ -17,7 +17,7 @@ mechanism.  The API is designed to easily and transparently be retrofitted into
 the existing logging mechanism.
 .SH SYNOPSIS
 
-#include "TraceFilter.h"
+#include <TraceFilter.h>
 
 typedef bool (*tf_TraceCallback) (void);
 
