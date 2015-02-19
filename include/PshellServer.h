@@ -113,7 +113,7 @@ struct PshellTokens
 #define PSHELL_LOG_LEVEL_3         3      /* Level 2 plus PSHELL_INFO */
 #define PSHELL_LOG_LEVEL_NONE      PSHELL_LOG_LEVEL_0
 #define PSHELL_LOG_LEVEL_ALL       PSHELL_LOG_LEVEL_3
-#define PSHELL_LOG_LEVEL_DEFAULT   PSHELL_LOG_LEVEL_3
+#define PSHELL_LOG_LEVEL_DEFAULT   PSHELL_LOG_LEVEL_ALL
 
 void pshell_setLogLevel(unsigned level_);
 
