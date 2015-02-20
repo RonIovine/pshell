@@ -46,6 +46,9 @@ extern "C" {
  * the converse it not true (i.e. this module can be omitted in the build
  * of the pshell library if this functionality is not desired).
  *
+ * An complete example of the usage of the API can be found in the included 
+ * file traceFilterDemo.c
+ *
  *******************************************************************************/
 
 /*
@@ -91,14 +94,12 @@ enum tf_TraceControl
 /*
  * trace filter library must be inialized before use, this function
  * call should before any registration of pshell commands via the
- * pshell_addCommand function, see the example in traceFilterDemo.c
- * for the usage of this function
+ * pshell_addCommand function
  */
 void tf_init(const char *configFile_);
 
 /*
- * register a thread name for thread based trace filtering,
- * see traceFilterDemo.c for example of function usage
+ * register a thread name for thread based trace filtering
  */
 void tf_registerThread(const char *threadName_);
 
@@ -134,16 +135,14 @@ void tf_callback(const char *file_,
 
 /*
  * macro to registger a memory location to watch at every trace statement,
- * use this instead of a direct call to tf_watch, see traceFilterDemo.c
- * for an example of macro usage
+ * use this instead of a direct call to tf_watch
  */ 
 #define TF_WATCH(symbol, address, width, format, control) \
           tf_watch(__FILE__, __LINE__, __FUNCTION__, symbol, address, width, format, control)
 
 /*
  * macro to registger a function to be called at every trace statement,
- * use this instead of a direct call to tf_callback, see traceFilterDemo.c
- * for an example of macro usage
+ * use this instead of a direct call to tf_callback
  */
 #define TF_CALLBACK(name, function, control) \
           tf_callback(__FILE__, __LINE__, __FUNCTION__, name, function, control)

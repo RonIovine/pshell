@@ -40,9 +40,12 @@ extern "C" {
  * This API provides the ability for a client program to invoke pshell commands
  * that are registered in a remote program that is running a pshell UDP or UNIX
  * server.  The format of the command string that is sent to the pshell should
- * be in the same usage format that the given command is expecting.  This provides
- * a very lightweight way to provide a control mechanism into a program that is
- * running a pshell, this is analagous to a remote procedure call (rpc).
+ * be in the same usage format that the given command is expecting.  This
+ * provides a very lightweight way to provide a control mechanism into a program
+ * that is running a pshell, this is analagous to a remote procedure call (rpc).
+ *
+ * An complete example of the usage of the API can be found in the included 
+ * file pshellControlDemo.c
  *
  *******************************************************************************/
 

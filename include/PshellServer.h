@@ -45,6 +45,9 @@ extern "C" {
  * methods to call these functions, they are described in documentation further
  * down in this file.
  *
+ * An complete example of the usage of the API can be found in the included 
+ * file pshellServerDemo.c
+ *
  *******************************************************************************/
 
 /****************
