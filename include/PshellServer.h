@@ -86,12 +86,14 @@ enum PshellServerMode
   PSHELL_NON_BLOCKING 
 };
 
-
 /******************************
  * public typedefs structures
  ******************************/
 
-/* structure used to tokenize command line arguments */
+/*
+ * structure used to tokenize command line arguments
+ * for the registered callback function
+ */
 
 struct PshellTokens
 {
@@ -104,8 +106,10 @@ struct PshellTokens
  ***************************************/
 
 /*
- * function and constants to let the client set the internal
- * debug log level
+ * pshell_setLogLevel:
+ * 
+ * function and constants to let the host program
+ * set the internal debug log level
  */
 #define PSHELL_LOG_LEVEL_0         0      /* No debug logs */
 #define PSHELL_LOG_LEVEL_1         1      /* PSHELL_ERROR only */
@@ -118,9 +122,11 @@ struct PshellTokens
 void pshell_setLogLevel(unsigned level_);
 
 /*
- * typedef and function to allow a client program to register a logging
+ * pshell_registerLogFunction:
+ * 
+ * typedef and function to allow the host program to register a logging
  * function for message output logging, if no output function is registered
- * 'printf' will be used to print out the log messages, if the client of
+ * 'printf' will be used to print out the log messages, if the user of
  * this API does not want to see any internal message printed out, set the
  * debug log level to PSHELL_LOG_LEVEL_NONE (0)
  */
@@ -129,17 +135,18 @@ void pshell_registerLogFunction(PshellLogFunction logFunction_);
 
 /*
  * PSHELL user callback function prototype definition, the interface 
- * is identical to the "main" in C, with the argc being the argument 
+ * is similar to the "main" in C, with the argc being the argument 
  * count (excluding the actual command itself), and argv[] being the 
  * argument list (also excluding the actual command), the interface
  * can be changed to include the actual command in argc and argv by
  * compiling the library with the command line compile option of
  * PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST
- * 
  */
 typedef void (*PshellFunction) (int argc, char *argv[]); 
 
 /*
+ * pshell_addCommand:
+ * 
  * this is the function used to register pshell commands, if the command
  * takes no arguments, the minArgs and maxArgs should be 0 and the usage
  * should be NULL, a usage is required if the command takes any arguments,
@@ -167,6 +174,8 @@ void pshell_addCommand(PshellFunction function_,
                        bool showUsage_ = true);
 
 /*
+ * pshell_runCommand:
+ * 
  * this function can be called from within a program in order to execute any
  * registered callback function, the passed in string command should be the
  * exact same format as when calling the same desired command interactively
@@ -176,6 +185,8 @@ void pshell_addCommand(PshellFunction function_,
 void pshell_runCommand(const char *command_, ...);
 
 /*
+ * pshell_startServer:
+ * 
  * this is the command used to invoke the pshell server, this function can
  * be invoked in either blocking or non-blocking mode, non-blocking mode
  * will create a separate thread to process the user input and return,
@@ -200,6 +211,8 @@ void pshell_startServer(const char *serverName_,
  */
 
 /*
+ * pshell_printf:
+ * 
  * this is the command used to display user data back the the pshell client,
  * the interface is exactly the same as the normal printf, the UDP/UNIX
  * pshell client has a 5 second response timeout, if the callback function
@@ -213,20 +226,24 @@ void pshell_startServer(const char *serverName_,
 void pshell_printf(const char *format_, ...);
 
 /*
+ * pshell_flush:
+ * 
  * this command is used to flush the transfer buffer from the pshell server
  * back to the client, which will then display the contents of the buffer
- * to the user, this only has an effect with a UDP or LOCAL server
+ * to the user, this only has an effect with a UDP, UNIX, or LOCAL server
  */
 void pshell_flush(void);
 
 /*
- * these helper commands are used to keep the UDP client alive with output 
+ * these helper commands are used to keep the UDP/UNIX client alive with output 
  * if a command is known to take longer than the 5 second client timeout
  */
 void pshell_wheel(const char *string_ = NULL);  /* user string string is optional */
 void pshell_march(const char *string_);         /* march a string or character */
 
 /*
+ * pshell_isHelp:
+ * 
  * this function will return "true" if the user types a '?' 
  * or '-h' after the command name, this can be checked from 
  * within a callback function to see if the user asked for 
@@ -238,8 +255,7 @@ void pshell_march(const char *string_);         /* march a string or character *
 bool pshell_isHelp(void);
 
 /*
- * this function is used to show the usage the command was registered with,
- * it will return PSHELL_COMMAND_USAGE_REQUESTED
+ * this function is used to show the usage the command was registered with
  */
 void pshell_showUsage(void);
 
@@ -250,11 +266,12 @@ void pshell_showUsage(void);
  */
 
 /*
- * the following 'pshell_tokenize' function can ONLY be called
- * from with an PSHELL callback function, the other following
- * functions do not have this restriction
+ * function to help tokenize command line arguments, this function
+ * can ONLY be called from with an PSHELL callback function
  */
 PshellTokens *pshell_tokenize(const char *string_, const char *delimeter_);
+
+/* various parameter parsing helper functions */
 unsigned pshell_getLength(const char *string_);
 bool pshell_isEqual(const char *string1_, const char *string2_);
 bool pshell_isEqualNoCase(const char *string1_, const char *string2_);

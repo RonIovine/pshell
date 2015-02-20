@@ -51,7 +51,7 @@ extern "C" {
 /*
  * If the following ifdef is uncommented, then for every file you want to do
  * file specific trace filtering you must put the 'TF_SYMBOL_TABLE' macro at
- * the top of the .cc file
+ * the top of each source file
  */
 //#define TF_FAST_FILENAME_LOOKUP
 
@@ -73,8 +73,14 @@ struct TraceSymbols
 #define TF_SYMBOL_TABLE
 #endif
 
+
+/* function prototype used for the TRACE_CALLBACK registration */
 typedef bool (*tf_TraceCallback) (void);
 
+/*
+ * specifies the behavour of the TRACE_WATCH and TRACE_CALLBACK
+ * triggers on a successful evaluation of the trigger criteria
+ */
 enum tf_TraceControl
 {
   TF_ONCE,
@@ -82,15 +88,34 @@ enum tf_TraceControl
   TF_ABORT
 };
 
+/*
+ * trace filter library must be inialized before use, this function
+ * call should before any registration of pshell commands via the
+ * pshell_addCommand function, see the example in traceFilterDemo.c
+ * for the usage of this function
+ */
 void tf_init(const char *configFile_);
 
+/*
+ * register a thread name for thread based trace filtering,
+ * see traceFilterDemo.c for example of function usage
+ */
 void tf_registerThread(const char *threadName_);
 
+/*
+ * this is the function that should be called to determine if a given
+ * trace should be output, see the example in TraceLog.h for an example
+ * on integrating this function into an existing trace logging system
+ */
 bool tf_isFilterPassed(const char *file_,
                        int line_,
                        const char *function_,
                        unsigned level_);
-                       
+
+/*
+ * the following two functions should not be called directly, but
+ * rather should only be call via their respective following macros
+ */                       
 void tf_watch(const char *file_,
               int line_,
               const char *function_,
@@ -109,14 +134,16 @@ void tf_callback(const char *file_,
 
 /*
  * macro to registger a memory location to watch at every trace statement,
- * use this instead of a direct call to tf_watch
+ * use this instead of a direct call to tf_watch, see traceFilterDemo.c
+ * for an example of macro usage
  */ 
 #define TF_WATCH(symbol, address, width, format, control) \
           tf_watch(__FILE__, __LINE__, __FUNCTION__, symbol, address, width, format, control)
 
 /*
  * macro to registger a function to be called at every trace statement,
- * use this instead of a direct call to tf_callback
+ * use this instead of a direct call to tf_callback, see traceFilterDemo.c
+ * for an example of macro usage
  */
 #define TF_CALLBACK(name, function, control) \
           tf_callback(__FILE__, __LINE__, __FUNCTION__, name, function, control)

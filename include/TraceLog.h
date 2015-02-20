@@ -33,12 +33,14 @@
 
 #include <TraceFilter.h>
 
-/*
- * this file and API are an example trace logging service to show how to
+/*******************************************************************************
+ *
+ * This file and API are an example trace logging service to show how to
  * integrate the trace filtering mechanism into an already existing trace
  * logging service that uses the __FILE__, __LINE__,  __FUNCTION__, level
  * paradigm
- */
+ *
+ *******************************************************************************/
 
 /* trace level definitions, this is an example of some common trace levels,
  * these need to be modified in accordance with the levels of the  existing
