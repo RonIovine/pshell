@@ -83,6 +83,13 @@ PshellServer(3C)   - Describes the API and usage of the PshellServer
 PshellControl(3C)  - Describes the API and usage of the PshellControl
 TraceFilter(3C)    - Described the API and usage of the TraceFilter
 
+A complete code example of application programs that use all the
+main features of the PSHELL library can be found in the files:
+
+$PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control client
+$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo dynamic trace filtering
+
 EXECUTION:
 
 To run the demo programs and any associated client programs, you must first
@@ -252,13 +259,6 @@ $PSHELL_CONFIG_DIR/pshell-client.conf file, this is also only available
 in command line mode:
 
 $ pshell -s
-
-A complete code example of application programs that use all the
-main features of the PSHELL library can be found in the files:
-
-$PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control client
-$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo dynamic trace filtering
 
 BUILDING:
 
