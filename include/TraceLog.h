@@ -78,6 +78,7 @@
 
 /* this trace cannot be disabled */
 #define TRACE_FORCE(format, args...) trace_outputLog("FORCE", __FILE__, __FUNCTION__, __LINE__, format, ## args);
+
 /* normal trace output macros, these are called directly by client code */
 #define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, "ERROR", format, ## args)
 #define TRACE_WARNING(format, args...) __TRACE(TL_WARNING, "WARNING", format, ## args)
@@ -86,7 +87,8 @@
 #define TRACE_DEBUG(format, args...) __TRACE(TL_DEBUG, "DEBUG", format, ## args)
 #define TRACE_ENTER(format, args...) __TRACE(TL_ENTER, "ENTER", format, ## args)
 #define TRACE_EXIT(format, args...) __TRACE(TL_EXIT, "EXIT", format, ## args)
-/* hex dump */
+
+/* hex dump trace */
 #define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, "DUMP", format, ## args)
 
 /*
