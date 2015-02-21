@@ -113,8 +113,8 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
 void trace_setLogPrefix(const char *name_);
 
 /*
- * common TRACE output function and macro that all the different levels map to,
- * this macro should NOT be called directly by client code
+ * common TRACE and DUMP output functions and macros that all the different
+ * levels map to, these macros should NOT be called directly by client code
  */
 extern void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
 extern void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
