@@ -360,16 +360,23 @@ void advancedParsing(int argc, char *argv[])
 }
 
 /*
- * function that shows the extraction of arg options using the
- * pshell_getOptions function
+ * function that shows the extraction of arg options using the pshell_getOption
+ * function,the fromat of the options are either -<option><value> where <option>
+ * is a single character option (e.g. -t10), or <option>=<value> where <option>
+ * is any length character string (e.g. timeout=10), if the 'strlen(option_)'
+ * is == 0, all option names & values will be extracted and returned in the
+ * 'option_' and 'value_' parameters, if the 'strlen(option_)' is > 0, the
+ * 'value_' will only be extracted if the option matches the requested option_
+ * name,
  */
  
 /******************************************************************************/
 /******************************************************************************/
 void getOptions(int argc, char *argv[])
 {
-  char option[20];
-  char value[20];
+  char returnedOption[40];
+  char returnedValue[40];
+  char *requestedOption;
   /* extract our args */
   for (int i = 1; i < argc; i++)
   {
@@ -380,18 +387,21 @@ void getOptions(int argc, char *argv[])
        * we want to extract all options with the option name and value
        * being returned to us, the strlen(option) must be 0 to do this
        */
-      option[0] = 0;
-      if (pshell_getOption(argv[i], option, value))
+      returnedOption[0] = 0;
+      if (pshell_getOption(argv[i], returnedOption, returnedValue))
       {
-        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n", i, argv[i], i, option, i, value);
+        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n",
+                      i, argv[i], i, returnedOption, i, returnedValue);
       }
     }
     else
     {
       /* we are looking to extract the value for a specific option */
-      if (pshell_getOption(argv[i], argv[0], value))
+      requestedOption = argv[0];
+      if (pshell_getOption(argv[i], requestedOption, returnedValue))
       {
-        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n", i, argv[i], i, argv[0], i, value);
+        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n",
+                      i, argv[i], i, requestedOption, i, returnedValue);
       }
     }
   }

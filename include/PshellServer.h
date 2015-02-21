@@ -297,7 +297,7 @@ bool pshell_isFloat(const char *string_);
  *
  * this function will extract options from the callback function args list
  * of the formats -<option><value> where <option> is a single character
- * option (e.g. -t10), or ,option>=<value> where <option> is any length
+ * option (e.g. -t10), or <option>=<value> where <option> is any length
  * character string (e.g. timeout=10), if the 'strlen(option_)' is == 0,
  * all option names & values will be extracted and returned in the 'option_'
  * and 'value_' parameters, if the 'strlen(option_)' is > 0, the 'value_'
@@ -305,9 +305,8 @@ bool pshell_isFloat(const char *string_);
  * see the pshellServerDemo program for examples on this function usage
  */
 bool pshell_getOption(const char *string_, char *option_, char *value_);
-void *pshell_getVoid(const char *string_);
-char *pshell_getString(const char *string_);
-bool pshell_getBool(const char *string_);  /* from numeric value or 'true/false' */
+void *pshell_getAddress(const char *string_); /* address from string value */
+bool pshell_getBool(const char *string_);     /* bool from string value of 'true' or 'false' */
 long pshell_getLong(const char *string_);
 int pshell_getInt(const char *string_);
 short pshell_getShort(const char *string_);

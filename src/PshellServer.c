@@ -1511,23 +1511,16 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
 
 /******************************************************************************/
 /******************************************************************************/
-void *pshell_getVoid(const char *string_)
+void *pshell_getAddress(const char *string_)
 {
   return ((void*)pshell_getUnsignedLong(string_));
 }
 
 /******************************************************************************/
 /******************************************************************************/
-char *pshell_getString(const char *string_)
-{
-  return ((char*)pshell_getUnsignedLong(string_));
-}
-
-/******************************************************************************/
-/******************************************************************************/
 bool pshell_getBool(const char *string_)
 {
-  return ((bool)pshell_getUnsignedLong(string_) || pshell_isEqual(string_, "true"));
+  return (pshell_isEqual(string_, "true"));
 }
 
 /******************************************************************************/

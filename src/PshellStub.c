@@ -86,9 +86,9 @@ bool pshell_isAlphaNumeric(const char *string_){return (true);}
 bool pshell_isDec(const char *string_){return (true);}
 bool isHex(const char *string_){return (true);}
 bool pshell_isFloat(const char *string_){return (true);}
-void *pshell_getVoid(const char *string_){return ((void*)0);}
-char *pshell_getString(const char *string_){return ((char*)0);}
-bool pshell_getBool(const char *string_){return ((bool)0);}
+bool pshell_getOption(const char *string_, char *option_, char *value_){return (false);}
+void *pshell_getAddress(const char *string_){return ((void*)0);}
+bool pshell_getBool(const char *string_){return (false);}
 long pshell_getLong(const char *string_){return ((long)0);}
 int pshell_getInt(const char *string_){return ((int)0);}
 short pshell_getShort(const char *string_){return ((short)0);}
