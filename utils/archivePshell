@@ -46,16 +46,6 @@ fi
 echo "Archiving pshell..."
 echo "Install directory: $PSHELL_INSTALL"
 rm $PSHELL_INSTALL/lib/libpshell-server.so
-#if [ -e "${PSHELL_INSTALL}/bin/pshell" ]
-#then
-  #echo "Cleaning directory bin..."
-  #rm $PSHELL_INSTALL/bin/*
-#fi
-#if [ -e "${PSHELL_INSTALL}/lib/libpshell.so" ]
-#then
-  #echo "Cleaning directory lib..."
-  #rm $PSHELL_INSTALL/lib/*
-#fi
 cd $PSHELL_INSTALL
 cd ..
 if [ -e $gzipFileName ]
