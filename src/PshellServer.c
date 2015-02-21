@@ -1435,6 +1435,82 @@ double pshell_getDouble(const char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
+bool pshell_getOption(const char *string_, char *option_, char *value_)
+{
+  PshellTokens *option = pshell_tokenize(string_, "=");
+  /* if 'option_' is NULL, we set the it to point to the option name
+   * and always extract the value, if 'option_' is not NULL, we only
+   * extract the value if the option matches the one they are looking
+   * for, the format of the option can have two different forms,
+   * -<option><value> type option where <option> is a single character
+   * identifier or <option>=<value> where <option> can be any length
+   * character string
+   */
+  if (strlen(option_) == 0)
+  {
+    /* return the found option and corresponding value */
+    
+    /* see if they are looking for a -<option><value> type option */
+    if (string_[0] == '-')
+    {
+      strncpy(option_, &string_[0], 2);
+      option_[2] = 0;
+      strcpy(value_, &string_[2]);
+      return (true);
+    }
+    else
+    {
+      // they are looking for a <option>=<value> type option */
+      if (option->numTokens == 2)
+      {
+        strcpy(option_, option->tokens[0]);
+        strcpy(value_, option->tokens[1]);
+        return (true);
+      }
+      else
+      {
+        return (false);
+      }
+    }
+  }
+  else
+  {
+
+     /* non-NULL option, look for the requested option */
+      
+    /* see if they are looking for a -<option><value> type option */
+    if (option_[0] == '-')
+    {
+      if ((string_[0] == '-') && (option_[1] == string_[1]))
+      {
+        /* got a match, set the value & return true */
+        strcpy(value_, &string_[2]);
+        return (true);
+      }
+      else
+      {
+        return (false);
+      }
+    }
+    else
+    {
+      // assume they are looking for a <option>=<value> type option */
+      if ((option->numTokens == 2) && pshell_isEqual(option->tokens[0], option_))
+      {
+        strcpy(value_, option->tokens[1]);
+        return (true);
+      }
+      else
+      {
+        return (false);
+      }
+    }
+  }
+  return (false);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void *pshell_getVoid(const char *string_)
 {
   return ((void*)pshell_getUnsignedLong(string_));
@@ -1451,7 +1527,7 @@ char *pshell_getString(const char *string_)
 /******************************************************************************/
 bool pshell_getBool(const char *string_)
 {
-  return ((bool)pshell_getUnsignedLong(string_));
+  return ((bool)pshell_getUnsignedLong(string_) || pshell_isEqual(string_, "true"));
 }
 
 /******************************************************************************/

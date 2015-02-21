@@ -359,6 +359,38 @@ void advancedParsing(int argc, char *argv[])
   }
 }
 
+/*
+ * function that shows the extraction of arg options using the
+ * pshell_getOptions function
+ */
+ 
+/******************************************************************************/
+/******************************************************************************/
+void getOptions(int argc, char *argv[])
+{
+  char option[20];
+  char value[20];
+  /* dump out our args */
+  for (int i = 1; i < argc; i++)
+  {
+    if (pshell_isEqual(argv[0], "all"))
+    {
+      option[0] = 0;
+      if (pshell_getOption(argv[i], option, value))
+      {
+        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n", i, argv[i], i, option, i, value);
+      }
+    }
+    else
+    {
+      if (pshell_getOption(argv[i], argv[0], value))
+      {
+        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n", i, argv[i], i, argv[0], i, value);
+      }
+    }
+  }
+}
+
 /******************************************************************************/
 /******************************************************************************/
 void showUsage(void)
@@ -483,6 +515,14 @@ int main(int argc, char *argv[])
                     1,                                              /* maxArgs */
                     true);                                          /* showUsage on "?" */
                   
+  pshell_addCommand(getOptions,                                  /* function */
+                    "getOptions",                                /* command */
+                    "example of parsing command line options",   /* description */
+                    "{all | <<opt>} <opt1> [<opt2> <opt3>...]",  /* usage */
+                    2,                                           /* minArgs */
+                    20,                                          /* maxArgs */
+                    true);                                       /* showUsage on "?" */
+                  
   /*
    * example of issuing an pshell command from within a program, this can be done before
    * or after the server is started, as long as the command being called is regstered
@@ -535,10 +575,10 @@ int main(int argc, char *argv[])
    *   anyhost   - all interfaces on a multi-homed host, for a single interface host
    *               this will yield the same results as using "myhost".
    *
-   * Finally, the 5th argument is the desired port number (for UDP and TCP servers only).
+   * Finally, the 5th argument is the desired port number.
    *
-   * All of these arguments (except the initial name) can be overridden via the 'pshell.conf'
-   * file on a per-server basis.
+   * All of these arguments (except the initial name) can be overridden via the
+   * 'pshell-server.conf' file on a per-server basis.
    *
    */
    
