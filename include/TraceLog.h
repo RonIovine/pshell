@@ -56,6 +56,7 @@
 #define TL_DEBUG    0x0010
 #define TL_ENTER    0x0020
 #define TL_EXIT     0x0040
+#define TL_DUMP     0x0080
 #else
 /* this example is when the existing trace system used hierarchical values for its trace levels */
 #define TL_ERROR    0
@@ -65,6 +66,7 @@
 #define TL_DEBUG    4
 #define TL_ENTER    5
 #define TL_EXIT     6
+#define TL_DUMP     7
 #endif
 
 /* 
@@ -74,16 +76,18 @@
  * __FUNCTION__, __LINE__ (and optionally a 'level') paradigm
  */
 
-/* normal trace output macros, these are called directly by client code */
-#define TRACE_ERROR(format, args...) TRACE(TL_ERROR, "ERROR", format, ## args)
-#define TRACE_WARNING(format, args...) TRACE(TL_WARNING, "WARNING", format, ## args)
-#define TRACE_FAILURE(format, args...) TRACE(TL_FAILURE, "FAILURE", format, ## args)
-#define TRACE_INFO(format, args...) TRACE(TL_INFO, "INFO", format, ## args)
-#define TRACE_DEBUG(format, args...) TRACE(TL_DEBUG, "DEBUG", format, ## args)
-#define TRACE_ENTER(format, args...) TRACE(TL_ENTER, "ENTER", format, ## args)
-#define TRACE_EXIT(format, args...) TRACE(TL_EXIT, "EXIT", format, ## args)
 /* this trace cannot be disabled */
-#define TRACE_FORCE(format, args...) trace_outputLog("FORCE", __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+#define TRACE_FORCE(format, args...) trace_outputLog("FORCE", __FILE__, __FUNCTION__, __LINE__, format, ## args);
+/* normal trace output macros, these are called directly by client code */
+#define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, "ERROR", format, ## args)
+#define TRACE_WARNING(format, args...) __TRACE(TL_WARNING, "WARNING", format, ## args)
+#define TRACE_FAILURE(format, args...) __TRACE(TL_FAILURE, "FAILURE", format, ## args)
+#define TRACE_INFO(format, args...) __TRACE(TL_INFO, "INFO", format, ## args)
+#define TRACE_DEBUG(format, args...) __TRACE(TL_DEBUG, "DEBUG", format, ## args)
+#define TRACE_ENTER(format, args...) __TRACE(TL_ENTER, "ENTER", format, ## args)
+#define TRACE_EXIT(format, args...) __TRACE(TL_EXIT, "EXIT", format, ## args)
+/* hex dump */
+#define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, "DUMP", format, ## args)
 
 /*
  * trace_registerLogFunction::
@@ -111,6 +115,9 @@ void trace_setLogPrefix(const char *name_);
  * this macro should NOT be called directly by client code
  */
 extern void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
-#define TRACE(level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+extern void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
+
+#define __TRACE(level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+#define __DUMP(address, length, level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputDump(address, length, name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
 
 #endif

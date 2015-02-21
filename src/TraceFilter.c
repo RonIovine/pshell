@@ -180,7 +180,8 @@ static LevelFilter _levelFilters[] = {{"ERROR",   TL_ERROR,   true,  true},
                                       {"INFO",    TL_INFO,    false, true},
                                       {"DEBUG",   TL_DEBUG,   false, true},
                                       {"ENTER",   TL_ENTER,   false, true},
-                                      {"EXIT",    TL_EXIT,    false, true}};
+                                      {"EXIT",    TL_EXIT,    false, true},
+                                      {"DUMP",    TL_DUMP,    false, true}};
 #else
 /* existing trace system uses hierarchical level values, map those to corresponding 
    discrete bitmasks in their correct position based on their level value */
@@ -190,7 +191,8 @@ static LevelFilter _levelFilters[] = {{"ERROR",   0x0001, true,  true},
                                       {"INFO",    0x0008, false, true},
                                       {"DEBUG",   0x0010, false, true},
                                       {"ENTER",   0x0020, false, true},
-                                      {"EXIT",    0x0040, false, true}};
+                                      {"EXIT",    0x0040, false, true},
+                                      {"DUMP",    0x0080, false, true}};
 #endif
 static const int _numLevels = sizeof(_levelFilters)/sizeof(LevelFilter);
 static unsigned _maxLevelNameLength = 0;
@@ -398,8 +400,13 @@ bool tf_isFilterPassed(const char *file_,
   bool threadFilterPassed = !_threadFilterEnabled;
   bool filterPassed = false;
   char traceOutputString[180];
+#ifdef TF_NATIVE_DISCRETE_LEVELS
+  /* noneed to translate level, use native discrete level directly */
+  unsigned level = level_;
+#else
   /* translate our hierarchical level to a discrete bitmask level */
-  unsigned level = _levelFilters[level_].level;   
+  unsigned level = _levelFilters[level_].level;
+#endif
   if (isWatchHit() && ((_watchNumHits == 0) || (_watchControl != TF_ONCE)))
   {
     /* print out the most recent trace for which the value was unchanged */
@@ -1104,7 +1111,7 @@ void configureFilter(int argc, char *argv[])
     {
       _globalLevel = TL_ALL;
     }
-    else if (pshell_isSubString(argv[1], "default", 1) && (argc == 2))
+    else if (pshell_isSubString(argv[1], "default", 3) && (argc == 2))
     {
       _globalLevel = TL_DEFAULT;
     }
@@ -1516,13 +1523,13 @@ void addLevelFilter(char *name_, unsigned &level_)
 {
   for (int i = 0; i < _numLevels; i++)
   {
-    if (strncasecmp(name_, _levelFilters[i].name, strlen(name_)) == 0)
+    if (strcasecmp(name_, _levelFilters[i].name) == 0)
     {
       level_ |= _levelFilters[i].level;
       break;
     }
   }
-  if (strncasecmp(name_, "default", strlen(name_)) == 0)
+  if (strncasecmp(name_, "default", 3) == 0)
   {
     level_ |= TL_DEFAULT;
   }
@@ -1534,7 +1541,7 @@ void removeLevelFilter(char *name_, unsigned &level_)
 {
   for (int i = 0; i < _numLevels; i++)
   {
-    if (strncasecmp(name_, _levelFilters[i].name, strlen(name_)) == 0)
+    if (strcasecmp(name_, _levelFilters[i].name) == 0)
     {
       if (_levelFilters[i].isMaskable)
       {

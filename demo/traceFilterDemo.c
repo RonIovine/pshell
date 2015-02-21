@@ -172,6 +172,7 @@ void setTriggers(int argc, char *argv[])
  * if our serverName is not found in the pshell.servers file
  */
 #define TF_DEMO_PORT 6002
+#define DUMP_BUFFER_SIZE 256
 
 /******************************************************************************/
 /******************************************************************************/
@@ -179,6 +180,7 @@ int main (int argc, char *argv[])
 {
 
   PshellServerType serverType;
+  char dumpBuffer[DUMP_BUFFER_SIZE];
 
   /* validate our command line arguments and get the server type */
   if (argc == 2)
@@ -207,6 +209,10 @@ int main (int argc, char *argv[])
     return (0);
   }
 
+  for (unsigned i = 0; i < DUMP_BUFFER_SIZE; i++)
+  {
+    dumpBuffer[i] = i;
+  }
 
   trace_setLogPrefix("demo");
 
@@ -286,6 +292,8 @@ int main (int argc, char *argv[])
     bar();
     sleep(1);
     TRACE_DEBUG("message 3");
+    sleep(1);
+    TRACE_DUMP(dumpBuffer, sizeof(dumpBuffer), "dumping buffer: dumpBuffer");
     sleep(1);
     TRACE_ERROR("message 4");
     sleep(1);

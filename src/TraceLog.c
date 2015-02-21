@@ -53,6 +53,16 @@ static TraceLogFunction _logFunction = NULL;
 static char _logPrefix[MAX_STRING_SIZE] = {"TRACE"};
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 
+/*****************************
+ * private "member" functions
+ *****************************/
+static void printLine(char *line_);
+static void formatHeader(const char *type_,
+                         const char *file_,
+                         const char *function_,
+                         int line_,
+                         char *outputString_);
+
 /**************************************
  * public API "member" function bodies
  **************************************/
@@ -61,7 +71,14 @@ static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 /******************************************************************************/
 void trace_registerLogFunction(TraceLogFunction logFunction_)
 {
-  _logFunction = logFunction_;
+  if (logFunction_ != NULL)
+  {
+    _logFunction = logFunction_;
+  }
+  else
+  {
+    TRACE_ERROR("NULL logFunction, not registered");
+  }
 }
 
 /******************************************************************************/
@@ -86,10 +103,82 @@ void trace_setLogPrefix(const char *name_)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...)
+void trace_outputLog(const char *type_,
+                     const char *file_,
+                     const char *function_,
+                     int line_,
+                     const char *format_, ...)
 {
   pthread_mutex_lock(&_mutex);
   char outputString[MAX_STRING_SIZE];
+  formatHeader(type_, file_, function_, line_, outputString);
+  va_list args;
+  va_start(args, format_);
+  vsprintf(&outputString[strlen(outputString)], format_, args);
+  va_end(args);
+  strcat(outputString, "\n");
+  printLine(outputString);
+  pthread_mutex_unlock(&_mutex);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_outputDump(void *address_,
+                      unsigned length_,
+                      const char *type_,
+                      const char *file_,
+                      const char *function_,
+                      int line_,
+                      const char *format_, ...)
+{
+  pthread_mutex_lock(&_mutex);
+  char asciiLine[80];
+  const unsigned bytesPerLine = 16;
+  unsigned char *bytes = (unsigned char *)address_;
+  unsigned short offset = 0;
+  char outputString[MAX_STRING_SIZE];
+  formatHeader(type_, file_, function_, line_, outputString);
+  va_list args;
+  va_start(args, format_);
+  vsprintf(&outputString[strlen(outputString)], format_, args);
+  va_end(args);
+  strcat(outputString, "\n");
+  printLine(outputString);
+  asciiLine[0] = 0;
+  for (unsigned i = 0; i < length_; i++)
+  {
+    // see if we are on a full line boundry
+    if ((i%bytesPerLine) == 0)
+    {
+      // see if we need to print our ascii data line
+      if (i > 0)
+      {
+        sprintf(outputString, "  %s\n", asciiLine);
+        printLine(outputString);
+        // asciiLine printed, clear it for next time
+        asciiLine[0] = 0;
+      }
+      // print our offset
+      sprintf(outputString, "  %04x  ", offset);
+      printLine(outputString);
+      offset += bytesPerLine;
+    }
+    // create our line of ascii data, for non-printable ascii characters just use a "."
+    sprintf(&asciiLine[strlen(asciiLine)], "%c", ((isprint(bytes[i]) && (bytes[i] < 128)) ? bytes[i] : '.'));
+    // print one hex byte
+    sprintf(outputString, "%02x ", bytes[i]);
+    printLine(outputString);
+  }
+  // done, print the final ascii line
+  sprintf(outputString, "  %*s\n", (int)(((bytesPerLine-strlen(asciiLine))*3)+strlen(asciiLine)), asciiLine);
+  printLine(outputString);
+  pthread_mutex_unlock(&_mutex);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void formatHeader(const char *type_, const char *file_, const char *function_, int line_, char *outputString_)
+{
   char timestamp[MAX_STRING_SIZE];
   struct timeval tv;
   struct tm tm;
@@ -110,19 +199,19 @@ void trace_outputLog(const char *type_, const char *file_, const char *function_
   {
     file = file_;
   }
-  sprintf(outputString, "%s%-7s | %s.%ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
-  va_list args;
-  va_start(args, format_);
-  vsprintf(&outputString[strlen(outputString)], format_, args);
-  va_end(args);
-  strcat(outputString, "\n");
+  sprintf(outputString_, "%s%-7s | %s.%ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void printLine(char *line_)
+{
   if (_logFunction == NULL)
   {
-    printf("%s", outputString);
+    printf("%s", line_);
   }
   else
   {
-    (*_logFunction)(outputString);
+    (*_logFunction)(line_);
   }
-  pthread_mutex_unlock(&_mutex);
 }

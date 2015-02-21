@@ -150,7 +150,7 @@ then
   cd $PSHELL_INSTALL/demo
   
   echo "Building pshellServerDemo program..."
-  g++ -Wall -I../include -DTF_FAST_FILENAME_LOOKUP -DTF_NATIVE_DISCRETE_LEVELS \
+  g++ -Wall -I../include \
   pshellServerDemo.c \
   -lpthread -L../lib -lpshell-server $READLINELIB \
   -o ../bin/pshellServerDemo
