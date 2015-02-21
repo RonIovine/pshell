@@ -370,11 +370,16 @@ void getOptions(int argc, char *argv[])
 {
   char option[20];
   char value[20];
-  /* dump out our args */
+  /* extract our args */
   for (int i = 1; i < argc; i++)
   {
+    /* see if we want to extract all options & values or a specific one */
     if (pshell_isEqual(argv[0], "all"))
     {
+      /*
+       * we want to extract all options with the option name and value
+       * being returned to us, the strlen(option) must be 0 to do this
+       */
       option[0] = 0;
       if (pshell_getOption(argv[i], option, value))
       {
@@ -383,6 +388,7 @@ void getOptions(int argc, char *argv[])
     }
     else
     {
+      /* we are looking to extract the value for a specific option */
       if (pshell_getOption(argv[i], argv[0], value))
       {
         pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n", i, argv[i], i, argv[0], i, value);

@@ -295,14 +295,14 @@ bool pshell_isFloat(const char *string_);
 /*
  * pshell_getOption:
  *
- * this function will extract options of the formats -<option><value>
- * where <option> is a single character option (e.g. -t10), or
- * <option>=<value> where <option> is any length character string
- * (e.g. timeout=10), if the 'strlen(option_)' is == 0, all option names
- * & values will be extracted and returned in the 'option_' and 'value_'
- * parameters, if the 'strlen(option_)' is > 0, the 'value_' will only
- * be extracted if the option matches the requested option_ name, see
- * the pshellServerDemo program for examples on this function usage
+ * this function will extract options from the callback function args list
+ * of the formats -<option><value> where <option> is a single character
+ * option (e.g. -t10), or ,option>=<value> where <option> is any length
+ * character string (e.g. timeout=10), if the 'strlen(option_)' is == 0,
+ * all option names & values will be extracted and returned in the 'option_'
+ * and 'value_' parameters, if the 'strlen(option_)' is > 0, the 'value_'
+ * will only be extracted if the option matches the requested option_ name,
+ * see the pshellServerDemo program for examples on this function usage
  */
 bool pshell_getOption(const char *string_, char *option_, char *value_);
 void *pshell_getVoid(const char *string_);
