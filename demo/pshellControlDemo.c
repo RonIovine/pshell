@@ -33,20 +33,35 @@
 
 #include <PshellControl.h>
 
-/*
+/*******************************************************************************
+ *
  * This is an example demo program that shows how to use the pshell control
  * interface.  This API will allow any external client program to invoke
  * functions that are registered within a remote program runnins a pshell
  * server.  This will only control programs that are running either a UDP
  * or UNIX pshell server.
- */
+ *
+ *******************************************************************************/
 
+/******************************************************************************/
+/******************************************************************************/
 void showUsage(void)
 {
+  printf("\n");
   printf("Usage: pshellControlDemo <server> [-p<port>]  [-t<timeout>] [-l<logLevel] [-e]\n");
+  printf("\n");
+  printf("  where:\n");
+  printf("    server  -  hostname or IP address of UDP server, or name of UNIX server\n");
+  printf("    -p      -  port number of UDP server, omit for UNIX server (default=UNIX)\n");
+  printf("    -t      -  wait timeout for response in mSec (default=100)\n");
+  printf("    -l      -  log level of control library (0-3, default=3, i.e. all)\n");
+  printf("    -e      -  extract data contents of response, must have non-0 wait timeout\n");
+  printf("\n");
   exit(0);
 }
 
+/******************************************************************************/
+/******************************************************************************/
 int main (int argc, char *argv[])
 {
   char inputLine[180];

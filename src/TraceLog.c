@@ -68,14 +68,19 @@ void trace_registerLogFunction(TraceLogFunction logFunction_)
 /******************************************************************************/
 void trace_setLogPrefix(const char *name_)
 {
-  if (name_ != NULL)
+  if ((name_ != NULL) && (strlen(name_) > 0))
   {
     int length = strlen(name_);
     for (int i = 0; i < length; i++)
     {
       _logPrefix[i] = toupper(name_[i]);
     }
-    _logPrefix[length] = 0;
+    _logPrefix[length] = '_';
+    _logPrefix[length+1] = 0;
+  }
+  else
+  {
+    _logPrefix[0] = 0;
   }
 }
 
@@ -105,7 +110,7 @@ void trace_outputLog(const char *type_, const char *file_, const char *function_
   {
     file = file_;
   }
-  sprintf(outputString, "%s_%-7s | %s.%ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
+  sprintf(outputString, "%s%-7s | %s.%ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
   va_list args;
   va_start(args, format_);
   vsprintf(&outputString[strlen(outputString)], format_, args);

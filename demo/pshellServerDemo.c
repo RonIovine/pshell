@@ -33,7 +33,8 @@
 
 #include <PshellServer.h>
 
-/*
+/*******************************************************************************
+ *
  * This is an example demo program that uses all the basic features of the
  * PSHELL library, this program can be run as either a UDP, TCP,  UNIX, or
  * local server based on the command line options.  If it is run as a UDP
@@ -42,7 +43,8 @@
  * use a standard  'telnet' client, if it is run as a local server, user
  * command line input is solicited directly from this program, no external
  * client is needed.
- */
+ *
+ *******************************************************************************/
 
 /*
  * PSHELL user callback functions, the interface is identical to the "main"
@@ -54,6 +56,9 @@
  * remote client.  The interface to this function is exactly the same as
  * the standard 'printf' function.
  */
+ 
+/******************************************************************************/
+/******************************************************************************/
 void hello(int argc, char *argv[])
 {
   pshell_printf("hello command dispatched:\n");
@@ -64,6 +69,8 @@ void hello(int argc, char *argv[])
   }
 }
 
+/******************************************************************************/
+/******************************************************************************/
 void world(int argc, char *argv[])
 {
   pshell_printf("world command dispatched:\n");
@@ -79,6 +86,9 @@ void world(int argc, char *argv[])
  * need a keep alive since the TCP protocol itself
  * handles that
  */
+ 
+/******************************************************************************/
+/******************************************************************************/
 void keepAlive(int argc, char *argv[])
 {
   if (pshell_isEqual(argv[0], "dots"))
@@ -140,6 +150,8 @@ void keepAlive(int argc, char *argv[])
  *        "dots" or "wheel" must be enter to be accepted.
  */
 
+/******************************************************************************/
+/******************************************************************************/
 void wildcardMatch(int argc, char *argv[])
 {
   if (pshell_isHelp())
@@ -207,6 +219,9 @@ void wildcardMatch(int argc, char *argv[])
  * registered usage with the pshell_showUsage call and then give some
  * optional enhanced usage with the pshell_printf call
  */
+
+/******************************************************************************/
+/******************************************************************************/ 
 void enhancedUsage(int argc, char *argv[])
 {
 
@@ -233,6 +248,9 @@ void enhancedUsage(int argc, char *argv[])
  * this function demonstrates the various helper functions that assist
  * in the interpretation and conversion of command line arguments
  */
+
+/******************************************************************************/
+/******************************************************************************/
 void formatChecking(int argc, char *argv[])
 {
 
@@ -277,6 +295,8 @@ void formatChecking(int argc, char *argv[])
 #define MAX_MINUTE 59
 #define MAX_SECOND 59
 
+/******************************************************************************/
+/******************************************************************************/
 void advancedParsing(int argc, char *argv[])
 {
   PshellTokens *timestamp = pshell_tokenize(argv[0], ":");
@@ -339,6 +359,8 @@ void advancedParsing(int argc, char *argv[])
   }
 }
 
+/******************************************************************************/
+/******************************************************************************/
 void showUsage(void)
 {
   printf("\n");
@@ -358,6 +380,8 @@ void showUsage(void)
  */
 #define PSHELL_DEMO_PORT 6001
 
+/******************************************************************************/
+/******************************************************************************/
 int main(int argc, char *argv[])
 {
 

@@ -99,8 +99,10 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
  * trace_registerLogName:
  *
  * set a log name that is used as a prefix for the log type,
- * if no name is given, the prefix will default to "TRACE",
- * e.g. TRACE_ERROR, TRACE_WARNING etc
+ * if this function is not called, the prefix will default to
+ * "TRACE", e.g. TRACE_ERROR, TRACE_WARNING etc, if this function
+ * is called with a NULL prefix, the trace name type will have
+ * not prefix, e.g. ERROR, WARNING etc.
  */
 void trace_setLogPrefix(const char *name_);
 

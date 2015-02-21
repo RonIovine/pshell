@@ -38,16 +38,13 @@ extern "C" {
  * This API provides the ability for a client program to add dynamic and
  * configurable trace control to a program that has a trace logging mechanism
  * that uses a __FILE__, __FUNCTION__, __LINE__, level, paradigm.  See the
- * included files TraceLog.h and TraceLog.cc example trace logging system along
- * with the demo program traceFilterDemo.c for examples on how to intrgrate and
- * use this feature in an existing appliation.
+ * included files TraceLog.h and TraceLog.cc for an example trace logging system
+ * along with the demo program traceFilterDemo.c for examples on how to intrgrate
+ * and use this feature in an existing appliation.
  *
  * This module is dependent on the application running a pshell server, but
  * the converse it not true (i.e. this module can be omitted in the build
  * of the pshell library if this functionality is not desired).
- *
- * An complete example of the usage of the API can be found in the included 
- * file traceFilterDemo.c
  *
  *******************************************************************************/
 

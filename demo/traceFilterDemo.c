@@ -33,13 +33,15 @@
 #include <PshellServer.h>
 #include <TraceLog.h>
 
-/*
+/*******************************************************************************
+ *
  * This is an example demo program that shows how to use the dynamically
  * controllable & configurable trace filtering mechanism.  This filtering
  * mechanism can be conficured interactivley on a love process via the
  * pshell interface.  This program utilizes a pshell server that can be
  * started as a UDP, UNIX, or TCP server.
- */
+ *
+ *******************************************************************************/
 
 /* the following items are examples for the dynamic trace filtering feature */
 
@@ -53,6 +55,9 @@
 TF_SYMBOL_TABLE; 
 
 /* a couple of functions to show function name filtering */
+
+/******************************************************************************/
+/******************************************************************************/
 void foo(void)
 {
   TRACE_ENTER("message 1");
@@ -60,6 +65,8 @@ void foo(void)
   TRACE_EXIT("message 2");
 }
 
+/******************************************************************************/
+/******************************************************************************/
 void bar(void)
 {
   TRACE_ENTER("message 1");
@@ -67,6 +74,8 @@ void bar(void)
   TRACE_EXIT("message 2");
 }
 
+/******************************************************************************/
+/******************************************************************************/
 void *myThread(void*)
 {
 
@@ -98,6 +107,9 @@ void *myThread(void*)
 unsigned watchAddress = 0;
 
 /* sample trace callback function */
+
+/******************************************************************************/
+/******************************************************************************/
 bool callbackCondition = false;
 bool callbackFunction(void)
 {
@@ -105,6 +117,8 @@ bool callbackFunction(void)
   return (callbackCondition);
 }
 
+/******************************************************************************/
+/******************************************************************************/
 void showUsage(void)
 {
   printf("\n");
@@ -117,6 +131,8 @@ void showUsage(void)
   printf("\n");
 }
 
+/******************************************************************************/
+/******************************************************************************/
 void setTriggers(int argc, char *argv[])
 {
   if (pshell_isSubString(argv[0], "callback", 1))
@@ -157,6 +173,8 @@ void setTriggers(int argc, char *argv[])
  */
 #define TF_DEMO_PORT 6002
 
+/******************************************************************************/
+/******************************************************************************/
 int main (int argc, char *argv[])
 {
 

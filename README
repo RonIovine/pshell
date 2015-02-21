@@ -92,6 +92,20 @@ $PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo dynamic trace filterin
 
 EXECUTION:
 
+There are 3 demo programs, one to demonstrate a program that incorporates a
+pshell server (pshellServerDemo), one that demonstrates a program that incorporates
+a the trace filter functionality (traceFilterDemo), and one that demonstrates
+the control of a program that is running a pshell server from another program
+(pshellControlDemo).
+
+All three demo programs have a usage that can be displayed by typing <programName> -h.
+The two demo programs pshellServerDemo and traceFilterDemo can be controlled via
+an interactive client program (either pshell or telnet) that shows the full command
+line functionality.  The demo program pshellControlDemo can control the other two demo
+programs through a quasi interactive method, but it is really meant to demonstrate an
+external program that uses the control interface.  The pshellCotrolDemo program can
+control either the pshellServerDemo or traceControlDemo program.
+
 To run the demo programs and any associated client programs, you must first
 setup the softlink to the pshell-server library.  After the above environment
 variables have been sourced, run "setPshellLib -full" to setup the softlink.
