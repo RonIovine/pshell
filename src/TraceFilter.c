@@ -173,7 +173,7 @@ static const void showSymbols(char *symbol_);
  * given existing trace system
  */
 #ifdef TF_NATIVE_DISCRETE_LEVELS
-/* existing trace system uses discrete bitmasks, use those values directly for the 'level' field */
+/* existing trace system uses discrete bitmasks, use those values directly for the 'mask' field */
 static LevelFilter _levelFilters[] = {{"ERROR",   TL_ERROR,   true,  true},
                                       {"FAILURE", TL_FAILURE, true,  true},
                                       {"WARNING", TL_WARNING, true,  true},
@@ -401,7 +401,7 @@ bool tf_isFilterPassed(const char *file_,
   bool filterPassed = false;
   char traceOutputString[180];
 #ifdef TF_NATIVE_DISCRETE_LEVELS
-  /* noneed to translate level, use native discrete level directly */
+  /* no need to translate level, use native discrete bitmask level directly */
   unsigned level = level_;
 #else
   /* translate our hierarchical level to a discrete bitmask level */

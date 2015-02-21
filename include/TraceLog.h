@@ -43,9 +43,12 @@
  *******************************************************************************/
 
 /* trace level definitions, this is an example of some common trace levels,
- * these need to be modified in accordance with the levels of the  existing
- * trace logging system, modify the '_levelFilters' static variable list in
- * the file 'TraceFilter.c' to correspond to these trace levels
+ * the trace filteing mechanism uses a discrete bitmask trace level paradigm
+ * rather than the more traditional hierarchical level paradigm, if the existing
+ * trace logging system uses a hierarchical level, those levels need to be
+ * mapped and translated into a corresponding discrete level, that is done by
+ * mapping the hierarchical levels into a corresponding bitmask value in the
+ * structure _levelFilters in TraceFilter.c
  */
 #ifdef TF_NATIVE_DISCRETE_LEVELS
 /* this example is when the existing trace system used discrete bitmasks for its trace levels */
@@ -77,7 +80,7 @@
  */
 
 /* this trace cannot be disabled */
-#define TRACE_FORCE(format, args...) trace_outputLog("FORCE", __FILE__, __FUNCTION__, __LINE__, format, ## args);
+#define TRACE_FORCE(format, args...) trace_outputLog("FORCE", __FILE__, __FUNCTION__, __LINE__, format, ## args)
 
 /* normal trace output macros, these are called directly by client code */
 #define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, "ERROR", format, ## args)
@@ -108,7 +111,7 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
  * if this function is not called, the prefix will default to
  * "TRACE", e.g. TRACE_ERROR, TRACE_WARNING etc, if this function
  * is called with a NULL prefix, the trace name type will have
- * not prefix, e.g. ERROR, WARNING etc.
+ * no prefix, e.g. ERROR, WARNING etc.
  */
 void trace_setLogPrefix(const char *name_);
 
