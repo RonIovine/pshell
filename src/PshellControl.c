@@ -94,7 +94,7 @@ static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static const char *_errorPad = "              ";
 
 /******************************************
- * private "member" function declarations
+ * private "member" function prototypes
  ******************************************/
 
 static PshellControl *getControl(int sid_);

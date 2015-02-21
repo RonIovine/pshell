@@ -53,9 +53,10 @@ static TraceLogFunction _logFunction = NULL;
 static char _logPrefix[MAX_STRING_SIZE] = {"TRACE"};
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 
-/*****************************
- * private "member" functions
- *****************************/
+/***************************************
+ * private "member" function prototypes
+ ***************************************/
+ 
 static void printLine(char *line_);
 static void formatHeader(const char *type_,
                          const char *file_,
@@ -174,6 +175,10 @@ void trace_outputDump(void *address_,
   printLine(outputString);
   pthread_mutex_unlock(&_mutex);
 }
+
+/**************************************
+ * private "member" function bodies
+ **************************************/
 
 /******************************************************************************/
 /******************************************************************************/
