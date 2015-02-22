@@ -146,6 +146,7 @@ void trace_outputDump(void *address_,
   strcat(outputString, "\n");
   printLine(outputString);
   asciiLine[0] = 0;
+  outputString[0] = 0;
   for (unsigned i = 0; i < length_; i++)
   {
     // see if we are on a full line boundry
@@ -154,24 +155,24 @@ void trace_outputDump(void *address_,
       // see if we need to print our ascii data line
       if (i > 0)
       {
-        sprintf(outputString, "  %s\n", asciiLine);
+        /* done with this line, add the asciii data & print it */
+        sprintf(&outputString[strlen(outputString)], "  %s\n", asciiLine);
         printLine(outputString);
-        // asciiLine printed, clear it for next time
+        // line  printed, clear them it for next time
         asciiLine[0] = 0;
+        outputString[0] = 0;
       }
-      // print our offset
-      sprintf(outputString, "  %04x  ", offset);
-      printLine(outputString);
+      // format our our offset
+      sprintf(&outputString[strlen(outputString)], "  %04x  ", offset);
       offset += bytesPerLine;
     }
     // create our line of ascii data, for non-printable ascii characters just use a "."
     sprintf(&asciiLine[strlen(asciiLine)], "%c", ((isprint(bytes[i]) && (bytes[i] < 128)) ? bytes[i] : '.'));
-    // print one hex byte
-    sprintf(outputString, "%02x ", bytes[i]);
-    printLine(outputString);
+    // format our line of hex byte
+    sprintf(&outputString[strlen(outputString)], "%02x ", bytes[i]);
   }
-  // done, print the final ascii line
-  sprintf(outputString, "  %*s\n", (int)(((bytesPerLine-strlen(asciiLine))*3)+strlen(asciiLine)), asciiLine);
+  // done, format & print the final line & ascii data
+  sprintf(&outputString[strlen(outputString)], "  %*s\n", (int)(((bytesPerLine-strlen(asciiLine))*3)+strlen(asciiLine)), asciiLine);
   printLine(outputString);
   pthread_mutex_unlock(&_mutex);
 }
