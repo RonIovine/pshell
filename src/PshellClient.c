@@ -231,18 +231,21 @@ char *commandGenerator (const char *command_, int state_);
 void showWelcome(void)
 {
   printf("\n");
-  PSHELL_PRINT_WELCOME_BORDER(printf, strlen(_banner));
-  printf("%s\n", PSHELL_WELCOME_BORDER);
-  printf("%s  %s\n", PSHELL_WELCOME_BORDER, _banner);
-  printf("%s\n", PSHELL_WELCOME_BORDER);
+  char sessionInfo[256];
   if (_serverType == UDP)
   {
-    printf("%s  Multi-session UDP server: %s[%s]\n", PSHELL_WELCOME_BORDER, _serverName, _ipAddress);
+    sprintf(sessionInfo, "%s  Multi-session UDP server: %s[%s]", PSHELL_WELCOME_BORDER, _serverName, _ipAddress);
   }
   else
   {
-    printf("%s  Multi-session UNIX server: %s[%s]\n", PSHELL_WELCOME_BORDER, _serverName, _ipAddress);
+    sprintf(sessionInfo, "%s  Multi-session UNIX server: %s[%s]", PSHELL_WELCOME_BORDER, _serverName, _ipAddress);
   }
+  unsigned maxLength = MAX(strlen(_banner), strlen(sessionInfo));;
+  PSHELL_PRINT_WELCOME_BORDER(printf, maxLength);
+  printf("%s\n", PSHELL_WELCOME_BORDER);
+  printf("%s  %s\n", PSHELL_WELCOME_BORDER, _banner);
+  printf("%s\n", PSHELL_WELCOME_BORDER);
+  printf("%s\n", sessionInfo);
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Idle session timeout: NONE\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);
@@ -256,7 +259,7 @@ void showWelcome(void)
   printf("%s  Command abbreviation supported\n", PSHELL_WELCOME_BORDER);
 #endif
   printf("%s\n", PSHELL_WELCOME_BORDER);
-  PSHELL_PRINT_WELCOME_BORDER(printf, strlen(_banner));
+  PSHELL_PRINT_WELCOME_BORDER(printf, maxLength);
   printf("\n");
 }
 

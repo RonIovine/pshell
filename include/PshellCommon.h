@@ -101,6 +101,6 @@ struct PshellMsg
 #endif
 
 #define PSHELL_WELCOME_BORDER "#"
-#define PSHELL_PRINT_WELCOME_BORDER(print, length) {for (int i = 0; i < MAX((int)(length+5), 56); i++) print(PSHELL_WELCOME_BORDER); print("\n");}
+#define PSHELL_PRINT_WELCOME_BORDER(print, length) {for (int i = 0; i < MAX((int)(length+2), 56); i++) print(PSHELL_WELCOME_BORDER); print("\n");}
 
 #endif
