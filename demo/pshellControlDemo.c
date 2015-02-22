@@ -51,11 +51,11 @@ void showUsage(void)
   printf("Usage: pshellControlDemo <server> [-p<port>]  [-t<timeout>] [-l<logLevel] [-e]\n");
   printf("\n");
   printf("  where:\n");
-  printf("    <server>    -  hostname or IP address of UDP server, or name of UNIX server\n");
-  printf("    <port>      -  port number of UDP server, omit for UNIX server\n");
-  printf("    <timeout>   -  wait timeout for response in mSec (default=100)\n");
-  printf("    <logLevel>  -  log level of control library (0-3, default=3, i.e. all)\n");
-  printf("    -e          -  extract data contents of response (must have non-0 wait timeout)\n");
+  printf("    <server>   - hostname or IP address of UDP server, or name of UNIX server\n");
+  printf("    <port>     - port number of UDP server, omit for UNIX server\n");
+  printf("    <timeout>  - wait timeout for response in mSec (default=100)\n");
+  printf("    <logLevel> - log level of control library (0-3, default=3, i.e. all)\n");
+  printf("    -e         - extract data contents of response (must have non-0 wait timeout)\n");
   printf("\n");
   exit(0);
 }

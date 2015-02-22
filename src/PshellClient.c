@@ -399,12 +399,7 @@ bool getPrompt(void)
 bool getIpAddress(void)
 {
   /* query for our ip address so we can setup our prompt and title bar */
-  if (_version == PSHELL_VERSION_1)
-  {
-    strcpy(_ipAddress, inet_ntoa(_destIpAddress.sin_addr));
-    return (true);
-  }
-  else if (processCommand(PSHELL_QUERY_IP_ADDRESS, NULL, 0, false, true))
+  if (processCommand(PSHELL_QUERY_IP_ADDRESS, NULL, 0, false, true))
   {
     strcpy(_ipAddress, _pshellRcvMsg->payload);
     return (true);
