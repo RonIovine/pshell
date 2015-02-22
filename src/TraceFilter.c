@@ -904,7 +904,6 @@ void showUsage(void)
   pshell_showUsage();
   pshell_printf("\n");
   pshell_printf("  where:\n");
-  pshell_printf("\n");
 #ifdef TF_FAST_FILENAME_LOOKUP
   pshell_printf("    <symbol>    - the symbol (i.e.file) name or substring\n");
 #endif

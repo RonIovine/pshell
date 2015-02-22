@@ -160,7 +160,6 @@ void wildcardMatch(int argc, char *argv[])
     pshell_showUsage();
     pshell_printf("\n");
     pshell_printf("  where valid <args> are:\n");
-    pshell_printf("\n");
     pshell_printf("    on\n");
     pshell_printf("    of*f\n");
     pshell_printf("    a*ll\n");
@@ -377,31 +376,45 @@ void getOptions(int argc, char *argv[])
   char returnedOption[40];
   char returnedValue[40];
   char *requestedOption;
-  /* extract our args */
-  for (int i = 1; i < argc; i++)
+  if (pshell_isHelp())
   {
-    /* see if we want to extract all options & values or a specific one */
-    if (pshell_isEqual(argv[0], "all"))
+    pshell_printf("\n");
+    pshell_showUsage();
+    pshell_printf("\n");
+    pshell_printf("  where::\n");
+    pshell_printf("    all    - extract all options\n");
+    pshell_printf("    <opt>  - option identifier to extract (e.g. '-t', 'timeout' etc)\n");
+    pshell_printf("    <optN> - option identifier along with value (e.g. '-t10', 'timeout=10', etc)\n");
+    pshell_printf("\n");
+  }
+  else
+  {
+    /* extract our args */
+    for (int i = 1; i < argc; i++)
     {
-      /*
-       * we want to extract all options with the option name and value
-       * being returned to us, the strlen(option) must be 0 to do this
-       */
-      returnedOption[0] = 0;
-      if (pshell_getOption(argv[i], returnedOption, returnedValue))
+      /* see if we want to extract all options & values or a specific one */
+      if (pshell_isEqual(argv[0], "all"))
       {
-        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n",
-                      i, argv[i], i, returnedOption, i, returnedValue);
+        /*
+         * we want to extract all options with the option name and value
+         * being returned to us, the strlen(option) must be 0 to do this
+         */
+        returnedOption[0] = 0;
+        if (pshell_getOption(argv[i], returnedOption, returnedValue))
+        {
+          pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n",
+                        i, argv[i], i, returnedOption, i, returnedValue);
+        }
       }
-    }
-    else
-    {
-      /* we are looking to extract the value for a specific option */
-      requestedOption = argv[0];
-      if (pshell_getOption(argv[i], requestedOption, returnedValue))
+      else
       {
-        pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n",
-                      i, argv[i], i, requestedOption, i, returnedValue);
+        /* we are looking to extract the value for a specific option */
+        requestedOption = argv[0];
+        if (pshell_getOption(argv[i], requestedOption, returnedValue))
+        {
+          pshell_printf("  arg[%d]: '%s', option[%d]: '%s', value[%d]: '%s'\n",
+                        i, argv[i], i, requestedOption, i, returnedValue);
+        }
       }
     }
   }
@@ -534,10 +547,10 @@ int main(int argc, char *argv[])
   pshell_addCommand(getOptions,                                  /* function */
                     "getOptions",                                /* command */
                     "example of parsing command line options",   /* description */
-                    "{all | <<opt>} <opt1> [<opt2> <opt3>...]",  /* usage */
+                    "{all | <opt>} <opt1> [<opt2> <opt3>...]",   /* usage */
                     2,                                           /* minArgs */
                     20,                                          /* maxArgs */
-                    true);                                       /* showUsage on "?" */
+                    false);                                      /* showUsage on "?" */
                   
   /*
    * example of issuing an pshell command from within a program, this can be done before
