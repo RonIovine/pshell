@@ -234,18 +234,18 @@ void showWelcome(void)
   char sessionInfo[256];
   if (_serverType == UDP)
   {
-    sprintf(sessionInfo, "%s  Multi-session UDP server: %s[%s]", PSHELL_WELCOME_BORDER, _serverName, _ipAddress);
+    sprintf(sessionInfo, "Multi-session UDP server: %s[%s]", _serverName, _ipAddress);
   }
   else
   {
-    sprintf(sessionInfo, "%s  Multi-session UNIX server: %s[%s]", PSHELL_WELCOME_BORDER, _serverName, _ipAddress);
+    sprintf(sessionInfo, "Multi-session UNIX server: %s[%s]", _serverName, _ipAddress);
   }
-  unsigned maxLength = MAX(strlen(_banner), strlen(sessionInfo));;
+  unsigned maxLength = MAX(strlen(_banner), strlen(sessionInfo))+3;
   PSHELL_PRINT_WELCOME_BORDER(printf, maxLength);
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  %s\n", PSHELL_WELCOME_BORDER, _banner);
   printf("%s\n", PSHELL_WELCOME_BORDER);
-  printf("%s\n", sessionInfo);
+  printf("%s  %s\n", PSHELL_WELCOME_BORDER, sessionInfo);
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Idle session timeout: NONE\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);

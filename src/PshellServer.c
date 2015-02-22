@@ -1869,8 +1869,8 @@ static void writeSocket(const char *string_, unsigned length_)
 static void showWelcome(void)
 {
   char sessionInfo[256];
-  sprintf(sessionInfo, "%s  Single session %s server: %s[%s]", PSHELL_WELCOME_BORDER, ((_serverType == PSHELL_TCP_SERVER) ? "TCP" : "LOCAL"), _serverName, _ipAddress);
-  unsigned maxLength = MAX(strlen(_banner), strlen(sessionInfo));;
+  sprintf(sessionInfo, "Single session %s server: %s[%s]", ((_serverType == PSHELL_TCP_SERVER) ? "TCP" : "LOCAL"), _serverName, _ipAddress);
+  unsigned maxLength = MAX(strlen(_banner), strlen(sessionInfo))+3;
   /* set our terminal title bar */
   pshell_printf("\033]0;%s: %s[%s], Mode: INTERACTIVE\007", _title, _serverName, _ipAddress);
   /* show our welcome screen */
@@ -1879,7 +1879,7 @@ static void showWelcome(void)
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s  %s\n", PSHELL_WELCOME_BORDER, _banner);
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
-  pshell_printf("%s\n", sessionInfo);
+  pshell_printf("%s  %s\n", PSHELL_WELCOME_BORDER, sessionInfo);
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   if (_serverType == PSHELL_TCP_SERVER)
   {
