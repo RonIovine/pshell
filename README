@@ -38,34 +38,44 @@ version, in addition, the pshell-server libraray has a full and stub version),
 one stand-alone UDP/UNIX client application (pshell), three utility shell
 scripts, one expect script, one build script and three demo programs.  The rest
 of this README will assume that this package has been unzipped with the current
-directory structure preserved.  It is understood that not all installations will
-follow this directory scheme.  Environment variables and the buildPshell,
-setPshellLib and showPshellLib shell scripts will need to be modified
-accordingly for a different install directory scheme.
+directory structure preserved.  
 
 The following lists all the pieces of this package along with a brief description:
 
-  1.  libpshell-server-full.a  -- Full version of libpshell-server library (static)
-  2.  libpshell-server-full.so -- Full version of libpshell-server library (shared)
-  3.  libpshell-server-stub.a  -- Stub version of libpshell-server library (static)
-  4.  libpshell-server-stub.so -- Stub version of libpshell-server library (shared)
-  5   libpshell-control.so     -- External pshell program control libpshell-control library (shared)
-  6   libpshell-control.a      -- External pshell program control libpshell-control library (static)
-  7.  pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
-  8.  pshell.exp               -- Expect script to provide interface similar to UDP/UNIX pshell
+  1.  install.sh               -- Install script for this package
+  2.  libpshell-server-full.a  -- Full version of libpshell-server library (static)
+  3.  libpshell-server-full.so -- Full version of libpshell-server library (shared)
+  4.  libpshell-server-stub.a  -- Stub version of libpshell-server library (static)
+  5.  libpshell-server-stub.so -- Stub version of libpshell-server library (shared)
+  6   libpshell-control.so     -- External pshell program control libpshell-control library (shared)
+  7   libpshell-control.a      -- External pshell program control libpshell-control library (static)
+  8.  pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
+  9.  pshell.exp               -- Expect script to provide interface similar to UDP/UNIX pshell
                                   client when using the TCP server with a telnet client
-  9.  buildPshell              -- Shell script to build the entire package or individual pieces
-  10. archivePshell            -- Shell script to creates a pshell-vX.Y.tar.gz archive
-  11. setPshellLib             -- Shell script to set the libpshell.so softlink to desired library
-  12. showPshelllLib           -- Shell script to show the current libpshell.so softlink setting
-  13. pshellServerDemo         -- Demo application using the pshell server library features
-  14. pshellControlDemo        -- Demo application using the pshell control library features
-  15. traceFilterDemo          -- Demo application using the optional trace filter feature
+  10. buildPshell              -- Shell script to build the entire package or individual pieces
+  11. archivePshell            -- Shell script to creates a pshell-vX.Y.tar.gz archive
+  12. setPshellLib             -- Shell script to set the libpshell.so softlink to desired library
+  13. showPshelllLib           -- Shell script to show the current libpshell.so softlink setting
+  14. pshellServerDemo         -- Demo application using the pshell server library features
+  15. pshellControlDemo        -- Demo application using the pshell control library features
+  16. traceFilterDemo          -- Demo application using the optional trace filter feature
+
+INSTALLATION:
+
+This package can either be installed on the target host for system wide usage, or
+in a local directory for limited access.  There is an installation script provided
+in the top level of the unzipped package (i.e. same directory as this README file)
+that will do the different installs.  To see the usage of the script 'cd' to that
+directory and type:
+
+$ ./install.sh -h
+
+Then run the script with the desired inputs.
 
 ENVIRONMENT:
 
-Setup the following environment variables in your shell startup script
-and re-scource the script, examples given for the bash shell:
+If the install script is run to setup local access, the following environment variables
+are written to the shell environment (i.e. .bashrc) file of the user:
 
 export PSHELL_INSTALL=<myInstallDir>
 export PSHELL_BATCH_DIR=$PSHELL_INSTALL/batch
@@ -74,14 +84,20 @@ export PATH=$PSHELL_INSTALL/bin:$PSHELL_INSTALL/utils:$PATH
 export MANPATH=$PSHELL_INSTALL/man:$MANPATH
 export LD_LIBRARY_PATH=$PSHELL_INSTALL/lib:$LD_LIBRARY_PATH
 
+Note that if a system wide install is done, none of the 'demo' programs are installed
+in any system wide 'bin' directories.  The can only be executed directly from the 'bin'
+directory of the unzipped package.  If a local install is done, the environment
+variables setup will allow the execution of the 'demo' programs from any location.
+
 DOCUMENTATION:
 
-The following manpages are available from the above configured MANPATH:
+The following manpages are available from the above configured MANPATH or
+from the standard manpage locations on a system installation:
 
-pshell(1)          - Describes the framework as well as the client program
-PshellServer(3C)   - Describes the API and usage of the PshellServer
-PshellControl(3C)  - Describes the API and usage of the PshellControl
-TraceFilter(3C)    - Described the API and usage of the TraceFilter
+pshell(1)         - Describes the framework as well as the client program
+PshellServer(3)   - Describes the API and usage of the PshellServer
+PshellControl(3)  - Describes the API and usage of the PshellControl
+TraceFilter(3)    - Described the API and usage of the TraceFilter
 
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:

@@ -1,53 +1,33 @@
-.TH PshellServer 3C "Sep 2012" "PSHELL" "Process Specific Embedded Command Line Shell" 
+.TH PshellServer 3 "Sep 2012" "PSHELL" "Process Specific Embedded Command Line Shell" 
 .SH NAME
 PshellServer - Process Specific Embedded Command Line Shell
 .SH DESCRIPTION
 The PshellServer will provide the API for embedding a lightweight CLI into any
-.br
 C/C++ program.  The PshellServer can run as either a UDP, TCP, UNIX, or LOCAL.
-.br
 server.  The UDP and UNIX servers supports multiple client sessions with no 
-.br
 idle session timeout.  It requires the included stand-alone UDP/UNIX client program 
-.br
 (called 'pshell') to communicate with the server.  The TCP based server provides 
-.br
 for a single client session with a configurable idle session timeout (defaults 
-.br
 to 10 minutes).  The TCP based server can be used with a standard 'telnet' client.  
-.br
 The LOCAL server supports a single session server with no idle session timeout.  
-.br
 It will solicit user input directly from the host program, no external client
-.br
 program is needed.
 
 In addition, the PshellServer can be run in two different operational modes, BLOCKING
-.br
 or NON_BLOCKING.  In BLOCKING mode, the server is run within the context of the
-.br
 calling function of the host process.  In NON_BLOCKING mode, the server is run within
-.br
 the context of a guest daemon thread which is created within the host process.
 
 The server provides a simple 'C' based API to register functions that can be invoked
-.br
 remotely.  The format of a CLI command is that of a single keyword followed by optional
-.br
 arguments, based on the function registration.  In that sense it is similar to a standard
-.br
 command line shell interpreter (as opposed to a multi-keyword based CLI).  The function
-.br
 that is invoked by the CLI can display data back to the client program (either 'telnet'
-.br
 or 'pshell') via a mechanism that has an API that is identical to the familiar 'printf'
-.br
 function.
 
 Finally, a UDP or UNIX pshell server also supports control from an external client
-.br
 program via the 'PshellControl.h' API.  Refer to the documentation on PshellControl
-.br
 for details on the API.
 .SH SYNOPSIS
 
@@ -76,23 +56,20 @@ void pshell_startServer(const char *serverName_,
 void pshell_printf(const char *format_, ...);
 
 The above synposis is just a summary of the most relevant part of the API,
-.br
 to see the full API refer to the include file 'PshellServer.h'
+
+Link with the library libpshell-server
 .SH EXAMPLES
 See the file pshellServerDemo.c in the pshell distribution package for a complete 
-.br
 list of examples of writing and registering PSHELL callback functions.
 .SH MT-LEVEL
 Only one PshellServer server can be opened and run per executable image.
-.br
 For NON_BLOCKING mode, a server thread will be created within the target
-.br
 program.  All CLI callback functions are executed within the context of
-.br
 this thread.  For BLOCKING mode, all CLI callback functions are executed
-.br
 within the context of the caller of the pshell_startServer function.  The
-.br
 PshellServer will ensure that it cannot be run more than once.
 .SH SEE ALSO
-pshell(1), PshellControl(3C)
+pshell(1), PshellControl(3)
+.SH AUTHOR
+Ron Iovine

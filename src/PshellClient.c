@@ -75,7 +75,7 @@
  */
 
 #ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc"
+#define PSHELL_CONFIG_DIR "/etc/pshell"
 #endif
 
 /*

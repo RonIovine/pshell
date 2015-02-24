@@ -79,7 +79,7 @@ static int _defaultIdleTimeout = 10;
  * the same name is not found
  */
 #ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc"
+#define PSHELL_CONFIG_DIR "/etc/pshell"
 #endif
 
 /*

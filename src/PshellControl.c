@@ -51,7 +51,7 @@
  * env variabel is not set
  */
 #ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc"
+#define PSHELL_CONFIG_DIR "/etc/pshell"
 #endif
 
 #define MAX_UNIX_CLIENTS 1000

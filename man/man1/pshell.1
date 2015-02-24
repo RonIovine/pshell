@@ -3,26 +3,17 @@
 pshell/pshell.exp - PSHELL UDP/UNIX client program/Telnet TCP client 'expect' script wrapper
 .SH DESCRIPTION
 The PSHELL API framework provides the ability to embed a shell type Command Line Interface
-.br
 (CLI) into any C/C++ application that can then be accessed via either the provided UDP/UNIX
-.br
 client program (called 'pshell') or via a standard 'telnet' based client.
-.br
 
 The 'pshell' program provides the client side command line interface (CLI) functionality
-.br
 to remotely invoke the callback functions that are registered within a program running a
-.br
 UDP or UNIX based PshellServer.
 
 The corresponding 'pshell.exp' 'expect' script provides a wrapper around a standard 'telnet'
-.br
 client to give a similar functionality (i.e. batch mode, command line mode etc) for programs
-.br
 that are running a TCP based PshellServer as the 'pshell' UDP/UNIX client program .  Use of 
-.br
 the 'pshell.exp' script is optional, the 'telnet' client can be used directly to interface
-.br
 to a TCP PshellServer, however, only interactive mode is supported.
 .SH USAGE
 Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<serverName> | <portNum>}
@@ -61,7 +52,8 @@ Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<se
           the last entered command.
 .SH EXAMPLES
 See the 'README' file that is distributed with this package for detailed instructions
-.br
 on using this framework.
 .SH SEE ALSO
-PshellServer(3C), PshellControl(3C), TraceFilter(3C)
+PshellServer(3), PshellControl(3), TraceFilter(3)
+.SH AUTHOR
+Ron Iovine

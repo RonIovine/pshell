@@ -48,11 +48,8 @@
  * the same name is not found
  */
 #ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc"
+#define PSHELL_CONFIG_DIR "/etc/pshell"
 #endif
-
-/* used for the default legacy behavour if the trace filter is disabled */
-extern int g_levelThreshold;
 
 /*
  ***********************************

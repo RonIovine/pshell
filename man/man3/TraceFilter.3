@@ -1,19 +1,13 @@
-.TH TraceFilter 3C "Sep 2012" "TraceFilter" "Dynamic interactive trace logging control" 
+.TH TraceFilter 3 "Sep 2012" "TraceFilter" "Dynamic interactive trace logging control"
 .SH NAME
 TraceFilter - Dynamic interactive trace logging control
 .SH DESCRIPTION
 The TraceFilter functionality will provide the ability to interactively control
-.br
 a program's trace logging feature via the remote PSHELL CLI server functionality.
-.br
 The filtering mechanism is used in conjunction with an already existing logging
-.br
 system that uses the __FILE__, __FUNCTION__, __LINE__, and level paradigm.  The
-.br
 TraceFilter does not provide that actual logging service itself, only the filtering
-.br
 mechanism.  The API is designed to easily and transparently be retrofitted into
-.br
 the existing logging mechanism.
 .SH SYNOPSIS
 
@@ -38,15 +32,11 @@ bool tf_isFilterPassed(const char *file_, int line_, const char *function_, unsi
 #define TF_CALLBACK(name, function, control)
 
 The above synposis is just a summary of the most relevant part of the API, to
-.br
 see the full API refer to the include file 'TraceFilter.h'
 
 The filter can be configured either via the startup file given in the 'tf_init'
-.br
 call or interactively via the PSHELL CLI.  To see the complete verbose usage of the
-.br
 CLI command, type 'trace ?' (or 'trace -h') at the CLI prompt.  The usage is shown
-.br
 below:
 
 traceFilterDemo[127.0.0.1]:PSHELL> trace ?
@@ -72,13 +62,15 @@ Usage: trace {on | off} |
     -           - remove the filter item from the specified list
 
   NOTE: If no '+' or '-' is given, the filter is set to the entered list
+
+Link with the library libpshell-server
 .SH EXAMPLES
 See the file traceFilterDemo.c in the pshell distribution package for a complete
-.br
 list of examples of integrating the TraceFilter mechanism into an existing
-.br
 trace logging system.
 .SH MT-LEVEL
 Safe
 .SH SEE ALSO
 pshell(1)
+.SH AUTHOR
+Ron Iovine

@@ -45,7 +45,7 @@ fi
 
 echo "Archiving pshell..."
 echo "Install directory: $PSHELL_INSTALL"
-rm $PSHELL_INSTALL/lib/libpshell-server.so
+rm -f $PSHELL_INSTALL/lib/libpshell-server.so
 cd $PSHELL_INSTALL
 cd ..
 if [ -e $gzipFileName ]

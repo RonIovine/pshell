@@ -152,7 +152,7 @@ void trace_outputDump(void *address_,
     // see if we are on a full line boundry
     if ((i%bytesPerLine) == 0)
     {
-      // see if we need to print our ascii data line
+      // see if we need to print out our line
       if (i > 0)
       {
         /* done with this line, add the asciii data & print it */
