@@ -49,7 +49,7 @@ void showUsage(void)
 {
   printf("\n");
   printf("Usage: pshellControlDemo {<hostname> | <ipAddress> | unix} {<port> | <unixServerName>}\n");
-  printf("                         [-t<timeout>] [-l<logLevel] [-e]\n");
+  printf("                         [-t<timeout>] [-l<logLevel>] [-extract]\n");
   printf("\n");
   printf("  where:\n");
   printf("    <hostname>       - hostname of UDP server\n");
@@ -59,7 +59,7 @@ void showUsage(void)
   printf("    <unixServerName> - name of UNIX server\n");
   printf("    <timeout>        - wait timeout for response in mSec (default=100)\n");
   printf("    <logLevel>       - log level of control library (0-3, default=3, i.e. all)\n");
-  printf("    -e               - extract data contents of response (must have non-0 wait timeout)\n");
+  printf("    extract          - extract data contents of response (must have non-0 wait timeout)\n");
   printf("\n");
   exit(0);
 }
@@ -92,7 +92,7 @@ int main (int argc, char *argv[])
     {
       logLevel = atoi(&argv[i][2]);
     }
-    else if (strncmp(argv[i], "-e", 2) == 0)
+    else if (strcmp(argv[i], "-extract") == 0)
     {
       extract = true;
     }

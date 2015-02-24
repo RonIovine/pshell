@@ -37,10 +37,10 @@ fi
 
 if [ $# -eq 1 ]
 then
-  if [ "$1" != "-l" ]
+  if [ "$1" != "-local" ]
   then
     echo
-    echo "Usage: installPshell [-l]"
+    echo "Usage: installPshell [-local]"
     echo
     echo "  This install script will either install this package on a system"
     echo "  wide basis or will setup a local install environment.  A system"
@@ -52,11 +52,17 @@ then
     echo "  that will allow use of the package features from a local directory."
     echo
     echo "  where:"
-    echo "    -l - install locally, omit for system install"
+    echo "    local - install locally, omit for system install"
     echo
     exit 1
   else
     # local install, create .pshellrc env file
+    echo "Setting softlink libpshell-server.so to libpshell-server-full.so"
+    if [ -e "lib/libpshell-server.so" ]
+    then
+      rm -f lib/libpshell-server.so
+    fi
+    ln -s $localDir/lib/libpshell-server-full.so lib/libpshell-server.so
     rm -f .pshellrc
     echo "#" >> .pshellrc
     echo "# Local PSHELL install env file" >> .pshellrc
@@ -70,9 +76,9 @@ then
     echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PATH >> .pshellrc
     echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> .pshellrc
     echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/lib:\$LD_LIBRARY_PATH >> .pshellrc
-    echo "INFO: Local install environment setup in '.pshellrc'"
-    echo "      To source enviromnent in current shell run 'source .pshellrc'"
-    echo "      To source enviromnent in all shells add 'source $localDir/.pshellrc' to your '.bashrc'"
+    echo "Local install environment setup in '.pshellrc'"
+    echo "To source enviromnent in current shell run 'source .pshellrc'"
+    echo "To source enviromnent in all shells add 'source $localDir/.pshellrc' to your '.bashrc'"
   fi
 else
   # system wide install

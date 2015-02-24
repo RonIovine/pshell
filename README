@@ -54,8 +54,8 @@ The following lists all the pieces of this package along with a brief descriptio
                                   client when using the TCP server with a telnet client
   10. buildPshell              -- Shell script to build the entire package or individual pieces
   11. archivePshell            -- Shell script to creates a pshell-vX.Y.tar.gz archive
-  12. setPshellLib             -- Shell script to set the libpshell.so softlink to desired library
-  13. showPshelllLib           -- Shell script to show the current libpshell.so softlink setting
+  12. setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
+  13. showPshelllLib           -- Shell script to show the current libpshell-server.so softlink setting
   14. pshellServerDemo         -- Demo application using the pshell server library features
   15. pshellControlDemo        -- Demo application using the pshell control library features
   16. traceFilterDemo          -- Demo application using the optional trace filter feature
@@ -84,7 +84,7 @@ Usage: installPshell [-l]
   where:
     -l - install locally, omit for system install
 
-Then run the script with the desired inputs.
+Then run the script with the desired inputs and follow any instructions (local install only).
 
 ENVIRONMENT:
 
@@ -139,13 +139,12 @@ control of an external program that is running a PshellServer via the PshellCont
 API.  The pshellCotrolDemo program can control either the pshellServerDemo or
 traceControlDemo program.
 
-To run the demo programs and any associated client programs, you must first
-setup the softlink to the pshell-server library.  After the above environment
-variables have been sourced, run "setPshellLib -full" to setup the softlink.
-Now you can run "pshellServerDemo" and connect to it with the "pshell" client
-program (for the UDP/UNIX server) or telnet or the pshell.exp telnet expect
-script wrapper (for the TCP server).  Note, to use the "pshell.exp" expect
-script you need to have "expect" installed on your host in /usr/bin.
+After the installPshell script has been (and the local env sourced if doing a
+local install), the client and associated demo programs can be run.  Run
+"pshellServerDemo" and connect to it with the "pshell" client program (for the
+UDP/UNIX server) or telnet or the pshell.exp telnet expect script wrapper (for
+the TCP server).  Note, to use the "pshell.exp" expect script you need to have
+"expect" installed on your host in /usr/bin.
 
 (NOTE: To see the features of the dynamically configurable optional TraceFilter
 mechanism, run the program "traceFilterDemo".  It can be controlled via the same
