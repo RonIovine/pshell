@@ -70,6 +70,21 @@ directory and type:
 
 $ ./installPshell -h
 
+Usage: installPshell [-l [<shellEnvFile>]]
+
+  This install script will either install this package on a system
+  wide basis or will setup a local install environment.  A system
+  install must be done as 'root' and will copy all libraries, binaries,
+  include files, conf files, and manpages to their customary system
+  locations.  A local install will not copy/move any files.  It will
+  only setup a local environment by writing environment variables into
+  your shell env file (i.e. .bashrc) that will allow use of the package
+  features from a local directory.
+
+  where:
+    -l           - install locally, omit for system install
+    shellEnvFile - name of shell environment file, defaults to .bashrc
+
 Then run the script with the desired inputs.
 
 ENVIRONMENT:
