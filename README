@@ -70,7 +70,7 @@ directory and type:
 
 $ ./installPshell -h
 
-Usage: installPshell [-l]
+Usage: installPshell [-local]
 
   This install script will either install this package on a system
   wide basis or will setup a local install environment.  A system
@@ -82,7 +82,7 @@ Usage: installPshell [-l]
   that will allow use of the package features from a local directory.
 
   where:
-    -l - install locally, omit for system install
+    local - install locally, omit for system install
 
 Then run the script with the desired inputs and follow any instructions (local install only).
 
@@ -139,8 +139,8 @@ control of an external program that is running a PshellServer via the PshellCont
 API.  The pshellCotrolDemo program can control either the pshellServerDemo or
 traceControlDemo program.
 
-After the installPshell script has been (and the local env sourced if doing a
-local install), the client and associated demo programs can be run.  Run
+After the installPshell script has been excuted (and the local env sourced if doing
+a local install), the client and associated demo programs can be run.  Run
 "pshellServerDemo" and connect to it with the "pshell" client program (for the
 UDP/UNIX server) or telnet or the pshell.exp telnet expect script wrapper (for
 the TCP server).  Note, to use the "pshell.exp" expect script you need to have
