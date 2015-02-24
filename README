@@ -35,14 +35,14 @@ GETTING STARTED:
 
 This package consists of 6 libraries (each library has both a shared and static
 version, in addition, the pshell-server libraray has a full and stub version),
-one stand-alone UDP/UNIX client application (pshell), three utility shell
-scripts, one expect script, one build script and three demo programs.  The rest
-of this README will assume that this package has been unzipped with the current
-directory structure preserved.  
+one stand-alone UDP/UNIX client application (pshell), ine install shell script,
+three utility shell scripts, one expect script, one build script and three demo
+programs.  The rest of this README will assume that this package has been unzipped
+with the current directory structure preserved.  
 
 The following lists all the pieces of this package along with a brief description:
 
-  1.  install.sh               -- Install script for this package
+  1.  installPshell            -- Install shell script for this package
   2.  libpshell-server-full.a  -- Full version of libpshell-server library (static)
   3.  libpshell-server-full.so -- Full version of libpshell-server library (shared)
   4.  libpshell-server-stub.a  -- Stub version of libpshell-server library (static)
@@ -68,14 +68,14 @@ in the top level of the unzipped package (i.e. same directory as this README fil
 that will do the different installs.  To see the usage of the script 'cd' to that
 directory and type:
 
-$ ./install.sh -h
+$ ./installPshell -h
 
 Then run the script with the desired inputs.
 
 ENVIRONMENT:
 
 If the install script is run to setup local access, the following environment variables
-are written to the shell environment (i.e. .bashrc) file of the user:
+are written to the shell environment file (e.g. .bashrc) of the user:
 
 export PSHELL_INSTALL=<myInstallDir>
 export PSHELL_BATCH_DIR=$PSHELL_INSTALL/batch
@@ -337,10 +337,10 @@ In most cases the defaults can be used and the flags don't need to be modified.
     This is the default directory that contains the pshell-server.conf,
     pshell-control.conf, and pshell-client.conf files.  If this env variable
     is not set, it will use the default directory that is setup in the
-    PshellServer.c, PshellControl.c,and PshellClient.c files (/etc). These
-    config files can be used to set various server, client, and control settings.
-    Refer to the example files in the 'config' directory of this package for
-    usage of these files.
+    PshellServer.c, PshellControl.c,and PshellClient.c files (/etc/pshell).
+    These config files can be used to set various server, client, and control
+    settings.  Refer to the example files in the 'config' directory of this
+    package for usage of these files.
     
   VSNPRINTF: for PshellServer (-lib build switch)
 

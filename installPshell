@@ -33,7 +33,7 @@ then
   if [ "$1" != "-l" -o $# -gt 2 ]
   then
     echo
-    echo "Usage: install.sh [-l [<shellEnvFile>]]"
+    echo "Usage: installPshell [-l [<shellEnvFile>]]"
     echo
     echo "  This install script will either install this package on a system"
     echo "  wide basis or will setup a local install environment.  A system"
@@ -63,12 +63,7 @@ then
       exit 1
     fi    
     localDir=$(pwd)
-    if [ ! -d "$localDir" ]
-    then
-      echo "ERROR: Local directory: $localDir, not found, enter valid directory"
-      exit 1
-    fi    
-    if [ ! -e "$localDir/install.sh" ]
+    if [ ! -e "$localDir/installPshell" ]
     then
       echo "ERROR: This script must be run from same directory where it resides"
       exit 1
@@ -108,7 +103,7 @@ else
     exit 1
   fi
 
-  if [ ! -e "$(pwd)/install.sh" ]
+  if [ ! -e "$(pwd)/installPshell" ]
   then
     echo "ERROR: This script must be run from same directory where it resides"
     exit 1
@@ -144,13 +139,13 @@ else
   cp lib/libpshell-control.so $libDir/pshell/.
   echo "Copying libpshell-control.a to $libDir/pshell"
   cp lib/libpshell-control.a $libDir/pshell/.
-  echo "Setting softlink libpshell-server.so to pshell/libpshell-server-full.so"
+  echo "Setting softlink $libDir/libpshell-server.so to $libDir/pshell/libpshell-server-full.so"
   if [ -e "$libDir/libpshell-server.so" ]
   then
     rm -f $libDir/libpshell-server.so
   fi
   ln -s $libDir/pshell/libpshell-server-full.so $libDir/libpshell-server.so
-  echo "Setting softlink libpshell-control.so to pshell/libpshell-control.so"
+  echo "Setting softlink $libDir/libpshell-control.so to $libDir/pshell/libpshell-control.so"
   if [ -e "$libDir/libpshell-control.so" ]
   then
     rm -f $libDir/libpshell-control.so
