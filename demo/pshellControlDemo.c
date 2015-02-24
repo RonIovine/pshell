@@ -48,14 +48,18 @@
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshellControlDemo <server> [-p<port>]  [-t<timeout>] [-l<logLevel] [-e]\n");
+  printf("Usage: pshellControlDemo {<hostname> | <ipAddress> | unix} {<port> | <unixServerName>}\n");
+  printf("                         [-t<timeout>] [-l<logLevel] [-e]\n");
   printf("\n");
   printf("  where:\n");
-  printf("    <server>   - hostname or IP address of UDP server, or name of UNIX server\n");
-  printf("    <port>     - port number of UDP server, omit for UNIX server\n");
-  printf("    <timeout>  - wait timeout for response in mSec (default=100)\n");
-  printf("    <logLevel> - log level of control library (0-3, default=3, i.e. all)\n");
-  printf("    -e         - extract data contents of response (must have non-0 wait timeout)\n");
+  printf("    <hostname>       - hostname of UDP server\n");
+  printf("    <ipAddress>      - IP address of UDP server\n");
+  printf("    unix             - specifies a UNIX server\n");
+  printf("    <port>           - port number of UDP server\n");
+  printf("    <unixServerName> - name of UNIX server\n");
+  printf("    <timeout>        - wait timeout for response in mSec (default=100)\n");
+  printf("    <logLevel>       - log level of control library (0-3, default=3, i.e. all)\n");
+  printf("    -e               - extract data contents of response (must have non-0 wait timeout)\n");
   printf("\n");
   exit(0);
 }
@@ -73,20 +77,16 @@ int main (int argc, char *argv[])
   bool extract = false;
   int sid;
 
-  if ((argc < 2) || (argc > 6))
+  if ((argc < 3) || (argc > 6))
   {
     showUsage();
   }
 
-  for (int i = 2; i < argc; i++)
+  for (int i = 3; i < argc; i++)
   {
     if (strncmp(argv[i], "-t", 2) == 0)
     {
       timeout = atoi(&argv[i][2]);
-    }
-    else if (strncmp(argv[i], "-p", 2) == 0)
-    {
-      port = atoi(&argv[i][2]);
     }
     else if (strncmp(argv[i], "-l", 2) == 0)
     {
@@ -100,6 +100,11 @@ int main (int argc, char *argv[])
     {
       showUsage();
     }
+  }
+
+  if (strcmp(argv[2], "unix") != 0)
+  {
+    port = atoi(argv[2]);
   }
 
   //printf("port: %d, timeout: %d, logLevel: %d, extract: %d\n", port, timeout, logLevel, extract);

@@ -28,72 +28,51 @@
 #
 #################################################################################
 
-if [ $# -ge 1 ]
+localDir=$(pwd)
+if [ ! -e "$localDir/installPshell" ]
 then
-  if [ "$1" != "-l" -o $# -gt 2 ]
+  echo "ERROR: This script must be run from same directory where it resides"
+  exit 1
+fi
+
+if [ $# -eq 1 ]
+then
+  if [ "$1" != "-l" ]
   then
     echo
-    echo "Usage: installPshell [-l [<shellEnvFile>]]"
+    echo "Usage: installPshell [-l]"
     echo
     echo "  This install script will either install this package on a system"
     echo "  wide basis or will setup a local install environment.  A system"
     echo "  install must be done as 'root' and will copy all libraries, binaries,"
     echo "  include files, conf files, and manpages to their customary system"
     echo "  locations.  A local install will not copy/move any files.  It will"
-    echo "  only setup a local environment by writing environment variables into"
-    echo "  your shell env file (i.e. .bashrc) that will allow use of the package"
-    echo "  features from a local directory."
+    echo "  only create a pshell env file (.pshellrc) that can be sourced in the"
+    echo "  current shell or can be added to your shell env file (i.e. .bashrc)"
+    echo "  that will allow use of the package features from a local directory."
     echo
     echo "  where:"
-    echo "    -l           - install locally, omit for system install"
-    echo "    shellEnvFile - name of shell environment file, defaults to .bashrc"
+    echo "    -l - install locally, omit for system install"
     echo
     exit 1
   else
-    # local install
-    if [ $# -eq 2 ]
-    then
-      shellEnvFile=$2
-    else
-      shellEnvFile="/home/$(whoami)/.bashrc"
-    fi
-    if [ ! -e "$shellEnvFile" ]
-    then
-      echo "ERROR: Shell env file: $shellEnvFile, not found, enter desired shellEnvFile"
-      exit 1
-    fi    
-    localDir=$(pwd)
-    if [ ! -e "$localDir/installPshell" ]
-    then
-      echo "ERROR: This script must be run from same directory where it resides"
-      exit 1
-    fi
-    if [ -e "$PSHELL_INSTALL" ]
-    then
-      if [ "$PSHELL_INSTALL" == "$localDir" ]
-      then
-        echo "INFO: Local install environment: $localDir already setup"
-        exit 1
-      else
-        while true; do
-          read -p "INFO: Replace existing install environment: $PSHELL_INSTALL with: $localDir? [y/n]: " yn
-          case $yn in
-            [Yy]* ) break;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-          esac
-        done
-        echo "INFO: May need to prune env file: $shellEnvFile of redundant environment variables"
-      fi
-    fi    
-    echo export PSHELL_INSTALL=$localDir >> $shellEnvFile
-    echo export PSHELL_BATCH_DIR=\$PSHELL_INSTALL/batch >> $shellEnvFile
-    echo export PSHELL_CONFIG_DIR=\$PSHELL_INSTALL/config >> $shellEnvFile
-    echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PATH >> $shellEnvFile
-    echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> $shellEnvFile
-    echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/lib:\$LD_LIBRARY_PATH >> $shellEnvFile
-    echo "INFO: Local install environment setup as: $localDir"
-    echo "      Re-source your enviromnent with 'source $shellEnvFile'"
+    # local install, create .pshellrc env file
+    rm -f .pshellrc
+    echo "#" >> .pshellrc
+    echo "# Local PSHELL install env file" >> .pshellrc
+    echo "#" >> .pshellrc
+    echo "# This env file can be sourced in the current command shell with 'source .pshellrc'" >> .pshellrc
+    echo "# or can be sourced for all shells by adding 'source $localDir/.pshellrc' to your '.bashrc'" >> .pshellrc
+    echo "#" >> .pshellrc
+    echo export PSHELL_INSTALL=$localDir >> .pshellrc
+    echo export PSHELL_BATCH_DIR=\$PSHELL_INSTALL/batch >> .pshellrc
+    echo export PSHELL_CONFIG_DIR=\$PSHELL_INSTALL/config >> .pshellrc
+    echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PATH >> .pshellrc
+    echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> .pshellrc
+    echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/lib:\$LD_LIBRARY_PATH >> .pshellrc
+    echo "INFO: Local install environment setup in '.pshellrc'"
+    echo "      To source enviromnent in current shell run 'source .pshellrc'"
+    echo "      To source enviromnent in all shells add 'source $localDir/.pshellrc' to your '.bashrc'"
   fi
 else
   # system wide install
@@ -103,30 +82,28 @@ else
     exit 1
   fi
 
-  if [ ! -e "$(pwd)/installPshell" ]
-  then
-    echo "ERROR: This script must be run from same directory where it resides"
-    exit 1
-  fi
-
   binDir="/usr/bin"
   includeDir="/usr/include"
   confDir="/etc/pshell"
   man1Dir="/usr/share/man/man1"
   man3Dir="/usr/share/man/man3"
+  
   if [ -d "/usr/lib64" ]
   then
     libDir="/usr/lib64"
   else
     libDir="/usr/lib"
   fi
+  
   echo "Installing pshell files..."
   echo "Installing libs..."
+  
   if [ ! -d $libDir/pshell ]
   then
     echo "Creating lib directory: $libDir"
     mkdir $libDir/pshell
   fi
+  
   echo "Copying libpshell-server-full.so to $libDir/pshell"
   cp lib/libpshell-server-full.so $libDir/pshell/.
   echo "Copying libpshell-server-full.a to $libDir/pshell"
@@ -139,22 +116,26 @@ else
   cp lib/libpshell-control.so $libDir/pshell/.
   echo "Copying libpshell-control.a to $libDir/pshell"
   cp lib/libpshell-control.a $libDir/pshell/.
+  
   echo "Setting softlink $libDir/libpshell-server.so to $libDir/pshell/libpshell-server-full.so"
   if [ -e "$libDir/libpshell-server.so" ]
   then
     rm -f $libDir/libpshell-server.so
   fi
   ln -s $libDir/pshell/libpshell-server-full.so $libDir/libpshell-server.so
+  
   echo "Setting softlink $libDir/libpshell-control.so to $libDir/pshell/libpshell-control.so"
   if [ -e "$libDir/libpshell-control.so" ]
   then
     rm -f $libDir/libpshell-control.so
   fi
   ln -s $libDir/pshell/libpshell-control.so $libDir/libpshell-control.so
+  
   echo "Installing bins..."
   echo "Copying pshell to $binDir"
   cp bin/pshell $binDir/.
   chmod +x $binDir/pshell
+  
   echo "Installing includes..."
   echo "Copying PshellServer.h to $includeDir"
   cp include/PshellServer.h $includeDir/.
@@ -164,12 +145,14 @@ else
   cp include/TraceFilter.h $includeDir/.
   echo "Copying TraceLog.h to $includeDir"
   cp include/TraceLog.h $includeDir/.
+  
   echo "Installing conf files..."
   if [ ! -d $confDir ]
   then
     echo "Creating conf directory: $confDir"
     mkdir $confDir
   fi
+  
   echo "Copying pshell-server.conf to $confDir"
   cp config/pshell-server.conf $confDir/.
   echo "Copying pshell-client.conf to $confDir"
@@ -177,6 +160,7 @@ else
   echo "Copying pshell-control.conf to $confDir"
   cp config/pshell-control.conf $confDir/.
   chmod 666 $confDir/*
+  
   echo "Installing manpages..."
   echo "Copying pshell.1 to $man1Dir"
   cp man/man1/pshell.1 $man1Dir/.
@@ -190,4 +174,7 @@ else
   echo "Copying TraceFilter.3 to $man3Dir"
   cp man/man3/TraceFilter.3 $man3Dir/.
   gzip -f $man3Dir/TraceFilter.3
+  echo "Copying TraceLog.3 to $man3Dir"
+  cp man/man3/TraceLog.3 $man3Dir/.
+  gzip -f $man3Dir/TraceLog.3
 fi

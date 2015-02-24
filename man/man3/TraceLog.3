@@ -1,0 +1,91 @@
+.TH TraceLog 3 "Sep 2012" "TraceLog" "Trage logging utility"
+.SH NAME
+TraceLog - Trace logging code instrumentation utility
+.SH DESCRIPTION
+The TraceLog functionality will provide a basic source code instrumentation logging
+mechanism.  It will provide for a macro based API that will allow instrumentation
+of the code for debug and diagnostics purposes.  The log format will provide a high
+resolution timestamp, code location information (file, function, line) and an optional
+user message.  The optional user message uses a varargs format that is identical to
+using 'printf', with the only caveat being that a newline ("\n") is automatically
+inserted, so need not be explicitley provided.
+
+This utility is integrated with the TraceFilter mechanism to allow for full dynamic
+control via the PSHELL client interface.
+.SH SYNOPSIS
+
+#include <TraceLog.h>
+
+/* this trace cannot be disabled */
+.br
+#define TRACE_FORCE(format, args...)
+
+/* normal trace output macros, these are called directly by client code */
+.br
+#define TRACE_ERROR(format, args...)
+.br
+#define TRACE_WARNING(format, args...)
+.br
+#define TRACE_FAILURE(format, args...)
+.br
+#define TRACE_INFO(format, args...)
+.br
+#define TRACE_DEBUG(format, args...)
+.br
+#define TRACE_ENTER(format, args...)
+.br
+#define TRACE_EXIT(format, args...)
+
+/* hex dump trace */
+.br
+#define TRACE_DUMP(address, length, format, args...)
+
+/*
+.br
+ * trace_registerLogFunction::
+.br
+ *
+.br
+ * typedef and function to allow a client program to register a logging
+.br
+ * function for message output logging, if no output function is registered
+.br
+ * 'printf' will be used to print out the log messages
+.br
+ */
+.br
+typedef void (*TraceLogFunction)(const char *outputString_);
+.br
+void trace_registerLogFunction(TraceLogFunction logFunction_);
+
+/*
+.br
+ * trace_registerLogName:
+.br
+ *
+.br
+ * set a log name that is used as a prefix for the log type,
+.br
+ * if this function is not called, the prefix will default to
+.br
+ * "TRACE", e.g. TRACE_ERROR, TRACE_WARNING etc, if this function
+.br
+ * is called with a NULL prefix, the trace name type will have
+.br
+ * no prefix, e.g. ERROR, WARNING etc.
+.br
+ */
+.br
+void trace_setLogPrefix(const char *name_);
+
+
+Link with the library libpshell-server
+.SH EXAMPLES
+See the file traceFilterDemo.c in the pshell distribution package for a complete
+list of examples of using the TraceLog utility trace logging system.
+.SH MT-LEVEL
+Safe
+.SH SEE ALSO
+pshell(1), TraceFilter(3)
+.SH AUTHOR
+Ron Iovine  --  github.com/RonIovine/pshell

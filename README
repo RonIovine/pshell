@@ -70,27 +70,27 @@ directory and type:
 
 $ ./installPshell -h
 
-Usage: installPshell [-l [<shellEnvFile>]]
+Usage: installPshell [-l]
 
   This install script will either install this package on a system
   wide basis or will setup a local install environment.  A system
   install must be done as 'root' and will copy all libraries, binaries,
   include files, conf files, and manpages to their customary system
   locations.  A local install will not copy/move any files.  It will
-  only setup a local environment by writing environment variables into
-  your shell env file (i.e. .bashrc) that will allow use of the package
-  features from a local directory.
+  only create a pshell env file (.pshellrc) that can be sourced in the
+  current shell or can be added to your shell env file (i.e. .bashrc)
+  that will allow use of the package features from a local directory.
 
   where:
-    -l           - install locally, omit for system install
-    shellEnvFile - name of shell environment file, defaults to .bashrc
+    -l - install locally, omit for system install
 
 Then run the script with the desired inputs.
 
 ENVIRONMENT:
 
 If the install script is run to setup local access, the following environment variables
-are written to the shell environment file (e.g. .bashrc) of the user:
+are written to the .pshellrc shell environment file, source that env file to setup
+your environment.
 
 export PSHELL_INSTALL=<myInstallDir>
 export PSHELL_BATCH_DIR=$PSHELL_INSTALL/batch
@@ -109,10 +109,11 @@ DOCUMENTATION:
 The following manpages are available from the above configured MANPATH or
 from the standard manpage locations on a system installation:
 
-pshell(1)         - Describes the framework as well as the client program
-PshellServer(3)   - Describes the API and usage of the PshellServer
-PshellControl(3)  - Describes the API and usage of the PshellControl
-TraceFilter(3)    - Described the API and usage of the TraceFilter
+pshell(1)        - Describes the framework as well as the client program
+PshellServer(3)  - Describes the API and usage of the PshellServer utility
+PshellControl(3) - Describes the API and usage of the PshellControl utility
+TraceFilter(3)   - Describes the API and usage of the TraceFilter utility
+TraceLog(3)      - Describes the API and usage of the TraceLog utility
 
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
@@ -498,11 +499,11 @@ should be treated as any other unsecure protocol, such as telnet.  The
 local target's PshellServer IP address and port should only be exposed within
 a local network or secure VPN, but should not be exposed for general use
 over untrusted networks, such as the public Internet.  For maximum security
-between the client and server, the server can be run at the target host's
-local loopback address (i.e. 127.0.0.1) and the PSHELL client application can
-be installed to run on the same local host as the target application.  Of
-course, a secure mechanism would then need to be provided to gain user access
-to that host (like ssh).
+between the client and server, the server can be run either as a UNIX domain
+server or at the target host's local loopback address (i.e. 127.0.0.1) and the
+PSHELL client application can be installed to run on the same local host as
+the target application.  Of course, a secure mechanism would then need to be
+provided to gain user access to that host (like ssh).  
 
 PORTING:
 
@@ -519,3 +520,5 @@ Enjoy...
 Ron Iovine
 
 Copyright 2009 Ron Iovine
+
+github.com/RonIovine/pshell
