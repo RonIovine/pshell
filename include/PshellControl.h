@@ -129,13 +129,15 @@ const char *pshell_getResultsString(int results_);
  * PSHELL_INVALID_SID is returned
  */
 #define PSHELL_INVALID_SID -1
-#define PSHELL_UNIX_SERVER 0
-#define PSHELL_NO_WAIT 0
+#define PSHELL_UNIX_SERVER  0
+#define PSHELL_NO_WAIT      0
+#define PSHELL_ONE_MSEC     1
+#define PSHELL_ONE_SEC      PSHELL_ONE_MSEC*1000
 
 int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,
                          unsigned port_ = PSHELL_UNIX_SERVER,
-                         unsigned defaultTimeout_ = PSHELL_NO_WAIT);
+                         unsigned defaultTimeout_ = PSHELL_ONE_MSEC*100);
 
 /*
  * pshell_disconnectServer:
