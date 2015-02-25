@@ -14,7 +14,7 @@ only work on remote programs that are running either a UDP or UNIX pshell server
 int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,
                          unsigned port_ = PSHELL_UNIX_SERVER,
-                         unsigned defaultTimeout_ = PSHELL_NO_WAIT);
+                         unsigned defaultTimeout_ = PSHELL_ONE_MSEC*100);
                          
 /* release resources for this connection */
 
