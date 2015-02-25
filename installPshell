@@ -51,6 +51,9 @@ then
     echo "  current shell or can be added to your shell env file (i.e. .bashrc)"
     echo "  that will allow use of the package features from a local directory."
     echo
+    echo "  The location of the local install environment will be the directory"
+    echo "  where this script resides."
+    echo
     echo "  where:"
     echo "    local - install locally, omit for system install"
     echo

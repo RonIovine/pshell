@@ -81,6 +81,9 @@ Usage: installPshell [-local]
   current shell or can be added to your shell env file (i.e. .bashrc)
   that will allow use of the package features from a local directory.
 
+  The location of the local install environment will be the directory
+  where this script resides.
+
   where:
     local - install locally, omit for system install
 
