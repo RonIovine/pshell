@@ -70,7 +70,7 @@ directory and type:
 
 $ ./installPshell -h
 
-Usage: installPshell [-local]
+Usage: installPshell [-local [<shellEnvFile>]]
 
   This install script will either install this package on a system
   wide basis or will setup a local install environment.  A system
@@ -85,7 +85,9 @@ Usage: installPshell [-local]
   where this script resides.
 
   where:
-    local - install locally, omit for system install
+    local        - install locally, omit for system install
+    shellEnvFile - name of shell environment file to modify
+                   (e.g. full path to your .bashrc)
 
 Then run the script with the desired inputs and follow any instructions (local install only).
 
