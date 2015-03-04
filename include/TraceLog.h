@@ -95,7 +95,7 @@
 #define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, "DUMP", format, ## args)
 
 /*
- * trace_registerLogFunction::
+ * trace_registerLogFunction:
  *
  * typedef and function to allow a client program to register a logging
  * function for message output logging, if no output function is registered

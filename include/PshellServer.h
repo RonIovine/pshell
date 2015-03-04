@@ -305,8 +305,14 @@ bool pshell_isFloat(const char *string_);
  * see the pshellServerDemo program for examples on this function usage
  */
 bool pshell_getOption(const char *string_, char *option_, char *value_);
-void *pshell_getAddress(const char *string_); /* address from string value */
-bool pshell_getBool(const char *string_);     /* bool from string value of 'true' or 'false' */
+
+/* address from string value */
+void *pshell_getAddress(const char *string_);
+
+/* bool from string value of 'true' or 'false' */
+bool pshell_getBool(const char *string_);
+
+/* numeric values from string value */
 long pshell_getLong(const char *string_);
 int pshell_getInt(const char *string_);
 short pshell_getShort(const char *string_);
