@@ -437,7 +437,7 @@ void showUsage(void)
 
 /*
  * setup our port number, this is the default port number used
- * if our serverName is not found in the pshell.servers file
+ * if our serverName is not found in the pshell-server.conf file
  */
 #define PSHELL_DEMO_PORT 6001
 

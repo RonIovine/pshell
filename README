@@ -86,7 +86,7 @@ Usage: installPshell [-local [<shellEnvFile>]]
 
   where:
     local        - install locally, omit for system install
-    shellEnvFile - name of shell environment file to modify
+    shellEnvFile - optional name of shell environment file to modify
                    (e.g. full path to your .bashrc)
 
 Then run the script with the desired inputs and follow any instructions (local install only).
@@ -316,9 +316,6 @@ BUILDING:
 This package includes binaries and libraries that were built and tested on
 CentOS Linux 6.6.  They should be able to run on any modern Linux distribution
 as is.  However, if a build is necessary, a shell based build script is provided.
-A standard Makefile was not included since this package is not meant as a
-stand-alone installed package but rather is meant to be included in other
-software applications.  
 
 The following is the usage of the build script:
 
@@ -443,6 +440,10 @@ In most cases the defaults can be used and the flags don't need to be modified.
         flag (i.e. grow exact or flush on overflow, depending on whether VSNPRINTF
         is defined).  Set all the other "CHUNK" sizes to 1, and do not set the
         PSHELL_COPY_ADD_COMMAND_STRINGS flag.
+
+The following set of compile options are just used by the TraceFilter (TF) part
+of this package.  This part of the library is optional and can be omitted if
+not used.
 
   TF_FAST_FILENAME_LOOKUP: for TraceFilter and application  
                            (-lib & -demo build switch)
