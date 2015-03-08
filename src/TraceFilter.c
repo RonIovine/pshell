@@ -434,23 +434,36 @@ bool tf_isFilterPassed(const char *file_,
   bool functionFilterPassed = !_functionFilterEnabled;
   bool threadFilterPassed = !_threadFilterEnabled;
   bool filterPassed = false;
-  char traceOutputString[180];
   unsigned level = _levelFilters[level_].level;
   if (isWatchHit() && ((_watchNumHits == 0) || (_watchControl != TF_ONCE)))
   {
     /* print out the most recent trace for which the value was unchanged */
-    sprintf(traceOutputString, _watchFormatString, "prev", _watchPrevValue);
-    trace_outputLog("WATCH", _watchPrevFile, _watchPrevFunction, _watchPrevLine, traceOutputString);
+    trace_outputLog("WATCH",
+                    _watchPrevFile,
+                    _watchPrevFunction,
+                    _watchPrevLine,
+                    _watchFormatString,
+                    "prev",
+                    _watchPrevValue);
     /* print out the current trace where the value change was detected */
-    sprintf(traceOutputString, _watchFormatString, "curr", _watchCurrValue);
-    trace_outputLog("WATCH", file_, function_, line_, traceOutputString);
+    trace_outputLog("WATCH",
+                    file_,
+                    function_,
+                    line_,
+                    _watchFormatString,
+                    "curr",
+                    _watchCurrValue);
     _watchPrevValue = _watchCurrValue;
     _watchNumHits++;
     filterPassed = false;
     /* see if they requested an abort on the condition being met */
     if (_watchControl == TF_ABORT)
     {
-      trace_outputLog("WATCH", __FILE__, __FUNCTION__, __LINE__, "Watchpoint requested ABORT");
+      trace_outputLog("WATCH",
+                      __FILE__,
+                      __FUNCTION__,
+                      __LINE__,
+                      "Watchpoint requested ABORT");
       assert(0);
     }
   }
@@ -535,29 +548,31 @@ bool tf_isFilterPassed(const char *file_,
       if (_callbackPrevCondition == false)
       {
         /* print out the most recent trace for which the condition was not detected */
-        sprintf(traceOutputString,
-                "Callback condition %s: Function: %s",
-                ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
-                _callbackName);
-                
         trace_outputLog("CALLBACK",
                         _callbackPrevFile,
                         _callbackPrevFunction,
                         _callbackPrevLine,
-                        traceOutputString);
-
+                        "Callback condition %s: Function: %s",
+                        ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
+                        _callbackName);
+                        
         /* print out the current trace where the condition was first detected */
-        sprintf(traceOutputString,
-                "Callback condition TRUE: Function: %s",
-                _callbackName);
-                
-        trace_outputLog("CALLBACK", file_, function_, line_, traceOutputString);
+        trace_outputLog("CALLBACK",
+                        file_,
+                        function_,
+                        line_,
+                        "Callback condition TRUE: Function: %s",
+                        _callbackName);
 
         /* see if they requested an abort on the condition being met */
         if (_callbackControl == TF_ABORT)
         {
-          sprintf(traceOutputString, "Callback requested ABORT: Function: %s", _callbackName);
-          trace_outputLog("CALLBACK", __FILE__, __FUNCTION__, __LINE__, traceOutputString);
+          trace_outputLog("CALLBACK",
+                          __FILE__,
+                          __FUNCTION__,
+                          __LINE__,
+                          "Callback requested ABORT: Function: %s",
+                          _callbackName);
           assert(0);
         }
         _callbackNumHits++;
@@ -571,26 +586,31 @@ bool tf_isFilterPassed(const char *file_,
       if (_callbackPrevCondition == true)
       {
         /* print out the most recent trace for which the condition was not detected */
-        sprintf(traceOutputString,
-                "Callback condition %s: Function: %s",
-                ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
-                _callbackName);
-                
         trace_outputLog("CALLBACK",
                         _callbackPrevFile,
                         _callbackPrevFunction,
                         _callbackPrevLine,
-                        traceOutputString);
+                        "Callback condition %s: Function: %s",
+                        ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
+                        _callbackName);
 
         /* print out the current trace where the condition was first detected */
-        sprintf(traceOutputString, "Callback condition FALSE: Function: %s", _callbackName);
-        trace_outputLog("CALLBACK", file_, function_, line_, traceOutputString);
+        trace_outputLog("CALLBACK",
+                        file_,
+                        function_,
+                        line_,
+                        "Callback condition FALSE: Function: %s",
+                        _callbackName);
 
         /* see if they requested an abort on the condition being met */
         if (_callbackControl == TF_ABORT)
         {
-          sprintf(traceOutputString, "Callback requested ABORT: Function: %s", _callbackName);
-          trace_outputLog("CALLBACK", __FILE__, __FUNCTION__, __LINE__, traceOutputString);
+          trace_outputLog("CALLBACK",
+                          __FILE__,
+                          __FUNCTION__,
+                          __LINE__,
+                          "Callback requested ABORT: Function: %s",
+                          _callbackName);
           assert(0);
         }
         _callbackNumHits++;
