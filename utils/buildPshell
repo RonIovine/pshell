@@ -53,7 +53,7 @@ fi
 if [ $# -ge 2 -a "$2" == "-readline" ]
 then
   READLINE="-DREADLINE"
-  READLINELIB="-lreadline -lcurses"
+  READLINELIB="-Wl,-Bstatic -lreadline -lncurses -Wl,-Bdynamic -ltermcap"
 else
   READLINE=""
   READLINELIB=""
@@ -86,8 +86,8 @@ then
   cd $PSHELL_INSTALL/src
   echo "Building pshell..."
   g++ -I../include $READLINE -Wall \
-  PshellClient.c \
-  -lnsl $READLINELIB \
+  PshellClient.c $READLINELIB \
+  -lnsl \
   -o ../bin/pshell
 fi
 
