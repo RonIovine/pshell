@@ -29,6 +29,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <string.h>
+#include <syslog.h>
 
 #include <PshellServer.h>
 #include <TraceLog.h>
@@ -179,7 +180,12 @@ void sampleLogFunction(const char *outputString_)
    * what to do with that string, i.e. write to stdout, write to
    * custom logfile, write to syslog etc
    */
+   
+   /* write to stdout */
    printf(outputString_);
+   
+   /* write to syslog */
+   syslog(LOG_INFO, outputString_);
 }
 
 /*
@@ -248,11 +254,19 @@ int main (int argc, char *argv[])
   trace_setLogPrefix("demo");
 
   /*
-   * register a custom client provided log file, it is up to the
+   * register a custom client provided log function, this function will
+   * take a fully formatted log message string, it is up to the
    * registering application to decide what to do with that string,
    * i.e. write to stdout, write to custom logfile, write to syslog
-   * etc
+   * etc, this is optional, if no log function is registered, the
+   * trace logging service will just use 'printf' to output the
+   * log message
    */
+   
+  /* open syslog with our program name */ 
+  openlog (argv[0], LOG_CONS | LOG_PID | LOG_NDELAY, LOG_USER);
+  
+  /* register our log function */
   trace_registerLogFunction(sampleLogFunction);
 
   /* initialize our dynamic trace filtering feature, this should be done
