@@ -110,7 +110,7 @@ void trace_registerLevels(void)
    * register all our trace levels with the trace filter service
    * format of call is "name", level, isDefault, isMaskable
    */
-  tf_addLevel("ERROR", TL_ERROR, true, true);
+  tf_addLevel("ERROR", TL_ERROR, true, false);
   tf_addLevel("WARNING", TL_WARNING, true, true);
   tf_addLevel("FAILURE", TL_FAILURE, true, true);
   tf_addLevel("INFO", TL_INFO, false, true);
