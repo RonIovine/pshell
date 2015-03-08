@@ -120,20 +120,6 @@ bool callbackFunction(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void showUsage(void)
-{
-  printf("\n");
-  printf("Usage: traceFilterDemo -udp | -unix | -tcp\n");
-  printf("\n");
-  printf("  where:\n");
-  printf("    -udp   - Multi-session UDP server\n");
-  printf("    -unix  - Multi-session UNIX domain server\n");
-  printf("    -tcp   - Single session TCP server\n");
-  printf("\n");
-}
-
-/******************************************************************************/
-/******************************************************************************/
 void setTriggers(int argc, char *argv[])
 {
   if (pshell_isSubString(argv[0], "callback", 1))
@@ -173,12 +159,12 @@ void setTriggers(int argc, char *argv[])
 void sampleLogFunction(const char *outputString_)
 {
   /*
-   * this sample log function is registered with the TraceLog '
-   * trace_registerLogFunction' call ot show a client supplied
+   * this sample log function is registered with the TraceLog
+   * 'trace_registerLogFunction' call to show a client supplied
    * log function, the string passed in is a fully formatted log
    * string, it is up to the registering application to decide
    * what to do with that string, i.e. write to stdout, write to
-   * custom logfile, write to syslog etc
+   * a custom logfile, write to syslog etc
    */
    
    /* write to stdout */
@@ -186,6 +172,20 @@ void sampleLogFunction(const char *outputString_)
    
    /* write to syslog */
    syslog(LOG_INFO, outputString_);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void showUsage(void)
+{
+  printf("\n");
+  printf("Usage: traceFilterDemo -udp | -unix | -tcp\n");
+  printf("\n");
+  printf("  where:\n");
+  printf("    -udp   - Multi-session UDP server\n");
+  printf("    -unix  - Multi-session UNIX domain server\n");
+  printf("    -tcp   - Single session TCP server\n");
+  printf("\n");
 }
 
 /*
@@ -236,21 +236,14 @@ int main (int argc, char *argv[])
     dumpBuffer[i] = i;
   }
 
-  /* must register our trace levels before callinig 'tf_init' */
+  /* must register our trace levels before calling 'tf_init' */
   trace_registerLevels();
-
-  /* 
-   * add a trace thread name, this should be done in the initialization
-   * of each thread (i.e. before the "infinite" loop), this will allow
-   * the TraceFilter to be able to do thread based filtering 
-   */
-   
-  tf_registerThread("main");
 
   /*
    * optionally set a log prefix, if not set, 'TRACE' will be used,
-   * if set to 'NULL',no prefix will be used
+   * if set to 'NULL', no prefix will be used
    */
+   
   trace_setLogPrefix("demo");
 
   /*
@@ -264,10 +257,18 @@ int main (int argc, char *argv[])
    */
    
   /* open syslog with our program name */ 
-  openlog (argv[0], LOG_CONS | LOG_PID | LOG_NDELAY, LOG_USER);
+  openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
   
   /* register our log function */
   trace_registerLogFunction(sampleLogFunction);
+
+  /* 
+   * add a trace thread name, this should be done in the initialization
+   * of each thread (i.e. before the "infinite" loop), this will allow
+   * the TraceFilter to be able to do thread based filtering 
+   */
+   
+  tf_registerThread("main");
 
   /* initialize our dynamic trace filtering feature, this should be done
    * at the beginning of the program, right after the 'main' and before
@@ -347,5 +348,7 @@ int main (int argc, char *argv[])
     TRACE_FAILURE("message 5");
     sleep(1);
    }
+   
    return (0);
+   
 }
