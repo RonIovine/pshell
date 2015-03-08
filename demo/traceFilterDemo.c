@@ -167,6 +167,21 @@ void setTriggers(int argc, char *argv[])
   }
 }
 
+/******************************************************************************/
+/******************************************************************************/
+void sampleLogFunction(const char *outputString_)
+{
+  /*
+   * this sample log function is registered with the TraceLog '
+   * trace_registerLogFunction' call ot show a client supplied
+   * log function, the string passed in is a fully formatted log
+   * string, it is up to the registering application to decide
+   * what to do with that string, i.e. write to stdout, write to
+   * custom logfile, write to syslog etc
+   */
+   printf(outputString_);
+}
+
 /*
  * setup our port number, this is the default port number used
  * if our serverName is not found in the pshell.servers file
@@ -231,6 +246,14 @@ int main (int argc, char *argv[])
    * if set to 'NULL',no prefix will be used
    */
   trace_setLogPrefix("demo");
+
+  /*
+   * register a custom client provided log file, it is up to the
+   * registering application to decide what to do with that string,
+   * i.e. write to stdout, write to custom logfile, write to syslog
+   * etc
+   */
+  trace_registerLogFunction(sampleLogFunction);
 
   /* initialize our dynamic trace filtering feature, this should be done
    * at the beginning of the program, right after the 'main' and before

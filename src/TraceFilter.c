@@ -308,6 +308,9 @@ static tf_TraceControl _callbackControl = TF_ONCE;
  * effecting any other level
  */
 static unsigned _hierarchicalLevel = 0;
+static  unsigned _minHierarchicalLevel = TF_MAX_LEVELS;
+static  unsigned _maxHierarchicalLevel = 0;
+static  unsigned _defaultHierarchicalLevel = 0;
 
 //#define TF_PRINT(name, file, function, line, message) printf("%s: %s(%s):%d - %s\n", name, file, function, line, message)
 
@@ -342,6 +345,7 @@ void tf_init(const char *configFile_)
     }
   }
   _globalLevel = TL_DEFAULT;
+  _hierarchicalLevel = _defaultHierarchicalLevel;
 
 #ifdef TF_FAST_FILENAME_LOOKUP
   unsigned length;
@@ -366,7 +370,7 @@ void tf_init(const char *configFile_)
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
                     "             load [<filename>] |\n"
-                    "             level {all | <value>} |\n"
+                    "             level {all | default | <value>} |\n"
                     "             filter {on | off} |\n"
                     "             global {on | off | all | default | [+|-]<level> [<level>] ...} |\n"
                     "             local {on | off} |\n"
@@ -413,6 +417,18 @@ void tf_addLevel(const char *levelName_,
 {
   if (levelValue_ < TF_MAX_LEVELS)
   {
+    if (levelValue_ < _minHierarchicalLevel)
+    {
+      _minHierarchicalLevel = levelValue_;
+    }
+    if (levelValue_ > _maxHierarchicalLevel)
+    {
+      _maxHierarchicalLevel = levelValue_;
+    }
+    if (isDefault_ && (levelValue_ > _defaultHierarchicalLevel))
+    {
+      _defaultHierarchicalLevel = levelValue_;
+    }
     _levelFilters[levelValue_].name = levelName_;
     _levelFilters[levelValue_].level = 1<<(levelValue_+1);
     _levelFilters[levelValue_].isDefault = isDefault_;
@@ -829,8 +845,19 @@ void showConfig(void)
   {
     pshell_printf("Trace callback.......: %s\n", NONE);
   }
+  if (_hierarchicalLevel == _defaultHierarchicalLevel)
+  {
+    pshell_printf("Hierarchical level...: %d (default)\n", _hierarchicalLevel);
+  }
+  else if (_hierarchicalLevel == _maxHierarchicalLevel)
+  {
+    pshell_printf("Hierarchical level...: %d (all)\n", _hierarchicalLevel);
+  }
+  else
+  {
+    pshell_printf("Hierarchical level...: %d\n", _hierarchicalLevel);
+  }
   pshell_printf("Filter enabled.......: %s\n", ((_filterEnabled) ? ON : OFF));
-  pshell_printf("Hierarchical level...: %d\n", _hierarchicalLevel);
   pshell_printf("  Local filter.......: %s\n", ((_localFilterEnabled) ? ON : OFF));
   pshell_printf("    File filter......: %s\n", ((_fileFilterEnabled) ? ON : OFF));
   if (_numFileFilters == 0)
@@ -1247,7 +1274,21 @@ void configureFilter(int argc, char *argv[])
   {
     if (pshell_isSubString(argv[1], "all", 3))
     {
-      _hierarchicalLevel = TF_MAX_LEVELS;
+      _hierarchicalLevel = _maxHierarchicalLevel;
+    }
+    else if (pshell_isSubString(argv[1], "default", 3))
+    {
+      _hierarchicalLevel = _defaultHierarchicalLevel;
+    }
+    else if ((pshell_getUnsigned(argv[1]) < _minHierarchicalLevel) ||
+             (pshell_getUnsigned(argv[1]) > _maxHierarchicalLevel))
+    {
+      pshell_printf("\n");
+      pshell_printf("ERROR: Invalid hierarchical value: %d, must be %d-%d, 'all', or 'default'\n",
+                    pshell_getUnsigned(argv[1]),
+                    _minHierarchicalLevel,
+                    _maxHierarchicalLevel);
+      pshell_printf("\n");      
     }
     else
     {
@@ -1702,22 +1743,23 @@ const void showThreads(char *thread_)
 const void showLevels(void)
 {
   pshell_printf("\n");
-  pshell_printf("****************************\n");
-  pshell_printf("*  AVAILABLE TRACE LEVELS  *\n");
-  pshell_printf("****************************\n");
+  pshell_printf("**********************************\n");
+  pshell_printf("*     AVAILABLE TRACE LEVELS     *\n");
+  pshell_printf("**********************************\n");
   pshell_printf("\n");
-  pshell_printf("%-*s  DEFAULT  MASKABLE\n", _maxLevelNameLength, "NAME");
+  pshell_printf("%-*s  DEFAULT  MASKABLE  VALUE\n", _maxLevelNameLength, "NAME");
   for (int i = 0; i < (int)_maxLevelNameLength; i++) pshell_printf("-");
-  pshell_printf("  -------  --------\n");
+  pshell_printf("  -------  --------  -----\n");
   for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
     if (_levelFilters[i].name != NULL)
     {
-      pshell_printf("%-*s  %-7s  %s\n",
+      pshell_printf("%-*s  %-7s  %-8s  %d\n",
                     _maxLevelNameLength,
                     _levelFilters[i].name,
                     ((_levelFilters[i].isDefault) ? "YES" : "NO"),
-                    ((_levelFilters[i].isMaskable) ? "YES" : "NO"));
+                    ((_levelFilters[i].isMaskable) ? "YES" : "NO"),
+                    i);
     }
   }
   pshell_printf("\n");
