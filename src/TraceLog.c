@@ -104,6 +104,24 @@ void trace_setLogPrefix(const char *name_)
 
 /******************************************************************************/
 /******************************************************************************/
+void trace_registerLevels(void)
+{
+  /*
+   * register all our trace levels with the trace filter service
+   * format of call is "name", level, isDefault, isMaskable
+   */
+  tf_addLevel("ERROR", TL_ERROR, true, true);
+  tf_addLevel("WARNING", TL_WARNING, true, true);
+  tf_addLevel("FAILURE", TL_FAILURE, true, true);
+  tf_addLevel("INFO", TL_INFO, false, true);
+  tf_addLevel("DEBUG", TL_DEBUG, false, true);
+  tf_addLevel("ENTER", TL_ENTER, false, true);
+  tf_addLevel("EXIT", TL_EXIT, false, true);
+  tf_addLevel("DUMP", TL_DUMP, false, true);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void trace_outputLog(const char *type_,
                      const char *file_,
                      const char *function_,

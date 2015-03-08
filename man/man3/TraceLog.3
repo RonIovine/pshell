@@ -60,7 +60,7 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
 
 /*
 .br
- * trace_registerLogName:
+ * trace_setLogPrefix:
 .br
  *
 .br
@@ -78,6 +78,19 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
 .br
 void trace_setLogPrefix(const char *name_);
 
+/*
+.br
+ * trace_registerLevels:
+.br
+ *
+.br
+ * register all our above trace levels with the trace filter, note
+.br
+ * that all levels MUST be registered before calling 'tf_init'
+.br
+ */
+.br
+void trace_registerLevels(void);
 
 Link with the library libpshell-server
 .SH EXAMPLES

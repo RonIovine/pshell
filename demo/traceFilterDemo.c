@@ -214,6 +214,21 @@ int main (int argc, char *argv[])
     dumpBuffer[i] = i;
   }
 
+  /* must register our trace levels before callinig 'tf_init' */
+  trace_registerLevels();
+
+  /* 
+   * add a trace thread name, this should be done in the initialization
+   * of each thread (i.e. before the "infinite" loop), this will allow
+   * the TraceFilter to be able to do thread based filtering 
+   */
+   
+  tf_registerThread("main");
+
+  /*
+   * optionally set a log prefix, if not set, 'TRACE' will be used,
+   * if set to 'NULL',no prefix will be used
+   */
   trace_setLogPrefix("demo");
 
   /* initialize our dynamic trace filtering feature, this should be done
@@ -228,6 +243,10 @@ int main (int argc, char *argv[])
    
   tf_init("traceFilterDemo.conf");
 
+  /*
+   * Register all our pshell callback commands here, after the 'tf_init'
+   */
+
   pshell_addCommand(setTriggers,                                              /* function */
                     "set",                                                    /* command */
                     "set the callback and watchpoint trace trigger values",   /* description */
@@ -236,19 +255,8 @@ int main (int argc, char *argv[])
                     2,                                                        /* maxArgs */
                     true);                                                    /* showUsage on "?" */
 
+  /* turn off all our traces */
   pshell_runCommand("trace off");
-
-  /* 
-   * add a trace thread name, this should be done in the initialization
-   * of each thread (i.e. before the "infinite" loop), this will allow
-   * the TraceFilter to be able to do thread based filtering 
-   */
-   
-  tf_registerThread("main");
-
-  /*
-   * Register all our rcbl callback commands here, after the 'tf_init'
-   */
 
   /*
    * register a memory address watchpoint to continuously look for a change in the contents
@@ -273,7 +281,8 @@ int main (int argc, char *argv[])
 
   /* issue a trace so we can trigger the TRACE_WATCH functionality */
   TRACE_INFO("First trace");
-   
+
+  /* start our pshell server */
   pshell_startServer("traceFilterDemo", serverType, PSHELL_NON_BLOCKING, "localhost", TF_DEMO_PORT);
    
   /* create a sample thread to show thread based filtering */

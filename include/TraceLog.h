@@ -42,26 +42,11 @@
  *
  *******************************************************************************/
 
-/* trace level definitions, this is an example of some common trace levels,
- * the trace filteing mechanism uses a discrete bitmask trace level paradigm
- * rather than the more traditional hierarchical level paradigm, if the existing
- * trace logging system uses a hierarchical level, those levels need to be
- * mapped and translated into a corresponding discrete level, that is done by
- * mapping the hierarchical levels into a corresponding bitmask value in the
- * structure _levelFilters in TraceFilter.c
+/*
+ * these trace levels must be register into the trace filter service via the
+ * 'tf_addLevel' function, that function must be called before calling 'tf_init',
+ * in this example, all the levels are added in the function 'trace_registerLevels'
  */
-#ifdef TF_NATIVE_DISCRETE_LEVELS
-/* this example is when the existing trace system used discrete bitmasks for its trace levels */
-#define TL_ERROR    0x0001
-#define TL_WARNING  0x0002
-#define TL_FAILURE  0x0004
-#define TL_INFO     0x0008
-#define TL_DEBUG    0x0010
-#define TL_ENTER    0x0020
-#define TL_EXIT     0x0040
-#define TL_DUMP     0x0080
-#else
-/* this example is when the existing trace system used hierarchical values for its trace levels */
 #define TL_ERROR    0
 #define TL_WARNING  1
 #define TL_FAILURE  2
@@ -70,7 +55,6 @@
 #define TL_ENTER    5
 #define TL_EXIT     6
 #define TL_DUMP     7
-#endif
 
 /* 
  * the folloinwg TRACE macros are just for example purposes, it is meant to illustrate
@@ -105,7 +89,7 @@ typedef void (*TraceLogFunction)(const char *outputString_);
 void trace_registerLogFunction(TraceLogFunction logFunction_);
 
 /*
- * trace_registerLogName:
+ * trace_setLogPrefix:
  *
  * set a log name that is used as a prefix for the log type,
  * if this function is not called, the prefix will default to
@@ -114,6 +98,14 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
  * no prefix, e.g. ERROR, WARNING etc.
  */
 void trace_setLogPrefix(const char *name_);
+
+/*
+ * trace_registerLevels:
+ *
+ * register all our above trace levels with the trace filter, note
+ * that all levels MUST be registered before calling 'tf_init'
+ */
+void trace_registerLevels(void);
 
 /*
  * common TRACE and DUMP output functions and macros that all the different

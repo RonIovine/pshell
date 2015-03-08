@@ -40,10 +40,10 @@ extern "C" {
  * This API provides the Process Specific Embedded Command Line Shell (PSHELL)
  * user API functionality.  It provides the ability for a client program to
  * register functions that can be invoked via a command line user interface.
- * The functions are of the same prototype of the 'main' in 'C', i.e.
- * 'int myFunc(int argc, char *argv[]), there are several ways and client
- * methods to call these functions, they are described in documentation further
- * down in this file.
+ * The functions are similar to the prototype of the 'main' in 'C', i.e.
+ * 'int myFunc(int argc, char *argv[]), there are several way to invoke these
+ * embedded functions based on how the pshell server is configured, which is
+ * described in documentation further down in this file.
  *
  * An complete example of the usage of the API can be found in the included 
  * file pshellServerDemo.c
@@ -56,15 +56,14 @@ extern "C" {
 
 /*
  * defines the server type, a UDP/UNIX server supports multiple
- * client sessions, but needs the 'pshell' client program to
- * operate, a TCP server only supports a single session but
- * can use a standard telnet client, a LOCAL server uses
- * no external client to provide the user input, rather,
- * it initiates all user prompting and control from within
- * the calling program itself, both the UDP and UNIX servers
- * support external programmatic control via the PshellControl.h
- * API, however, a UNIX domain server can only be controlled
- * externally by a client (either 'pshell' or control API)
+ * client sessions, but needs the included 'pshell' client program
+ * to operate, a TCP server only supports a single session but
+ * can use a standard telnet client, a LOCAL server uses no external
+ * client to provide the user input, rather, it initiates all user
+ * prompting and control from within the calling program itself, both
+ * the UDP and UNIX servers support external programmatic control via
+ * the PshellControl.h API, however, a UNIX domain server can only be
+ * controlled externally by a client (either 'pshell' or control API)
  * running on same host as the target program
  */
 enum PshellServerType
@@ -145,7 +144,7 @@ void pshell_registerLogFunction(PshellLogFunction logFunction_);
  * compiling the library with the command line compile option of
  * PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST
  */
-typedef void (*PshellFunction) (int argc, char *argv[]); 
+typedef void (*PshellFunction)(int argc, char *argv[]); 
 
 /*
  * pshell_addCommand:
@@ -218,13 +217,13 @@ void pshell_startServer(const char *serverName_,
  * 
  * this is the command used to display user data back the the pshell client,
  * the interface is exactly the same as the normal printf, the UDP/UNIX
- * pshell client has a 5 second response timeout, if the callback function
- * does not return to the client within 5 seconds, either with a command 
- * completion indication or display output, the command will timeout, when
- * using the TCP based PSHELL server along with the 'telnet' client, there
- * is no client based timeout (other than the timeouts already built into
- * the TCP protocol itself), there is also no timeout for a LOCAL PSHELL
- * server
+ * pshell client has a default 5 second response timeout (which can be changed
+ * at the 'pshell' command line), if the callback function does not return to
+ * the client within 5 seconds, either with a command  completion indication
+ * or display output, the command will timeout, when using the TCP based PSHELL
+ * server along with the 'telnet' client, there is no client based timeout
+ * (other than the timeouts already built into the TCP protocol itself), there
+ * is also no timeout for a LOCAL PSHELL server
  */
 void pshell_printf(const char *format_, ...);
 
@@ -298,7 +297,7 @@ bool pshell_isFloat(const char *string_);
  * this function will extract options from the callback function args list
  * of the formats -<option><value> where <option> is a single character
  * option (e.g. -t10), or <option>=<value> where <option> is any length
- * character string (e.g. timeout=10), if the 'strlen(option_)' is == 0,
+ * character string (e.g. timeout=10), if the 'strlen(option_)' == 0,
  * all option names & values will be extracted and returned in the 'option_'
  * and 'value_' parameters, if the 'strlen(option_)' is > 0, the 'value_'
  * will only be extracted if the option matches the requested option_ name,
@@ -306,13 +305,13 @@ bool pshell_isFloat(const char *string_);
  */
 bool pshell_getOption(const char *string_, char *option_, char *value_);
 
-/* address from string value */
+/* return address from string value */
 void *pshell_getAddress(const char *string_);
 
-/* bool from string value of 'true' or 'false' */
+/* return bool from string value of 'true' or 'false' */
 bool pshell_getBool(const char *string_);
 
-/* numeric values from string value */
+/* return numeric values from string value */
 long pshell_getLong(const char *string_);
 int pshell_getInt(const char *string_);
 short pshell_getShort(const char *string_);

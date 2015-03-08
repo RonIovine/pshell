@@ -481,13 +481,6 @@ not used.
     Specifies the maximum number of threads that can be registered and have
     an active filter, defaults to 100
 
-  TF_NATIVE_DISCRETE_LEVELS: for TraceFilter (-lib build switch)
-
-    Specifies whether the existing trace logging system uses a discrete or
-    hierarchical level specification, if hierarchical, then those hierarchies
-    must be mapped to corresponding discrete levels with corresponding bitmap
-    masks
-
   TF_USE_COLORS: for TraceFilter (-lib build switch)
 
     Specifies whether to use colors for the 'ON/OFF/NONE' identifiers for the

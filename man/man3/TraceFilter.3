@@ -17,6 +17,8 @@ typedef bool (*tf_TraceCallback) (void);
 
 enum tf_TraceControl {TF_ONCE, TF_CONTINUOUS, TF_ABORT};
 
+void tf_addLevel(const char *name_, unsigned value_, bool isDefault_, bool isMaskable_);
+                 
 void tf_init(const char *configFile_);
 
 void tf_registerThread(const char *threadName_);
@@ -44,6 +46,7 @@ traceFilterDemo[127.0.0.1]:PSHELL> trace ?
 Usage: trace {on | off} |
              show {config | levels | threads [<thread>] | symbols [<symbol>]} |
              load [<filename>] |
+             level {all | <value>} |
              filter {on | off} |
              global {on | off | all | default | [+|-]<level> [<level>] ...} |
              local {on | off} |
@@ -52,8 +55,8 @@ Usage: trace {on | off} |
              thread {on | off | [+|-]<thread>[:<levelSpec>] [<thread>[:<levelSpec>]] ...}
 
   where:
-
-    <symbol>    - the symbol (i.e.file) name or substring
+    <value>     - the hierarchical level to set (used when filter is off)
+    <symbol>    - the symbol (i.e. file) name or substring
     <thread>    - the registered thread name or substring
     <level>     - one of the available trace levels
     <lineSpec>  - list of one or more lines to filter (e.g. 1,3,5-7,9)
@@ -62,6 +65,10 @@ Usage: trace {on | off} |
     -           - remove the filter item from the specified list
 
   NOTE: If no '+' or '-' is given, the filter is set to the entered list
+
+  NOTE: If the trace filter is disabled, the trace behavour will default
+        using the hierarchical level value as opposed to the discrete levels
+        that are used when the filter is enabled
 
 Link with the library libpshell-server
 .SH EXAMPLES

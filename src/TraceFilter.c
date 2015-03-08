@@ -165,33 +165,42 @@ static const void showSymbols(char *symbol_);
  */
 
 /* format for level entry is 'name', 'mask', 'isDefault', 'isMaskable',
- * this is just an example of some common trace levels, the contents of 
- * this structure needs to be customized for the specific levels of the
- * given existing trace system
+ * this structure is populated via the public API function 'tf_addLevel',
+ * all levels must be populated before the 'tf_init' function is called
  */
-#ifdef TF_NATIVE_DISCRETE_LEVELS
-/* existing trace system uses discrete bitmasks, use those values directly for the 'mask' field */
-static LevelFilter _levelFilters[] = {{"ERROR",   TL_ERROR,   true,  true},
-                                      {"FAILURE", TL_FAILURE, true,  true},
-                                      {"WARNING", TL_WARNING, true,  true},
-                                      {"INFO",    TL_INFO,    false, true},
-                                      {"DEBUG",   TL_DEBUG,   false, true},
-                                      {"ENTER",   TL_ENTER,   false, true},
-                                      {"EXIT",    TL_EXIT,    false, true},
-                                      {"DUMP",    TL_DUMP,    false, true}};
-#else
-/* existing trace system uses hierarchical level values, map those to corresponding 
-   discrete bitmasks in their correct position based on their level value */
-static LevelFilter _levelFilters[] = {{"ERROR",   0x0001, true,  true},
-                                      {"FAILURE", 0x0002, true,  true},
-                                      {"WARNING", 0x0004, true,  true},
-                                      {"INFO",    0x0008, false, true},
-                                      {"DEBUG",   0x0010, false, true},
-                                      {"ENTER",   0x0020, false, true},
-                                      {"EXIT",    0x0040, false, true},
-                                      {"DUMP",    0x0080, false, true}};
-#endif
-static const int _numLevels = sizeof(_levelFilters)/sizeof(LevelFilter);
+#define TF_MAX_LEVELS 32
+static LevelFilter _levelFilters[TF_MAX_LEVELS] = {{NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true},
+                                                   {NULL, 0, false, true}};
 static unsigned _maxLevelNameLength = 0;
 static unsigned _globalLevel = 0;
 static unsigned TL_DEFAULT = 0;
@@ -291,6 +300,15 @@ static tf_TraceCallback _callbackFunction = NULL;
 static int _callbackNumHits = 0;
 static tf_TraceControl _callbackControl = TF_ONCE;
 
+/* this hierarchical level will be applied when the trace is
+ * on but the filter is off, the 'tf_isFilterPassed' will
+ * return 'true' if this level is >= the level passed in,
+ * if the filter is on, then the levels are discrete bitmask
+ * levels that can be enabled/disabled individually without
+ * effecting any other level
+ */
+static unsigned _hierarchicalLevel = 0;
+
 //#define TF_PRINT(name, file, function, line, message) printf("%s: %s(%s):%d - %s\n", name, file, function, line, message)
 
 /************************************
@@ -303,21 +321,24 @@ void tf_init(const char *configFile_)
 {
 
   /* setup trace level stuff */
-  for (int i = 0; i < _numLevels; i++)
+  for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if (strlen(_levelFilters[i].name) > _maxLevelNameLength)
+    if (_levelFilters[i].name != NULL)
     {
-      _maxLevelNameLength = strlen(_levelFilters[i].name);
-    }
-    TL_ALL |= _levelFilters[i].level;
-    if (!_levelFilters[i].isMaskable)
-    {
-      TL_UNMASKABLE |= _levelFilters[i].level;
-      TL_DEFAULT |= _levelFilters[i].level;
-    }
-    if (_levelFilters[i].isDefault)
-    {
-      TL_DEFAULT |= _levelFilters[i].level;
+      if (strlen(_levelFilters[i].name) > _maxLevelNameLength)
+      {
+        _maxLevelNameLength = strlen(_levelFilters[i].name);
+      }
+      TL_ALL |= _levelFilters[i].level;
+      if (!_levelFilters[i].isMaskable)
+      {
+        TL_UNMASKABLE |= _levelFilters[i].level;
+        TL_DEFAULT |= _levelFilters[i].level;
+      }
+      if (_levelFilters[i].isDefault)
+      {
+        TL_DEFAULT |= _levelFilters[i].level;
+      }
     }
   }
   _globalLevel = TL_DEFAULT;
@@ -345,6 +366,7 @@ void tf_init(const char *configFile_)
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
                     "             load [<filename>] |\n"
+                    "             level {all | <value>} |\n"
                     "             filter {on | off} |\n"
                     "             global {on | off | all | default | [+|-]<level> [<level>] ...} |\n"
                     "             local {on | off} |\n"
@@ -384,6 +406,22 @@ void tf_registerThread(const char *threadName_)
 
 /******************************************************************************/
 /******************************************************************************/
+void tf_addLevel(const char *levelName_,
+                 unsigned levelValue_,
+                 bool isDefault_,
+                 bool isMaskable_)
+{
+  if (levelValue_ < TF_MAX_LEVELS)
+  {
+    _levelFilters[levelValue_].name = levelName_;
+    _levelFilters[levelValue_].level = 1<<(levelValue_+1);
+    _levelFilters[levelValue_].isDefault = isDefault_;
+    _levelFilters[levelValue_].isMaskable = isMaskable_;    
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 bool tf_isFilterPassed(const char *file_,
                        int line_,
                        const char *function_,
@@ -397,13 +435,7 @@ bool tf_isFilterPassed(const char *file_,
   bool threadFilterPassed = !_threadFilterEnabled;
   bool filterPassed = false;
   char traceOutputString[180];
-#ifdef TF_NATIVE_DISCRETE_LEVELS
-  /* no need to translate level, use native discrete bitmask level directly */
-  unsigned level = level_;
-#else
-  /* translate our hierarchical level to a discrete bitmask level */
   unsigned level = _levelFilters[level_].level;
-#endif
   if (isWatchHit() && ((_watchNumHits == 0) || (_watchControl != TF_ONCE)))
   {
     /* print out the most recent trace for which the value was unchanged */
@@ -422,11 +454,6 @@ bool tf_isFilterPassed(const char *file_,
       assert(0);
     }
   }
-  else if (level & TL_UNMASKABLE)
-  {
-    /* short circuit the evaluation if the level is one of our unmaskable levels */
-    filterPassed = true;
-  }
   else if (!_traceEnabled)
   {
     /* if trace is not enabled, return false */
@@ -435,12 +462,16 @@ bool tf_isFilterPassed(const char *file_,
   else if (!_filterEnabled)
   {
     /* filter not enabled, return legacy default hierarchical behavour */
+    filterPassed = (_hierarchicalLevel >= level_);
+  }
+  else if (level & TL_UNMASKABLE)
+  {
+    /* short circuit the evaluation if the level is one of our unmaskable levels */
     filterPassed = true;
   }
   else if (_localFilterEnabled)
   {
-    /* evaluate any file filters,  need to offset the filename by 7 characters
-     * because they all have a '../src/' pre-pended to it */
+    /* evaluate any file filters */
     if ((_fileFilterEnabled) &&
         ((fileFilter = findFileFilter(file_)) != NULL) &&
         ((fileFilterPassed = ((fileFilter->numLineFilters == 0) &&
@@ -779,6 +810,7 @@ void showConfig(void)
     pshell_printf("Trace callback.......: %s\n", NONE);
   }
   pshell_printf("Filter enabled.......: %s\n", ((_filterEnabled) ? ON : OFF));
+  pshell_printf("Hierarchical level...: %d\n", _hierarchicalLevel);
   pshell_printf("  Local filter.......: %s\n", ((_localFilterEnabled) ? ON : OFF));
   pshell_printf("    File filter......: %s\n", ((_fileFilterEnabled) ? ON : OFF));
   if (_numFileFilters == 0)
@@ -807,9 +839,9 @@ void showConfig(void)
       if (_fileFilters[i].level != TL_ALL)
       {
         prefix2 = _prefix2;
-        for (int j = 0; j < _numLevels; j++)
+        for (int j = 0; j < TF_MAX_LEVELS; j++)
         {
-          if (_fileFilters[i].level & _levelFilters[j].level)
+          if ((_levelFilters[j].name != NULL) && (_fileFilters[i].level & _levelFilters[j].level))
           {
             pshell_printf("%s%s", prefix2, _levelFilters[j].name);
             prefix2 = _prefix3;
@@ -836,9 +868,9 @@ void showConfig(void)
       if (_functionFilters[i].level != TL_ALL)
       {
         prefix2 = _prefix2;
-        for (int j = 0; j < _numLevels; j++)
+        for (int j = 0; j < TF_MAX_LEVELS; j++)
         {
-          if (_functionFilters[i].level & _levelFilters[j].level)
+          if ((_levelFilters[j].name != NULL) && (_functionFilters[i].level & _levelFilters[j].level))
           {
             pshell_printf("%s%s", prefix2, _levelFilters[j].name);
             prefix2 = _prefix3;
@@ -865,9 +897,9 @@ void showConfig(void)
       if (_threadFilters[i].level != TL_ALL)
       {
         prefix2 = _prefix2;
-        for (int j = 0; j < _numLevels; j++)
+        for (int j = 0; j < TF_MAX_LEVELS; j++)
         {
-          if (_threadFilters[i].level & _levelFilters[j].level)
+          if ((_levelFilters[j].name != NULL) && (_threadFilters[i].level & _levelFilters[j].level))
           {
             pshell_printf("%s%s", prefix2, _levelFilters[j].name);
             prefix2 = _prefix3;
@@ -882,9 +914,9 @@ void showConfig(void)
   pshell_printf("  Global filter......: %s\n", ((_globalFilterEnabled) ? ON : OFF));
   prefix1 = "";
   pshell_printf("    Level(s).........: ");
-  for (int i = 0; i < _numLevels; i++)
+  for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if (_levelFilters[i].level & _globalLevel)
+    if ((_levelFilters[i].name != NULL) && (_levelFilters[i].level & _globalLevel))
     {
       pshell_printf("%s%s\n", prefix1, _levelFilters[i].name);
       prefix1 = _prefix1;
@@ -901,8 +933,9 @@ void showUsage(void)
   pshell_showUsage();
   pshell_printf("\n");
   pshell_printf("  where:\n");
+  pshell_printf("    <value>     - the hierarchical level to set (used when filter is off)\n");
 #ifdef TF_FAST_FILENAME_LOOKUP
-  pshell_printf("    <symbol>    - the symbol (i.e.file) name or substring\n");
+  pshell_printf("    <symbol>    - the symbol (i.e. file) name or substring\n");
 #endif
   pshell_printf("    <thread>    - the registered thread name or substring\n");
   pshell_printf("    <level>     - one of the available trace levels\n");
@@ -912,6 +945,10 @@ void showUsage(void)
   pshell_printf("    -           - remove the filter item from the specified list\n");
   pshell_printf("\n");
   pshell_printf("  NOTE: If no '+' or '-' is given, the filter is set to the entered list\n");
+  pshell_printf("\n");
+  pshell_printf("  NOTE: If the trace filter is disabled, the trace behavour will default\n");
+  pshell_printf("        using the hierarchical level value as opposed to the discrete levels\n");
+  pshell_printf("        that are used when the filter is enabled\n");
   pshell_printf("\n");
 }
 
@@ -1186,6 +1223,17 @@ void configureFilter(int argc, char *argv[])
       showUsage();
     }
   }
+  else if (pshell_isSubString(argv[0], "level", 3) && (argc == 2))
+  {
+    if (pshell_isSubString(argv[1], "all", 3))
+    {
+      _hierarchicalLevel = TF_MAX_LEVELS;
+    }
+    else
+    {
+      _hierarchicalLevel = pshell_getUnsigned(argv[1]);
+    }
+  }
   else
   {
     showUsage();
@@ -1262,6 +1310,17 @@ void loadConfigFile(const char *file_, bool interactive_)
             else if (strcmp(tokens.tokens[2], "off") == 0)
             {
               _filterEnabled = false;
+            }
+          }
+          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "level") == 0))
+          {
+            if (strcmp(tokens.tokens[2], "all") == 0)
+            {
+              _hierarchicalLevel = TF_MAX_LEVELS;
+            }
+            else
+            {
+              _hierarchicalLevel = pshell_getUnsigned(tokens.tokens[2]);
             }
           }
           else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "local") == 0))
@@ -1517,9 +1576,9 @@ const void showSymbols(char *symbol_)
 /******************************************************************************/
 void addLevelFilter(char *name_, unsigned &level_)
 {
-  for (int i = 0; i < _numLevels; i++)
+  for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if (strcasecmp(name_, _levelFilters[i].name) == 0)
+    if ((_levelFilters[i].name != NULL) && (strcasecmp(name_, _levelFilters[i].name) == 0))
     {
       level_ |= _levelFilters[i].level;
       break;
@@ -1535,9 +1594,9 @@ void addLevelFilter(char *name_, unsigned &level_)
 /******************************************************************************/
 void removeLevelFilter(char *name_, unsigned &level_)
 {
-  for (int i = 0; i < _numLevels; i++)
+  for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if (strcasecmp(name_, _levelFilters[i].name) == 0)
+    if ((_levelFilters[i].name != NULL) && (strcasecmp(name_, _levelFilters[i].name) == 0))
     {
       if (_levelFilters[i].isMaskable)
       {
@@ -1630,13 +1689,16 @@ const void showLevels(void)
   pshell_printf("%-*s  DEFAULT  MASKABLE\n", _maxLevelNameLength, "NAME");
   for (int i = 0; i < (int)_maxLevelNameLength; i++) pshell_printf("-");
   pshell_printf("  -------  --------\n");
-  for (int i = 0; i < _numLevels; i++)
+  for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    pshell_printf("%-*s  %-7s  %s\n",
-                  _maxLevelNameLength,
-                  _levelFilters[i].name,
-                  ((_levelFilters[i].isDefault) ? "YES" : "NO"),
-                  ((_levelFilters[i].isMaskable) ? "YES" : "NO"));
+    if (_levelFilters[i].name != NULL)
+    {
+      pshell_printf("%-*s  %-7s  %s\n",
+                    _maxLevelNameLength,
+                    _levelFilters[i].name,
+                    ((_levelFilters[i].isDefault) ? "YES" : "NO"),
+                    ((_levelFilters[i].isMaskable) ? "YES" : "NO"));
+    }
   }
   pshell_printf("\n");
 }
@@ -1645,9 +1707,9 @@ const void showLevels(void)
 /******************************************************************************/
 bool isLevel(char *string_)
 {
-  for (int i = 0; i < _numLevels; i++)
+  for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if (strncasecmp(string_, _levelFilters[i].name, strlen(string_)) == 0)
+    if ((_levelFilters[i].name != NULL ) && (strncasecmp(string_, _levelFilters[i].name, strlen(string_)) == 0))
     {
       return (true);
     }
@@ -1821,7 +1883,7 @@ void addFileFilter(const char *file_, bool interactive_)
       pshell_printf("Symbol '%s' not found or ambiguous, add macro\n", tokens.tokens[0]);
       pshell_printf("'TF_SYMBOL'TABLE' to file or expand abbreviation\n");
       pshell_printf("\n");
-     }
+    }
   }
   else if (interactive_)
   {

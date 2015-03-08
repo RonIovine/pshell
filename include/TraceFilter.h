@@ -75,7 +75,7 @@ struct TraceSymbols
 
 
 /* function prototype used for the TRACE_CALLBACK registration */
-typedef bool (*tf_TraceCallback) (void);
+typedef bool (*tf_TraceCallback)(void);
 
 /*
  * specifies the behavour of the TRACE_WATCH and TRACE_CALLBACK
@@ -87,6 +87,15 @@ enum tf_TraceControl
   TF_CONTINUOUS,
   TF_ABORT
 };
+
+/*
+ * add a trace level for dynamic filtering, note that all trace levels
+ * MUST be registered before calling 'tf_init'
+ */
+void tf_addLevel(const char *levelName_,
+                 unsigned levelValue_,
+                 bool isDefault_,
+                 bool isMaskable_);
 
 /*
  * trace filter library must be inialized before use, this function
