@@ -209,6 +209,7 @@ int main (int argc, char *argv[])
     return (0);
   }
 
+  /* initialize a sample memory hex dump buffer */
   for (unsigned i = 0; i < DUMP_BUFFER_SIZE; i++)
   {
     dumpBuffer[i] = i;
