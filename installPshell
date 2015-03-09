@@ -62,12 +62,17 @@ then
     exit 1
   else
     # local install, create .pshellrc env file
-    echo "Setting softlink libpshell-server.so to libpshell-server-full.so"
+    echo "Setting softlink libpshell-server to libpshell-server-full"
     if [ -e "lib/libpshell-server.so" ]
     then
       rm -f lib/libpshell-server.so
     fi
     ln -s $localDir/lib/libpshell-server-full.so lib/libpshell-server.so
+    if [ -e "lib/libpshell-server.a" ]
+    then
+      rm -f lib/libpshell-server.a
+    fi
+    ln -s $localDir/lib/libpshell-server-full.a lib/libpshell-server.a
     rm -f .pshellrc
     echo "#" >> .pshellrc
     echo "# Local PSHELL install env file" >> .pshellrc
@@ -143,14 +148,20 @@ else
   echo "Copying libpshell-control.a to $libDir/pshell"
   cp lib/libpshell-control.a $libDir/pshell/.
   
-  echo "Setting softlink $libDir/libpshell-server.so to $libDir/pshell/libpshell-server-full.so"
+  echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"
   if [ -e "$libDir/libpshell-server.so" ]
   then
     rm -f $libDir/libpshell-server.so
   fi
   ln -s $libDir/pshell/libpshell-server-full.so $libDir/libpshell-server.so
   
-  echo "Setting softlink $libDir/libpshell-control.so to $libDir/pshell/libpshell-control.so"
+  if [ -e "$libDir/libpshell-server.a" ]
+  then
+    rm -f $libDir/libpshell-server.a
+  fi
+  ln -s $libDir/pshell/libpshell-server-full.a $libDir/libpshell-server.a
+
+  echo "Setting softlink $libDir/libpshell-control to $libDir/pshell/libpshell-control"
   if [ -e "$libDir/libpshell-control.so" ]
   then
     rm -f $libDir/libpshell-control.so

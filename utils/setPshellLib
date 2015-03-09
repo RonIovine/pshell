@@ -42,6 +42,11 @@ then
       rm ${PSHELL_INSTALL}/lib/libpshell-server.so
     fi
     ln -s ${PSHELL_INSTALL}/lib/libpshell-server-stub.so ${PSHELL_INSTALL}/lib/libpshell-server.so 
+    if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.a" ]
+    then
+      rm ${PSHELL_INSTALL}/lib/libpshell-server.a
+    fi
+    ln -s ${PSHELL_INSTALL}/lib/libpshell-server-stub.a ${PSHELL_INSTALL}/lib/libpshell-server.a
   else
     echo "ERROR: Environment variable PSHELL_INSTALL not defined"
   fi
@@ -54,6 +59,11 @@ then
       rm ${PSHELL_INSTALL}/lib/libpshell-server.so
     fi
     ln -s ${PSHELL_INSTALL}/lib/libpshell-server-full.so ${PSHELL_INSTALL}/lib/libpshell-server.so 
+    if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.a" ]
+    then
+      rm ${PSHELL_INSTALL}/lib/libpshell-server.a
+    fi
+    ln -s ${PSHELL_INSTALL}/lib/libpshell-server-full.a ${PSHELL_INSTALL}/lib/libpshell-server.a
   else
     echo "ERROR: Environment variable PSHELL_INSTALL not defined"
   fi
