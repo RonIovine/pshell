@@ -31,7 +31,7 @@
 if [ $# -lt 1 -o $# -gt 3 -o "$1" == "-h" -o "$1" == "-help" ]
 then
   echo
-  echo "Usage: buildPshell {-all | -pshell | -lib | -demo} [-readline] [-clean]"
+  echo "Usage: buildPshell {-all | -pshell | -lib | -demo} [-readline] [-static] [-clean]"
   echo
   echo "  where:"
   echo "    all      - build all components of the pshell package"
@@ -39,6 +39,7 @@ then
   echo "    lib      - build the pshell link libraries only (shared, static and stub)"
   echo "    demo     - build the pshell stand-alone demo program only"
   echo "    readline - build the with the readline development and link libraries"
+  echo "    static   - link with static libraries (readline, ncurses, pshell-server) as available"
   echo "    clean    - remove all old binaries and libraries"
   echo
   exit 1
@@ -50,10 +51,24 @@ then
   exit 1
 fi
 
+STATIC1=""
+STATIC2=""
+if [ $# -ge 2 -a "$2" == "-static" ]
+then
+  STATIC1="-Wl,-Bstatic"
+  STATIC2="-Wl,-Bdynamic -ltermcap"
+fi
+
+if [ $# -ge 3 -a "$3" == "-static" ]
+then
+  STATIC1="-Wl,-Bstatic"
+  STATIC2="-Wl,-Bdynamic -ltermcap"
+fi
+
 if [ $# -ge 2 -a "$2" == "-readline" ]
 then
   READLINE="-DREADLINE"
-  READLINELIB="-Wl,-Bstatic -lreadline -lncurses -Wl,-Bdynamic -ltermcap"
+  READLINELIB="$STATIC1 -lreadline -lncurses $STATIC2"
 else
   READLINE=""
   READLINELIB=""
@@ -68,6 +83,14 @@ then
 fi
 
 if [ $# -eq 3 -a "$3" == "-clean" ]
+then
+  echo "Cleaning directory bin..."
+  rm $PSHELL_INSTALL/bin/*
+  echo "Cleaning directory lib..."
+  rm $PSHELL_INSTALL/lib/*
+fi
+
+if [ $# -eq 4 -a "$4" == "-clean" ]
 then
   echo "Cleaning directory bin..."
   rm $PSHELL_INSTALL/bin/*
@@ -152,7 +175,7 @@ then
   echo "Building pshellServerDemo program..."
   g++ -Wall -I../include \
   pshellServerDemo.c \
-  -lpthread -L../lib -Wl,-Bstatic -lpshell-server $READLINELIB \
+  -lpthread -L../lib $STATIC1 -lpshell-server $READLINELIB \
   -o ../bin/pshellServerDemo
   
   echo "Building pshellControlDemo program..."
@@ -164,9 +187,8 @@ then
   echo "Building traceFilterDemo program..."
   g++ -Wall -I../include -DTF_FAST_FILENAME_LOOKUP \
   traceFilterDemo.c \
-  -lpthread -L../lib -Wl,-Bstatic -lpshell-server $READLINELIB \
-  -o ../bin/traceFilterDemo
-  
+  -lpthread -L../lib $STATIC1 -lpshell-server $READLINELIB \
+  -o ../bin/traceFilterDemo  
 fi
 
 if [ "$1" == "-all" ]
