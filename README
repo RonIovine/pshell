@@ -314,8 +314,9 @@ $ pshell -s
 BUILDING:
 
 This package includes binaries and libraries that were built and tested on
-CentOS Linux 6.6.  They should be able to run on any modern Linux distribution
-as is.  However, if a build is necessary, a shell based build script is provided.
+CentOS Linux 6.6 and Linux Mint 17.  They should be able to run on any modern
+Linux distribution as is.  However, if a build is necessary, a shell based
+build script is provided.
 
 The following is the usage of the build script:
 
