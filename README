@@ -35,12 +35,12 @@ GETTING STARTED:
 
 This package consists of 6 libraries (each library has both a shared and static
 version, in addition, the pshell-server libraray has a full and stub version),
-one stand-alone UDP/UNIX client application (pshell), ine install shell script,
+one stand-alone UDP/UNIX client application (pshell), one install shell script,
 three utility shell scripts, one expect script, one build script and three demo
 programs.  The rest of this README will assume that this package has been unzipped
 with the current directory structure preserved.  
 
-The following lists all the pieces of this package along with a brief description:
+The following lists all the items in this package along with a brief description:
 
   1.  installPshell            -- Install shell script for this package
   2.  libpshell-server-full.a  -- Full version of libpshell-server library (static)
@@ -50,8 +50,8 @@ The following lists all the pieces of this package along with a brief descriptio
   6   libpshell-control.so     -- External pshell program control libpshell-control library (shared)
   7   libpshell-control.a      -- External pshell program control libpshell-control library (static)
   8.  pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
-  9.  pshell.exp               -- Expect script to provide interface similar to UDP/UNIX pshell
-                                  client when using the TCP server with a telnet client
+  9.  pshell.exp               -- Expect script telnet wrapper to provide interface similar to the
+                                  UDP/UNIX pshell client when using the TCP server with a telnet client
   10. buildPshell              -- Shell script to build the entire package or individual pieces
   11. archivePshell            -- Shell script to creates a pshell-vX.Y.tar.gz archive
   12. setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
@@ -106,8 +106,9 @@ export LD_LIBRARY_PATH=$PSHELL_INSTALL/lib:$LD_LIBRARY_PATH
 
 Note that if a system wide install is done, none of the 'demo' programs are installed
 in any system wide 'bin' directories.  The can only be executed directly from the 'bin'
-directory of the unzipped package.  If a local install is done, the environment
-variables setup will allow the execution of the 'demo' programs from any location.
+directory of the unzipped package.  If a local install is done and its environment
+sourced, the environment variables setup will allow the execution of the 'demo' programs
+from any location.
 
 DOCUMENTATION:
 
@@ -125,7 +126,7 @@ main features of the PSHELL library can be found in the files:
 
 $PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
 $PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control client
-$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo dynamic trace filtering
+$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo for dynamic trace filtering
 
 EXECUTION:
 
@@ -146,9 +147,9 @@ traceControlDemo program.
 
 After the installPshell script has been excuted (and the local env sourced if doing
 a local install), the client and associated demo programs can be run.  Run
-"pshellServerDemo" and connect to it with the "pshell" client program (for the
-UDP/UNIX server) or telnet or the pshell.exp telnet expect script wrapper (for
-the TCP server).  Note, to use the "pshell.exp" expect script you need to have
+"pshellServerDemo" and connect to it with the "pshell" client program for a
+UDP/UNIX server, or telnet (or the pshell.exp telnet expect script wrapper) for
+a TCP server.  Note, to use the "pshell.exp" expect script you need to have
 "expect" installed on your host in /usr/bin.
 
 (NOTE: To see the features of the dynamically configurable optional TraceFilter
@@ -222,7 +223,7 @@ Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix}
           to fill out partial commands and up-arrow to recall
           the last entered command.
 
-NOTE: The "-t <timeout>" option,the "unix" specifier, and the "batch" interative
+NOTE: The "-t<timeout>" option, the "unix" specifier, and the "batch" interative
       command are only supported on the UDP/UNIX client/server.
 
 Invoke the pshell client program per the above usage.  The pshellServerDemo
@@ -333,8 +334,8 @@ Usage: buildPshell {-all | -pshell | -lib | -demo} [-readline] [-static] [-clean
 
 NOTE: Use the -readline build option if your build environment supports the
       GNU readline library development package, also note that readline also
-      has a dependency with the curses (ncurses) library.  The current binaries
-      and libraries were all compiled with the -readline flag.  
+      has a dependency with the curses (ncurses) library.  The delivered
+      binaries and libraries were all compiled with the -readline flag.  
 
 COMPILE OPTIONS:
 
