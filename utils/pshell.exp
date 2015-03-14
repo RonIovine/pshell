@@ -36,9 +36,12 @@
 #
 #################################################################################
 
-# if the terminal title bar and prompt are changed in the PshellServers.c or the
-# pshell-server.conf files from these defaults below, make sure the following two
-# variables are changed accordingly
+# if the terminal title bar and prompt are changed in the PshellServers.c from
+# these defaults below, make sure the following two variables are changed accordingly,
+# however, if the defaults are overridded in the pshell-server.conf file, these
+# do not need to be changed, AND this script is invoked with a serverName as opposed
+# to just a portNum, this script will detect the new values for that server and assign
+# them accordingly
 
 set title "PSHELL"
 set prompt "PSHELL>"
@@ -78,10 +81,13 @@ proc showUsage {} {
   puts "          to fill out partial commands and up-arrow to recall"
   puts "          the last entered command."
   puts ""
-  puts "    NOTE: If the terminal title bar and/or prompt are changed in the"
-  puts "          PshellServers.c or the pshell-server.conf files, the variables"
-  puts "          'title' and 'prompt' at the top of this script must be changed"
-  puts "          accordingly"
+  puts "    NOTE: If the default terminal title bar and/or prompt are changed"
+  puts "          in the PshellServers.c file, the variables 'title' and 'prompt'"
+  puts "          at the top of this script must be changed accordingly, however,"
+  puts "          if the default terminal title bar and/or prompt are changed in"
+  puts "          the pshell-server.conf file AND we are calling this script with"
+  puts "          a serverName as opposed to a portNum, this script will automatically"
+  puts "          detect that and assign the new values"
   puts ""
   exit
 }
@@ -108,18 +114,18 @@ if {[llength $argv] == 1} {
   if {[lindex $argv 0] == "-s"} {
     # see if our env variable exists
     if { [info exists env(PSHELL_CONFIG_DIR) ] } {
-      set serversFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
+      set clientConfFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
     } else {
-      set serversFile /etc/pshell-client.conf
+      set clientConfFile /etc/pshell/pshell-client.conf
     }
     # check if our source file exists
-    if ![file exists $serversFile] {
-      puts "PSHELL_ERROR: Server file '$serversFile' not found"
+    if ![file exists $clientConfFile] {
+      puts "PSHELL_ERROR: Client config file '$clientConfFile' not found"
       exit
     }
     # scan the file to get our mas server name length so we can have a prettily aligned output
     set maxServerNameLength 11
-    set file [open $serversFile r]
+    set file [open $clientConfFile r]
     while {[gets $file line] != -1} {
       if {[string index $line 0] != "#" && [string length $line] > 0} {
         set list [split $line ":"]
@@ -171,20 +177,45 @@ set hostOrIpAddr [lindex $argv 0]
 set serverName [lindex $argv 1]
 set portNum $serverName
 
-# open any servers file to get the port number
-if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/pshell-client.conf] } {
-  set serversFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
-} else {
-  set serversFile /etc/pshell-client.conf
-}
-if { [file exists $serversFile] } {
-  set file [open $serversFile r]
-  while {[gets $file line] != -1} {
-    if {[string index $line 0] != "#" && [string length $line] > 0} {
-      set list [split $line ":"]
-      if {[llength $list] == 2 && [string compare $serverName [lindex $list 0]] == 0} {
-        set portNum [lindex $list 1]
-        break
+# see if we have a named server
+if { !([string is integer $serverName]) } {
+
+  # open the client config file to get the port number
+  if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/pshell-client.conf] } {
+    set clientConfFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
+  } else {
+    set clientConfFile /etc/pshell/pshell-client.conf
+  }
+  if { [file exists $clientConfFile] } {
+    set file [open $clientConfFile r]
+    while {[gets $file line] != -1} {
+      if {[string index $line 0] != "#" && [string length $line] > 0} {
+        set list [split $line ":"]
+        if {[llength $list] == 2 && [string compare $serverName [lindex $list 0]] == 0} {
+          set portNum [lindex $list 1]
+          break
+        }
+      }
+    }
+  }
+
+  # open the servers config file to get any prompt and/or title override
+  if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/pshell-server.conf] } {
+    set serverConfFile $env(PSHELL_CONFIG_DIR)/pshell-server.conf
+  } else {
+    set serverConfFile /etc/pshell/pshell-server.conf
+  }
+  if { [file exists $serverConfFile] } {
+    set file [open $serverConfFile r]
+    while {[gets $file line] != -1} {
+      if {[string index $line 0] != "#" && [string length $line] > 0} {
+        set list [split $line "="]
+        if {[llength $list] == 2 && [string compare $serverName.title [lindex $list 0]] == 0} {
+          set title [string range [lindex $list 1] 1 end-1]
+        }
+        if {[llength $list] == 2 && [string compare $serverName.prompt [lindex $list 0]] == 0} {
+          set prompt [string trimright [string range [lindex $list 1] 1 end-1]]
+        }
       }
     }
   }
