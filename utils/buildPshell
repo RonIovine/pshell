@@ -104,16 +104,6 @@ then
   echo "Install directory: $PSHELL_INSTALL"
 fi
 
-if [ "$1" == "-pshell" -o "$1" == "-all" ]
-then
-  cd $PSHELL_INSTALL/src
-  echo "Building pshell..."
-  g++ -I../include $READLINE -Wall \
-  PshellClient.c $READLINELIB \
-  -lnsl \
-  -o ../bin/pshell
-fi
-
 if [ "$1" == "-lib" -o "$1" == "-all" ]
 then
   cd $PSHELL_INSTALL/src
@@ -166,6 +156,16 @@ if [ "$1" == "-all" ]
 then
   echo "Setting libpshell-server to libpshell-server-full..."
   setPshellLib -full
+fi
+
+if [ "$1" == "-pshell" -o "$1" == "-all" ]
+then
+  cd $PSHELL_INSTALL/src
+  echo "Building pshell..."
+  g++ -I../include $READLINE -Wall \
+  PshellClient.c $READLINELIB \
+  -lnsl \
+  -o ../bin/pshell
 fi
 
 if [ "$1" == "-demo" -o "$1" == "-all" ]
