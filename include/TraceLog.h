@@ -95,7 +95,7 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
  * if this function is not called, the prefix will default to
  * "TRACE", e.g. TRACE_ERROR, TRACE_WARNING etc, if this function
  * is called with a NULL prefix, the trace name type will have
- * no prefix, e.g. ERROR, WARNING etc.
+ * no prefix, e.g. just ERROR, WARNING etc.
  */
 void trace_setLogPrefix(const char *name_);
 
