@@ -109,7 +109,8 @@ else
   # system wide install
   if [ $(whoami) != "root" ]
   then
-    echo "ERROR: Must be 'root' to do system install of this package, run 'installPshell -h' for usage"
+    echo "ERROR: Must be 'root' to do system install of this package,"
+    echo "       run 'installPshell -l' for local install or 'installPshell -h' for usage"
     exit 1
   fi
 
