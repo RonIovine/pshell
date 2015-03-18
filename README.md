@@ -29,3 +29,5 @@ as a UDP or UNIX server.
 
 This package also provides an integrated interactive dynamic trace filtering mechanism that can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`, `__LINE__`, `__FUNCTION__`, and `level` paradigm. The trace filtering mechanism does not provide the actual logging service itself, only the filtering mechanism that can be dynamically controlled via the embedded CLI. 
 
+See the full README file for a complete description of all the components, installation, and usage.
+
