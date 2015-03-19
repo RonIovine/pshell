@@ -88,21 +88,6 @@ enum PshellServerMode
   PSHELL_NON_BLOCKING 
 };
 
-/******************************
- * public typedefs structures
- ******************************/
-
-/*
- * structure used to tokenize command line arguments
- * for the registered callback function
- */
-
-struct PshellTokens
-{
-  unsigned numTokens;
-  char **tokens;
-};
-
 /***************************************
  * public "member" function prototypes
  ***************************************/
@@ -268,9 +253,18 @@ void pshell_showUsage(void);
  */
 
 /*
+ * pshell_tokenize:
+ *
  * function to help tokenize command line arguments, this function
- * can ONLY be called from with an PSHELL callback function
+ * can ONLY be called from with an PSHELL callback function, this
+ * function returns a pointer to this structure that contains the
+ * tokenized items
  */
+struct PshellTokens
+{
+  unsigned numTokens;
+  char **tokens;
+};
 PshellTokens *pshell_tokenize(const char *string_, const char *delimeter_);
 
 /* various parameter parsing helper functions */
