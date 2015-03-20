@@ -564,7 +564,7 @@ int main(int argc, char *argv[])
    *
    * The 1st argument is our serverName (i.e. "pshellServerDemo").
    *
-   * The 2nd argument specifies the type of PSHELL server, the three valid values are:
+   * The 2nd argument specifies the type of PSHELL server, the four valid values are:
    * 
    *   PSHELL_UDP_SERVER   - Server runs as a multi-session UDP based server.  This requires
    *                         the special stand-alone command line UDP/UNIX client program
