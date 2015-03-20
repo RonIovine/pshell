@@ -38,7 +38,7 @@
  *
  * This is an example demo program that shows how to use the dynamically
  * controllable & configurable trace filtering mechanism.  This filtering
- * mechanism can be conficured interactivley on a live process via the
+ * mechanism can be configured interactivley on a live process via the
  * pshell interface.  This program utilizes a pshell server that can be
  * started as a UDP, UNIX, or TCP server.
  *
