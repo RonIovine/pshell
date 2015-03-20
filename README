@@ -53,12 +53,12 @@ The following lists all the items in this package along with a brief description
   9.  pshell.exp               -- Expect script telnet wrapper to provide interface similar to the
                                   UDP/UNIX pshell client when using the TCP server with a telnet client
   10. buildPshell              -- Shell script to build the entire package or individual pieces
-  11. archivePshell            -- Shell script to creates a pshell-vX.Y.tar.gz archive
+  11. archivePshell            -- Shell script to create a pshell-vX.Y.tar.gz archive
   12. setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
   13. showPshelllLib           -- Shell script to show the current libpshell-server.so softlink setting
   14. pshellServerDemo         -- Demo application using the pshell server library features
   15. pshellControlDemo        -- Demo application using the pshell control library features
-  16. traceFilterDemo          -- Demo application using the optional trace filter feature
+  16. traceFilterDemo          -- Demo application using the optional trace filter features
 
 INSTALLATION:
 
