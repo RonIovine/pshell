@@ -75,6 +75,8 @@ void bar(void)
   TRACE_EXIT("message 2");
 }
 
+/* thread function to show thread based filtering */
+
 /******************************************************************************/
 /******************************************************************************/
 void *myThread(void*)
@@ -104,8 +106,6 @@ void *myThread(void*)
   return (NULL);
 
 }
-
-unsigned watchAddress = 0;
 
 /* sample trace callback function */
 
@@ -195,6 +195,10 @@ void showUsage(void)
 #define TF_DEMO_PORT 6002
 #define DUMP_BUFFER_SIZE 256
 
+/* global memory address to set a trace watchpoint on */
+
+unsigned watchAddress = 0;
+
 /******************************************************************************/
 /******************************************************************************/
 int main (int argc, char *argv[])
@@ -273,11 +277,11 @@ int main (int argc, char *argv[])
   /* initialize our dynamic trace filtering feature, this should be done
    * at the beginning of the program, right after the 'main' and before
    * any registration of pshell user commands, it will first look for the
-   * file based on the TF_STARTUP_DIR env variable, and if not found
-   * will open this file as an absolute path, call this function with 
-   * 'NULL' if no startup file is desired, this call as well as all the
-   * other 'tf_' calls are optional and can be omitted if dynamic trace 
-   * filtering is not used
+   * file based on the PSHELL_CONFIG_DIR env variable, and if not found
+   * will look in /etc/pshell, and if not found, will open this file as
+   * an absolute path, call this function with  'NULL' if no startup file
+   * is desired, this call as well as all the other 'tf_' calls are optional
+   * and can be omitted if dynamic trace  filtering is not used
    */
    
   tf_init("traceFilterDemo.conf");
