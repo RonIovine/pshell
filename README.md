@@ -31,4 +31,4 @@ This package also provides an integrated interactive dynamic trace filtering mec
 
 See the full README file for a complete description of all the components, installation, and usage.
 
-Note, this package used to be hosted at code.google.com at code.google.com/p/rdb-lite, it was re-christened as 'pshell' when it was migrated to this hosting service.
+Note, this package used to be hosted at [code.google.com](https://code.google.com) at [RDB-Lite](https://code.google.com/p/rdb-lite), it was re-christened as 'pshell' when it was migrated to this hosting service.
