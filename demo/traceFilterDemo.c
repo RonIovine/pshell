@@ -118,6 +118,10 @@ bool callbackFunction(void)
   return (callbackCondition);
 }
 
+/* global memory address to set a trace watchpoint on */
+
+unsigned watchAddress = 0;
+
 /******************************************************************************/
 /******************************************************************************/
 void setTriggers(int argc, char *argv[])
@@ -194,10 +198,6 @@ void showUsage(void)
  */
 #define TF_DEMO_PORT 6002
 #define DUMP_BUFFER_SIZE 256
-
-/* global memory address to set a trace watchpoint on */
-
-unsigned watchAddress = 0;
 
 /******************************************************************************/
 /******************************************************************************/

@@ -1272,6 +1272,7 @@ void configureFilter(int argc, char *argv[])
   }
   else if (pshell_isSubString(argv[0], "level", 3) && (argc == 2))
   {
+    _filterEnabled = false;
     if (pshell_isSubString(argv[1], "all", 3))
     {
       _hierarchicalLevel = _maxHierarchicalLevel;
