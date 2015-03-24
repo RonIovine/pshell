@@ -19,13 +19,13 @@ The signature for the embedded functions are similar to the 'main' in 'C' as fol
 
 `void myFunc(int argc, char *argv[]);`
 
-These functions can be invoked in several ways depending on how the internal
-PSHELL server is configured.  The following shows the various PSHELL server
-types along with their associated invokation method:
+These functions can be invoked via several mechanisms ways depending on how the internal PSHELL 
+server is configured.  The following shows the various PSHELL server types along with their 
+associated invokation method:
 
 * TCP Server   : Uses standard 'telnet' client to invoke functions
-* UDP Server   : Uses included 'pshell' client to invoke functions
-* UNIX Server  : Uses included 'pshell' client to invoke functions
+* UDP Server   : Uses included 'pshell' client or control API nto invoke functions
+* UNIX Server  : Uses included 'pshell' client or control  API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application itself
 
 The functions are dispatched via its registered command name (keyword), along
