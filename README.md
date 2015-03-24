@@ -24,7 +24,7 @@ server is configured.  The following shows the various PSHELL server types along
 associated invokation method:
 
 * TCP Server   : Uses standard 'telnet' interactive client to invoke functions
-* UDP Server   : Uses included 'pshell' interactive client or control API nto invoke functions
+* UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
 * UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application 
                  itself via local command line ineractive prompting
