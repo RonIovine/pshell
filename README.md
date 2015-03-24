@@ -8,7 +8,7 @@ building C/C++ applications that incorporate a Process Specific Embedded
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
 framework and API to embed functions within a C/C++ application that can be
 invoked either via a separate interactive client program ('telnet' or 'phsell') 
-or via direct interaction from the within application itself.
+or via direct interaction from within the application itself.
 
 There is also a control mechanism API provided by where any external program
 can make calls into another program that is running a PSHELL (only supported for
