@@ -570,12 +570,12 @@ int main(int argc, char *argv[])
    *                         the special stand-alone command line UDP/UNIX client program
    *                         'pshell'.  This server has no timeout for idle client sessions.
    *                         It can be also becontrolled programatically via an external
-   *                         program runningthe PshellControl.h API.
+   *                         program running the PshellControl.h API.
    *   PSHELL_UNIX_SERVER  - Server runs as a multi-session UNIX based server.  This requires
    *                         the special stand-alone command line UDP/UNIX client program
    *                         'pshell'.  This server has no timeout for idle client sessions.
    *                         It can be also becontrolled programatically via an external
-   *                         program runningthe PshellControl.h API.
+   *                         program running the PshellControl.h API.
    *   PSHELL_TCP_SERVER   - Server runs as a single session TCP based server with a 10 minute
    *                         idle client session timeout.  The TCP server can be connected to
    *                         using a standard 'telnet' based client.
