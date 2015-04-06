@@ -1,0 +1,20 @@
+This directory contains initialization configuration files used for the
+various peices of the PSHELL package.  The following files and their use
+are described as follows:
+
+pshell-server.conf:
+  This file contains configuration override information for all the PSHELL
+  servers configured on a given host.  The startup information can be overridden
+  on a per-server basis.
+
+pshell-client.conf:
+  This file is used by the PSHELL UDP Client program and the pshell.exp telnet
+  'expect' script to assign server names to port addresses.  This can help in
+  creating named servers without having to memorize port numbers.
+
+pshell-control.conf:
+  This file contains configuration override information for all the PSHELL
+  control clients configured on a given host.  The startup information can be
+  overridden on a per-client basis.
+
+

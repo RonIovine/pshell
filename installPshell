@@ -200,6 +200,8 @@ else
   cp config/pshell-client.conf $configDir/.
   echo "Copying pshell-control.conf to $configDir"
   cp config/pshell-control.conf $configDir/.
+  echo "Copying README to $configDir"
+  cp config/README $configDir/.
   chmod 666 $configDir/*
   
   echo "Installing batch files..."
