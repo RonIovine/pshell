@@ -1,0 +1,9 @@
+This directory is used as the default directory for the batch files.
+A batch file can contain one or more commands and can be sourced with
+the built in command "batch".  The format of the commands are just as
+they would be typed at the command line.
+
+The batch processing will first look for the batch file in the directory
+specified by the $PSHELL_BATCH_DIR environment variable, and if not found
+will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if
+still not found, will take the passed in batch file name a verbatim filename.

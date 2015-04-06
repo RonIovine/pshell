@@ -100,15 +100,10 @@ void tf_addLevel(const char *levelName_,
 /*
  * trace filter library must be inialized before use, this function
  * call should be before any registration of user defined pshell
- * commands via the pshell_addCommand function, the configFile can
- * contain trace commands that can configure any trace setting that
- * can be done via the 'trace' CLI command, use of this startup config
- * file is optional, but is hightly recommended, since if it is not
- * is given, then the default trace levels cannot be modified at program
- * startup time, thus limiting the ability for full trace control
- * during program initialization/startup
+ * commands via the pshell_addCommand function and before the
+ * pshell_startServer function
  */
-void tf_init(const char *configFile_ = NULL);
+void tf_init(void);
 
 /*
  * register a thread name for thread based trace filtering

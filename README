@@ -99,6 +99,7 @@ your environment.
 
 export PSHELL_INSTALL=<myInstallDir>
 export PSHELL_BATCH_DIR=$PSHELL_INSTALL/batch
+export PSHELL_STARTUP_DIR=$PSHELL_INSTALL/startup
 export PSHELL_CONFIG_DIR=$PSHELL_INSTALL/config
 export PATH=$PSHELL_INSTALL/bin:$PSHELL_INSTALL/utils:$PATH
 export MANPATH=$PSHELL_INSTALL/man:$MANPATH
@@ -223,8 +224,8 @@ Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix}
           to fill out partial commands and up-arrow to recall
           the last entered command.
 
-NOTE: The "-t<timeout>" option, the "unix" specifier, and the "batch" interative
-      command are only supported on the UDP/UNIX client/server.
+NOTE: The "-t<timeout>" option, the "unix" specifier are only
+      supported on the UDP/UNIX client/server.
 
 Invoke the pshell client program per the above usage.  The pshellServerDemo
 program uses the identifier "localhost" for the hostname, this name
@@ -357,11 +358,38 @@ In most cases the defaults can be used and the flags don't need to be modified.
     This is the default directory that contains the pshell-server.conf,
     pshell-control.conf, and pshell-client.conf files.  If this env variable
     is not set, it will use the default directory that is setup in the
-    PshellServer.c, PshellControl.c,and PshellClient.c files (/etc/pshell).
+    PshellServer.c, PshellControl.c,and PshellClient.c files (/etc/pshell/config).
     These config files can be used to set various server, client, and control
     settings.  Refer to the example files in the 'config' directory of this
     package for usage of these files.
     
+  PSHELL_STARTUP_DIR: for PshellServer (-lib build switch)
+
+    This directory is used as the default directory for the startup files.
+    A startup file can contain one or more commands that are sourced during
+    startup and initialization of the given PSHELL server.  The format of
+    the commands are just as they would be typed at the command line.
+
+    The startup processing will first look for the file <serverName>.startup
+    in the directory specified by the $PSHELL_STARTUP_DIR environment variable,
+    and if not found will look in the default PSHELL_STARTUP_DIR
+    (i.e. /etc/pshell/startup).
+
+    Note that the naming convention of <serverName>.startup must be adhered to
+    where <serverName> is the name that is used in the pshell_startServer call.
+
+  PSHELL_BATCH_DIR: for PshellServer (-lib build switch)
+
+    This directory is used as the default directory for the batch files.
+    A batch file can contain one or more commands and can be sourced with
+    the built in command "batch".  The format of the commands are just as
+    they would be typed at the command line.
+
+    The batch processing will first look for the batch file in the directory
+    specified by the $PSHELL_BATCH_DIR environment variable, and if not found
+    will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if 
+    still not found, will take the passed in batch file name a verbatim filename.
+
   VSNPRINTF: for PshellServer (-lib build switch)
 
     Some versions of the standard 'C' library do not support the

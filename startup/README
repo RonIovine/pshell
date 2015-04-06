@@ -1,0 +1,11 @@
+This directory is used as the default directory for the startup files.
+A startup file can contain one or more commands that are sourced during
+startup and initialization of the given PSHELL server.  The format of
+the commands are just as they would be typed at the command line.
+
+The startup processing will first look for the file <serverName>.startup
+in the directory specified by the $PSHELL_STARTUP_DIR environment variable,
+and if not found will look in the default PSHELL_STARTUP_DIR (i.e. /etc/pshell/startup).
+
+Note that the naming convention of <serverName>.startup must be adhered to
+where <serverName> is the name that is used in the pshell_startServer call.

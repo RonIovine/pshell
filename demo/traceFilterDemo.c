@@ -276,15 +276,11 @@ int main (int argc, char *argv[])
 
   /* initialize our dynamic trace filtering feature, this should be done
    * at the beginning of the program, right after the 'main' and before
-   * any registration of pshell user commands, it will first look for the
-   * file based on the PSHELL_CONFIG_DIR env variable, and if not found
-   * will look in /etc/pshell, and if not found, will open this file as
-   * an absolute path, call this function with  'NULL' if no startup file
-   * is desired, this call as well as all the other 'tf_' calls are optional
-   * and can be omitted if dynamic trace  filtering is not used
+   * any registration of pshell user commands and before starting the
+   * pshell server
    */
    
-  tf_init("traceFilterDemo.conf");
+  tf_init();
 
   /*
    * Register all our pshell callback commands here, after the 'tf_init'

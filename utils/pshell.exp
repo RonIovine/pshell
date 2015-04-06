@@ -203,7 +203,7 @@ if { !([string is integer $serverName]) } {
   if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/pshell-server.conf] } {
     set serverConfFile $env(PSHELL_CONFIG_DIR)/pshell-server.conf
   } else {
-    set serverConfFile /etc/pshell/pshell-server.conf
+    set serverConfFile /etc/pshell/config/pshell-server.conf
   }
   if { [file exists $serverConfFile] } {
     set file [open $serverConfFile r]
@@ -312,8 +312,22 @@ if {$command != ""} {
   }
 } elseif {$batchFile != ""} {
   set filename $batchFile
-  if { [info exists env(PSHELL_BATCH_DIR)] && [file exists $env(PSHELL_BATCH_DIR)/$batchFile] } {
-    set batchFile $env(PSHELL_BATCH_DIR)/$batchFile
+  if {[info exists env(PSHELL_BATCH_DIR)]} {
+    set batchFile $env(PSHELL_BATCH_DIR)/$filename
+    if {!([file exists $batchFile])} {
+      puts "PSHELL_ERROR: Batch file '$batchFile' not found"
+      set batchFile /etc/pshell/batch/$filename
+      if {!([file exists $batchFile])} {
+        puts "PSHELL_ERROR: Batch file '$batchFile' not found"
+        set batchFile $filename
+      }
+    }
+  } else {
+    set batchFile /etc/pshell/batch/$batchFile
+    if {!([file exists $batchFile])} {
+      set batchFile $filename
+      puts "PSHELL_ERROR: Batch file '$batchFile' not found"
+    }
   }
   if {[file exists $batchFile]} {
     if {$rate > 0} {

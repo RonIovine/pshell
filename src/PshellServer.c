@@ -79,7 +79,32 @@ static int _defaultIdleTimeout = 10;
  * the same name is not found
  */
 #ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc/pshell"
+#define PSHELL_CONFIG_DIR "/etc/pshell/config"
+#endif
+
+/*
+ * the default batch dir is where the server will look for the specified filename
+ * as given in the interacive "batch" command, if it does not find it in the directory
+ * specified by the env variable PSHELL_BATCH_DIR, or the CWD, change this to any other
+ * desired default location, the batch file can contain any commands that can be entered
+ * to the server via the interacive command line, the batch file is executed during the
+ * startup of the server, so it can serve as a program initialization file, it can also
+ * be re-executed via the "batch" command
+ */
+#ifndef PSHELL_BATCH_DIR
+#define PSHELL_BATCH_DIR "/etc/pshell/batch"
+#endif
+
+/*
+ * the default startup dir is where the server will look for the <serverName>.startup
+ * file if it does not find it in the directory specified by the env variable
+ * PSHELL_STARTUP_DIR, or the CWD, change this to any other desired default location, 
+ * the startup file can contain any commands that can be entered to the server via
+ * the interacive command line, the startup file is executed during the startup
+ * of the server, so it can serve as a program initialization file
+ */
+#ifndef PSHELL_STARTUP_DIR
+#define PSHELL_STARTUP_DIR "/etc/pshell/startup"
 #endif
 
 /*
@@ -321,7 +346,7 @@ char **commandCompletion (const char *command_, int start_, int end_);
 char *commandGenerator (const char *command_, int state_);
 #endif
 
-/* UDP/UNIX server functions */
+/* UDP and UNIX server functions */
 
 static void runUDPServer(void);
 static void receiveUDP(void);
@@ -362,9 +387,12 @@ static void showWelcome(void);
 static int getIpAddress(const char *interface_, char *ipAddress_);
 static bool createSocket(void);
 
-/* common functions (UDP, TCP and LOCAL servers) */
+/* common functions (UDP, TCP, UNIX, and LOCAL servers) */
 
 static void loadConfigFile(void);
+static bool loadCommandFile(const char *filename_, bool interactive_);
+static void loadStartupFile(void);
+static void loadBatchFile(const char *batchFile_);
 static bool checkForWhitespace(const char *string_);
 static char *createArgs(char *command_);
 static unsigned findCommand(char *command_);
@@ -495,8 +523,7 @@ void pshell_addCommand(PshellFunction function_,
    */
   if (((_serverType == PSHELL_UDP_SERVER) || (_serverType == PSHELL_UNIX_SERVER)) &&
       (pshell_isEqual(command_, "help") ||
-       pshell_isEqual(command_, "quit") ||
-       pshell_isEqual(command_, "batch")))
+       pshell_isEqual(command_, "quit")))
   {
     PSHELL_WARNING("Command: '%s' is duplicate of a native interactive UDP/UNIX client command", command_);
     PSHELL_WARNING("Command: '%s'  will be available in command line mode only", command_);
@@ -936,7 +963,7 @@ void pshell_startServer(const char *serverName_,
   PshellCmd helpCmd;
   PshellCmd quitCmd;
   PshellCmd batchCmd;
-  int numNativeCommands = 2;
+  int numNativeCommands = 1;
   int i;
 
   if ((serverType_ != PSHELL_UDP_SERVER) &&
@@ -969,6 +996,7 @@ void pshell_startServer(const char *serverName_,
       {
         strcpy(_hostnameOrIpAddr, hostnameOrIpAddr_);
       }
+      
       strcpy(_title, _defaultTitle);
       strcpy(_banner, _defaultBanner);
       strcpy(_prompt, _defaultPrompt);
@@ -1002,58 +1030,76 @@ void pshell_startServer(const char *serverName_,
                           0,
                           0,
                           true);
+        numNativeCommands += 2;
+      }
 
-        /* move these commands to be first in the command list */
+      if (_serverType == PSHELL_LOCAL_SERVER)
+      {
+        /* add our built in command for all server types */
+        pshell_addCommand(batch,
+                        "batch",
+                        "run commands from a batch file",
+                        "<filename> [rate=<seconds] [repeat=<count>] [clear]",
+                        1,
+                        4,
+                        false);
+      }
+      else
+      {
+        pshell_addCommand(batch,
+                        "batch",
+                        "run commands from a batch file",
+                        "<filename>",
+                        1,
+                        1,
+                        false);
+      }
 
-        /* save off the command info */
-        helpCmd.function = _commandTable[_numCommands-1].function;
-        helpCmd.command = _commandTable[_numCommands-1].command;
-        helpCmd.usage = _commandTable[_numCommands-1].usage;
-        helpCmd.description = _commandTable[_numCommands-1].description;
-        helpCmd.minArgs = _commandTable[_numCommands-1].minArgs;
-        helpCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
-        helpCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      /* move these commands to be first in the command list */
 
-        quitCmd.function = _commandTable[_numCommands-2].function;
-        quitCmd.command = _commandTable[_numCommands-2].command;
-        quitCmd.usage = _commandTable[_numCommands-2].usage;
-        quitCmd.description = _commandTable[_numCommands-2].description;
-        quitCmd.minArgs = _commandTable[_numCommands-2].minArgs;
-        quitCmd.maxArgs = _commandTable[_numCommands-2].maxArgs;
-        quitCmd.showUsage = _commandTable[_numCommands-2].showUsage;
+      /* save off the command info */
+      batchCmd.function = _commandTable[_numCommands-1].function;
+      batchCmd.command = _commandTable[_numCommands-1].command;
+      batchCmd.usage = _commandTable[_numCommands-1].usage;
+      batchCmd.description = _commandTable[_numCommands-1].description;
+      batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+      batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+      batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
 
-        if (_serverType == PSHELL_LOCAL_SERVER)
-        {
-          numNativeCommands = 3;
-          pshell_addCommand(batch,
-                          "batch",
-                          "run commands from a batch file",
-                          "<filename> [rate=<seconds] [repeat=<count>] [clear]",
-                          1,
-                          4,
-                          false);
-          batchCmd.function = _commandTable[_numCommands-1].function;
-          batchCmd.command = _commandTable[_numCommands-1].command;
-          batchCmd.usage = _commandTable[_numCommands-1].usage;
-          batchCmd.description = _commandTable[_numCommands-1].description;
-          batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
-          batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
-          batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
-        }
+      if (numNativeCommands == 3)
+      {
+        helpCmd.function = _commandTable[_numCommands-2].function;
+        helpCmd.command = _commandTable[_numCommands-2].command;
+        helpCmd.usage = _commandTable[_numCommands-2].usage;
+        helpCmd.description = _commandTable[_numCommands-2].description;
+        helpCmd.minArgs = _commandTable[_numCommands-2].minArgs;
+        helpCmd.maxArgs = _commandTable[_numCommands-2].maxArgs;
+        helpCmd.showUsage = _commandTable[_numCommands-2].showUsage;
 
-        /* move all the other commands down in the command list */
-        for (i = (int)(_numCommands-(numNativeCommands+1)); i >= 0; i--)
-        {
-          _commandTable[i+numNativeCommands].function = _commandTable[i].function;
-          _commandTable[i+numNativeCommands].command = _commandTable[i].command;
-          _commandTable[i+numNativeCommands].usage = _commandTable[i].usage;
-          _commandTable[i+numNativeCommands].description = _commandTable[i].description;
-          _commandTable[i+numNativeCommands].minArgs = _commandTable[i].minArgs;
-          _commandTable[i+numNativeCommands].maxArgs = _commandTable[i].maxArgs;
-          _commandTable[i+numNativeCommands].showUsage = _commandTable[i].showUsage;
-        }
+        quitCmd.function = _commandTable[_numCommands-3].function;
+        quitCmd.command = _commandTable[_numCommands-3].command;
+        quitCmd.usage = _commandTable[_numCommands-3].usage;
+        quitCmd.description = _commandTable[_numCommands-3].description;
+        quitCmd.minArgs = _commandTable[_numCommands-3].minArgs;
+        quitCmd.maxArgs = _commandTable[_numCommands-3].maxArgs;
+        quitCmd.showUsage = _commandTable[_numCommands-3].showUsage;
+      }
 
-        /* restore the saved command info to positions 0 and 1 in the list */
+      /* move all the other commands down in the command list */
+      for (i = (int)(_numCommands-(numNativeCommands+1)); i >= 0; i--)
+      {
+        _commandTable[i+numNativeCommands].function = _commandTable[i].function;
+        _commandTable[i+numNativeCommands].command = _commandTable[i].command;
+        _commandTable[i+numNativeCommands].usage = _commandTable[i].usage;
+        _commandTable[i+numNativeCommands].description = _commandTable[i].description;
+        _commandTable[i+numNativeCommands].minArgs = _commandTable[i].minArgs;
+        _commandTable[i+numNativeCommands].maxArgs = _commandTable[i].maxArgs;
+        _commandTable[i+numNativeCommands].showUsage = _commandTable[i].showUsage;
+      }
+
+      /* restore the saved native command info to be first in the command list */
+      if (numNativeCommands == 3)
+      {
         _commandTable[0].function = quitCmd.function;
         _commandTable[0].command = quitCmd.command;
         _commandTable[0].usage = quitCmd.usage;
@@ -1070,18 +1116,27 @@ void pshell_startServer(const char *serverName_,
         _commandTable[1].maxArgs = helpCmd.maxArgs;
         _commandTable[1].showUsage = helpCmd.showUsage;
 
-        if (_serverType == PSHELL_LOCAL_SERVER)
-        {
-          _commandTable[2].function = batchCmd.function;
-          _commandTable[2].command = batchCmd.command;
-          _commandTable[2].usage = batchCmd.usage;
-          _commandTable[2].description = batchCmd.description;
-          _commandTable[2].minArgs = batchCmd.minArgs;
-          _commandTable[2].maxArgs = batchCmd.maxArgs;
-          _commandTable[2].showUsage = batchCmd.showUsage;
-        }
-
+        _commandTable[2].function = batchCmd.function;
+        _commandTable[2].command = batchCmd.command;
+        _commandTable[2].usage = batchCmd.usage;
+        _commandTable[2].description = batchCmd.description;
+        _commandTable[2].minArgs = batchCmd.minArgs;
+        _commandTable[2].maxArgs = batchCmd.maxArgs;
+        _commandTable[2].showUsage = batchCmd.showUsage;
       }
+      else
+      {
+        _commandTable[0].function = batchCmd.function;
+        _commandTable[0].command = batchCmd.command;
+        _commandTable[0].usage = batchCmd.usage;
+        _commandTable[0].description = batchCmd.description;
+        _commandTable[0].minArgs = batchCmd.minArgs;
+        _commandTable[0].maxArgs = batchCmd.maxArgs;
+        _commandTable[0].showUsage = batchCmd.showUsage;
+      }
+
+      /* load any startup file */
+      loadStartupFile();
 
       if (_serverMode == PSHELL_BLOCKING)
       {
@@ -1599,8 +1654,33 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
   if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
   {
     sprintf(batchFile, "%s/%s", batchPath, filename_);
+    if ((fp = fopen(batchFile, "r")) == NULL)
+    {
+      PSHELL_ERROR("Could not open batch file: '%s'", batchFile);
+      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+      if ((fp = fopen(batchFile, "r")) == NULL)
+      {
+        PSHELL_ERROR("Could not open batch file: '%s'", batchFile);
+        strcpy(batchFile, filename_);
+        fp = fopen(batchFile, "r");
+      }
+    }
   }
-  if ((fp = fopen(batchFile, "r")) != NULL)
+  else
+  {
+    sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+    if ((fp = fopen(batchFile, "r")) == NULL)
+    {
+      if ((fp = fopen(batchFile, "r")) == NULL)
+      {
+        PSHELL_ERROR("Could not open batch file: '%s'", batchFile);
+        strcpy(batchFile, filename_);
+        fp = fopen(batchFile, "r");
+      }
+    }
+  }
+  
+  if (fp != NULL)
   {
     while ((repeat_ == 0) || (count < repeat_))
     {
@@ -1960,12 +2040,15 @@ static void batch(int argc, char *argv[])
     pshell_printf("\n");
     pshell_printf("  where:\n");
     pshell_printf("    filename - name of batch file to run\n");
-    pshell_printf("    rate     - rate in seconds to repeat batch file (default=0)\n");
-    pshell_printf("    repeat   - number of times to repeat command or 'forever' (default=1)\n");
-    pshell_printf("    clear    - clear the screen between batch file runs\n");
+    if (_serverType == PSHELL_LOCAL_SERVER)
+    {
+      pshell_printf("    rate     - rate in seconds to repeat batch file (default=0)\n");
+      pshell_printf("    repeat   - number of times to repeat command or 'forever' (default=1)\n");
+      pshell_printf("    clear    - clear the screen between batch file runs\n");
+    }
     pshell_printf("\n");
   }
-  else
+  else if (_serverType == PSHELL_LOCAL_SERVER)
   {
     for (int i = 1; i < argc; i++)
     {
@@ -2006,6 +2089,10 @@ static void batch(int argc, char *argv[])
       }
     }
     processBatchFile(argv[0], rate, repeat, clear);
+  }
+  else
+  {
+    loadBatchFile(argv[0]);
   }
 }
 
@@ -2688,6 +2775,104 @@ static void *serverThread(void*)
 {
   runServer();
   return (NULL);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static bool loadCommandFile(const char *filename_, bool inteactive_)
+{
+  char line[180];
+  FILE *fp;
+  bool retCode = false;
+  if ((fp = fopen(filename_, "r")) != NULL)
+  {
+    while (fgets(line, sizeof(line), fp) != NULL)
+    {
+      /* ignore comment or blank lines */
+      if ((line[0] != '#') && (strlen(line) > 0))
+      {
+        _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
+        if (line[strlen(line)-1] == '\n')
+        {
+          line[strlen(line)-1] = 0;  /* NULL terminate */
+        }
+        if (strlen(line) > 0)
+        {
+          if (inteactive_)
+          {
+            processCommand(line);
+          }
+          else
+          {
+            pshell_runCommand(line);
+          }
+        }
+      }
+    }
+    fclose(fp);
+    retCode = true;
+  }
+  else if (inteactive_)
+  {
+    pshell_printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
+  }
+  return (retCode);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static void loadStartupFile(void)
+{
+  char startupFile[180];
+  char *startupPath;
+
+  startupFile[0] = '\0';
+  if ((startupPath = getenv("PSHELL_STARTUP_DIR")) != NULL)
+  {
+    sprintf(startupFile, "%s/%s.startup", startupPath, _serverName);
+    if (loadCommandFile(startupFile, false) == false)
+    {
+      sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
+      loadCommandFile(startupFile, false);
+    }
+  }
+  else
+  {
+    sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
+    loadCommandFile(startupFile, false);
+  }
+  
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static void loadBatchFile(const char *batchFile_)
+{
+  char batchFile[180];
+  char *batchPath;
+
+  batchFile[0] = '\0';
+  if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
+  {
+    sprintf(batchFile, "%s/%s", batchPath, batchFile_);
+    if (loadCommandFile(batchFile, true) == false)
+    {
+      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
+      if (loadCommandFile(batchFile, true) == false)
+      {
+        loadCommandFile(batchFile_, true);
+      }
+    }
+  }
+  else
+  {
+    sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
+    if (loadCommandFile(batchFile, true) == false)
+    {
+      loadCommandFile(batchFile_, true);
+    }
+  }
+  
 }
 
 /******************************************************************************/

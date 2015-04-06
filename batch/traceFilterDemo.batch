@@ -38,6 +38,11 @@
 #
 #################################################################################
 
-hello 1 2
-enhancedUsage 4
-world
+#trace file traceFilterDemo.c:13,20
+#trace file TraceFilter.c:135,156,300-400,190
+trace global all
+trace on
+#trace function myFunction1 myFunction2 
+#trace function myFunction3 myFunction2 foo
+#trace file TraceFilter.c:1,5,7
+

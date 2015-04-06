@@ -75,7 +75,21 @@
  */
 
 #ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc/pshell"
+#define PSHELL_CONFIG_DIR "/etc/pshell/config"
+#endif
+
+/*
+ * the default batch dir is where the server will look for the specified filename
+ * as given in the interacive "batch" command, if it does not find it in the directory
+ * specified by the env variable PSHELL_BATCH_DIR, or the CWD, change this to any other
+ * desired default location, the batch file can contain any commands that can be entered
+ * to the server via the interacive command line, the batch file is executed during the
+ * startup of the server, so it can serve as a program initialization file, it can also
+ * be re-executed via the "batch" command
+ */
+
+#ifndef PSHELL_BATCH_DIR
+#define PSHELL_BATCH_DIR "/etc/pshell/batch"
 #endif
 
 /*
@@ -132,17 +146,14 @@ unsigned _maxCommandLength = strlen("batch");
 const char *_nativeInteractiveCommands [] =
 {
   "quit",
-  "help",
-  "batch"
+  "help"
 };
 #define QUIT_INDEX 0
 #define HELP_INDEX 1
-#define BATCH_INDEX 2
 const char *_nativeInteractiveCommandDescriptions [] =
 {
   "exit interactive mode",
-  "show all available commands",
-  "run commands from a batch file"
+  "show all available commands"
 };
 unsigned _numNativeInteractiveCommands = sizeof(_nativeInteractiveCommands)/sizeof(char*);
 
@@ -949,8 +960,33 @@ void processBatchFile(char *filename_, unsigned rate_, bool clear_)
   if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
   {
     sprintf(batchFile, "%s/%s", batchPath, filename_);
+    if ((fp = fopen(batchFile, "r")) == NULL)
+    {
+      printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile);
+      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+      if ((fp = fopen(batchFile, "r")) == NULL)
+      {
+        printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile);
+        strcpy(batchFile, filename_);
+        fp = fopen(batchFile, "r");
+      }
+    }
   }
-  if ((fp = fopen(batchFile, "r")) != NULL)
+  else
+  {
+    sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+    if ((fp = fopen(batchFile, "r")) == NULL)
+    {
+      if ((fp = fopen(batchFile, "r")) == NULL)
+      {
+        printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile);
+        strcpy(batchFile, filename_);
+        fp = fopen(batchFile, "r");
+      }
+    }
+  }
+  
+  if (fp != NULL)
   {
     do
     {
@@ -966,7 +1002,10 @@ void processBatchFile(char *filename_, unsigned rate_, bool clear_)
           {
             inputLine[strlen(inputLine)-1] = 0;  /* NULL terminate */
           }
-          processCommand(PSHELL_USER_COMMAND, inputLine, 0, false, false);
+          if (strlen(inputLine) > 0)
+          {
+            processCommand(PSHELL_USER_COMMAND, inputLine, 0, false, false);
+          }
         }
       }
       sleep(rate_);
@@ -1037,25 +1076,6 @@ void processInteractiveMode(void)
         else
         {
           printf("Usage: quit\n");
-        }
-      }
-      else if (strstr(_nativeInteractiveCommands[BATCH_INDEX], tokens[0]) ==
-               _nativeInteractiveCommands[BATCH_INDEX])
-      {
-        if (numTokens == 2)
-        {
-          if ((strcmp(tokens[1], "?") == 0) || (strcmp(tokens[1], "-h") == 0))
-          {
-            printf("Usage: batch <filename>\n");
-          }
-          else
-          {
-            processBatchFile(tokens[1], 0, false);
-          }
-        }
-        else
-        {
-          printf("Usage: batch <filename>\n");
         }
       }
       else

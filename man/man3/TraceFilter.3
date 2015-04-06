@@ -19,7 +19,7 @@ enum tf_TraceControl {TF_ONCE, TF_CONTINUOUS, TF_ABORT};
 
 void tf_addLevel(const char *name_, unsigned value_, bool isDefault_, bool isMaskable_);
                  
-void tf_init(const char *configFile_);
+void tf_init(void);
 
 void tf_registerThread(const char *threadName_);
 
@@ -45,7 +45,6 @@ traceFilterDemo[127.0.0.1]:PSHELL> trace ?
 
 Usage: trace {on | off} |
              show {config | levels | threads [<thread>] | symbols [<symbol>]} |
-             load [<filename>] |
              level {all | default | <value>} |
              filter {on | off} |
              global {on | off | all | default | [+|-]<level> [<level>] ...} |

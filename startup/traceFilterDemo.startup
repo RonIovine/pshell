@@ -28,14 +28,23 @@
 
 #################################################################################
 #
-# Example trace filter config file, the format of the commands are exactly the
-# same as would be typed at the interactive command line
+# This is an example startup file to send commands into a PSHELL server at
+# server initialization time.  The format of the commands are just as they would
+# be typed at the command line.  The startup file processing will first look for
+# the file <serverName>.startup in the directory specified by the
+# $PSHELL_STARTUP_DIR environment variable, and if not found will look in the
+# default PSHELL_STARTUP_DIR (i.e. /etc/pshell/startup).  It will then execute
+# all the commands before starting the server.
+#
+# Note that the naming convention of <serverName>.startup must be adhered to
+# where <serverName> is the name that is used in the pshell_startServer call.
 #
 #################################################################################
 
 #trace file traceFilterDemo.c:13,20
 #trace file TraceFilter.c:135,156,300-400,190
 trace global all
+#trace on
 #trace function myFunction1 myFunction2 
 #trace function myFunction3 myFunction2 foo
 #trace file TraceFilter.c:1,5,7

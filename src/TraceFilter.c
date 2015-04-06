@@ -126,7 +126,6 @@ struct RegisteredThread
 static void showConfig(void);
 static void showUsage(void);
 static void configureFilter(int argc, char *argv[]);
-static void loadConfigFile(const char *file_, bool interactive_);
 static void addLevelFilter(char *name_, unsigned &level_);
 static void addFileFilter(const char *file_, bool interactive_);
 static void addFunctionFilter(const char *function_, bool interactive_);
@@ -320,7 +319,7 @@ static  unsigned _defaultHierarchicalLevel = 0;
  
 /******************************************************************************/
 /******************************************************************************/
-void tf_init(const char *configFile_)
+void tf_init(void)
 {
 
   /* setup trace level stuff */
@@ -369,7 +368,6 @@ void tf_init(const char *configFile_)
 #else
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
-                    "             load [<filename>] |\n"
                     "             level {all | default | <value>} |\n"
                     "             filter {on | off} |\n"
                     "             global {on | off | all | default | [+|-]<level> [<level>] ...} |\n"
@@ -380,13 +378,6 @@ void tf_init(const char *configFile_)
                     1,                                       /* minArgs */
                     30,                                      /* maxArgs */
                     false);                                  /* showUsage on "?" */
-
-  /* load any startup configuration file */
-  _configFile[0] = '\0';
-  if ((configFile_ != NULL) && (strlen(configFile_) > 0))
-  {
-    loadConfigFile(configFile_, false);
-  }
 
 }
 
@@ -1246,30 +1237,6 @@ void configureFilter(int argc, char *argv[])
       showUsage();
     }
   }
-  else if (pshell_isSubString(argv[0], "load", 3))
-  {
-    if (argc == 1)
-    {
-      if (_configFile[0] != '\0')
-      {
-        loadConfigFile(_configFile, true);
-      }
-      else
-      {
-        pshell_printf("\n");
-        pshell_printf("ERROR: No valid config file specified to reload\n");
-        pshell_printf("\n");
-      }
-    }
-    else if (argc == 2)
-    {
-      loadConfigFile(argv[1], true);
-    }
-    else
-    {
-      showUsage();
-    }
-  }
   else if (pshell_isSubString(argv[0], "level", 3) && (argc == 2))
   {
     _filterEnabled = false;
@@ -1299,194 +1266,6 @@ void configureFilter(int argc, char *argv[])
   else
   {
     showUsage();
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
-void loadConfigFile(const char *file_, bool interactive_)
-{
-  FILE *fp;
-  char line[300];
-  char configFile[180];
-  char cwd[180];
-  char *configPath;
-  Tokens tokens;
-
-  configFile[0] = '\0';
-  if ((configPath = getenv("PSHELL_CONFIG_DIR")) != NULL)
-  {
-      snprintf(configFile, sizeof(configFile), "%s/%s", configPath, file_);
-  }
-
-  if ((fp = fopen(configFile, "r")) == NULL)
-  {
-    /* either the env variable is not found or the file is not found
-     * look in our default directory
-     */
-    sprintf(configFile, "%s/%s", PSHELL_CONFIG_DIR, file_);
-    if ((fp = fopen(configFile, "r")) == NULL)
-    {
-      /* not found in our default directory, look in our CWD */
-      getcwd(cwd, sizeof(cwd));
-      snprintf(configFile, sizeof(configFile), "%s/%s", cwd, file_);
-      if ((fp = fopen(configFile, "r")) == NULL)
-      {
-        /* still not found, just open the filename as-is */
-        sprintf(configFile, "%s", file_);
-        fp = fopen(configFile, "r");
-      }
-    }
-  }
-
-  if (fp != NULL)
-  {
-    strcpy(_configFile, configFile);
-    removeAllFileFilters();
-    removeAllFunctionFilters();
-    removeAllThreadFilters();
-    _globalLevel = TL_DEFAULT;
-    while (fgets(line, 300, fp) != NULL)
-    {
-      if ((line[0] != '#') && (line[0] != '\n'))
-      {
-        /* non-comment line, process it */
-        line[strlen(line)-1] = '\0';
-        tokenize(line, tokens, " ");
-        if ((tokens.numTokens >= 2) && (strcmp(tokens.tokens[0], "trace") == 0))
-        {
-          if (strcmp(tokens.tokens[1], "on") == 0)
-          {
-            _traceEnabled = true;
-          }
-          else if (strcmp(tokens.tokens[1], "off") == 0)
-          {
-            _traceEnabled = false;
-          }
-          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "filter") == 0))
-          {
-            if (strcmp(tokens.tokens[2], "on") == 0)
-            {
-              _filterEnabled = true;
-            }
-            else if (strcmp(tokens.tokens[2], "off") == 0)
-            {
-              _filterEnabled = false;
-            }
-          }
-          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "level") == 0))
-          {
-            if (strcmp(tokens.tokens[2], "all") == 0)
-            {
-              _hierarchicalLevel = TF_MAX_LEVELS;
-            }
-            else
-            {
-              _hierarchicalLevel = pshell_getUnsigned(tokens.tokens[2]);
-            }
-          }
-          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "local") == 0))
-          {
-            if (strcmp(tokens.tokens[2], "on") == 0)
-            {
-              _localFilterEnabled = true;
-            }
-            else if (strcmp(tokens.tokens[2], "off") == 0)
-            {
-              _localFilterEnabled = false;
-            }
-          }
-          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "global") == 0))
-          {
-            if (strcmp(tokens.tokens[2], "on") == 0)
-            {
-              _globalFilterEnabled = true;
-            }
-            else if (strcmp(tokens.tokens[2], "off") == 0)
-            {
-              _globalFilterEnabled = false;
-            }
-            else if (strcmp(tokens.tokens[2], "all") == 0)
-            {
-              _globalLevel = TL_ALL;
-            }
-            else if (strcmp(tokens.tokens[2], "default") == 0)
-            {
-              _globalLevel = TL_DEFAULT;
-            }
-            else
-            {
-              _globalLevel = TL_UNMASKABLE;
-              for (int i = 2; i < tokens.numTokens; i++)
-              {
-                addLevelFilter(tokens.tokens[i], _globalLevel);
-              }
-            }
-          }
-          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "file") == 0))
-          {
-            if (strcmp(tokens.tokens[2], "on") == 0)
-            {
-              _fileFilterEnabled = true;
-            }
-            else if (strcmp(tokens.tokens[2], "off") == 0)
-            {
-              _fileFilterEnabled = false;
-            }
-            else
-            {
-              for (int i = 2; i < tokens.numTokens; i++)
-              {
-                addFileFilter(tokens.tokens[i], interactive_);
-              }
-            }
-          }
-          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "function") == 0))
-          {
-            if (strcmp(tokens.tokens[2], "on") == 0)
-            {
-              _functionFilterEnabled = true;
-            }
-            else if (strcmp(tokens.tokens[2], "off") == 0)
-            {
-              _functionFilterEnabled = false;
-            }
-            else
-            {
-              for (int i = 2; i < tokens.numTokens; i++)
-              {
-                addFunctionFilter(tokens.tokens[i], interactive_);
-              }
-            }
-          }
-          else if ((tokens.numTokens > 2) && (strcmp(tokens.tokens[1], "thread") == 0))
-          {
-            if (strcmp(tokens.tokens[2], "on") == 0)
-            {
-              _threadFilterEnabled = true;
-            }
-            else if (strcmp(tokens.tokens[2], "off") == 0)
-            {
-              _threadFilterEnabled = false;
-            }
-            else
-            {
-              for (int i = 2; i < tokens.numTokens; i++)
-              {
-                addThreadFilter(tokens.tokens[i], interactive_);
-              }
-            }
-          }
-        }
-      }
-    }
-    fclose(fp);
-  }
-  else if (interactive_)
-  {
-    pshell_printf("\n");
-    pshell_printf("ERROR: Could not load configuration file: %s\n", file_);
-    pshell_printf("\n");
   }
 }
 

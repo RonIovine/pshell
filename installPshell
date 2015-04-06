@@ -82,6 +82,7 @@ then
     echo "#" >> .pshellrc
     echo export PSHELL_INSTALL=$localDir >> .pshellrc
     echo export PSHELL_BATCH_DIR=\$PSHELL_INSTALL/batch >> .pshellrc
+    echo export PSHELL_STARTUP_DIR=\$PSHELL_INSTALL/startup >> .pshellrc
     echo export PSHELL_CONFIG_DIR=\$PSHELL_INSTALL/config >> .pshellrc
     echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PATH >> .pshellrc
     echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> .pshellrc
@@ -116,7 +117,9 @@ else
 
   binDir="/usr/bin"
   includeDir="/usr/include"
-  confDir="/etc/pshell"
+  configDir="/etc/pshell/config"
+  batchDir="/etc/pshell/batch"
+  startupDir="/etc/pshell/startup"
   man1Dir="/usr/share/man/man1"
   man3Dir="/usr/share/man/man3"
   
@@ -185,19 +188,49 @@ else
   cp include/TraceLog.h $includeDir/.
   
   echo "Installing conf files..."
-  if [ ! -d $confDir ]
+  if [ ! -d $configDir ]
   then
-    echo "Creating conf directory: $confDir"
-    mkdir $confDir
+    echo "Creating conf directory: $configDir"
+    mkdir $configDir
   fi
   
-  echo "Copying pshell-server.conf to $confDir"
-  cp config/pshell-server.conf $confDir/.
-  echo "Copying pshell-client.conf to $confDir"
-  cp config/pshell-client.conf $confDir/.
-  echo "Copying pshell-control.conf to $confDir"
-  cp config/pshell-control.conf $confDir/.
-  chmod 666 $confDir/*
+  echo "Copying pshell-server.conf to $configDir"
+  cp config/pshell-server.conf $configDir/.
+  echo "Copying pshell-client.conf to $configDir"
+  cp config/pshell-client.conf $configDir/.
+  echo "Copying pshell-control.conf to $configDir"
+  cp config/pshell-control.conf $configDir/.
+  chmod 666 $configDir/*
+  
+  echo "Installing batch files..."
+  if [ ! -d $batchDir ]
+  then
+    echo "Creating batch directory: $batchDir"
+    mkdir $batchDir
+  fi
+  
+  #echo "Copying pshellServerDemo.batch to $batchDir"
+  #cp batch/pshellServerDemo.batch $batchDir/.
+  #echo "Copying traceFilterDemo.batch to $batchDir"
+  #cp batch/traceFilterDemo.batch $batchDir/.
+  echo "Copying README to $batchDir"
+  cp batch/README $batchDir/.
+  chmod 666 $batchDir/*
+  
+  echo "Installing startup files..."
+  if [ ! -d $startupDir ]
+  then
+    echo "Creating startup directory: $startupDir"
+    mkdir $startupDir
+  fi
+  
+  #echo "Copying pshellServerDemo.startup to $startupDir"
+  #cp startup/pshellServerDemo.startup $startupDir/.
+  #echo "Copying traceFilterDemo.startup to $startupDir"
+  #cp startup/traceFilterDemo.startup $startupDir/.
+  echo "Copying README to $startupDir"
+  cp startup/README $startupDir/.
+  chmod 666 $startupDir/*
   
   echo "Installing manpages..."
   echo "Copying pshell.1 to $man1Dir"
