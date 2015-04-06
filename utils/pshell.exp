@@ -315,6 +315,7 @@ if {$command != ""} {
   if {[info exists env(PSHELL_BATCH_DIR)]} {
     set batchFile $env(PSHELL_BATCH_DIR)/$filename
     if {!([file exists $batchFile])} {
+      puts ""
       puts "PSHELL_ERROR: Batch file '$batchFile' not found"
       set batchFile /etc/pshell/batch/$filename
       if {!([file exists $batchFile])} {
@@ -325,8 +326,9 @@ if {$command != ""} {
   } else {
     set batchFile /etc/pshell/batch/$batchFile
     if {!([file exists $batchFile])} {
-      set batchFile $filename
+      puts ""
       puts "PSHELL_ERROR: Batch file '$batchFile' not found"
+      set batchFile $filename
     }
   }
   if {[file exists $batchFile]} {
