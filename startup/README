@@ -11,5 +11,5 @@ Note that the naming convention of startup file must adhere to the example
 shown above, i.e. <serverName>.startup, where <serverName> is the name that
 is used in the pshell_startServer call.
 
-See the startup files in the 'startup' directory of this distribution package
+See the *.startup files in the 'startup' directory of this distribution package
 for examples.
