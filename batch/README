@@ -7,3 +7,6 @@ The batch processing will first look for the batch file in the directory
 specified by the $PSHELL_BATCH_DIR environment variable, and if not found
 will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if
 still not found, will take the passed in batch file name verbatim.
+
+See the startup files in the 'batch' directory of this distribution package
+for examples.
