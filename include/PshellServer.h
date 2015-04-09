@@ -236,7 +236,7 @@ void pshell_march(const char *string_);         /* march a string or character *
  * within a callback function to see if the user asked for 
  * help, the command MUST be registered with the "showUsage" 
  * arg set to "false" in its addCommand registration, otherwise 
- * the PshServer itself will give the usage on a '?' or '-h'
+ * the PSHELL server itself will give the usage on a '?' or '-h'
  * without dispatching the command
  */ 
 bool pshell_isHelp(void);
@@ -245,12 +245,6 @@ bool pshell_isHelp(void);
  * this function is used to show the usage the command was registered with
  */
 void pshell_showUsage(void);
-
-/*
- * the following functions are some simple helper functions
- * to assist in interpreting the string based command line 
- * arguments
- */
 
 /*
  * pshell_tokenize:
@@ -267,7 +261,25 @@ struct PshellTokens
 };
 PshellTokens *pshell_tokenize(const char *string_, const char *delimeter_);
 
-/* various parameter parsing helper functions */
+/*
+ * pshell_getOption:
+ *
+ * this function will extract options from the callback function args list
+ * of the formats -<option><value> where <option> is a single character
+ * option (e.g. -t10), or <option>=<value> where <option> is any length
+ * character string (e.g. timeout=10), if the 'strlen(option_)' == 0,
+ * all option names & values will be extracted and returned in the 'option_'
+ * and 'value_' parameters, if the 'strlen(option_)' is > 0, the 'value_'
+ * will only be extracted if the option matches the requested option_ name,
+ * see the pshellServerDemo program for examples on this function usage
+ */
+bool pshell_getOption(const char *string_, char *option_, char *value_);
+
+/*
+ * the following functions are some simple helper functions
+ * to assist in interpreting the string based command line 
+ * arguments
+ */
 unsigned pshell_getLength(const char *string_);
 bool pshell_isEqual(const char *string1_, const char *string2_);
 bool pshell_isEqualNoCase(const char *string1_, const char *string2_);
@@ -284,20 +296,6 @@ bool pshell_isFloat(const char *string_);
  * to assist in converting the string based command line 
  * arguments to other data types
  */
-
-/*
- * pshell_getOption:
- *
- * this function will extract options from the callback function args list
- * of the formats -<option><value> where <option> is a single character
- * option (e.g. -t10), or <option>=<value> where <option> is any length
- * character string (e.g. timeout=10), if the 'strlen(option_)' == 0,
- * all option names & values will be extracted and returned in the 'option_'
- * and 'value_' parameters, if the 'strlen(option_)' is > 0, the 'value_'
- * will only be extracted if the option matches the requested option_ name,
- * see the pshellServerDemo program for examples on this function usage
- */
-bool pshell_getOption(const char *string_, char *option_, char *value_);
 
 /* return address from string value */
 void *pshell_getAddress(const char *string_);
