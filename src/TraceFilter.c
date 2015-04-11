@@ -227,7 +227,6 @@ static int _numRegisteredThreads = 0;
 static RegisteredThread _registeredThreads[TF_MAX_THREAD_FILTERS];
 static unsigned _maxThreadNameLength = 0;
 
-static char _configFile[180];
 static const char *_prefix1 = "                     : ";
 static const char *_prefix2 = " [";
 static const char *_prefix3 = ", ";
@@ -788,7 +787,6 @@ void showConfig(void)
   pshell_printf("*  TRACE FILTER CONFIGURATION  *\n");
   pshell_printf("********************************\n");
   pshell_printf("\n");
-  pshell_printf("Config file..........: %s\n", ((_configFile[0] == '\0') ? NONE : _configFile));
   pshell_printf("Trace enabled........: %s\n", ((_traceEnabled) ? ON : OFF));
   if (_watchSymbol != NULL)
   {
