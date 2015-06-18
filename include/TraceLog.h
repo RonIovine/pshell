@@ -108,6 +108,20 @@ void trace_setLogPrefix(const char *name_);
 void trace_registerLevels(void);
 
 /*
+ * trace_showLocation:
+ *
+ * display the file, function, and line information in the trace logs
+ */
+void trace_showLocation(bool show_);
+
+/*
+ * trace_showTimestamp:
+ *
+ * display the timestamp in the trace logs
+ */
+void trace_showTimestamp(bool show_);
+
+/*
  * common TRACE and DUMP output functions and macros that all the different
  * levels map to, these macros should NOT be called directly by client code
  */

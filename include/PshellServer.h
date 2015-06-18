@@ -30,6 +30,7 @@
 #define PSHELL_SERVER_H
 
 #include <stdarg.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

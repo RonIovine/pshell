@@ -50,8 +50,10 @@
  *************************/
 
 static TraceLogFunction _logFunction = NULL;
-static char _logPrefix[MAX_STRING_SIZE] = {"TRACE"};
+static char _logPrefix[MAX_STRING_SIZE] = {"TRACE | "};
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
+static bool _printLocation = true;
+static bool _printTimestamp = true;
 
 /***************************************
  * private "member" function prototypes
@@ -93,13 +95,29 @@ void trace_setLogPrefix(const char *name_)
     {
       _logPrefix[i] = toupper(name_[i]);
     }
-    _logPrefix[length] = '_';
-    _logPrefix[length+1] = 0;
+    _logPrefix[length] = ' ';
+    _logPrefix[length+1] = '|';
+    _logPrefix[length+2] = ' ';
+    _logPrefix[length+3] = 0;
   }
   else
   {
     _logPrefix[0] = 0;
   }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_showLocation(bool show_)
+{
+  _printLocation = show_;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_showTimestamp(bool show_)
+{
+  _printTimestamp = show_;
 }
 
 /******************************************************************************/
@@ -223,7 +241,28 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   {
     file = file_;
   }
-  sprintf(outputString_, "%s%-7s | %s.%ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
+  if (_printLocation)
+  {
+    if (_printTimestamp)
+    {
+      sprintf(outputString_, "%s%-7s | %s.%ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
+    }
+    else
+    {
+      sprintf(outputString_, "%s%-7s | %s(%s):%d | ", _logPrefix, type_, file, function_, line_);
+    }
+  }
+  else
+  {
+    if (_printTimestamp)
+    {
+      sprintf(outputString_, "%s%-7s | %s.%ld | ", _logPrefix, type_, timestamp, tv.tv_usec);
+    }
+    else
+    {
+      sprintf(outputString_, "%s%-7s | ", _logPrefix, type_);
+    }
+  }
 }
 
 /******************************************************************************/
