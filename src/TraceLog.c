@@ -245,7 +245,7 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   {
     if (_printTimestamp)
     {
-      sprintf(outputString_, "%s%-7s | %s.%ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
+      sprintf(outputString_, "%s%-7s | %s.%-6ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
     }
     else
     {
@@ -256,7 +256,7 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   {
     if (_printTimestamp)
     {
-      sprintf(outputString_, "%s%-7s | %s.%ld | ", _logPrefix, type_, timestamp, tv.tv_usec);
+      sprintf(outputString_, "%s%-7s | %s.%-6ld | ", _logPrefix, type_, timestamp, tv.tv_usec);
     }
     else
     {
