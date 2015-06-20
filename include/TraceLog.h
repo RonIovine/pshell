@@ -55,7 +55,7 @@
 #define TL_ENTER      5
 #define TL_EXIT       6
 #define TL_DUMP       7
-// start all user devined levels after the MAX
+/* start all user devined levels after the MAX */
 #define TL_MAX_LEVELS TL_DUMP
 
 /* 
