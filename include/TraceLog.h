@@ -115,11 +115,25 @@ void trace_registerLevels(void);
 void trace_showLocation(bool show_);
 
 /*
+ * trace_isLocationEnabled:
+ *
+ * returns if the trace location format is enabled
+ */
+bool trace_isLocationEnabled(void);
+
+/*
  * trace_showTimestamp:
  *
  * display the timestamp in the trace logs
  */
 void trace_showTimestamp(bool show_);
+
+/*
+ * trace_isTimestampEnabled:
+ *
+ * returns if the trace timestamp format is enabled
+ */
+bool trace_isTimestampEnabled(void);
 
 /*
  * common TRACE and DUMP output functions and macros that all the different

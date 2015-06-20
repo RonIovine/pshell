@@ -367,6 +367,7 @@ void tf_init(void)
 #else
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
+                    "             format {default | [+|-]<level> [<level>] ...} |\n"
                     "             level {all | default | <value>} |\n"
                     "             filter {on | off} |\n"
                     "             global {on | off | all | default | [+|-]<level> [<level>] ...} |\n"
@@ -788,6 +789,8 @@ void showConfig(void)
   pshell_printf("********************************\n");
   pshell_printf("\n");
   pshell_printf("Trace enabled........: %s\n", ((_traceEnabled) ? ON : OFF));
+  pshell_printf("Trace location.......: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
+  pshell_printf("Trace timestamp......: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
   if (_watchSymbol != NULL)
   {
     pshell_printf("Trace watchpoint.....: %s\n", _watchSymbol);
@@ -969,16 +972,17 @@ void showUsage(void)
   pshell_showUsage();
   pshell_printf("\n");
   pshell_printf("  where:\n");
-  pshell_printf("    <value>     - the hierarchical level to set (used when filter is off)\n");
+  pshell_printf("    <value>      - the hierarchical level to set (used when filter is off)\n");
 #ifdef TF_FAST_FILENAME_LOOKUP
-  pshell_printf("    <symbol>    - the symbol (i.e. file) name or substring\n");
+  pshell_printf("    <symbol>     - the symbol (i.e. file) name or substring\n");
 #endif
-  pshell_printf("    <thread>    - the registered thread name or substring\n");
-  pshell_printf("    <level>     - one of the available trace levels\n");
-  pshell_printf("    <lineSpec>  - list of one or more lines to filter (e.g. 1,3,5-7,9)\n");
-  pshell_printf("    <levelSpec> - list of one or more levels or 'default' (e.g. enter,exit)\n");
-  pshell_printf("    +           - append the filter item to the specified list\n");
-  pshell_printf("    -           - remove the filter item from the specified list\n");
+  pshell_printf("    <thread>     - the registered thread name or substring\n");
+  pshell_printf("    <level>      - one of the available trace levels\n");
+  pshell_printf("    <lineSpec>   - list of one or more lines to filter (e.g. 1,3,5-7,9)\n");
+  pshell_printf("    <levelSpec>  - list of one or more levels or 'default' (e.g. enter,exit)\n");
+  pshell_printf("    <formatSpec> - list of one or more formats or 'default' (e.g. location,timestamp)\n");
+  pshell_printf("    +            - append the filter item to the specified list\n");
+  pshell_printf("    -            - remove the filter item from the specified list\n");
   pshell_printf("\n");
   pshell_printf("  NOTE: If no '+' or '-' is given, the filter is set to the entered list\n");
   pshell_printf("\n");
@@ -1032,6 +1036,79 @@ void configureFilter(int argc, char *argv[])
       for (int i = 1; i < argc; i++)
       {
         addFileFilter(argv[i], true);
+      }
+    }
+  }
+  else if (pshell_isSubString(argv[0], "format", 4) && (argc > 1))
+  {
+    if (pshell_isSubString(argv[1], "default", 2))
+    {
+      trace_showLocation(true);
+      trace_showTimestamp(true);
+    }
+    else if (pshell_isSubString(argv[1], "location", 2))
+    {
+      trace_showLocation(true);
+      trace_showTimestamp(false);
+    }
+    else if (pshell_isSubString(argv[1], "timestamp", 2))
+    {
+      trace_showLocation(false);
+      trace_showTimestamp(true);
+    }
+    else if (argv[1][0] == '+')
+    {
+      /* append to existing format filters */
+      if (pshell_isSubString(&argv[1][1], "timestamp", 2))
+      {
+        trace_showTimestamp(true);
+      }
+      else if (pshell_isSubString(&argv[1][1], "location", 2))
+      {
+        trace_showLocation(true);
+      }
+      for (int i = 2; i < argc; i++)
+      {
+        if (pshell_isSubString(argv[i], "timestamp", 2))
+        {
+          trace_showTimestamp(true);
+        }
+        else if (pshell_isSubString(argv[i], "location", 2))
+        {
+          trace_showLocation(true);
+        }
+      }
+    }
+    else if (argv[1][0] == '-')
+    {
+      /* remove from existing format filters */
+      if (pshell_isSubString(&argv[1][1], "timestamp", 2))
+      {
+        trace_showTimestamp(false);
+      }
+      else if (pshell_isSubString(&argv[1][1], "location", 2))
+      {
+        trace_showLocation(false);
+      }
+      for (int i = 2; i < argc; i++)
+      {
+        if (pshell_isSubString(argv[i], "timestamp", 2))
+        {
+          trace_showTimestamp(false);
+        }
+        else if (pshell_isSubString(argv[i], "location", 2))
+        {
+          trace_showLocation(false);
+        }
+      }
+    }
+    else
+    {
+      /* set function filters to specified list */
+      removeAllFunctionFilters();
+      for (int i = 1; i < argc; i++)
+      {
+        addFunctionFilter(argv[i], true);
       }
     }
   }
