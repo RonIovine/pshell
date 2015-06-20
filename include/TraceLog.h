@@ -47,14 +47,16 @@
  * 'tf_addLevel' function, that function must be called before calling 'tf_init',
  * in this example, all the levels are added in the function 'trace_registerLevels'
  */
-#define TL_ERROR    0
-#define TL_WARNING  1
-#define TL_FAILURE  2
-#define TL_INFO     3
-#define TL_DEBUG    4
-#define TL_ENTER    5
-#define TL_EXIT     6
-#define TL_DUMP     7
+#define TL_ERROR      0
+#define TL_WARNING    1
+#define TL_FAILURE    2
+#define TL_INFO       3
+#define TL_DEBUG      4
+#define TL_ENTER      5
+#define TL_EXIT       6
+#define TL_DUMP       7
+// start all user devined levels after the MAX
+#define TL_MAX_LEVELS TL_DUMP
 
 /* 
  * the folloinwg TRACE macros are just for example purposes, it is meant to illustrate

@@ -199,6 +199,20 @@ void showUsage(void)
 #define TF_DEMO_PORT 6002
 #define DUMP_BUFFER_SIZE 256
 
+/*
+ * create some user defined levels and macros
+ */
+
+/* must start user defined levels after TL_MAX_LEVELS */
+#define TL_USER_LEVEL1   TL_MAX_LEVELS+1
+#define TL_USER_LEVEL2   TL_MAX_LEVELS+2
+#define TL_USER_LEVEL3   TL_MAX_LEVELS+3
+
+/* define some program specific trace macros */
+#define TRACE_USER_LEVEL1(format, args...) __TRACE(TL_USER_LEVEL1, "USER_LEVEL1", format, ## args)
+#define TRACE_USER_LEVEL2(format, args...) __TRACE(TL_USER_LEVEL2, "USER_LEVEL2", format, ## args)
+#define TRACE_USER_LEVEL3(format, args...) __TRACE(TL_USER_LEVEL3, "USER_LEVEL3", format, ## args)
+
 /******************************************************************************/
 /******************************************************************************/
 int main (int argc, char *argv[])
@@ -240,8 +254,25 @@ int main (int argc, char *argv[])
     dumpBuffer[i] = i;
   }
 
-  /* must register our trace levels before calling 'tf_init' */
+  /*
+   * register our standard trace levels with the trace filter
+   * mechanism, this must register our trace levels before
+   * calling 'tf_init'
+   */
+   
   trace_registerLevels();
+
+  /*
+   * register our program specific trace log levels with the
+   * trace filter mechanism, this must be done after registering
+   * our standard levels and before calling 'tf_init'
+   * 
+   * format of call is "name", level, isDefault, isMaskable
+   */
+   
+  tf_addLevel("USER_LEVEL1", TL_USER_LEVEL1, false, true);
+  tf_addLevel("USER_LEVEL2", TL_USER_LEVEL2, false, true);
+  tf_addLevel("USER_LEVEL3", TL_USER_LEVEL3, false, true);  
 
   /*
    * optionally set a log prefix, if not set, 'TRACE' will be used,

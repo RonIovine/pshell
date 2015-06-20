@@ -367,7 +367,8 @@ void tf_init(void)
 #else
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
-                    "             format {default | [+|-]<level> [<level>] ...} |\n"
+                    "             location {on | off} |\n"
+                    "             timestamp {on | off} |\n"
                     "             level {all | default | <value>} |\n"
                     "             filter {on | off} |\n"
                     "             global {on | off | all | default | [+|-]<level> [<level>] ...} |\n"
@@ -980,7 +981,6 @@ void showUsage(void)
   pshell_printf("    <level>      - one of the available trace levels\n");
   pshell_printf("    <lineSpec>   - list of one or more lines to filter (e.g. 1,3,5-7,9)\n");
   pshell_printf("    <levelSpec>  - list of one or more levels or 'default' (e.g. enter,exit)\n");
-  pshell_printf("    <formatSpec> - list of one or more formats or 'default' (e.g. location,timestamp)\n");
   pshell_printf("    +            - append the filter item to the specified list\n");
   pshell_printf("    -            - remove the filter item from the specified list\n");
   pshell_printf("\n");
@@ -1039,77 +1039,34 @@ void configureFilter(int argc, char *argv[])
       }
     }
   }
-  else if (pshell_isSubString(argv[0], "format", 4) && (argc > 1))
+  else if (pshell_isSubString(argv[0], "location", 5) && (argc > 1))
   {
-    if (pshell_isSubString(argv[1], "default", 2))
+    if (pshell_isSubString(argv[1], "on", 2))
     {
       trace_showLocation(true);
-      trace_showTimestamp(true);
     }
-    else if (pshell_isSubString(argv[1], "location", 2))
-    {
-      trace_showLocation(true);
-      trace_showTimestamp(false);
-    }
-    else if (pshell_isSubString(argv[1], "timestamp", 2))
+    else if (pshell_isSubString(argv[1], "off", 2))
     {
       trace_showLocation(false);
-      trace_showTimestamp(true);
-    }
-    else if (argv[1][0] == '+')
-    {
-      /* append to existing format filters */
-      if (pshell_isSubString(&argv[1][1], "timestamp", 2))
-      {
-        trace_showTimestamp(true);
-      }
-      else if (pshell_isSubString(&argv[1][1], "location", 2))
-      {
-        trace_showLocation(true);
-      }
-      for (int i = 2; i < argc; i++)
-      {
-        if (pshell_isSubString(argv[i], "timestamp", 2))
-        {
-          trace_showTimestamp(true);
-        }
-        else if (pshell_isSubString(argv[i], "location", 2))
-        {
-          trace_showLocation(true);
-        }
-      }
-    }
-    else if (argv[1][0] == '-')
-    {
-      /* remove from existing format filters */
-      if (pshell_isSubString(&argv[1][1], "timestamp", 2))
-      {
-        trace_showTimestamp(false);
-      }
-      else if (pshell_isSubString(&argv[1][1], "location", 2))
-      {
-        trace_showLocation(false);
-      }
-      for (int i = 2; i < argc; i++)
-      {
-        if (pshell_isSubString(argv[i], "timestamp", 2))
-        {
-          trace_showTimestamp(false);
-        }
-        else if (pshell_isSubString(argv[i], "location", 2))
-        {
-          trace_showLocation(false);
-        }
-      }
     }
     else
     {
-      /* set function filters to specified list */
-      removeAllFunctionFilters();
-      for (int i = 1; i < argc; i++)
-      {
-        addFunctionFilter(argv[i], true);
-      }
+      pshell_showUsage();
+    }
+  }
+  else if (pshell_isSubString(argv[0], "timestamp", 4) && (argc > 1))
+  {
+    if (pshell_isSubString(argv[1], "on", 2))
+    {
+      trace_showTimestamp(true);
+    }
+    else if (pshell_isSubString(argv[1], "off", 2))
+    {
+      trace_showTimestamp(false);
+    }
+    else
+    {
+      pshell_showUsage();
     }
   }
   else if (pshell_isSubString(argv[0], "function", 4) && (argc > 1))
@@ -1297,7 +1254,7 @@ void configureFilter(int argc, char *argv[])
   {
     _traceEnabled = false;
   }
-  else if (pshell_isSubString(argv[0], "local", 3) && (argc == 2))
+  else if (pshell_isSubString(argv[0], "local", 5) && (argc == 2))
   {
     if (pshell_isSubString(argv[1], "on", 2))
     {
