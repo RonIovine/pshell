@@ -30,8 +30,11 @@
 #define TRACE_LOG_H
 
 #include <stdio.h>
-
 #include <TraceFilter.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*******************************************************************************
  *
@@ -146,5 +149,9 @@ extern void trace_outputDump(void *address_, unsigned length_, const char *type_
 
 #define __TRACE(level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
 #define __DUMP(address, length, level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputDump(address, length, name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
