@@ -172,10 +172,10 @@ void sampleLogFunction(const char *outputString_)
    */
    
    /* write to stdout */
-   printf(outputString_);
+   printf("%s", outputString_);
    
    /* write to syslog */
-   syslog(LOG_INFO, outputString_);
+   syslog(LOG_INFO, "%s", outputString_);
 }
 
 /******************************************************************************/
