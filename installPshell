@@ -117,6 +117,7 @@ else
 
   binDir="/usr/bin"
   includeDir="/usr/include"
+  pshellDir="/etc/pshell"
   configDir="/etc/pshell/config"
   batchDir="/etc/pshell/batch"
   startupDir="/etc/pshell/startup"
@@ -187,7 +188,14 @@ else
   echo "Copying TraceLog.h to $includeDir"
   cp include/TraceLog.h $includeDir/.
   
+  if [ ! -d $pshellDir ]
+  then
+    echo "Creating pshell directory: $pshellDir"
+    mkdir $pshellDir
+  fi
+
   echo "Installing conf files..."
+
   if [ ! -d $configDir ]
   then
     echo "Creating conf directory: $configDir"
