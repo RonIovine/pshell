@@ -52,7 +52,9 @@ extern "C" {
 /*
  * pshell_setLogLevel:
  *
- * function and constants to let the client set the internal debug log level
+ * function and constants to let the client set the internal debug log level,
+ * if the client of this API does not want to see any internal message printed,
+ * set the debug log level to PSHELL_LOG_LEVEL_NONE (0)
  */
 #define PSHELL_LOG_LEVEL_0         0   /* No debug log messages */
 #define PSHELL_LOG_LEVEL_1         1   /* PSHELL_ERROR only */
@@ -69,9 +71,7 @@ void pshell_setLogLevel(unsigned level_);
  *
  * typedef and function to allow a client program to register a logging
  * function for message output logging, if no output function is registered
- * 'printf' will be used to print out the log messages, if the client of
- * this API does not want to see any internal message printed, set the
- * debug log level to PSHELL_LOG_LEVEL_NONE (0)
+ * 'printf' will be used to print out the log messages
  */
 typedef void (*PshellLogFunction)(const char *outputString_);
 void pshell_registerLogFunction(PshellLogFunction logFunction_);

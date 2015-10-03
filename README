@@ -19,17 +19,17 @@ PSHELL server is configured.  The following shows the various PSHELL server
 types along with their associated invokation method:
 
 TCP Server   : Uses standard 'telnet' client to invoke functions
-UDP Server   : Uses included 'pshell' client to invoke functions
-UNIX Server  : Uses included 'pshell' client to invoke functions
+UDP Server   : Uses included 'pshell' or control client to invoke functions
+UNIX Server  : Uses included 'pshell' or control client to invoke functions
 LOCAL Server : No client program needed, functions invoked directly
                from within application itself
 
 The functions are dispatched via its registered command name (keyword), along
 with 0 or more command line arguments, similar to command line shell processing.
 
-There is also a control mechanism API provided by where any external program
-can make calls into another program that is running a PSHELL that is configured
-for a UDP or UNIX server.
+There is also a control mechanism API and library provided by where any external
+program can make calls into another program that is running a PSHELL that is
+configured for a UDP or UNIX server.
 
 GETTING STARTED:
 
@@ -65,8 +65,11 @@ INSTALLATION:
 This package can either be installed on the target host for system wide usage, or
 in a local directory for limited access.  There is an installation script provided
 in the top level of the unzipped package (i.e. same directory as this README file)
-that will do the different installs.  To see the usage of the script 'cd' to that
-directory and type:
+that will do the different installs.  This package has binaries built for an x86
+target.  If using this package for a a different target, see the following section
+on building from source.
+
+To see the usage of the script 'cd' to that directory and type:
 
 $ ./installPshell -h
 
@@ -106,7 +109,7 @@ export MANPATH=$PSHELL_INSTALL/man:$MANPATH
 export LD_LIBRARY_PATH=$PSHELL_INSTALL/lib:$LD_LIBRARY_PATH
 
 Note that if a system wide install is done, none of the 'demo' programs are installed
-in any system wide 'bin' directories.  The can only be executed directly from the 'bin'
+in any system wide 'bin' directories.  They can only be executed directly from the 'bin'
 directory of the unzipped package.  If a local install is done and its environment
 sourced, the environment variables setup will allow the execution of the 'demo' programs
 from any location.
@@ -126,7 +129,7 @@ A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
 $PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control client
+$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control extrenal client
 $PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo for dynamic trace filtering
 
 EXECUTION:
@@ -142,9 +145,9 @@ The two demo programs pshellServerDemo and traceFilterDemo can be controlled via
 an interactive client program (either pshell or telnet) that shows the full command
 line functionality.  The demo program pshellControlDemo can control the other two demo
 programs through a simple command line UI, but it is really meant to demonstrate the
-control of an external program that is running a PshellServer via the PshellControl
-API.  The pshellCotrolDemo program can control either the pshellServerDemo or
-traceControlDemo program.
+programmitic control of an external program that is running a PshellServer via the
+PshellControl API andlibrary.  The pshellCotrolDemo program can control either the
+pshellServerDemo or traceControlDemo program.
 
 After the installPshell script has been excuted (and the local env sourced if doing
 a local install), the client and associated demo programs can be run.  Run
@@ -315,10 +318,12 @@ $ pshell -s
 
 BUILDING:
 
-This package includes binaries and libraries that were built and tested on
+This package includes x86 binaries and libraries that were built and tested on
 CentOS Linux 6.6 and Linux Mint 17.  They should be able to run on any modern
-Linux distribution as is.  However, if a build is necessary, a shell based
-build script is provided.
+Linux x86 distribution as is.  However, if a build is necessary for different
+target hardware, a shell based build script is provided.  This package has
+been successfully re-built and run on a Raspberry Pi/ARM based system running
+Raspbian Linux.
 
 The following is the usage of the build script:
 
@@ -335,7 +340,7 @@ Usage: buildPshell {-all | -pshell | -lib | -demo} [-readline] [-static] [-clean
 
 NOTE: Use the -readline build option if your build environment supports the
       GNU readline library development package, also note that readline also
-      has a dependency with the curses (ncurses) library.  The delivered
+      has a dependency with the curses (ncurses) library.  The delivered x86
       binaries and libraries were all compiled with the -readline flag.  
 
 COMPILE OPTIONS:
@@ -390,16 +395,17 @@ In most cases the defaults can be used and the flags don't need to be modified.
     will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if 
     still not found, will take the passed in batch file name a verbatim filename.
 
-  VSNPRINTF: for PshellServer (-lib build switch)
+  PSHELL_VSNPRINTF: for PshellServer (-lib build switch)
 
     Some versions of the standard 'C' library do not support the
     function "vsnprintf".  This function is used in the "pshell_printf"
     function to format and populate the PSHELL transfer buffer and to
     detect for buffer overflow.  If this function is not available,
     the function "vsprintf" is used in its place.  Since vsprintf does
-    not support the "n" argument, we need empirically detect a potential
-    buffer overflow condition with a guardband mechanism, which is described
-    below.  This flag is defined by default in the build script.
+    not support the "n" argument to indicate the amount of buffer overflow,
+    we need empirically detect a potential buffer overflow condition with
+    a guardband mechanism, which is described below.  This flag is defined
+    by default in the build script.
 
   PSHELL_PAYLOAD_CHUNK: for PshellServer (-lib build switch)
 
@@ -422,16 +428,16 @@ In most cases the defaults can be used and the flags don't need to be modified.
     When set, it will grow the payload of the PSHELL transfer buffer
     in the specified PSHELL_PAYLOAD_CHUNK size upon a buffer overflow.
     If NOT set it will have two different behavours, depending on
-    whether the VSNPRINTF flag is set or not, these are as follows:
+    whether the PSHELL_VSNPRINTF flag is set or not, these are as follows:
 
-    VSPRINTF defined: Grow the payload in the EXACT amount needed to
-    accomidate the current overflow condition.  Note that this will
-    only work if the PshellServer is built with glibc2.1, if it is
-    built with glibc2.0, it will grow in chunks, regardless of the
-    setting of this flag.
+    PSHELL_VSNPRINTF defined: Grow the payload in the EXACT amount needed
+    to accomidate the current overflow condition.  Note that this will
+    only work if the PshellServer is built with glibc2.1 or later, if
+    it is built with glibc2.0, it will grow in chunks, regardless of
+    the setting of this flag.
 
-    VSNPRINTF NOT defined: This will cause the contents of the buffer
-    to be flushed over the socket on a detected buffer overflow.
+    PSHELL_VSNPRINTF NOT defined: This will cause the contents of the
+    buffer to be flushed over the socket on a detected buffer overflow.
 
   PSHELL_TOKEN_LIST_CHUNK: for PshellServer (-lib build switch)
 
@@ -467,8 +473,8 @@ In most cases the defaults can be used and the flags don't need to be modified.
 
   NOTE: For minimal memory usage, set the PSHELL_PAYLOAD_CHUNK to a fairly
         modest value (it's been tested with a value as low as 20 when using
-        the VSNPRINTF compile flag) and do NOT set the PSHELL_GROW_PAYLOAD_IN_CHUNKS
-        flag (i.e. grow exact or flush on overflow, depending on whether VSNPRINTF
+        the PSHELL_VSNPRINTF compile flag) and do NOT set the PSHELL_GROW_PAYLOAD_IN_CHUNKS
+        flag (i.e. grow exact or flush on overflow, depending on whether PSHELL_VSNPRINTF
         is defined).  Set all the other "CHUNK" sizes to 1, and do not set the
         PSHELL_COPY_ADD_COMMAND_STRINGS flag.
 

@@ -42,7 +42,7 @@ extern "C" {
  * user API functionality.  It provides the ability for a client program to
  * register functions that can be invoked via a command line user interface.
  * The functions are similar to the prototype of the 'main' in 'C', i.e.
- * 'int myFunc(int argc, char *argv[]), there are several way to invoke these
+ * 'int myFunc(int argc, char *argv[]), there are several ways to invoke these
  * embedded functions based on how the pshell server is configured, which is
  * described in documentation further down in this file.
  *
@@ -63,9 +63,9 @@ extern "C" {
  * client to provide the user input, rather, it initiates all user
  * prompting and control from within the calling program itself, both
  * the UDP and UNIX servers support external programmatic control via
- * the PshellControl.h API, however, a UNIX domain server can only be
- * controlled externally by a client (either 'pshell' or control API)
- * running on same host as the target program
+ * the PshellControl.h API and corresponding library, however, a UNIX
+ * domain server can only be controlled externally by a client (either
+ * 'pshell' or the control API) running on same host as the target program
  */
 enum PshellServerType
 {
@@ -96,8 +96,10 @@ enum PshellServerMode
 /*
  * pshell_setLogLevel:
  * 
- * function and constants to let the host program
- * set the internal debug log level
+ * function and constants to let the host program set the
+ * internal debug log level, if the user of this API does
+ * not want to see any internal message printed out, set
+ * the debug log level to PSHELL_LOG_LEVEL_NONE (0)
  */
 #define PSHELL_LOG_LEVEL_0         0      /* No debug logs */
 #define PSHELL_LOG_LEVEL_1         1      /* PSHELL_ERROR only */
@@ -114,9 +116,7 @@ void pshell_setLogLevel(unsigned level_);
  * 
  * typedef and function to allow the host program to register a logging
  * function for message output logging, if no output function is registered
- * 'printf' will be used to print out the log messages, if the user of
- * this API does not want to see any internal message printed out, set the
- * debug log level to PSHELL_LOG_LEVEL_NONE (0)
+ * 'printf' will be used to print out the log messages
  */
 typedef void (*PshellLogFunction)(const char *outputString_);
 void pshell_registerLogFunction(PshellLogFunction logFunction_);
@@ -148,10 +148,6 @@ typedef void (*PshellFunction)(int argc, char *argv[]);
  * the pshell_isHelp function below to determine if the user is requesting
  * help, finally, the function's command cannot contain any whitespace (i.e.
  * multi-keyword commands are not supported)
- *
- * NOTE: the below 'pshell_addCommand' function is NOT threadsafe, this function 
- * should only be invoked under a single task context, or a sequentually based 
- * multi-threaded context (i.e. sequential multi-thread startup sequence)
  */
 void pshell_addCommand(PshellFunction function_,
                        const char *command_, 
@@ -165,25 +161,24 @@ void pshell_addCommand(PshellFunction function_,
  * pshell_runCommand:
  * 
  * this function can be called from within a program in order to execute any
- * registered callback function, the passed in string command should be the
- * exact same format as when calling the same desired command interactively
- * via the pshell command line client, this function uses a 'printf' type
- * vararg interface
+ * locally registered callback functions, the passed in string command should
+ * be the exact same format as when calling the same desired command interactively
+ * via the pshell command line client, this function uses a 'printf' type vararg
+ * interface
  */
 void pshell_runCommand(const char *command_, ...);
 
 /*
  * pshell_startServer:
  * 
- * this is the command used to invoke the pshell server, this function can
+ * this is the command used to start the pshell server, this function can
  * be invoked in either blocking or non-blocking mode, non-blocking mode
  * will create a separate thread to process the user input and return,
  * blocking mode will process the user input directly from this function,
- * it will not return
+ * i.e. it will never return control to the calling context
  * 
  * this command can only be invoked once per-process, an error message is 
- * displayed if a program tries to invoke this more than once (i.e. under 
- * two different contexts)
+ * displayed if a program tries to invoke this more than once
  *
  * NOTE: for a LOCAL or UNIX server, the last two parameters should be omitted
  */
@@ -195,7 +190,7 @@ void pshell_startServer(const char *serverName_,
 
 /*
  * the following commands should ONLY be called from 
- * within the scope of an PSHELL callback function
+ * within the scope of a PSHELL callback function
  */
 
 /*
@@ -226,7 +221,7 @@ void pshell_flush(void);
  * these helper commands are used to keep the UDP/UNIX client alive with output 
  * if a command is known to take longer than the 5 second client timeout
  */
-void pshell_wheel(const char *string_ = NULL);  /* user string string is optional */
+void pshell_wheel(const char *string_ = NULL);  /* spinning ascii wheel, user string string is optional */
 void pshell_march(const char *string_);         /* march a string or character */
 
 /*

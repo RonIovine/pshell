@@ -43,7 +43,7 @@
 #include <cstdarg>
 #include <cstdio>
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 #include <readline/readline.h>
 #include <readline/history.h>
 #endif
@@ -114,17 +114,17 @@ static int _defaultIdleTimeout = 10;
  * the server compile flag PSHELL_GROW_PAYLOAD_IN_CHUNKS is set.
  *
  * If that compile flag is NOT set, the behavour of the transfer buffer upon
- * an overflow is dependent on the setting of the VSNPRINTF compile flag as
+ * an overflow is dependent on the setting of the PSHELL_VSNPRINTF compile flag as
  * described below:
  *
- * VSNPRINTF is set:
+ * PSHELL_VSNPRINTF is set:
  *
  * The buffer will grow in the EXACT amount needed in the event of an overflow
  * (note, this is only for glibc 2.1 and higher, for glibc 2.0, we grow by the
  * chunk size because in the 2.0 'C' library the "vsnprintf" function does not
  * support returning the overflow size).
  *
- * VSNPRINTF is NOT set:
+ * PSHELL_VSNPRINTF is NOT set:
 
  * The buffer will be flushed to the client upon overflow.  Note that care must
  * be taken when setting the PSHELL_PAYLOAD_GUARDBAND value when operating in this
@@ -144,7 +144,7 @@ static int _defaultIdleTimeout = 10;
  * memory corruption
  */
 
-#ifndef VSNPRINTF
+#ifndef PSHELL_VSNPRINTF
 #ifndef PSHELL_PAYLOAD_GUARDBAND
 #define PSHELL_PAYLOAD_GUARDBAND 400   /* bytes */
 #endif
@@ -234,7 +234,7 @@ struct PshellTokens_c
 
 /* LOCAL server data */
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 bool _commandFound;
 int _matchLength;
 unsigned _commandPos;
@@ -296,6 +296,7 @@ static unsigned _maxTabColumns = 0;
 static bool _isRunning = false;
 static bool _isCommandDispatched = false;
 static bool _isCommandInteractive = true;
+static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static PshellLogFunction _logFunction = NULL;
 static unsigned _logLevel = PSHELL_LOG_LEVEL_DEFAULT;
@@ -341,7 +342,7 @@ static void stripWhitespace(char *string_);
 static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
 static void clearScreen(void);
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 char **commandCompletion (const char *command_, int start_, int end_);
 char *commandGenerator (const char *command_, int state_);
 #endif
@@ -456,12 +457,15 @@ void pshell_addCommand(PshellFunction function_,
   unsigned entry;
   void *ptr;
 
+  pthread_mutex_lock(&_mutex);
+
   /* perform some command validation */
 
   /* see if we have a NULL command name */
   if (command_ == NULL)
   {
     PSHELL_ERROR("NULL command name, command not added");
+     pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -469,6 +473,7 @@ void pshell_addCommand(PshellFunction function_,
   if (description_ == NULL)
   {
     PSHELL_ERROR("NULL description, command: '%s' not added", command_);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -476,6 +481,7 @@ void pshell_addCommand(PshellFunction function_,
   if (function_ == NULL)
   {
     PSHELL_ERROR("NULL function, command: '%s' not added", command_);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -484,6 +490,7 @@ void pshell_addCommand(PshellFunction function_,
   {
     PSHELL_ERROR("Usage provided for function that takes no arguments, command: '%s' not added",
                  command_);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -492,6 +499,7 @@ void pshell_addCommand(PshellFunction function_,
   {
     PSHELL_ERROR("NULL usage for command that takes arguments, command: '%s' not added",
                  command_);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -506,6 +514,7 @@ void pshell_addCommand(PshellFunction function_,
                  minArgs_,
                  maxArgs_,
                  command_);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -513,6 +522,7 @@ void pshell_addCommand(PshellFunction function_,
   if (checkForWhitespace(command_))
   {
     PSHELL_ERROR("Whitespace found, command: '%s' not added", command_);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -537,6 +547,7 @@ void pshell_addCommand(PshellFunction function_,
     if (pshell_isEqual(_commandTable[entry].command, command_))
     {
       PSHELL_ERROR("Duplicate command found, command: '%s' not added", command_);
+      pthread_mutex_unlock(&_mutex);
       return;
     }
 
@@ -544,6 +555,7 @@ void pshell_addCommand(PshellFunction function_,
     if (_commandTable[entry].function == function_)
     {
       PSHELL_ERROR("Duplicate function found, command: '%s' not added", command_);
+      pthread_mutex_unlock(&_mutex);
       return;
     }
 
@@ -566,6 +578,7 @@ void pshell_addCommand(PshellFunction function_,
       PSHELL_ERROR("Could not allocate memory to expand command table, size: %d, command: '%s' not added",
                    (int)((_commandTableSize+PSHELL_COMMAND_CHUNK)*sizeof(PshellCmd)),
                    command_);
+      pthread_mutex_unlock(&_mutex);
       return;
     }
     /* success, update our pointer and allocated size */
@@ -588,6 +601,7 @@ void pshell_addCommand(PshellFunction function_,
     PSHELL_ERROR("Could not allocate memory for command name, size: %d, command: '%s' not added",
                  (pshell_getLength(command_)),
                  command_);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -600,6 +614,7 @@ void pshell_addCommand(PshellFunction function_,
                    (pshell_getLength(usage_)),
                    command_);
       free(_commandTable[_numCommands].command);
+      pthread_mutex_unlock(&_mutex);
       return;
     }
   }
@@ -615,6 +630,7 @@ void pshell_addCommand(PshellFunction function_,
                  command_);
     free(_commandTable[_numCommands].command);
     free(_commandTable[_numCommands].usage);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 
@@ -646,6 +662,8 @@ void pshell_addCommand(PshellFunction function_,
   {
     _maxCommandLength = pshell_getLength(command_);
   }
+
+  pthread_mutex_unlock(&_mutex);
 
 }
 
@@ -802,7 +820,7 @@ void pshell_printf(const char *format_, ...)
   int offset = pshell_getLength(_pshellMsg->payload);
   char *address = &_pshellMsg->payload[offset];
 
-#ifndef VSNPRINTF
+#ifndef PSHELL_VSNPRINTF
 
 #ifdef PSHELL_GROW_PAYLOAD_IN_CHUNKS
   void *ptr;
@@ -863,7 +881,7 @@ void pshell_printf(const char *format_, ...)
   vsprintf(address, format_, args);
   va_end(args);
 
-#else  /* ifndef VSNPRINTF */
+#else  /* ifndef PSHELL_VSNPRINTF */
 
   void *ptr;
   int newPayloadSize;
@@ -941,7 +959,7 @@ void pshell_printf(const char *format_, ...)
       }
     }
   }
-#endif  /* ifndef VSNPRINTF */
+#endif  /* ifndef PSHELL_VSNPRINTF */
 
   /* if we are running a TCP server, flush the output to the socket */
   if ((_serverType == PSHELL_TCP_SERVER) || (_serverType == PSHELL_LOCAL_SERVER))
@@ -1730,7 +1748,7 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
 
 /******************************************************************************/
 /******************************************************************************/
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 
 /******************************************************************************/
 /******************************************************************************/
@@ -1784,7 +1802,7 @@ char *commandGenerator(const char *command_, int state_)
 
 }
 
-#endif /* READLINE */
+#endif /* PSHELL_READLINE */
 
 /******************************************************************************/
 /******************************************************************************/
@@ -1872,7 +1890,7 @@ static void runLocalServer(void)
   sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
   showWelcome();
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
   char *commandLine;
   /* register our TAB completion function */
   rl_attempted_completion_function = commandCompletion;
@@ -1884,7 +1902,7 @@ static void runLocalServer(void)
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
     while (strlen(inputLine) == 0)
     {
-#ifdef READLINE
+#ifdef PSHELL_READLINE
       commandLine = NULL;
       _commandFound = false;
       commandLine = readline(_interactivePrompt);
@@ -1981,7 +1999,7 @@ static void showWelcome(void)
   }
   else  /* local server build with readline library */
   {
-#ifdef READLINE
+#ifdef PSHELL_READLINE
     pshell_printf("%s  Full <TAB> completion, up-arrow recall, command\n", PSHELL_WELCOME_BORDER);
     pshell_printf("%s  line editing and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
     pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
@@ -3184,7 +3202,7 @@ static void processQueryPrompt(void)
 
 /*
  * called when pshell client runs in interactive mode and
- * was built with the -DREADLINE compile time flag, in
+ * was built with the -DPSHELL_READLINE compile time flag, in
  * that case the client needs the command list for its
  * TAB completion function, it is much easier to parse
  * a list of just the command names with a simple delimeter

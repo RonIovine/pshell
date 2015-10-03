@@ -67,7 +67,7 @@ fi
 
 if [ $# -ge 2 -a "$2" == "-readline" ]
 then
-  READLINE="-DREADLINE"
+  READLINE="-DPSHELL_READLINE"
   READLINELIB="$STATIC1 -lreadline -lncurses $STATIC2"
 else
   READLINE=""

@@ -58,20 +58,23 @@ extern "C" {
 #define TL_ENTER      5
 #define TL_EXIT       6
 #define TL_DUMP       7
-/* start all user devined levels after the MAX */
+/* start all user defined levels after the MAX */
 #define TL_MAX_LEVELS TL_DUMP
 
 /* 
- * the folloinwg TRACE macros are just for example purposes, it is meant to illustrate
- * using the function 'tf_isFilterPassed' to provide dynamic trace control to a
- * system with an already existing trace logging function that uses the __FILE__,
- * __FUNCTION__, __LINE__ (and optionally a 'level') paradigm
+ * the following are some example TRACE macros to illustrate integrating the
+ * function 'tf_isFilterPassed' into an existing trace logging system to provide
+ * dynamic trace control via an integrated pshell setver, the existing trace
+ * logging utility must ustilize the __FILE__, __FUNCTION__, __LINE__ (and
+ * optionally a 'level') trace logging paradigm 
  */
 
-/* this trace cannot be disabled */
+/* trace output macros, these are called directly by client code */
+
+/* this trace cannot be disabled, hence no call to the 'tf_isFilterPassed' function is necessary */
 #define TRACE_FORCE(format, args...) trace_outputLog("FORCE", __FILE__, __FUNCTION__, __LINE__, format, ## args)
 
-/* normal trace output macros, these are called directly by client code */
+/* these traces must pass through the 'tf_isFilterPassed' function in order to be displayed */
 #define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, "ERROR", format, ## args)
 #define TRACE_WARNING(format, args...) __TRACE(TL_WARNING, "WARNING", format, ## args)
 #define TRACE_FAILURE(format, args...) __TRACE(TL_FAILURE, "FAILURE", format, ## args)
@@ -80,7 +83,7 @@ extern "C" {
 #define TRACE_ENTER(format, args...) __TRACE(TL_ENTER, "ENTER", format, ## args)
 #define TRACE_EXIT(format, args...) __TRACE(TL_EXIT, "EXIT", format, ## args)
 
-/* hex dump trace */
+/* hex dump trace, must also pass the 'tf_isFilterPassed' criteria */
 #define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, "DUMP", format, ## args)
 
 /*
@@ -98,9 +101,9 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
  *
  * set a log name that is used as a prefix for the log type,
  * if this function is not called, the prefix will default to
- * "TRACE", e.g. TRACE_ERROR, TRACE_WARNING etc, if this function
- * is called with a NULL prefix, the trace name type will have
- * no prefix, e.g. just ERROR, WARNING etc.
+ * "TRACE", e.g. TRACE | ERROR..., TRACE | WARNING... etc, if
+ * this function is called with a NULL prefix, the trace name
+ * type will have no prefix, e.g. just ERROR..., WARNING... etc.
  */
 void trace_setLogPrefix(const char *name_);
 

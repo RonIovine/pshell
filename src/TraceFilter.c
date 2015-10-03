@@ -306,9 +306,9 @@ static tf_TraceControl _callbackControl = TF_ONCE;
  * effecting any other level
  */
 static unsigned _hierarchicalLevel = 0;
-static  unsigned _minHierarchicalLevel = TF_MAX_LEVELS;
-static  unsigned _maxHierarchicalLevel = 0;
-static  unsigned _defaultHierarchicalLevel = 0;
+static unsigned _minHierarchicalLevel = TF_MAX_LEVELS;
+static unsigned _maxHierarchicalLevel = 0;
+static unsigned _defaultHierarchicalLevel = 0;
 
 //#define TF_PRINT(name, file, function, line, message) printf("%s: %s(%s):%d - %s\n", name, file, function, line, message)
 

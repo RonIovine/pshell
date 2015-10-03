@@ -38,7 +38,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 #include <readline/readline.h>
 #include <readline/history.h>
 #endif
@@ -194,7 +194,7 @@ const char **_pshellCommandList;
 unsigned _numPshellCommands = 0;
 unsigned _maxPshellCommands = PSHELL_COMMAND_CHUNK;
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 bool _commandFound;
 int _matchLength;
 unsigned _commandPos;
@@ -232,7 +232,7 @@ void clearScreen(void);
 void showWelcome(void);
 void exitProgram(int exitCode_);
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 char **commandCompletion (const char *command_, int start_, int end_);
 char *commandGenerator (const char *command_, int state_);
 #endif
@@ -263,7 +263,7 @@ void showWelcome(void)
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);
-#ifdef READLINE
+#ifdef PSHELL_READLINE
   printf("%s  Full <TAB> completion, up-arrow recall, command\n", PSHELL_WELCOME_BORDER);
   printf("%s  line editing and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
 #else
@@ -749,7 +749,7 @@ void stripWhitespace(char *string_)
 /******************************************************************************/
 void getInput(void)
 {
-#ifdef READLINE
+#ifdef PSHELL_READLINE
   char *commandLine;
   _interactiveCommand[0] = 0;
   while (strlen(_interactiveCommand) == 0)
@@ -853,7 +853,7 @@ void buildCommandList(void)
 
 }
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
 
 /******************************************************************************/
 /******************************************************************************/
@@ -906,7 +906,7 @@ char *commandGenerator(const char *command_, int state_)
   return (NULL);
 
 }
-#endif /* READLINE */
+#endif /* PSHELL_READLINE */
 
 /******************************************************************************/
 /******************************************************************************/
@@ -924,7 +924,7 @@ bool initInteractiveMode(void)
   }
   buildCommandList();
 
-#ifdef READLINE
+#ifdef PSHELL_READLINE
   /* register our TAB completion function */
   rl_attempted_completion_function = commandCompletion;
 #endif
@@ -1254,7 +1254,7 @@ void showUsage(void)
   printf("          interactive mode type 'help' or '?' at the prompt to\n");
   printf("          see all available commands, to get help on a single\n");
   printf("          command, type '<command> {? | -h}'.");
-#ifdef READLINE
+#ifdef PSHELL_READLINE
   printf("  Use TAB completion\n");
   printf("          to fill out partial commands and up-arrow to recall\n");
   printf("          the last entered command.\n");

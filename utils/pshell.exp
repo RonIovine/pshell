@@ -32,13 +32,13 @@
 #
 # This is an expect script that wraps a telnet session for the TCP based PSHELL
 # server to provide for a similar command line usage as the UDP based "pshell"
-# client program that is used for the UDP based PSHELL server
+# client program that is used for the UDP/UNIX based PSHELL server
 #
 #################################################################################
 
-# if the terminal title bar and prompt are changed in the PshellServers.c from
+# if the terminal title bar and prompt are changed in the PshellServer.c file from
 # these defaults below, make sure the following two variables are changed accordingly,
-# however, if the defaults are overridded in the pshell-server.conf file, these
+# however, if the defaults are overridden in the pshell-server.conf file, these
 # do not need to be changed, AND this script is invoked with a serverName as opposed
 # to just a portNum, this script will detect the new values for that server and assign
 # them accordingly

@@ -36,7 +36,7 @@
  * This module honors the complete public API of the PshellServer and
  * TraceFilter modules but with all the underlying functionality stubbed 
  * out, link with this module (or the corresponding "stub" library) to 
- * easily remove all PSHELL functionality from a program without makeing 
+ * easily remove all PSHELL functionality from a program without making 
  * any changes to actual source code
  */
 
@@ -56,7 +56,7 @@ void pshell_startServer(const char *serverName_,
                         unsigned port_)
 {  
   printf("PSHELL_INFO: STUB Server: %s Started\n", serverName_);
-  if (serverMode_ == PSHELL_BLOCKING) for (;;) sleep(300);
+  if (serverMode_ == PSHELL_BLOCKING) for (;;) sleep(30000);
 }
 
 void pshell_addCommand(PshellFunction function_,
