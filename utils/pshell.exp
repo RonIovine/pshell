@@ -38,10 +38,10 @@
 
 # if the terminal title bar and prompt are changed in the PshellServer.c file from
 # these defaults below, make sure the following two variables are changed accordingly,
-# however, if the defaults are overridden in the pshell-server.conf file, these
-# do not need to be changed, AND this script is invoked with a serverName as opposed
-# to just a portNum, this script will detect the new values for that server and assign
-# them accordingly
+# however, if the defaults are overridden in the pshell-server.conf file AND this
+# script is invoked with a serverName as opposed to just a portNum, this script will
+# detect the new values for that server and assign them accordingly, then these do not
+# need to be changed
 
 set title "PSHELL"
 set prompt "PSHELL>"
