@@ -331,7 +331,7 @@ Usage: buildPshell {-all | -pshell | -lib | -demo} [-readline] [-static] [-clean
 
   where:
     all      - build all components of the pshell package
-    pshell   - build the pshell UDP stand-alone client program only
+    pshell   - build the pshell UDP/UNIX stand-alone client program only
     lib      - build the pshell link libraries only (shared, static and stub)
     demo     - build the pshell stand-alone demo program only
     readline - build the with the readline development and link libraries
