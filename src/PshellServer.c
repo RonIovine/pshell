@@ -2996,7 +2996,8 @@ static void loadConfigFile(void)
               {
                 _serverMode = PSHELL_BLOCKING;
               }
-              else if (pshell_isEqualNoCase(value->tokens[0], "NON_BLOCKING"))
+              else if (pshell_isEqualNoCase(value->tokens[0], "NON_BLOCKING") ||
+                       pshell_isEqualNoCase(value->tokens[0], "NON-BLOCKING"))
               {
                 _serverMode = PSHELL_NON_BLOCKING;
               }
