@@ -1,5 +1,5 @@
 # pshell
-**Process Specific Embedded Command Line Shell for C/C++ Applications**
+**Lightweight, Process-Specific Embedded Command Line Shell for C/C++ Applications**
 
 ##### INTRODUCTION:
 
