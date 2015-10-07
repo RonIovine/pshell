@@ -20,7 +20,7 @@ The signature for the embedded command line shell functions are similar to the
 
 `void myFunc(int argc, char *argv[]);`
 
-These functions can be invoked via several mechanisms ways depending on how the internal PSHELL 
+These functions can be invoked via several mechanisms depending on how the internal PSHELL 
 server is configured.  The following shows the various PSHELL server types along with their 
 associated invokation method:
 
