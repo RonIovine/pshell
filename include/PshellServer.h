@@ -280,6 +280,7 @@ unsigned pshell_getLength(const char *string_);
 bool pshell_isEqual(const char *string1_, const char *string2_);
 bool pshell_isEqualNoCase(const char *string1_, const char *string2_);
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_);
+bool pshell_isSubStringNoCase(const char *string1_, const char *string2_, unsigned minChars_);
 bool pshell_isAlpha(const char *string_);
 bool pshell_isNumeric(const char *string_);  /* isDec || isHex */
 bool pshell_isAlphaNumeric(const char *string_);

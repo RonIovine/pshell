@@ -1304,14 +1304,31 @@ bool pshell_isEqualNoCase(const char *string1_, const char *string2_)
 /******************************************************************************/
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_)
 {
-  const char *str;
-  if ((strlen(string1_) < minChars_) || (strlen(string1_) > strlen(string2_)))
+  if ((string1_ == NULL) && (string2_ == NULL))
+  {
+    return (true);
+  }
+  else if ((string1_ != NULL) && (string2_ != NULL))
+  {
+    return (strncmp(string1_, string2_, minChars_) == 0);
+  }
+  else
   {
     return (false);
   }
-  else if (((str = strstr(string2_, string1_)) != NULL) && (str == string2_))
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool pshell_isSubStringNoCase(const char *string1_, const char *string2_, unsigned minChars_)
+{
+  if ((string1_ == NULL) && (string2_ == NULL))
   {
     return (true);
+  }
+  else if ((string1_ != NULL) && (string2_ != NULL))
+  {
+    return (strncasecmp(string1_, string2_, minChars_) == 0);
   }
   else
   {

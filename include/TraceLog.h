@@ -64,8 +64,8 @@ extern "C" {
 /* 
  * the following are some example TRACE macros to illustrate integrating the
  * function 'tf_isFilterPassed' into an existing trace logging system to provide
- * dynamic trace control via an integrated pshell setver, the existing trace
- * logging utility must ustilize the __FILE__, __FUNCTION__, __LINE__ (and
+ * dynamic trace control via an integrated pshell server, the existing trace
+ * logging utility must utilize the __FILE__, __FUNCTION__, __LINE__ (and
  * optionally a 'level') trace logging paradigm 
  */
 
@@ -145,7 +145,8 @@ bool trace_isTimestampEnabled(void);
 
 /*
  * common TRACE and DUMP output functions and macros that all the different
- * levels map to, these macros should NOT be called directly by client code
+ * levels map to, these functions and macros should NOT be called directly
+ * by client code
  */
 extern void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
 extern void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);

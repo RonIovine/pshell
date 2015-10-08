@@ -80,6 +80,7 @@ unsigned pshell_getLength(const char *string_){return (0);}
 bool pshell_isEqual(const char *string1_, const char *string2_){return (true);}
 bool pshell_isEqualNoCase(const char *string1_, const char *string2_){return (true);}
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_){return (true);}
+bool pshell_isSubStringNoCase(const char *string1_, const char *string2_, unsigned minChars_){return (true);}
 bool pshell_isAlpha(const char *string_){return (true);}
 bool pshell_isNumeric(const char *string_){return (true);}
 bool pshell_isAlphaNumeric(const char *string_){return (true);}
