@@ -319,11 +319,12 @@ $ pshell -s
 BUILDING:
 
 This package includes x86 binaries and libraries that were built and tested on
-CentOS Linux 6.6 and Linux Mint 17.  They should be able to run on any modern
-Linux x86 distribution as is.  However, if a build is necessary for different
-target hardware, a shell based build script is provided.  This package has
-been successfully re-built and run on a Raspberry Pi/ARM based system running
-Raspbian Linux.
+CentOS Linux 6.6 (RedHat base) and Linux Mint 17 (Debian/Ubuntu base).  They
+should be able to run on any modern Linux x86 distribution as is.  However, if
+a build is necessary for different target hardware, a shell based build script
+is provided.  This package has been successfully re-built and run on a Raspberry
+Pi/ARM based system running Raspbian Linux.  Someday a real makefile will be
+provided.
 
 The following is the usage of the build script:
 
