@@ -29,22 +29,23 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <TraceLog.h>
 #include <TraceFilter.h>
 #include <PshellServer.h>
 
 /*
- * This module honors the complete public API of the PshellServer and
- * TraceFilter modules but with all the underlying functionality stubbed 
+ * This module honors the complete public API of the PshellServer, TraceFilter,
+ * and TraceLog modules but with all the underlying functionality stubbed 
  * out, link with this module (or the corresponding "stub" library) to 
  * easily remove all PSHELL functionality from a program without making 
  * any changes to actual source code
  */
 
-/* private "member" data */
+/* PshellServer private "member" data */
 
 static PshellTokens _dummyTokens;
 
-/* public "member" functions */
+/* PshellServer public API functions */
 void pshell_setLogLevel(unsigned level_){};
 void pshell_registerLogFunction(PshellLogFunction logFunction_){};
 const char *pshell_getResultsString(int results_){return ("PSHELL_UNKNOWN_RESULT");};
@@ -101,13 +102,31 @@ unsigned char pshell_getUnsignedChar(const char *string_){return ((unsigned char
 float pshell_getFloat(const char *string_){return ((float)0.0);}
 double pshell_getDouble(const char *string_){return ((double)0.0);}
 
+/* TraceFilter private "member" data */
+
 #ifdef TF_FAST_FILENAME_LOOKUP
-int TraceSymbols::_numSymbols = 0;
-const char *TraceSymbols::_symbolTable[TF_MAX_TRACE_SYMBOLS];
+int tf_TraceSymbols::_numSymbols = 0;
+const char *tf_TraceSymbols::_symbolTable[TF_MAX_TRACE_SYMBOLS];
 #endif
 
-void tf_init(const char *configFile_){}
+/* TraceFilter public API functions */
+
+void tf_registerLogFunction(tf_TraceLogFunction logFunction_){}
+void tf_addLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_){}
+void tf_init(void){}
 void tf_registerThread(const char *threadName_){}
 bool tf_isFilterPassed(const char *file_, int line_, const char *function_, unsigned level_){return (true);}
 void tf_watch(const char *file_, int line_, const char *function_, const char *symbol_, void *address_, int width_, const char *format_, tf_TraceControl control_){}
 void tf_callback(const char *file_, int line_, const char *function_, const char *callbackName_, tf_TraceCallback callbackFunction_, tf_TraceControl control_){}
+
+/* TraceLog public API functions */
+
+void trace_registerLogFunction(TraceLogFunction logFunction_){}
+void trace_setLogPrefix(const char *name_){}
+void trace_registerLevels(void){}
+void trace_showLocation(bool show_){}
+bool trace_isLocationEnabled(void){return (true);}
+void trace_showTimestamp(bool show_){}
+bool trace_isTimestampEnabled(void){return (true);}
+void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}
+void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}

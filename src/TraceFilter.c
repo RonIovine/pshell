@@ -34,8 +34,12 @@
 #include <assert.h>
 
 #include <PshellServer.h>
-#include <TraceLog.h>
 #include <TraceFilter.h>
+
+#ifdef TF_INTEGRATED_TRACE
+#include <TraceLog.h>
+#endif
+
 
 /*
  * the default config dir is where the server will look for the pshell.conf
@@ -57,8 +61,8 @@
  ***********************************
  */
 #ifdef TF_FAST_FILENAME_LOOKUP
-int TraceSymbols::_numSymbols = 0;
-const char *TraceSymbols::_symbolTable[TF_MAX_TRACE_SYMBOLS];
+int tf_TraceSymbols::_numSymbols = 0;
+const char *tf_TraceSymbols::_symbolTable[TF_MAX_TRACE_SYMBOLS];
 #endif
 
 /*
@@ -149,6 +153,11 @@ static const void showThreads(char *thread_);
 static bool isLevel(char *string_);
 static bool isWatchHit(void);
 static void getWatchValue(void);
+static void printLog(const char *name_,
+                     const char *file_,
+                     const char *function_,
+                     int line_,
+                     const char *message_);
 #ifdef TF_FAST_FILENAME_LOOKUP
 static const void showSymbols(char *symbol_);
 #endif
@@ -297,6 +306,7 @@ static const char *_callbackName = NULL;
 static tf_TraceCallback _callbackFunction = NULL;
 static int _callbackNumHits = 0;
 static tf_TraceControl _callbackControl = TF_ONCE;
+static tf_TraceLogFunction _logFunction = NULL;
 
 /* this hierarchical level will be applied when the trace is
  * on but the filter is off, the 'tf_isFilterPassed' will
@@ -309,8 +319,6 @@ static unsigned _hierarchicalLevel = 0;
 static unsigned _minHierarchicalLevel = TF_MAX_LEVELS;
 static unsigned _maxHierarchicalLevel = 0;
 static unsigned _defaultHierarchicalLevel = 0;
-
-//#define TF_PRINT(name, file, function, line, message) printf("%s: %s(%s):%d - %s\n", name, file, function, line, message)
 
 /************************************
  * "public" function bodies
@@ -347,9 +355,9 @@ void tf_init(void)
 
 #ifdef TF_FAST_FILENAME_LOOKUP
   unsigned length;
-  for (int i = 0; i < TraceSymbols::_numSymbols; i++)
+  for (int i = 0; i < tf_TraceSymbols::_numSymbols; i++)
   {
-    if ((length = strlen(TraceSymbols::_symbolTable[i])) > _maxSymbolLength)
+    if ((length = strlen(tf_TraceSymbols::_symbolTable[i])) > _maxSymbolLength)
     {
       _maxSymbolLength = length;
     }
@@ -367,8 +375,10 @@ void tf_init(void)
 #else
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
+#ifdef TF_INTEGRATED_TRACE
                     "             location {on | off} |\n"
                     "             timestamp {on | off} |\n"
+#endif
                     "             level {all | default | <value>} |\n"
                     "             filter {on | off} |\n"
                     "             global {on | off | all | default | [+|-]<level> [<level>] ...} |\n"
@@ -435,6 +445,7 @@ bool tf_isFilterPassed(const char *file_,
                        const char *function_,
                        unsigned level_)
 {
+  char traceOutputString[180];
   FileFilter *fileFilter = NULL;
   FunctionFilter *functionFilter = NULL;
   ThreadFilter *threadFilter = NULL;
@@ -445,33 +456,23 @@ bool tf_isFilterPassed(const char *file_,
   unsigned level = _levelFilters[level_].level;
   if (isWatchHit() && ((_watchNumHits == 0) || (_watchControl != TF_ONCE)))
   {
+    
     /* print out the most recent trace for which the value was unchanged */
-    trace_outputLog("WATCH",
-                    _watchPrevFile,
-                    _watchPrevFunction,
-                    _watchPrevLine,
-                    _watchFormatString,
-                    "prev",
-                    _watchPrevValue);
+    sprintf(traceOutputString, _watchFormatString, "prev", _watchPrevValue);
+    printLog("WATCH", _watchPrevFile, _watchPrevFunction, _watchPrevLine, traceOutputString);
+    
     /* print out the current trace where the value change was detected */
-    trace_outputLog("WATCH",
-                    file_,
-                    function_,
-                    line_,
-                    _watchFormatString,
-                    "curr",
-                    _watchCurrValue);
+    sprintf(traceOutputString, _watchFormatString, "curr", _watchCurrValue);
+    printLog("WATCH", file_, function_, line_, traceOutputString);
+    
     _watchPrevValue = _watchCurrValue;
     _watchNumHits++;
     filterPassed = false;
+    
     /* see if they requested an abort on the condition being met */
     if (_watchControl == TF_ABORT)
     {
-      trace_outputLog("WATCH",
-                      __FILE__,
-                      __FUNCTION__,
-                      __LINE__,
-                      "Watchpoint requested ABORT");
+      printLog("WATCH", __FILE__, __FUNCTION__, __LINE__, "Watchpoint requested ABORT");
       assert(0);
     }
   }
@@ -556,31 +557,23 @@ bool tf_isFilterPassed(const char *file_,
       if (_callbackPrevCondition == false)
       {
         /* print out the most recent trace for which the condition was not detected */
-        trace_outputLog("CALLBACK",
-                        _callbackPrevFile,
-                        _callbackPrevFunction,
-                        _callbackPrevLine,
-                        "Callback condition %s: Function: %s",
-                        ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
-                        _callbackName);
-                        
+        sprintf(traceOutputString,
+                "Callback condition %s: Function: %s",
+                ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
+                _callbackName);
+        printLog("CALLBACK",
+                 _callbackPrevFile,
+                 _callbackPrevFunction,
+                 _callbackPrevLine,
+                 traceOutputString);
         /* print out the current trace where the condition was first detected */
-        trace_outputLog("CALLBACK",
-                        file_,
-                        function_,
-                        line_,
-                        "Callback condition TRUE: Function: %s",
-                        _callbackName);
-
+        sprintf(traceOutputString, "Callback condition TRUE: Function: %s", _callbackName);
+        printLog("CALLBACK", file_, function_, line_, traceOutputString);
         /* see if they requested an abort on the condition being met */
         if (_callbackControl == TF_ABORT)
         {
-          trace_outputLog("CALLBACK",
-                          __FILE__,
-                          __FUNCTION__,
-                          __LINE__,
-                          "Callback requested ABORT: Function: %s",
-                          _callbackName);
+          sprintf(traceOutputString, "Callback requested ABORT: Function: %s", _callbackName);
+          printLog("CALLBACK", __FILE__, __FUNCTION__, __LINE__, traceOutputString);
           assert(0);
         }
         _callbackNumHits++;
@@ -594,31 +587,23 @@ bool tf_isFilterPassed(const char *file_,
       if (_callbackPrevCondition == true)
       {
         /* print out the most recent trace for which the condition was not detected */
-        trace_outputLog("CALLBACK",
-                        _callbackPrevFile,
-                        _callbackPrevFunction,
-                        _callbackPrevLine,
-                        "Callback condition %s: Function: %s",
-                        ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
-                        _callbackName);
-
+        sprintf(traceOutputString,
+                "Callback condition %s: Function: %s",
+                ((_callbackPrevCondition) ? "TRUE" : "FALSE"),
+                _callbackName);
+        printLog("CALLBACK",
+                 _callbackPrevFile,
+                 _callbackPrevFunction,
+                 _callbackPrevLine,
+                 traceOutputString);
         /* print out the current trace where the condition was first detected */
-        trace_outputLog("CALLBACK",
-                        file_,
-                        function_,
-                        line_,
-                        "Callback condition FALSE: Function: %s",
-                        _callbackName);
-
+        sprintf(traceOutputString, "Callback condition FALSE: Function: %s", _callbackName);
+        printLog("CALLBACK", file_, function_, line_, traceOutputString);
         /* see if they requested an abort on the condition being met */
         if (_callbackControl == TF_ABORT)
         {
-          trace_outputLog("CALLBACK",
-                          __FILE__,
-                          __FUNCTION__,
-                          __LINE__,
-                          "Callback requested ABORT: Function: %s",
-                          _callbackName);
+          sprintf(traceOutputString, "Callback requested ABORT: Function: %s", _callbackName);
+          printLog("CALLBACK", __FILE__, __FUNCTION__, __LINE__, traceOutputString);
           assert(0);
         }
         _callbackNumHits++;
@@ -670,12 +655,12 @@ void tf_watch(const char *file_,
   char traceOutputString[180];
   if (symbol_ == NULL)
   {
-    trace_outputLog("WATCH", file_, function_, line_, "Watchpoint NOT SET: Symbol is NULL!!");
+    printLog("WATCH", file_, function_, line_, "Watchpoint NOT SET: Symbol is NULL!!");
   }
   else if (address_ == NULL)
   {
     sprintf(traceOutputString, "Watchpoint NOT SET for Symbol: %s, Address is NULL!!", symbol_);
-    trace_outputLog("WATCH", file_, function_, line_, traceOutputString);
+    printLog("WATCH", file_, function_, line_, traceOutputString);
   }
   else if ((width_ != 1) && (width_ != 2) && (width_ != 4) && (width_ != 8))
   {
@@ -684,7 +669,7 @@ void tf_watch(const char *file_,
             symbol_,
             address_,
             width_);
-    trace_outputLog("WATCH", file_, function_, line_, traceOutputString);
+    printLog("WATCH", file_, function_, line_, traceOutputString);
   }
   else
   {
@@ -706,7 +691,7 @@ void tf_watch(const char *file_,
             _watchWidth,
             format_);
     sprintf(traceOutputString, _watchFormatString, _watchCurrValue);
-    trace_outputLog("WATCH", file_, function_, line_, traceOutputString);
+    printLog("WATCH", file_, function_, line_, traceOutputString);
     sprintf(_watchFormatString,
             "Watchpoint HIT: Symbol: %s, Address: %p, Value[%s]: %s",
             _watchSymbol,
@@ -733,12 +718,43 @@ void tf_callback(const char *file_,
   _callbackPrevLine = line_;
   _callbackControl = control_;
   sprintf(traceOutputString, "Callback REGISTERED: Function: %s", _callbackName);
-  trace_outputLog("CALLBACK", file_, function_, line_, traceOutputString);
+  printLog("CALLBACK", file_, function_, line_, traceOutputString);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void tf_registerLogFunction(tf_TraceLogFunction logFunction_)
+{
+  _logFunction = logFunction_;
 }
 
 /************************************
  * "private" function bodies
  ************************************/
+
+/******************************************************************************/
+/******************************************************************************/
+void printLog(const char *name_,
+              const char *file_,
+              const char *function_,
+              int line_,
+              const char *message_)
+{
+#ifdef TF_INTEGRATED_TRACE
+  trace_outputLog(name_, file_, function_, line_, message_);
+#else
+  if (_logFunction == NULL)
+  {
+    printf("%s: %s(%s):%d - %s\n", name_, file_, function_, line_, message_);
+  }
+  else
+  {
+    char traceOutputLine[180];
+    sprintf(traceOutputLine, "%s: %s(%s):%d - %s\n", name_, file_, function_, line_, message_);
+    (*_logFunction)(traceOutputLine);
+  }
+#endif
+}
 
 /******************************************************************************/
 /******************************************************************************/
@@ -790,8 +806,10 @@ void showConfig(void)
   pshell_printf("********************************\n");
   pshell_printf("\n");
   pshell_printf("Trace enabled........: %s\n", ((_traceEnabled) ? ON : OFF));
+#ifdef TF_INTEGRATED_TRACE
   pshell_printf("Trace location.......: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
   pshell_printf("Trace timestamp......: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
+#endif
   if (_watchSymbol != NULL)
   {
     pshell_printf("Trace watchpoint.....: %s\n", _watchSymbol);
@@ -1039,6 +1057,7 @@ void configureFilter(int argc, char *argv[])
       }
     }
   }
+#ifdef TF_INTEGRATED_TRACE
   else if (pshell_isSubString(argv[0], "location", 5) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "on", 2))
@@ -1069,6 +1088,7 @@ void configureFilter(int argc, char *argv[])
       pshell_showUsage();
     }
   }
+#endif
   else if (pshell_isSubString(argv[0], "function", 4) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "on", 2))
@@ -1330,13 +1350,13 @@ const char *findSymbol(const char *symbol_)
 {
 #ifdef TF_FAST_FILENAME_LOOKUP
   const char *symbol = NULL;
-  for (int i = 0; i < TraceSymbols::_numSymbols; i++)
+  for (int i = 0; i < tf_TraceSymbols::_numSymbols; i++)
   {
-    if (strstr(TraceSymbols::_symbolTable[i], symbol_) != NULL)
+    if (strstr(tf_TraceSymbols::_symbolTable[i], symbol_) != NULL)
     {
       if (symbol == NULL)
       {
-        symbol = TraceSymbols::_symbolTable[i];
+        symbol = tf_TraceSymbols::_symbolTable[i];
       }
       else
       {
@@ -1365,36 +1385,36 @@ const void showSymbols(char *symbol_)
   pshell_printf("*  AVAILABLE TRACE SYMBOLS  *\n");
   pshell_printf("*****************************\n");
   pshell_printf("\n");
-  if (TraceSymbols::_numSymbols == 0)
+  if (tf_TraceSymbols::_numSymbols == 0)
   {
     pshell_printf("No registered file symbols\n\n");
     return;
   }
-  for (int i = 0; i < TraceSymbols::_numSymbols; i++)
+  for (int i = 0; i < tf_TraceSymbols::_numSymbols; i++)
   {
     if (symbol_ == NULL)
     {
-      pshell_printf("%-*s  ", _maxSymbolLength, TraceSymbols::_symbolTable[i]);
-      if ((((i+1)%_maxSymbolColumns) == 0) || (i == (TraceSymbols::_numSymbols-1)))
+      pshell_printf("%-*s  ", _maxSymbolLength, tf_TraceSymbols::_symbolTable[i]);
+      if ((((i+1)%_maxSymbolColumns) == 0) || (i == (tf_TraceSymbols::_numSymbols-1)))
       {
         pshell_printf("\n");
       }
     }
-    else if ((ptr = strstr(TraceSymbols::_symbolTable[i], symbol_)) != NULL)
+    else if ((ptr = strstr(tf_TraceSymbols::_symbolTable[i], symbol_)) != NULL)
     {
       int numHighlighted = 0;
       int numToHighlight = (int)strlen(symbol_);
       bool highlight = false;
-      int length = strlen(TraceSymbols::_symbolTable[i]);
+      int length = strlen(tf_TraceSymbols::_symbolTable[i]);
       for (int j = 0; j < length; j++)
       {
-        if (&TraceSymbols::_symbolTable[i][j] == ptr)
+        if (&tf_TraceSymbols::_symbolTable[i][j] == ptr)
         {
           highlight = true;
         }
         if (highlight)
         {
-          pshell_printf("%s%c%s", RED, TraceSymbols::_symbolTable[i][j], NORMAL);
+          pshell_printf("%s%c%s", RED, tf_TraceSymbols::_symbolTable[i][j], NORMAL);
           numHighlighted++;
           if (numHighlighted == numToHighlight)
           {
@@ -1403,7 +1423,7 @@ const void showSymbols(char *symbol_)
         }
         else
         {
-          pshell_printf("%c", TraceSymbols::_symbolTable[i][j]);
+          pshell_printf("%c", tf_TraceSymbols::_symbolTable[i][j]);
         }
       }
       for (int j = 0; j < (int)(_maxSymbolLength-length); j++)

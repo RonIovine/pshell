@@ -483,6 +483,13 @@ The following set of compile options are just used by the TraceFilter (TF) part
 of this package.  This part of the library is optional and can be omitted if
 not used.
 
+  TF_INTEGRATED_TRACE: for TraceFilter and application  
+                           (-lib & -demo build switch)
+
+    This flag specifies whether to build in interactive configuration control
+    hooks for the example TraceLog service.  When using this flag, the TraceLog
+    moduled must be included in the build process.
+
   TF_FAST_FILENAME_LOOKUP: for TraceFilter and application  
                            (-lib & -demo build switch)
 

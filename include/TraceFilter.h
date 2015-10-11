@@ -61,13 +61,13 @@ extern "C" {
 #define TF_MAX_TRACE_SYMBOLS 5000
 #endif
 
-struct TraceSymbols
+struct tf_TraceSymbols
 {
-  TraceSymbols(const char *file_){if (_numSymbols < TF_MAX_TRACE_SYMBOLS) _symbolTable[_numSymbols++] = file_;};
+  tf_TraceSymbols(const char *file_){if (_numSymbols < TF_MAX_TRACE_SYMBOLS) _symbolTable[_numSymbols++] = file_;};
   static int _numSymbols;
   static const char *_symbolTable[TF_MAX_TRACE_SYMBOLS];
 };
-#define TF_SYMBOL_TABLE static TraceSymbols __tf_traceSymbols(__FILE__)
+#define TF_SYMBOL_TABLE static tf_TraceSymbols __tf_traceSymbols(__FILE__)
 
 #else
 #define TF_SYMBOL_TABLE
@@ -87,6 +87,18 @@ enum tf_TraceControl
   TF_CONTINUOUS,
   TF_ABORT
 };
+
+/*
+ * typedef and function to allow a client program to register a logging
+ * function for message output logging of the internal WATCH and CALLBACK
+ * functionality, register a function if this package is build without the
+ * TF_INTEGRATED_TRACE flag, if not built with that flag, and if no function
+ * is registered, then 'printf' will be used, if this package is built with
+ * the TF_INTEGRATED_TRACE, then the TraceLog trace_outputLog function will
+ * be used
+ */
+typedef void (*tf_TraceLogFunction)(const char *outputString_);
+void tf_registerLogFunction(tf_TraceLogFunction logFunction_);
 
 /*
  * add a trace level for dynamic filtering, note that all trace levels

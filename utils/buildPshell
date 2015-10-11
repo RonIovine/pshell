@@ -109,7 +109,7 @@ then
   cd $PSHELL_INSTALL/src
   echo "Building libpshell-server-full.a..."
   g++ -I../include -DVSNPRINTF $READLINE -Wall -c PshellServer.c -o PshellServer.o
-  g++ -I../include -DTF_FAST_FILENAME_LOOKUP -DTF_USE_COLORS -Wall -c TraceFilter.c -o TraceFilter.o
+  g++ -I../include -DTF_FAST_FILENAME_LOOKUP -DTF_INTEGRATED_TRACE -DTF_USE_COLORS -Wall -c TraceFilter.c -o TraceFilter.o
   g++ -I../include -Wall -c TraceLog.c -o TraceLog.o
   ar rcs ../lib/libpshell-server-full.a \
   PshellServer.o \
@@ -119,7 +119,7 @@ then
 
   echo "Building libpshell-server-full.so..."
   g++ -I../include -DVSNPRINTF $READLINE -Wall -fPIC -c PshellServer.c -o PshellServer.o
-  g++ -I../include -DTF_FAST_FILENAME_LOOKUP -DTF_USE_COLORS -Wall -fPIC -c TraceFilter.c -o TraceFilter.o
+  g++ -I../include -DTF_FAST_FILENAME_LOOKUP -DTF_INTEGRATED_TRACE -DTF_USE_COLORS -Wall -fPIC -c TraceFilter.c -o TraceFilter.o
   g++ -I../include -Wall -fPIC -c TraceLog.c -o TraceLog.o
   g++ -shared -o ../lib/libpshell-server-full.so \
   PshellServer.o \
