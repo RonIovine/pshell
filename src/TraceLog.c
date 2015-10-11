@@ -242,9 +242,6 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   // get timestamp
   gettimeofday(&tv, NULL);
   gmtime_r(&tv.tv_sec, &tm);
-  // timestamp with date & time
-  //strftime(timestamp, sizeof(timestamp), "%m/%d/%y %T", &tm);
-  // timestamp with time only
   strftime(timestamp, sizeof(timestamp), "%T", &tm);
   // strip off any leading path of filename
   if ((file = strrchr(file_, '/')) != NULL)
@@ -255,28 +252,24 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   {
     file = file_;
   }
-  if (_printLocation)
+  
+  if (_printLocation && _printTimestamp)
   {
-    if (_printTimestamp)
-    {
-      sprintf(outputString_, "%s%-7s | %s.%-6ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
-    }
-    else
-    {
-      sprintf(outputString_, "%s%-7s | %s(%s):%d | ", _logPrefix, type_, file, function_, line_);
-    }
+    sprintf(outputString_, "%s%-7s | %s.%-6ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
+  }
+  else if (_printLocation)
+  {
+    sprintf(outputString_, "%s%-7s | %s(%s):%d | ", _logPrefix, type_, file, function_, line_);
+  }
+  else if (_printTimestamp)
+  {
+    sprintf(outputString_, "%s%-7s | %s.%-6ld | ", _logPrefix, type_, timestamp, tv.tv_usec);
   }
   else
   {
-    if (_printTimestamp)
-    {
-      sprintf(outputString_, "%s%-7s | %s.%-6ld | ", _logPrefix, type_, timestamp, tv.tv_usec);
-    }
-    else
-    {
-      sprintf(outputString_, "%s%-7s | ", _logPrefix, type_);
-    }
+    sprintf(outputString_, "%s%-7s | ", _logPrefix, type_);
   }
+  
 }
 
 /******************************************************************************/
