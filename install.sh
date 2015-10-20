@@ -29,7 +29,7 @@
 #################################################################################
 
 localDir=$(pwd)
-if [ ! -e "$localDir/installPshell" ]
+if [ ! -e "$localDir/install.sh" ]
 then
   echo "ERROR: This script must be run from same directory where it resides"
   exit 1
@@ -40,7 +40,7 @@ then
   if [ "$1" != "-local" -o $# -gt 2 ]
   then
     echo
-    echo "Usage: installPshell [-local [<shellEnvFile>]]"
+    echo "Usage: install.sh [-local [<shellEnvFile>]]"
     echo
     echo "  This install script will either install this package on a system"
     echo "  wide basis or will setup a local install environment.  A system"
@@ -111,7 +111,7 @@ else
   if [ $(whoami) != "root" ]
   then
     echo "ERROR: Must be 'root' to do system install of this package,"
-    echo "       run 'installPshell -l' for local install or 'installPshell -h' for usage"
+    echo "       run 'install.sh -l' for local install or 'install.sh -h' for usage"
     exit 1
   fi
 

@@ -53,6 +53,7 @@ static TraceLogFunction _logFunction = NULL;
 static char _logPrefix[MAX_STRING_SIZE] = {"TRACE | "};
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool _printLocation = true;
+static bool _printPath = false;
 static bool _printTimestamp = true;
 
 /***************************************
@@ -115,6 +116,13 @@ void trace_showLocation(bool show_)
 
 /******************************************************************************/
 /******************************************************************************/
+void trace_showPath(bool show_)
+{
+  _printPath = show_;
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void trace_showTimestamp(bool show_)
 {
   _printTimestamp = show_;
@@ -132,6 +140,13 @@ bool trace_isLocationEnabled(void)
 bool trace_isTimestampEnabled(void)
 {
   return (_printTimestamp);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool trace_isPathEnabled(void)
+{
+  return (_printPath);
 }
 
 /******************************************************************************/
@@ -244,7 +259,7 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   gmtime_r(&tv.tv_sec, &tm);
   strftime(timestamp, sizeof(timestamp), "%T", &tm);
   // strip off any leading path of filename
-  if ((file = strrchr(file_, '/')) != NULL)
+  if (!_printPath && ((file = strrchr(file_, '/')) != NULL))
   {
     file++;
   }

@@ -36,24 +36,10 @@
 #include <PshellServer.h>
 #include <TraceFilter.h>
 
-#ifdef TF_INTEGRATED_TRACE
+#ifdef TF_INTEGRATED_TRACE_LOG
 #include <TraceLog.h>
 #endif
 
-
-/*
- * the default config dir is where the server will look for the pshell.conf
- * file if it does not find it in the directory specified by the env variable
- * PSHELL_CONFIG_DIR, or the CWD, change this to any other desired location, 
- * the config file can contain settings that override the defined default 
- * configurations for the title, banner, prompt, address, port, type and mode
- * values, this is also the directory the TraceFilter 'init' function looks in
- * for its startup config file in the event that the environment variable of
- * the same name is not found
- */
-#ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc/pshell"
-#endif
 
 /*
  ***********************************
@@ -248,10 +234,6 @@ static unsigned _maxSymbolLength = 0;
 static unsigned _maxSymbolColumns = 0;
 #endif
 
-#ifndef TF_FAST_FILENAME_LOOKUP
-#define TF_USE_COLORS
-#endif
-
 #ifdef TF_USE_COLORS
 #if 0   /* comment out the unused colors so we don't get compiler warnings */
 static const char *GREEN     = "\33[1;32m";
@@ -375,8 +357,9 @@ void tf_init(void)
 #else
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
-#ifdef TF_INTEGRATED_TRACE
+#ifdef TF_INTEGRATED_TRACE_LOG
                     "             location {on | off} |\n"
+                    "             path {on | off} |\n"
                     "             timestamp {on | off} |\n"
 #endif
                     "             level {all | default | <value>} |\n"
@@ -740,7 +723,7 @@ void printLog(const char *name_,
               int line_,
               const char *message_)
 {
-#ifdef TF_INTEGRATED_TRACE
+#ifdef TF_INTEGRATED_TRACE_LOG
   trace_outputLog(name_, file_, function_, line_, message_);
 #else
   if (_logFunction == NULL)
@@ -806,8 +789,9 @@ void showConfig(void)
   pshell_printf("********************************\n");
   pshell_printf("\n");
   pshell_printf("Trace enabled........: %s\n", ((_traceEnabled) ? ON : OFF));
-#ifdef TF_INTEGRATED_TRACE
+#ifdef TF_INTEGRATED_TRACE_LOG
   pshell_printf("Trace location.......: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
+  pshell_printf("Trace path...........: %s\n", ((trace_isPathEnabled()) ? ON : OFF));
   pshell_printf("Trace timestamp......: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
 #endif
   if (_watchSymbol != NULL)
@@ -1057,7 +1041,7 @@ void configureFilter(int argc, char *argv[])
       }
     }
   }
-#ifdef TF_INTEGRATED_TRACE
+#ifdef TF_INTEGRATED_TRACE_LOG
   else if (pshell_isSubString(argv[0], "location", 5) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "on", 2))
@@ -1082,6 +1066,21 @@ void configureFilter(int argc, char *argv[])
     else if (pshell_isSubString(argv[1], "off", 2))
     {
       trace_showTimestamp(false);
+    }
+    else
+    {
+      pshell_showUsage();
+    }
+  }
+  else if (pshell_isSubString(argv[0], "path", 4) && (argc > 1))
+  {
+    if (pshell_isSubString(argv[1], "on", 2))
+    {
+      trace_showPath(true);
+    }
+    else if (pshell_isSubString(argv[1], "off", 2))
+    {
+      trace_showPath(false);
     }
     else
     {

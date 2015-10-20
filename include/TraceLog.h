@@ -130,6 +130,20 @@ void trace_showLocation(bool show_);
 bool trace_isLocationEnabled(void);
 
 /*
+ * trace_showPath:
+ *
+ * controls the stripping of any preceeding path information from the __FILE__ string
+ */
+void trace_showPath(bool show_);
+
+/*
+ * trace_isPathEnabled:
+ *
+ * returns whether we are stripping any preceeding path from the __FILE__ string
+ */
+bool trace_isPathEnabled(void);
+
+/*
  * trace_showTimestamp:
  *
  * display the timestamp in the trace logs

@@ -1,0 +1,300 @@
+#################################################################################
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
+#       without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+#################################################################################
+
+#################################################################################
+#
+# Example pshell build-time configuration, the Makefile uses the '.config'
+# file for it's build-time configuration settings.  The user should copy the
+# provided 'defconfig' file to '.config' and make any desired modifications 
+# to that file, then run the 'make'.  If the file '.config' is not found, the
+# 'defconfig' file will be copied to '.config' before the build starts.  The
+# user should NOT modify the provided 'defconfig' file as it provides an example
+# of the default build-time configuration settings for reference.
+#
+# This file lists the configuration options that are used when building the
+# pshell libraries, the pshell UDP/UNIX client program, and included demo
+# programs.  All lines starting with # are ignored. Configuration option
+# lines must be commented out completly if they are not to be included, i.e.,
+# just setting VARIABLE=n is not disabling that variable.
+#
+#################################################################################
+
+#################################################################################
+#
+# The following set of compile options are used by the pshell library part
+# of this package. 
+#
+#################################################################################
+
+#
+# change the default window title bar for all servers, the full window
+# title format is 'title: shellName[ipAddress]', this can also be changed
+# on a per-server basis via the pshell-server.conf file
+#
+#PSHELL_DEFAULT_TITLE="PSHELL"
+
+#
+# change the default single-line welcome banner for all servers, this can
+# also be changed on a per-server basis via the pshell-server.conf file
+#
+#PSHELL_DEFAULT_BANNER="PSHELL: Process Specific Embedded Command Line Shell"
+
+#
+# change the default prompt all servers, the full prompt format is
+# 'shellName[ipAddress]:prompt' title format is 'title: shellName[ipAddress]',
+# this can also be changed on a per-server basis via the pshell-server.conf
+# file
+#
+#PSHELL_DEFAULT_PROMPT="PSHELL>"
+
+#
+# change the default TCP server timeout, this can also be changed
+# on a per-server basis via the pshell-server.conf file
+#
+#PSHELL_DEFAULT_TIMEOUT=10
+
+#
+# This flag is used to make the argc/argv interface into the pshell callback
+# functions behave in EXACTLY the same as the argc/argv in a 'C' "main".
+# That is, the actual command itself will be included in the argc argument
+# count and argv[0] will be the actual command.  If not set, argc/argv will
+# ONLY include the actual arguments typed after the command.
+#
+#PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST=n
+
+#
+# This is the default directory that contains the pshell-server.conf,
+# pshell-control.conf, and pshell-client.conf files.  If this env variable
+# is not set, it will use the default directory that is setup in the
+# PshellServer.c, PshellControl.c,and PshellClient.c files (/etc/pshell/config).
+# These config files can be used to set various server, client, and control
+# settings.  Refer to the example files in the 'config' directory of this
+# package for usage of these files.
+#    
+#PSHELL_CONFIG_DIR="/etc/pshell/config"
+
+#
+# This directory is used as the default directory for the startup files.
+# A startup file can contain one or more commands that are sourced during
+# startup and initialization of the given PSHELL server.  The format of
+# the commands are just as they would be typed at the command line.
+#
+# The startup processing will first look for the file <serverName>.startup
+# in the directory specified by the $PSHELL_STARTUP_DIR environment variable,
+# and if not found will look in the default PSHELL_STARTUP_DIR
+# (i.e. /etc/pshell/startup).
+#
+# Note that the naming convention of <serverName>.startup must be adhered to
+# where <serverName> is the name that is used in the pshell_startServer call.
+#
+#PSHELL_STARTUP_DIR="/etc/pshell/startup"
+
+#
+# This directory is used as the default directory for the batch files.
+# A batch file can contain one or more commands and can be sourced with
+# the built in command "batch".  The format of the commands are just as
+# they would be typed at the command line.
+#
+# The batch processing will first look for the batch file in the directory
+# specified by the $PSHELL_BATCH_DIR environment variable, and if not found
+# will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if 
+# still not found, will take the passed in batch file name a verbatim filename.
+#
+#PSHELL_BATCH_DIR="/etc/pshell/batch"
+
+#
+# Build with the READLINE development libraries so pshell client and
+# pshell local server can support up-arrow recall, TAB completion,
+# command line editing etc.
+#
+# NOTE: Use of this option requires the the GNU readline library development
+#       package, also note that readline also has a dependency with the curses
+#       (ncurses) library.  The delivered x86 binaries and libraries were all
+#       compiled with the -readline flag.  
+#
+PSHELL_READLINE=y
+
+#
+# Some versions of the standard 'C' library do not support the
+# function "vsnprintf".  This function is used in the "pshell_printf"
+# function to format and populate the PSHELL transfer buffer and to
+# detect for buffer overflow.  If this function is not available,
+# the function "vsprintf" is used in its place.  Since vsprintf does
+# not support the "n" argument to indicate the amount of buffer overflow,
+# we need empirically detect a potential buffer overflow condition with
+# a guardband mechanism, which is described below.  This flag is defined
+# by default in the build script.
+#
+PSHELL_VSNPRINTF=y
+
+#
+# This is the initial size in bytes for the payload of the pshell
+# transfer message.  It is also the size the buffer will grow by
+# in the event of a buffer overflow if we are specified to grow
+# in chunks, see the previous flag.  The default value is 4000.
+#
+#PSHELL_PAYLOAD_CHUNK=4000
+
+#
+# This is the guardband used to detect a transfer buffer overflow
+# when using "vsprintf" to format and populate the buffer.  This
+# value should be smaller than the PSHELL_PAYLOAD_CHUNK size but
+# larger than the maximum expected data size for any given SINGLE
+# "pshell_printf" function call.  The default value for this is 400
+# (bytes).
+#
+#PSHELL_PAYLOAD_GUARDBAND=400
+
+#
+# When set, it will grow the payload of the PSHELL transfer buffer
+# in the specified PSHELL_PAYLOAD_CHUNK size upon a buffer overflow.
+# If NOT set it will have two different behavours, depending on
+# whether the PSHELL_VSNPRINTF flag is set or not, these are as follows:
+#
+# PSHELL_VSNPRINTF defined: Grow the payload in the EXACT amount needed
+# to accomidate the current overflow condition.  Note that this will
+# only work if the PshellServer is built with glibc2.1 or later, if
+# it is built with glibc2.0, it will grow in chunks, regardless of
+# the setting of this flag.
+#
+# PSHELL_VSNPRINTF NOT defined: This will cause the contents of the
+# buffer to be flushed over the socket on a detected buffer overflow.
+#
+#PSHELL_GROW_PAYLOAD_IN_CHUNKS=n
+
+#
+# This is the amount we will grow our Tokens list by in the event
+# we need more tokens, a new Tokens list is potentially created by
+# each pshell_tokenize call as necessary, Tokens lists are reused
+# for each callback function, this is how command line arguments are
+# parsed.  The default is 10 if no value is specified for this flag.
+#
+#PSHELL_TOKEN_LIST_CHUNK=10
+
+#
+# This is the amount we will grow our list of tokens by in the
+# event we need more tokens for a given pshell_tokenize call, token
+# entries are reused for each callback function.  The default is
+# 10 if no value is specified for this flag.
+#
+#PSHELL_TOKEN_CHUNK=10
+
+#
+# This is the initial size in number of entries for the command
+# table list.  It is also the chunk size to grow by in the event of
+# overflow.  The command table list is used to contain information
+# on all registered commands.  The default is 50 if no value is
+# specified for this flag.
+#
+#PSHELL_COMMAND_CHUNK=50
+
+#
+# This flag will tell the pshell_addCommand function to make a copy of
+# (i.e. clone) the command, usage, and description strings.  This flag
+# should be set if there is any chance that those strings will go out
+# of scope at any time after the addCommand call.  If this flag is not
+# set, the pointers to these strings will be used as-is for the command's
+# command table entry.
+#
+# NOTE:
+#
+#  For minimal memory usage, set the PSHELL_PAYLOAD_CHUNK to a fairly
+#  modest value (it's been tested with a value as low as 20 when using
+#  the PSHELL_VSNPRINTF compile flag) and do NOT set the PSHELL_GROW_PAYLOAD_IN_CHUNKS
+#  flag (i.e. grow exact or flush on overflow, depending on whether PSHELL_VSNPRINTF
+#  is defined).  Set all the other "CHUNK" sizes to 1, and do not set the
+#  PSHELL_COPY_ADD_COMMAND_STRINGS flag.
+#
+#PSHELL_COPY_ADD_COMMAND_STRINGS=n
+
+#
+# Include the TraceFilter module in the compilation of the PshellServer libraries
+#
+PSHELL_INCLUDE_TRACE_FILTER=y
+
+#################################################################################
+#
+# The following set of compile options are just used by the TraceFilter (TF) part
+# of this package.  This part of the library is optional and can be omitted if
+# not used.
+#
+#################################################################################
+
+#
+# This flag specifies whether to build in interactive configuration control
+# hooks for the example TraceLog service.  When using this flag, the TraceLog
+# module will be included in the build process along with the TraceFilter module
+#
+TF_INTEGRATED_TRACE_LOG=y
+
+#
+# This flag specifies whether to use fast filename lookup just using a quick
+# pointer compare rather than a full "strcmp".  When using this flag every file
+# needs to have the macro 'TF_SYMBOL_TABLE' placed at the top of the file,
+# typically right after all the include directives.  This will preclude file
+# filtering on '.h' files.
+#
+TF_FAST_FILENAME_LOOKUP=y
+
+#
+# If the TF_FAST_FILENAME_LOOKUP flag is set, this value specifies the max
+# number of files in the filename symbol table, if not specified defaults to
+# 5000
+#
+#TF_MAX_TRACE_SYMBOLS=5000
+
+#
+# Specifies the max number of line specifications (not lines) that can be
+# placed in a file filter, defaults to 50
+#
+#TF_MAX_LINE_FILTERS=50
+
+#
+# Specifies the maximum number of files that can have an active filter,
+# defaults to 500
+#
+#TF_MAX_FILE_FILTERS=500
+
+#
+# Specifies the maximum number of functions that can have an active filter,
+# defaults to 500
+#
+#TF_MAX_FUNCTION_FILTERS=500
+
+#
+# Specifies the maximum number of threads that can be registered and have
+# an active filter, defaults to 100
+#
+#TF_MAX_THREAD_FILTERS=100
+
+#
+# Specifies whether to use colors for the 'ON/OFF/NONE' identifiers for the
+# "trace show config" command and for the highlighting of the found substrings
+# for the "trace show symbols" command
+#
+TF_USE_COLORS=y

@@ -54,19 +54,43 @@
 /* constants */
 
 /*
- * change the default window title bar, welcome banner, and prompt to suit,
- * your product/application, note that these can also be changed on a per-server
- * basis at startup time via the pshell-server.conf file
+ * change the default window title bar, welcome banner, and prompt and
+ * TCP server timeout to suit, your product/application, note that these
+ * can also be changed on a per-server basis at startup time via the
+ * pshell-server.conf file or for all servers via the .config makefile
+ * settings (requires a re-build from source)
  */
 
+#define XSTR(x) #x
+#define STR(x) XSTR(x)
+
 /* the full window title format is 'title: shellName[ipAddress]' */
+#ifdef PSHELL_DEFAULT_TITLE
+static const char *_defaultTitle  = STR(PSHELL_DEFAULT_TITLE);
+#else
 static const char *_defaultTitle  = "PSHELL";
+#endif
+
 /* this is the first line of the welcome banner */
+#ifdef PSHELL_DEFAULT_BANNER
+static const char *_defaultBanner = STR(PSHELL_DEFAULT_BANNER);
+#else
 static const char *_defaultBanner = "PSHELL: Process Specific Embedded Command Line Shell";
+#endif
+
 /* the full prompt format is 'shellName[ipAddress]:prompt' */
+#ifdef PSHELL_DEFAULT_PROMPT
+static const char *_defaultPrompt = STR(PSHELL_DEFAULT_PROMPT);
+#else
 static const char *_defaultPrompt = "PSHELL> ";
+#endif
+
 /* the default idle session timeout for TCP sessions in minutes */
+#ifdef PSHELL_DEFAULT_TIMEOUT
+static int _defaultIdleTimeout = PSHELL_DEFAULT_TIMEOUT;
+#else
 static int _defaultIdleTimeout = 10;
+#endif
 
 /*
  * the default config dir is where the server will look for the pshell-server.conf
@@ -78,7 +102,10 @@ static int _defaultIdleTimeout = 10;
  * for its startup config file in the event that the environment variable of
  * the same name is not found
  */
-#ifndef PSHELL_CONFIG_DIR
+#ifdef PSHELL_CONFIG_DIR
+#undef PSHELL_CONFIG_DIR
+#define PSHELL_CONFIG_DIR STR(PSHELL_CONFIG_DIR)
+#else
 #define PSHELL_CONFIG_DIR "/etc/pshell/config"
 #endif
 
@@ -91,7 +118,10 @@ static int _defaultIdleTimeout = 10;
  * startup of the server, so it can serve as a program initialization file, it can also
  * be re-executed via the "batch" command
  */
-#ifndef PSHELL_BATCH_DIR
+#ifdef PSHELL_BATCH_DIR
+#undef PSHELL_BATCH_DIR
+#define PSHELL_BATCH_DIR STR(PSHELL_BATCH_DIR)
+#else
 #define PSHELL_BATCH_DIR "/etc/pshell/batch"
 #endif
 
@@ -103,7 +133,10 @@ static int _defaultIdleTimeout = 10;
  * the interacive command line, the startup file is executed during the startup
  * of the server, so it can serve as a program initialization file
  */
-#ifndef PSHELL_STARTUP_DIR
+#ifdef PSHELL_STARTUP_DIR
+#undef PSHELL_STARTUP_DIR
+#define PSHELL_STARTUP_DIR STR(PSHELL_STARTUP_DIR)
+#else
 #define PSHELL_STARTUP_DIR "/etc/pshell/startup"
 #endif
 
@@ -1018,6 +1051,10 @@ void pshell_startServer(const char *serverName_,
       strcpy(_title, _defaultTitle);
       strcpy(_banner, _defaultBanner);
       strcpy(_prompt, _defaultPrompt);
+      if (_prompt[strlen(_prompt)-1] != ' ')
+      {
+        strcat(_prompt, " ");
+      }
       _port = port_;
       _serverType = serverType_;
       _serverMode = serverMode_;
