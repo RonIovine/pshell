@@ -346,7 +346,7 @@ Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y] 
     pshell       - build the pshell UDP stand-alone client program only
     lib          - build the pshell link libraries only (shared, static and stub)
     demo         - build the pshell stand-alone demo program only
-    install      - install pshell components
+    install      - build and install all pshell components
     clean        - clean all binaries (libs & executables)
     verbose      - print verbose messages for build process
     local        - specify local install (install target only)

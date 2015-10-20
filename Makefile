@@ -236,7 +236,7 @@ help:
 	@echo "    pshell       - build the pshell UDP/UNIX stand-alone client program only"
 	@echo "    lib          - build the pshell link libraries only (shared, static and stub)"
 	@echo "    demo         - build the pshell stand-alone demo programs only"
-	@echo "    install      - install pshell components"
+	@echo "    install      - build and install all pshell components"
 	@echo "    clean        - clean all binaries (libs & executables)"
 	@echo "    verbose      - print verbose messages for build process"
 	@echo "    local        - specify local install (install target only)"
