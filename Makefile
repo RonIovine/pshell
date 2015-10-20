@@ -55,6 +55,10 @@ VERBOSE = @
 LOCAL =
 SHELL_ENV_FILE =
 
+#
+# if our build-time configuration file, .config, does not exist, copy
+# the default deconfig file to .config and proceed with the build
+#
 ifeq (,$(wildcard .config))
   $(info Build-time configuration file: '.config' not found)
   $(info Copying 'defconfig' to '.config' for build)
@@ -65,6 +69,9 @@ ifeq (,$(wildcard .config))
   endif
 endif
 
+#
+# pull in our build-time configuration file
+#
 -include .config
 
 #
@@ -77,9 +84,11 @@ PSHELL_OBJS = PshellServer.o
 #
 CLIENT_LIBS = -lnsl
 
+#########################
 #
 # PshellServer flags
 #
+#########################
 
 ifdef PSHELL_DEFAULT_TITLE
 PSHELL_FLAGS += -DPSHELL_DEFAULT_TITLE=$(PSHELL_DEFAULT_TITLE)
@@ -163,9 +172,11 @@ ifdef PSHELL_INCLUDE_TRACE_FILTER
 PSHELL_OBJS += TraceFilter.o
 endif
 
+#########################
 #
 # TraceFilter flags
 #
+#########################
 
 ifdef TF_FAST_FILENAME_LOOKUP
 TF_FLAGS += -DTF_FAST_FILENAME_LOOKUP
@@ -210,15 +221,21 @@ endif
 
 .PHONY: demo lib
 
+###############
+#
+# targets
+#
+###############
+
 help:
 	@echo
 	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y] [shellEnvFile=<file>]"
 	@echo
 	@echo "  where:"
 	@echo "    all          - build all components of the pshell package"
-	@echo "    pshell       - build the pshell UDP stand-alone client program only"
+	@echo "    pshell       - build the pshell UDP/UNIX stand-alone client program only"
 	@echo "    lib          - build the pshell link libraries only (shared, static and stub)"
-	@echo "    demo         - build the pshell stand-alone demo program only"
+	@echo "    demo         - build the pshell stand-alone demo programs only"
 	@echo "    install      - install pshell components"
 	@echo "    clean        - clean all binaries (libs & executables)"
 	@echo "    verbose      - print verbose messages for build process"
