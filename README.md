@@ -51,7 +51,7 @@ logging system is used.
 
 In addition to the infrastructure components, three demo programs are also provided, one to
 show the usage of the pshell server API, one to show the usage of pshell control API, and one
-to show the usage of the traced filter/trace log API.
+to show the usage of the trace filter/trace log API.
 
 See the full README file for a complete description of all the components, installation, and usage.
 
