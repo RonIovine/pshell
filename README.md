@@ -13,8 +13,7 @@ or via direct interaction from within the application itself.
 There is also a control mechanism API provided by where any external program can
 make calls into another program that is running a PSHELL (only supported for UDP
 or UNIX pshell servers).  This will provide a programmatic control access mechanism
-to the registered command line shell functions.  A demo program is also provided to
-show the usage of the pshell control API.
+to the registered command line shell functions.
 
 The signature for the embedded command line shell functions are similar to the 
 'main' in 'C' as follows:
@@ -37,8 +36,7 @@ associated invokation method:
                  itself via local command line interactive prompting
 
 The functions are dispatched via its registered command name (keyword), along with 0 or more
-command line arguments, similar to command line shell processing.  A demo program is also
-provided to show the usage of the pshell server API.
+command line arguments, similar to command line shell processing.
 
 This package also provides an optional integrated interactive dynamic trace filtering mechanism that 
 can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`, 
@@ -46,9 +44,14 @@ can be incorporated into any software that uses an existing trace logging system
 easily compiled out via the build-time config files.
 
 Along with the optional trace filtering mechanism, there is also an optional integrated trace logging
-subsystem, API, and demo program that is provided to demonstrate the dynamic control of logging via
-the trace filter pshell CLI mechanism.  This example logging system can also be compiled out via the
-build-time config files if an existing logging system is used.
+subsystem and API to show the integration of an existing logging system into the dynamic trace filter
+API.  The output of this logging system can be controlled via the trace filter pshell CLI mechanism.
+This example logging system can also be compiled out via the build-time config files if an existing
+logging system is used.
+
+In addition to the infrastructure components, three demo programs are also provided, one to
+show the usage of the pshell server API, one to show the usage of pshell control API, and one
+to show the usage of the traced filter/trace log API.
 
 See the full README file for a complete description of all the components, installation, and usage.
 
