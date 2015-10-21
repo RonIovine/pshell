@@ -304,8 +304,10 @@ demo:
 	@echo "Building pshellControlDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.c $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 	
+ifdef TF_INTEGRATED_TRACE_LOG
 	@echo "Building traceFilterDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.c $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
+endif
 
 all: lib pshell demo
 	@echo "PSHELL package successfully built..."
