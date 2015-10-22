@@ -213,26 +213,27 @@ VERBOSE =
 endif
 
 #
-# make sure only 'root' can run 'make install'
+# create a 'newline' for our error message
 #
 define nl
 
 
 endef
+
+#
+# make sure only 'root' can run 'make install'
+#
 USER = $(shell whoami)
 TARGET = $(MAKECMDGOALS)
 ifeq ($(TARGET), install)
-
   ifeq ($(local), y)
     LOCAL = -local
+    ifneq ($(shellEnvFile), )
+      SHELL_ENV_FILE = $(shellEnvFile)
+    endif
   else ifneq ($(USER), root)
     $(error $(nl)ERROR: User '$(USER)' cannot run 'make install', $(nl)       must be 'root' to do a system install of this package, $(nl)       either run as 'root' or do 'make install local=y')
   endif
-
-  ifneq ($(shellEnvFile), )
-    SHELL_ENV_FILE = $(shellEnvFile)
-  endif
-
 endif
 
 .PHONY: demo lib
