@@ -40,6 +40,7 @@ SHARED_LIB = $(CC) -shared -o
 SRC_DIR = src
 LIB_DIR = lib
 BIN_DIR = bin
+UTILS_DIR = utils
 DEMO_DIR = demo
 
 PSHELL_FLAGS =
@@ -306,7 +307,7 @@ lib:
 	$(VERBOSE)rm *.o
 
 	@echo "Setting libpshell-server to libpshell-server-full..."
-	$(VERBOSE)setPshellLib -full
+	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full
 
 pshell:
 	@echo "Building pshell stand-alone UDP/UNIX client..."
