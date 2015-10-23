@@ -185,6 +185,19 @@ void pshell_disconnectServer(int sid_)
 
 /******************************************************************************/
 /******************************************************************************/
+void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_)
+{
+  pthread_mutex_lock(&_mutex);
+  PshellControl *control;
+  if ((control = getControl(sid_)) != NULL)
+  {
+    control->defaultTimeout = defaultTimeout_;
+  }
+  pthread_mutex_unlock(&_mutex);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 int pshell_sendCommand1(int sid_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);

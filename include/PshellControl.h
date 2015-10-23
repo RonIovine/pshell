@@ -149,6 +149,14 @@ int pshell_connectServer(const char *controlName_,
 void pshell_disconnectServer(int sid_);
 
 /*
+ * pshell_setDefaultTimeout:
+ *
+ * set the default server response timeout that is used in the
+ * 'send' commands that don't take a tmeout override
+ */
+void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
+
+/*
  * pshell_sendCommandN:
  *
  * these functions are used to send a pshell command to the remote process,
