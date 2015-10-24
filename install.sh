@@ -111,7 +111,8 @@ else
   if [ $(whoami) != "root" ]
   then
     echo "ERROR: Must be 'root' to do system install of this package,"
-    echo "       run 'install.sh -l' for local install or 'install.sh -h' for usage"
+    echo "       run 'install.sh -local' for local install or 'install.sh -h'"
+    echo "       for usage"
     exit 1
   fi
 
