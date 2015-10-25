@@ -126,6 +126,8 @@ void trace_setLogPrefix(const char *name_){}
 void trace_registerLevels(void){}
 void trace_showLocation(bool show_){}
 bool trace_isLocationEnabled(void){return (true);}
+void trace_showPath(bool show_){}
+bool trace_isPathEnabled(void){return (true);}
 void trace_showTimestamp(bool show_){}
 bool trace_isTimestampEnabled(void){return (true);}
 void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}
