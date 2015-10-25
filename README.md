@@ -35,8 +35,9 @@ command line arguments, similar to command line shell processing.
 
 There is also a control mechanism API provided by where any external program can
 make calls into another program that is running a PSHELL (only supported for UDP
-or UNIX pshell servers).  This will provide a programmatic control access mechanism
-to the registered command line shell functions.
+or UNIX pshell servers).  This will provide a direct programmatic control access
+mechanism to a remote process' pshell functions without having to shell out to
+call the pshell command line client program via the 'system' call.
 
 This package also provides an optional integrated interactive dynamic trace filtering mechanism that 
 can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`, 
