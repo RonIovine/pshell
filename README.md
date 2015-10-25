@@ -20,7 +20,7 @@ clients via a mechanism similar to the familiar 'printf' as follows:
 
 `void pshell_printf(const char *format_, ...);`
 
-These functions can be invoked via several mechanisms depending on how the internal PSHELL 
+These functions can be invoked via several methods depending on how the internal PSHELL 
 server is configured.  The following shows the various PSHELL server types along with their 
 associated invokation method:
 
