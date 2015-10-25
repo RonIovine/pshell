@@ -32,15 +32,16 @@
 # file for it's build-time configuration settings.  The user should copy the
 # provided 'defconfig' file to '.config' and make any desired modifications 
 # to that file, then run the 'make'.  If the file '.config' is not found, the
-# 'defconfig' file will be copied to '.config' before the build starts.  The
-# user should NOT modify the provided 'defconfig' file as it provides an example
-# of the default build-time configuration settings for reference.
+# 'defconfig' file will be copied to '.config' my the makefile processing before
+# the build process starts.  The user should NOT modify the provided 'defconfig'
+# file directly as it provides an example of the default build-time configuration
+@ settings for reference.
 #
 # This file lists the configuration options that are used when building the
-# pshell libraries, the pshell UDP/UNIX client program, and included demo
-# programs.  All lines starting with # are ignored. Configuration option
-# lines must be commented out completly if they are not to be included, i.e.,
-# just setting VARIABLE=n is not disabling that variable.
+# pshell libraries, the pshell UDP/UNIX client program, and the included demo
+# programs.  All lines starting with # are ignored. Configuration option lines
+# must be commented out completly if they are not to be included, i.e., just
+# setting VARIABLE=n is not disabling that variable.
 #
 #################################################################################
 
@@ -66,9 +67,8 @@
 
 #
 # change the default prompt all servers, the full prompt format is
-# 'shellName[ipAddress]:prompt' title format is 'title: shellName[ipAddress]',
-# this can also be changed on a per-server basis via the pshell-server.conf
-# file
+# 'shellName[ipAddress]:prompt', this can also be changed on a per-server
+# basis via the pshell-server.conf file
 #
 #PSHELL_DEFAULT_PROMPT="PSHELL>"
 
@@ -80,10 +80,10 @@
 
 #
 # This flag is used to make the argc/argv interface into the pshell callback
-# functions behave in EXACTLY the same as the argc/argv in a 'C' "main".
+# functions behave in exactly the same as the argc/argv in a 'C' "main".
 # That is, the actual command itself will be included in the argc argument
 # count and argv[0] will be the actual command.  If not set, argc/argv will
-# ONLY include the actual arguments typed after the command.
+# only include the actual arguments typed after the command.
 #
 #PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST=n
 
@@ -123,18 +123,19 @@
 # The batch processing will first look for the batch file in the directory
 # specified by the $PSHELL_BATCH_DIR environment variable, and if not found
 # will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if 
-# still not found, will take the passed in batch file name a verbatim filename.
+# still not found, will take the passed in batch file name verbatim.
 #
 #PSHELL_BATCH_DIR="/etc/pshell/batch"
 
 #
-# Build with the READLINE development libraries so pshell client and
+# Build with the READLINE development libraries so the pshell client and
 # pshell local server can support up-arrow recall, TAB completion,
 # command line editing etc.
 #
 # NOTE: Use of this option requires the the GNU readline library development
 #       package, also note that readline also has a dependency with the curses
-#       (ncurses) library.  
+#       (ncurses) library.  The included x86 binaries were built with this
+#       flag enabled.
 #
 #PSHELL_READLINE=y
 
@@ -146,8 +147,7 @@
 # the function "vsprintf" is used in its place.  Since vsprintf does
 # not support the "n" argument to indicate the amount of buffer overflow,
 # we need empirically detect a potential buffer overflow condition with
-# a guardband mechanism, which is described below.  This flag is defined
-# by default in the build script.
+# a guardband mechanism, which is described below.
 #
 PSHELL_VSNPRINTF=y
 
@@ -163,7 +163,7 @@ PSHELL_VSNPRINTF=y
 # This is the guardband used to detect a transfer buffer overflow
 # when using "vsprintf" to format and populate the buffer.  This
 # value should be smaller than the PSHELL_PAYLOAD_CHUNK size but
-# larger than the maximum expected data size for any given SINGLE
+# larger than the maximum expected data size for any given single
 # "pshell_printf" function call.  The default value for this is 400
 # (bytes).
 #
@@ -239,15 +239,16 @@ PSHELL_INCLUDE_TRACE_FILTER=y
 #################################################################################
 #
 # The following set of compile options are just used by the TraceFilter (TF) part
-# of this package.  This part of the library is optional and can be omitted if
-# not used.
+# of this package.  This part of the library is optional and can be omitted by
+# commenting out the above flag if not used.
 #
 #################################################################################
 
 #
-# This flag specifies whether to build in interactive configuration control
-# hooks for the example TraceLog service.  When using this flag, the TraceLog
-# module will be included in the build process along with the TraceFilter module
+# This flag specifies whether to build in the example TraceLog service into the
+# pshell libraries along with the traceFilterDemo program to demonstrate the
+# interactive trace control via the TraceFilter mechanism.  This flag will
+# automatically enable the above flag.  
 #
 TF_INTEGRATED_TRACE_LOG=y
 
@@ -294,6 +295,6 @@ TF_FAST_FILENAME_LOOKUP=y
 #
 # Specifies whether to use colors for the 'ON/OFF/NONE' identifiers for the
 # "trace show config" command and for the highlighting of the found substrings
-# for the "trace show symbols" command
+# for the "trace show symbols" command of the interactive pshell CLI.
 #
 TF_USE_COLORS=y
