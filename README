@@ -103,7 +103,7 @@ If the install script is run to setup local access, the following environment va
 are written to the .pshellrc shell environment file, source that env file to setup
 your environment.
 
-export PSHELL_INSTALL=<myInstallDir>
+export PSHELL_INSTALL=<myLocalInstallDir>
 export PSHELL_BATCH_DIR=$PSHELL_INSTALL/batch
 export PSHELL_STARTUP_DIR=$PSHELL_INSTALL/startup
 export PSHELL_CONFIG_DIR=$PSHELL_INSTALL/config
@@ -131,9 +131,9 @@ TraceLog(3)      - Describes the API and usage of the TraceLog utility
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
-$PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control external client
-$PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo for dynamic trace filtering
+$PSHELL_INSTALL/demo/pshellServerDemo.c  --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.c --  Sample pshell control external client
+$PSHELL_INSTALL/demo/traceFilterDemo.c   --  Server demo for dynamic trace filtering
 
 EXECUTION:
 
