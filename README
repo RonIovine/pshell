@@ -132,15 +132,15 @@ A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
 $PSHELL_INSTALL/demo/pshellServerDemo.cc  --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control extrenal client
+$PSHELL_INSTALL/demo/pshellControlDemo.cc --  Sample pshell control external client
 $PSHELL_INSTALL/demo/traceFilterDemo.cc   --  Server demo for dynamic trace filtering
 
 EXECUTION:
 
 There are 3 demo programs, one to demonstrate a program that incorporates a
 pshell server (pshellServerDemo), one that demonstrates a program that incorporates
-a the trace filter functionality (traceFilterDemo), and one that demonstrates
-the control of a program that is running a pshell server from another program
+the trace filter functionality (traceFilterDemo), and one that demonstrates the
+control of a program that is running a pshell server from another program
 (pshellControlDemo).
 
 All three demo programs have a usage that can be displayed by typing <programName> -h.
@@ -149,7 +149,7 @@ an interactive client program (either pshell or telnet) that shows the full comm
 line functionality.  The demo program pshellControlDemo can control the other two demo
 programs through a simple command line UI, but it is really meant to demonstrate the
 programmitic control of an external program that is running a PshellServer via the
-PshellControl API andlibrary.  The pshellCotrolDemo program can control either the
+PshellControl API and library.  The pshellCotrolDemo program can control either the
 pshellServerDemo or traceControlDemo program.
 
 After the install.sh script has been excuted (and the local env sourced if doing
@@ -331,7 +331,7 @@ copied to '.config', which should then be modified as necessary.  The settings
 in the '.config' file are then used for the build process.  If no modifications
 are desired in the build settings, there is no need to copy 'defconfig' to
 '.config' as during the build process, if no '.config' is found, the copy will
-be done by the makefile processing.
+be done automatically by the makefile processing.
 
 This package has been successfully re-built and run on a Raspberry Pi/ARM based
 system running Raspbian Linux.  
@@ -339,13 +339,13 @@ system running Raspbian Linux.
 The following is the usage of the Makefile, see the included 'defconfig' file for
 all the build-time options and their descriptions:
 
-Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y] [shellEnvFile=<file>]
+Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]
 
   where:
     all          - build all components of the pshell package
     pshell       - build the pshell UDP stand-alone client program only
     lib          - build the pshell link libraries only (shared, static and stub)
-    demo         - build the pshell stand-alone demo program only
+    demo         - build the pshell stand-alone demo programs only
     install      - build and install all pshell components
     clean        - clean all binaries (libs & executables)
     verbose      - print verbose messages for build process
@@ -377,22 +377,19 @@ over untrusted networks, such as the public Internet.  For maximum security
 between the client and server, the server can be run either as a UNIX domain
 server or at the target host's local loopback address (i.e. 127.0.0.1) and the
 PSHELL client application can be installed to run on the same local host as
-the target application.  Of course, a secure mechanism would then need to be
-provided to gain user access to that host (like ssh).  
+the target application.  Of course, a secure mechanism (like ssh) would then
+need to be used to gain user access to that host.
 
 PORTING:
 
 This package was written to run on Unix/Linux type platforms and their
 derivitaves.  This does not preclude this package from being ported to
-any other operating system.  All that is needed is basic BSD IP socket
-and posix thread support.  This package is written entirely in standard
+any other operating system.  All that is needed is basic BSD socket and
+posix thread support.  This package is written entirely in standard 
 ANSI 'C'.
 
-I hope you find this package useful.
 
-Enjoy...
-
-Ron Iovine
+- Ron Iovine
 
 Copyright 2009 Ron Iovine
 

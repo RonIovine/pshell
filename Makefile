@@ -246,7 +246,7 @@ endif
 
 help:
 	@echo
-	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y] [shellEnvFile=<file>]"
+	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]"
 	@echo
 	@echo "  where:"
 	@echo "    all          - build all components of the pshell package"
@@ -255,7 +255,7 @@ help:
 	@echo "    demo         - build the pshell stand-alone demo programs only"
 	@echo "    install      - build and install all pshell components"
 	@echo "    clean        - clean all binaries (libs & executables)"
-	@echo "    verbose      - print verbose messages for build process"
+	@echo "    verbose      - print verbose messages from build process"
 	@echo "    local        - specify local install (install target only)"
 	@echo "    shellEnvFile - shell env file (i.e. .bashrc) to modify for local install"
 	@echo
