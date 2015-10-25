@@ -1565,15 +1565,21 @@ double pshell_getDouble(const char *string_)
 bool pshell_getOption(const char *string_, char *option_, char *value_)
 {
   PshellTokens *option = pshell_tokenize(string_, "=");
-  /* if 'option_' is NULL, we set the it to point to the option name
-   * and always extract the value, if 'option_' is not NULL, we only
-   * extract the value if the option matches the one they are looking
-   * for, the format of the option can have two different forms,
-   * -<option><value> type option where <option> is a single character
-   * identifier or <option>=<value> where <option> can be any length
-   * character string
+  /* if the 'strlen(option_) == 0', we always extract the option into
+   * 'value_' and copy the extracted option name into 'option_', if
+   * the 'strlen(option_) != 0', we only extract the 'value_' if the
+   * option matches the one specified in the 'option_' string, the
+   * format of the option can have two different forms, -<option><value>
+   * type option where <option> is a single character identifier or
+   * <option>=<value> where <option> can be any length character string,
+   * if 'option_ == NULL', we do not extract any option and return 'false'
    */
-  if (strlen(option_) == 0)
+  if (option_ == NULL)
+  {
+    /* cannot extract the option into a NULL string */
+    return (false);
+  }
+  else if (strlen(option_) == 0)
   {
     /* return the found option and corresponding value */
     
@@ -1603,7 +1609,7 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
   else
   {
 
-     /* non-NULL option, look for the requested option */
+    /* non-NULL option, look for the requested option */
       
     /* see if they are looking for a -<option><value> type option */
     if (option_[0] == '-')

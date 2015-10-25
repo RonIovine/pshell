@@ -213,7 +213,9 @@ void pshell_printf(const char *format_, ...);
  * 
  * this command is used to flush the transfer buffer from the pshell server
  * back to the client, which will then display the contents of the buffer
- * to the user, this only has an effect with a UDP, UNIX, or LOCAL server
+ * to the user, this only has an effect with a UDP, UNIX, or LOCAL server,
+ * since a TCP server is a character based stream, there is no buffering of
+ * transfer data
  */
 void pshell_flush(void);
 
@@ -222,7 +224,7 @@ void pshell_flush(void);
  * if a command is known to take longer than the 5 second client timeout
  */
 void pshell_wheel(const char *string_ = NULL);  /* spinning ascii wheel, user string string is optional */
-void pshell_march(const char *string_);         /* march a string or character */
+void pshell_march(const char *string_);         /* march a string or character across the screen */
 
 /*
  * pshell_isHelp:
@@ -232,8 +234,8 @@ void pshell_march(const char *string_);         /* march a string or character *
  * within a callback function to see if the user asked for 
  * help, the command MUST be registered with the "showUsage" 
  * arg set to "false" in its addCommand registration, otherwise 
- * the PSHELL server itself will give the usage on a '?' or '-h'
- * without dispatching the command
+ * the PSHELL server itself will give the registered usage on
+ * a '?' or '-h' without dispatching the command
  */ 
 bool pshell_isHelp(void);
 
