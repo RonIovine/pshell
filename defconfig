@@ -247,8 +247,8 @@ PSHELL_INCLUDE_TRACE_FILTER=y
 #
 # This flag specifies whether to build in the example TraceLog service into the
 # pshell libraries along with the traceFilterDemo program to demonstrate the
-# interactive trace control via the TraceFilter mechanism.  This flag will
-# automatically enable the above flag.  
+# interactive trace control via the TraceFilter mechanism.  This can only be
+# enabled if the above PSHELL_INCLUDE_TRACE_FILTER flag is also enabled.
 #
 TF_INTEGRATED_TRACE_LOG=y
 
