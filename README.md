@@ -10,7 +10,7 @@ framework and API to embed functions within a C/C++ application that can be
 invoked either via a separate interactive client program ('telnet' or 'phsell') 
 or via direct interaction from within the application itself.
 
-The signature for the embedded command line shell functions are similar to the 
+The prototype for the embedded command line shell functions are similar to the 
 'main' in 'C' as follows:
 
 `void myFunc(int argc, char *argv[]);`
