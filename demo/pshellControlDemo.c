@@ -37,7 +37,7 @@
  *
  * This is an example demo program that shows how to use the pshell control
  * interface.  This API will allow any external client program to invoke
- * functions that are registered within a remote program runnins a pshell
+ * functions that are registered within a remote program running a pshell
  * server.  This will only control programs that are running either a UDP
  * or UNIX pshell server.
  *
