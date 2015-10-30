@@ -268,10 +268,9 @@ struct PshellTokens_c
 /* LOCAL server data */
 
 #ifdef PSHELL_READLINE
-bool _commandFound;
-int _matchLength;
-unsigned _commandPos;
-bool _completionEnabled;
+static bool _commandFound;
+static int _matchLength;
+static unsigned _commandPos;
 #endif
 
 /* UDP/UNIX server data */

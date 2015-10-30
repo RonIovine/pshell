@@ -49,12 +49,10 @@ extern "C" {
  *******************************************************************************/
 
 /*
- * If the following ifdef is uncommented, then for every file you want to do
- * file specific trace filtering you must put the 'TF_SYMBOL_TABLE' macro at
- * the top of each source file
+ * If the following ifdef is enabled via the .config build-time configuration,
+ * then for every file you want to do file specific trace filtering you must
+ * put the 'TF_SYMBOL_TABLE' macro at the top of each source file
  */
-//#define TF_FAST_FILENAME_LOOKUP
-
 #ifdef TF_FAST_FILENAME_LOOKUP
 
 #ifndef TF_MAX_TRACE_SYMBOLS
@@ -91,11 +89,11 @@ enum tf_TraceControl
 /*
  * typedef and function to allow a client program to register a logging
  * function for message output logging of the internal WATCH and CALLBACK
- * functionality, register a function if this package is build without the
+ * functionality, register a function if this package is built without the
  * TF_INTEGRATED_TRACE flag, if not built with that flag, and if no function
  * is registered, then 'printf' will be used, if this package is built with
- * the TF_INTEGRATED_TRACE, then the TraceLog trace_outputLog function will
- * be used
+ * the TF_INTEGRATED_TRACE, then the TraceLog trace_outputLog function from
+ * the file TraceLog.h willbe used
  */
 typedef void (*tf_TraceLogFunction)(const char *outputString_);
 void tf_registerLogFunction(tf_TraceLogFunction logFunction_);

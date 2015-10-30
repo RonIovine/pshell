@@ -9,27 +9,33 @@ building C/C++ applications that incorporate a Process Specific Embedded Command
 Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
 framework and API to embed functions within a C/C++ application that can be
 invoked either via a separate client program or directly from the within
-application itself.  The prototype for the embedded functions are similar to
-the 'main' in 'C' as follows:
+application itself.
+
+There is also a control mechanism API and library provided by where any external
+program can make calls into another program that is running a PSHELL that is
+configured for a UDP or UNIX server.
+
+The prototype for the embedded functions are similar to the 'main' in 'C' as follows:
 
 void myFunc(int argc, char *argv[]);
+
+Command line shell functions can also display information back to the interactive
+clients via a mechanism similar to the familiar 'printf' as follows:
+
+void pshell_printf(const char *format_, ...);
 
 These functions can be invoked in several ways depending on how the internal
 PSHELL server is configured.  The following shows the various PSHELL server
 types along with their associated invokation method:
 
-TCP Server   : Uses standard 'telnet' client to invoke functions
-UDP Server   : Uses included 'pshell' or control client to invoke functions
-UNIX Server  : Uses included 'pshell' or control client to invoke functions
-LOCAL Server : No client program needed, functions invoked directly
-               from within application itself
+TCP Server   : Uses standard 'telnet' interactive client to invoke functions
+UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
+UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
+LOCAL Server : No client program needed, functions invoked directly from within application 
+               itself via local command line interactive prompting
 
 The functions are dispatched via its registered command name (keyword), along
 with 0 or more command line arguments, similar to command line shell processing.
-
-There is also a control mechanism API and library provided by where any external
-program can make calls into another program that is running a PSHELL that is
-configured for a UDP or UNIX server.
 
 GETTING STARTED:
 
