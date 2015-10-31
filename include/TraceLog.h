@@ -116,6 +116,16 @@ void trace_setLogPrefix(const char *name_);
 void trace_registerLevels(void);
 
 /*
+ * trace_addUserLevel:
+ *
+ * add a user defined trace level, the level will be registered with the TraceFilter
+ * API via the tf_addLevel call, we wrap that call with this function so we can get
+ * our maximum trace type level string length so our display is formatted and aligned
+ * correctly
+ */
+void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_);
+
+/*
  * trace_showLocation:
  *
  * display the file, function, and line information in the trace logs
@@ -156,6 +166,20 @@ void trace_showTimestamp(bool show_);
  * returns if the trace timestamp format is enabled
  */
 bool trace_isTimestampEnabled(void);
+
+/*
+ * trace_showPrefix:
+ *
+ * display the configured prefix in the trace logs
+ */
+void trace_showPrefix(bool show_);
+
+/*
+ * trace_isPrefixEnabled:
+ *
+ * returns if the trace prefix is enabled
+ */
+bool trace_isPrefixEnabled(void);
 
 /*
  * common TRACE and DUMP output functions and macros that all the different

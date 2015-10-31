@@ -265,14 +265,17 @@ int main (int argc, char *argv[])
   /*
    * register our program specific trace log levels with the
    * trace filter mechanism, this must be done after registering
-   * our standard levels and before calling 'tf_init'
+   * our standard levels and before calling 'tf_init', call this
+   * function instead of 'tf_addLevel' directly so we can keep
+   * track of our max level name string length so our trace display
+   * can be formatted and aligned correctly
    * 
    * format of call is "name", level, isDefault, isMaskable
    */
-   
-  tf_addLevel("USER_LEVEL1", TL_USER_LEVEL1, false, true);
-  tf_addLevel("USER_LEVEL2", TL_USER_LEVEL2, false, true);
-  tf_addLevel("USER_LEVEL3", TL_USER_LEVEL3, false, true);  
+
+  trace_addUserLevel("USER_LEVEL1", TL_USER_LEVEL1, false, true);
+  trace_addUserLevel("USER_LEVEL2", TL_USER_LEVEL2, false, true);
+  trace_addUserLevel("USER_LEVEL3", TL_USER_LEVEL3, false, true);  
 
   /*
    * optionally set a log prefix, if not set, 'TRACE' will be used,
@@ -377,6 +380,8 @@ int main (int argc, char *argv[])
     TRACE_ERROR("message 4");
     sleep(1);
     TRACE_FAILURE("message 5");
+    sleep(1);
+    TRACE_USER_LEVEL1("message 6");
     sleep(1);
    }
    

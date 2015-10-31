@@ -54,7 +54,9 @@ static char _logPrefix[MAX_STRING_SIZE] = {"TRACE | "};
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool _printLocation = true;
 static bool _printPath = false;
+static const char *_printPrefix = _logPrefix;
 static bool _printTimestamp = true;
+static unsigned _maxTypeLength = 7;
 
 /***************************************
  * private "member" function prototypes
@@ -151,6 +153,27 @@ bool trace_isPathEnabled(void)
 
 /******************************************************************************/
 /******************************************************************************/
+void trace_showPrefix(bool show_)
+{
+  if (show_)
+  {
+    _printPrefix = _logPrefix;
+  }
+  else
+  {
+    _printPrefix = "";
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool trace_isPrefixEnabled(void)
+{
+  return (strcmp(_printPrefix, "") != 0);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void trace_registerLevels(void)
 {
   /*
@@ -165,6 +188,21 @@ void trace_registerLevels(void)
   tf_addLevel("ENTER", TL_ENTER, false, true);
   tf_addLevel("EXIT", TL_EXIT, false, true);
   tf_addLevel("DUMP", TL_DUMP, false, true);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_)
+{
+  /* call this function instead of 'tf_addLevel' directly so we can keep
+   * track of our max level name string length so our trace display can
+   * be formatted and aligned correctly
+   */
+  if (strlen(levelName_) > _maxTypeLength)
+  {
+    _maxTypeLength = strlen(levelName_);
+  }
+  tf_addLevel(levelName_, levelValue_, isDefault_, isMaskable_);
 }
 
 /******************************************************************************/
@@ -270,19 +308,19 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   
   if (_printLocation && _printTimestamp)
   {
-    sprintf(outputString_, "%s%-7s | %s.%-6ld | %s(%s):%d | ", _logPrefix, type_, timestamp, tv.tv_usec, file, function_, line_);
+    sprintf(outputString_, "%s%-*s | %s.%-6ld | %s(%s):%d | ", _printPrefix, _maxTypeLength, type_, timestamp, tv.tv_usec, file, function_, line_);
   }
   else if (_printLocation)
   {
-    sprintf(outputString_, "%s%-7s | %s(%s):%d | ", _logPrefix, type_, file, function_, line_);
+    sprintf(outputString_, "%s%-*s | %s(%s):%d | ", _printPrefix, _maxTypeLength, type_, file, function_, line_);
   }
   else if (_printTimestamp)
   {
-    sprintf(outputString_, "%s%-7s | %s.%-6ld | ", _logPrefix, type_, timestamp, tv.tv_usec);
+    sprintf(outputString_, "%s%-*s | %s.%-6ld | ", _printPrefix, _maxTypeLength, type_, timestamp, tv.tv_usec);
   }
   else
   {
-    sprintf(outputString_, "%s%-7s | ", _logPrefix, type_);
+    sprintf(outputString_, "%s%-*s | ", _printPrefix, _maxTypeLength, type_);
   }
   
 }

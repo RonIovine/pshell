@@ -124,11 +124,14 @@ void tf_callback(const char *file_, int line_, const char *function_, const char
 void trace_registerLogFunction(TraceLogFunction logFunction_){}
 void trace_setLogPrefix(const char *name_){}
 void trace_registerLevels(void){}
+void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_){};
 void trace_showLocation(bool show_){}
 bool trace_isLocationEnabled(void){return (true);}
 void trace_showPath(bool show_){}
 bool trace_isPathEnabled(void){return (true);}
 void trace_showTimestamp(bool show_){}
 bool trace_isTimestampEnabled(void){return (true);}
+void trace_showPrefix(bool show_){};
+bool trace_isPrefixEnabled(void){return (true);}
 void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}
 void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}
