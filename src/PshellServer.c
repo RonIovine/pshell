@@ -61,9 +61,6 @@
  * settings (requires a re-build from source)
  */
 
-#define XSTR(x) #x
-#define STR(x) XSTR(x)
-
 /* the full window title format is 'title: shellName[ipAddress]' */
 #ifdef PSHELL_DEFAULT_TITLE
 static const char *_defaultTitle  = STR(PSHELL_DEFAULT_TITLE);

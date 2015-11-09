@@ -100,6 +100,9 @@ struct PshellMsg
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
+#define XSTR(x) #x
+#define STR(x) XSTR(x)
+
 #define PSHELL_WELCOME_BORDER "#"
 #define PSHELL_PRINT_WELCOME_BORDER(print, length) {for (int i = 0; i < MAX((int)(length+2), 56); i++) print(PSHELL_WELCOME_BORDER); print("\n");}
 

@@ -35,7 +35,7 @@
 # 'defconfig' file will be copied to '.config' my the makefile processing before
 # the build process starts.  The user should NOT modify the provided 'defconfig'
 # file directly as it provides an example of the default build-time configuration
-@ settings for reference.
+# settings for reference.
 #
 # This file lists the configuration options that are used when building the
 # pshell libraries, the pshell UDP/UNIX client program, and the included demo

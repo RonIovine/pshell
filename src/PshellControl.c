@@ -50,8 +50,11 @@
  * psehll-control.conf configuration file is the PSHELL_CONFIG_DIR
  * env variabel is not set
  */
-#ifndef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR "/etc/pshell"
+#ifdef PSHELL_CONFIG_DIR
+#undef PSHELL_CONFIG_DIR
+#define PSHELL_CONFIG_DIR STR(PSHELL_CONFIG_DIR)
+#else
+#define PSHELL_CONFIG_DIR "/etc/pshell/config"
 #endif
 
 #define MAX_UNIX_CLIENTS 1000
