@@ -303,12 +303,12 @@ lib:
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-control.a..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/PshellControl.c -o PshellControl.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellControl.c -o PshellControl.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-control.a PshellControl.o
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-control.so..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellControl.c -o PshellControl.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellControl.c -o PshellControl.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-control.so PshellControl.o
 	$(VERBOSE)rm *.o
 
