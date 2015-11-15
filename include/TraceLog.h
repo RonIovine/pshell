@@ -72,19 +72,19 @@ extern "C" {
 /* trace output macros, these are called directly by client code */
 
 /* this trace cannot be disabled, hence no call to the 'tf_isFilterPassed' function is necessary */
-#define TRACE_FORCE(format, args...) trace_outputLog("FORCE", __FILE__, __FUNCTION__, __LINE__, format, ## args)
+#define TRACE_FORCE(format, args...) trace_outputLog("Force", __FILE__, __FUNCTION__, __LINE__, format, ## args)
 
 /* these traces must pass through the 'tf_isFilterPassed' function in order to be displayed */
-#define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, "ERROR", format, ## args)
-#define TRACE_WARNING(format, args...) __TRACE(TL_WARNING, "WARNING", format, ## args)
-#define TRACE_FAILURE(format, args...) __TRACE(TL_FAILURE, "FAILURE", format, ## args)
-#define TRACE_INFO(format, args...) __TRACE(TL_INFO, "INFO", format, ## args)
-#define TRACE_DEBUG(format, args...) __TRACE(TL_DEBUG, "DEBUG", format, ## args)
-#define TRACE_ENTER(format, args...) __TRACE(TL_ENTER, "ENTER", format, ## args)
-#define TRACE_EXIT(format, args...) __TRACE(TL_EXIT, "EXIT", format, ## args)
+#define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, "Error", format, ## args)
+#define TRACE_WARNING(format, args...) __TRACE(TL_WARNING, "Warning", format, ## args)
+#define TRACE_FAILURE(format, args...) __TRACE(TL_FAILURE, "Failure", format, ## args)
+#define TRACE_INFO(format, args...) __TRACE(TL_INFO, "Info", format, ## args)
+#define TRACE_DEBUG(format, args...) __TRACE(TL_DEBUG, "Debug", format, ## args)
+#define TRACE_ENTER(format, args...) __TRACE(TL_ENTER, "Enter", format, ## args)
+#define TRACE_EXIT(format, args...) __TRACE(TL_EXIT, "Exit", format, ## args)
 
 /* hex dump trace, must also pass the 'tf_isFilterPassed' criteria */
-#define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, "DUMP", format, ## args)
+#define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, "Dump", format, ## args)
 
 /*
  * trace_registerLogFunction:

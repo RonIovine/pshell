@@ -96,7 +96,8 @@ void trace_setLogPrefix(const char *name_)
     int length = strlen(name_);
     for (int i = 0; i < length; i++)
     {
-      _logPrefix[i] = toupper(name_[i]);
+      //_logPrefix[i] = toupper(name_[i]);
+      _logPrefix[i] = name_[i];
     }
     _logPrefix[length] = ' ';
     _logPrefix[length+1] = '|';
@@ -180,21 +181,22 @@ void trace_registerLevels(void)
    * register all our trace levels with the trace filter service
    * format of call is "name", level, isDefault, isMaskable
    */
-  tf_addLevel("ERROR", TL_ERROR, true, false);
-  tf_addLevel("WARNING", TL_WARNING, true, true);
-  tf_addLevel("FAILURE", TL_FAILURE, true, true);
-  tf_addLevel("INFO", TL_INFO, false, true);
-  tf_addLevel("DEBUG", TL_DEBUG, false, true);
-  tf_addLevel("ENTER", TL_ENTER, false, true);
-  tf_addLevel("EXIT", TL_EXIT, false, true);
-  tf_addLevel("DUMP", TL_DUMP, false, true);
+  tf_addLevel("Error", TL_ERROR, true, false);
+  tf_addLevel("Warning", TL_WARNING, true, true);
+  tf_addLevel("Failure", TL_FAILURE, true, true);
+  tf_addLevel("Info", TL_INFO, false, true);
+  tf_addLevel("Debug", TL_DEBUG, false, true);
+  tf_addLevel("Enter", TL_ENTER, false, true);
+  tf_addLevel("Exit", TL_EXIT, false, true);
+  tf_addLevel("Dump", TL_DUMP, false, true);
 }
 
 /******************************************************************************/
 /******************************************************************************/
 void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_)
 {
-  /* call this function instead of 'tf_addLevel' directly so we can keep
+  /*
+   * call this function instead of 'tf_addLevel' directly so we can keep
    * track of our max level name string length so our trace display can
    * be formatted and aligned correctly
    */

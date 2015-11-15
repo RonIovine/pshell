@@ -443,11 +443,11 @@ bool tf_isFilterPassed(const char *file_,
     
     /* print out the most recent trace for which the value was unchanged */
     sprintf(traceOutputString, _watchFormatString, "prev", _watchPrevValue);
-    printLog("WATCH", _watchPrevFile, _watchPrevFunction, _watchPrevLine, traceOutputString);
+    printLog("Watch", _watchPrevFile, _watchPrevFunction, _watchPrevLine, traceOutputString);
     
     /* print out the current trace where the value change was detected */
     sprintf(traceOutputString, _watchFormatString, "curr", _watchCurrValue);
-    printLog("WATCH", file_, function_, line_, traceOutputString);
+    printLog("Watch", file_, function_, line_, traceOutputString);
     
     _watchPrevValue = _watchCurrValue;
     _watchNumHits++;
@@ -456,7 +456,7 @@ bool tf_isFilterPassed(const char *file_,
     /* see if they requested an abort on the condition being met */
     if (_watchControl == TF_ABORT)
     {
-      printLog("WATCH", __FILE__, __FUNCTION__, __LINE__, "Watchpoint requested ABORT");
+      printLog("Watch", __FILE__, __FUNCTION__, __LINE__, "Watchpoint requested ABORT");
       assert(0);
     }
   }
@@ -639,12 +639,12 @@ void tf_watch(const char *file_,
   char traceOutputString[180];
   if (symbol_ == NULL)
   {
-    printLog("WATCH", file_, function_, line_, "Watchpoint NOT SET: Symbol is NULL!!");
+    printLog("Watch", file_, function_, line_, "Watchpoint NOT SET: Symbol is NULL!!");
   }
   else if (address_ == NULL)
   {
     sprintf(traceOutputString, "Watchpoint NOT SET for Symbol: %s, Address is NULL!!", symbol_);
-    printLog("WATCH", file_, function_, line_, traceOutputString);
+    printLog("Watch", file_, function_, line_, traceOutputString);
   }
   else if ((width_ != 1) && (width_ != 2) && (width_ != 4) && (width_ != 8))
   {
@@ -653,7 +653,7 @@ void tf_watch(const char *file_,
             symbol_,
             address_,
             width_);
-    printLog("WATCH", file_, function_, line_, traceOutputString);
+    printLog("Watch", file_, function_, line_, traceOutputString);
   }
   else
   {
@@ -675,7 +675,7 @@ void tf_watch(const char *file_,
             _watchWidth,
             format_);
     sprintf(traceOutputString, _watchFormatString, _watchCurrValue);
-    printLog("WATCH", file_, function_, line_, traceOutputString);
+    printLog("Watch", file_, function_, line_, traceOutputString);
     sprintf(_watchFormatString,
             "Watchpoint HIT: Symbol: %s, Address: %p, Value[%s]: %s",
             _watchSymbol,
@@ -702,7 +702,7 @@ void tf_callback(const char *file_,
   _callbackPrevLine = line_;
   _callbackControl = control_;
   sprintf(traceOutputString, "Callback REGISTERED: Function: %s", _callbackName);
-  printLog("CALLBACK", file_, function_, line_, traceOutputString);
+  printLog("Callback", file_, function_, line_, traceOutputString);
 }
 
 /******************************************************************************/

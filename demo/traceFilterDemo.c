@@ -209,9 +209,9 @@ void showUsage(void)
 #define TL_USER_LEVEL3   TL_MAX_LEVELS+3
 
 /* define some program specific trace macros */
-#define TRACE_USER_LEVEL1(format, args...) __TRACE(TL_USER_LEVEL1, "USER_LEVEL1", format, ## args)
-#define TRACE_USER_LEVEL2(format, args...) __TRACE(TL_USER_LEVEL2, "USER_LEVEL2", format, ## args)
-#define TRACE_USER_LEVEL3(format, args...) __TRACE(TL_USER_LEVEL3, "USER_LEVEL3", format, ## args)
+#define TRACE_USER_LEVEL1(format, args...) __TRACE(TL_USER_LEVEL1, "UserLevel1", format, ## args)
+#define TRACE_USER_LEVEL2(format, args...) __TRACE(TL_USER_LEVEL2, "UserLevel2", format, ## args)
+#define TRACE_USER_LEVEL3(format, args...) __TRACE(TL_USER_LEVEL3, "UserLevel3", format, ## args)
 
 /******************************************************************************/
 /******************************************************************************/
@@ -273,9 +273,9 @@ int main (int argc, char *argv[])
    * format of call is "name", level, isDefault, isMaskable
    */
 
-  trace_addUserLevel("USER_LEVEL1", TL_USER_LEVEL1, false, true);
-  trace_addUserLevel("USER_LEVEL2", TL_USER_LEVEL2, false, true);
-  trace_addUserLevel("USER_LEVEL3", TL_USER_LEVEL3, false, true);  
+  trace_addUserLevel("UserLevel1", TL_USER_LEVEL1, false, true);
+  trace_addUserLevel("UserLevel2", TL_USER_LEVEL2, false, true);
+  trace_addUserLevel("UserLevel3", TL_USER_LEVEL3, false, true);  
 
   /*
    * optionally set a log prefix, if not set, 'TRACE' will be used,
