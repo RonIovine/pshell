@@ -137,9 +137,9 @@ endif
 ifdef PSHELL_READLINE
   PSHELL_FLAGS += -DPSHELL_READLINE
   CLIENT_FLAGS += -DPSHELL_READLINE
-  CLIENT_LIBS += -lreadline -lncurses
-  PSHELL_SERVER_DEMO_LIBS += -lreadline -lncurses
-  TRACE_FILTER_DEMO_LIBS += -lreadline -lncurses
+  CLIENT_LIBS += -lreadline
+  PSHELL_SERVER_DEMO_LIBS += -lreadline
+  TRACE_FILTER_DEMO_LIBS += -lreadline
 endif
 
 ifdef PSHELL_VSNPRINTF

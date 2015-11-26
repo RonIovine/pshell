@@ -132,10 +132,7 @@
 # pshell local server can support up-arrow recall, TAB completion,
 # command line editing etc.
 #
-# NOTE: Use of this option requires the the GNU readline library development
-#       package, also note that readline also has a dependency with the curses
-#       (ncurses) library.  The included x86 binaries were built with this
-#       flag enabled.
+# NOTE: The included x86 binaries were built with this flag enabled.
 #
 #PSHELL_READLINE=y
 
