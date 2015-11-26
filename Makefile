@@ -48,25 +48,36 @@ TF_FLAGS =
 CLIENT_FLAGS =
 TRACE_FILTER_DEMO_FLAGS =
 
-PSHELL_SERVER_DEMO_LIBS = -lpthread -L$(LIB_DIR) -lpshell-server
-PSHELL_CONTROL_DEMO_LIBS = -lpthread -L$(LIB_DIR) -lpshell-control 
-TRACE_FILTER_DEMO_LIBS = -lpthread -L$(LIB_DIR) -lpshell-server
+PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
+PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread 
+TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
 
 VERBOSE = @
 LOCAL =
 SHELL_ENV_FILE =
 
 #
+# create a 'newline' for our error message
+#
+define nl
+
+
+endef
+
+#
 # if our build-time configuration file, .config, does not exist, copy
 # the default deconfig file to .config and proceed with the build
 #
-ifeq (,$(wildcard .config))
-  $(info Build-time configuration file: '.config' not found)
-  $(info Copying 'defconfig' to '.config' for build)
-  ifeq (,$(wildcard defconfig))
-    $(error ERROR: Could not find file: 'defconfig')
-  else
-    $(shell cp defconfig .config)
+TARGET = $(MAKECMDGOALS)
+ifneq ($(TARGET), )
+  ifeq (,$(wildcard .config))
+    $(info Build-time configuration file: '.config' not found)
+    $(info Copying 'defconfig' to '.config' for build)
+    ifeq (,$(wildcard defconfig))
+      $(error ERROR: Could not find file: 'defconfig')
+    else
+      $(shell cp defconfig .config)
+    endif
   endif
 endif
 
@@ -218,18 +229,9 @@ ifeq ($(verbose), y)
 endif
 
 #
-# create a 'newline' for our error message
-#
-define nl
-
-
-endef
-
-#
 # make sure only 'root' can run 'make install'
 #
 USER = $(shell whoami)
-TARGET = $(MAKECMDGOALS)
 ifeq ($(TARGET), install)
   ifeq ($(local), y)
     LOCAL = -local

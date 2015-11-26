@@ -33,39 +33,51 @@ then
   echo "Usage: setPshellLib -stub | -full"
   exit 1
 fi
+if [ -n "$PSHELL_INSTALL" ]
+then
+  LIB_DIR=${PSHELL_INSTALL}/lib
+else
+  LIB_DIR=$(pwd)/lib
+fi
 if [ "$1" == "-stub" ] 
 then
-  if [ -n "$PSHELL_INSTALL" ]
+  if [ ! -e "$LIB_DIR/libpshell-server-stub.so" ]
   then
-    if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.so" ]
-    then
-      rm ${PSHELL_INSTALL}/lib/libpshell-server.so
-    fi
-    ln -s ${PSHELL_INSTALL}/lib/libpshell-server-stub.so ${PSHELL_INSTALL}/lib/libpshell-server.so 
-    if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.a" ]
-    then
-      rm ${PSHELL_INSTALL}/lib/libpshell-server.a
-    fi
-    ln -s ${PSHELL_INSTALL}/lib/libpshell-server-stub.a ${PSHELL_INSTALL}/lib/libpshell-server.a
+    echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-stub.so'"
+  elif [ ! -e "$LIB_DIR/libpshell-server-stub.a" ]
+  then
+    echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-stub.a'"
   else
-    echo "ERROR: Environment variable PSHELL_INSTALL not defined"
+    if [ -e "$LIB_DIR/libpshell-server.so" ]
+    then
+      rm $LIB_DIR/libpshell-server.so
+    fi
+    ln -s $LIB_DIR/libpshell-server-stub.so $LIB_DIR/libpshell-server.so 
+    if [ -e "$LIB_DIR/libpshell-server.a" ]
+    then
+      rm $LIB_DIR/libpshell-server.a
+    fi
+    ln -s $LIB_DIR/libpshell-server-stub.a $LIB_DIR/libpshell-server.a
   fi
 elif [ "$1" == "-full" ] 
 then
-  if [ -n "$PSHELL_INSTALL" ]
+  if [ ! -e "$LIB_DIR/libpshell-server-full.so" ]
   then
-    if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.so" ]
-    then
-      rm ${PSHELL_INSTALL}/lib/libpshell-server.so
-    fi
-    ln -s ${PSHELL_INSTALL}/lib/libpshell-server-full.so ${PSHELL_INSTALL}/lib/libpshell-server.so 
-    if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.a" ]
-    then
-      rm ${PSHELL_INSTALL}/lib/libpshell-server.a
-    fi
-    ln -s ${PSHELL_INSTALL}/lib/libpshell-server-full.a ${PSHELL_INSTALL}/lib/libpshell-server.a
+    echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-full.so'"
+  elif [ ! -e "$LIB_DIR/libpshell-server-full.a" ]
+  then
+    echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-full.a'"
   else
-    echo "ERROR: Environment variable PSHELL_INSTALL not defined"
+    if [ -e "$LIB_DIR/libpshell-server.so" ]
+    then
+      rm $LIB_DIR/libpshell-server.so
+    fi
+    ln -s $LIB_DIR/libpshell-server-full.so $LIB_DIR/libpshell-server.so 
+    if [ -e "$LIB_DIR/libpshell-server.a" ]
+    then
+      rm $LIB_DIR/libpshell-server.a
+    fi
+    ln -s $LIB_DIR/libpshell-server-full.a $LIB_DIR/libpshell-server.a
   fi
 else
   echo "Usage: setPshellLib -stub | -full"

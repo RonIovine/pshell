@@ -1,2 +1,4 @@
 /.pshellrc
 /.config
+*.cproject
+*.project
