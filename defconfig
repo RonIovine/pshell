@@ -55,26 +55,27 @@
 #
 # change the default window title bar for all servers, the full window
 # title format is 'title: shellName[ipAddress]', this can also be changed
-# on a per-server basis via the pshell-server.conf file
+# at runtime on a per-server basis via the pshell-server.conf file
 #
 #PSHELL_DEFAULT_TITLE="PSHELL"
 
 #
 # change the default single-line welcome banner for all servers, this can
-# also be changed on a per-server basis via the pshell-server.conf file
+# also be changed at runtime on a per-server basis via the pshell-server.conf 
+# file
 #
 #PSHELL_DEFAULT_BANNER="PSHELL: Process Specific Embedded Command Line Shell"
 
 #
 # change the default prompt all servers, the full prompt format is
-# 'shellName[ipAddress]:prompt', this can also be changed on a per-server
-# basis via the pshell-server.conf file
+# 'shellName[ipAddress]:prompt', this can also be changed at runtime 
+# on a per-server basis via the pshell-server.conf file
 #
 #PSHELL_DEFAULT_PROMPT="PSHELL>"
 
 #
 # change the default TCP server timeout, this can also be changed
-# on a per-server basis via the pshell-server.conf file
+# at runtime on a per-server basis via the pshell-server.conf file
 #
 #PSHELL_DEFAULT_TIMEOUT=10
 
@@ -229,7 +230,7 @@ PSHELL_VSNPRINTF=y
 #PSHELL_COPY_ADD_COMMAND_STRINGS=n
 
 #
-# Include the TraceFilter module in the compilation of the PshellServer libraries
+# Include the TraceFilter module as part of the PshellServer libraries
 #
 PSHELL_INCLUDE_TRACE_FILTER=y
 
@@ -243,7 +244,7 @@ PSHELL_INCLUDE_TRACE_FILTER=y
 
 #
 # This flag specifies whether to build in the example TraceLog service into the
-# pshell libraries along with the traceFilterDemo program to demonstrate the
+# PshellServer libraries along with the traceFilterDemo program to demonstrate 
 # interactive trace control via the TraceFilter mechanism.  This can only be
 # enabled if the above PSHELL_INCLUDE_TRACE_FILTER flag is also enabled.
 #
@@ -254,7 +255,7 @@ TF_INTEGRATED_TRACE_LOG=y
 # pointer compare rather than a full "strcmp".  When using this flag every file
 # needs to have the macro 'TF_SYMBOL_TABLE' placed at the top of the file,
 # typically right after all the include directives.  This will preclude file
-# filtering on '.h' files.
+# filtering on '.h' files that have inline functions.
 #
 TF_FAST_FILENAME_LOOKUP=y
 

@@ -56,7 +56,7 @@ static bool _printLocation = true;
 static bool _printPath = false;
 static const char *_printPrefix = _logPrefix;
 static bool _printTimestamp = true;
-static unsigned _maxTypeLength = 7;
+static unsigned _maxTypeLength = 0;
 
 /***************************************
  * private "member" function prototypes
@@ -175,24 +175,6 @@ bool trace_isPrefixEnabled(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_registerLevels(void)
-{
-  /*
-   * register all our trace levels with the trace filter service
-   * format of call is "name", level, isDefault, isMaskable
-   */
-  tf_addLevel("Error", TL_ERROR, true, false);
-  tf_addLevel("Warning", TL_WARNING, true, true);
-  tf_addLevel("Failure", TL_FAILURE, true, true);
-  tf_addLevel("Info", TL_INFO, false, true);
-  tf_addLevel("Debug", TL_DEBUG, false, true);
-  tf_addLevel("Enter", TL_ENTER, false, true);
-  tf_addLevel("Exit", TL_EXIT, false, true);
-  tf_addLevel("Dump", TL_DUMP, false, true);
-}
-
-/******************************************************************************/
-/******************************************************************************/
 void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_)
 {
   /*
@@ -205,6 +187,24 @@ void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDef
     _maxTypeLength = strlen(levelName_);
   }
   tf_addLevel(levelName_, levelValue_, isDefault_, isMaskable_);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_registerLevels(void)
+{
+  /*
+   * register all our trace levels with the trace filter service
+   * format of call is "name", level, isDefault, isMaskable
+   */
+  trace_addUserLevel("Error", TL_ERROR, true, false);
+  trace_addUserLevel("Warning", TL_WARNING, true, true);
+  trace_addUserLevel("Failure", TL_FAILURE, true, true);
+  trace_addUserLevel("Info", TL_INFO, false, true);
+  trace_addUserLevel("Debug", TL_DEBUG, false, true);
+  trace_addUserLevel("Enter", TL_ENTER, false, true);
+  trace_addUserLevel("Exit", TL_EXIT, false, true);
+  trace_addUserLevel("Dump", TL_DUMP, false, true);
 }
 
 /******************************************************************************/
