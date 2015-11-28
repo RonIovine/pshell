@@ -72,7 +72,7 @@ INSTALLATION:
 This package can either be installed on the target host for system wide usage, or
 in a local directory for limited access.  There is an installation script provided
 in the top level of the unzipped package (i.e. same directory as this README file)
-that will do the different installs.  This package has binaries built for an x86
+that will do the different installs.  This package has binaries built for an x86_64
 target that have been tested on CentOs (RedHat derivitave) and Mint (Ubuntu derivitave)
 Linux distributions.  It has also been successfully built and run on a ARM based
 Raspberry Pi system running Raspbian Linux.  If using this package for a a different
@@ -327,9 +327,9 @@ $ pshell -s
 
 BUILDING:
 
-This package includes x86 binaries and libraries that were built and tested on
+This package includes x86_64 binaries and libraries that were built and tested on
 CentOS Linux 6.6 (RedHat base) and Linux Mint 17 (Debian/Ubuntu base).  They
-should be able to run on any modern Linux x86 distribution as is.  However, if
+should be able to run on any modern Linux x86_64 distribution as is.  However, if
 a build is necessary for different target hardware, a Makefile along with config
 files are provided.  The 'defconfig' file has the default settings for various
 build-time compilation settings.  This file should not be modified, but rather

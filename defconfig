@@ -133,7 +133,7 @@
 # pshell local server can support up-arrow recall, TAB completion,
 # command line editing etc.
 #
-# NOTE: The included x86 binaries were built with this flag enabled.
+# NOTE: The included x86_64 binaries were built with this flag enabled.
 #
 #PSHELL_READLINE=y
 
