@@ -197,14 +197,14 @@ void trace_registerLevels(void)
    * register all our trace levels with the trace filter service
    * format of call is "name", level, isDefault, isMaskable
    */
-  trace_addUserLevel("Error", TL_ERROR, true, false);
-  trace_addUserLevel("Warning", TL_WARNING, true, true);
-  trace_addUserLevel("Failure", TL_FAILURE, true, true);
-  trace_addUserLevel("Info", TL_INFO, false, true);
-  trace_addUserLevel("Debug", TL_DEBUG, false, true);
-  trace_addUserLevel("Enter", TL_ENTER, false, true);
-  trace_addUserLevel("Exit", TL_EXIT, false, true);
-  trace_addUserLevel("Dump", TL_DUMP, false, true);
+  trace_addUserLevel(TL_ERROR_STRING, TL_ERROR, true, false);
+  trace_addUserLevel(TL_WARNING_STRING, TL_WARNING, true, true);
+  trace_addUserLevel(TL_FAILURE_STRING, TL_FAILURE, true, true);
+  trace_addUserLevel(TL_INFO_STRING, TL_INFO, false, true);
+  trace_addUserLevel(TL_DEBUG_STRING, TL_DEBUG, false, true);
+  trace_addUserLevel(TL_ENTER_STRING, TL_ENTER, false, true);
+  trace_addUserLevel(TL_EXIT_STRING, TL_EXIT, false, true);
+  trace_addUserLevel(TL_DUMP_STRING, TL_DUMP, false, true);
 }
 
 /******************************************************************************/

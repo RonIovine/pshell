@@ -61,6 +61,17 @@ extern "C" {
 /* start all user defined levels after the MAX */
 #define TL_MAX_LEVELS TL_DUMP
 
+/* define the string based names of the trace levels */
+#define TL_ERROR_STRING "Error" 
+#define TL_WARNING_STRING "Warning"
+#define TL_FAILURE_STRING "Failure"
+#define TL_INFO_STRING "Info"
+#define TL_DEBUG_STRING "Debug"
+#define TL_ENTER_STRING "Enter"
+#define TL_EXIT_STRING "Exit"
+#define TL_DUMP_STRING "Dump"
+#define TL_FORCE_STRING "Force"
+
 /* 
  * the following are some example TRACE macros to illustrate integrating the
  * function 'tf_isFilterPassed' into an existing trace logging system to provide
@@ -72,19 +83,19 @@ extern "C" {
 /* trace output macros, these are called directly by client code */
 
 /* this trace cannot be disabled, hence no call to the 'tf_isFilterPassed' function is necessary */
-#define TRACE_FORCE(format, args...) trace_outputLog("Force", __FILE__, __FUNCTION__, __LINE__, format, ## args)
+#define TRACE_FORCE(format, args...) trace_outputLog(TL_FORCE_STRING, __FILE__, __FUNCTION__, __LINE__, format, ## args)
 
 /* these traces must pass through the 'tf_isFilterPassed' function in order to be displayed */
-#define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, "Error", format, ## args)
-#define TRACE_WARNING(format, args...) __TRACE(TL_WARNING, "Warning", format, ## args)
-#define TRACE_FAILURE(format, args...) __TRACE(TL_FAILURE, "Failure", format, ## args)
-#define TRACE_INFO(format, args...) __TRACE(TL_INFO, "Info", format, ## args)
-#define TRACE_DEBUG(format, args...) __TRACE(TL_DEBUG, "Debug", format, ## args)
-#define TRACE_ENTER(format, args...) __TRACE(TL_ENTER, "Enter", format, ## args)
-#define TRACE_EXIT(format, args...) __TRACE(TL_EXIT, "Exit", format, ## args)
+#define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, TL_ERROR_STRING, format, ## args)
+#define TRACE_WARNING(format, args...) __TRACE(TL_WARNING, TL_WARNING_STRING, format, ## args)
+#define TRACE_FAILURE(format, args...) __TRACE(TL_FAILURE, TL_FAILURE_STRING, format, ## args)
+#define TRACE_INFO(format, args...) __TRACE(TL_INFO, TL_INFO_STRING, format, ## args)
+#define TRACE_DEBUG(format, args...) __TRACE(TL_DEBUG, TL_DEBUG_STRING, format, ## args)
+#define TRACE_ENTER(format, args...) __TRACE(TL_ENTER, TL_ENTER_STRING, format, ## args)
+#define TRACE_EXIT(format, args...) __TRACE(TL_EXIT, TL_EXIT_STRING, format, ## args)
 
 /* hex dump trace, must also pass the 'tf_isFilterPassed' criteria */
-#define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, "Dump", format, ## args)
+#define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, TL_DUMP_STRING, format, ## args)
 
 /*
  * trace_registerLogFunction:
