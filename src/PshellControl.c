@@ -435,6 +435,7 @@ int sendPshellCommand(PshellControl *control_, const char *command_, unsigned ti
   fd_set readFd;
   struct timeval timeout;
   int bytesRead = 0;
+  int seqNum;
   int retCode = PSHELL_COMMAND_SUCCESS;
 
   if (control_ != NULL)
@@ -444,6 +445,8 @@ int sendPshellCommand(PshellControl *control_, const char *command_, unsigned ti
     FD_SET(control_->socketFd,&readFd);
 
     control_->pshellMsg.header.msgType = PSHELL_CONTROL_COMMAND;
+    control_->pshellMsg.header.seqNum++;
+    seqNum = control_->pshellMsg.header.seqNum;
     control_->pshellMsg.header.respNeeded = (timeoutOverride_ > 0);
     control_->pshellMsg.payload[0] = 0;
     strncpy(control_->pshellMsg.payload, command_, PSHELL_PAYLOAD_SIZE);
@@ -460,31 +463,52 @@ int sendPshellCommand(PshellControl *control_, const char *command_, unsigned ti
       timeout.tv_sec = timeoutOverride_/1000;
       timeout.tv_usec = (timeoutOverride_%1000)*1000;
       
-      if ((select(control_->socketFd+1, &readFd, NULL, NULL, &timeout)) < 0)
+      /* loop in case we have any stale responses we need to flush from the socket */
+      while (true)
       {
-        retCode = PSHELL_SOCKET_SELECT_FAILURE;
-      }
-      else if (FD_ISSET(control_->socketFd, &readFd))
-      {
-        /* got a response, read it */
-        if ((bytesRead = recvfrom(control_->socketFd,
-                                  (char *)&control_->pshellMsg,
-                                  sizeof(control_->pshellMsg),
-                                  0,
-                                  (struct sockaddr *)0,
-                                  (socklen_t *)0)) < 0)
+        if ((select(control_->socketFd+1, &readFd, NULL, NULL, &timeout)) < 0)
         {
-          retCode = PSHELL_SOCKET_RECEIVE_FAILURE;
+          retCode = PSHELL_SOCKET_SELECT_FAILURE;
+          break;
+        }
+        else if (FD_ISSET(control_->socketFd, &readFd))
+        {
+          /* got a response, read it */
+          if ((bytesRead = recvfrom(control_->socketFd,
+                                    (char *)&control_->pshellMsg,
+                                    sizeof(control_->pshellMsg),
+                                    0,
+                                    (struct sockaddr *)0,
+                                    (socklen_t *)0)) < 0)
+          {
+            retCode = PSHELL_SOCKET_RECEIVE_FAILURE;
+            break;
+          }
+          else if (seqNum > control_->pshellMsg.header.seqNum)
+          {
+            /* 
+             * make sure we have the correct response, this condition can happen if we had 
+             * a very short timeout for the previous call and missed the response, in which 
+             * case the response to the previous call will be queued in the socket ahead of 
+             * our current expected response, when we detect that condition, we read the 
+             * socket until we either find the correct response or timeout, we toss any previous 
+             * unmatched responses
+             */
+            PSHELL_WARNING("Received seqNum: %d, does not match sent seqNum: %d", control_->pshellMsg.header.seqNum, seqNum)
+          }
+          else
+          {
+            retCode = control_->pshellMsg.header.msgType;
+            break;
+          }
         }
         else
         {
-          retCode = control_->pshellMsg.header.msgType;
+          retCode = PSHELL_SOCKET_TIMEOUT;
+          break;
         }
       }
-      else
-      {
-        retCode = PSHELL_SOCKET_TIMEOUT;
-      }
+      control_->pshellMsg.header.seqNum = seqNum;
     }
   }
   else

@@ -53,6 +53,7 @@ struct PshellMsgHdr
   char msgType;
   char respNeeded;
   char dataNeeded;
+  int seqNum;
   char pad;
 };
 
