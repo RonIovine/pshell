@@ -48,15 +48,15 @@
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshellControlDemo {<hostname> | <ipAddress> | unix} {<port> | <unixServerName>}\n");
+  printf("Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix}\n");
   printf("                         [-t<timeout>] [-l<logLevel>] [-extract]\n");
   printf("\n");
   printf("  where:\n");
   printf("    <hostname>       - hostname of UDP server\n");
   printf("    <ipAddress>      - IP address of UDP server\n");
+  printf("    <unixServerName> - name of UNIX server\n");
   printf("    unix             - specifies a UNIX server\n");
   printf("    <port>           - port number of UDP server\n");
-  printf("    <unixServerName> - name of UNIX server\n");
   printf("    <timeout>        - wait timeout for response in mSec (default=100)\n");
   printf("    <logLevel>       - log level of control library (0-3, default=3, i.e. all)\n");
   printf("    extract          - extract data contents of response (must have non-0 wait timeout)\n");

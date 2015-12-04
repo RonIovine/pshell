@@ -188,6 +188,16 @@ void pshell_disconnectServer(int sid_)
 
 /******************************************************************************/
 /******************************************************************************/
+void pshell_disconnectAllServers(void)
+{
+  for (int sid = 0; sid < PSHELL_MAX_SERVERS; sid++)
+  {
+    pshell_disconnectServer(sid);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_)
 {
   pthread_mutex_lock(&_mutex);
@@ -285,12 +295,12 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
     vsprintf(command, command_, args);
     va_end(args);
     control->pshellMsg.header.dataNeeded = true;
-    if (timeoutOverride_ == 0)
+    if (timeoutOverride_ == PSHELL_NO_WAIT)
     {
       PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
     }
     if ((sendPshellCommand(control, command, timeoutOverride_) == PSHELL_COMMAND_SUCCESS) &&
-        (timeoutOverride_ > 0))
+        (timeoutOverride_ != PSHELL_NO_WAIT))
     {
       bytesExtracted = extractResults(control, results_, size_);
     }
@@ -338,10 +348,44 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
   int retCode = -1;
 
   control_->defaultTimeout = defaultTimeout_;
-  if (port_ > 0)
+  if (port_ == PSHELL_UNIX_SERVER)
   {
 
-    /* UDP server must provide a non-0 port number */
+    control_->serverType = UNIX;
+      
+    if ((control_->socketFd = socket(AF_UNIX, SOCK_DGRAM, 0)) < 0)
+    {
+      PSHELL_ERROR("PSHELL_ERROR: Cannot create UNIX socket");
+      return (false);
+    }
+
+    control_->sourceUnixAddress.sun_family = AF_UNIX;
+
+    /* bind to our source socket */
+    for (int i = 0; ((i < MAX_UNIX_CLIENTS) && (retCode < 0)); i++)
+    {
+      sprintf(control_->sourceUnixAddress.sun_path,
+              "%s/pshellControlClient%d",
+              PSHELL_UNIX_SOCKET_PATH,
+              (rand()%MAX_UNIX_CLIENTS));
+      retCode = bind(control_->socketFd,
+                     (struct sockaddr *)&control_->sourceUnixAddress,
+                     sizeof(control_->sourceUnixAddress));
+    }
+    
+    if (retCode < 0)
+    {
+      PSHELL_ERROR("PSHELL_ERROR: Cannot bind to UNIX socket: %s", control_->sourceUnixAddress.sun_path);
+      return (false);
+    }
+    /* setup our destination server information */
+    control_->destUnixAddress.sun_family = AF_UNIX;
+    sprintf(control_->destUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, remoteServer_);
+
+  }
+  else
+  {    
+    
     control_->serverType = UDP;
   
     /*
@@ -389,41 +433,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
         return (false);
       }
     }
-  }
-  else
-  {
-    
-    /* UNIX server does not need a port number */
-    control_->serverType = UNIX;
-      
-    if ((control_->socketFd = socket(AF_UNIX, SOCK_DGRAM, 0)) < 0)
-    {
-      PSHELL_ERROR("PSHELL_ERROR: Cannot create UNIX socket");
-      return (false);
-    }
-
-    control_->sourceUnixAddress.sun_family = AF_UNIX;
-
-    /* bind to our source socket */
-    for (int i = 0; ((i < MAX_UNIX_CLIENTS) && (retCode < 0)); i++)
-    {
-      sprintf(control_->sourceUnixAddress.sun_path,
-              "%s/pshellControlClient%d",
-              PSHELL_UNIX_SOCKET_PATH,
-              (rand()%MAX_UNIX_CLIENTS));
-      retCode = bind(control_->socketFd,
-                     (struct sockaddr *)&control_->sourceUnixAddress,
-                     sizeof(control_->sourceUnixAddress));
-    }
-    
-    if (retCode < 0)
-    {
-      PSHELL_ERROR("PSHELL_ERROR: Cannot bind to UNIX socket: %s", control_->sourceUnixAddress.sun_path);
-      return (false);
-    }
-    /* setup our destination server information */
-    control_->destUnixAddress.sun_family = AF_UNIX;
-    sprintf(control_->destUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, remoteServer_);
+   
   }
   return (true);
 }
@@ -447,7 +457,7 @@ int sendPshellCommand(PshellControl *control_, const char *command_, unsigned ti
     control_->pshellMsg.header.msgType = PSHELL_CONTROL_COMMAND;
     control_->pshellMsg.header.seqNum++;
     seqNum = control_->pshellMsg.header.seqNum;
-    control_->pshellMsg.header.respNeeded = (timeoutOverride_ > 0);
+    control_->pshellMsg.header.respNeeded = (timeoutOverride_ != PSHELL_NO_WAIT);
     control_->pshellMsg.payload[0] = 0;
     strncpy(control_->pshellMsg.payload, command_, PSHELL_PAYLOAD_SIZE);
     /* send command request to remote pshell */
@@ -455,7 +465,7 @@ int sendPshellCommand(PshellControl *control_, const char *command_, unsigned ti
     {
       retCode = PSHELL_SOCKET_SEND_FAILURE;
     }
-    else if (timeoutOverride_ > 0)
+    else if (timeoutOverride_ != PSHELL_NO_WAIT)
     {
       /* they want a response from the remote pshell */
       /* timeout value is in milliSeconds */
@@ -688,15 +698,7 @@ static void loadConfigFile(const char *controlName_,
             }
             else if (strcmp(option, "port") == 0)
             {
-              /*
-               * make this check in case they changed the server
-               * from udp to unix and forgot to comment out the
-               * port
-               */
-              if (!isUnix)
-              {
-                port_ = atoi(value);
-              }
+              port_ = atoi(value);
             }
             else if (strcmp(option, "timeout") == 0)
             {
@@ -713,6 +715,15 @@ static void loadConfigFile(const char *controlName_,
         }
       }
     }
+    /*
+     * make this check in case they changed the server
+     * from udp to unix and forgot to comment out the
+     * port
+     */
+     if (isUnix)
+     {
+       port_ = PSHELL_UNIX_SERVER;
+     }
   }
 }
 

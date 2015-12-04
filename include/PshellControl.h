@@ -149,6 +149,17 @@ int pshell_connectServer(const char *controlName_,
 void pshell_disconnectServer(int sid_);
 
 /*
+ * pshell_disconnectAllServers:
+ *
+ * use this function to cleanup any resources for all connected servers,
+ * this function should be called upon program termination, either in a
+ * graceful termination or within an exception signal handler, it is especially
+ * inportant that ths be called when a unix server is used since there are
+ * associated file handles that need to be cleaned up
+ */
+void pshell_disconnectAllServers(void);
+
+/*
  * pshell_setDefaultTimeout:
  *
  * set the default server response timeout that is used in the
