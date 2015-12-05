@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <signal.h>
 
 #ifdef PSHELL_READLINE
 #include <readline/readline.h>
@@ -1189,7 +1190,7 @@ void showNamedServers(void)
     printf("  %d\n", _pshellServersList[server].portNum);
   }
   printf("\n");
-
+  exitProgram(0);
 }
 
 /******************************************************************************/
@@ -1262,6 +1263,7 @@ void showUsage(void)
   printf("\n");
 #endif
   printf("\n");
+  exitProgram(0);
 }
 
 /******************************************************************************/
@@ -1320,7 +1322,33 @@ void exitProgram(int exitCode_)
   {
     unlink(_sourceUnixAddress.sun_path);
   }
+  if (exitCode_ > 0)
+  {
+    printf("\n");
+  }
   exit(exitCode_);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void registerSignalHandlers(void)
+{
+	signal(SIGHUP, exitProgram);		/* 1	Hangup (POSIX).  */
+	signal(SIGINT, exitProgram);		/* 2	Interrupt (ANSI).  */
+	signal(SIGQUIT, exitProgram);		/* 3	Quit (POSIX).  */
+	signal(SIGILL, exitProgram);		/* 4	Illegal instruction (ANSI).  */
+	signal(SIGABRT, exitProgram);		/* 6	Abort (ANSI).  */
+	signal(SIGBUS, exitProgram);		/* 7	BUS error (4.2 BSD).  */
+	signal(SIGFPE, exitProgram);		/* 8	Floating-point exception (ANSI).  */
+	signal(SIGSEGV, exitProgram);		/* 11	Segmentation violation (ANSI).  */
+	signal(SIGPIPE, exitProgram);		/* 13	Broken pipe (POSIX).  */
+	signal(SIGALRM, exitProgram);		/* 14	Alarm clock (POSIX).  */
+	signal(SIGTERM, exitProgram);		/* 15	Termination (ANSI).  */
+	signal(SIGSTKFLT, exitProgram);	/* 16	Stack fault.  */
+	signal(SIGXCPU, exitProgram);		/* 24	CPU limit exceeded (4.2 BSD).  */
+	signal(SIGXFSZ, exitProgram);		/* 25	File size limit exceeded (4.2 BSD).  */
+	signal(SIGPWR, exitProgram);		/* 30	Power failure restart (System V).  */
+	signal(SIGSYS, exitProgram);		/* 31	Bad system call.  */
 }
 
 /******************************************************************************/
@@ -1332,6 +1360,9 @@ int main(int argc, char *argv[])
   bool clear = false;
   char commandName[PSHELL_PAYLOAD_SIZE];
   char *str;
+
+  /* register signal handlers so we can do a graceful termination and cleanup any system resources */
+  registerSignalHandlers();
 
   _mode = COMMAND_LINE;
 
@@ -1350,17 +1381,14 @@ int main(int argc, char *argv[])
       if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "?") == 0))
       {
         showUsage();
-        exitProgram(1);
       }
       else if (strcmp(argv[1], "-s") == 0)
       {
         showNamedServers();
-        exitProgram(0);
       }
       else
       {
         showUsage();
-        exit(1);
       }
     }
     else if (argc == 3)
@@ -1409,7 +1437,6 @@ int main(int argc, char *argv[])
       else
       {
         showUsage();
-        exitProgram(0);
       }
     }
     else  /* argc == 7 */
@@ -1423,7 +1450,6 @@ int main(int argc, char *argv[])
       else
       {
         showUsage();
-        exitProgram(0);
       }
     }
     if (init(argv[1], argv[2]))
@@ -1481,7 +1507,6 @@ int main(int argc, char *argv[])
   else
   {
     showUsage();
-    exitProgram(1);
   }
   exitProgram(0);
 }

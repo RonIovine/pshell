@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <syslog.h>
+#include <stdlib.h>
+#include <signal.h>
 
 #include <PshellServer.h>
 #include <TraceLog.h>
@@ -192,6 +194,37 @@ void showUsage(void)
   printf("\n");
 }
 
+/******************************************************************************/
+/******************************************************************************/
+void signalHandler(int signal_)
+{
+	pshell_cleanupResources();
+  printf("\n");
+	exit(0);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void registerSignalHandlers(void)
+{
+	signal(SIGHUP, signalHandler);		/* 1	Hangup (POSIX).  */
+	signal(SIGINT, signalHandler);		/* 2	Interrupt (ANSI).  */
+	signal(SIGQUIT, signalHandler);		/* 3	Quit (POSIX).  */
+	signal(SIGILL, signalHandler);		/* 4	Illegal instruction (ANSI).  */
+	signal(SIGABRT, signalHandler);		/* 6	Abort (ANSI).  */
+	signal(SIGBUS, signalHandler);		/* 7	BUS error (4.2 BSD).  */
+	signal(SIGFPE, signalHandler);		/* 8	Floating-point exception (ANSI).  */
+	signal(SIGSEGV, signalHandler);		/* 11	Segmentation violation (ANSI).  */
+	signal(SIGPIPE, signalHandler);		/* 13	Broken pipe (POSIX).  */
+	signal(SIGALRM, signalHandler);		/* 14	Alarm clock (POSIX).  */
+	signal(SIGTERM, signalHandler);		/* 15	Termination (ANSI).  */
+	signal(SIGSTKFLT, signalHandler);	/* 16	Stack fault.  */
+	signal(SIGXCPU, signalHandler);		/* 24	CPU limit exceeded (4.2 BSD).  */
+	signal(SIGXFSZ, signalHandler);		/* 25	File size limit exceeded (4.2 BSD).  */
+	signal(SIGPWR, signalHandler);		/* 30	Power failure restart (System V).  */
+	signal(SIGSYS, signalHandler);		/* 31	Bad system call.  */
+}
+
 /*
  * setup our port number, this is the default port number used
  * if our serverName is not found in the pshell-server.conf file
@@ -252,6 +285,9 @@ int main (int argc, char *argv[])
     showUsage();
     return (0);
   }
+
+  /* register signal handlers so we can do a graceful termination and cleanup any system resources */
+  registerSignalHandlers();
 
   /* initialize a sample memory hex dump buffer */
   for (unsigned i = 0; i < DUMP_BUFFER_SIZE; i++)
@@ -388,8 +424,11 @@ int main (int argc, char *argv[])
     sleep(1);
     TRACE_USER_LEVEL1("message 6");
     sleep(1);
-   }
+  }
    
-   return (0);
+  /* cleanup any pshell system resources before exiting */
+  pshell_cleanupResources();
+   
+  return (0);
    
 }

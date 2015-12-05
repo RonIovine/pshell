@@ -189,6 +189,19 @@ void pshell_startServer(const char *serverName_,
                         unsigned port_ = 0);
 
 /*
+ * pshell_cleanupResources:
+ * 
+ * this is the command used to cleanup any system resources associated with 
+ * a pshell server upon program termination, either via a normal, graceful 
+ * termination or via an signal handler exception based termination, this is 
+ * only really necessary for a 'unix' type pshell server in order to cleanup 
+ * the temporary file handle in the /tmp directory that is associated with the
+ * 'unix' type server, although as good practice, this function should be 
+ * called upon program termination regardless of the pshell server type
+ */
+void pshell_cleanupResources(void);
+
+/*
  * the following commands should ONLY be called from 
  * within the scope of a PSHELL callback function
  */

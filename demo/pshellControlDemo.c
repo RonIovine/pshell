@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <signal.h>
 
 #include <PshellControl.h>
 
@@ -62,6 +63,37 @@ void showUsage(void)
   printf("    extract          - extract data contents of response (must have non-0 wait timeout)\n");
   printf("\n");
   exit(0);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void signalHandler(int signal_)
+{
+	pshell_disconnectAllServers();
+  printf("\n");
+	exit(0);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void registerSignalHandlers(void)
+{
+	signal(SIGHUP, signalHandler);		/* 1	Hangup (POSIX).  */
+	signal(SIGINT, signalHandler);		/* 2	Interrupt (ANSI).  */
+	signal(SIGQUIT, signalHandler);		/* 3	Quit (POSIX).  */
+	signal(SIGILL, signalHandler);		/* 4	Illegal instruction (ANSI).  */
+	signal(SIGABRT, signalHandler);		/* 6	Abort (ANSI).  */
+	signal(SIGBUS, signalHandler);		/* 7	BUS error (4.2 BSD).  */
+	signal(SIGFPE, signalHandler);		/* 8	Floating-point exception (ANSI).  */
+	signal(SIGSEGV, signalHandler);		/* 11	Segmentation violation (ANSI).  */
+	signal(SIGPIPE, signalHandler);		/* 13	Broken pipe (POSIX).  */
+	signal(SIGALRM, signalHandler);		/* 14	Alarm clock (POSIX).  */
+	signal(SIGTERM, signalHandler);		/* 15	Termination (ANSI).  */
+	signal(SIGSTKFLT, signalHandler);	/* 16	Stack fault.  */
+	signal(SIGXCPU, signalHandler);		/* 24	CPU limit exceeded (4.2 BSD).  */
+	signal(SIGXFSZ, signalHandler);		/* 25	File size limit exceeded (4.2 BSD).  */
+	signal(SIGPWR, signalHandler);		/* 30	Power failure restart (System V).  */
+	signal(SIGSYS, signalHandler);		/* 31	Bad system call.  */
 }
 
 /******************************************************************************/
@@ -106,6 +138,9 @@ int main (int argc, char *argv[])
   {
     port = atoi(argv[2]);
   }
+
+  /* register signal handlers so we can do a graceful termination and cleanup any system resources */
+  registerSignalHandlers();
 
   //printf("port: %d, timeout: %d, logLevel: %d, extract: %d\n", port, timeout, logLevel, extract);
 

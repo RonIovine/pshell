@@ -1215,6 +1215,16 @@ void pshell_startServer(const char *serverName_,
 
 }
 
+/******************************************************************************/
+/******************************************************************************/
+void pshell_cleanupResources(void)
+{
+  if (_isRunning && (_serverType == PSHELL_UNIX_SERVER))
+  {
+    unlink(_localUnixAddress.sun_path);
+  }
+}
+
 /**************************************************
  * command line agrument interpretation functions
  **************************************************/
