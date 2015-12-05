@@ -49,7 +49,6 @@ static PshellTokens _dummyTokens;
 void pshell_setLogLevel(unsigned level_){};
 void pshell_registerLogFunction(PshellLogFunction logFunction_){};
 const char *pshell_getResultsString(int results_){return ("PSHELL_UNKNOWN_RESULT");};
-
 void pshell_startServer(const char *serverName_,  
                         PshellServerType serverType_,
                         PshellServerMode serverMode_,
@@ -59,7 +58,6 @@ void pshell_startServer(const char *serverName_,
   printf("PSHELL_INFO: STUB Server: %s Started\n", serverName_);
   if (serverMode_ == PSHELL_BLOCKING) for (;;) sleep(30000);
 }
-
 void pshell_addCommand(PshellFunction function_,
                        const char *command_,
                        const char *description_,
@@ -67,9 +65,7 @@ void pshell_addCommand(PshellFunction function_,
                        unsigned char minArgs_,
                        unsigned char maxArgs_,
                        bool showUsage_){}
-
 void pshell_runCommand(const char *command_, ...){}
-
 void pshell_printf(const char *format_, ...){}
 void pshell_flush(void){}
 void pshell_wheel(const char *string_){}
