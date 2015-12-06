@@ -591,14 +591,14 @@ void pshell_addCommand(PshellFunction function_,
   }
 
   /*
-  * if we've fallen through to here, we must have
-  * validated ok, perpare to add the new command
-  */
+   * if we've fallen through to here, we must have
+   * validated ok, perpare to add the new command
+   */
 
   /*
-  * see if we need to grab a new chunk of memory
-  * for our command table
-  */
+   * see if we need to grab a new chunk of memory
+   * for our command table
+   */
   if (_numCommands >= _commandTableSize)
   {
     /* grab a chunk for our command table */
@@ -618,11 +618,11 @@ void pshell_addCommand(PshellFunction function_,
 #ifdef PSHELL_COPY_ADD_COMMAND_STRINGS
 
   /*
-  * make a duplicate of the command, usage and description strings,
-  * this compile time flag should be set if there is a chance of
-  * any of these strings used in the addCommand call going out of
-  * scope
-  */
+   * make a duplicate of the command, usage and description strings,
+   * this compile time flag should be set if there is a chance of
+   * any of these strings used in the addCommand call going out of
+   * scope
+   */
 
   /* now populate the table with the new entry */
   if ((_commandTable[_numCommands].command = strdup(command_)) == NULL)
@@ -703,7 +703,8 @@ void pshell_runCommand(const char *command_, ...)
   char *commandName;
   char fullCommand[256];
   char command[256];
-  /* only dispatch command if we are not already in the middle of
+  /* 
+   * only dispatch command if we are not already in the middle of
    * dispatching an interactive command
    */
   if (!_isCommandDispatched)
@@ -790,7 +791,8 @@ void pshell_flush(void)
   char *printPos;
   char *newline;
 
-  /* if we called a command non-interactively, just bail because there is no
+  /* 
+   * if we called a command non-interactively, just bail because there is no
    * client side program (either pshell or telnet) to receive the output
    */
   if (_isCommandInteractive)
@@ -837,7 +839,8 @@ void pshell_flush(void)
 void pshell_printf(const char *format_, ...)
 {
 
-  /* if we called a command non-interactively, just bail because there is no
+  /* 
+   * if we called a command non-interactively, just bail because there is no
    * pshell client side program to receive the output
    */
   if (!_isCommandInteractive || !_isRunning)
@@ -888,17 +891,17 @@ void pshell_printf(const char *format_, ...)
     {
 
       /*
-      * successfully got a new chunk of memory,
-      * update our pointer and set our payload size
-      */
+       * successfully got a new chunk of memory,
+       * update our pointer and set our payload size
+       */
       _pshellPayloadSize = newPayloadSize;
       _pshellMsg = (PshellMsg*)ptr;
 
       /*
-      * we need to do this because our address could have changed in
-      * the realloc, we need to preserve our original offset for the
-      * vsnprintf call
-      */
+       * we need to do this because our address could have changed in
+       * the realloc, we need to preserve our original offset for the
+       * vsnprintf call
+       */
       address = &_pshellMsg->payload[offset];
     }
 
@@ -947,17 +950,17 @@ void pshell_printf(const char *format_, ...)
       if (requestedSize > -1)
       {
         /*
-        * grab exactly what is needed,
-        * glibc 2.1 returns the overflow size
-        */
+         * grab exactly what is needed,
+         * glibc 2.1 returns the overflow size
+         */
         newPayloadSize = _pshellPayloadSize + requestedSize + 1;
       }
       else
       {
         /*
-        * grab another chunk, glibc 2.0 will return -1
-        * on an overflow instead of the overflow size
-        */
+         * grab another chunk, glibc 2.0 will return -1
+         * on an overflow instead of the overflow size
+         */
         newPayloadSize = _pshellPayloadSize + PSHELL_PAYLOAD_CHUNK;
       }
 #endif
@@ -972,17 +975,17 @@ void pshell_printf(const char *format_, ...)
       {
 
         /*
-        * successfully got a new chunk of memory,
-        * update our pointer and set our payload size
-        */
+         * successfully got a new chunk of memory,
+         * update our pointer and set our payload size
+         */
         _pshellPayloadSize = newPayloadSize;
         _pshellMsg = (PshellMsg*)ptr;
 
         /*
-        * we need to do this because our address could have changed in
-        * the realloc, we need to preserver our original offset for the
-        * vsnprintf call
-        */
+         * we need to do this because our address could have changed in
+         * the realloc, we need to preserver our original offset for the
+         * vsnprintf call
+         */
         address = &_pshellMsg->payload[offset];
 
       }
@@ -1265,9 +1268,9 @@ PshellTokens *pshell_tokenize(const char *string_, const char *delimeter_)
     }
 
     /*
-    * get our first token, copy our original string
-    * so we don't hack it up with our tokenization
-    */
+     * get our first token, copy our original string
+     * so we don't hack it up with our tokenization
+     */
     _tokenList[_numTokenLists].string =  strdup(string_);
     if ((str = strtok(_tokenList[_numTokenLists].string, delimeter_)) != NULL)
     {
@@ -1599,7 +1602,7 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
     }
     else
     {
-      // they are looking for a <option>=<value> type option */
+      /* they are looking for a <option>=<value> type option */
       if (option->numTokens == 2)
       {
         strcpy(option_, option->tokens[0]);
@@ -1633,7 +1636,7 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
     }
     else
     {
-      // assume they are looking for a <option>=<value> type option */
+      /* assume they are looking for a <option>=<value> type option */
       if ((option->numTokens == 2) && pshell_isEqual(option->tokens[0], option_))
       {
         strcpy(value_, option->tokens[1]);
@@ -1832,11 +1835,11 @@ char *commandGenerator(const char *command_, int state_)
   char *returnCommand;
 
   /*
-  * if this is a new command to complete, set the starting search
-  * command, this funciton is called repeatedly, the state must be
-  * preserved between calls, that is why _matchLength and _currentPos
-  * are static global variables, we need to pick up where we left off
-  */
+   * if this is a new command to complete, set the starting search
+   * command, this funciton is called repeatedly, the state must be
+   * preserved between calls, that is why _matchLength and _currentPos
+   * are static global variables, we need to pick up where we left off
+   */
   if (state_ == 0)
   {
     _matchLength = strlen(command_);
@@ -1859,10 +1862,10 @@ char *commandGenerator(const char *command_, int state_)
   }
 
   /*
-  * if no names matched, then return NULL,
-  * supress normal filename completion when
-  * we are done finding matches
-  */
+   * if no names matched, then return NULL,
+   * supress normal filename completion when
+   * we are done finding matches
+   */
   rl_attempted_completion_over = 1;
   return (NULL);
 
@@ -1985,6 +1988,11 @@ static void runLocalServer(void)
       fgets(inputLine, sizeof(inputLine), stdin);
       stripWhitespace(inputLine);
 #endif
+    }
+    /* if we are not in interactive mode, wait a little bit and try again */
+    while (!_isCommandInteractive)
+    {
+      sleep(1);
     }
     processCommand(inputLine);
   }
@@ -2820,6 +2828,11 @@ static void receiveTCP(void)
     if (length > 0)
     {
       addHistory(command);
+      /* if we are not in interactive mode, wait a little bit and try again */
+      while (!_isCommandInteractive)
+      {
+        sleep(1);
+      }
       processCommand(command);
     }
     else if (length < 0)
@@ -3404,9 +3417,9 @@ static void processCommand(char *command_)
   char fullCommand[180];
   char retCode = PSHELL_COMMAND_COMPLETE;
   char *commandName = fullCommand;  /* make a non NULL ptr so we don't get "cannot
-                                     * create args" error for the non-user commands */
+                                       create args" error for the non-user commands */
   unsigned payloadSize = _pshellPayloadSize;  /* save off current size in case it changes
-                                             * and we need to grab more memory, UDP server only */
+                                                 and we need to grab more memory, UDP server only */
   PshellMsg updatePayloadSize;
 
   /* save off our original command */
@@ -3414,9 +3427,9 @@ static void processCommand(char *command_)
   strcpy(fullCommand, command_);
 
   /*
-  * clear out our message payload so all of our pshell_printf
-  * commands start at the beginning of the buffer
-  */
+   * clear out our message payload so all of our pshell_printf
+   * commands start at the beginning of the buffer
+   */
   _pshellMsg->payload[0] = 0;
 
   _isControlCommand = false;
@@ -3440,10 +3453,10 @@ static void processCommand(char *command_)
                 (pshell_isHelp() && !_foundCommand->showUsage))
       {
         /*
-        * dispatch user command, don't need to check for a NULL
-        * function pointer because the validation in the addCommand
-        * function will catch that and not add the command
-        */
+         * dispatch user command, don't need to check for a NULL
+         * function pointer because the validation in the addCommand
+         * function will catch that and not add the command
+         */
         _foundCommand->function(_argc, _argv);
       }
       else
@@ -3457,13 +3470,13 @@ static void processCommand(char *command_)
   {
     retCode = PSHELL_COMMAND_SUCCESS;
     /*
-     * if the caller does not any data back, we set this value to
+     * if the caller does not need any data back, we set this value to
      * false which will short circuit any calls to pshell_printf
      */
     _isCommandInteractive = _pshellMsg->header.dataNeeded;
     /* set this to true so we can tokenize our command line with pshell_tokenize */
     _isCommandDispatched = true;
-    /* set the to true so we prevent any intermediate flushed back to the control cliennt */
+    /* set the to true so we prevent any intermediate flushes back to the control client */
     _isControlCommand = true;
     /* user command, create the arg list and look for the command */
     if (((commandName = createArgs(fullCommand)) != NULL) &&
@@ -3479,10 +3492,10 @@ static void processCommand(char *command_)
                 (pshell_isHelp() && !_foundCommand->showUsage))
       {
         /*
-        * dispatch user command, don't need to check for a NULL
-        * function pointer because the validation in the addCommand
-        * function will catch that and not add the command
-        */
+         * dispatch user command, don't need to check for a NULL
+         * function pointer because the validation in the addCommand
+         * function will catch that and not add the command
+         */
         _foundCommand->function(_argc, _argv);
       }
       else
@@ -3575,10 +3588,10 @@ static void processCommand(char *command_)
   reply(_pshellMsg);
 
   /*
-  * set this to false to be sure nobody calls pshell_tokenize outside the context
-  * of an pshell callback function because the cleanupTokens must be called to
-  * avoid any memory leaks
-  */
+   * set this to false to be sure nobody calls pshell_tokenize outside the context
+   * of an pshell callback function because the cleanupTokens must be called to
+   * avoid any memory leaks
+   */
   _isCommandDispatched = false;
   cleanupTokens();
 

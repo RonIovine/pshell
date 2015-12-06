@@ -180,7 +180,7 @@ ifdef PSHELL_INCLUDE_TRACE_FILTER
   # the integrated trace module is dependent on the trace filter module,
   # so only allow it to be included if the trace filter is also included
   ifdef TF_INTEGRATED_TRACE_LOG
-  TF_FLAGS += -DTF_INTEGRATED_TRACE_LOG
+    TF_FLAGS += -DTF_INTEGRATED_TRACE_LOG
     PSHELL_OBJS += TraceLog.o
   endif
 else
