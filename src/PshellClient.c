@@ -1333,22 +1333,22 @@ void exitProgram(int exitCode_)
 /******************************************************************************/
 void registerSignalHandlers(void)
 {
-	signal(SIGHUP, exitProgram);		/* 1	Hangup (POSIX).  */
-	signal(SIGINT, exitProgram);		/* 2	Interrupt (ANSI).  */
-	signal(SIGQUIT, exitProgram);		/* 3	Quit (POSIX).  */
-	signal(SIGILL, exitProgram);		/* 4	Illegal instruction (ANSI).  */
-	signal(SIGABRT, exitProgram);		/* 6	Abort (ANSI).  */
-	signal(SIGBUS, exitProgram);		/* 7	BUS error (4.2 BSD).  */
-	signal(SIGFPE, exitProgram);		/* 8	Floating-point exception (ANSI).  */
-	signal(SIGSEGV, exitProgram);		/* 11	Segmentation violation (ANSI).  */
-	signal(SIGPIPE, exitProgram);		/* 13	Broken pipe (POSIX).  */
-	signal(SIGALRM, exitProgram);		/* 14	Alarm clock (POSIX).  */
-	signal(SIGTERM, exitProgram);		/* 15	Termination (ANSI).  */
-	signal(SIGSTKFLT, exitProgram);	/* 16	Stack fault.  */
-	signal(SIGXCPU, exitProgram);		/* 24	CPU limit exceeded (4.2 BSD).  */
-	signal(SIGXFSZ, exitProgram);		/* 25	File size limit exceeded (4.2 BSD).  */
-	signal(SIGPWR, exitProgram);		/* 30	Power failure restart (System V).  */
-	signal(SIGSYS, exitProgram);		/* 31	Bad system call.  */
+  signal(SIGHUP, exitProgram);		/* 1	Hangup (POSIX).  */
+  signal(SIGINT, exitProgram);		/* 2	Interrupt (ANSI).  */
+  signal(SIGQUIT, exitProgram);		/* 3	Quit (POSIX).  */
+  signal(SIGILL, exitProgram);		/* 4	Illegal instruction (ANSI).  */
+  signal(SIGABRT, exitProgram);		/* 6	Abort (ANSI).  */
+  signal(SIGBUS, exitProgram);		/* 7	BUS error (4.2 BSD).  */
+  signal(SIGFPE, exitProgram);		/* 8	Floating-point exception (ANSI).  */
+  signal(SIGSEGV, exitProgram);		/* 11	Segmentation violation (ANSI).  */
+  signal(SIGPIPE, exitProgram);		/* 13	Broken pipe (POSIX).  */
+  signal(SIGALRM, exitProgram);		/* 14	Alarm clock (POSIX).  */
+  signal(SIGTERM, exitProgram);		/* 15	Termination (ANSI).  */
+  signal(SIGSTKFLT, exitProgram);	/* 16	Stack fault.  */
+  signal(SIGXCPU, exitProgram);		/* 24	CPU limit exceeded (4.2 BSD).  */
+  signal(SIGXFSZ, exitProgram);		/* 25	File size limit exceeded (4.2 BSD).  */
+  signal(SIGPWR, exitProgram);		/* 30	Power failure restart (System V).  */
+  signal(SIGSYS, exitProgram);		/* 31	Bad system call.  */
 }
 
 /******************************************************************************/
