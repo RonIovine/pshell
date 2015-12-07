@@ -40,7 +40,7 @@ extern "C" {
  *
  * This file and API are an example trace logging service to show how to
  * integrate the trace filtering mechanism into an already existing trace
- * logging service that uses the __FILE__, __LINE__,  __FUNCTION__, level
+ * logging service that uses the __FILE__, __LINE__, __FUNCTION__, level
  * paradigm
  *
  *******************************************************************************/

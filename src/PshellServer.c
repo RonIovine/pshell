@@ -406,7 +406,6 @@ static void addHistory(char *command_);
 static void clearHistory(void);
 static void showPrompt(char *command_);
 static void tokenize(char *string_, struct Tokens *tokens_, const char *delimiter_);
-static void addHistory(char *command_);
 
 /* common functions (TCP and LOCAL servers) */
 

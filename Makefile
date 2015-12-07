@@ -295,12 +295,12 @@ lib:
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-server-stub.a..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.c -o PshellStub.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.c -o PshellStub.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-stub.a PshellStub.o
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-server-stub.so..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.c -o PshellStub.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.c -o PshellStub.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-stub.so PshellStub.o
 	$(VERBOSE)rm *.o
 	
