@@ -45,8 +45,10 @@ DEMO_DIR = demo
 
 PSHELL_FLAGS =
 TF_FLAGS = 
+TRACE_FLAGS = 
 CLIENT_FLAGS =
 TRACE_FILTER_DEMO_FLAGS =
+TRACE_LOG_DEMO_FLAGS =
 
 PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
 PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread 
@@ -181,6 +183,8 @@ ifdef PSHELL_INCLUDE_TRACE_FILTER
   # so only allow it to be included if the trace filter is also included
   ifdef TF_INTEGRATED_TRACE_LOG
     TF_FLAGS += -DTF_INTEGRATED_TRACE_LOG
+    TRACE_FLAGS += -DDYNAMIC_TRACE_FILTER
+    TRACE_FILTER_DEMO_FLAGS += -DDYNAMIC_TRACE_FILTER
     PSHELL_OBJS += TraceLog.o
   endif
 else
@@ -222,6 +226,17 @@ endif
 
 ifdef TF_USE_COLORS
   TF_FLAGS += -DTF_USE_COLORS
+endif
+
+#########################
+#
+# TraceLog flags
+#
+#########################
+
+ifdef TRACE_LOG_DISABLED
+  TRACE_FILTER_DEMO_FLAGS += -DTRACE_LOG_DISABLED
+  TRACE_LOG_DEMO_FLAGS += -DTRACE_LOG_DISABLED
 endif
 
 ifeq ($(verbose), y)
@@ -283,14 +298,14 @@ lib:
 	@echo "Building libpshell-server-full.a..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellServer.c -o PshellServer.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceFilter.c -o TraceFilter.o
-	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.c -o TraceLog.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.c -o TraceLog.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-full.a $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-server-full.so..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellServer.c -o PshellServer.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceFilter.c -o TraceFilter.o
-	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.c -o TraceLog.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.c -o TraceLog.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-full.so $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 	
@@ -332,6 +347,9 @@ ifeq ($(TF_INTEGRATED_TRACE_LOG),y)
 	@echo "Building traceFilterDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.c $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
 endif
+
+	@echo "Building traceLogDemo program..."
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.c $(DEMO_DIR)/traceLogDemo.c -o $(BIN_DIR)/traceLogDemo
 
 all: lib pshell demo
 	@echo "PSHELL package successfully built..."

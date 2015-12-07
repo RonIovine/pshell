@@ -30,7 +30,9 @@
 #define TRACE_LOG_H
 
 #include <stdio.h>
+#ifdef DYNAMIC_TRACE_FILTER
 #include <TraceFilter.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,8 +60,11 @@ extern "C" {
 #define TL_ENTER      5
 #define TL_EXIT       6
 #define TL_DUMP       7
+
 /* start all user defined levels after the MAX */
 #define TL_MAX_LEVELS TL_DUMP
+#define TL_ALL_LEVELS TL_MAX_LEVELS
+#define TL_DEFAULT_LEVEL TL_FAILURE
 
 /* define the string based names of the trace levels */
 #define TL_ERROR_STRING "Error" 
@@ -82,8 +87,17 @@ extern "C" {
 
 /* trace output macros, these are called directly by client code */
 
+#ifdef TRACE_LOG_DISABLED
+
+/* no trace logs, completly compile out all trace logs for performance */
+#define TRACE_FORCE(format, args...)
+
+#else
+
 /* this trace cannot be disabled, hence no call to the 'tf_isFilterPassed' function is necessary */
 #define TRACE_FORCE(format, args...) trace_outputLog(TL_FORCE_STRING, __FILE__, __FUNCTION__, __LINE__, format, ## args)
+
+#endif
 
 /* these traces must pass through the 'tf_isFilterPassed' function in order to be displayed */
 #define TRACE_ERROR(format, args...) __TRACE(TL_ERROR, TL_ERROR_STRING, format, ## args)
@@ -135,6 +149,31 @@ void trace_registerLevels(void);
  * correctly
  */
 void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_);
+
+/* 
+ * if we are using a stand-alone traceLog system and not integrating it into the
+ * traceFilter mechanism we need to provide an internal trace log level and a way
+ * to set it
+ */
+#ifndef DYNAMIC_TRACE_FILTER
+
+/*
+ * trace_setLogLevel:
+ * 
+ * this function is used to set the internal trace log level when this module
+ * is built with the DYNAMIC_TRACE_FILTER flag NOT set (i.e. stand-alone mode)
+ */
+void trace_setLogLevel(unsigned _logLevel);
+
+/*
+ * trace_getLogLevel:
+ * 
+ * this function is used to return the internal trace log level when this module
+ * is built with the DYNAMIC_TRACE_FILTER flag NOT set (i.e. stand-alone mode)
+ */
+unsigned trace_getLogLevel(void);
+
+#endif
 
 /*
  * trace_showLocation:
@@ -192,6 +231,14 @@ void trace_showPrefix(bool show_);
  */
 bool trace_isPrefixEnabled(void);
 
+/****************************************************************************
+ * 
+ * NOTE: There are no public APIs beyhond this point, all public functional
+ *       APIs and macros appear above this section, do not call anything
+ *       below this section directly!!
+ * 
+ ****************************************************************************/
+
 /*
  * common TRACE and DUMP output functions and macros that all the different
  * levels map to, these functions and macros should NOT be called directly
@@ -200,8 +247,37 @@ bool trace_isPrefixEnabled(void);
 extern void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
 extern void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
 
+#ifdef TRACE_LOG_DISABLED
+
+/* no trace logs, completly compile out all trace logs for performance */
+#define __TRACE(level, name, format, args...)
+#define __DUMP(address, length, level, name, format, args...)
+
+#else  /* trace logs enabled */
+
+#ifdef DYNAMIC_TRACE_FILTER
+
+/* 
+ * dynamic trace filtering enabled, use the tf_isFilterPassed function in the dynamic 
+ * trace filter module to determine if a given trace should be printed out
+ */
 #define __TRACE(level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
 #define __DUMP(address, length, level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputDump(address, length, name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+
+#else  /* stand-alone trace logs (i.e. no dynamic filtering) */
+
+/* 
+ * dynamic trace filtering not enabled, use use a simple compare of the desired hierarchical
+ * trace level against the configures trace level to determine if a given trace should be 
+ * printed out
+ */
+extern unsigned _traceLogLevel;
+#define __TRACE(level, name, format, args...) if (_traceLogLevel >= level) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+#define __DUMP(address, length, level, name, format, args...) if (_traceLogLevel >= level) {trace_outputDump(address, length, name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+
+#endif  /* DYNAMIC_TRACE_FILTER */
+
+#endif  /* TRACE_LOG_DISABLED */
 
 #ifdef __cplusplus
 }

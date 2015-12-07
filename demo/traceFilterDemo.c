@@ -256,8 +256,10 @@ void registerSignalHandlers(void)
 int main (int argc, char *argv[])
 {
 
-  PshellServerType serverType;
+#ifndef TRACE_LOG_DISABLED
   char dumpBuffer[DUMP_BUFFER_SIZE];
+#endif
+  PshellServerType serverType;
 
   /* validate our command line arguments and get the server type */
   if (argc == 2)
@@ -289,11 +291,13 @@ int main (int argc, char *argv[])
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
 
+#ifndef TRACE_LOG_DISABLED
   /* initialize a sample memory hex dump buffer */
   for (unsigned i = 0; i < DUMP_BUFFER_SIZE; i++)
   {
     dumpBuffer[i] = i;
   }
+#endif
 
   /*
    * register our standard trace levels with the trace filter

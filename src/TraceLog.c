@@ -46,6 +46,20 @@
  */
 
 /*************************
+ * public "member" data
+ *************************/
+
+/* 
+ * note that this data item is only used for a stand-alone TraceLog module, i.e.
+ * it is not part of the dynamic trace filtering mechanism, i.e. this module is
+ * built with the DYNAMIC_TRACE_FILTER flag NOT set, the levels can  be set from 
+ * within the program by making calls to the trace_setLogLevel function
+ */
+#ifndef DYNAMIC_TRACE_FILTER
+unsigned _traceLogLevel = TL_DEFAULT_LEVEL;
+#endif
+
+/*************************
  * private "member" data
  *************************/
 
@@ -72,6 +86,24 @@ static void formatHeader(const char *type_,
 /**************************************
  * public API "member" function bodies
  **************************************/
+
+#ifndef DYNAMIC_TRACE_FILTER
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_setLogLevel(unsigned _logLevel)
+{
+  _traceLogLevel = _logLevel;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+unsigned trace_getLogLevel(void)
+{
+  return (_traceLogLevel);
+}
+
+#endif
 
 /******************************************************************************/
 /******************************************************************************/
@@ -186,7 +218,9 @@ void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDef
   {
     _maxTypeLength = strlen(levelName_);
   }
+#ifdef DYNAMIC_TRACE_FILTER
   tf_addLevel(levelName_, levelValue_, isDefault_, isMaskable_);
+#endif
 }
 
 /******************************************************************************/

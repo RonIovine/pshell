@@ -296,3 +296,15 @@ TF_FAST_FILENAME_LOOKUP=y
 # for the "trace show symbols" command of the interactive pshell CLI.
 #
 TF_USE_COLORS=y
+
+#################################################################################
+#
+# The following set of compile options are just used by the TraceLog module
+#
+#################################################################################
+
+#
+# Specifies whether to stub out all the trace log macros for performance reasons,
+# comment out this compile flag to disable (i.e. stub out) all trace log macros
+#
+#TRACE_LOG_DISABLED=y
