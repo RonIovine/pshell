@@ -708,16 +708,16 @@ void pshell_runCommand(const char *command_, ...)
    */
   if (!_isCommandDispatched)
   {
-    /* create the command fro our varargs */
-    va_list args;
-    va_start(args, command_);
-    vsprintf(command, command_, args);
-    va_end(args);
     /* set this to false so we can short circuit any calls to pshell_printf since
      * there is no client side program to receive the output */
     _isCommandInteractive = false;
     /* set this to true so we can tokenize our command line with pshell_tokenize */
     _isCommandDispatched = true;
+    /* create the command from our varargs */
+    va_list args;
+    va_start(args, command_);
+    vsprintf(command, command_, args);
+    va_end(args);
     strcpy(fullCommand, command);
     /* user command, create the arg list and look for the command */
     if (((commandName = createArgs(fullCommand)) != NULL) &&
@@ -1988,11 +1988,10 @@ static void runLocalServer(void)
       stripWhitespace(inputLine);
 #endif
     }
-    /* if we are not in interactive mode, wait a little bit and try again */
-    while (!_isCommandInteractive)
-    {
-      sleep(1);
-    }
+    /* if we are currently process a non-interactive command (via the pshell_runCommand
+     * function call), wait a little bit for it to complete processing an interactive command */
+    while (!_isCommandInteractive) sleep(1);    
+    /* good to go, process an interactive command */
     processCommand(inputLine);
   }
 }
@@ -2827,11 +2826,10 @@ static void receiveTCP(void)
     if (length > 0)
     {
       addHistory(command);
-      /* if we are not in interactive mode, wait a little bit and try again */
-      while (!_isCommandInteractive)
-      {
-        sleep(1);
-      }
+      /* if we are currently process a non-interactive command (via the pshell_runCommand
+       * function call), wait a little bit for it to complete processing an interactive command */
+      while (!_isCommandInteractive) sleep(1);
+      /* good to go, process an interactive command */
       processCommand(command);
     }
     else if (length < 0)
@@ -3629,15 +3627,14 @@ static void receiveUDP(void)
     else
     {
 
-      /* if we are not in interactive mode, wait a little bit and try again */
-      while (!_isCommandInteractive)
-      {
-        sleep(1);
-      }
+      /* if we are currently process a non-interactive command (via the pshell_runCommand
+       * function call), wait a little bit for it to complete processing an interactive command */
+      while (!_isCommandInteractive) sleep(1);
+      
       /* make sure our command is NULL terminated */
       _pshellMsg->payload[receivedSize-PSHELL_HEADER_SIZE] = 0;
-
-      /* process the command and issue the reply */
+      
+      /* good to go, process an interactive command */
       processCommand(_pshellMsg->payload);
 
     }
@@ -3678,15 +3675,14 @@ static void receiveUNIX(void)
     else
     {
 
-      /* if we are not in interactive mode, wait a little bit and try again */
-      while (!_isCommandInteractive)
-      {
-        sleep(1);
-      }
+      /* if we are currently process a non-interactive command (via the pshell_runCommand
+       * function call), wait a little bit for it to complete processing an interactive command */
+      while (!_isCommandInteractive) sleep(1);
+      
       /* make sure our command is NULL terminated */
       _pshellMsg->payload[receivedSize-PSHELL_HEADER_SIZE] = 0;
-
-      /* process the command and issue the reply */
+      
+      /* good to go, process an interactive command */
       processCommand(_pshellMsg->payload);
 
     }

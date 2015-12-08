@@ -428,6 +428,10 @@ int main (int argc, char *argv[])
     sleep(1);
     TRACE_USER_LEVEL1("message 6");
     sleep(1);
+    TRACE_USER_LEVEL2("message 7");
+    sleep(1);
+    TRACE_USER_LEVEL3("message 8");
+    sleep(1);
   }
    
   /* cleanup any pshell system resources before exiting */

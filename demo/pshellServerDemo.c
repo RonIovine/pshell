@@ -268,14 +268,14 @@ void formatChecking(int argc, char *argv[])
   else if (pshell_isAlpha(argv[0]))
   {
     pshell_isEqual(argv[0], "myarg") ?
-    pshell_printf("Alphabetic arg: '%s' equal to 'myarg'\n", argv[0]) :
-    pshell_printf("Alphabetic arg: '%s' not equal to 'myarg'\n", argv[0]);
+      pshell_printf("Alphabetic arg: '%s' equal to 'myarg'\n", argv[0]) :
+      pshell_printf("Alphabetic arg: '%s' not equal to 'myarg'\n", argv[0]);
   }
   else if (pshell_isAlphaNumeric(argv[0]))
   {
     pshell_isEqual(argv[0], "myarg1") ?
-    pshell_printf("Alpha numeric arg: '%s' equal to 'myarg1'\n", argv[0]) :
-    pshell_printf("Alpha numeric arg: '%s' not equal to 'myarg1'\n", argv[0]);
+      pshell_printf("Alpha numeric arg: '%s' equal to 'myarg1'\n", argv[0]) :
+      pshell_printf("Alpha numeric arg: '%s' not equal to 'myarg1'\n", argv[0]);
   }
   else if (pshell_isFloat(argv[0]))
   {
