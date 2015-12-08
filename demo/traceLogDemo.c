@@ -190,9 +190,6 @@ int main (int argc, char *argv[])
   /* register our log function */
   trace_registerLogFunction(sampleLogFunction);
 
-  /* issue a trace so we can trigger the TRACE_WATCH functionality */
-  TRACE_INFO("First trace");
-
   /* go into an infinite loop issuing some traces so we can demonstrate dynamic trace filtering */
   for (;;)
   {

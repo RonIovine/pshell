@@ -155,7 +155,7 @@ static int _defaultIdleTimeout = 10;
  * support returning the overflow size).
  *
  * PSHELL_VSNPRINTF is NOT set:
-
+ * 
  * The buffer will be flushed to the client upon overflow.  Note that care must
  * be taken when setting the PSHELL_PAYLOAD_GUARDBAND value when operating in this
  * mode.
@@ -1988,8 +1988,8 @@ static void runLocalServer(void)
       stripWhitespace(inputLine);
 #endif
     }
-    /* if we are currently process a non-interactive command (via the pshell_runCommand
-     * function call), wait a little bit for it to complete processing an interactive command */
+    /* if we are currently processing a non-interactive command (via the pshell_runCommand
+     * function call), wait a little bit for it to complete before processing an interactive command */
     while (!_isCommandInteractive) sleep(1);    
     /* good to go, process an interactive command */
     processCommand(inputLine);
@@ -2069,7 +2069,7 @@ static void showWelcome(void)
     pshell_printf("%s  line editing and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
     pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   }
-  else  /* local server build with readline library */
+  else  /* local server built with readline library */
   {
 #ifdef PSHELL_READLINE
     pshell_printf("%s  Full <TAB> completion, up-arrow recall, command\n", PSHELL_WELCOME_BORDER);
@@ -2826,8 +2826,8 @@ static void receiveTCP(void)
     if (length > 0)
     {
       addHistory(command);
-      /* if we are currently process a non-interactive command (via the pshell_runCommand
-       * function call), wait a little bit for it to complete processing an interactive command */
+      /* if we are currently processing a non-interactive command (via the pshell_runCommand
+       * function call), wait a little bit for it to complete before processing an interactive command */
       while (!_isCommandInteractive) sleep(1);
       /* good to go, process an interactive command */
       processCommand(command);
@@ -3192,7 +3192,7 @@ static bool createSocket(void)
     {
       PSHELL_ERROR("Cannot bind to socket: address: %s, port: %d",
                    inet_ntoa(_localIpAddress.sin_addr),
-                     ntohs(_localIpAddress.sin_port));
+                   ntohs(_localIpAddress.sin_port));
       return (false);
     }
 
@@ -3627,8 +3627,8 @@ static void receiveUDP(void)
     else
     {
 
-      /* if we are currently process a non-interactive command (via the pshell_runCommand
-       * function call), wait a little bit for it to complete processing an interactive command */
+      /* if we are currently processing a non-interactive command (via the pshell_runCommand
+       * function call), wait a little bit for it to complete before processing an interactive command */
       while (!_isCommandInteractive) sleep(1);
       
       /* make sure our command is NULL terminated */
@@ -3675,8 +3675,8 @@ static void receiveUNIX(void)
     else
     {
 
-      /* if we are currently process a non-interactive command (via the pshell_runCommand
-       * function call), wait a little bit for it to complete processing an interactive command */
+      /* if we are currently processing a non-interactive command (via the pshell_runCommand
+       * function call), wait a little bit for it to complete before processing an interactive command */
       while (!_isCommandInteractive) sleep(1);
       
       /* make sure our command is NULL terminated */
