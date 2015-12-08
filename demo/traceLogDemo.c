@@ -157,14 +157,12 @@ int main (int argc, char *argv[])
    * track of our max level name string length so our trace display can be 
    * formatted and aligned correctly
    * 
-   * format of call is "name", level, isDefault, isMaskable, but the last
-   * two values are only used for dynamic filtering, so they are ignored
-   * in this stand-alone example
+   * format of call is "name", level
    */
 
-  trace_addUserLevel(TL_USER_LEVEL1_STRING, TL_USER_LEVEL1, false, true);
-  trace_addUserLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2, false, true);
-  trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3, false, true);  
+  trace_addUserLevel(TL_USER_LEVEL1_STRING, TL_USER_LEVEL1);
+  trace_addUserLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2);
+  trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3);  
 
   /* set our log level */
   trace_setLogLevel(logLevel);

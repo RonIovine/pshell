@@ -148,7 +148,7 @@ void trace_registerLevels(void);
  * our maximum trace type level string length so our display is formatted and aligned
  * correctly
  */
-void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_);
+void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_ = false, bool isMaskable_ = true);
 
 /* 
  * if we are using a stand-alone traceLog system and not integrating it into the
