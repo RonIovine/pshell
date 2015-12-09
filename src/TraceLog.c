@@ -64,7 +64,7 @@ unsigned _traceLogLevel = TL_DEFAULT_LEVEL;
  *************************/
 
 static TraceLogFunction _logFunction = NULL;
-static char _logPrefix[MAX_STRING_SIZE] = {"TRACE | "};
+static char _logPrefix[MAX_STRING_SIZE] = {"Trace | "};
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool _printLocation = true;
 static bool _printPath = false;
