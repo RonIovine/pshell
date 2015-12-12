@@ -32,7 +32,7 @@
 # file for it's build-time configuration settings.  The user should copy the
 # provided 'defconfig' file to '.config' and make any desired modifications 
 # to that file, then run the 'make'.  If the file '.config' is not found, the
-# 'defconfig' file will be copied to '.config' my the makefile processing before
+# 'defconfig' file will be copied to '.config' by the makefile processing before
 # the build process starts.  The user should NOT modify the provided 'defconfig'
 # file directly as it provides an example of the default build-time configuration
 # settings for reference.
@@ -47,7 +47,7 @@
 
 #################################################################################
 #
-# The following set of compile options are used by the pshell library part
+# The following set of compile options are used by the PshellServer library part
 # of this package. 
 #
 #################################################################################
@@ -74,8 +74,8 @@
 #PSHELL_DEFAULT_PROMPT="PSHELL>"
 
 #
-# change the default TCP server timeout, this can also be changed
-# at runtime on a per-server basis via the pshell-server.conf file
+# change the default TCP server idle session timeout (in minutes), this can also 
+# be changed at runtime on a per-server basis via the pshell-server.conf file
 #
 #PSHELL_DEFAULT_TIMEOUT=10
 
@@ -134,6 +134,8 @@
 # command line editing etc.
 #
 # NOTE: The included x86_64 binaries were built with this flag enabled.
+#       If you enable this flag, you must be sure to have the readline
+#       development libraries (libreadline-dev) installed on your system.
 #
 #PSHELL_READLINE=y
 
