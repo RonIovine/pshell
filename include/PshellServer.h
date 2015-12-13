@@ -164,7 +164,11 @@ void pshell_addCommand(PshellFunction function_,
  * locally registered callback functions, the passed in string command should
  * be the exact same format as when calling the same desired command interactively
  * via the pshell command line client, this function uses a 'printf' type vararg
- * interface
+ * interface, note, invoking a registered command via this function will cause
+ * that function to potentially be executed under two separate thread contexts,
+ * the main pshell server thread and the thread that calls pshell_runCommand, as 
+ * such, any re-entrancy issues that might arise within the registered callback 
+ * function need to be taken into account
  */
 void pshell_runCommand(const char *command_, ...);
 
