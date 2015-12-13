@@ -165,7 +165,8 @@ PSHELL_VSNPRINTF=y
 # value should be smaller than the PSHELL_PAYLOAD_CHUNK size but
 # larger than the maximum expected data size for any given single
 # "pshell_printf" function call.  The default value for this is 400
-# (bytes).
+# (bytes).  If you have a single pshell_printf that is in excess
+# of the configured guardband, memory corruption may occur.
 #
 #PSHELL_PAYLOAD_GUARDBAND=400
 

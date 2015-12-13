@@ -266,12 +266,12 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
     vsprintf(command, command_, args);
     va_end(args);
     control->pshellMsg.header.dataNeeded = true;
-    if (control->defaultTimeout == 0)
+    if (control->defaultTimeout == PSHELL_NO_WAIT)
     {
       PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
     }
     if ((sendPshellCommand(control, command, control->defaultTimeout) == PSHELL_COMMAND_SUCCESS) &&
-        (control->defaultTimeout > 0))
+        (control->defaultTimeout != PSHELL_NO_WAIT))
     {
       bytesExtracted = extractResults(control, results_, size_);
     }
