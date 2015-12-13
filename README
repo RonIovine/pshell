@@ -66,6 +66,7 @@ The following lists all the items in this package along with a brief description
   - pshellServerDemo         -- Demo application using the pshell server library features
   - pshellControlDemo        -- Demo application using the pshell control library features
   - traceFilterDemo          -- Demo application using the optional trace filter features
+  - traceLogDemo             -- Demo application using the stand-alone TraceLog module
 
 INSTALLATION:
 
@@ -345,7 +346,7 @@ system running Raspbian Linux.
 NOTE: While an overriding design goal was to write all the code in standard ANSI
       C and use standard C linkages, there are a couple of small places where some 
       C++ semantics snuck in, namely with function prototypes that take default
-      parameters and a struct that has a constructor.  Since all of the file extensions
+      parameters and one struct that has a constructor.  Since all of the file extensions
       are just '.c' in keeping with the spirit of C, you cannot use the gcc compiler
       since it will assume C only semantics.  As such, this package needs to be built
       with the 'g++' compiler.
@@ -399,9 +400,10 @@ PORTING:
 This package was written to run on Unix/Linux type platforms and their
 derivitaves.  This does not preclude this package from being ported to
 any other operating system.  All that is needed is basic BSD socket and
-posix thread support.  This package is written entirely in standard 
+posix thread support.  This package is written entirely* in standard 
 ANSI 'C'.
 
+* See NOTE in BUILDING section.
 
 Ron Iovine
 
