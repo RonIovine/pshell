@@ -79,7 +79,7 @@ Linux distributions.  It has also been successfully built and run on a ARM based
 Raspberry Pi system running Raspbian Linux.  If using this package for a a different
 target, see the following section on building from source.
 
-To see the usage of the script 'cd' to that directory and type:
+To see the usage of the script 'cd' to the top level pshell directory and type:
 
 $ ./install.sh -h
 
@@ -141,6 +141,7 @@ main features of the PSHELL library can be found in the files:
 $PSHELL_INSTALL/demo/pshellServerDemo.c  --  Server demo for user defined commands
 $PSHELL_INSTALL/demo/pshellControlDemo.c --  Sample pshell control external client
 $PSHELL_INSTALL/demo/traceFilterDemo.c   --  Server demo for dynamic trace filtering
+$PSHELL_INSTALL/demo/traceLogDemo.c      --  Demo using the stand-alone TraceLog module
 
 EXECUTION:
 
