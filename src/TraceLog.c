@@ -125,20 +125,11 @@ void trace_setLogPrefix(const char *name_)
 {
   if ((name_ != NULL) && (strlen(name_) > 0))
   {
-    int length = strlen(name_);
-    for (int i = 0; i < length; i++)
-    {
-      //_logPrefix[i] = toupper(name_[i]);
-      _logPrefix[i] = name_[i];
-    }
-    _logPrefix[length] = ' ';
-    _logPrefix[length+1] = '|';
-    _logPrefix[length+2] = ' ';
-    _logPrefix[length+3] = 0;
+    sprintf(_logPrefix, "%s | ", name_);
   }
   else
   {
-    _logPrefix[0] = 0;
+    _logPrefix[0] = '\0';
   }
 }
 
