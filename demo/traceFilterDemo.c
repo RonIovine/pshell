@@ -63,18 +63,18 @@ TF_SYMBOL_TABLE;
 /******************************************************************************/
 void foo(void)
 {
-  TRACE_ENTER("message 1");
+  TRACE_ENTER("");
   sleep(1);
-  TRACE_EXIT("message 2");
+  TRACE_EXIT("");
 }
 
 /******************************************************************************/
 /******************************************************************************/
 void bar(void)
 {
-  TRACE_ENTER("message 1");
+  TRACE_ENTER(NULL);
   sleep(1);
-  TRACE_EXIT("message 2");
+  TRACE_EXIT(NULL);
 }
 
 /* thread function to show thread based filtering */
