@@ -288,6 +288,8 @@ void trace_outputDump(void *address_,
   char outputString[MAX_STRING_SIZE];
   formatHeader(type_, file_, function_, line_, outputString);
   unsigned length = strlen(outputString);
+  sprintf(&outputString[length], "%d Bytes | ", length_);
+  length = strlen(outputString);
   va_list args;
   va_start(args, format_);
   vsprintf(&outputString[strlen(outputString)], format_, args);
