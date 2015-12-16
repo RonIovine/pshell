@@ -117,6 +117,7 @@ static void showConfig(void);
 static void showUsage(void);
 static void configureFilter(int argc, char *argv[]);
 static void addLevelFilter(char *name_, unsigned &level_);
+static bool getHierarchicalLevel(char *name_, unsigned &level_);
 static void addFileFilter(const char *file_, bool interactive_);
 static void addFunctionFilter(const char *function_, bool interactive_);
 static void addThreadFilter(const char *thread_, bool interactive_);
@@ -1320,15 +1321,21 @@ void configureFilter(int argc, char *argv[])
     {
       _hierarchicalLevel = _defaultHierarchicalLevel;
     }
+    else if (pshell_isAlpha(argv[1]))
+    {
+      if (!getHierarchicalLevel(argv[1], _hierarchicalLevel))
+      {
+        pshell_printf("\n");
+        pshell_printf("ERROR: Invalid level name: '%s'\n", argv[1]);
+        showLevels();
+      }
+    }
     else if ((pshell_getUnsigned(argv[1]) < _minHierarchicalLevel) ||
              (pshell_getUnsigned(argv[1]) > _maxHierarchicalLevel))
     {
       pshell_printf("\n");
-      pshell_printf("ERROR: Invalid hierarchical value: %d, must be %d-%d, 'all', or 'default'\n",
-                    pshell_getUnsigned(argv[1]),
-                    _minHierarchicalLevel,
-                    _maxHierarchicalLevel);
-      pshell_printf("\n");      
+      pshell_printf("ERROR: Invalid level value: %s\n", argv[1]);
+      showLevels();
     }
     else
     {
@@ -1484,6 +1491,21 @@ const void showSymbols(char *symbol_)
   }
 }
 #endif
+
+/******************************************************************************/
+/******************************************************************************/
+bool getHierarchicalLevel(char *name_, unsigned &level_)
+{
+  for (int i = 0; i < TF_MAX_LEVELS; i++)
+  {
+    if ((_levelFilters[i].name != NULL) && (strcasecmp(name_, _levelFilters[i].name) == 0))
+    {
+      level_ = i;
+      return (true);
+    }
+  }
+  return (false);
+}
 
 /******************************************************************************/
 /******************************************************************************/
