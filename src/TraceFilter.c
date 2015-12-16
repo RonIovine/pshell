@@ -223,7 +223,7 @@ static int _numRegisteredThreads = 0;
 static RegisteredThread _registeredThreads[TF_MAX_THREAD_FILTERS];
 static unsigned _maxThreadNameLength = 0;
 
-static const char *_prefix1 = "                     : ";
+static const char *_prefix1 = "                        : ";
 static const char *_prefix2 = " [";
 static const char *_prefix3 = ", ";
 static const char *_prefix4 = ":";
@@ -790,24 +790,24 @@ void showConfig(void)
   const char *prefix1 = "";
   const char *prefix2 = "";
   pshell_printf("\n");
-  pshell_printf("********************************\n");
-  pshell_printf("*  TRACE FILTER CONFIGURATION  *\n");
-  pshell_printf("********************************\n");
+  pshell_printf("**********************************\n");
+  pshell_printf("*   TRACE FILTER CONFIGURATION   *\n");
+  pshell_printf("**********************************\n");
   pshell_printf("\n");
-  pshell_printf("Trace enabled........: %s\n", ((_traceEnabled) ? ON : OFF));
+  pshell_printf("Trace enabled...........: %s\n", ((_traceEnabled) ? ON : OFF));
 #ifdef TF_INTEGRATED_TRACE_LOG
-  pshell_printf("Trace location.......: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
-  pshell_printf("Trace path...........: %s\n", ((trace_isPathEnabled()) ? ON : OFF));
-  pshell_printf("Trace prefix.........: %s\n", ((trace_isPrefixEnabled()) ? ON : OFF));
-  pshell_printf("Trace timestamp......: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
+  pshell_printf("Trace location..........: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
+  pshell_printf("Trace path..............: %s\n", ((trace_isPathEnabled()) ? ON : OFF));
+  pshell_printf("Trace prefix............: %s\n", ((trace_isPrefixEnabled()) ? ON : OFF));
+  pshell_printf("Trace timestamp.........: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
 #endif
   if (_watchSymbol != NULL)
   {
-    pshell_printf("Trace watchpoint.....: %s\n", _watchSymbol);
-    pshell_printf("  Address............: %p\n", _watchAddress);
-    pshell_printf("  Width..............: %d byte(s)\n", _watchWidth);
-    pshell_printf("  Num Hits...........: %d\n", _watchNumHits);
-    pshell_printf("  Control............: ");
+    pshell_printf("Trace watchpoint........: %s\n", _watchSymbol);
+    pshell_printf("  Address...............: %p\n", _watchAddress);
+    pshell_printf("  Width.................: %d byte(s)\n", _watchWidth);
+    pshell_printf("  Num Hits..............: %d\n", _watchNumHits);
+    pshell_printf("  Control...............: ");
     if (_watchControl == TF_ONCE)
     {
       pshell_printf("ONCE\n");
@@ -823,13 +823,13 @@ void showConfig(void)
   }
   else
   {
-    pshell_printf("Trace watchpoint.....: %s\n", NONE);
+    pshell_printf("Trace watchpoint........: %s\n", NONE);
   }
   if (_callbackFunction != NULL)
   {
-    pshell_printf("Trace callback.......: %s\n", _callbackName);
-    pshell_printf("  Num hits...........: %d\n", _callbackNumHits);
-    pshell_printf("  Control............: ");
+    pshell_printf("Trace callback..........: %s\n", _callbackName);
+    pshell_printf("  Num hits..............: %d\n", _callbackNumHits);
+    pshell_printf("  Control...............: ");
     if (_callbackControl == TF_ONCE)
     {
       pshell_printf("ONCE\n");
@@ -845,30 +845,23 @@ void showConfig(void)
   }
   else
   {
-    pshell_printf("Trace callback.......: %s\n", NONE);
+    pshell_printf("Trace callback..........: %s\n", NONE);
   }
-  if (_hierarchicalLevel == _defaultHierarchicalLevel)
+  pshell_printf("Hierarchical level(s)...: %s\n", _levelFilters[0].name);
+  for (unsigned i = 1; i <= _hierarchicalLevel; i++)
   {
-    pshell_printf("Hierarchical level...: %d (default)\n", _hierarchicalLevel);
+    pshell_printf("                        : %s\n", _levelFilters[i].name);
   }
-  else if (_hierarchicalLevel == _maxHierarchicalLevel)
-  {
-    pshell_printf("Hierarchical level...: %d (all)\n", _hierarchicalLevel);
-  }
-  else
-  {
-    pshell_printf("Hierarchical level...: %d\n", _hierarchicalLevel);
-  }
-  pshell_printf("Filter enabled.......: %s\n", ((_filterEnabled) ? ON : OFF));
-  pshell_printf("  Local filter.......: %s\n", ((_localFilterEnabled) ? ON : OFF));
-  pshell_printf("    File filter......: %s\n", ((_fileFilterEnabled) ? ON : OFF));
+  pshell_printf("Filter enabled..........: %s\n", ((_filterEnabled) ? ON : OFF));
+  pshell_printf("  Local filter..........: %s\n", ((_localFilterEnabled) ? ON : OFF));
+  pshell_printf("    File filter.........: %s\n", ((_fileFilterEnabled) ? ON : OFF));
   if (_numFileFilters == 0)
   {
-    pshell_printf("      File(s)........: %s\n", NONE);
+    pshell_printf("      File(s)...........: %s\n", NONE);
   }
   else
   {
-    pshell_printf("      File(s)........: ");
+    pshell_printf("      File(s)...........: ");
     for (int i = 0; i < _numFileFilters; i++)
     {
       pshell_printf("%s%s", prefix1, _fileFilters[i].filename);
@@ -903,14 +896,14 @@ void showConfig(void)
     }
   }
   prefix1 = "";
-  pshell_printf("    Function filter..: %s\n", ((_functionFilterEnabled) ? ON : OFF));
+  pshell_printf("    Function filter.....: %s\n", ((_functionFilterEnabled) ? ON : OFF));
   if (_numFunctionFilters == 0)
   {
-    pshell_printf("      Function(s)....: %s\n", NONE);
+    pshell_printf("      Function(s).......: %s\n", NONE);
   }
   else
   {
-    pshell_printf("      Function(s)....: ");
+    pshell_printf("      Function(s).......: ");
     for (int i = 0; i < _numFunctionFilters; i++)
     {
       pshell_printf("%s%s ", prefix1, _functionFilters[i]);
@@ -932,14 +925,14 @@ void showConfig(void)
     }
   }
   prefix1 = "";
-  pshell_printf("    Thread filter....: %s\n", ((_threadFilterEnabled) ? ON : OFF));
+  pshell_printf("    Thread filter.......: %s\n", ((_threadFilterEnabled) ? ON : OFF));
   if (_numThreadFilters == 0)
   {
-    pshell_printf("      Thread(s)......: %s\n", NONE);
+    pshell_printf("      Thread(s).........: %s\n", NONE);
   }
   else
   {
-    pshell_printf("      Thread(s)......: ");
+    pshell_printf("      Thread(s).........: ");
     for (int i = 0; i < _numThreadFilters; i++)
     {
       pshell_printf("%s%s ", prefix1, _threadFilters[i].threadName);
@@ -960,9 +953,9 @@ void showConfig(void)
       prefix1 = _prefix1;
     }
   }
-  pshell_printf("  Global filter......: %s\n", ((_globalFilterEnabled) ? ON : OFF));
+  pshell_printf("  Global filter.........: %s\n", ((_globalFilterEnabled) ? ON : OFF));
   prefix1 = "";
-  pshell_printf("    Level(s).........: ");
+  pshell_printf("    Level(s)............: ");
   for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
     if ((_levelFilters[i].name != NULL) && (_levelFilters[i].level & _globalLevel))
