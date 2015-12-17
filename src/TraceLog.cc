@@ -243,20 +243,12 @@ void trace_outputLog(const char *type_,
   pthread_mutex_lock(&_mutex);
   char outputString[MAX_STRING_SIZE];
   formatHeader(type_, file_, function_, line_, outputString);
-  unsigned length = strlen(outputString);
   va_list args;
   va_start(args, format_);
   vsprintf(&outputString[strlen(outputString)], format_, args);
   va_end(args);
-  if (strlen(outputString) == length)
-  {
-    outputString[length-2] = '\n';
-    outputString[length-1] = '\0';
-  }
-  else
-  {
-    strcat(outputString, "\n");
-  }
+  // add newline
+  strcat(outputString, "\n");
   printLine(outputString);
   pthread_mutex_unlock(&_mutex);
 }
@@ -278,22 +270,14 @@ void trace_outputDump(void *address_,
   unsigned short offset = 0;
   char outputString[MAX_STRING_SIZE];
   formatHeader(type_, file_, function_, line_, outputString);
-  unsigned length = strlen(outputString);
-  sprintf(&outputString[length], "%d Bytes | ", length_);
-  length = strlen(outputString);
+  // add the number of bytes in this hex dump
+  sprintf(&outputString[strlen(outputString)], "%d Bytes | ", length_);
   va_list args;
   va_start(args, format_);
   vsprintf(&outputString[strlen(outputString)], format_, args);
   va_end(args);
-  if (strlen(outputString) == length)
-  {
-    outputString[length-2] = '\n';
-    outputString[length-1] = '\0';
-  }
-  else
-  {
-    strcat(outputString, "\n");
-  }
+  // add newline
+  strcat(outputString, "\n");
   printLine(outputString);
   asciiLine[0] = 0;
   outputString[0] = 0;

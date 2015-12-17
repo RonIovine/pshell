@@ -345,12 +345,12 @@ This package has been successfully re-built and run on a Raspberry Pi/ARM based
 system running Raspbian Linux.  
 
 NOTE: While an overriding design goal was to write all the code in standard ANSI
-      C and use standard C linkages, there are a couple of small places where some 
-      C++ semantics snuck in, namely with function prototypes that take default
-      parameters and one struct that has a constructor.  Since all of the file extensions
-      are just '.c' in keeping with the spirit of C, you cannot use the gcc compiler
-      since it will assume C only semantics.  As such, this package needs to be built
-      with the 'g++' compiler.
+      C and use standard C linkages, and a standard functional 'C' API, there are
+      a couple of small places where some C++ semantics snuck in, namely with 
+      function prototypes that take default parameters and one struct that has 
+      a constructor.  Because of this, all the source modules have a '.cc' C++
+      style extension instead of the customary '.c' C style extension in order 
+      to be able to use the standard 'gcc' compiler as well the 'g++' compiler.
 
 The following is the usage of the Makefile, see the included 'defconfig' file for
 all the build-time options and their descriptions:
@@ -401,10 +401,10 @@ PORTING:
 This package was written to run on Unix/Linux type platforms and their
 derivitaves.  This does not preclude this package from being ported to
 any other operating system.  All that is needed is basic BSD socket and
-posix thread support.  This package is written entirely* in standard 
-ANSI 'C'.
-
-* See NOTE in BUILDING section.
+posix thread support.  The API is a standard 'C' functional API, an attempt
+was made to stick with standard ANSI 'C' as much as possible, however,
+a very few small concessions to C++ we made, see the notes in the BUILDING
+section about the deatils.
 
 Ron Iovine
 
