@@ -28,7 +28,7 @@
 
 CC=gcc
 
-FILE_EXT=cc
+SRC_EXT=cc
 
 INCLUDE = -I$(abspath include)
 
@@ -298,36 +298,36 @@ help:
 
 lib:
 	@echo "Building libpshell-server-full.a..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellServer.$(FILE_EXT) -o PshellServer.o
-	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceFilter.$(FILE_EXT) -o TraceFilter.o
-	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.$(FILE_EXT) -o TraceLog.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-full.a $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-server-full.so..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellServer.$(FILE_EXT) -o PshellServer.o
-	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceFilter.$(FILE_EXT) -o TraceFilter.o
-	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.$(FILE_EXT) -o TraceLog.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-full.so $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-server-stub.a..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.$(FILE_EXT) -o PshellStub.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-stub.a PshellStub.o
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-server-stub.so..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.$(FILE_EXT) -o PshellStub.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-stub.so PshellStub.o
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-control.a..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellControl.$(FILE_EXT) -o PshellControl.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellControl.$(SRC_EXT) -o PshellControl.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-control.a PshellControl.o
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-control.so..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellControl.$(FILE_EXT) -o PshellControl.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellControl.$(SRC_EXT) -o PshellControl.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-control.so PshellControl.o
 	$(VERBOSE)rm *.o
 
@@ -336,22 +336,22 @@ lib:
 
 pshell:
 	@echo "Building pshell stand-alone UDP/UNIX client..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(FILE_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
 demo:
 	@echo "Building pshellServerDemo program..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(FILE_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
 	
 	@echo "Building pshellControlDemo program..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(FILE_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 	
 ifeq ($(TF_INTEGRATED_TRACE_LOG),y)
 	@echo "Building traceFilterDemo program..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.$(FILE_EXT) $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.$(SRC_EXT) $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
 endif
 
 	@echo "Building traceLogDemo program..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(FILE_EXT) $(DEMO_DIR)/traceLogDemo.$(FILE_EXT) -o $(BIN_DIR)/traceLogDemo
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) -o $(BIN_DIR)/traceLogDemo
 
 all: lib pshell demo
 	@echo "PSHELL package successfully built..."

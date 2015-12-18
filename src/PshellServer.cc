@@ -1349,13 +1349,18 @@ bool pshell_isEqualNoCase(const char *string1_, const char *string2_)
 /******************************************************************************/
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_)
 {
+  unsigned length;
   if ((string1_ == NULL) && (string2_ == NULL))
   {
     return (true);
   }
+  else if ((length = strlen(string1_)) > strlen(string2_))
+  {
+    return (false);
+  }
   else if ((string1_ != NULL) && (string2_ != NULL))
   {
-    return (strncmp(string1_, string2_, minChars_) == 0);
+    return (strncmp(string1_, string2_, MAX(length, minChars_)) == 0);
   }
   else
   {
@@ -1367,13 +1372,18 @@ bool pshell_isSubString(const char *string1_, const char *string2_, unsigned min
 /******************************************************************************/
 bool pshell_isSubStringNoCase(const char *string1_, const char *string2_, unsigned minChars_)
 {
+  unsigned length;
   if ((string1_ == NULL) && (string2_ == NULL))
   {
     return (true);
   }
+  else if ((length = strlen(string1_)) > strlen(string2_))
+  {
+    return (false);
+  }
   else if ((string1_ != NULL) && (string2_ != NULL))
   {
-    return (strncasecmp(string1_, string2_, minChars_) == 0);
+    return (strncasecmp(string1_, string2_, MAX(length, minChars_)) == 0);
   }
   else
   {

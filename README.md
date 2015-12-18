@@ -54,7 +54,13 @@ In addition to the infrastructure components, three demo programs are also provi
 show the usage of the pshell server API, one to show the usage of pshell control API, and one
 to show the usage of the trace filter/trace log API.
 
-See the full README file for a complete description of all the components, installation, and usage.
+The code is written almost entirely in standard ANSI 'C', and the API is a functional 'C' API, 
+however, there are a couple of isolated places where C++ semantics are used.  Because of this, 
+all of the source files use the '.cc' C++ style extension instead of the more normal '.c' C 
+style extension in order to be able to use the 'gcc' compiler (which uses the file extension 
+for the filetype key) as well the 'g++' compiler.
+
+See the full README file for a complete description of all the components, installation, building, and usage.
 
 Note, this package was originally hosted at [code.google.com](https://code.google.com) as 
 [RDB-Lite](https://code.google.com/p/rdb-lite), it was re-christened as 'pshell' when it was 
