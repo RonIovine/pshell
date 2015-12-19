@@ -94,7 +94,7 @@ enum PshellServerMode
  ***************************************/
 
 /*
- * pshell_setLogLevel:
+ * pshell_setServerLogLevel:
  * 
  * function and constants to let the host program set the
  * internal debug log level, if the user of this API does
@@ -109,17 +109,17 @@ enum PshellServerMode
 #define PSHELL_LOG_LEVEL_ALL       PSHELL_LOG_LEVEL_3
 #define PSHELL_LOG_LEVEL_DEFAULT   PSHELL_LOG_LEVEL_ALL
 
-void pshell_setLogLevel(unsigned level_);
+void pshell_setServerLogLevel(unsigned level_);
 
 /*
- * pshell_registerLogFunction:
+ * pshell_registerServerLogFunction:
  * 
  * typedef and function to allow the host program to register a logging
  * function for message output logging, if no output function is registered
  * 'printf' will be used to print out the log messages
  */
 typedef void (*PshellLogFunction)(const char *outputString_);
-void pshell_registerLogFunction(PshellLogFunction logFunction_);
+void pshell_registerServerLogFunction(PshellLogFunction logFunction_);
 
 /*
  * PSHELL user callback function prototype definition, the interface 

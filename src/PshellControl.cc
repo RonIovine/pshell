@@ -121,14 +121,14 @@ static void _printf(const char *format_, ...);
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setLogLevel(unsigned level_)
+void pshell_setControlLogLevel(unsigned level_)
 {
   _logLevel = level_;
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_registerLogFunction(PshellLogFunction logFunction_)
+void pshell_registerControlLogFunction(PshellLogFunction logFunction_)
 {
   if (logFunction_ != NULL)
   {

@@ -50,7 +50,7 @@ extern "C" {
  *******************************************************************************/
 
 /*
- * pshell_setLogLevel:
+ * pshell_setCotrolLogLevel:
  *
  * function and constants to let the client set the internal debug log level,
  * if the client of this API does not want to see any internal message printed,
@@ -64,17 +64,17 @@ extern "C" {
 #define PSHELL_LOG_LEVEL_ALL       PSHELL_LOG_LEVEL_3
 #define PSHELL_LOG_LEVEL_DEFAULT   PSHELL_LOG_LEVEL_2
 
-void pshell_setLogLevel(unsigned level_);
+void pshell_setControlLogLevel(unsigned level_);
 
 /*
- * pshell_registerLogFunction:
+ * pshell_registerControlLogFunction:
  *
  * typedef and function to allow a client program to register a logging
  * function for message output logging, if no output function is registered
  * 'printf' will be used to print out the log messages
  */
 typedef void (*PshellLogFunction)(const char *outputString_);
-void pshell_registerLogFunction(PshellLogFunction logFunction_);
+void pshell_registerControlLogFunction(PshellLogFunction logFunction_);
 
 /*
  * the following enum values are returned by the non-extraction

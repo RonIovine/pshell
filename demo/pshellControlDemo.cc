@@ -147,7 +147,7 @@ int main (int argc, char *argv[])
   if ((sid = pshell_connectServer(argv[0], argv[1], port, timeout)) != PSHELL_INVALID_SID)
   {
     // set our debug level
-    pshell_setLogLevel(logLevel);
+    pshell_setControlLogLevel(logLevel);
     inputLine[0] = 0;
     printf("Enter command or 'q' to quit\n");
     while (inputLine[0] != 'q')
