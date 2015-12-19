@@ -705,7 +705,8 @@ void pshell_runCommand(const char *command_, ...)
   /* 
    * only dispatch command if we are not already in the middle of
    * dispatching an interactive command
-   */
+   */   
+  pthread_mutex_lock(&_mutex);
   if (!_isCommandDispatched)
   {
     /* set this to false so we can short circuit any calls to pshell_printf since
@@ -743,6 +744,7 @@ void pshell_runCommand(const char *command_, ...)
     /* set back to interactive mode */
     _isCommandInteractive = true;
   }
+  pthread_mutex_unlock(&_mutex);
 }
 
 /******************************************************************************/
@@ -3435,6 +3437,8 @@ static void processCommand(char *command_)
                                                  and we need to grab more memory, UDP server only */
   PshellMsg updatePayloadSize;
 
+  pthread_mutex_lock(&_mutex);
+  
   /* save off our original command */
   strcpy(savedCommand, command_);
   strcpy(fullCommand, command_);
@@ -3607,6 +3611,7 @@ static void processCommand(char *command_)
    */
   _isCommandDispatched = false;
   cleanupTokens();
+  pthread_mutex_unlock(&_mutex);
 
 }
 

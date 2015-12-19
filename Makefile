@@ -178,7 +178,6 @@ ifdef PSHELL_COPY_ADD_COMMAND_STRINGS
   PSHELL_FLAGS += -DPSHELL_COPY_ADD_COMMAND_STRINGS
 endif
 
-
 ifdef PSHELL_INCLUDE_TRACE_FILTER
   PSHELL_OBJS += TraceFilter.o
   # the integrated trace module is dependent on the trace filter module,

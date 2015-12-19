@@ -81,9 +81,9 @@ typedef bool (*tf_TraceCallback)(void);
  */
 enum tf_TraceControl
 {
-  TF_ONCE,
-  TF_CONTINUOUS,
-  TF_ABORT
+  TF_ONCE,       // stop evaluating trigger on first successful occurance
+  TF_CONTINUOUS, // always evaluate trigger at every trace
+  TF_ABORT       // termitate program on first successful evaluation occurance
 };
 
 /*
