@@ -1,8 +1,6 @@
 # pshell
 **A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++ Applications**
 
-##### INTRODUCTION:
-
 This package contains all the necessary code, documentation and examples for
 building C/C++ applications that incorporate a Process Specific Embedded
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
