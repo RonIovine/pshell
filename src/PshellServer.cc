@@ -1679,7 +1679,9 @@ void *pshell_getAddress(const char *string_)
 /******************************************************************************/
 bool pshell_getBool(const char *string_)
 {
-  return (pshell_isEqual(string_, "true"));
+  return (pshell_isEqual(string_, "true") || 
+          pshell_isEqual(string_, "yes") || 
+          pshell_isEqual(string_, "on"));
 }
 
 /******************************************************************************/
@@ -1894,10 +1896,11 @@ char *commandGenerator(const char *command_, int state_)
 /******************************************************************************/
 static void stripWhitespace(char *string_)
 {
-  unsigned i;
+  int i;
   char *str = string_;
 
-  for (i = 0; i < strlen(string_); i++)
+  /* strip leading whitespace */
+  for (i = 0; i < (int)strlen(string_); i++)
   {
     if (!isspace(string_[i]))
     {
@@ -1909,10 +1912,10 @@ static void stripWhitespace(char *string_)
   {
     strcpy(string_, str);
   }
-  /* now NULL terminate the string */
-  if (string_[strlen(string_)-1] == '\n')
+  /* strip trailing whitespace */
+  for (i = strlen(string_)-1; ((i >= 0) && isspace(string_[i])); i--)
   {
-    string_[strlen(string_)-1] = 0;
+    string_[i] = '\0';
   }
 }
 

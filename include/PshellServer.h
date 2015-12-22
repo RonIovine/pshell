@@ -312,7 +312,7 @@ bool pshell_isFloat(const char *string_);
 /* return address from string value */
 void *pshell_getAddress(const char *string_);
 
-/* return bool from string value of 'true' or 'false' */
+/* return bool from string values of true/false, yes/no, on/off */
 bool pshell_getBool(const char *string_);
 
 /* return numeric values from string value */
