@@ -297,10 +297,11 @@ bool pshell_isEqualNoCase(const char *string1_, const char *string2_);
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_);
 bool pshell_isSubStringNoCase(const char *string1_, const char *string2_, unsigned minChars_);
 bool pshell_isAlpha(const char *string_);
-bool pshell_isNumeric(const char *string_);  /* isDec || isHex */
 bool pshell_isAlphaNumeric(const char *string_);
 bool pshell_isDec(const char *string_);
-bool pshell_isHex(const char *string_);      /* format 0x<hexDigits> */
+/* if needHexPrefix == true, format is 0x<hexDigits>, if needHexPrefix == false, format is <hexDigits> */
+bool pshell_isHex(const char *string_, bool needHexPrefix_ = true);      
+bool pshell_isNumeric(const char *string_, bool needHexPrefix_ = true);  /* isDec || isHex */
 bool pshell_isFloat(const char *string_);
 
 /*
@@ -315,15 +316,26 @@ void *pshell_getAddress(const char *string_);
 /* return bool from string values of true/false, yes/no, on/off */
 bool pshell_getBool(const char *string_);
 
-/* return numeric values from string value */
-long pshell_getLong(const char *string_);
-int pshell_getInt(const char *string_);
-short pshell_getShort(const char *string_);
-char pshell_getChar(const char *string_);
-unsigned pshell_getUnsigned(const char *string_);
-unsigned long pshell_getUnsignedLong(const char *string_);
-unsigned short pshell_getUnsignedShort(const char *string_);
-unsigned char pshell_getUnsignedChar(const char *string_);
+/* desired radix of integer extractions */
+enum PshellRadix
+{
+  PSHELL_RADIX_DEC, /* <decimalValue> only */
+  PSHELL_RADIX_HEX, /* 0x<hexValue> or <hexValue> depending on setting of needHexPrefix */
+  PSHELL_RADIX_ANY  /* will transparently work for <decValue> or 0x<hexValue> */
+};
+/* 
+ * return numeric values from string value, the needHexPrefix value is only used
+ * for a radix of PSHELL_RADIX_HEX, if set to true, the value needs to be preceeded 
+ * by the 0x identifier, if set to false, then the prefic is not necessary
+ */
+long pshell_getLong(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+int pshell_getInt(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+short pshell_getShort(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+char pshell_getChar(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+unsigned pshell_getUnsigned(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+unsigned long pshell_getUnsignedLong(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+unsigned short pshell_getUnsignedShort(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+unsigned char pshell_getUnsignedChar(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
 float pshell_getFloat(const char *string_);
 double pshell_getDouble(const char *string_);
 

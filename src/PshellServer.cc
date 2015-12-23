@@ -1416,9 +1416,9 @@ bool pshell_isAlpha(const char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
-bool pshell_isNumeric(const char *string_)
+bool pshell_isNumeric(const char *string_, bool needHexPrefix_)
 {
-  return (pshell_isDec(string_) || pshell_isHex(string_));
+  return (pshell_isDec(string_) || pshell_isHex(string_, needHexPrefix_));
 }
 
 /******************************************************************************/
@@ -1469,31 +1469,32 @@ bool pshell_isDec(const char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
-bool pshell_isHex(const char *string_)
+bool pshell_isHex(const char *string_, bool needHexPrefix_)
 {
   unsigned i;
-  if (pshell_getLength(string_) > 2)
+  unsigned start = 0;
+  if (needHexPrefix_)
   {
-    if ((string_[0] == '0') && (tolower(string_[1]) == 'x'))
+    /* if they are requesting the 0x prefix, make sure it is there */
+    if ((pshell_getLength(string_) > 2) &&
+        (string_[0] == '0') && 
+        (tolower(string_[1]) == 'x'))
     {
-      for (i = 2; i < pshell_getLength(string_); i++)
-      {
-        if (!isxdigit(string_[i]))
-        {
-          return (false);
-        }
-      }
-      return (true);
+      start = 2;
     }
     else
     {
       return (false);
     }
   }
-  else
+  for (i = start; i < pshell_getLength(string_); i++)
   {
-    return (false);
+    if (!isxdigit(string_[i]))
+    {
+      return (false);
+    }
   }
+  return (true);
 }
 
 /******************************************************************************/
@@ -1538,36 +1539,70 @@ bool pshell_isFloat(const char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
-long pshell_getLong(const char *string_)
+long pshell_getLong(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  if (pshell_isDec(string_))
+  if (radix_ == PSHELL_RADIX_ANY)
+  {
+    if (pshell_isDec(string_))
+    {
+      return (strtol(string_, (char **)NULL, 10));
+    }
+    else if (pshell_isHex(string_))
+    {
+      return (strtol(string_, (char **)NULL, 16));
+    }
+    else
+    {
+      PSHELL_ERROR("Could not extract numeric value from string: '%s', consider checking format with pshell_isNumeric()", string_);
+      return (0);
+    }
+  }
+  else if ((radix_ == PSHELL_RADIX_DEC) && pshell_isDec(string_))
   {
     return (strtol(string_, (char **)NULL, 10));
   }
-  else if (pshell_isHex(string_))
+  else if ((radix_ == PSHELL_RADIX_HEX) && pshell_isHex(string_, needHexPrefix_))
   {
     return (strtol(string_, (char **)NULL, 16));
   }
   else
   {
+    PSHELL_ERROR("Could not extract numeric value from string: '%s', consider checking format with pshell_isNumeric()", string_);
     return (0);
   }
 }
 
 /******************************************************************************/
 /******************************************************************************/
-unsigned long pshell_getUnsignedLong(const char *string_)
+unsigned long pshell_getUnsignedLong(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  if (pshell_isDec(string_))
+  if (radix_ == PSHELL_RADIX_ANY)
+  {
+    if (pshell_isDec(string_))
+    {
+      return (strtol(string_, (char **)NULL, 10));
+    }
+    else if (pshell_isHex(string_))
+    {
+      return (strtol(string_, (char **)NULL, 16));
+    }
+    else
+    {
+      PSHELL_ERROR("Could not extract numeric value from string: '%s', consider checking format with pshell_isNumeric()", string_);
+      return (0);
+    }
+  }
+  else if ((radix_ == PSHELL_RADIX_DEC) && pshell_isDec(string_))
   {
     return (strtoul(string_, (char **)NULL, 10));
   }
-  else if (pshell_isHex(string_))
+  else if ((radix_ == PSHELL_RADIX_HEX) && pshell_isHex(string_, needHexPrefix_))
   {
     return (strtoul(string_, (char **)NULL, 16));
   }
   else
   {
+    PSHELL_ERROR("Could not extract numeric value from string: '%s', consider checking format with pshell_isNumeric()", string_);
     return (0);
   }
 }
@@ -1582,6 +1617,7 @@ double pshell_getDouble(const char *string_)
   }
   else
   {
+    PSHELL_ERROR("Could not extract floating point value from string: '%s', consider checking format with pshell_isFloat()", string_);
     return (0.0);
   }
 }
@@ -1693,44 +1729,44 @@ float pshell_getFloat(const char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_getInt(const char *string_)
+int pshell_getInt(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  return ((int)pshell_getLong(string_));
+  return ((int)pshell_getLong(string_, radix_, needHexPrefix_));
 }
 
 /******************************************************************************/
 /******************************************************************************/
-short pshell_getShort(const char *string_)
+short pshell_getShort(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  return ((short)pshell_getLong(string_));
+  return ((short)pshell_getLong(string_, radix_, needHexPrefix_));
 }
 
 /******************************************************************************/
 /******************************************************************************/
-char pshell_getChar(const char *string_)
+char pshell_getChar(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  return ((char)pshell_getLong(string_));
+  return ((char)pshell_getLong(string_, radix_, needHexPrefix_));
 }
 
 /******************************************************************************/
 /******************************************************************************/
-unsigned pshell_getUnsigned(const char *string_)
+unsigned pshell_getUnsigned(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  return ((unsigned)pshell_getUnsignedLong(string_));
+  return ((unsigned)pshell_getUnsignedLong(string_, radix_, needHexPrefix_));
 }
 
 /******************************************************************************/
 /******************************************************************************/
-unsigned short pshell_getUnsignedShort(const char *string_)
+unsigned short pshell_getUnsignedShort(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  return ((unsigned short)pshell_getUnsignedLong(string_));
+  return ((unsigned short)pshell_getUnsignedLong(string_, radix_, needHexPrefix_));
 }
 
 /******************************************************************************/
 /******************************************************************************/
-unsigned char pshell_getUnsignedChar(const char *string_)
+unsigned char pshell_getUnsignedChar(const char *string_, PshellRadix radix_, bool needHexPrefix_)
 {
-  return ((unsigned char)pshell_getUnsignedLong(string_));
+  return ((unsigned char)pshell_getUnsignedLong(string_, radix_, needHexPrefix_));
 }
 
 /************************************

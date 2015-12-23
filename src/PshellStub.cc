@@ -80,22 +80,22 @@ bool pshell_isEqualNoCase(const char *string1_, const char *string2_){return (tr
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_){return (true);}
 bool pshell_isSubStringNoCase(const char *string1_, const char *string2_, unsigned minChars_){return (true);}
 bool pshell_isAlpha(const char *string_){return (true);}
-bool pshell_isNumeric(const char *string_){return (true);}
+bool pshell_isNumeric(const char *string_, bool needHexPrefix_){return (true);}
 bool pshell_isAlphaNumeric(const char *string_){return (true);}
 bool pshell_isDec(const char *string_){return (true);}
-bool isHex(const char *string_){return (true);}
+bool pshell_isHex(const char *string_, bool needHexPrefix_){return (true);}
 bool pshell_isFloat(const char *string_){return (true);}
 bool pshell_getOption(const char *string_, char *option_, char *value_){return (false);}
 void *pshell_getAddress(const char *string_){return ((void*)0);}
 bool pshell_getBool(const char *string_){return (false);}
-long pshell_getLong(const char *string_){return ((long)0);}
-int pshell_getInt(const char *string_){return ((int)0);}
-short pshell_getShort(const char *string_){return ((short)0);}
-char pshell_getChar(const char *string_){return ((char)0);}
-unsigned pshell_getUnsigned(const char *string_){return ((unsigned)0);}
-unsigned long pshell_getUnsignedLong(const char *string_){return ((unsigned long)0);}
-unsigned short pshell_getUnsignedShort(const char *string_){return ((unsigned short)0);}
-unsigned char pshell_getUnsignedChar(const char *string_){return ((unsigned char)0);}
+long pshell_getLong(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((long)0);}
+int pshell_getInt(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((int)0);}
+short pshell_getShort(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((short)0);}
+char pshell_getChar(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((char)0);}
+unsigned pshell_getUnsigned(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((unsigned)0);}
+unsigned long pshell_getUnsignedLong(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((unsigned long)0);}
+unsigned short pshell_getUnsignedShort(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((unsigned short)0);}
+unsigned char pshell_getUnsignedChar(const char *string_, PshellRadix radix_, bool needHexPrefix_){return ((unsigned char)0);}
 float pshell_getFloat(const char *string_){return ((float)0.0);}
 double pshell_getDouble(const char *string_){return ((double)0.0);}
 
