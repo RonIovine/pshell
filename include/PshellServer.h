@@ -287,9 +287,13 @@ PshellTokens *pshell_tokenize(const char *string_, const char *delimeter_);
 bool pshell_getOption(const char *string_, char *option_, char *value_);
 
 /*
+ * format checking functions:
+ * 
  * the following functions are some simple helper functions
  * to assist in interpreting the string based command line 
- * arguments
+ * arguments, note that unlike some of the previous functions,
+ * the remaining functions do not need to be called strictly 
+ * from within the context of a pshell callback function
  */
 unsigned pshell_getLength(const char *string_);
 bool pshell_isEqual(const char *string1_, const char *string2_);
@@ -305,6 +309,8 @@ bool pshell_isNumeric(const char *string_, bool needHexPrefix_ = true);  /* isDe
 bool pshell_isFloat(const char *string_);
 
 /*
+ * various data extraction functions:
+ * 
  * the following functions are some simple helper functions
  * to assist in converting the string based command line 
  * arguments to other data types
@@ -319,14 +325,16 @@ bool pshell_getBool(const char *string_);
 /* desired radix of integer extractions */
 enum PshellRadix
 {
-  PSHELL_RADIX_DEC, /* <decimalValue> only */
+  PSHELL_RADIX_DEC, /* <decValue> only */
   PSHELL_RADIX_HEX, /* 0x<hexValue> or <hexValue> depending on setting of needHexPrefix */
   PSHELL_RADIX_ANY  /* will transparently work for <decValue> or 0x<hexValue> */
 };
 /* 
- * return numeric values from string value, the needHexPrefix value is only used
+ * integer extraction functions:
+ * 
+ * return numeric values from string value, the needHexPrefix parameter is only used
  * for a radix of PSHELL_RADIX_HEX, if set to true, the value needs to be preceeded 
- * by the 0x identifier, if set to false, then the prefic is not necessary
+ * by the 0x identifier, if set to false, then the prefix is not necessary
  */
 long pshell_getLong(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
 int pshell_getInt(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
@@ -336,6 +344,10 @@ unsigned pshell_getUnsigned(const char *string_, PshellRadix radix_ = PSHELL_RAD
 unsigned long pshell_getUnsignedLong(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
 unsigned short pshell_getUnsignedShort(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
 unsigned char pshell_getUnsignedChar(const char *string_, PshellRadix radix_ = PSHELL_RADIX_ANY, bool needHexPrefix_ = true);
+
+/* 
+ * floating point extraction functions 
+ */
 float pshell_getFloat(const char *string_);
 double pshell_getDouble(const char *string_);
 
