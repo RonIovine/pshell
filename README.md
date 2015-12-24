@@ -50,7 +50,7 @@ logging system is used.
 
 In addition to the infrastructure components, four demo programs are also provided, one to
 show the usage of the pshell server API, one to show the usage of pshell control API, one
-to show the usage of the trace filter/trace log API, and one to show the udage of a stand-alone 
+to show the usage of the trace filter/trace log API, and one to show the usage of a stand-alone 
 (no filtering) trace log application.
 
 The code is written almost entirely in standard ANSI 'C', and the API is a functional 'C' API, 
