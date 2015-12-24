@@ -649,7 +649,7 @@ int main(int argc, char *argv[])
    
   pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, "localhost", PSHELL_DEMO_PORT);
   
-  /* cleanup any pshell system resources before exiting */
+  /* should never get here, but cleanup any pshell system resources as good practice */
   pshell_cleanupResources();
    
   return (0);

@@ -1,16 +1,16 @@
 # pshell
 **A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++ Applications**
 
-This package contains all the necessary code, documentation and examples for
-building C/C++ applications that incorporate a Process Specific Embedded
+This package contains all the necessary code, documentation, and examples for
+building C/C++ applications that incorporate a Process-Specific Embedded
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
 framework and API to embed functions within a C/C++ application that can be
 invoked either via a separate interactive client program ('telnet' or 'phsell') 
 or via direct interaction from within the application itself.
 
 There is also a control mechanism API provided by where any external program can
-make calls into another program that is running a PSHELL (only supported for UDP
-or UNIX pshell servers).  This will provide a direct programmatic control access
+make calls into another program that is running a PSHELL server (only supported for 
+UDP or UNIX pshell servers).  This will provide a direct programmatic control access
 mechanism to a remote process' pshell functions without having to shell out to
 call the pshell command line client program via the 'system' call.
 
@@ -48,9 +48,10 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, three demo programs are also provided, one to
-show the usage of the pshell server API, one to show the usage of pshell control API, and one
-to show the usage of the trace filter/trace log API.
+In addition to the infrastructure components, four demo programs are also provided, one to
+show the usage of the pshell server API, one to show the usage of pshell control API, one
+to show the usage of the trace filter/trace log API, and one to show the udage of a stand-alone 
+(no filtering) trace log application.
 
 The code is written almost entirely in standard ANSI 'C', and the API is a functional 'C' API, 
 however, there are a couple of isolated places where C++ semantics are used.  Because of this, 

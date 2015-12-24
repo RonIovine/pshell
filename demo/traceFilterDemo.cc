@@ -434,7 +434,7 @@ int main (int argc, char *argv[])
     sleep(1);
   }
    
-  /* cleanup any pshell system resources before exiting */
+  /* should never get here, but cleanup any pshell system resources as good practice */
   pshell_cleanupResources();
    
   return (0);
