@@ -46,9 +46,8 @@
 static PshellTokens _dummyTokens;
 
 /* PshellServer public API functions */
-void pshell_setLogLevel(unsigned level_){};
-void pshell_registerLogFunction(PshellLogFunction logFunction_){};
-const char *pshell_getResultsString(int results_){return ("PSHELL_UNKNOWN_RESULT");};
+void pshell_setServerLogLevel(unsigned level_){};
+void pshell_registerServerLogFunction(PshellLogFunction logFunction_){};
 void pshell_startServer(const char *serverName_,  
                         PshellServerType serverType_,
                         PshellServerMode serverMode_,
@@ -122,6 +121,8 @@ void trace_registerLogFunction(TraceLogFunction logFunction_){}
 void trace_setLogPrefix(const char *name_){}
 void trace_registerLevels(void){}
 void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_){};
+void trace_setLogLevel(unsigned _logLevel){};
+unsigned trace_getLogLevel(void){return (0);};
 void trace_showLocation(bool show_){}
 bool trace_isLocationEnabled(void){return (true);}
 void trace_showPath(bool show_){}

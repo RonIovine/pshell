@@ -329,6 +329,7 @@ enum PshellRadix
   PSHELL_RADIX_HEX, /* 0x<hexValue> or <hexValue> depending on setting of needHexPrefix */
   PSHELL_RADIX_ANY  /* will transparently work for <decValue> or 0x<hexValue> */
 };
+
 /* 
  * integer extraction functions:
  * 
