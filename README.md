@@ -53,6 +53,12 @@ show the usage of the pshell server API, one to show the usage of pshell control
 to show the usage of the trace filter/trace log API, and one to show the usage of a stand-alone 
 (no filtering) trace log application.
 
+Finally, a stub module/library is provided that will honor the complete API of the normal pshell
+library but with all the underlying functionality stubbed out.  This will allow all the pshell 
+functionality to easily be completly removed from an application without requiring any code 
+changes or recompilation, only a re-link (for static linking) or restart (when using a shared 
+library acessed via a softlink) of the target program is necessary.
+
 The code is written almost entirely in standard ANSI 'C', and the API is a functional 'C' API, 
 however, there are a couple of isolated places where C++ semantics are used.  Because of this, 
 all of the source files use the '.cc' C++ style extension instead of the more normal '.c' C 
