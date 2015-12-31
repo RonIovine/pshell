@@ -45,7 +45,7 @@ extern "C" {
  * that is running a pshell, this is analagous to a remote procedure call (rpc).
  *
  * An complete example of the usage of the API can be found in the included 
- * file pshellControlDemo.c
+ * demo program file pshellControlDemo.cc
  *
  *******************************************************************************/
 
@@ -84,7 +84,7 @@ enum PshellControlResults
 {
   /*
    * the following "COMMAND" enums are returned by the remote pshell server
-   * and must match their corresponding values in PshellServer.c
+   * and must match their corresponding values in PshellServer.cc
    */
   PSHELL_COMMAND_SUCCESS,        
   PSHELL_COMMAND_NOT_FOUND,      
@@ -121,7 +121,7 @@ const char *pshell_getResultsString(int results_);
  * timeout value, for a UDP server, the remoteServer must be either a valid
  * hostname or IP address and a valid destination port must be provided, for
  * a UNIX server, only a valid server name must be provided along with the
- * identifier PSHELL_UNIX_SERVER for the 'port' parameter
+ * identifier PSHELL_UNIX_SERVER (i.e. 0) for the 'port' parameter
  *
  * this function returns a Server ID (sid) handle which must be saved and
  * used for all subsequent calls into this library, if the function fails
@@ -177,10 +177,10 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
  * their command string directly in this function call rather than having to
  * create a separate string and calling 'sprintf' to format it
  *
- * the return of the following 2 functions is one of the PshellControlResults
- *
  * there are 4 version of this command, since we are using standard 'C' linkage,
  * we cannot overload the function names, hence the separate names
+ * 
+ * the return of the following 2 functions is one of the PshellControlResults
  */
 int pshell_sendCommand1(int sid_, const char *command_, ...);
 int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...);
