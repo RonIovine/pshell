@@ -3123,18 +3123,26 @@ static void loadConfigFile(void)
                 _serverType = PSHELL_LOCAL_SERVER;
               }
             }
-            else if (pshell_isEqual(item->tokens[1], "mode"))
-            {
-              if (pshell_isEqualNoCase(value->tokens[0], "BLOCKING"))
-              {
-                _serverMode = PSHELL_BLOCKING;
-              }
-              else if (pshell_isEqualNoCase(value->tokens[0], "NON_BLOCKING") ||
-                       pshell_isEqualNoCase(value->tokens[0], "NON-BLOCKING"))
-              {
-                _serverMode = PSHELL_NON_BLOCKING;
-              }
-            }
+            //
+            // remove the ability to change the server mode at startup time via the .conf
+            // file, the reason being is that the code will either be structured to run a
+            // blocking or non-blocking server, and changing it at startup time (without
+            // making any code changes) can produce unexpected and undesirable results
+            // (i.e. code written expecting the pshell_startServer will be blocking could
+            // cause problems if the mode is suddenly changed to non-blocking etc)
+            //
+            //else if (pshell_isEqual(item->tokens[1], "mode"))
+            //{
+            //  if (pshell_isEqualNoCase(value->tokens[0], "BLOCKING"))
+            //  {
+            //    _serverMode = PSHELL_BLOCKING;
+            //  }
+            //  else if (pshell_isEqualNoCase(value->tokens[0], "NON_BLOCKING") ||
+            //           pshell_isEqualNoCase(value->tokens[0], "NON-BLOCKING"))
+            //  {
+            //    _serverMode = PSHELL_NON_BLOCKING;
+            //  }
+            //}
           }
         }
       }

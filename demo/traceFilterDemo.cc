@@ -116,7 +116,6 @@ void *myThread(void*)
 bool callbackCondition = false;
 bool callbackFunction(void)
 {
-  TRACE_INFO("Sample callback function called");
   return (callbackCondition);
 }
 

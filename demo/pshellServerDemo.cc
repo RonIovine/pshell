@@ -637,13 +637,12 @@ int main(int argc, char *argv[])
    *   localhost - the loopback address (i.e. 127.0.0.1)
    *   myhost    - the hostname assigned to this host, this is usually defined in the
    *               /etc/hosts file and is assigned to the default interface
-   *   anyhost   - all interfaces on a multi-homed host, for a single interface host
-   *               this will yield the same results as using "myhost".
+   *   anyhost   - all interfaces on a multi-homed host (including loopback)
    *
    * Finally, the 5th argument is the desired port number.
    *
-   * All of these arguments (except the initial name) can be overridden via the
-   * 'pshell-server.conf' file on a per-server basis.
+   * All of these arguments (except the initial name and the mode, i.e. args 1 & 3) can be overridden 
+   * via the 'pshell-server.conf' file on a per-server basis.
    *
    */
    
