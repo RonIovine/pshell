@@ -3031,7 +3031,6 @@ static void loadBatchFile(const char *batchFile_)
 static void loadConfigFile(void)
 {
   PshellTokens *config;
-  PshellTokens *value;
   PshellTokens *item;
   char configFile[180];
   char cwd[180];
@@ -3069,80 +3068,58 @@ static void loadConfigFile(void)
       /* look for our server name on every non-commented line */
       if (line[0] != '#')
       {
+        line[strlen(line)-1] = '\0';
         config = pshell_tokenize(line, "=");
         if (config->numTokens == 2)
         {
           item = pshell_tokenize(config->tokens[0], ".");
-          value = pshell_tokenize(config->tokens[1], "\"");
-          if ((item->numTokens == 2) &&
-              (value->numTokens == 2) &&
-              pshell_isEqual(item->tokens[0], _serverName))
+          if ((item->numTokens == 2) && pshell_isEqual(item->tokens[0], _serverName))
           {
             if (pshell_isEqual(item->tokens[1], "title"))
             {
-              strcpy(_title, value->tokens[0]);
+              strcpy(_title, config->tokens[1]);
             }
             else if (pshell_isEqual(item->tokens[1], "banner"))
             {
-              strcpy(_banner, value->tokens[0]);
+              strcpy(_banner, config->tokens[1]);
             }
             else if (pshell_isEqual(item->tokens[1], "prompt"))
             {
-              strcpy(_prompt, value->tokens[0]);
+              strcpy(_prompt, config->tokens[1]);
             }
             else if (pshell_isEqual(item->tokens[1], "host"))
             {
-              strcpy(_hostnameOrIpAddr, value->tokens[0]);
+              strcpy(_hostnameOrIpAddr, config->tokens[1]);
             }
             else if (pshell_isEqual(item->tokens[1], "port") &&
-                     pshell_isNumeric(value->tokens[0]))
+                     pshell_isNumeric(config->tokens[1]))
             {
-              _port = pshell_getUnsigned(value->tokens[0]);
+              _port = pshell_getUnsigned(config->tokens[1]);
             }
             else if (pshell_isEqual(item->tokens[1], "timeout") &&
-                     pshell_isNumeric(value->tokens[0]))
+                     pshell_isNumeric(config->tokens[1]))
             {
-              _defaultIdleTimeout = pshell_getInt(value->tokens[0]);
+              _defaultIdleTimeout = pshell_getInt(config->tokens[1]);
             }
             else if (pshell_isEqual(item->tokens[1], "type"))
             {
-              if (pshell_isEqualNoCase(value->tokens[0], "UDP"))
+              if (pshell_isEqualNoCase(config->tokens[1], "UDP"))
               {
                 _serverType = PSHELL_UDP_SERVER;
               }
-              else if (pshell_isEqualNoCase(value->tokens[0], "UNIX"))
+              else if (pshell_isEqualNoCase(config->tokens[1], "UNIX"))
               {
                 _serverType = PSHELL_UNIX_SERVER;
               }
-              else if (pshell_isEqualNoCase(value->tokens[0], "TCP"))
+              else if (pshell_isEqualNoCase(config->tokens[1], "TCP"))
               {
                 _serverType = PSHELL_TCP_SERVER;
               }
-              else if (pshell_isEqualNoCase(value->tokens[0], "LOCAL"))
+              else if (pshell_isEqualNoCase(config->tokens[1], "LOCAL"))
               {
                 _serverType = PSHELL_LOCAL_SERVER;
               }
             }
-            //
-            // remove the ability to change the server mode at startup time via the .conf
-            // file, the reason being is that the code will either be structured to run a
-            // blocking or non-blocking server, and changing it at startup time (without
-            // making any code changes) can produce unexpected and undesirable results
-            // (i.e. code written expecting the pshell_startServer will be blocking could
-            // cause problems if the mode is suddenly changed to non-blocking etc)
-            //
-            //else if (pshell_isEqual(item->tokens[1], "mode"))
-            //{
-            //  if (pshell_isEqualNoCase(value->tokens[0], "BLOCKING"))
-            //  {
-            //    _serverMode = PSHELL_BLOCKING;
-            //  }
-            //  else if (pshell_isEqualNoCase(value->tokens[0], "NON_BLOCKING") ||
-            //           pshell_isEqualNoCase(value->tokens[0], "NON-BLOCKING"))
-            //  {
-            //    _serverMode = PSHELL_NON_BLOCKING;
-            //  }
-            //}
           }
         }
       }

@@ -675,12 +675,12 @@ static void loadConfigFile(const char *controlName_,
       /* look for our server name on every non-commented line */
       if (line[0] != '#')
       {
-        if (((value = strstr(line, "=\"")) != NULL) &&
+        line[strlen(line)-1] = '\0';
+        if (((value = strstr(line, "=")) != NULL) &&
             ((option = strstr(line, ".")) != NULL))
         {
-          value[strlen(value)-2] = 0;
           value[0] = 0;
-          value += 2;
+          value++;
           option[0] = 0;
           option++;
           control = line;

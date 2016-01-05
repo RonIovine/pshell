@@ -641,7 +641,7 @@ int main(int argc, char *argv[])
    *
    * Finally, the 5th argument is the desired port number.
    *
-   * All of these arguments (except the initial name and the mode, i.e. args 1 & 3) can be overridden 
+   * All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden 
    * via the 'pshell-server.conf' file on a per-server basis.
    *
    */
