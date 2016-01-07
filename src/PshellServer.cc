@@ -1040,6 +1040,9 @@ void pshell_startServer(const char *serverName_,
     if ((_pshellMsg = (PshellMsg*)malloc(_pshellPayloadSize+PSHELL_HEADER_SIZE)) != NULL)
     {
 
+      /* initialize payload of transfer buffer */
+      _pshellMsg->payload[0] = '\0';
+      
       /* make sure we are only invoked once */
       _isRunning = true;
       strcpy(_serverName, serverName_);
