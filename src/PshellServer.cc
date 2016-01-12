@@ -415,6 +415,7 @@ static void showWelcome(void);
 
 static int getIpAddress(const char *interface_, char *ipAddress_);
 static bool createSocket(void);
+static void setInteractivePrompt(void);
 
 /* common functions (UDP, TCP, UNIX, and LOCAL servers) */
 
@@ -1051,6 +1052,7 @@ void pshell_startServer(const char *serverName_,
         strcpy(_hostnameOrIpAddr, hostnameOrIpAddr_);
       }
       
+      _ipAddress[0] = '\0';
       strcpy(_title, _defaultTitle);
       strcpy(_banner, _defaultBanner);
       strcpy(_prompt, _defaultPrompt);
@@ -2058,6 +2060,24 @@ static void runLocalServer(void)
 
 /******************************************************************************/
 /******************************************************************************/
+static void setInteractivePrompt(void)
+{
+  if (strlen(_ipAddress) == 0)
+  {
+    if (pshell_isEqual(_hostnameOrIpAddr, "localhost"))
+    {
+      strcpy(_ipAddress, "127.0.0.1");
+    }
+    else
+    {
+      getIpAddress("eth0", _ipAddress);
+    }
+    sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static int getIpAddress(const char *interface_, char *ipAddress_)
 {
   struct ifaddrs *ifaddr;
@@ -2423,6 +2443,8 @@ static void receiveTCP(void)
   }
 
   setbuf(_clientFd, NULL);
+  
+  setInteractivePrompt();
 
   /* print out our welcome banner */
   showWelcome();
@@ -3295,6 +3317,7 @@ static void processQueryName(void)
 /******************************************************************************/
 static void processQueryIpAddress(void)
 {
+  setInteractivePrompt();
   pshell_printf("%s", _ipAddress);
 }
 
