@@ -137,7 +137,7 @@ else
   
   if [ ! -d $libDir/pshell ]
   then
-    echo "Creating lib directory: $libDir"
+    echo "Creating lib directory: $libDir/pshell"
     mkdir $libDir/pshell
   fi
   
@@ -199,7 +199,7 @@ else
 
   if [ ! -d $configDir ]
   then
-    echo "Creating conf directory: $configDir"
+    echo "Creating config directory: $configDir"
     mkdir $configDir
   fi
   
