@@ -123,11 +123,11 @@ void keepAlive(int argc, char *argv[])
   else if (pshell_isEqual(argv[0], "wheel"))
   {
     pshell_printf("spinning wheel keep alive:\n");
-    for (unsigned i = 0; i < 10; i++)
+    for (unsigned i = 0; i < 100; i++)
     {
       /* string is optional, use NULL to omit */
       pshell_wheel("optional string: ");
-      sleep(1);
+      usleep(100000);
     }
   }
   else

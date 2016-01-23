@@ -773,8 +773,8 @@ void pshell_showUsage(void)
 void pshell_wheel(const char *string_)
 {
   (string_ != NULL) ?
-    pshell_printf("\r%s%c", string_, _wheel[(_wheelPos++)%sizeof(_wheel)]) :
-    pshell_printf("\r%c", _wheel[(_wheelPos++)%sizeof(_wheel)]);
+    pshell_printf("\r%s%c", string_, _wheel[(_wheelPos++)%4]) :
+    pshell_printf("\r%c", _wheel[(_wheelPos++)%4]);
   pshell_flush();
 }
 
