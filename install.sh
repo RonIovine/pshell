@@ -142,17 +142,17 @@ else
   fi
   
   echo "Copying libpshell-server-full.so to $libDir/pshell"
-  cp lib/libpshell-server-full.so $libDir/pshell/.
+  cp -f lib/libpshell-server-full.so $libDir/pshell/.
   echo "Copying libpshell-server-full.a to $libDir/pshell"
-  cp lib/libpshell-server-full.a $libDir/pshell/.
+  cp -f lib/libpshell-server-full.a $libDir/pshell/.
   echo "Copying libpshell-server-stub.so to $libDir/pshell"
-  cp lib/libpshell-server-stub.so $libDir/pshell/.
+  cp -f lib/libpshell-server-stub.so $libDir/pshell/.
   echo "Copying libpshell-server-stub.a to $libDir/pshell"
-  cp lib/libpshell-server-stub.a $libDir/pshell/.
+  cp -f lib/libpshell-server-stub.a $libDir/pshell/.
   echo "Copying libpshell-control.so to $libDir/pshell"
-  cp lib/libpshell-control.so $libDir/pshell/.
+  cp -f lib/libpshell-control.so $libDir/pshell/.
   echo "Copying libpshell-control.a to $libDir/pshell"
-  cp lib/libpshell-control.a $libDir/pshell/.
+  cp -f lib/libpshell-control.a $libDir/pshell/.
   
   echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"
   if [ -e "$libDir/libpshell-server.so" ]
@@ -176,18 +176,18 @@ else
   
   echo "Installing bins..."
   echo "Copying pshell to $binDir"
-  cp bin/pshell $binDir/.
+  cp -f bin/pshell $binDir/.
   chmod +x $binDir/pshell
   
   echo "Installing includes..."
   echo "Copying PshellServer.h to $includeDir"
-  cp include/PshellServer.h $includeDir/.
+  cp -f include/PshellServer.h $includeDir/.
   echo "Copying PshellControl.h to $includeDir"
-  cp include/PshellControl.h $includeDir/.
+  cp -f include/PshellControl.h $includeDir/.
   echo "Copying TraceFilter.h to $includeDir"
-  cp include/TraceFilter.h $includeDir/.
+  cp -f include/TraceFilter.h $includeDir/.
   echo "Copying TraceLog.h to $includeDir"
-  cp include/TraceLog.h $includeDir/.
+  cp -f include/TraceLog.h $includeDir/.
   
   if [ ! -d $pshellDir ]
   then
@@ -195,7 +195,7 @@ else
     mkdir $pshellDir
   fi
 
-  echo "Installing conf files..."
+  echo "Installing config files..."
 
   if [ ! -d $configDir ]
   then
@@ -204,13 +204,13 @@ else
   fi
   
   echo "Copying pshell-server.conf to $configDir"
-  cp config/pshell-server.conf $configDir/.
+  cp -f config/pshell-server.conf $configDir/.
   echo "Copying pshell-client.conf to $configDir"
-  cp config/pshell-client.conf $configDir/.
+  cp -f config/pshell-client.conf $configDir/.
   echo "Copying pshell-control.conf to $configDir"
-  cp config/pshell-control.conf $configDir/.
+  cp -f config/pshell-control.conf $configDir/.
   echo "Copying README to $configDir"
-  cp config/README $configDir/.
+  cp -f config/README $configDir/.
   chmod 666 $configDir/*
   
   echo "Installing batch files..."
@@ -221,11 +221,11 @@ else
   fi
   
   #echo "Copying pshellServerDemo.batch to $batchDir"
-  #cp batch/pshellServerDemo.batch $batchDir/.
+  #cp -f batch/pshellServerDemo.batch $batchDir/.
   #echo "Copying traceFilterDemo.batch to $batchDir"
-  #cp batch/traceFilterDemo.batch $batchDir/.
+  #cp -f batch/traceFilterDemo.batch $batchDir/.
   echo "Copying README to $batchDir"
-  cp batch/README $batchDir/.
+  cp -f batch/README $batchDir/.
   chmod 666 $batchDir/*
   
   echo "Installing startup files..."
@@ -236,27 +236,27 @@ else
   fi
   
   #echo "Copying pshellServerDemo.startup to $startupDir"
-  #cp startup/pshellServerDemo.startup $startupDir/.
+  #cp -f startup/pshellServerDemo.startup $startupDir/.
   #echo "Copying traceFilterDemo.startup to $startupDir"
-  #cp startup/traceFilterDemo.startup $startupDir/.
+  #cp -f startup/traceFilterDemo.startup $startupDir/.
   echo "Copying README to $startupDir"
-  cp startup/README $startupDir/.
+  cp -f startup/README $startupDir/.
   chmod 666 $startupDir/*
   
   echo "Installing manpages..."
   echo "Copying pshell.1 to $man1Dir"
-  cp man/man1/pshell.1 $man1Dir/.
+  cp -f man/man1/pshell.1 $man1Dir/.
   gzip -f $man1Dir/pshell.1
   echo "Copying PshellControl.3 to $man3Dir"
-  cp man/man3/PshellControl.3 $man3Dir/.
+  cp -f man/man3/PshellControl.3 $man3Dir/.
   gzip -f $man3Dir/PshellControl.3
   echo "Copying PshellServer.3 to $man3Dir"
-  cp man/man3/PshellServer.3 $man3Dir/.
+  cp -f man/man3/PshellServer.3 $man3Dir/.
   gzip -f $man3Dir/PshellServer.3
   echo "Copying TraceFilter.3 to $man3Dir"
-  cp man/man3/TraceFilter.3 $man3Dir/.
+  cp -f man/man3/TraceFilter.3 $man3Dir/.
   gzip -f $man3Dir/TraceFilter.3
   echo "Copying TraceLog.3 to $man3Dir"
-  cp man/man3/TraceLog.3 $man3Dir/.
+  cp -f man/man3/TraceLog.3 $man3Dir/.
   gzip -f $man3Dir/TraceLog.3
 fi
