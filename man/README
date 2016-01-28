@@ -1,0 +1,3 @@
+This directory and its subdirectories contain manpages for the various
+parts of the pshell package.  They are installed in the customary manpage
+locations (/usr/share/man) on a system wide install.

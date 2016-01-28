@@ -129,7 +129,7 @@ if {[llength $argv] == 1} {
     while {[gets $file line] != -1} {
       if {[string index $line 0] != "#" && [string length $line] > 0} {
         set list [split $line ":"]
-        if {[llength $list] == 2 && [string length [lindex $list 0]] > $maxServerNameLength} {
+        if {[llength $list] >= 2 && [string length [lindex $list 0]] > $maxServerNameLength} {
           set maxServerNameLength [string length [lindex $list 0]]
         }
       }
@@ -146,15 +146,17 @@ if {[llength $argv] == 1} {
     }
     puts "  Port Number"
     for {set count 0} {$count < $maxServerNameLength} {incr count 1} {
-      puts -nonewline "-"
+      #puts -nonewline "-"
+      puts -nonewline "="
     }
-    puts "  -----------"
+    #puts "  -----------"
+    puts "  ==========="
     # got the max server name length, now reset the file pointer and read it again
     seek $file 0
     while {[gets $file line] != -1} {
       if {[string index $line 0] != "#" && [string length $line] > 0} {
         set list [split $line ":"]
-        if {[llength $list] == 2} {
+        if {[llength $list] >= 2} {
           set serverName [lindex $list 0]
           set portNum [lindex $list 1]
           puts -nonewline $serverName
@@ -191,7 +193,7 @@ if { !([string is integer $serverName]) } {
     while {[gets $file line] != -1} {
       if {[string index $line 0] != "#" && [string length $line] > 0} {
         set list [split $line ":"]
-        if {[llength $list] == 2 && [string compare $serverName [lindex $list 0]] == 0} {
+        if {[llength $list] >= 2 && [string compare $serverName [lindex $list 0]] == 0} {
           set portNum [lindex $list 1]
           break
         }

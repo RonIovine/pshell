@@ -1,0 +1,2 @@
+This directory contains all the source code used for the pshell server library,
+pshell control library, and the stand-alone pshell UDP/UNIX client program.

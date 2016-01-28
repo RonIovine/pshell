@@ -1,0 +1,10 @@
+This directory contains all the libraries included in this package.
+It includes both .a and .so versions of all libraries for both static
+and dynamic linking.  The pshell server libraries are also provided 
+in full form and stub form.  The stub library honors the complete API
+of the pshell server library, but with all the underlying functionality 
+stubbed out.  This will allow for easy removal of all pshell functionality 
+from an application without any application code changes or re-compiles.
+
+These libraries are installed in the /usr/lib area on a system wide install.
+

@@ -121,6 +121,7 @@ enum ServerType
  * or trailing underscores for local stack variables
  */
 
+bool _serverResponseTimeoutOverride = false;
 int _serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
 int _socketFd;
 struct sockaddr_in _sourceIpAddress;
@@ -184,6 +185,7 @@ struct PshellServers
 {
   const char *serverName;
   unsigned portNum;
+  unsigned timeout;
 };
 
 PshellServers *_pshellServersList;
@@ -261,6 +263,8 @@ void showWelcome(void)
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Idle session timeout: NONE\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);
+  printf("%s  Command response timeout: %d seconds\n", PSHELL_WELCOME_BORDER, _serverResponseTimeout);
+  printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);
@@ -308,6 +312,11 @@ unsigned findServerPort(char *name_)
   {
     if (strcmp(name_, _pshellServersList[server].serverName) == 0)
     {
+      /* only set the server response timeout if we did not get a command line override */
+      if (!_serverResponseTimeoutOverride)
+      {
+        _serverResponseTimeout = _pshellServersList[server].timeout;
+      }
       return (_pshellServersList[server].portNum);
     }
   }
@@ -1095,10 +1104,9 @@ void getNamedServers(void)
   char defaultServersFile[180];
   char line[180];
   char *serversPath;
-  char *str1;
-  char *str2;
   FILE *fp;
-
+  char *tokens[MAX_TOKENS];
+  unsigned numTokens;
   sprintf(defaultServersFile, "%s/pshell-client.conf", PSHELL_CONFIG_DIR);
   if ((serversPath = getenv("PSHELL_CONFIG_DIR")) != NULL)
   {
@@ -1115,35 +1123,53 @@ void getNamedServers(void)
     _pshellServersList = (PshellServers*)malloc(_pshellServersListSize*sizeof(PshellServers));
     while (fgets(line, 180, fp) != NULL)
     {
-      if ((line[0] != '#') &&
-          ((str1 = strtok(line, ":")) != NULL) &&
-          ((str2 = strtok(NULL, ":")) != NULL))
+      if (line[0] != '#') 
       {
-        /* got both args */
-        if (_numPshellServers < _pshellServersListSize)
+        tokenize(line, ":", tokens, MAX_TOKENS, &numTokens);
+        if ((numTokens >=2) && (numTokens <= 3))
         {
-          _pshellServersList[_numPshellServers].serverName = strdup(str1);
-          _pshellServersList[_numPshellServers].portNum = atoi(str2);
-          if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxServerNameLength)
-          {
-            _maxServerNameLength = strlen(_pshellServersList[_numPshellServers].serverName);
+          /* got at least both args */
+         if (_numPshellServers < _pshellServersListSize)
+          { 
+            _pshellServersList[_numPshellServers].serverName = strdup(tokens[0]);
+            _pshellServersList[_numPshellServers].portNum = atoi(tokens[1]);
+            if (numTokens == 3)
+            {
+              _pshellServersList[_numPshellServers].timeout = atoi(tokens[2]);
+            }
+            else
+            {
+              _pshellServersList[_numPshellServers].timeout = _serverResponseTimeout;
+            }
+            if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxServerNameLength)
+            {
+              _maxServerNameLength = strlen(_pshellServersList[_numPshellServers].serverName);
+            }
+            _numPshellServers++;
           }
-          _numPshellServers++;
-        }
-        else
-        {
-          /* grab a new chunk for our servers list */
-          _pshellServersListSize += PSHELL_SERVERS_CHUNK;
-          _pshellServersList = (PshellServers*)realloc(_pshellServersList,
-                                                   _pshellServersListSize*sizeof(PshellServers));
-          /* now add the new server */
-          _pshellServersList[_numPshellServers].serverName = strdup(str1);
-          _pshellServersList[_numPshellServers].portNum = atoi(str2);
-          if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxServerNameLength)
+          else
           {
-            _maxServerNameLength = strlen(_pshellServersList[_numPshellServers].serverName);
+            /* grab a new chunk for our servers list */
+            _pshellServersListSize += PSHELL_SERVERS_CHUNK;
+            _pshellServersList = (PshellServers*)realloc(_pshellServersList,
+                                                        _pshellServersListSize*sizeof(PshellServers));
+            /* now add the new server */
+            _pshellServersList[_numPshellServers].serverName = strdup(tokens[0]);
+            _pshellServersList[_numPshellServers].portNum = atoi(tokens[1]);
+            if (numTokens == 3)
+            {
+              _pshellServersList[_numPshellServers].timeout = atoi(tokens[2]);
+            }
+            else
+            {
+              _pshellServersList[_numPshellServers].timeout = _serverResponseTimeout;
+            }
+            if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxServerNameLength)
+            {
+              _maxServerNameLength = strlen(_pshellServersList[_numPshellServers].serverName);
+            }
+            _numPshellServers++; 
           }
-          _numPshellServers++;
         }
       }
     }
@@ -1174,12 +1200,12 @@ void showNamedServers(void)
   {
     printf(" ");
   }
-  printf("  Port Number\n");
+  printf("  Port Number  Response Timeout\n");
   for (i = 0; i < fieldWidth; i++)
   {
-    printf("-");
+    printf("=");
   }
-  printf("  -----------\n");
+  printf("  ===========  ================\n");
   for (server = 0; server < _numPshellServers; server++)
   {
     printf("%s", _pshellServersList[server].serverName);
@@ -1187,7 +1213,7 @@ void showNamedServers(void)
     {
       printf(" ");
     }
-    printf("  %d\n", _pshellServersList[server].portNum);
+    printf("  %-11d  %d seconds\n", _pshellServersList[server].portNum, _pshellServersList[server].timeout);
   }
   printf("\n");
   exitProgram(0);
@@ -1300,6 +1326,7 @@ void checkForTimeoutOverride(int *argc, char *argv[])
       if ((strlen(argv[1]) > 2) && (isDec(&argv[1][2])))
       {
         _serverResponseTimeout = atoi(&argv[1][2]);
+        _serverResponseTimeoutOverride = true;
       }
       else
       {

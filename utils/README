@@ -1,0 +1,6 @@
+This directory contains various helper scripts for this package.  There are
+shell scripts to crete a tarball archive of this package, to set/show the
+pshell server library softlink settings, and an 'expect' script that will wrap
+a standard 'telnet' client to give it similar functionality as the 'pshell'
+UDP/UNIX client program, i.e. use named servers, run commands from batch file,
+periodically repeating commands or batch files etc.
