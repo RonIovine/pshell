@@ -137,7 +137,7 @@ else
   
   if [ ! -d $libDir/pshell ]
   then
-    echo "Creating lib directory: $libDir/pshell"
+    echo "Creating lib directory $libDir/pshell"
     mkdir $libDir/pshell
   fi
   
@@ -191,7 +191,7 @@ else
   
   if [ ! -d $pshellDir ]
   then
-    echo "Creating pshell directory: $pshellDir"
+    echo "Creating pshell directory $pshellDir"
     mkdir $pshellDir
   fi
 
@@ -199,7 +199,7 @@ else
 
   if [ ! -d $configDir ]
   then
-    echo "Creating config directory: $configDir"
+    echo "Creating config directory $configDir"
     mkdir $configDir
   fi
   
@@ -216,7 +216,7 @@ else
   echo "Installing batch files..."
   if [ ! -d $batchDir ]
   then
-    echo "Creating batch directory: $batchDir"
+    echo "Creating batch directory $batchDir"
     mkdir $batchDir
   fi
   
@@ -231,7 +231,7 @@ else
   echo "Installing startup files..."
   if [ ! -d $startupDir ]
   then
-    echo "Creating startup directory: $startupDir"
+    echo "Creating startup directory $startupDir"
     mkdir $startupDir
   fi
   

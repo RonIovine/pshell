@@ -75,16 +75,14 @@ else
   
   echo "Removing libs..."
   
-  echo "Removing lib directory: $libDir/pshell"
+  echo "Removing lib directory $libDir/pshell"
   rm -rf $libDir/pshell
   
-  echo "Removing softlink $libDir/libpshell-server.so"
+  echo "Removing softlink $libDir/libpshell-server"
   rm -f $libDir/libpshell-server.so
-  
-  echo "Removing softlink $libDir/libpshell-server.a"
   rm -f $libDir/libpshell-server.a
   
-  echo "Removing softlink $libDir/libpshell-control.so"
+  echo "Removing softlink $libDir/libpshell-control"
   rm -f $libDir/libpshell-control.so
   
   echo "Removing pshell from $binDir"
@@ -104,24 +102,24 @@ else
   echo "Removing TraceLog.h from $includeDir"
   rm -f $includeDir/TraceLog.h
   
-  echo "Removing pshell directory: $pshellDir"
+  echo "Removing pshell directory $pshellDir"
   rm -rf $pshellDir
 
   echo "Removing manpages..."
   
-  echo "Removing pshell.1.gz from $man1Dir"
+  echo "Removing pshell.1 from $man1Dir"
   rm -f $man1Dir/pshell.1.gz
   
-  echo "Removing PshellControl.3.gz from $man3Dir"
+  echo "Removing PshellControl.3 from $man3Dir"
   rm -f $man3Dir/PshellControl.3.gz
   
-  echo "Removing PshellServer.3.gz from $man3Dir"
+  echo "Removing PshellServer.3 from $man3Dir"
   rm -f $man3Dir/PshellServer.3.gz
   
-  echo "Removing TraceFilter.3.gz from $man3Dir"
+  echo "Removing TraceFilter.3 from $man3Dir"
   rm -f $man3Dir/TraceFilter.3.gz
   
-  echo "Removing TraceLog.3.gz from $man3Dir"
+  echo "Removing TraceLog.3 from $man3Dir"
   rm -f $man3Dir/TraceLog.3.gz
   
 fi
