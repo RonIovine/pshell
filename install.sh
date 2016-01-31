@@ -88,7 +88,7 @@ then
     echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> .pshellrc
     echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/lib:\$LD_LIBRARY_PATH >> .pshellrc
     echo "Local install environment setup in '.pshellrc'"
-    echo "To source enviromnent in current shell run 'source .pshellrc'"
+    echo "To source enviromnent in current shell run 'source .pshellrc' at the command line"
     if [ $# -eq 2 ]
     then
       shellEnvFile=$2
