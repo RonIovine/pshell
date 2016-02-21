@@ -39,16 +39,12 @@ with 0 or more command line arguments, similar to command line shell processing.
 
 GETTING STARTED:
 
-This package consists of 6 libraries (each library has both a shared and static
-version, in addition, the pshell-server libraray has a full and stub version),
-one stand-alone UDP/UNIX client application (pshell), one install shell script,
-three utility shell scripts, one expect script, one build script and three demo
-programs.  The rest of this README will assume that this package has been unzipped
-with the current directory structure preserved.  
-
-The following lists all the items in this package along with a brief description:
+This package consists of the following components, all provided binaries (libs
+and executables) were built for the x86_64 target.  The script pshell.exp
+requires the 'expect' package to be installed.
 
   - install.sh               -- Install shell script for this package
+  - uninstall.sh             -- Uninstall shell script for this package
   - defconfig                -- Default configuration file for build process
   - Makefile                 -- File for building all libraries and executables
   - libpshell-server-full.a  -- Full version of libpshell-server library (static)
@@ -145,13 +141,13 @@ $PSHELL_INSTALL/demo/traceLogDemo.c      --  Demo using the stand-alone TraceLog
 
 EXECUTION:
 
-There are 3 demo programs, one to demonstrate a program that incorporates a
+There are 4 demo programs, one to demonstrate a program that incorporates a
 pshell server (pshellServerDemo), one that demonstrates a program that incorporates
-the trace filter functionality (traceFilterDemo), and one that demonstrates the
-control of a program that is running a pshell server from another program
-(pshellControlDemo).
+the trace filter functionality (traceFilterDemo), one that demonstrates the control 
+of a program that is running a pshell server from another program (pshellControlDemo),
+and one that just demonstrates the stand-alone usage of the TraceLog API (traceLogDemo).
 
-All three demo programs have a usage that can be displayed by typing <programName> -h.
+All four demo programs have a usage that can be displayed by typing <programName> -h.
 The two demo programs pshellServerDemo and traceFilterDemo can be controlled via
 an interactive client program (either pshell or telnet) that shows the full command
 line functionality.  The demo program pshellControlDemo can control the other two demo
