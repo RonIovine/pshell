@@ -707,7 +707,6 @@ void pshell_runCommand(const char *command_, ...)
    * only dispatch command if we are not already in the middle of
    * dispatching an interactive command
    */   
-  pthread_mutex_lock(&_mutex);
   if (!_isCommandDispatched)
   {
     /* set this to false so we can short circuit any calls to pshell_printf since
@@ -745,7 +744,6 @@ void pshell_runCommand(const char *command_, ...)
     /* set back to interactive mode */
     _isCommandInteractive = true;
   }
-  pthread_mutex_unlock(&_mutex);
 }
 
 /******************************************************************************/
@@ -1099,7 +1097,7 @@ void pshell_startServer(const char *serverName_,
         pshell_addCommand(batch,
                         "batch",
                         "run commands from a batch file",
-                        "<filename> [rate=<seconds] [repeat=<count>] [clear]",
+                        "<filename> [repeat=<count> [rate=<seconds]] [clear]",
                         1,
                         4,
                         false);
@@ -1794,39 +1792,39 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
   char inputLine[180];
   char batchFile[180];
   char filename[80];
+  char cwd[180];
   char *batchPath;
   unsigned count = 0;
 
   strcpy(filename, filename_);
   if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
   {
+    /* look for batch file in env variable path */
     sprintf(batchFile, "%s/%s", batchPath, filename_);
     if ((fp = fopen(batchFile, "r")) == NULL)
     {
-      PSHELL_ERROR("Could not open batch file: '%s'", batchFile);
-      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+      /* look for batch file in local directory */
+      sprintf(batchFile, "%s", filename_);
       if ((fp = fopen(batchFile, "r")) == NULL)
-      {
-        PSHELL_ERROR("Could not open batch file: '%s'", batchFile);
-        strcpy(batchFile, filename_);
+      {      
+        /* look for batch file in default directory */
+        sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
         fp = fopen(batchFile, "r");
       }
     }
   }
   else
   {
-    sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+    /* look for batch file in local directory */
+    sprintf(batchFile, "%s", filename_);
     if ((fp = fopen(batchFile, "r")) == NULL)
     {
-      if ((fp = fopen(batchFile, "r")) == NULL)
-      {
-        PSHELL_ERROR("Could not open batch file: '%s'", batchFile);
-        strcpy(batchFile, filename_);
-        fp = fopen(batchFile, "r");
-      }
+      /* look for batch file in default directory */
+      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+      fp = fopen(batchFile, "r");
     }
   }
-  
+
   if (fp != NULL)
   {
     while ((repeat_ == 0) || (count < repeat_))
@@ -1871,7 +1869,17 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
   }
   else
   {
-    PSHELL_ERROR("Could not open batch file: '%s'", batchFile);
+    getcwd(cwd, sizeof(cwd));
+    PSHELL_ERROR("Could not open batch file: %s", filename_);
+    if (batchPath != NULL)
+    {
+      PSHELL_ERROR("Could not find file in local directory: %s, env directory: %s, or default directory: %s", 
+                   cwd, batchPath, PSHELL_BATCH_DIR);
+    }
+    else
+    {
+      PSHELL_ERROR("Could not find file in local directory: %s, or default directory: %s", cwd, PSHELL_BATCH_DIR);
+    }
   }
 }
 
@@ -3006,16 +3014,29 @@ static void loadStartupFile(void)
   if ((startupPath = getenv("PSHELL_STARTUP_DIR")) != NULL)
   {
     sprintf(startupFile, "%s/%s.startup", startupPath, _serverName);
+    /* look for file in path pointed to by env variable */
     if (loadCommandFile(startupFile, false) == false)
     {
-      sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
-      loadCommandFile(startupFile, false);
+      /* look for file in current working directory */
+      sprintf(startupFile, "%s.startup", _serverName);
+      if (loadCommandFile(startupFile, false) == false)
+      {  
+        /* look for file in default directory */    
+        sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
+        loadCommandFile(startupFile, false);
+      }
     }
   }
   else
   {
-    sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
-    loadCommandFile(startupFile, false);
+    /* look for file in current working directory */
+    sprintf(startupFile, "%s.startup", _serverName);
+    if (loadCommandFile(startupFile, false) == false)
+    {  
+      /* look for file in default directory */    
+      sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
+      loadCommandFile(startupFile, false);
+    }
   }
   
 }
@@ -3030,22 +3051,27 @@ static void loadBatchFile(const char *batchFile_)
   batchFile[0] = '\0';
   if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
   {
+    /* look for file in path pointed to by env variable */
     sprintf(batchFile, "%s/%s", batchPath, batchFile_);
     if (loadCommandFile(batchFile, true) == false)
     {
-      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
-      if (loadCommandFile(batchFile, true) == false)
+      /* look for file in current working directory */
+      if (loadCommandFile(batchFile_, true) == false)
       {
-        loadCommandFile(batchFile_, true);
+        /* look for file in default directory */    
+        sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
+        loadCommandFile(batchFile, true);
       }
     }
   }
   else
   {
-    sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
-    if (loadCommandFile(batchFile, true) == false)
+    /* look for file in current working directory */
+    if (loadCommandFile(batchFile_, true) == false)
     {
-      loadCommandFile(batchFile_, true);
+      /* look for file in default directory */    
+      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
+      loadCommandFile(batchFile, true);
     }
   }
   
@@ -3487,8 +3513,6 @@ static void processCommand(char *command_)
                                                  and we need to grab more memory, UDP server only */
   PshellMsg updatePayloadSize;
 
-  pthread_mutex_lock(&_mutex);
-  
   /* save off our original command */
   strcpy(savedCommand, command_);
   strcpy(fullCommand, command_);
@@ -3661,7 +3685,6 @@ static void processCommand(char *command_)
    */
   _isCommandDispatched = false;
   cleanupTokens();
-  pthread_mutex_unlock(&_mutex);
 
 }
 
