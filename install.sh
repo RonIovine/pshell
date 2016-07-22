@@ -220,10 +220,6 @@ else
     mkdir $batchDir
   fi
   
-  #echo "Copying pshellServerDemo.batch to $batchDir"
-  #cp -f batch/pshellServerDemo.batch $batchDir/.
-  #echo "Copying traceFilterDemo.batch to $batchDir"
-  #cp -f batch/traceFilterDemo.batch $batchDir/.
   echo "Copying README to $batchDir"
   cp -f batch/README $batchDir/.
   chmod 666 $batchDir/*
@@ -235,10 +231,6 @@ else
     mkdir $startupDir
   fi
   
-  #echo "Copying pshellServerDemo.startup to $startupDir"
-  #cp -f startup/pshellServerDemo.startup $startupDir/.
-  #echo "Copying traceFilterDemo.startup to $startupDir"
-  #cp -f startup/traceFilterDemo.startup $startupDir/.
   echo "Copying README to $startupDir"
   cp -f startup/README $startupDir/.
   chmod 666 $startupDir/*

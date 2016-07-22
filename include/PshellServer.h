@@ -169,6 +169,18 @@ void pshell_addCommand(PshellFunction function_,
 void pshell_runCommand(const char *command_, ...);
 
 /*
+ * pshell_noServer: 
+ * 
+ * this function is used to run in non-server mode, i.e. non-interactive, command 
+ * line mode, this will run the command as typed at the command line as a single-shot 
+ * command and exit, this command must be run with the initial argc, argv as they are 
+ * passed into the 'main' from the command line, see the example demo program
+ * pshellNoServerDemo.cc that is included with this package for the usage of this
+ * function
+ */
+void pshell_noServer(int argc, char *argv[]); 
+
+/*
  * pshell_startServer:
  * 
  * this is the command used to start the pshell server, this function can
@@ -179,6 +191,9 @@ void pshell_runCommand(const char *command_, ...);
  * 
  * this command can only be invoked once per-process, an error message is 
  * displayed if a program tries to invoke this more than once
+ * 
+ * see the example demo program pshellServerDemo.cc that is included with
+ * this package for the usage of this function
  *
  * NOTE: for a LOCAL or UNIX server, the last two parameters should be omitted
  */

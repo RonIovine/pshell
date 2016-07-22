@@ -359,6 +359,9 @@ static unsigned _maxTokenLists = 0;
 static unsigned _numTokenLists = 0;
 static int _argc;
 static char **_argv;
+static PshellCmd _helpCmd;
+static PshellCmd _quitCmd;
+static PshellCmd _batchCmd;
 
 /****************************************
  * private "member" function prototypes
@@ -419,6 +422,7 @@ static void setInteractivePrompt(void);
 
 /* common functions (UDP, TCP, UNIX, and LOCAL servers) */
 
+static void addNativeCommands(void);
 static void loadConfigFile(void);
 static bool loadCommandFile(const char *filename_, bool interactive_);
 static void loadStartupFile(void);
@@ -440,6 +444,8 @@ static void quit(int argc, char *argv[]);
 /* native callback commands (LOCAL server only) */
 
 static void batch(int argc, char *argv[]);
+
+#define PSHELL_NO_SERVER (PshellServerType)255
 
 /* output display macros */
 static void _printf(const char *format_, ...);
@@ -994,7 +1000,9 @@ void pshell_printf(const char *format_, ...)
 #endif  /* ifndef PSHELL_VSNPRINTF */
 
   /* if we are running a TCP server, flush the output to the socket */
-  if ((_serverType == PSHELL_TCP_SERVER) || (_serverType == PSHELL_LOCAL_SERVER))
+  if ((_serverType == PSHELL_TCP_SERVER) || 
+      (_serverType == PSHELL_LOCAL_SERVER) ||
+      (_serverType == PSHELL_NO_SERVER))
   {
     pshell_flush();
   }
@@ -1010,11 +1018,6 @@ void pshell_startServer(const char *serverName_,
                         unsigned port_)
 {
   pthread_t pshellServerThreadTID;
-  PshellCmd helpCmd;
-  PshellCmd quitCmd;
-  PshellCmd batchCmd;
-  int numNativeCommands = 1;
-  int i;
 
   if ((serverType_ != PSHELL_UDP_SERVER) &&
       (serverType_ != PSHELL_UNIX_SERVER) &&
@@ -1066,132 +1069,8 @@ void pshell_startServer(const char *serverName_,
       /* load any config file */
       loadConfigFile();
 
-      if ((_serverType != PSHELL_UDP_SERVER) && (_serverType != PSHELL_UNIX_SERVER))
-      {
-        /*
-         * add our two built in commands for the TCP/LOCAL server,
-         * for the UDP/UNIX server, these are implemented in the
-         * stand-alone 'pshell' client program
-         */
-        pshell_addCommand(quit,
-                          "quit",
-                          "exit interactive mode",
-                          NULL,
-                          0,
-                          0,
-                          true);
-
-        pshell_addCommand(help,
-                          "help",
-                          "show all available commands",
-                          NULL,
-                          0,
-                          0,
-                          true);
-        numNativeCommands += 2;
-      }
-
-      if (_serverType == PSHELL_LOCAL_SERVER)
-      {
-        /* add our built in command for all server types */
-        pshell_addCommand(batch,
-                        "batch",
-                        "run commands from a batch file",
-                        "<filename> [repeat=<count> [rate=<seconds]] [clear]",
-                        1,
-                        4,
-                        false);
-      }
-      else
-      {
-        pshell_addCommand(batch,
-                        "batch",
-                        "run commands from a batch file",
-                        "<filename>",
-                        1,
-                        1,
-                        false);
-      }
-
-      /* move these commands to be first in the command list */
-
-      /* save off the command info */
-      batchCmd.function = _commandTable[_numCommands-1].function;
-      batchCmd.command = _commandTable[_numCommands-1].command;
-      batchCmd.usage = _commandTable[_numCommands-1].usage;
-      batchCmd.description = _commandTable[_numCommands-1].description;
-      batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
-      batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
-      batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
-
-      if (numNativeCommands == 3)
-      {
-        helpCmd.function = _commandTable[_numCommands-2].function;
-        helpCmd.command = _commandTable[_numCommands-2].command;
-        helpCmd.usage = _commandTable[_numCommands-2].usage;
-        helpCmd.description = _commandTable[_numCommands-2].description;
-        helpCmd.minArgs = _commandTable[_numCommands-2].minArgs;
-        helpCmd.maxArgs = _commandTable[_numCommands-2].maxArgs;
-        helpCmd.showUsage = _commandTable[_numCommands-2].showUsage;
-
-        quitCmd.function = _commandTable[_numCommands-3].function;
-        quitCmd.command = _commandTable[_numCommands-3].command;
-        quitCmd.usage = _commandTable[_numCommands-3].usage;
-        quitCmd.description = _commandTable[_numCommands-3].description;
-        quitCmd.minArgs = _commandTable[_numCommands-3].minArgs;
-        quitCmd.maxArgs = _commandTable[_numCommands-3].maxArgs;
-        quitCmd.showUsage = _commandTable[_numCommands-3].showUsage;
-      }
-
-      /* move all the other commands down in the command list */
-      for (i = (int)(_numCommands-(numNativeCommands+1)); i >= 0; i--)
-      {
-        _commandTable[i+numNativeCommands].function = _commandTable[i].function;
-        _commandTable[i+numNativeCommands].command = _commandTable[i].command;
-        _commandTable[i+numNativeCommands].usage = _commandTable[i].usage;
-        _commandTable[i+numNativeCommands].description = _commandTable[i].description;
-        _commandTable[i+numNativeCommands].minArgs = _commandTable[i].minArgs;
-        _commandTable[i+numNativeCommands].maxArgs = _commandTable[i].maxArgs;
-        _commandTable[i+numNativeCommands].showUsage = _commandTable[i].showUsage;
-      }
-
-      /* restore the saved native command info to be first in the command list */
-      if (numNativeCommands == 3)
-      {
-        _commandTable[0].function = quitCmd.function;
-        _commandTable[0].command = quitCmd.command;
-        _commandTable[0].usage = quitCmd.usage;
-        _commandTable[0].description = quitCmd.description;
-        _commandTable[0].minArgs = quitCmd.minArgs;
-        _commandTable[0].maxArgs = quitCmd.maxArgs;
-        _commandTable[0].showUsage = quitCmd.showUsage;
-
-        _commandTable[1].function = helpCmd.function;
-        _commandTable[1].command = helpCmd.command;
-        _commandTable[1].usage = helpCmd.usage;
-        _commandTable[1].description = helpCmd.description;
-        _commandTable[1].minArgs = helpCmd.minArgs;
-        _commandTable[1].maxArgs = helpCmd.maxArgs;
-        _commandTable[1].showUsage = helpCmd.showUsage;
-
-        _commandTable[2].function = batchCmd.function;
-        _commandTable[2].command = batchCmd.command;
-        _commandTable[2].usage = batchCmd.usage;
-        _commandTable[2].description = batchCmd.description;
-        _commandTable[2].minArgs = batchCmd.minArgs;
-        _commandTable[2].maxArgs = batchCmd.maxArgs;
-        _commandTable[2].showUsage = batchCmd.showUsage;
-      }
-      else
-      {
-        _commandTable[0].function = batchCmd.function;
-        _commandTable[0].command = batchCmd.command;
-        _commandTable[0].usage = batchCmd.usage;
-        _commandTable[0].description = batchCmd.description;
-        _commandTable[0].minArgs = batchCmd.minArgs;
-        _commandTable[0].maxArgs = batchCmd.maxArgs;
-        _commandTable[0].showUsage = batchCmd.showUsage;
-      }
+      /* add our native commands */
+      addNativeCommands();
 
       /* load any startup file */
       loadStartupFile();
@@ -1220,6 +1099,68 @@ void pshell_startServer(const char *serverName_,
     PSHELL_ERROR("pshellServer is already running");
   }
 
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void pshell_noServer(int argc, char *argv[])
+{
+  unsigned numMatches;
+  char *commandName;
+  _serverType = PSHELL_NO_SERVER;
+  _isCommandInteractive = true;
+  _isControlCommand = false;
+  _isCommandDispatched = true;
+  _isRunning = true;
+  strcpy(_serverName, argv[0]);
+  strcpy(_ipAddress, "local");
+  strcpy(_title, "PSHELL");  
+  _pshellMsg = (PshellMsg*)malloc(_pshellPayloadSize+PSHELL_HEADER_SIZE);
+  addNativeCommands();
+  if (argc > 1)
+  {
+    /* initialize payload of transfer buffer */
+    _pshellMsg->payload[0] = '\0';
+    commandName = argv[1];
+    _argc = argc-(PSHELL_BASE_ARG_OFFSET+1);
+    _argv = &argv[PSHELL_BASE_ARG_OFFSET+1];
+    if ((numMatches = findCommand(commandName)) == 1)
+    {
+      /* see if they asked for the command usage */
+      if (pshell_isHelp() && _foundCommand->showUsage)
+      {
+        pshell_showUsage();
+      }
+      else if (((_argc >= _foundCommand->minArgs) &&
+                (_argc <= _foundCommand->maxArgs)) ||
+                (pshell_isHelp() && !_foundCommand->showUsage))
+      {
+        /*
+         * dispatch user command, don't need to check for a NULL
+         * function pointer because the validation in the addCommand
+         * function will catch that and not add the command
+         */
+        _foundCommand->function(_argc, _argv);
+      }
+      else
+      {
+        /* arg count validation failure, show the usage */
+        pshell_showUsage();
+      }
+    }
+    else if (numMatches == 0)
+    {
+      printf("PSHELL_ERROR: Command: '%s' not found\n", commandName);
+    }
+    else if (numMatches > 1)
+    {
+      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", commandName);
+    }
+  }
+  else
+  {
+    help(argc, argv);
+  }
 }
 
 /******************************************************************************/
@@ -2218,7 +2159,7 @@ static void batch(int argc, char *argv[])
     pshell_printf("\n");
     pshell_printf("  where:\n");
     pshell_printf("    filename - name of batch file to run\n");
-    if (_serverType == PSHELL_LOCAL_SERVER)
+    if ((_serverType == PSHELL_LOCAL_SERVER) || (_serverType == PSHELL_NO_SERVER))
     {
       pshell_printf("    rate     - rate in seconds to repeat batch file (default=0)\n");
       pshell_printf("    repeat   - number of times to repeat command or 'forever' (default=1)\n");
@@ -2226,7 +2167,7 @@ static void batch(int argc, char *argv[])
     }
     pshell_printf("\n");
   }
-  else if (_serverType == PSHELL_LOCAL_SERVER)
+  else if ((_serverType == PSHELL_LOCAL_SERVER) || (_serverType == PSHELL_NO_SERVER))
   {
     for (int i = 1; i < argc; i++)
     {
@@ -3079,6 +3020,173 @@ static void loadBatchFile(const char *batchFile_)
 
 /******************************************************************************/
 /******************************************************************************/
+static void addNativeCommands(void)
+{
+  int numNativeCommands = 1;
+  int i;
+  
+  if ((_serverType != PSHELL_UDP_SERVER) && (_serverType != PSHELL_UNIX_SERVER))
+  {
+    /*
+     * add our two built in commands for the TCP/LOCAL server,
+     * for the UDP/UNIX server, these are implemented in the
+     * stand-alone 'pshell' client program
+     */
+    if (_serverType != PSHELL_NO_SERVER)
+    {
+      pshell_addCommand(quit,
+                        "quit",
+                        "exit interactive mode",
+                        NULL,
+                        0,
+                        0,
+                        true);
+      numNativeCommands += 1;
+    }
+
+    pshell_addCommand(help,
+                      "help",
+                      "show all available commands",
+                      NULL,
+                      0,
+                      0,
+                      true);
+    numNativeCommands += 1;
+  }
+
+  if ((_serverType == PSHELL_LOCAL_SERVER) || (_serverType == PSHELL_NO_SERVER))
+  {
+    /* add our built in command for all server types */
+    pshell_addCommand(batch,
+                      "batch",
+                      "run commands from a batch file",
+                      "<filename> [repeat=<count> [rate=<seconds]] [clear]",
+                      1,
+                      4,
+                      false);
+  }
+  else
+  {
+    pshell_addCommand(batch,
+                      "batch",
+                      "run commands from a batch file",
+                      "<filename>",
+                      1,
+                      1,
+                      false);
+  }
+
+  /* move these commands to be first in the command list */
+
+  /* save off the command info */
+  _batchCmd.function = _commandTable[_numCommands-1].function;
+  _batchCmd.command = _commandTable[_numCommands-1].command;
+  _batchCmd.usage = _commandTable[_numCommands-1].usage;
+  _batchCmd.description = _commandTable[_numCommands-1].description;
+  _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+  _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+  _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+
+  if (numNativeCommands == 3)
+  {
+    _helpCmd.function = _commandTable[_numCommands-2].function;
+    _helpCmd.command = _commandTable[_numCommands-2].command;
+    _helpCmd.usage = _commandTable[_numCommands-2].usage;
+    _helpCmd.description = _commandTable[_numCommands-2].description;
+    _helpCmd.minArgs = _commandTable[_numCommands-2].minArgs;
+    _helpCmd.maxArgs = _commandTable[_numCommands-2].maxArgs;
+    _helpCmd.showUsage = _commandTable[_numCommands-2].showUsage;
+
+    _quitCmd.function = _commandTable[_numCommands-3].function;
+    _quitCmd.command = _commandTable[_numCommands-3].command;
+    _quitCmd.usage = _commandTable[_numCommands-3].usage;
+    _quitCmd.description = _commandTable[_numCommands-3].description;
+    _quitCmd.minArgs = _commandTable[_numCommands-3].minArgs;
+    _quitCmd.maxArgs = _commandTable[_numCommands-3].maxArgs;
+    _quitCmd.showUsage = _commandTable[_numCommands-3].showUsage;
+  }
+  else if (numNativeCommands == 2)
+  {
+    _helpCmd.function = _commandTable[_numCommands-2].function;
+    _helpCmd.command = _commandTable[_numCommands-2].command;
+    _helpCmd.usage = _commandTable[_numCommands-2].usage;
+    _helpCmd.description = _commandTable[_numCommands-2].description;
+    _helpCmd.minArgs = _commandTable[_numCommands-2].minArgs;
+    _helpCmd.maxArgs = _commandTable[_numCommands-2].maxArgs;
+    _helpCmd.showUsage = _commandTable[_numCommands-2].showUsage;
+  }
+
+  /* move all the other commands down in the command list */
+  for (i = (int)(_numCommands-(numNativeCommands+1)); i >= 0; i--)
+  {
+    _commandTable[i+numNativeCommands].function = _commandTable[i].function;
+    _commandTable[i+numNativeCommands].command = _commandTable[i].command;
+    _commandTable[i+numNativeCommands].usage = _commandTable[i].usage;
+    _commandTable[i+numNativeCommands].description = _commandTable[i].description;
+    _commandTable[i+numNativeCommands].minArgs = _commandTable[i].minArgs;
+    _commandTable[i+numNativeCommands].maxArgs = _commandTable[i].maxArgs;
+    _commandTable[i+numNativeCommands].showUsage = _commandTable[i].showUsage;
+  }
+
+  /* restore the saved native command info to be first in the command list */
+  if (numNativeCommands == 3)
+  {
+    _commandTable[0].function = _quitCmd.function;
+    _commandTable[0].command = _quitCmd.command;
+    _commandTable[0].usage = _quitCmd.usage;
+    _commandTable[0].description = _quitCmd.description;
+    _commandTable[0].minArgs = _quitCmd.minArgs;
+    _commandTable[0].maxArgs = _quitCmd.maxArgs;
+    _commandTable[0].showUsage = _quitCmd.showUsage;
+
+    _commandTable[1].function = _helpCmd.function;
+    _commandTable[1].command = _helpCmd.command;
+    _commandTable[1].usage = _helpCmd.usage;
+    _commandTable[1].description = _helpCmd.description;
+    _commandTable[1].minArgs = _helpCmd.minArgs;
+    _commandTable[1].maxArgs = _helpCmd.maxArgs;
+    _commandTable[1].showUsage = _helpCmd.showUsage;
+
+    _commandTable[2].function = _batchCmd.function;
+    _commandTable[2].command = _batchCmd.command;
+    _commandTable[2].usage = _batchCmd.usage;
+    _commandTable[2].description = _batchCmd.description;
+    _commandTable[2].minArgs = _batchCmd.minArgs;
+    _commandTable[2].maxArgs = _batchCmd.maxArgs;
+    _commandTable[2].showUsage = _batchCmd.showUsage;
+  }
+  else if (numNativeCommands == 2)
+  {
+    _commandTable[0].function = _helpCmd.function;
+    _commandTable[0].command = _helpCmd.command;
+    _commandTable[0].usage = _helpCmd.usage;
+    _commandTable[0].description = _helpCmd.description;
+    _commandTable[0].minArgs = _helpCmd.minArgs;
+    _commandTable[0].maxArgs = _helpCmd.maxArgs;
+    _commandTable[0].showUsage = _helpCmd.showUsage;
+
+    _commandTable[1].function = _batchCmd.function;
+    _commandTable[1].command = _batchCmd.command;
+    _commandTable[1].usage = _batchCmd.usage;
+    _commandTable[1].description = _batchCmd.description;
+    _commandTable[1].minArgs = _batchCmd.minArgs;
+    _commandTable[1].maxArgs = _batchCmd.maxArgs;
+    _commandTable[1].showUsage = _batchCmd.showUsage;
+  }
+  else
+  {
+    _commandTable[0].function = _batchCmd.function;
+    _commandTable[0].command = _batchCmd.command;
+    _commandTable[0].usage = _batchCmd.usage;
+    _commandTable[0].description = _batchCmd.description;
+    _commandTable[0].minArgs = _batchCmd.minArgs;
+    _commandTable[0].maxArgs = _batchCmd.maxArgs;
+    _commandTable[0].showUsage = _batchCmd.showUsage;
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static void loadConfigFile(void)
 {
   PshellTokens *config;
@@ -3477,10 +3585,14 @@ static unsigned findCommand(char *command_)
   unsigned entry;
   unsigned numMatches = 0;
   _foundCommand = NULL;
-  if (pshell_isEqual(command_, "?"))
+  if (pshell_isEqual(command_, "?") || 
+      pshell_isEqual(command_, "-h") || 
+      pshell_isEqual(command_, "-help") ||
+      pshell_isEqual(command_, "--help"))
   {
     /* the position of the "help" command  */
-    _foundCommand = &_commandTable[1];
+    //_foundCommand = &_commandTable[1];
+    _foundCommand = &_helpCmd;
     numMatches = 1;
   }
   else

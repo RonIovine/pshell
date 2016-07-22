@@ -341,6 +341,9 @@ demo:
 	@echo "Building pshellServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
 	
+	@echo "Building pshellNoServerDemo program..."
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellNoServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellNoServerDemo
+
 	@echo "Building pshellControlDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 	
