@@ -60,6 +60,7 @@ requires the 'expect' package to be installed.
   - setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
   - showPshelllLib           -- Shell script to show the current libpshell-server.so softlink setting
   - pshellServerDemo         -- Demo application using the pshell server library features
+  - pshellNoServerDemo       -- Demo application using non-server option of the pshell library
   - pshellControlDemo        -- Demo application using the pshell control library features
   - traceFilterDemo          -- Demo application using the optional trace filter features
   - traceLogDemo             -- Demo application using the stand-alone TraceLog module

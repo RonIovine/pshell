@@ -2148,7 +2148,7 @@ static void setup(int argc, char *argv[])
   {
     pshell_showUsage();
     pshell_printf("\n");
-    pshell_printf("This command will setup busybox like softlink shortcuts to\n");
+    pshell_printf("This command will setup Busybox like softlink shortcuts to\n");
     pshell_printf("all the registered commands.  This command must be run from\n");
     pshell_printf("the same directory as the invoking program and may require\n");
     pshell_printf("root privlidges to setup the softlinks.\n");
@@ -2201,7 +2201,7 @@ static void help(int argc, char *argv[])
     pshell_printf("main program (i.e. not via softlink shortcuts).\n");
     pshell_printf("\n");
     pshell_printf("The special command '--setup' can be run via the main\n");
-    pshell_printf("program to automatically setup Busybox like softlinks\n");
+    pshell_printf("program to automatically setup Busybox like softlink\n");
     pshell_printf("shortcuts for each of the commands.  The --setup command\n");
     pshell_printf("must be run from the same directory as the main program\n");
     pshell_printf("resides and may require root privlidges.\n");
@@ -3251,7 +3251,7 @@ static void addNativeCommands(void)
   
   _setupCmd.function = setup;
   _setupCmd.command = "--setup";
- _setupCmd.usage = NULL;
+  _setupCmd.usage = NULL;
   _setupCmd.description = "setup busybox like softlink shortcuts to all registered commands";
   _setupCmd.minArgs = 0;
   _setupCmd.maxArgs = 0;
