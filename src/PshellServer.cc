@@ -42,6 +42,7 @@
 #include <ctype.h>
 #include <cstdarg>
 #include <cstdio>
+#include <sys/stat.h>
 
 #ifdef PSHELL_READLINE
 #include <readline/readline.h>
@@ -362,6 +363,7 @@ static char **_argv;
 static PshellCmd _helpCmd;
 static PshellCmd _quitCmd;
 static PshellCmd _batchCmd;
+static PshellCmd _setupCmd;
 
 /****************************************
  * private "member" function prototypes
@@ -435,6 +437,11 @@ static bool allocateTokens(void);
 static void cleanupTokens(void);
 static void *serverThread(void*);
 static void runServer(void);
+
+/* command that is run in no-server mode to setup busybox like 
+ * softlinks to all of the commands
+ */
+static void setup(int argc, char *argv[]);
 
 /* native callback commands (TCP and LOCAL server only) */
 
@@ -1117,19 +1124,20 @@ void pshell_noServer(int argc, char *argv[])
   strcpy(_title, "PSHELL");  
   _pshellMsg = (PshellMsg*)malloc(_pshellPayloadSize+PSHELL_HEADER_SIZE);
   addNativeCommands();
-  if (argc > 1)
+  /* initialize payload of transfer buffer */
+  _pshellMsg->payload[0] = '\0';
+  for (int i = 0; i < argc; i++)
   {
-    /* initialize payload of transfer buffer */
-    _pshellMsg->payload[0] = '\0';
-    commandName = argv[1];
-    _argc = argc-(PSHELL_BASE_ARG_OFFSET+1);
-    _argv = &argv[PSHELL_BASE_ARG_OFFSET+1];
+    commandName = argv[i];
+    _argc = argc-(PSHELL_BASE_ARG_OFFSET+i);
+    _argv = &argv[PSHELL_BASE_ARG_OFFSET+i];
     if ((numMatches = findCommand(commandName)) == 1)
     {
       /* see if they asked for the command usage */
       if (pshell_isHelp() && _foundCommand->showUsage)
       {
         pshell_showUsage();
+        break;
       }
       else if (((_argc >= _foundCommand->minArgs) &&
                 (_argc <= _foundCommand->maxArgs)) ||
@@ -1141,25 +1149,30 @@ void pshell_noServer(int argc, char *argv[])
          * function will catch that and not add the command
          */
         _foundCommand->function(_argc, _argv);
+        break;
       }
       else
       {
         /* arg count validation failure, show the usage */
         pshell_showUsage();
+        break;
       }
     }
-    else if (numMatches == 0)
+  }
+  if (numMatches == 0)
+  {
+    if (argc == 1)
+    {
+      help(argc, argv);
+    }
+    else
     {
       printf("PSHELL_ERROR: Command: '%s' not found\n", commandName);
     }
-    else if (numMatches > 1)
-    {
-      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", commandName);
-    }
   }
-  else
+  else if (numMatches > 1)
   {
-    help(argc, argv);
+    printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", commandName);
   }
 }
 
@@ -2126,6 +2139,45 @@ static void quit(int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
+static void setup(int argc, char *argv[])
+{
+  pshell_printf("\n");
+  pshell_printf("Busybox softlink setup:\n");
+    pshell_printf("\n");
+  if (pshell_isHelp())
+  {
+    pshell_showUsage();
+    pshell_printf("\n");
+    pshell_printf("This command will setup busybox like softlink shortcuts to\n");
+    pshell_printf("all the registered commands.  This command must be run from\n");
+    pshell_printf("the same directory as the invoking program and may require\n");
+    pshell_printf("root privlidges to setup the softlinks.\n");
+  }
+  else
+  {
+    char command[180];
+    struct stat buffer;   
+    if (stat (_serverName, &buffer) == 0)
+    {
+      for (unsigned i = 0; i < _numCommands; i++)
+      {
+        pshell_printf("Setting up softlink: %s -> %s\n", _commandTable[i].command, _serverName);
+        sprintf(command, "rm -f %s", _commandTable[i].command);
+        system(command);
+        sprintf(command, "ln -s %s %s", _serverName, _commandTable[i].command);
+        system(command);
+      }
+    }
+    else
+    {
+      pshell_printf("ERROR: Setup command must be run from same directory as '%s' resides\n", _serverName);
+    }
+  }
+  pshell_printf("\n");
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static void help(int argc, char *argv[])
 {
   unsigned i;
@@ -2140,6 +2192,19 @@ static void help(int argc, char *argv[])
     pshell_printf("%s",  _commandTable[i].command);
     for (pad = strlen(_commandTable[i].command); pad < _maxCommandLength; pad++) pshell_printf(" ");
     pshell_printf("  -  %s\n", _commandTable[i].description);
+  }
+  if (_serverType == PSHELL_NO_SERVER)
+  {
+    pshell_printf("\n");
+    pshell_printf("Type '?' or '-h' after command name to get usage.\n");
+    pshell_printf("Command name abbreviation supported if invoking via\n");
+    pshell_printf("main program (i.e. not via softlink shortcuts).\n");
+    pshell_printf("\n");
+    pshell_printf("The special command '--setup' can be run via the main\n");
+    pshell_printf("program to automatically setup Busybox like softlinks\n");
+    pshell_printf("shortcuts for each of the commands.  The --setup command\n");
+    pshell_printf("must be run from the same directory as the main program\n");
+    pshell_printf("resides and may require root privlidges.\n");
   }
   pshell_printf("\n");
 }
@@ -3183,6 +3248,15 @@ static void addNativeCommands(void)
     _commandTable[0].maxArgs = _batchCmd.maxArgs;
     _commandTable[0].showUsage = _batchCmd.showUsage;
   }
+  
+  _setupCmd.function = setup;
+  _setupCmd.command = "--setup";
+ _setupCmd.usage = NULL;
+  _setupCmd.description = "setup busybox like softlink shortcuts to all registered commands";
+  _setupCmd.minArgs = 0;
+  _setupCmd.maxArgs = 0;
+  _setupCmd.showUsage = false;
+
 }
 
 /******************************************************************************/
@@ -3591,8 +3665,13 @@ static unsigned findCommand(char *command_)
       pshell_isEqual(command_, "--help"))
   {
     /* the position of the "help" command  */
-    //_foundCommand = &_commandTable[1];
     _foundCommand = &_helpCmd;
+    numMatches = 1;
+  }
+  else if ((_serverType == PSHELL_NO_SERVER) && pshell_isEqual(command_, "--setup"))
+  {
+    /* command to setup out busybox like softlinks based on our command names  */
+    _foundCommand = &_setupCmd;
     numMatches = 1;
   }
   else
