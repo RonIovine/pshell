@@ -41,7 +41,10 @@
  * PSHELL library in non-server mode, non-server mode is a non-interactive,
  * one shot command processing mode, i.e. it will take all the arguments 
  * typed after the program name and process them as a single-shot command
- * and exit.
+ * and exit.  This mode will also allow for the setup of each individual
+ * command to be softlinked back to the main parent program via the '--setup'
+ * command option to provide a Busybox like soflink shortcut access to each
+ * individual command directly and not through this parent program.
  *
  *******************************************************************************/
 
