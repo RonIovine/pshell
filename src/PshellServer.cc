@@ -2151,7 +2151,8 @@ static void setup(int argc, char *argv[])
     pshell_printf("This command will setup Busybox like softlink shortcuts to\n");
     pshell_printf("all the registered commands.  This command must be run from\n");
     pshell_printf("the same directory as the invoking program and may require\n");
-    pshell_printf("root privlidges to setup the softlinks.\n");
+    pshell_printf("root privlidges to setup the softlinks, depending on the\n");
+    pshell_printf("directory settings.\n");
   }
   else
   {
@@ -2159,7 +2160,7 @@ static void setup(int argc, char *argv[])
     struct stat buffer;   
     if (stat (_serverName, &buffer) == 0)
     {
-      for (unsigned i = 0; i < _numCommands; i++)
+      for (unsigned i = 1; i < _numCommands; i++)
       {
         pshell_printf("Setting up softlink: %s -> %s\n", _commandTable[i].command, _serverName);
         sprintf(command, "rm -f %s", _commandTable[i].command);
@@ -2196,15 +2197,17 @@ static void help(int argc, char *argv[])
   if (_serverType == PSHELL_NO_SERVER)
   {
     pshell_printf("\n");
-    pshell_printf("Type '?' or '-h' after command name to get usage.\n");
-    pshell_printf("Command name abbreviation supported if invoking via\n");
-    pshell_printf("main program (i.e. not via softlink shortcuts).\n");
+    pshell_printf("To run command type '%s <command>'\n", _serverName);
     pshell_printf("\n");
-    pshell_printf("The special command '--setup' can be run via the main\n");
-    pshell_printf("program to automatically setup Busybox like softlink\n");
-    pshell_printf("shortcuts for each of the commands.  The --setup command\n");
-    pshell_printf("must be run from the same directory as the main program\n");
-    pshell_printf("resides and may require root privlidges.\n");
+    pshell_printf("To get command usage type '%s <command> {? | -h}'\n", _serverName);
+    pshell_printf("\n");
+    pshell_printf("The special command '%s --setup' can be run\n", _serverName);
+    pshell_printf("to automatically setup Busybox like softlink shortcuts for\n");
+    pshell_printf("each of the commands.  This will allow direct access to each\n");
+    pshell_printf("command from the command line shell without having to use the\n");
+    pshell_printf("actual parent program name.  This command command must be run\n");
+    pshell_printf("from the same directory the parent program resides and may\n");
+    pshell_printf("require root privlidges depending on the directory settings.\n");
   }
   pshell_printf("\n");
 }
@@ -3090,7 +3093,8 @@ static void addNativeCommands(void)
   int numNativeCommands = 1;
   int i;
   
-  if ((_serverType != PSHELL_UDP_SERVER) && (_serverType != PSHELL_UNIX_SERVER))
+  if ((_serverType != PSHELL_UDP_SERVER) && 
+      (_serverType != PSHELL_UNIX_SERVER))
   {
     /*
      * add our two built in commands for the TCP/LOCAL server,
