@@ -40,7 +40,7 @@ command line arguments, similar to command line shell processing.
 This framework also provides the ability to run in non-server, non-interactive mode.  In this
 mode, the registered commands can be dispatched via the shell command line directly as single
 shot commands via the main registering program.  In this mode, there is no interactive user
-prompting, and control is returned to the calling command line shell whenthe command is complete.  
+prompting, and control is returned to the calling command line shell when the command is complete.  
 This mode also provides the ability to setup softlink shortcuts to each internal command and to 
 invoke those commands from the command line shell directly via the shortcut name rather than 
 the parent program name, in a manner similar Busybox functionality.
