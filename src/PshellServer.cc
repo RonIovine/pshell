@@ -2142,11 +2142,9 @@ static void quit(int argc, char *argv[])
 static void setup(int argc, char *argv[])
 {
   pshell_printf("\n");
-  pshell_printf("Busybox softlink setup:\n");
-    pshell_printf("\n");
   if (pshell_isHelp())
   {
-    pshell_showUsage();
+    pshell_printf("Usage: %s --setup\n", _serverName);
     pshell_printf("\n");
     pshell_printf("This command will setup Busybox like softlink shortcuts to\n");
     pshell_printf("all the registered commands.  This command must be run from\n");
@@ -2160,6 +2158,8 @@ static void setup(int argc, char *argv[])
     struct stat buffer;   
     if (stat (_serverName, &buffer) == 0)
     {
+      pshell_printf("Busybox softlink setup:\n");
+      pshell_printf("\n");
       for (unsigned i = 1; i < _numCommands; i++)
       {
         pshell_printf("Setting up softlink: %s -> %s\n", _commandTable[i].command, _serverName);
