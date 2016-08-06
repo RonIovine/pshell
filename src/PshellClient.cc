@@ -209,7 +209,6 @@ bool _completionEnabled;
 bool isNumeric(char *string_);
 unsigned findServerPort(char *name_);
 bool getServerName(void);
-bool getIpAddress(void);
 bool getTitle(void);
 bool getBanner(void);
 bool getPrompt(void);
@@ -420,23 +419,6 @@ bool getPrompt(void)
 
 /******************************************************************************/
 /******************************************************************************/
-bool getIpAddress(void)
-{
-  /* query for our ip address so we can setup our prompt and title bar */
-  if (processCommand(PSHELL_QUERY_IP_ADDRESS, NULL, 0, false, true))
-  {
-    strcpy(_ipAddress, _pshellRcvMsg->payload);
-    return (true);
-  }
-  else
-  {
-    printf("PSHELL_ERROR: Could not obtain IP address info from server\n");
-    return (false);
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
 bool getPayloadSize(void)
 {
   if (processCommand(PSHELL_QUERY_PAYLOAD_SIZE, NULL, 0, false, true))
@@ -543,6 +525,7 @@ bool init(char *destination_, char *server_)
         }
       }
     }
+    strcpy(_ipAddress, inet_ntoa(_destIpAddress.sin_addr));
   }
   else
   {
@@ -574,13 +557,12 @@ bool init(char *destination_, char *server_)
     _isUnixConnected = true;
     _destUnixAddress.sun_family = AF_UNIX;
     sprintf(_destUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, server_);
-    
+    strcpy(_ipAddress, "unix");
   }
 
   return (getVersion() && 
           getPayloadSize() && 
           getServerName() && 
-          getIpAddress() && 
           getTitle() && 
           getBanner() && 
           getPrompt());

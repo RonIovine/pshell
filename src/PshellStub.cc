@@ -57,6 +57,7 @@ void pshell_startServer(const char *serverName_,
   printf("PSHELL_INFO: STUB Server: %s Started\n", serverName_);
   if (serverMode_ == PSHELL_BLOCKING) for (;;) sleep(30000);
 }
+void pshell_noServer(int argc, char *argv[]){};
 void pshell_cleanupResources(void){}
 void pshell_addCommand(PshellFunction function_,
                        const char *command_,

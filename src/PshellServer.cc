@@ -392,7 +392,6 @@ static void replyUNIX(PshellMsg *pshellMsg_);
 static void processQueryVersion(void);
 static void processQueryPayloadSize(void);
 static void processQueryName(void);
-static void processQueryIpAddress(void);
 static void processQueryTitle(void);
 static void processQueryBanner(void);
 static void processQueryPrompt(void);
@@ -420,7 +419,6 @@ static void showWelcome(void);
 
 static int getIpAddress(const char *interface_, char *ipAddress_);
 static bool createSocket(void);
-static void setInteractivePrompt(void);
 
 /* common functions (UDP, TCP, UNIX, and LOCAL servers) */
 
@@ -1948,10 +1946,15 @@ static void runTCPServer(void)
               _serverName,
               _hostnameOrIpAddr,
               _port);
+  struct sockaddr_in addr;
+  socklen_t addrlen = sizeof(addr);
   /* startup our TCP server and accept new connections */
   while (createSocket() && (_connectFd = accept(_socketFd, NULL, 0)) > 0)
   {
     /* shutdown original socket to not allow any new connections until we are done with this one */
+    getsockname(_connectFd, (sockaddr *)&addr, &addrlen);
+    strcpy(_ipAddress, inet_ntoa(addr.sin_addr));
+    sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
     shutdown(_socketFd, SHUT_RDWR);
     receiveTCP();
     shutdown(_connectFd, SHUT_RDWR);
@@ -2017,24 +2020,6 @@ static void runLocalServer(void)
     while (!_isCommandInteractive) sleep(1);    
     /* good to go, process an interactive command */
     processCommand(inputLine);
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static void setInteractivePrompt(void)
-{
-  if (strlen(_ipAddress) == 0)
-  {
-    if (pshell_isEqual(_hostnameOrIpAddr, "localhost"))
-    {
-      strcpy(_ipAddress, "127.0.0.1");
-    }
-    else
-    {
-      getIpAddress("eth0", _ipAddress);
-    }
-    sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
   }
 }
 
@@ -2461,8 +2446,6 @@ static void receiveTCP(void)
 
   setbuf(_clientFd, NULL);
   
-  setInteractivePrompt();
-
   /* print out our welcome banner */
   showWelcome();
 
@@ -3430,7 +3413,6 @@ static bool createSocket(void)
       if (pshell_isEqual(requestedHost, "anyhost"))
       {
         _localIpAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-        getIpAddress("eth0", _ipAddress);
       }
       else if (pshell_isEqual(requestedHost, "localhost"))
       {
@@ -3523,14 +3505,6 @@ static void processQueryPayloadSize(void)
 static void processQueryName(void)
 {
   pshell_printf("%s", _serverName);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static void processQueryIpAddress(void)
-{
-  setInteractivePrompt();
-  pshell_printf("%s", _ipAddress);
 }
 
 /******************************************************************************/
@@ -3808,10 +3782,6 @@ static void processCommand(char *command_)
   else if (_pshellMsg->header.msgType == PSHELL_QUERY_NAME)
   {
     processQueryName();
-  }
-  else if (_pshellMsg->header.msgType == PSHELL_QUERY_IP_ADDRESS)
-  {
-    processQueryIpAddress();
   }
   else if (_pshellMsg->header.msgType == PSHELL_QUERY_TITLE)
   {

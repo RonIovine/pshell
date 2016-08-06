@@ -88,11 +88,10 @@ struct PshellMsg
 #define PSHELL_UPDATE_PAYLOAD_SIZE  6   /* server initiated, upon buffer overflow */
 #define PSHELL_USER_COMMAND         7   /* pshell client initiated */
 #define PSHELL_COMMAND_COMPLETE     8   /* server initiated, in response to pshell client request */
-#define PSHELL_QUERY_IP_ADDRESS     9   /* pshell client initiated */
-#define PSHELL_QUERY_BANNER         10  /* pshell client initiated */
-#define PSHELL_QUERY_TITLE          11  /* pshell client initiated */
-#define PSHELL_QUERY_PROMPT         12  /* pshell client initiated */
-#define PSHELL_CONTROL_COMMAND      13  /* control client initiated */
+#define PSHELL_QUERY_BANNER         9   /* pshell client initiated */
+#define PSHELL_QUERY_TITLE          10  /* pshell client initiated */
+#define PSHELL_QUERY_PROMPT         11  /* pshell client initiated */
+#define PSHELL_CONTROL_COMMAND      12  /* control client initiated */
 
 #define PSHELL_COMMAND_DELIMETER "/"  /* delimits commands for queryCommands2 */
 
