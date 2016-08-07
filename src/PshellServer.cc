@@ -2126,6 +2126,9 @@ static void quit(int argc, char *argv[])
 /******************************************************************************/
 static void setup(int argc, char *argv[])
 {
+  char command[80];
+  char line[80];
+  FILE *fp;
   pshell_printf("\n");
   if (pshell_isHelp())
   {
@@ -2139,9 +2142,8 @@ static void setup(int argc, char *argv[])
   }
   else
   {
-    char command[180];
     struct stat buffer;   
-    if (stat (_serverName, &buffer) == 0)
+    if (stat(_serverName, &buffer) == 0)
     {
       pshell_printf("Busybox softlink setup:\n");
       pshell_printf("\n");
@@ -2156,7 +2158,15 @@ static void setup(int argc, char *argv[])
     }
     else
     {
-      pshell_printf("ERROR: Setup command must be run from same directory as '%s' resides\n", _serverName);
+      pshell_printf("ERROR: Setup command must be run from same directory as '%s' resides,\n", _serverName);
+      sprintf(command, "which %s", _serverName);
+      if ((fp = popen(command, "r")) != NULL)
+      {
+        if (fgets(line, sizeof(line), fp) != NULL)
+        {
+          pshell_printf("       i.e. %s", line);
+        }
+      }
     }
   }
   pshell_printf("\n");
