@@ -2509,7 +2509,7 @@ static void receiveTCP(void)
       }
       else if (retCode == 0)
       {
-        pshell_printf("\nIdle session timeout");
+        pshell_printf("\nIdle session timeout\n");
         return;
       }
 
