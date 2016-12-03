@@ -2200,9 +2200,9 @@ static void help(int argc, char *argv[])
     pshell_printf("to automatically setup Busybox like softlink shortcuts for\n");
     pshell_printf("each of the commands.  This will allow direct access to each\n");
     pshell_printf("command from the command line shell without having to use the\n");
-    pshell_printf("actual parent program name.  This command command must be run\n");
-    pshell_printf("from the same directory the parent program resides and may\n");
-    pshell_printf("require root privlidges depending on the directory settings.\n");
+    pshell_printf("actual parent program name.  This command must be run from the\n");
+    pshell_printf("same directory the parent program resides and may require root\n");
+    pshell_printf("privlidges depending on the directory settings.\n");
   }
   pshell_printf("\n");
 }

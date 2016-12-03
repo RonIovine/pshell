@@ -130,7 +130,7 @@ void pshell_registerServerLogFunction(PshellLogFunction logFunction_);
  * compiling the library with the command line compile option of
  * PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST
  */
-typedef void (*PshellFunction)(int argc, char *argv[]); 
+typedef void (*PshellFunction)(int argc_, char *argv_[]); 
 
 /*
  * pshell_addCommand:
@@ -178,7 +178,7 @@ void pshell_runCommand(const char *command_, ...);
  * pshellNoServerDemo.cc that is included with this package for the usage of this
  * function
  */
-void pshell_noServer(int argc, char *argv[]); 
+void pshell_noServer(int argc_, char *argv_[]); 
 
 /*
  * pshell_startServer:

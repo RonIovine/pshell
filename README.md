@@ -22,7 +22,7 @@ The prototype for the embedded command line shell functions are similar to the
 Command line shell functions can also display information back to the interactive
 clients via a mechanism similar to the familiar 'printf' as follows:
 
-`void pshell_printf(const char *format_, ...);`
+`void pshell_printf(const char *format, ...);`
 
 These functions can be invoked via several methods depending on how the internal PSHELL 
 server is configured.  The following shows the various PSHELL server types along with their 
