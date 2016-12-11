@@ -810,7 +810,7 @@ void pshell_flush(void)
   {
     if ((_serverType == PSHELL_UDP_SERVER) || (_serverType == PSHELL_UNIX_SERVER))
     {
-      /* don't do any intermediate flushed if this command was from a control client */
+      /* don't do any intermediate flushes if this command was from a control client */
       if (!_isControlCommand)
       {
         reply(_pshellMsg);
