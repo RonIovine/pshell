@@ -67,12 +67,6 @@ functionality to easily be completly removed from an application without requiri
 changes or recompilation, only a re-link (for static linking) or restart (when using a shared 
 library acessed via a softlink) of the target program is necessary.
 
-The code is written almost entirely in standard ANSI 'C', and the API is a functional 'C' API, 
-however, there are a couple of isolated places where C++ semantics are used.  Because of this, 
-all of the source files use the '.cc' C++ style extension instead of the more normal '.c' C 
-style extension in order to be able to use the 'gcc' compiler (which uses the file extension 
-for the filetype key) as well the 'g++' compiler.
-
 See the full README file for a complete description of all the components, installation, building, and usage.
 
 Note, this package was originally hosted at [code.google.com](https://code.google.com) as 

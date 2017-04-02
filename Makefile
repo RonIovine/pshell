@@ -26,9 +26,9 @@
 #
 #################################################################################
 
-CC=gcc
+CC=gcc -lstdc++
 
-SRC_EXT=cc
+SRC_EXT=c
 
 INCLUDE = -I$(abspath include)
 
