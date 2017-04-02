@@ -124,13 +124,13 @@ void trace_registerLevels(void){}
 void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_){};
 void trace_setLogLevel(unsigned _logLevel){};
 unsigned trace_getLogLevel(void){return (0);};
-void trace_showLocation(bool show_){}
+void trace_enableLocation(bool enable_){}
 bool trace_isLocationEnabled(void){return (true);}
-void trace_showPath(bool show_){}
+void trace_enablePath(bool enable_){}
 bool trace_isPathEnabled(void){return (true);}
-void trace_showTimestamp(bool show_){}
+void trace_enableTimestamp(bool enable_){}
 bool trace_isTimestampEnabled(void){return (true);}
-void trace_showPrefix(bool show_){};
+void trace_enablePrefix(bool enable_){};
 bool trace_isPrefixEnabled(void){return (true);}
 void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}
 void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}

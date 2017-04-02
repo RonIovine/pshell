@@ -176,11 +176,11 @@ unsigned trace_getLogLevel(void);
 #endif
 
 /*
- * trace_showLocation:
+ * trace_enableLocation:
  *
- * display the file, function, and line information in the trace logs
+ * enable/disable the displaying of the file, function, and line information in the trace logs
  */
-void trace_showLocation(bool show_);
+void trace_enableLocation(bool enable_);
 
 /*
  * trace_isLocationEnabled:
@@ -190,11 +190,11 @@ void trace_showLocation(bool show_);
 bool trace_isLocationEnabled(void);
 
 /*
- * trace_showPath:
+ * trace_enablePath:
  *
- * controls the stripping of any preceeding path information from the __FILE__ string
+ * enable/disable the displaying of any preceeding path information from the __FILE__ string
  */
-void trace_showPath(bool show_);
+void trace_enablePath(bool enable_);
 
 /*
  * trace_isPathEnabled:
@@ -204,11 +204,11 @@ void trace_showPath(bool show_);
 bool trace_isPathEnabled(void);
 
 /*
- * trace_showTimestamp:
+ * trace_enableTimestamp:
  *
- * display the timestamp in the trace logs
+ * enable/disable the displaying of the timestamp in the trace logs
  */
-void trace_showTimestamp(bool show_);
+void trace_enableTimestamp(bool enable_);
 
 /*
  * trace_isTimestampEnabled:
@@ -218,11 +218,11 @@ void trace_showTimestamp(bool show_);
 bool trace_isTimestampEnabled(void);
 
 /*
- * trace_showPrefix:
+ * trace_enablePrefix:
  *
- * display the configured prefix in the trace logs
+ * enable/disable the displaying of the prefix in the trace logs
  */
-void trace_showPrefix(bool show_);
+void trace_enablePrefix(bool enable_);
 
 /*
  * trace_isPrefixEnabled:

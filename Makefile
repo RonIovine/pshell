@@ -28,7 +28,7 @@
 
 CC=gcc -lstdc++
 
-SRC_EXT=c
+SRC_EXT=cc
 
 INCLUDE = -I$(abspath include)
 

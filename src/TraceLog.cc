@@ -135,23 +135,23 @@ void trace_setLogPrefix(const char *name_)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_showLocation(bool show_)
+void trace_enableLocation(bool enable_)
 {
-  _printLocation = show_;
+  _printLocation = enable_;
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_showPath(bool show_)
+void trace_enablePath(bool enable_)
 {
-  _printPath = show_;
+  _printPath = enable_;
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_showTimestamp(bool show_)
+void trace_enableTimestamp(bool enable_)
 {
-  _printTimestamp = show_;
+  _printTimestamp = enable_;
 }
 
 /******************************************************************************/
@@ -177,9 +177,9 @@ bool trace_isPathEnabled(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_showPrefix(bool show_)
+void trace_enablePrefix(bool enable_)
 {
-  if (show_)
+  if (enable_)
   {
     _printPrefix = _logPrefix;
   }

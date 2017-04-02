@@ -1046,11 +1046,11 @@ void configureFilter(int argc, char *argv[])
   {
     if (pshell_isSubString(argv[1], "on", 2))
     {
-      trace_showLocation(true);
+      trace_enableLocation(true);
     }
     else if (pshell_isSubString(argv[1], "off", 2))
     {
-      trace_showLocation(false);
+      trace_enableLocation(false);
     }
     else
     {
@@ -1061,11 +1061,11 @@ void configureFilter(int argc, char *argv[])
   {
     if (pshell_isSubString(argv[1], "on", 2))
     {
-      trace_showTimestamp(true);
+      trace_enableTimestamp(true);
     }
     else if (pshell_isSubString(argv[1], "off", 2))
     {
-      trace_showTimestamp(false);
+      trace_enableTimestamp(false);
     }
     else
     {
@@ -1076,11 +1076,11 @@ void configureFilter(int argc, char *argv[])
   {
     if (pshell_isSubString(argv[1], "on", 2))
     {
-      trace_showPath(true);
+      trace_enablePath(true);
     }
     else if (pshell_isSubString(argv[1], "off", 2))
     {
-      trace_showPath(false);
+      trace_enablePath(false);
     }
     else
     {
@@ -1091,11 +1091,11 @@ void configureFilter(int argc, char *argv[])
   {
     if (pshell_isSubString(argv[1], "on", 2))
     {
-      trace_showPrefix(true);
+      trace_enablePrefix(true);
     }
     else if (pshell_isSubString(argv[1], "off", 2))
     {
-      trace_showPrefix(false);
+      trace_enablePrefix(false);
     }
     else
     {
