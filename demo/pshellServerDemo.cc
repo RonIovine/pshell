@@ -82,7 +82,7 @@ void world(int argc, char *argv[])
  * this command shows an example client keep alive,
  * the PSHELL UDP client has a default 5 second timeout, 
  * if a command will be known to take longer than 5 
- * seconds, it must give some kind of  output back to 
+ * seconds, it must give some kind of output back to 
  * the client, this shows the two helper functions 
  * created the assist in this, the TCP client does not
  * need a keep alive since the TCP protocol itself

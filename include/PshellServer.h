@@ -46,7 +46,7 @@ extern "C" {
  * embedded functions based on how the pshell server is configured, which is
  * described in documentation further down in this file.
  *
- * An complete example of the usage of the API can be found in the included 
+ * A complete example of the usage of the API can be found in the included 
  * demo program file pshellServerDemo.cc
  *
  *******************************************************************************/
@@ -172,11 +172,11 @@ void pshell_runCommand(const char *command_, ...);
  * pshell_noServer: 
  * 
  * this function is used to run in non-server mode, i.e. non-interactive, command 
- * line mode, this will run the command as typed at the command line as a single-shot 
- * command and exit, this command must be run with the initial argc, argv as they are 
- * passed into the 'main' from the command line, see the example demo program
- * pshellNoServerDemo.cc that is included with this package for the usage of this
- * function
+ * line mode, this will run the command as typed at the host's command line as a 
+ * single-shot command and exit, this command must be run with the initial argc, 
+ * argv as they are passed into the 'main' from the command line, see the example 
+ * demo program pshellNoServerDemo.cc that is included with this package for the 
+ * usage of this function
  */
 void pshell_noServer(int argc_, char *argv_[]); 
 

@@ -38,12 +38,12 @@ The functions are dispatched via its registered command name (keyword), along
 with 0 or more command line arguments, similar to command line shell processing.
 
 This framework also provides the ability to run in non-server, non-interactive mode.  In this
-mode, the registered commands can be dispatched via the shell command line directly as single
-shot commands via the main registering program.  In this mode, there is no interactive user
-prompting, and control is returned to the calling command line shell whenthe command is complete.  
-This mode also provides the ability to setup softlink shortcuts to each internal command and to 
-invoke those commands from the command line shell directly via the shortcut name rather than 
-the parent program name, in a manner similar Busybox functionality.
+mode, the registered commands can be dispatched via the host's shell command line directly as 
+single shot commands via the main registering program.  In this mode, there is no interactive 
+user prompting, and control is returned to the calling host's command line shell when the command 
+is complete.  This mode also provides the ability to setup softlink shortcuts to each internal 
+command and to invoke those commands from the host's command line shell directly via the shortcut 
+name rather than the parent program name, in a manner similar Busybox functionality.
 
 This package also provides an optional integrated interactive dynamic trace filtering mechanism 
 that can be incorporated into any software that uses an existing trace logging system that uses 
@@ -56,10 +56,10 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, four demo programs are also provided, one to
+In addition to the infrastructure components, five demo programs are also provided, one to
 show the usage of the pshell server API, one to show the usage of pshell control API, one
-to show the usage of the trace filter/trace log API, and one to show the usage of a stand-alone 
-(no filtering) trace log application.
+to show the usage of the trace filter/trace log API, one to show the usage of a stand-alone 
+(no filtering) trace log application, and one to show the usage of the multi-call binary API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 
@@ -165,27 +165,32 @@ TraceLog(3)      - Describes the API and usage of the TraceLog utility
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
-$PSHELL_INSTALL/demo/pshellServerDemo.c  --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.c --  Sample pshell control external client
-$PSHELL_INSTALL/demo/traceFilterDemo.c   --  Server demo for dynamic trace filtering
-$PSHELL_INSTALL/demo/traceLogDemo.c      --  Demo using the stand-alone TraceLog module
+$PSHELL_INSTALL/demo/pshellServerDemo.c    --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.c   --  Sample pshell control external client
+$PSHELL_INSTALL/demo/traceFilterDemo.c     --  Server demo for dynamic trace filtering
+$PSHELL_INSTALL/demo/traceLogDemo.c        --  Demo using the stand-alone TraceLog module
+$PSHELL_INSTALL/demo/pshellNoServerDemo.c  --  Demo using the multi-call binary option
 
 EXECUTION:
 
-There are 4 demo programs, one to demonstrate a program that incorporates a
+There are 5 demo programs, one to demonstrate a program that incorporates a
 pshell server (pshellServerDemo), one that demonstrates a program that incorporates
 the trace filter functionality (traceFilterDemo), one that demonstrates the control 
 of a program that is running a pshell server from another program (pshellControlDemo),
-and one that just demonstrates the stand-alone usage of the TraceLog API (traceLogDemo).
+one that just demonstrates the stand-alone usage of the TraceLog API (traceLogDemo),
+and one that demonstrates the use of the multi-cal binary API (pshellNoServerDemo).
 
-All four demo programs have a usage that can be displayed by typing <programName> -h.
+All five demo programs have a usage that can be displayed by typing <programName> -h.
 The two demo programs pshellServerDemo and traceFilterDemo can be controlled via
 an interactive client program (either pshell or telnet) that shows the full command
 line functionality.  The demo program pshellControlDemo can control the other two demo
 programs through a simple command line UI, but it is really meant to demonstrate the
 programmitic control of an external program that is running a PshellServer via the
-PshellControl API and library.  The pshellCotrolDemo program can control either the
-pshellServerDemo or traceControlDemo program.
+PshellControl API and library.  The pshellControlDemo program can control either the
+pshellServerDemo or traceControlDemo program.  The functionality of the pshellNoServerDemo
+is only access directly from the host's command line shell, either directly from the
+pshellNoServerDemo itself, or via the setup softlinks for each command (need to run
+'pshellNoServerDemo --setup' to setup softlinks).
 
 After the install.sh script has been excuted (and the local env sourced if doing
 a local install), the client and associated demo programs can be run.  Run
@@ -419,9 +424,9 @@ a local network or secure VPN, but should not be exposed for general use
 over untrusted networks, such as the public Internet.  For maximum security
 between the client and server, the server can be run either as a UNIX domain
 server or at the target host's local loopback address (i.e. 127.0.0.1) and the
-PSHELL client application can be installed to run on the same local host as
-the target application.  Of course, a secure mechanism (like ssh) would then
-need to be used to gain user access to that host.
+PSHELL client application (pshell) can be installed to run on the same local 
+host as the target application.  Of course, a secure mechanism (like ssh) would 
+then need to be used to provide a secure user access method to that host.
 
 PORTING:
 

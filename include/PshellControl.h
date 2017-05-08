@@ -44,7 +44,7 @@ extern "C" {
  * provides a very lightweight way to provide a control mechanism into a program
  * that is running a pshell, this is analagous to a remote procedure call (rpc).
  *
- * An complete example of the usage of the API can be found in the included 
+ * A complete example of the usage of the API can be found in the included 
  * demo program file pshellControlDemo.cc
  *
  *******************************************************************************/

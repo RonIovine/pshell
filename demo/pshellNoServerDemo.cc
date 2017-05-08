@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
    * example of running in non-server mode, i.e. non-interactive, command line mode,
    * this will run the command as typed at the command line as a single-shot command
    * and exit, this command must be run with the initial argc, argv as they are passed
-   * into the 'main' from the command line
+   * into the 'main' from the host's command line
    */
   pshell_noServer(argc, argv);
   

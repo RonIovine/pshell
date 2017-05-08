@@ -38,12 +38,13 @@ The functions are dispatched via its registered command name (keyword), along wi
 command line arguments, similar to command line shell processing.
 
 This framework also provides the ability to run in non-server, non-interactive mode.  In this
-mode, the registered commands can be dispatched via the shell command line directly as single
-shot commands via the main registering multi-call binary program.  In this mode, there is no 
-interactive user prompting, and control is returned to the calling command line shell when the 
-command is complete.  This mode also provides the ability to setup softlink shortcuts to each 
-internal command and to invoke those commands from the command line shell directly via the 
-shortcut name  rather than the parent program name, in a manner similar [Busybox](https://busybox.net/about.html) functionality.
+mode, the registered commands can be dispatched via the host's shell command line directly as 
+single shot commands via the main registering multi-call binary program.  In this mode, there 
+is no interactive user prompting, and control is returned to the calling host's command line 
+shell when the command is complete.  This mode also provides the ability to setup softlink 
+shortcuts to each internal command and to invoke those commands from the host's command line 
+shell directly via the shortcut name  rather than the parent program name, in a manner similar 
+[Busybox](https://busybox.net/about.html) functionality.
 
 This package also provides an optional integrated interactive dynamic trace filtering mechanism that 
 can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`, 
@@ -56,10 +57,10 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, four demo programs are also provided, one to
+In addition to the infrastructure components, fivedemo programs are also provided, one to
 show the usage of the pshell server API, one to show the usage of pshell control API, one
-to show the usage of the trace filter/trace log API, and one to show the usage of a stand-alone 
-(no filtering) trace log application.
+to show the usage of the trace filter/trace log API, one to show the usage of a stand-alone 
+(no filtering) trace log application, and one to show the usage of the multi-call binary API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 

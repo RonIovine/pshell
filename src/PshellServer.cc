@@ -249,8 +249,8 @@ struct PshellCmd
 struct PshellTokens_c
 {
   PshellTokens _public;  /* returned to the caller of "pshell_tokenize" */
-  unsigned maxTokens;  /* used for internal token management */
-  char *string;        /* used for internal token management */
+  unsigned maxTokens;    /* used for internal token management */
+  char *string;          /* used for internal token management */
 };
 
 /*************************
@@ -315,7 +315,7 @@ static char _interactivePrompt[80];
 static unsigned _maxTabCommandLength = 0;
 static unsigned _maxTabColumns = 0;
 
-/* common data (for UDP, TCP and LOCAL servers */
+/* common data (for UDP, TCP, UNIX, and LOCAL servers */
 
 #ifdef PSHELL_INCLUDE_COMMAND_IN_ARGS_LIST
 #define PSHELL_BASE_ARG_OFFSET 0
@@ -502,7 +502,7 @@ void pshell_addCommand(PshellFunction function_,
   /* perform some command validation */
 
   /* see if we have a NULL command name */
-  if (command_ == NULL)
+  if ((command_ == NULL) || (strlen(command_) == 0))
   {
     PSHELL_ERROR("NULL command name, command not added");
      pthread_mutex_unlock(&_mutex);
@@ -510,7 +510,7 @@ void pshell_addCommand(PshellFunction function_,
   }
 
   /* see if we have a NULL description */
-  if (description_ == NULL)
+  if ((description_ == NULL) || (strlen(description_) == 0))
   {
     PSHELL_ERROR("NULL description, command: '%s' not added", command_);
     pthread_mutex_unlock(&_mutex);
@@ -535,7 +535,7 @@ void pshell_addCommand(PshellFunction function_,
   }
 
   /* see if they provided no usage for a function with arguments */
-  if (((maxArgs_ > 0) || (minArgs_ > 0)) && (usage_ == NULL))
+  if (((maxArgs_ > 0) || (minArgs_ > 0)) && ((usage_ == NULL) || (strlen(usage_) == 0)))
   {
     PSHELL_ERROR("NULL usage for command that takes arguments, command: '%s' not added",
                  command_);
