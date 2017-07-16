@@ -56,13 +56,12 @@ extern "C" {
  * if the client of this API does not want to see any internal message printed,
  * set the debug log level to PSHELL_LOG_LEVEL_NONE (0)
  */
-#define PSHELL_LOG_LEVEL_0         0   /* No debug log messages */
-#define PSHELL_LOG_LEVEL_1         1   /* PSHELL_ERROR only */
-#define PSHELL_LOG_LEVEL_2         2   /* Level 1 plus PSHELL_WARNING */
-#define PSHELL_LOG_LEVEL_3         3   /* Level 2 plus PSHELL_INFO */
-#define PSHELL_LOG_LEVEL_NONE      PSHELL_LOG_LEVEL_0
-#define PSHELL_LOG_LEVEL_ALL       PSHELL_LOG_LEVEL_3
-#define PSHELL_LOG_LEVEL_DEFAULT   PSHELL_LOG_LEVEL_2
+#define PSHELL_LOG_LEVEL_NONE      0   /* No debug log messages */
+#define PSHELL_LOG_LEVEL_ERROR     1   /* PSHELL_ERROR */
+#define PSHELL_LOG_LEVEL_WARNING   2   /* PSHELL_ERROR, PSHELL_WARNING */
+#define PSHELL_LOG_LEVEL_INFO      3   /* PSHELL_ERROR, PSHELL_WARNING, PSHELL_INFO */
+#define PSHELL_LOG_LEVEL_ALL       PSHELL_LOG_LEVEL_INFO
+#define PSHELL_LOG_LEVEL_DEFAULT   PSHELL_LOG_LEVEL_WARNING
 
 void pshell_setControlLogLevel(unsigned level_);
 
@@ -163,7 +162,7 @@ void pshell_disconnectAllServers(void);
  * pshell_setDefaultTimeout:
  *
  * set the default server response timeout that is used in the
- * 'send' commands that don't take a tmeout override
+ * 'send' commands that don't take a timeout override
  */
 void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
 

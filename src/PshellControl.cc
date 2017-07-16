@@ -111,9 +111,9 @@ static void loadConfigFile(const char *controlName_, char *remoteServer_, unsign
 static void _printf(const char *format_, ...);
 
 /* output display macros */
-#define PSHELL_ERROR(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_1) {_printf("PSHELL_ERROR: " format_, ##__VA_ARGS__);_printf("\n");}
-#define PSHELL_WARNING(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_2) {_printf("PSHELL_WARNING: " format_, ##__VA_ARGS__);_printf("\n");}
-#define PSHELL_INFO(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_2) {_printf("PSHELL_INFO: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_ERROR(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_ERROR) {_printf("PSHELL_ERROR: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_WARNING(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_WARNING) {_printf("PSHELL_WARNING: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_INFO(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_INFO) {_printf("PSHELL_INFO: " format_, ##__VA_ARGS__);_printf("\n");}
 
 /**************************************
  * public API "member" function bodies

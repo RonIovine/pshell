@@ -454,9 +454,9 @@ static void batch(int argc, char *argv[]);
 
 /* output display macros */
 static void _printf(const char *format_, ...);
-#define PSHELL_ERROR(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_1) {_printf("PSHELL_ERROR: " format_, ##__VA_ARGS__);_printf("\n");}
-#define PSHELL_WARNING(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_2) {_printf("PSHELL_WARNING: " format_, ##__VA_ARGS__);_printf("\n");}
-#define PSHELL_INFO(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_3) {_printf("PSHELL_INFO: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_ERROR(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_ERROR) {_printf("PSHELL_ERROR: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_WARNING(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_WARNING) {_printf("PSHELL_WARNING: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_INFO(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_INFO) {_printf("PSHELL_INFO: " format_, ##__VA_ARGS__);_printf("\n");}
 
 /**************************************
  * public API "member" function bodies
@@ -1036,9 +1036,9 @@ void pshell_startServer(const char *serverName_,
                  PSHELL_UNIX_SERVER,
                  PSHELL_LOCAL_SERVER);
   }
-  else if ((serverType_ != PSHELL_LOCAL_SERVER) && ((port_ == 0) || (hostnameOrIpAddr_ == NULL)))
+  else if (((serverType_ == PSHELL_UDP_SERVER) || (serverType_ == PSHELL_TCP_SERVER)) && ((port_ == 0) || (hostnameOrIpAddr_ == NULL)))
   {
-    PSHELL_ERROR("Non-local server, must supply valid IP/hostname and port");
+    PSHELL_ERROR("%s server must supply valid IP/hostname and port", ((serverType_ == PSHELL_UDP_SERVER) ? "UDP" : "TCP"));
   }
   else if (!_isRunning)
   {
