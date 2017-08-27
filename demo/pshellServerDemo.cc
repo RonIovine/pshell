@@ -362,7 +362,7 @@ void advancedParsing(int argc, char *argv[])
 
 /*
  * function that shows the extraction of arg options using the pshell_getOption
- * function,the fromat of the options are either -<option><value> where <option>
+ * function,the format of the options are either -<option><value> where <option>
  * is a single character option (e.g. -t10), or <option>=<value> where <option>
  * is any length character string (e.g. timeout=10), if the 'strlen(option_)'
  * is == 0, all option names & values will be extracted and returned in the

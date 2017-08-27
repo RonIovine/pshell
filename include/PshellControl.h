@@ -185,8 +185,8 @@ int pshell_sendCommand1(int sid_, const char *command_, ...);
 int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...);
 
 /*
- * the following two commands will issue the remote the command and extract
- * any results that are returned in the payload of the message, this will only
+ * the following two commands will issue the remote command and extract any
+ * results that are returned in the payload of the message, this will only
  * work with a non-0 timeout and a return result of PSHELL_COMMAND_SUCCESS,
  * the data in the payload is ascii formatted character data, it is the
  * responsibility of the calling application to parse & understand the results,

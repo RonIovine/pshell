@@ -92,7 +92,7 @@
 # This is the default directory that contains the pshell-server.conf,
 # pshell-control.conf, and pshell-client.conf files.  If this env variable
 # is not set, it will use the default directory that is setup in the
-# PshellServer.c, PshellControl.c,and PshellClient.c files (/etc/pshell/config).
+# PshellServer.c, PshellControl.c, and PshellClient.c files (/etc/pshell/config).
 # These config files can be used to set various server, client, and control
 # settings.  Refer to the example files in the 'config' directory of this
 # package for usage of these files.
@@ -140,7 +140,7 @@
 #PSHELL_READLINE=y
 
 #
-# Some versions of the standard 'C' library do not support the
+# Some older versions of the standard 'C' library do not support the
 # function "vsnprintf".  This function is used in the "pshell_printf"
 # function to format and populate the PSHELL transfer buffer and to
 # detect for buffer overflow.  If this function is not available,

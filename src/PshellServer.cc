@@ -2426,6 +2426,7 @@ static void showPrompt(char *command_)
 static void receiveTCP(void)
 {
   unsigned char character;
+  unsigned char character1;
   int i;
   int numRead;
   int position;
@@ -2551,7 +2552,7 @@ static void receiveTCP(void)
         isTelnetOption = 0;
       }
 
-      /* handle ANSI arrows */
+      /* handle various control keys */
       if (esc)
       {
         if (esc == '[')
@@ -2571,6 +2572,39 @@ static void receiveTCP(void)
             case 'D': /* Left */
               character = CTRL('B');
               break;
+            case '1': /* Home */
+              character1 = CTRL('A');
+              continue;
+            case '3': /* Delete */
+              character1 = CTRL('D');
+              continue;
+            case '4': /* End */
+              character1 = CTRL('E');
+              continue;
+            case '5': /* page up */
+            case '6': /* page down */
+              character1 = 0;
+              continue;
+            case '~': /* End of 4 char escape seauence */
+              character = character1;
+              break;
+            default:
+              character = 0;
+              break;
+          }
+          esc = 0;
+        }
+        else if (esc == 'O')
+        {
+          /* remap to readline control codes */
+          switch (character)
+          {
+            case 'H': /* Home */
+              character = CTRL('A');
+              break;
+            case 'F': /* End */
+              character = CTRL('E');
+              break;
             default:
               character = 0;
               break;
@@ -2579,7 +2613,14 @@ static void receiveTCP(void)
         }
         else
         {
-          esc = (character == '[') ? character : 0;
+          if ((character == '[') || (character == 'O'))
+          {
+            esc = character;
+          }
+          else
+          {
+            esc = 0;
+          }
           continue;
         }
       }
@@ -2607,6 +2648,26 @@ static void receiveTCP(void)
         continue;
       }
 
+      /* delete character under cursor */
+      if (character == CTRL('D'))
+      {
+        if (cursor < length)
+        {
+          for (i = cursor; i <= length; i++)
+          {
+            command[i] = command[i+1];
+          }
+          writeSocket(command+cursor, strlen(command+cursor));
+          writeSocket(" ", 0);
+          for (i = 0; i <= (int)strlen(command+cursor); i++)
+          {
+            writeSocket("\b", 0);
+          }
+          length--;          
+        }
+        continue;
+      }
+      
       /* back word, backspace/delete */
       if (character == CTRL('W') || character == CTRL('H') || character == 0x7f)
       {
@@ -2837,8 +2898,11 @@ static void receiveTCP(void)
         {
           if (cursor < length)
           {
-            writeSocket(&command[cursor], 0);
-            cursor++;
+            writeSocket(&command[cursor++], 0);
+            for (int i = 0; i < (length-cursor); i++)
+            {
+              writeSocket("\b", 0);
+            }
           }
         }
         continue;
