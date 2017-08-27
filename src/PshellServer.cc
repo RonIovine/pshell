@@ -2585,7 +2585,7 @@ static void receiveTCP(void)
             case '6': /* page down */
               character1 = 0;
               continue;
-            case '~': /* End of 4 char escape seauence */
+            case '~': /* End of 4 char escape sequence */
               character = character1;
               break;
             default:
@@ -2898,11 +2898,7 @@ static void receiveTCP(void)
         {
           if (cursor < length)
           {
-            writeSocket(&command[cursor++], 0);
-            for (int i = 0; i < (length-cursor); i++)
-            {
-              writeSocket("\b", 0);
-            }
+            writeSocket(&command[cursor++], 1);
           }
         }
         continue;
