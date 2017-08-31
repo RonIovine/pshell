@@ -2613,13 +2613,15 @@ static void receiveTCP(void)
         }
         else
         {
-          if ((character == '[') || (character == 'O'))
+          switch (character)
           {
-            esc = character;
-          }
-          else
-          {
-            esc = 0;
+            case '[':
+            case 'O':
+              esc = character;
+              break;
+            default:
+              esc = 0;
+              break;
           }
           continue;
         }
