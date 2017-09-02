@@ -46,7 +46,15 @@
 set title "PSHELL"
 set prompt "PSHELL>"
 
+set defaultInstallDir "/etc/pshell"
+set defaultConfigDir $defaultInstallDir/"config"
+set defaultBatchDir $defaultInstallDir/"batch"
+set defaultClientConfigFile "pshell-client.conf"
+set defaultServerConfigFile "pshell-server.conf"
+
 proc showUsage {} {
+  variable defaultClientConfigFile
+  variable defaultServerConfigFile
   puts ""
   puts "Usage: pshell.exp -h | ? | -s | {<hostName> | <ipAddress>} {<serverName> | <portNum>}"
   puts "                 \[-h | ? | {<command> \[<rate> \[clear\]\]} | {-f <fileName> \[<rate> \[clear\]}\]"
@@ -54,7 +62,7 @@ proc showUsage {} {
   puts "  where:"
   puts ""
   puts "    -h,?       - show pshell.exp usage or command set of specified PSHELL server"
-  puts "    -s         - show named servers in \$PSHELL_CONFIG_DIR/pshell-client.conf file"
+  puts "    -s         - show named servers in \$PSHELL_CONFIG_DIR/$defaultClientConfigFile file"
   puts "    -f         - run commands from a batch file"
   puts "    -t         - change the default server response timeout"
   puts "    hostName   - hostname of desired PSHELL server"
@@ -85,7 +93,7 @@ proc showUsage {} {
   puts "          in the PshellServers.c file, the variables 'title' and 'prompt'"
   puts "          at the top of this script must be changed accordingly, however,"
   puts "          if the default terminal title bar and/or prompt are changed in"
-  puts "          the pshell-server.conf file AND we are calling this script with"
+  puts "          the $defaultServerConfigFile file AND we are calling this script with"
   puts "          a serverName as opposed to a portNum, this script will automatically"
   puts "          detect that and assign the new values"
   puts ""
@@ -114,9 +122,9 @@ if {[llength $argv] == 1} {
   if {[lindex $argv 0] == "-s"} {
     # see if our env variable exists
     if { [info exists env(PSHELL_CONFIG_DIR) ] } {
-      set clientConfFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
+      set clientConfFile $env(PSHELL_CONFIG_DIR)/$defaultClientConfigFile
     } else {
-      set clientConfFile /etc/pshell/pshell-client.conf
+      set clientConfFile $defaultConfigDir/$defaultClientConfigFile
     }
     # check if our source file exists
     if ![file exists $clientConfFile] {
@@ -181,31 +189,40 @@ set portNum $serverName
 
 # see if we have a named server
 if { !([string is integer $serverName]) } {
-
+  set portNum -1
   # open the client config file to get the port number
-  if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/pshell-client.conf] } {
-    set clientConfFile $env(PSHELL_CONFIG_DIR)/pshell-client.conf
+  if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/$defaultClientConfigFile] } {
+    set clientConfFile $env(PSHELL_CONFIG_DIR)/$defaultClientConfigFile
   } else {
-    set clientConfFile /etc/pshell/pshell-client.conf
+    set clientConfFile $defaultConfigDir/$defaultClientConfigFile
   }
   if { [file exists $clientConfFile] } {
     set file [open $clientConfFile r]
     while {[gets $file line] != -1} {
       if {[string index $line 0] != "#" && [string length $line] > 0} {
         set list [split $line ":"]
-        if {[llength $list] >= 2 && [string compare $serverName [lindex $list 0]] == 0} {
+        if {[llength $list] >= 2 && [string first $serverName [lindex $list 0]] != -1} {
           set portNum [lindex $list 1]
           break
         }
       }
     }
+  } else {
+    puts "PSHELL_ERROR: Could not open client config file: '$clientConfFile'"
+    exit
+  }
+  
+  # see if we found a port for the specified named server in our client config file
+  if { $portNum == -1 } {
+    puts "PSHELL_ERROR: Could not find port number for named server: '$serverName' in client config file: '$clientConfFile'"
+    exit
   }
 
   # open the servers config file to get any prompt and/or title override
-  if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/pshell-server.conf] } {
-    set serverConfFile $env(PSHELL_CONFIG_DIR)/pshell-server.conf
+  if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/$defaultServerConfigFile] } {
+    set serverConfFile $env(PSHELL_CONFIG_DIR)/$defaultServerConfigFile
   } else {
-    set serverConfFile /etc/pshell/config/pshell-server.conf
+    set serverConfFile $defaultConfigDir/$defaultServerConfigFile
   }
   if { [file exists $serverConfFile] } {
     set file [open $serverConfFile r]
@@ -319,14 +336,14 @@ if {$command != ""} {
     if {!([file exists $batchFile])} {
       puts ""
       puts "PSHELL_ERROR: Batch file '$batchFile' not found"
-      set batchFile /etc/pshell/batch/$filename
+      set batchFile $defaultBatchDir/$filename
       if {!([file exists $batchFile])} {
         puts "PSHELL_ERROR: Batch file '$batchFile' not found"
         set batchFile $filename
       }
     }
   } else {
-    set batchFile /etc/pshell/batch/$batchFile
+    set batchFile $defaultBatchDir/$batchFile
     if {!([file exists $batchFile])} {
       puts ""
       puts "PSHELL_ERROR: Batch file '$batchFile' not found"
