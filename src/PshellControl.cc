@@ -59,6 +59,8 @@
 
 #define MAX_UNIX_CLIENTS 1000
 
+#define MAX_STRING_SIZE 300
+
 /* enums */
 
 enum ServerType
@@ -215,16 +217,24 @@ int pshell_sendCommand1(int sid_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int retCode= PSHELL_SOCKET_NOT_CONNECTED;
-  char command[300];
+  int bytesFormatted = 0;
+  char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
   if ((control = getControl(sid_)) != NULL)
   {
     va_start(args, command_);
-    vsprintf(command, command_, args);
+    bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
     va_end(args);
-    control->pshellMsg.header.dataNeeded = false;
-    retCode = sendPshellCommand(control, command, control->defaultTimeout);
+    if (bytesFormatted < (int)sizeof(command))
+    {
+      control->pshellMsg.header.dataNeeded = false;
+      retCode = sendPshellCommand(control, command, control->defaultTimeout);
+    }
+    else
+    {
+      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
+    }
   }
   pthread_mutex_unlock(&_mutex);  
   return (retCode);
@@ -236,16 +246,24 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
 {
   pthread_mutex_lock(&_mutex);
   int retCode= PSHELL_SOCKET_NOT_CONNECTED;
-  char command[300];
+  int bytesFormatted = 0;
+  char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
   if ((control = getControl(sid_)) != NULL)
   {
     va_start(args, command_);
-    vsprintf(command, command_, args);
+    bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
     va_end(args);
-    control->pshellMsg.header.dataNeeded = false;
-    retCode = sendPshellCommand(control, command, timeoutOverride_);
+    if (bytesFormatted < (int)sizeof(command))
+    {
+      control->pshellMsg.header.dataNeeded = false;
+      retCode = sendPshellCommand(control, command, timeoutOverride_);
+    }
+    else
+    {
+      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
+    }
   }
   pthread_mutex_unlock(&_mutex);  
   return (retCode);
@@ -257,23 +275,30 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
 {
   pthread_mutex_lock(&_mutex);
   int bytesExtracted = 0;
-  char command[300];
+  int bytesFormatted = 0;
+  char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
   if ((control = getControl(sid_)) != NULL)
   {
     va_start(args, command_);
-    vsprintf(command, command_, args);
+    bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
     va_end(args);
-    control->pshellMsg.header.dataNeeded = true;
-    if (control->defaultTimeout == PSHELL_NO_WAIT)
+    if (bytesFormatted < (int)sizeof(command))
     {
-      PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
+      if (!(control->pshellMsg.header.dataNeeded = (control->defaultTimeout != PSHELL_NO_WAIT)))
+      {
+        PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
+      }
+      if ((sendPshellCommand(control, command, control->defaultTimeout) == PSHELL_COMMAND_SUCCESS) &&
+          (control->pshellMsg.header.dataNeeded))
+      {
+        bytesExtracted = extractResults(control, results_, size_);
+      }
     }
-    if ((sendPshellCommand(control, command, control->defaultTimeout) == PSHELL_COMMAND_SUCCESS) &&
-        (control->defaultTimeout != PSHELL_NO_WAIT))
+    else
     {
-      bytesExtracted = extractResults(control, results_, size_);
+      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
   pthread_mutex_unlock(&_mutex);  
@@ -286,23 +311,30 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
 {
   pthread_mutex_lock(&_mutex);
   int bytesExtracted = 0;
-  char command[300];
+  int bytesFormatted = 0;
+  char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
   if ((control = getControl(sid_)) != NULL)
   {
     va_start(args, command_);
-    vsprintf(command, command_, args);
+    bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
     va_end(args);
-    control->pshellMsg.header.dataNeeded = true;
-    if (timeoutOverride_ == PSHELL_NO_WAIT)
+    if (bytesFormatted < (int)sizeof(command))
     {
-      PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
+      if (!(control->pshellMsg.header.dataNeeded = (timeoutOverride_ != PSHELL_NO_WAIT)))
+      {
+        PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
+      }
+      if ((sendPshellCommand(control, command, timeoutOverride_) == PSHELL_COMMAND_SUCCESS) &&
+          (control->pshellMsg.header.dataNeeded))
+      {
+        bytesExtracted = extractResults(control, results_, size_);
+      }
     }
-    if ((sendPshellCommand(control, command, timeoutOverride_) == PSHELL_COMMAND_SUCCESS) &&
-        (timeoutOverride_ != PSHELL_NO_WAIT))
+    else
     {
-      bytesExtracted = extractResults(control, results_, size_);
+      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
   pthread_mutex_unlock(&_mutex);  
@@ -626,7 +658,7 @@ PshellControl *getControl(int sid_)
   }
   else
   {
-    PSHELL_ERROR("Out of range sid: %d, valid range: 0-%d", sid_, PSHELL_MAX_SERVERS);
+    PSHELL_ERROR("Out of range sid: %d, valid range: 0-%d", sid_, PSHELL_MAX_SERVERS-1);
   }
   return (control);
 }
@@ -638,10 +670,10 @@ static void loadConfigFile(const char *controlName_,
                            unsigned &port_,
                            unsigned &defaultTimeout_)
 {
-  char configFile[180];
-  char cwd[180];
+  char configFile[MAX_STRING_SIZE];
+  char cwd[MAX_STRING_SIZE];
   char *configPath;
-  char line[180];
+  char line[MAX_STRING_SIZE];
   FILE *fp;
   char *value;
   char *control;
@@ -731,18 +763,26 @@ static void loadConfigFile(const char *controlName_,
 /******************************************************************************/
 void _printf(const char *format_, ...)
 {
-  char outputString[300];
+  char outputString[MAX_STRING_SIZE];
+  int bytesFormatted = 0;
   va_list args;
   va_start(args, format_);
-  vsprintf(outputString, format_, args);
+  bytesFormatted = vsnprintf(outputString, sizeof(outputString), format_, args);
   va_end(args);
-  if (_logFunction == NULL)
+  if (bytesFormatted < (int)sizeof(outputString))
   {
-    printf("%s", outputString);
+    if (_logFunction == NULL)
+    {
+      printf("%s", outputString);
+    }
+    else
+    {
+      (*_logFunction)(outputString);
+    }
   }
   else
   {
-    (*_logFunction)(outputString);
+    printf("PSHELL_WARNING: Could not format output: '%s', length exceeds %d bytes, %d bytes needed\n", outputString, (int)sizeof(outputString), bytesFormatted);
   }
 }
 
