@@ -233,7 +233,7 @@ int pshell_sendCommand1(int sid_, const char *command_, ...)
     }
     else
     {
-      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
+      PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
   pthread_mutex_unlock(&_mutex);  
@@ -262,7 +262,7 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
     }
     else
     {
-      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
+      PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
   pthread_mutex_unlock(&_mutex);  
@@ -298,7 +298,7 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
     }
     else
     {
-      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
+      PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
   pthread_mutex_unlock(&_mutex);  
@@ -334,7 +334,7 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
     }
     else
     {
-      PSHELL_WARNING("Could not format command: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
+      PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
   pthread_mutex_unlock(&_mutex);  
@@ -616,6 +616,12 @@ int extractResults(PshellControl *control_, char *results_, int size_)
     strncpy(results_, control_->pshellMsg.payload, size_);
     bytesExtracted = MIN(payloadSize, size_);
   }
+  if ((bytesExtracted == size_) && (results_[bytesExtracted-1] != 0))
+  {
+    // make sure we NULL terminate if we have truncated
+    results_[bytesExtracted-1] = 0;
+    PSHELL_WARNING("Truncating results, size: %d, too small for returned payload: %d", size_, payloadSize);
+  }
   return (bytesExtracted);
 }
 
@@ -782,7 +788,7 @@ void _printf(const char *format_, ...)
   }
   else
   {
-    printf("PSHELL_WARNING: Could not format output: '%s', length exceeds %d bytes, %d bytes needed\n", outputString, (int)sizeof(outputString), bytesFormatted);
+    printf("PSHELL_WARNING: Output truncated: '%s', length exceeds %d bytes, %d bytes needed\n", outputString, (int)sizeof(outputString), bytesFormatted);
   }
 }
 
