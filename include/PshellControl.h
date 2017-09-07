@@ -114,13 +114,14 @@ const char *pshell_getResultsString(int results_);
  * the timeout value is the number of milliseconds to wait for a response
  * from the remote command in the pshell_sendCommandN functions, a timeout
  * value of 0 will not wait for a response, in which case the function
- * will return either PSHELL_SOCKET_NOT_CONNECTED or PSHELL_COMMAND_SUCCESS,
- * the timeout value entered in this funcition will be used as the default
- * timeout for all calls to pshell_sendCommandN that do not provide an override
- * timeout value, for a UDP server, the remoteServer must be either a valid
- * hostname or IP address and a valid destination port must be provided, for
- * a UNIX server, only a valid server name must be provided along with the
- * identifier PSHELL_UNIX_SERVER (i.e. 0) for the 'port' parameter
+ * will return either PSHELL_SOCKET_NOT_CONNECTED, PSHELL_SOCKET_SEND_FAILURE,
+ * or PSHELL_COMMAND_SUCCESS, the timeout value entered in this funcition 
+ * will be used as the default timeout for all calls to pshell_sendCommandN 
+ * that do not provide an override timeout value, for a UDP server, the 
+ * remoteServer must be either a valid hostname or IP address and a valid 
+ * destination port must be provided, for a UNIX server, only a valid server 
+ * name must be provided along with the identifier PSHELL_UNIX_SERVER (i.e. 0) 
+ * for the 'port' parameter
  *
  * this function returns a Server ID (sid) handle which must be saved and
  * used for all subsequent calls into this library, if the function fails
@@ -136,7 +137,7 @@ const char *pshell_getResultsString(int results_);
 int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,
                          unsigned port_ = PSHELL_UNIX_SERVER,
-                         unsigned defaultTimeout_ = PSHELL_ONE_MSEC*100);
+                         unsigned defaultTimeout_ = PSHELL_NO_WAIT);
 
 /*
  * pshell_disconnectServer:

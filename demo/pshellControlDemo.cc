@@ -103,7 +103,7 @@ int main (int argc, char *argv[])
   char inputLine[180];
   char results[300];
   int bytesRead;
-  int timeout = 100;
+  int timeout = PSHELL_ONE_MSEC*100;
   int port = 0;
   int logLevel = PSHELL_LOG_LEVEL_ALL;
   bool extract = false;
