@@ -148,8 +148,8 @@ void keepAlive(int argc, char *argv[])
  *
  * NOTE: This technique could have been used in the previous example for the
  *       "wheel" and "dots" arguments to provide for wildcarding of those
- *        arguments.  In the above example, as written, the entire string of
- *        "dots" or "wheel" must be enter to be accepted.
+ *       arguments.  In the above example, as written, the entire string of
+ *       "dots" or "wheel" must be enter to be accepted.
  */
 
 /******************************************************************************/

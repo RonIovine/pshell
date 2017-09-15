@@ -309,7 +309,7 @@ unsigned findServerPort(char *name_)
 
   for (server = 0; server < _numPshellServers; server++)
   {
-    if (strcmp(name_, _pshellServersList[server].serverName) == 0)
+    if (strncmp(name_, _pshellServersList[server].serverName, strlen(name_)) == 0)
     {
       /* only set the server response timeout if we did not get a command line override */
       if (!_serverResponseTimeoutOverride)

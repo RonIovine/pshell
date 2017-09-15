@@ -151,7 +151,7 @@ int pshell_connectServer(const char *controlName_,
 {
   pthread_mutex_lock(&_mutex);
   int sid;
-  char remoteServer[256];
+  char remoteServer[MAX_STRING_SIZE];
   unsigned port = port_;
   unsigned defaultTimeout = defaultTimeout_;
   if ((sid = createControl()) != PSHELL_INVALID_SID)
