@@ -181,7 +181,7 @@ There are 6 demo programs, one to demonstrate a program that incorporates a
 pshell server (pshellServerDemo), one that demonstrates a program that incorporates
 the trace filter functionality (traceFilterDemo), one that demonstrates the control 
 of a program that is running a pshell server from another program (pshellControlDemo),
-one thatdemonstrates the aggregation of multiple pshell servers into a single server
+one that demonstrates the aggregation of multiple pshell servers into a single server
 via the control API (pshellAggregatorDemo), one that just demonstrates the stand-alone 
 usage of the TraceLog API (traceLogDemo), and one that demonstrates the use of the 
 multi-cal binary API (pshellNoServerDemo).
@@ -193,7 +193,7 @@ line functionality.  The demo program pshellControlDemo can control the other tw
 programs through a simple command line UI, but it is really meant to demonstrate the
 programmitic control of an external program that is running a PshellServer via the
 PshellControl API and library.  The pshellControlDemo program can control either the
-pshellServerDemo or traceControlDemo program.  The pshellAggregator can control both 
+pshellServerDemo or traceControlDemo program.  The pshellAggregatorDemo can control both 
 the pshellServerDemo or traceControlDemo within a single invocation.  The functionality 
 of the pshellNoServerDemo is only access directly from the host's command line shell, 
 either directly from the pshellNoServerDemo itself, or via the setup softlinks for each 

@@ -227,7 +227,7 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
     control->pshellMsg.header.msgType =  PSHELL_QUERY_COMMANDS1;
     control->pshellMsg.header.dataNeeded = true;
     control->pshellMsg.payload[0] = 0;
-    if ((retCode = sendPshellCommand(control, PSHELL_QUERY_COMMANDS1, "", PSHELL_ONE_SEC*5)) == PSHELL_COMMAND_SUCCESS)
+    if ((retCode = sendPshellCommand(control, PSHELL_QUERY_COMMANDS1, "query commands", PSHELL_ONE_SEC*5)) == PSHELL_COMMAND_SUCCESS)
     {
       sprintf(&results_[strlen(results_)], "\n");
       for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) sprintf(&results_[strlen(results_)], "*");

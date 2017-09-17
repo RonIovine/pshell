@@ -39,7 +39,7 @@
  *
  * This is an example demo program that shows the use of multiple pshell control
  * interfaces to aggregate all of the remote commands from all of the connected
- * control interfaces into a single local pshell server.
+ * servers into a single local pshell server
  *
  *******************************************************************************/
 
@@ -119,7 +119,7 @@ void dispatchRemoteCommand(int sid, int argc, char *argv[])
 }
 
 /*
- * this following two functions are the control specific functions that interface
+ * the following two functions are the control specific functions that interface
  * directly to a given remote server via the control API for a give SID, this is
  * how multiple remote pshell servers can be aggregated into a single pshell
  * server
@@ -180,7 +180,7 @@ int main (int argc, char *argv[])
 
   if ((traceFilterDemoSid = pshell_connectServer("traceFilterDemo", argv[1], TF_DEMO_PORT, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
   {
-    printf("ERROR: Could not connect to remote pshell serverL traceFilterControl\n");
+    printf("ERROR: Could not connect to remote pshell server traceFilterControl\n");
     exit(0);
   }
   
@@ -191,7 +191,7 @@ int main (int argc, char *argv[])
   pshell_addCommand(pshellServerControl,                            /* function */
                     "pshellServerDemo",                             /* command */
                     "control the remote pshellServerDemo process",  /* description */
-                    "<pshellServerDemoCommand> | '?' | '-h'",       /* usage */
+                    "<command> | ? | -h",                           /* usage */
                     1,                                              /* minArgs */
                     30,                                             /* maxArgs */
                     false);                                         /* showUsage on "?" */
@@ -199,7 +199,7 @@ int main (int argc, char *argv[])
   pshell_addCommand(traceFilterControl,                            /* function */
                     "traceFilterDemo",                             /* command */
                     "control the remote traceFilterDemo process",  /* description */
-                    "<traceFilterDemoCommand> | '?' | '-h'",       /* usage */
+                    "<command> | ? | -h",                          /* usage */
                     1,                                             /* minArgs */
                     30,                                            /* maxArgs */
                     false);                                        /* showUsage on "?" */
