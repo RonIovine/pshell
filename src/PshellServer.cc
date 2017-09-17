@@ -329,7 +329,7 @@ static bool _isCommandInteractive = true;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static PshellLogFunction _logFunction = NULL;
-static unsigned _logLevel = PSHELL_LOG_LEVEL_DEFAULT;
+static unsigned _logLevel = PSHELL_SERVER_LOG_LEVEL_DEFAULT;
 
 static int _socketFd;
 static struct sockaddr_in _localIpAddress;
@@ -454,9 +454,9 @@ static void batch(int argc, char *argv[]);
 
 /* output display macros */
 static void _printf(const char *format_, ...);
-#define PSHELL_ERROR(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_ERROR) {_printf("PSHELL_ERROR: " format_, ##__VA_ARGS__);_printf("\n");}
-#define PSHELL_WARNING(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_WARNING) {_printf("PSHELL_WARNING: " format_, ##__VA_ARGS__);_printf("\n");}
-#define PSHELL_INFO(format_, ...) if (_logLevel >= PSHELL_LOG_LEVEL_INFO) {_printf("PSHELL_INFO: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_ERROR(format_, ...) if (_logLevel >= PSHELL_SERVER_LOG_LEVEL_ERROR) {_printf("PSHELL_ERROR: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_WARNING(format_, ...) if (_logLevel >= PSHELL_SERVER_LOG_LEVEL_WARNING) {_printf("PSHELL_WARNING: " format_, ##__VA_ARGS__);_printf("\n");}
+#define PSHELL_INFO(format_, ...) if (_logLevel >= PSHELL_SERVER_LOG_LEVEL_INFO) {_printf("PSHELL_INFO: " format_, ##__VA_ARGS__);_printf("\n");}
 
 /**************************************
  * public API "member" function bodies

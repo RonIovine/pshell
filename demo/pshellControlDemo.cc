@@ -105,7 +105,7 @@ int main (int argc, char *argv[])
   int bytesRead;
   int timeout = PSHELL_ONE_MSEC*100;
   int port = 0;
-  int logLevel = PSHELL_LOG_LEVEL_ALL;
+  int logLevel = PSHELL_CONTROL_LOG_LEVEL_ALL;
   bool extract = false;
   int sid;
 

@@ -99,14 +99,14 @@ enum PshellServerMode
  * function and constants to let the host program set the
  * internal debug log level, if the user of this API does
  * not want to see any internal message printed out, set
- * the debug log level to PSHELL_LOG_LEVEL_NONE (0)
+ * the debug log level to PSHELL_SERVER_LOG_LEVEL_NONE (0)
  */
-#define PSHELL_LOG_LEVEL_NONE      0   /* No debug logs */
-#define PSHELL_LOG_LEVEL_ERROR     1   /* PSHELL_ERROR */
-#define PSHELL_LOG_LEVEL_WARNING   2   /* PSHELL_ERROR, PSHELL_WARNING */
-#define PSHELL_LOG_LEVEL_INFO      3   /* PSHELL_ERROR, PSHELL_WARNING, PSHELL_INFO */
-#define PSHELL_LOG_LEVEL_ALL       PSHELL_LOG_LEVEL_INFO
-#define PSHELL_LOG_LEVEL_DEFAULT   PSHELL_LOG_LEVEL_WARNING
+#define PSHELL_SERVER_LOG_LEVEL_NONE      0   /* No debug logs */
+#define PSHELL_SERVER_LOG_LEVEL_ERROR     1   /* PSHELL_ERROR */
+#define PSHELL_SERVER_LOG_LEVEL_WARNING   2   /* PSHELL_ERROR, PSHELL_WARNING */
+#define PSHELL_SERVER_LOG_LEVEL_INFO      3   /* PSHELL_ERROR, PSHELL_WARNING, PSHELL_INFO */
+#define PSHELL_SERVER_LOG_LEVEL_ALL       PSHELL_SERVER_LOG_LEVEL_INFO
+#define PSHELL_SERVER_LOG_LEVEL_DEFAULT   PSHELL_SERVER_LOG_LEVEL_ALL
 
 void pshell_setServerLogLevel(unsigned level_);
 
