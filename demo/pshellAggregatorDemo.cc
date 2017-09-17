@@ -124,14 +124,14 @@ int traceFilterDemoSid;
 
 /******************************************************************************/
 /******************************************************************************/
-void pshellServerControl(int argc, char *argv[])
+void pshellServerDemo(int argc, char *argv[])
 {
   controlServer(pshellServerDemoSid, argc, argv);
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void traceFilterControl(int argc, char *argv[])
+void traceFilterDemo(int argc, char *argv[])
 {
   controlServer(traceFilterDemoSid, argc, argv);
 }
@@ -171,7 +171,7 @@ int main (int argc, char *argv[])
   
   /* these will aggregrate the commands from the two separate servers we are connected to */
   
-  pshell_addCommand(pshellServerControl,                            /* function */
+  pshell_addCommand(pshellServerDemo,                               /* function */
                     "pshellServerDemo",                             /* command */
                     "control the remote pshellServerDemo process",  /* description */
                     "<command> | ? | -h",                           /* usage */
@@ -179,7 +179,7 @@ int main (int argc, char *argv[])
                     30,                                             /* maxArgs */
                     false);                                         /* showUsage on "?" */
 
-  pshell_addCommand(traceFilterControl,                            /* function */
+  pshell_addCommand(traceFilterDemo,                               /* function */
                     "traceFilterDemo",                             /* command */
                     "control the remote traceFilterDemo process",  /* description */
                     "<command> | ? | -h",                          /* usage */
