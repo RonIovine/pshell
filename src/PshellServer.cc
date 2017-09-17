@@ -763,9 +763,10 @@ bool pshell_isHelp(void)
 {
   return ((_argc == 1) &&
           (pshell_isEqual(_argv[0], "?") ||
-          pshell_isEqual(_argv[0], "-h") ||
-          pshell_isEqual(_argv[0], "-help") ||
-          pshell_isEqual(_argv[0], "--help")));
+           pshell_isEqual(_argv[0], "-h") ||
+           pshell_isEqual(_argv[0], "--h") ||
+           pshell_isEqual(_argv[0], "-help") ||
+           pshell_isEqual(_argv[0], "--help")));
 }
 
 /******************************************************************************/

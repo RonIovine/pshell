@@ -89,6 +89,7 @@ struct PshellControl
   struct sockaddr_in destIpAddress;
   struct sockaddr_un sourceUnixAddress;
   struct sockaddr_un destUnixAddress;
+  char remoteServer[MAX_STRING_SIZE];
 };
 
 #define PSHELL_MAX_SERVERS 100
@@ -104,7 +105,7 @@ static const char *_errorPad = "              ";
 
 static PshellControl *getControl(int sid_);
 static int createControl(void);
-static int sendPshellCommand(PshellControl *control_, const char *command_, unsigned timeoutOverride_);
+static int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, unsigned timeoutOverride_);
 static bool sendPshellMsg(PshellControl *control_);
 static int extractResults(PshellControl *control_, char *results_, int size_);
 static bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned port_, unsigned defaultMsecTimeout_);
@@ -164,6 +165,10 @@ int pshell_connectServer(const char *controlName_,
       _control[sid] = NULL;
       sid = PSHELL_INVALID_SID;
     }
+    else
+    {
+      sprintf(_control[sid]->remoteServer,  "%s[%s]", controlName_, remoteServer);
+    }
   }
   pthread_mutex_unlock(&_mutex);
   return (sid);
@@ -213,6 +218,33 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_)
 
 /******************************************************************************/
 /******************************************************************************/
+void pshell_extractCommands(int sid_, char *results_, int size_)
+{
+  PshellControl *control;
+  int retCode;
+  if ((control = getControl(sid_)) != NULL)
+  {
+    control->pshellMsg.header.msgType =  PSHELL_QUERY_COMMANDS1;
+    control->pshellMsg.header.dataNeeded = true;
+    control->pshellMsg.payload[0] = 0;
+    if ((retCode = sendPshellCommand(control, PSHELL_QUERY_COMMANDS1, "", PSHELL_ONE_SEC*5)) == PSHELL_COMMAND_SUCCESS)
+    {
+      sprintf(&results_[strlen(results_)], "\n");
+      for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) sprintf(&results_[strlen(results_)], "*");
+      sprintf(&results_[strlen(results_)], "\n");
+      sprintf(&results_[strlen(results_)], "*   COMMAND LIST: %s", control->remoteServer);
+      for (unsigned i = 0; i < 3; i++) sprintf(&results_[strlen(results_)], " ");;
+      sprintf(&results_[strlen(results_)], "*\n");
+      for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) sprintf(&results_[strlen(results_)], "*");
+      sprintf(&results_[strlen(results_)], "\n");
+      sprintf(&results_[strlen(results_)], "\n");
+      extractResults(control, &results_[strlen(results_)], size_-strlen(results_));
+    }
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 int pshell_sendCommand1(int sid_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
@@ -229,7 +261,7 @@ int pshell_sendCommand1(int sid_, const char *command_, ...)
     if (bytesFormatted < (int)sizeof(command))
     {
       control->pshellMsg.header.dataNeeded = false;
-      retCode = sendPshellCommand(control, command, control->defaultTimeout);
+      retCode = sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, control->defaultTimeout);
     }
     else
     {
@@ -258,7 +290,7 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
     if (bytesFormatted < (int)sizeof(command))
     {
       control->pshellMsg.header.dataNeeded = false;
-      retCode = sendPshellCommand(control, command, timeoutOverride_);
+      retCode = sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, timeoutOverride_);
     }
     else
     {
@@ -290,7 +322,7 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
       {
         PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
       }
-      if ((sendPshellCommand(control, command, control->defaultTimeout) == PSHELL_COMMAND_SUCCESS) &&
+      if ((sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, control->defaultTimeout) == PSHELL_COMMAND_SUCCESS) &&
           (control->pshellMsg.header.dataNeeded))
       {
         bytesExtracted = extractResults(control, results_, size_);
@@ -326,7 +358,7 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
       {
         PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
       }
-      if ((sendPshellCommand(control, command, timeoutOverride_) == PSHELL_COMMAND_SUCCESS) &&
+      if ((sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, timeoutOverride_) == PSHELL_COMMAND_SUCCESS) &&
           (control->pshellMsg.header.dataNeeded))
       {
         bytesExtracted = extractResults(control, results_, size_);
@@ -472,7 +504,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
 
 /******************************************************************************/
 /******************************************************************************/
-int sendPshellCommand(PshellControl *control_, const char *command_, unsigned timeoutOverride_)
+int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, unsigned timeoutOverride_)
 {
   fd_set readFd;
   struct timeval timeout;
@@ -486,7 +518,7 @@ int sendPshellCommand(PshellControl *control_, const char *command_, unsigned ti
     FD_ZERO (&readFd);
     FD_SET(control_->socketFd,&readFd);
 
-    control_->pshellMsg.header.msgType = PSHELL_CONTROL_COMMAND;
+    control_->pshellMsg.header.msgType = commandType_;
     control_->pshellMsg.header.seqNum++;
     seqNum = control_->pshellMsg.header.seqNum;
     control_->pshellMsg.header.respNeeded = (timeoutOverride_ != PSHELL_NO_WAIT);
@@ -568,13 +600,14 @@ int sendPshellCommand(PshellControl *control_, const char *command_, unsigned ti
                  _errorPad,
                  control_->pshellMsg.payload);
   }
-  else if (retCode != PSHELL_COMMAND_SUCCESS)
+  else if ((retCode != PSHELL_COMMAND_SUCCESS) && (retCode != PSHELL_COMMAND_COMPLETE))
   {
     PSHELL_ERROR("Remote pshell command: '%s', %s", command_, pshell_getResultsString(retCode));
   }
   else
   {
     PSHELL_INFO("Remote pshell command: '%s', %s", command_, pshell_getResultsString(retCode));
+    retCode = PSHELL_COMMAND_SUCCESS;
   }
   
   return (retCode);

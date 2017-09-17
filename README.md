@@ -57,10 +57,12 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, five demo programs are also provided, one to
+In addition to the infrastructure components, six demo programs are also provided, one to
 show the usage of the pshell server API, one to show the usage of pshell control API, one
-to show the usage of the trace filter/trace log API, one to show the usage of a stand-alone 
-(no filtering) trace log application, and one to show the usage of the multi-call binary API.
+to show the aggergation of multiple pshell servers into a single pshell server via the control
+API, one to show the usage of the trace filter/trace log API, one to show the usage of a 
+stand-alone  (no filtering) trace log application, and one to show the usage of the multi-call 
+binary API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 

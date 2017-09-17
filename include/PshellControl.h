@@ -168,6 +168,16 @@ void pshell_disconnectAllServers(void);
 void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
 
 /*
+ * pshell_extractCommands:
+ *
+ * this function will extract all the commands or a remote pshell
+ * server and present them in a human readable form, this is useful
+ * when writing a multi server control aggregator, see the demo program
+ * pshellAggregatorDemo in the demo directory for examples
+ */
+void pshell_extractCommands(int sid_, char *results_, int size_);
+
+/*
  * pshell_sendCommandN:
  *
  * these functions are used to send a pshell command to the remote process,
