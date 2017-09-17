@@ -74,48 +74,41 @@ void registerSignalHandlers(void)
   signal(SIGSYS, signalHandler);    /* 31 Bad system call.  */
 }
 
+/*
+ * this function is the common generic function to control any server
+ * based on only the SID and entered command, it should be called from 
+ * every control specific callback for this aggregator
+ */
+
 /* make sure the results array is big enough for any possible output */
 char results[4096];
+
+/* this contains the re-constituted command */
 char command[300];
 
-/* the SIDs of all the remote pshell servers we are aggregating */
-int pshellServerDemoSid;
-int traceFilterDemoSid;
-
-/*
- * this function is a common function to show all the remote commands
- * for a given control sid, it should be called from every control 
- * specific callback for this aggregator when the user asks for help
- */
-
 /******************************************************************************/
 /******************************************************************************/
-void showRemoteCommands(int sid)
+void controlServer(int sid, int argc, char *argv[])
 {
-    results[0] = 0;
+  if (pshell_isHelp() || pshell_isEqual(argv[0], "help"))
+  {
     pshell_extractCommands(sid, results, sizeof(results));
     pshell_printf("%s", results);
-}
-
-/*
- * this function is a common function to dispatch a given remote command
- * for a given control sid, it should be called from every control 
- * specific callback for any non-help command
- */
-
-/******************************************************************************/
-/******************************************************************************/
-void dispatchRemoteCommand(int sid, int argc, char *argv[])
-{
+  }
+  else
+  {
+    // re-constitute the original command
     command[0] = 0;
-    results[0] = 0;
     for (int arg = 0; arg < argc; arg++)
     {
       sprintf(&command[strlen(command)], "%s ", argv[arg]);
     }
     command[strlen(command)-1] = 0;
-    pshell_sendCommand3(sid, results, sizeof(results), command);
-    pshell_printf("%s\n", results);
+    if (pshell_sendCommand3(sid, results, sizeof(results), command) > 0)
+    {
+      pshell_printf("%s\n", results);
+    }
+  }
 }
 
 /*
@@ -125,36 +118,23 @@ void dispatchRemoteCommand(int sid, int argc, char *argv[])
  * server
  */
 
+/* the SIDs of all the remote pshell servers we are aggregating */
+int pshellServerDemoSid;
+int traceFilterDemoSid;
+
 /******************************************************************************/
 /******************************************************************************/
 void pshellServerControl(int argc, char *argv[])
 {
-  if (pshell_isHelp() || pshell_isEqual(argv[0], "help"))
-  {
-    showRemoteCommands(pshellServerDemoSid);
-  }
-  else
-  {
-    dispatchRemoteCommand(pshellServerDemoSid, argc, argv);
-  }
+  controlServer(pshellServerDemoSid, argc, argv);
 }
 
 /******************************************************************************/
 /******************************************************************************/
 void traceFilterControl(int argc, char *argv[])
 {
-  if (pshell_isHelp() || pshell_isEqual(argv[0], "help"))
-  {
-    showRemoteCommands(traceFilterDemoSid);
-  }
-  else
-  {
-    dispatchRemoteCommand(traceFilterDemoSid, argc, argv);
-  }
+  controlServer(traceFilterDemoSid, argc, argv);
 }
-
-#define PSHELL_DEMO_PORT 6001
-#define TF_DEMO_PORT 6002
 
 /******************************************************************************/
 /******************************************************************************/
@@ -172,17 +152,20 @@ int main (int argc, char *argv[])
    * and timeout values can be overridden via the pshell-control.conf 
    * file
    */
-  if ((pshellServerDemoSid = pshell_connectServer("pshellServerDemo", argv[1], PSHELL_DEMO_PORT, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
+  if ((pshellServerDemoSid = pshell_connectServer("pshellServerDemo", argv[1], 6001, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
   {
     printf("ERROR: Could not connect to remote pshell server: pshellServerControl\n");
     exit(0);
   }
 
-  if ((traceFilterDemoSid = pshell_connectServer("traceFilterDemo", argv[1], TF_DEMO_PORT, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
+  if ((traceFilterDemoSid = pshell_connectServer("traceFilterDemo", argv[1], 6002, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
   {
     printf("ERROR: Could not connect to remote pshell server traceFilterControl\n");
     exit(0);
   }
+  
+  /* register signal handlers so we can do a graceful termination and cleanup any system resources */
+  registerSignalHandlers();
   
   /* register our local pshell commands */
   

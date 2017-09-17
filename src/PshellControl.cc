@@ -229,6 +229,7 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
     control->pshellMsg.payload[0] = 0;
     if ((retCode = sendPshellCommand(control, PSHELL_QUERY_COMMANDS1, "query commands", PSHELL_ONE_SEC*5)) == PSHELL_COMMAND_SUCCESS)
     {
+      results_[0] = 0;
       sprintf(&results_[strlen(results_)], "\n");
       for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) sprintf(&results_[strlen(results_)], "*");
       sprintf(&results_[strlen(results_)], "\n");
@@ -646,6 +647,7 @@ int extractResults(PshellControl *control_, char *results_, int size_)
   int payloadSize = strlen(control_->pshellMsg.payload);
   if ((payloadSize > 0) && (results_ != NULL))
   {
+    results_[0] = 0;
     strncpy(results_, control_->pshellMsg.payload, size_);
     bytesExtracted = MIN(payloadSize, size_);
   }
