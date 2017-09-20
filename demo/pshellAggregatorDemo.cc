@@ -90,7 +90,7 @@ char *buildCommand(char *command, unsigned size, int argc, char *argv[])
  {
     /* re-constitute the original command */
     command[0] = 0;
-    for (int arg = 0; ((arg < argc) && (strlen(command) < size)); arg++)
+    for (int arg = 0; ((arg < argc) && ((size - strlen(command)) > strlen(argv[arg]))); arg++)
     {
       sprintf(&command[strlen(command)], "%s ", argv[arg]);
     }
