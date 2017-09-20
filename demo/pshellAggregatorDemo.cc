@@ -86,11 +86,11 @@ void registerSignalHandlers(void)
  
  /******************************************************************************/
 /******************************************************************************/
-char *buildCommand(char *command, int argc, char *argv[])
+char *buildCommand(char *command, unsigned size, int argc, char *argv[])
  {
     /* re-constitute the original command */
     command[0] = 0;
-    for (int arg = 0; arg < argc; arg++)
+    for (int arg = 0; ((arg < argc) && (strlen(command) < size)); arg++)
     {
       sprintf(&command[strlen(command)], "%s ", argv[arg]);
     }
@@ -120,7 +120,7 @@ void controlServer(int sid, int argc, char *argv[])
   {
     /* this contains the re-constituted command */
     char command[300];
-    if (pshell_sendCommand3(sid, results, sizeof(results), buildCommand(command, argc, argv)) > 0)
+    if (pshell_sendCommand3(sid, results, sizeof(results), buildCommand(command, sizeof(command), argc, argv)) > 0)
     {
       pshell_printf("%s\n", results);
     }
@@ -207,8 +207,7 @@ int main (int argc, char *argv[])
   
   /* register our local pshell commands */
   
-  /* these will aggregrate the commands from the two separate servers we are connected to */
-  
+  /* these will aggregrate the commands from the two separate servers we are connected to */  
   pshell_addCommand(pshellServerDemo,                               /* function */
                     "pshellServerDemo",                             /* command */
                     "control the remote pshellServerDemo process",  /* description */
@@ -230,7 +229,6 @@ int main (int argc, char *argv[])
    * pshell commands, either within one server or across multiple servers, into
    * one command
    */
-   
   pshell_addCommand(meta,                                      /* function */
                     "meta",                                    /* command */
                     "meta command, calls seperate functions",  /* description */
@@ -242,7 +240,7 @@ int main (int argc, char *argv[])
   /* start our local pshell server */
   pshell_startServer("pshellAggregatorDemo", PSHELL_LOCAL_SERVER, PSHELL_BLOCKING);
   
-  /* disconnect all out remote control servers */
+  /* disconnect all our remote control servers */
   pshell_disconnectAllServers();
   
   /* cleanup our local server's resources */
