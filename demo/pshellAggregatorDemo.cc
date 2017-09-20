@@ -39,7 +39,11 @@
  *
  * This is an example demo program that shows the use of multiple pshell control
  * interfaces to aggregate all of the remote commands from all of the connected
- * servers into a single local pshell server
+ * servers into a single local pshell server.  This can be useful in presenting
+ * a consolidated user shell who's functionality spans several discrete pshell
+ * servers.  Since this uses the PshellControl API, the external servers must
+ * all be either UDP or Unix servers.  The consolidation point in this example 
+ * is a local pshell server.
  *
  *******************************************************************************/
 
@@ -48,6 +52,7 @@
 void signalHandler(int signal_)
 {
   pshell_disconnectAllServers();
+  pshell_cleanupResources();
   printf("\n");
   exit(0);
 }
@@ -75,6 +80,25 @@ void registerSignalHandlers(void)
 }
 
 /*
+ * this function will re-create the original command into one
+ * string from the argc, argv items
+ */
+ 
+ /******************************************************************************/
+/******************************************************************************/
+char *buildCommand(char *command, int argc, char *argv[])
+ {
+    /* re-constitute the original command */
+    command[0] = 0;
+    for (int arg = 0; arg < argc; arg++)
+    {
+      sprintf(&command[strlen(command)], "%s ", argv[arg]);
+    }
+    command[strlen(command)-1] = 0;
+    return (command);
+ }
+
+/*
  * this function is the common generic function to control any server
  * based on only the SID and entered command, it should be called from 
  * every control specific callback for this aggregator
@@ -82,9 +106,6 @@ void registerSignalHandlers(void)
 
 /* make sure the results array is big enough for any possible output */
 char results[4096];
-
-/* this contains the re-constituted command */
-char command[300];
 
 /******************************************************************************/
 /******************************************************************************/
@@ -97,30 +118,31 @@ void controlServer(int sid, int argc, char *argv[])
   }
   else
   {
-    // re-constitute the original command
-    command[0] = 0;
-    for (int arg = 0; arg < argc; arg++)
-    {
-      sprintf(&command[strlen(command)], "%s ", argv[arg]);
-    }
-    command[strlen(command)-1] = 0;
-    if (pshell_sendCommand3(sid, results, sizeof(results), command) > 0)
+    /* this contains the re-constituted command */
+    char command[300];
+    if (pshell_sendCommand3(sid, results, sizeof(results), buildCommand(command, argc, argv)) > 0)
     {
       pshell_printf("%s\n", results);
     }
   }
 }
 
+/* 
+ * the SIDs of all the remote pshell servers we are aggregating, add more SID 
+ * identifiers for each external server being controlled/aggregated
+ */
+int pshellServerDemoSid;
+int traceFilterDemoSid;
+
 /*
  * the following two functions are the control specific functions that interface
  * directly to a given remote server via the control API for a give SID, this is
- * how multiple remote pshell servers can be aggregated into a single pshell
- * server
+ * how multiple remote pshell servers can be aggregated into a single local pshell
+ * server, each separate SID for each remote server needs it's own dedicated
+ * callback that is registered to the local pshell server, the only thing these
+ * local pshell functions need to do is call the common 'controlServer' function
+ * with the passed in argc, argv, and their unique SID identifier
  */
-
-/* the SIDs of all the remote pshell servers we are aggregating */
-int pshellServerDemoSid;
-int traceFilterDemoSid;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -136,6 +158,22 @@ void traceFilterDemo(int argc, char *argv[])
   controlServer(traceFilterDemoSid, argc, argv);
 }
 
+/*
+ * example meta command that will call multiple discrete pshell commands from
+ * multiple pshell servers
+ */
+ 
+/******************************************************************************/
+/******************************************************************************/
+void meta(int argc, char *argv[])
+{
+  if (pshell_sendCommand3(pshellServerDemoSid, results, sizeof(results), "hello %s %s", argv[0], argv[1]) > 0)
+  {
+    pshell_printf("%s\n", results);
+  }
+  pshell_sendCommand1(traceFilterDemoSid, "set callback %s", argv[2]);
+}
+
 /******************************************************************************/
 /******************************************************************************/
 int main (int argc, char *argv[])
@@ -143,7 +181,7 @@ int main (int argc, char *argv[])
   
   if (argc != 2)
   {
-    printf("Usage: pshellAggregatorDemo <remoteServer>\n");
+    printf("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>}\n");
     exit (0);
   }
   
@@ -186,11 +224,28 @@ int main (int argc, char *argv[])
                     1,                                             /* minArgs */
                     30,                                            /* maxArgs */
                     false);                                        /* showUsage on "?" */
+                    
+  /* 
+   * add any "meta" commands here, meta commands can aggregate multiple discrete
+   * pshell commands, either within one server or across multiple servers, into
+   * one command
+   */
+   
+  pshell_addCommand(meta,                                      /* function */
+                    "meta",                                    /* command */
+                    "meta command, calls seperate functions",  /* description */
+                    "<arg1> <arg2> <arg3>",                    /* usage */
+                    3,                                         /* minArgs */
+                    3,                                         /* maxArgs */
+                    true);                                     /* showUsage on "?" */   
 
   /* start our local pshell server */
   pshell_startServer("pshellAggregatorDemo", PSHELL_LOCAL_SERVER, PSHELL_BLOCKING);
   
   /* disconnect all out remote control servers */
   pshell_disconnectAllServers();
+  
+  /* cleanup our local server's resources */
+  pshell_cleanupResources();
 
 }
