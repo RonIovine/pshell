@@ -174,6 +174,21 @@ void meta(int argc, char *argv[])
   pshell_sendCommand1(traceFilterDemoSid, "set callback %s", argv[2]);
 }
 
+/*
+ * example multicast command, this willsenda given command to all the registered
+ * multicast receivers for that multicast group, multicast groups are based on
+ * the command's keyword
+ */
+ 
+/******************************************************************************/
+/******************************************************************************/
+void multicast(int argc, char *argv[])
+{
+  pshell_sendMulticast("test");
+  pshell_sendMulticast("trace 1 2 3 4");
+  pshell_sendMulticast("hello");
+}
+
 /******************************************************************************/
 /******************************************************************************/
 int main (int argc, char *argv[])
@@ -184,6 +199,9 @@ int main (int argc, char *argv[])
     printf("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>}\n");
     exit (0);
   }
+  
+  /* register signal handlers so we can do a graceful termination and cleanup any system resources */
+  registerSignalHandlers();
   
   /* 
    * connect to our remote servers, the hostname/ipAddress, port,
@@ -202,9 +220,16 @@ int main (int argc, char *argv[])
     exit(0);
   }
   
-  /* register signal handlers so we can do a graceful termination and cleanup any system resources */
-  registerSignalHandlers();
+  /* 
+   * add some multicast groups for our control sids, a multicast group is based
+   * on the command's keyword
+   */
+  pshell_addMulticast(pshellServerDemoSid, "trace");
+  pshell_addMulticast(traceFilterDemoSid, "trace");  
   
+  pshell_addMulticast(pshellServerDemoSid, "test");
+  pshell_addMulticast(traceFilterDemoSid, "test");
+
   /* register our local pshell commands */
   
   /* these will aggregrate the commands from the two separate servers we are connected to */  
@@ -229,13 +254,25 @@ int main (int argc, char *argv[])
    * pshell commands, either within one server or across multiple servers, into
    * one command
    */
-  pshell_addCommand(meta,                                      /* function */
-                    "meta",                                    /* command */
-                    "meta command, calls seperate functions",  /* description */
-                    "<arg1> <arg2> <arg3>",                    /* usage */
-                    3,                                         /* minArgs */
-                    3,                                         /* maxArgs */
-                    true);                                     /* showUsage on "?" */   
+  pshell_addCommand(meta,                                               /* function */
+                    "meta",                                             /* command */
+                    "meta command, wraps multiple seperate functions",  /* description */
+                    "<arg1> <arg2> <arg3>",                             /* usage */
+                    3,                                                  /* minArgs */
+                    3,                                                  /* maxArgs */
+                    true);                                              /* showUsage on "?" */   
+
+  /* 
+   * add an example command that uses the one-to-many multicast feature of
+   * the control API
+   */
+  pshell_addCommand(multicast,                                       /* function */
+                    "multicast",                                     /* command */
+                    "example multicast command to several servers",  /* description */
+                    NULL,                                            /* usage */
+                    0,                                               /* minArgs */
+                    0,                                               /* maxArgs */
+                    true);                                           /* showUsage on "?" */   
 
   /* start our local pshell server */
   pshell_startServer("pshellAggregatorDemo", PSHELL_LOCAL_SERVER, PSHELL_BLOCKING);

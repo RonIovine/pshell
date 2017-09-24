@@ -178,6 +178,26 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
 void pshell_extractCommands(int sid_, char *results_, int size_);
 
 /*
+ * pshell_addMulticast:
+ * 
+ * this command will add a given multicast receiver (i.e. sid) to a multicast 
+ * group, multicast groups are based on the command's keyword
+ */
+void pshell_addMulticast(int sid_, const char *keyword_);
+
+/*
+ * pshell_sendMulticast:
+ * 
+ * this command will send a given command to all the registered multicast
+ * receivers (i.e. sids) for this multicast group, multicast groups are 
+ * based on the command's keyword, this function will issue the command as 
+ * a best effort fire-and-forget command to each receiver in the multicast 
+ * group, no results will be requested or expected, and no response will be 
+ * requested or expected
+ */
+void pshell_sendMulticast(const char *command_, ...);
+
+/*
  * pshell_sendCommandN:
  *
  * these functions are used to send a pshell command to the remote process,

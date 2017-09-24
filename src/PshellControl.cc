@@ -59,6 +59,10 @@
 
 #define MAX_UNIX_CLIENTS 1000
 
+#define PSHELL_MAX_SERVERS 100
+
+#define MAX_MULTICAST_GROUPS 100
+
 #define MAX_STRING_SIZE 300
 
 /* enums */
@@ -92,7 +96,21 @@ struct PshellControl
   char remoteServer[MAX_STRING_SIZE];
 };
 
-#define PSHELL_MAX_SERVERS 100
+struct PshellMulticast
+{
+  int numSids;
+  int sidList[PSHELL_MAX_SERVERS];
+  char keyword[MAX_STRING_SIZE];
+};
+
+struct PshellMulticastList
+{
+  int numGroups;
+  PshellMulticast groups[MAX_MULTICAST_GROUPS];
+};
+
+static PshellMulticastList _multicastList = {0};
+
 static PshellControl *_control[PSHELL_MAX_SERVERS] = {0};
 static PshellLogFunction _logFunction = NULL;
 static unsigned _logLevel = PSHELL_CONTROL_LOG_LEVEL_DEFAULT;
@@ -242,6 +260,108 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
       extractResults(control, &results_[strlen(results_)], size_-strlen(results_));
     }
   }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void pshell_addMulticast(int sid_, const char *keyword_)
+{
+  int groupIndex = _multicastList.numGroups;
+  for (int i = 0; i < _multicastList.numGroups; i++)
+  {
+    if (strcmp(_multicastList.groups[i].keyword, keyword_) == 0)
+    {
+      /* we found an existing multicast group, break out */
+      groupIndex = i;
+      break;
+    }
+  }
+  if (groupIndex < MAX_MULTICAST_GROUPS)
+  {
+    /* group found, not seeif we haver a new unique sid for this group */
+    int sidIndex = _multicastList.groups[groupIndex].numSids;
+    for (int i = 0; i < _multicastList.groups[groupIndex].numSids; i++)
+    {
+      if (_multicastList.groups[groupIndex].sidList[i] == sid_)
+      {
+        sidIndex = i;
+        break;
+      }
+    }
+    if (sidIndex < PSHELL_MAX_SERVERS)
+    {      
+      /* see if we have a new multicast group (keyword) */
+      if (groupIndex == _multicastList.numGroups)
+      {
+        /* new keyword (group), add the new entry */
+        strcpy(_multicastList.groups[_multicastList.numGroups++].keyword, keyword_);
+        PSHELL_INFO("Adding new multicast group keyword: '%s', numGroups: %d", keyword_, _multicastList.numGroups);
+      }
+      /* see if we have a new sid for this group */
+      if (sidIndex == _multicastList.groups[groupIndex].numSids)
+      {      
+        /* new sid for this group, add it */
+        _multicastList.groups[groupIndex].sidList[_multicastList.groups[groupIndex].numSids++] = sid_;
+        PSHELL_INFO("Adding new multicast group sid: %d, keyword: '%s', numGroups: %d, numSids: %d", 
+                    sid_,
+                    keyword_, 
+                    _multicastList.numGroups,
+                    _multicastList.groups[groupIndex].numSids);
+      }
+    }
+    else
+    {
+      PSHELL_ERROR("Max servers: %d exceeded for multicast group: '%s'", PSHELL_MAX_SERVERS, _multicastList.groups[groupIndex].keyword);
+    }
+  }
+  else
+  {
+    PSHELL_ERROR("Max multicast groups: %d exceeded", MAX_MULTICAST_GROUPS);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void pshell_sendMulticast(const char *command_, ...)
+{
+  pthread_mutex_lock(&_mutex);
+  int bytesFormatted = 0;
+  char command[MAX_STRING_SIZE];
+  PshellControl *control;
+  char *keyword;
+  va_list args;
+  va_start(args, command_);
+  bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
+  va_end(args);
+  if (bytesFormatted < (int)sizeof(command))
+  {
+    for (int group = 0; group < _multicastList.numGroups; group++)
+    {
+      if (((keyword = strstr(command, _multicastList.groups[group].keyword)) != NULL) && (keyword == command))
+      {
+        /* we found a match, send command to all of our sids */
+        for (int sid = 0; sid < _multicastList.groups[group].numSids; sid++)
+        {
+          if ((control = getControl(_multicastList.groups[group].sidList[sid])) != NULL)
+          {
+            /* 
+             * since we are sending to multiple servers, we don't want any data 
+             * back and we don't even want ay response,wejust do fire-and-forget
+             */
+            control->pshellMsg.header.dataNeeded = false;
+            control->pshellMsg.header.respNeeded = false;
+            sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, PSHELL_NO_WAIT);
+            PSHELL_INFO("Sending multicast command: '%s' to sid: %d", command, _multicastList.groups[group].sidList[sid]);
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
+  }
+  pthread_mutex_unlock(&_mutex);  
 }
 
 /******************************************************************************/
