@@ -193,11 +193,18 @@ void multicast(int argc, char *argv[])
 /******************************************************************************/
 int main (int argc, char *argv[])
 {
+  unsigned pshellServerDemoPort = 6001;
+  unsigned traceFilterDemoPort = 6002;
   
-  if (argc != 2)
+  if ((argc != 2) && (argc != 4))
   {
-    printf("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>}\n");
+    printf("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]\n");
     exit (0);
+  }
+  else if (argc == 4)
+  {
+    pshellServerDemoPort = atoi(argv[2]);
+    traceFilterDemoPort = atoi(argv[3]);
   }
   
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
@@ -208,13 +215,13 @@ int main (int argc, char *argv[])
    * and timeout values can be overridden via the pshell-control.conf 
    * file
    */
-  if ((pshellServerDemoSid = pshell_connectServer("pshellServerDemo", argv[1], 6001, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
+  if ((pshellServerDemoSid = pshell_connectServer("pshellServerDemo", argv[1], pshellServerDemoPort, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
   {
     printf("ERROR: Could not connect to remote pshell server: pshellServerControl\n");
     exit(0);
   }
 
-  if ((traceFilterDemoSid = pshell_connectServer("traceFilterDemo", argv[1], 6002, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
+  if ((traceFilterDemoSid = pshell_connectServer("traceFilterDemo", argv[1], traceFilterDemoPort, PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
   {
     printf("ERROR: Could not connect to remote pshell server traceFilterControl\n");
     exit(0);

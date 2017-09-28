@@ -49,6 +49,12 @@
  *******************************************************************************/
 
 /*
+ * setup our port number, this is the default port number used
+ * if our serverName is not found in the pshell-server.conf file
+ */
+#define PSHELL_DEMO_PORT 6001
+
+/*
  * PSHELL user callback functions, the interface is identical to the "main"
  * in C, with the argc being the argument count (excluding the actual
  * command itself), and argv[] being the argument list (again, excluding
@@ -427,13 +433,14 @@ void getOptions(int argc, char *argv[])
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshellServerDemo -udp | -unix | -tcp | -local\n");
+  printf("Usage: pshellServerDemo -udp [<port>] | -tcp [<port>] | -unix | -local\n");
   printf("\n");
   printf("  where:\n");
   printf("    -udp   - Multi-session UDP server\n");
-  printf("    -unix  - Multi-session UNIX domain server\n");
   printf("    -tcp   - Single session TCP server\n");
+  printf("    -unix  - Multi-session UNIX domain server\n");
   printf("    -local - Local command dispatching server\n");
+  printf("    <port> - Desired UDP or TCP port, default: %d\n", PSHELL_DEMO_PORT);
   printf("\n");
 }
 
@@ -468,21 +475,16 @@ void registerSignalHandlers(void)
   signal(SIGSYS, signalHandler);    /* 31 Bad system call.  */
 }
 
-/*
- * setup our port number, this is the default port number used
- * if our serverName is not found in the pshell-server.conf file
- */
-#define PSHELL_DEMO_PORT 6001
-
 /******************************************************************************/
 /******************************************************************************/
 int main(int argc, char *argv[])
 {
 
   PshellServerType serverType;
+  unsigned port = PSHELL_DEMO_PORT;
 
   /* validate our command line arguments and get the server type */
-  if (argc == 2)
+  if (( argc == 2) || (argc == 3))
   {
     if (strcmp(argv[1], "-udp") == 0)
     {
@@ -504,6 +506,10 @@ int main(int argc, char *argv[])
     {
       showUsage();
       return (0);
+    }
+    if (argc == 3)
+    {
+      port = atoi(argv[2]);
     }
   }
   else
@@ -646,7 +652,7 @@ int main(int argc, char *argv[])
    *
    */
    
-  pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, "anyhost", PSHELL_DEMO_PORT);
+  pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, "anyhost", port);
   
   /* should never get here, but cleanup any pshell system resources as good practice */
   pshell_cleanupResources();

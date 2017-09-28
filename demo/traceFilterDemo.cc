@@ -46,6 +46,12 @@
  *
  *******************************************************************************/
 
+/*
+ * setup our port number, this is the default port number used
+ * if our serverName is not found in the pshell-server.conf file
+ */
+#define TF_DEMO_PORT 6002
+
 /* the following items are examples for the dynamic trace filtering feature */
 
 /* need to place this macro at the top of every source file in order to do
@@ -184,12 +190,13 @@ void sampleLogFunction(const char *outputString_)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: traceFilterDemo -udp | -unix | -tcp\n");
+  printf("Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix\n");
   printf("\n");
   printf("  where:\n");
   printf("    -udp   - Multi-session UDP server\n");
-  printf("    -unix  - Multi-session UNIX domain server\n");
   printf("    -tcp   - Single session TCP server\n");
+  printf("    -unix  - Multi-session UNIX domain server\n");
+  printf("    <port> - Desired UDP or TCP port, default: %d\n", TF_DEMO_PORT);
   printf("\n");
 }
 
@@ -224,11 +231,7 @@ void registerSignalHandlers(void)
   signal(SIGSYS, signalHandler);    /* 31 Bad system call.  */
 }
 
-/*
- * setup our port number, this is the default port number used
- * if our serverName is not found in the pshell-server.conf file
- */
-#define TF_DEMO_PORT 6002
+/* size of our example dump buffer */
 #define DUMP_BUFFER_SIZE 256
 
 /*
@@ -255,13 +258,15 @@ void registerSignalHandlers(void)
 int main (int argc, char *argv[])
 {
 
+  unsigned port = TF_DEMO_PORT;
+
 #ifndef TRACE_LOG_DISABLED
   char dumpBuffer[DUMP_BUFFER_SIZE];
 #endif
   PshellServerType serverType;
 
   /* validate our command line arguments and get the server type */
-  if (argc == 2)
+  if ((argc == 2) || (argc == 3))
   {
     if (strcmp(argv[1], "-udp") == 0)
     {
@@ -279,6 +284,10 @@ int main (int argc, char *argv[])
     {
       showUsage();
       return (0);
+    }
+    if (argc == 3)
+    {
+      port = atoi(argv[2]);
     }
   }
   else
@@ -400,7 +409,7 @@ int main (int argc, char *argv[])
   TRACE_INFO("First trace");
 
   /* start our pshell server */
-  pshell_startServer("traceFilterDemo", serverType, PSHELL_NON_BLOCKING, "localhost", TF_DEMO_PORT);
+  pshell_startServer("traceFilterDemo", serverType, PSHELL_NON_BLOCKING, "localhost", port);
    
   /* create a sample thread to show thread based filtering */
   pthread_t threadId;
