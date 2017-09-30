@@ -238,6 +238,7 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_)
 /******************************************************************************/
 void pshell_extractCommands(int sid_, char *results_, int size_)
 {
+  pthread_mutex_lock(&_mutex);
   PshellControl *control;
   int retCode;
   if ((control = getControl(sid_)) != NULL)
@@ -260,12 +261,14 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
       extractResults(control, &results_[strlen(results_)], size_-strlen(results_));
     }
   }
+  pthread_mutex_unlock(&_mutex);
 }
 
 /******************************************************************************/
 /******************************************************************************/
 void pshell_addMulticast(int sid_, const char *keyword_)
 {
+  pthread_mutex_lock(&_mutex);
   int groupIndex = _multicastList.numGroups;
   for (int i = 0; i < _multicastList.numGroups; i++)
   {
@@ -318,6 +321,7 @@ void pshell_addMulticast(int sid_, const char *keyword_)
   {
     PSHELL_ERROR("Max multicast groups: %d exceeded", MAX_MULTICAST_GROUPS);
   }
+  pthread_mutex_unlock(&_mutex);
 }
 
 /******************************************************************************/
