@@ -241,7 +241,7 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
   pthread_mutex_lock(&_mutex);
   PshellControl *control;
   int retCode;
-  if ((control = getControl(sid_)) != NULL)
+  if ((results_ != NULL) && (control = getControl(sid_)) != NULL)
   {
     control->pshellMsg.header.msgType =  PSHELL_QUERY_COMMANDS1;
     control->pshellMsg.header.dataNeeded = true;
@@ -249,16 +249,16 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
     if ((retCode = sendPshellCommand(control, PSHELL_QUERY_COMMANDS1, "query commands", PSHELL_ONE_SEC*5)) == PSHELL_COMMAND_SUCCESS)
     {
       results_[0] = 0;
-      sprintf(&results_[strlen(results_)], "\n");
-      for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) sprintf(&results_[strlen(results_)], "*");
-      sprintf(&results_[strlen(results_)], "\n");
-      sprintf(&results_[strlen(results_)], "*   COMMAND LIST: %s", control->remoteServer);
-      for (unsigned i = 0; i < 3; i++) sprintf(&results_[strlen(results_)], " ");;
-      sprintf(&results_[strlen(results_)], "*\n");
-      for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) sprintf(&results_[strlen(results_)], "*");
-      sprintf(&results_[strlen(results_)], "\n");
-      sprintf(&results_[strlen(results_)], "\n");
-      extractResults(control, &results_[strlen(results_)], size_-strlen(results_));
+      snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "\n");
+      for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "*");
+      snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "\n");
+      snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "*   COMMAND LIST: %s", control->remoteServer);
+      for (unsigned i = 0; i < 3; i++) snprintf(&results_[strlen(results_)], (size_-strlen(results_)), " ");;
+      snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "*\n");
+      for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "*");
+      snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "\n");
+      snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "\n");
+      extractResults(control, &results_[strlen(results_)], (size_-strlen(results_)));
     }
   }
   pthread_mutex_unlock(&_mutex);
