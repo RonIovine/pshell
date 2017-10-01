@@ -57,7 +57,7 @@ This example logging system can also be compiled out via the build-time config f
 logging system is used.
 
 In addition to the infrastructure components, six demo programs are also provided, one to
-show the usage of the pshell server API, one to show the usage of pshell control API, , one
+show the usage of the pshell server API, one to show the usage of pshell control API, one
 to show the aggergation of multiple pshell servers into a single pshell server via the control
 API, one to show the usage of the trace filter/trace log API, one to show the usage of a 
 stand-alone (no filtering) trace log application, and one to show the usage of the multi-call 
@@ -195,7 +195,7 @@ programmitic control of an external program that is running a PshellServer via t
 PshellControl API and library.  The pshellControlDemo program can control either the
 pshellServerDemo or traceControlDemo program.  The pshellAggregatorDemo can control both 
 the pshellServerDemo or traceControlDemo within a single invocation.  The functionality 
-of the pshellNoServerDemo is only access directly from the host's command line shell, 
+of the pshellNoServerDemo is only accessed directly from the host's command line shell, 
 either directly from the pshellNoServerDemo itself, or via the setup softlinks for each 
 command (need to run 'pshellNoServerDemo --setup' to setup softlinks).
 
@@ -203,8 +203,8 @@ After the install.sh script has been excuted (and the local env sourced if doing
 a local install), the client and associated demo programs can be run.  Run
 "pshellServerDemo" and connect to it with the "pshell" client program for a
 UDP/UNIX server, or telnet (or the pshell.exp telnet expect script wrapper) for
-a TCP server.  Note, to use the "pshell.exp" expect script you need to have
-"expect" installed on your host in /usr/bin.
+a TCP server.  Note, to use the "pshell.exp" expect script you need to have the
+"expect" package installed on your host in /usr/bin.
 
 (NOTE: To see the features of the dynamically configurable optional TraceFilter
 mechanism, run the program "traceFilterDemo".  It can be controlled via the same

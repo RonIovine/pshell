@@ -3721,7 +3721,7 @@ static unsigned findCommand(char *command_)
   }
   else if ((_serverType == PSHELL_NO_SERVER) && pshell_isEqual(command_, "--setup"))
   {
-    /* command to setup out busybox like softlinks based on our command names  */
+    /* command to setup our busybox like softlinks based on our command names  */
     _foundCommand = &_setupCmd;
     numMatches = 1;
   }

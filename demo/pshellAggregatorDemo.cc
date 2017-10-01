@@ -92,7 +92,7 @@ char *buildCommand(char *command, unsigned size, int argc, char *argv[])
     command[0] = 0;
     for (int arg = 0; ((arg < argc) && ((size - strlen(command)) > strlen(argv[arg])+1)); arg++)
     {
-      sprintf(&command[strlen(command)], "%s ", argv[arg]);
+      snprintf(&command[strlen(command)], (size-strlen(command)), "%s ", argv[arg]);
     }
     command[strlen(command)-1] = 0;
     return (command);
@@ -175,7 +175,7 @@ void meta(int argc, char *argv[])
 }
 
 /*
- * example multicast command, this willsenda given command to all the registered
+ * example multicast command, this will send a given command to all the registered
  * multicast receivers for that multicast group, multicast groups are based on
  * the command's keyword
  */
@@ -197,6 +197,11 @@ int main (int argc, char *argv[])
   unsigned traceFilterDemoPort = 6002;
   
   if ((argc != 2) && (argc != 4))
+  {
+    printf("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]\n");
+    exit (0);
+  }
+  else if ((argc == 2) && (strcmp(argv[1], "-h") == 0))
   {
     printf("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]\n");
     exit (0);

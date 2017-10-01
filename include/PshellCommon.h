@@ -50,11 +50,11 @@
 
 struct PshellMsgHdr
 {
-  char msgType;
-  char respNeeded;
-  char dataNeeded;
-  int seqNum;
-  char pad;
+  uint8_t msgType;
+  uint8_t respNeeded;
+  uint8_t dataNeeded;
+  uint8_t pad;
+  uint32_t seqNum;
 };
 
 struct PshellMsg

@@ -567,7 +567,7 @@ bool tf_isFilterPassed(const char *file_,
         }
         _callbackNumHits++;
         _callbackPrevCondition = true;
-        /* force trace to  be off because we are supersceding it with out own trace output */
+        /* force trace to be off because we are supersceding it with our own trace output */
         filterPassed = false;
       }
     }
@@ -597,7 +597,7 @@ bool tf_isFilterPassed(const char *file_,
         }
         _callbackNumHits++;
         _callbackPrevCondition = false;
-        /* force trace to  be off because we are supersceding it with out own trace output */
+        /* force trace to be off because we are supersceding it with our own trace output */
         filterPassed = false;
       }
     }

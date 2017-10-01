@@ -120,7 +120,7 @@ const char *pshell_getResultsString(int results_);
  * that do not provide an override timeout value, for a UDP server, the 
  * remoteServer must be either a valid hostname or IP address and a valid 
  * destination port must be provided, for a UNIX server, only a valid server 
- * name must be provided along with the identifier PSHELL_UNIX_SERVER (i.e. 0) 
+ * name must be provided along with the identifier PSHELL_UNIX_CONTROL (i.e. 0) 
  * for the 'port' parameter
  *
  * this function returns a Server ID (sid) handle which must be saved and
@@ -129,14 +129,14 @@ const char *pshell_getResultsString(int results_);
  * PSHELL_INVALID_SID is returned
  */
 #define PSHELL_INVALID_SID -1
-#define PSHELL_UNIX_SERVER  0
+#define PSHELL_UNIX_CONTROL 0
 #define PSHELL_NO_WAIT      0
 #define PSHELL_ONE_MSEC     1
 #define PSHELL_ONE_SEC      PSHELL_ONE_MSEC*1000
 
 int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,
-                         unsigned port_ = PSHELL_UNIX_SERVER,
+                         unsigned port_ = PSHELL_UNIX_CONTROL,
                          unsigned defaultTimeout_ = PSHELL_NO_WAIT);
 
 /*

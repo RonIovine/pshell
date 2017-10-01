@@ -48,7 +48,7 @@
 /*
  * this constant defines the default location to look for the
  * psehll-control.conf configuration file is the PSHELL_CONFIG_DIR
- * env variabel is not set
+ * env variable is not set
  */
 #ifdef PSHELL_CONFIG_DIR
 #undef PSHELL_CONFIG_DIR
@@ -281,7 +281,7 @@ void pshell_addMulticast(int sid_, const char *keyword_)
   }
   if (groupIndex < MAX_MULTICAST_GROUPS)
   {
-    /* group found, not seeif we haver a new unique sid for this group */
+    /* group found, now see if we have a new unique sid for this group */
     int sidIndex = _multicastList.groups[groupIndex].numSids;
     for (int i = 0; i < _multicastList.groups[groupIndex].numSids; i++)
     {
@@ -350,7 +350,7 @@ void pshell_sendMulticast(const char *command_, ...)
           {
             /* 
              * since we are sending to multiple servers, we don't want any data 
-             * back and we don't even want ay response,wejust do fire-and-forget
+             * back and we don't even want any response, we just do fire-and-forget
              */
             control->pshellMsg.header.dataNeeded = false;
             control->pshellMsg.header.respNeeded = false;
@@ -537,7 +537,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
   int retCode = -1;
 
   control_->defaultTimeout = defaultTimeout_;
-  if (port_ == PSHELL_UNIX_SERVER)
+  if (port_ == PSHELL_UNIX_CONTROL)
   {
 
     control_->serverType = UNIX;
@@ -634,7 +634,7 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
   fd_set readFd;
   struct timeval timeout;
   int bytesRead = 0;
-  int seqNum;
+  uint32_t seqNum;
   int retCode = PSHELL_COMMAND_SUCCESS;
 
   if (control_ != NULL)
@@ -890,7 +890,7 @@ static void loadConfigFile(const char *controlName_,
             else if (strcmp(option, "unix") == 0)
             {
               strcpy(remoteServer_, value);
-              port_ = PSHELL_UNIX_SERVER;
+              port_ = PSHELL_UNIX_CONTROL;
               isUnix = true;
             }
             else if (strcmp(option, "port") == 0)
@@ -919,7 +919,7 @@ static void loadConfigFile(const char *controlName_,
      */
      if (isUnix)
      {
-       port_ = PSHELL_UNIX_SERVER;
+       port_ = PSHELL_UNIX_CONTROL;
      }
   }
 }

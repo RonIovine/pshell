@@ -67,7 +67,7 @@
 #PSHELL_DEFAULT_BANNER="PSHELL: Process Specific Embedded Command Line Shell"
 
 #
-# change the default prompt all servers, the full prompt format is
+# change the default prompt for all servers, the full prompt format is
 # 'shellName[ipAddress]:prompt', this can also be changed at runtime 
 # on a per-server basis via the pshell-server.conf file
 #
@@ -92,7 +92,7 @@
 # This is the default directory that contains the pshell-server.conf,
 # pshell-control.conf, and pshell-client.conf files.  If this env variable
 # is not set, it will use the default directory that is setup in the
-# PshellServer.c, PshellControl.c, and PshellClient.c files (/etc/pshell/config).
+# PshellServer.cc, PshellControl.cc, and PshellClient.cc files (/etc/pshell/config).
 # These config files can be used to set various server, client, and control
 # settings.  Refer to the example files in the 'config' directory of this
 # package for usage of these files.
