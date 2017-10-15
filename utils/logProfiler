@@ -473,6 +473,11 @@ def getTimeDisplay(time, labelLength):
   global gTimeWidthAdjust
   global gDiffRequested
   global gDiffType
+  # make the display of a 0 time display the microseconds part,
+  # a 0 time delta does not display the microseconds by default
+  if (time == datetime.timedelta(0)):
+    time = "0:00:00.000000"
+  endif
   if (gDiffRequested):
     if (gDiffType == "percent"):
       width = 10
@@ -657,12 +662,6 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
          ((functionFilter != gNoFilter) and (fileFilter == gNoFilter) and ((functionFilter in profile["function1"]) or (functionFilter in profile["function2"]))) or
          (((fileFilter in profile["file1"]) or (fileFilter in profile["file2"])) and ((functionFilter in profile["function1"]) or (functionFilter in profile["function2"]))))):
       numDisplayed += 1
-      # make the display of a 0 standard deviation display the microseconds part like all
-      # the other time delta displays, a 0 time delta does not display the microseconds
-      stdDev = "0:00:00.000000"
-      if (profile["stdDev"] != datetime.timedelta(0)):
-        stdDev = profile["stdDev"]
-      endif
       if (not gDiffRequested):
         totalDisplayedTime += profile["tot"]
       endif
@@ -684,7 +683,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                            ' '.ljust(gSpaceLength),
                                                            getTimeDisplay(profile["avg"], gTimeDeltaLength).ljust(gTimeDeltaLength),
                                                            ' '.ljust(gSpaceLength),
-                                                           getTimeDisplay(stdDev, gTimeDeltaLength).ljust(gTimeDeltaLength)))
+                                                           getTimeDisplay(profile["stdDev"], gTimeDeltaLength).ljust(gTimeDeltaLength)))
     endif
     if ((count != gDisplayAll) and (numDisplayed >= int(count))):
       break
