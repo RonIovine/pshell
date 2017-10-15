@@ -125,12 +125,6 @@ def showUsage():
   print "  This program will provide several ways to analyze a logfile that has a log entry"
   print "  format that includes a file, function, line, and timestamp."
   print
-  print "  It will currently work with log entries of the following formats:"
-  print
-  print "  my-app | Warning | 14:40:32.377256 | my-file(my-function):my-line | my-message"
-  print "  2017-10-12T09:26:04.31081 <WARN> my-hostname: my-app: my-function: my-file@my-line: my-message"
-  print "  2014-08-17 23:11:00.114 WARNING [my-pid:my-function:my-line] my-message"
-  print
   print "  where:"
   print "    -tot      : Sort highest to lowest total time"
   print "    -min      : Sort highest to lowest minimum time"
@@ -152,9 +146,17 @@ def showUsage():
   print "    <outfile> : Name of the output file to write the results"
   print "    <logfile> : Trace log file to profile"
   print
-  print "  NOTE: If doing a non-diff profile, as many logfiles can be given as desired,"
-  print "        for a 'diff' based profile, exactly two logfiles must be given, for a"
-  print "        time 'delta' based analysis, only one logfile should be provided"
+  print "  NOTES:"
+  print
+  print "    If doing a non-diff profile, as many logfiles can be given as desired,"
+  print "    for a 'diff' based profile, exactly two logfiles must be given, for a"
+  print "    time 'delta' based analysis, only one logfile should be provided."
+  print
+  print "    This program will currently work with log entries of the following formats:"
+  print
+  print "    my-app | my-level | 14:40:32.377256 | my-file(my-function):my-line | my-message"
+  print "    2017-10-12T09:26:04.31081 my-level my-hostname: my-app: my-function: my-file@my-line: my-message"
+  print "    2014-08-17 23:11:00.114 my-level [my-pid:my-function:my-line] my-message"
   print
   sys.exit()
 enddef
@@ -280,14 +282,14 @@ def parseLine(line):
   # we need to extract the file, function, line, and timestamp, an
   # example of the currently parsed log line formats are:
   #
-  # my-app | Warning    | 14:40:32.377256 | my-file(my-function):my-line | my-message
+  # my-app | my-level | 14:40:32.377256 | my-file(my-function):my-line | my-message
   #
-  # 2017-10-12T09:26:04.31081 <WARN> my-hostname: my-app: my-function: my-file@my-line: my-message
+  # 2017-10-12T09:26:04.31081 my-level my-hostname: my-app: my-function: my-file@my-line: my-message
   #
-  # 2014-08-17 23:11:00.114 WARNING [my-pid:my-function:my-line] my-message
+  # 2014-08-17 23:11:00.114 my-level [my-pid:my-function:my-line] my-message
   #
 
-  # parse format: my-app | Warning | 14:40:32.377256 | my-file(my-function):my-line | my-message
+  # parse format: my-app | my-level | 14:40:32.377256 | my-file(my-function):my-line | my-message
   tokenDelimiter = "|"
   expectedNumTokens = 5
   timestampTokenPos = 2
@@ -306,7 +308,7 @@ def parseLine(line):
     endif
   endif
   
-  # parse format: 2017-10-12T09:26:04.31081 <WARN> my-hostname: my-app: my-function: my-file@my-line: my-message
+  # parse format: 2017-10-12T09:26:04.31081 my-level my-hostname: my-app: my-function: my-file@my-line: my-message
   tokenDelimiter = " "
   expectedNumTokens = 6
   timestampTokenPos = 0
@@ -324,7 +326,7 @@ def parseLine(line):
     endif
   endif
   
-  # parse format: 2014-08-17 23:11:00.114 WARNING [my-pid:my-function:my-line] my-message
+  # parse format: 2014-08-17 23:11:00.114 my-level [my-pid:my-function:my-line] my-message
   tokenDelimiter = " "
   expectedNumTokens = 4
   timestampTokenPos = 1
@@ -366,7 +368,7 @@ def updateProfile(profiles, prevLine, currLine):
     prevTime = datetime.datetime.strptime(timestamp1, gTimestampFormat)
     timeDelta = currTime - prevTime
     # filter out any negative timeDelta, this could happen if the system time
-    # has changed during the creation of a logfile
+    # has changed during the creation of a logfile or at the midnight rollover
     if (timeDelta >= datetime.timedelta(0)):
       profile = findProfile(profiles, filename1, function1, line1, filename2, function2, line2)
       if (profile == None):
