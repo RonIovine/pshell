@@ -47,8 +47,8 @@ gMinArea1Width = len(gAreaLabel1)
 gAreaLabel2 = "END CODE AREA"
 gMinArea2Width = len(gAreaLabel2)
 
-gOccurancesLabel = "OCC"
-gOccurancesLabelLength = len(gOccurancesLabel)+3
+gCountLabel = "COUNT"
+gCountLabelLength = len(gCountLabel)+1
 
 gTotTimeLabel = "TOT TIME"
 gMaxTimeLabel = "MAX TIME"
@@ -91,13 +91,13 @@ gWheel = ('|', '/', '-', '\\')
 gWheelIndex = 0
 
 # command line option switches and default values
-gValidOptions = ('-tot', '-min', '-max', '-avg', '-med', '-std', '-occ')
+gValidOptions = ('-tot', '-min', '-max', '-avg', '-med', '-std', '-count')
 gValidDiffs = ('percent', 'time')
 gDiffRequested = False
 gTimeSuffix = NULL
 gTimeWidthAdjust = 0
-gOccuranceSuffix = NULL
-gOccuranceWidthAdjust = 0
+gCountSuffix = NULL
+gCountWidthAdjust = 0
 gTotalRunTime = datetime.timedelta(0)
 gTotalProfiledTime = datetime.timedelta(0)
 gDisplayAll = "all"
@@ -118,7 +118,7 @@ gProfilesDiff = []
 #####################################################
 def showUsage():
   print
-  print "Usage: logProfiler [-tot | -min | -max | -avg | -med | -std | -occ]"
+  print "Usage: logProfiler [-tot | -min | -max | -avg | -med | -std | -count]"
   print "                   [num=<count>] [file=<name>] [func=<name>] [out=<outfile>] [diff=<type>] [delta=<time>]"
   print "                   <logfile1> [<logfile2>...<logfileN>]"
   print
@@ -132,7 +132,7 @@ def showUsage():
   print "    -avg      : Sort highest to lowest average time"
   print "    -med      : Sort highest to lowest median time"
   print "    -std      : Sort highest to lowest standard deviation time"
-  print "    -occ      : Sort highest to lowest number of occurances"
+  print "    -count    : Sort highest to lowest occurance count"
   print "    num       : Specify number of entries to display"
   print "    file      : Specify a file name display filter"
   print "    func      : Specify a function name display filter"
@@ -498,21 +498,21 @@ enddef
 
 #####################################################
 #
-# shows occurances display
+# shows counts display
 #
 #####################################################
-def getOccuranceDisplay(occurance, labelLength):
-  global gOccuranceSuffix
-  global gOccuranceWidthAdjust
+def getCountDisplay(count, labelLength):
+  global gCountSuffix
+  global gCountWidthAdjust
   global gDiffRequested
   if (gDiffRequested):
-    if (occurance > 0):
-      return (("+"+str(occurance)).rjust(8)+gOccuranceSuffix).rjust(labelLength-gOccuranceWidthAdjust)
+    if (count > 0):
+      return (("+"+str(count)).rjust(8)+gCountSuffix).rjust(labelLength-gCountWidthAdjust)
     else:
-      return (str(occurance).rjust(8)+gOccuranceSuffix).rjust(labelLength-gOccuranceWidthAdjust)
+      return (str(count).rjust(8)+gCountSuffix).rjust(labelLength-gCountWidthAdjust)
     endif
   else:
-    return (str(occurance).ljust(labelLength)+gOccuranceSuffix).rjust(labelLength-gOccuranceWidthAdjust)
+    return (str(count).ljust(labelLength)+gCountSuffix).rjust(labelLength-gCountWidthAdjust)
   endif
 enddef
 
@@ -525,8 +525,8 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   global gBanner
   global gBannerLength
 
-  global gOccurancesLabel
-  global gOccurancesLabelLength
+  global gCountLabel
+  global gCountLabelLength
 
   global gTotTimeLabel
   global gMaxTimeLabel
@@ -563,7 +563,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   global gMaxAreaWidth2
 
   totalDisplayedTime = datetime.timedelta(0)
-  gOccurancesLabelLength = gOccurancesLabelLength + len(gLabelSuffix)
+  gCountLabelLength = gCountLabelLength + len(gLabelSuffix)
 
   if (outfile == "none"):
     file = sys.stdout
@@ -585,7 +585,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
     profiles.sort(key=operator.itemgetter('stdDev'), reverse=True)
   elif (option == "-tot"):
     profiles.sort(key=operator.itemgetter('tot'), reverse=True)
-  elif (option == "-occ"):
+  elif (option == "-count"):
     profiles.sort(key=operator.itemgetter('count'), reverse=True)
   endif
 
@@ -615,7 +615,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   # display our header
   maxFieldWidth = maxAreaWidth1 + \
                   gMaxAreaWidth2 + \
-                  gOccurancesLabelLength + \
+                  gCountLabelLength + \
                   gTimeDeltaLength*gTimeDeltaCount + \
                   gNormalDisplayPadLength
   file.write("%s%s\n" % (gClearStatusUpdate, gBanner.center(maxFieldWidth)))
@@ -626,7 +626,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                        ' '.ljust(gSpaceLength),
                                                        gAreaLabel2.ljust(maxAreaWidth2),
                                                        ' '.ljust(gSpaceLength),
-                                                       (gOccurancesLabel+gLabelSuffix).ljust(gOccurancesLabelLength),
+                                                       (gCountLabel+gLabelSuffix).ljust(gCountLabelLength),
                                                        ' '.ljust(gSpaceLength),
                                                        (gTotTimeLabel+gLabelSuffix).ljust(gTimeDeltaLength),
                                                        ' '.ljust(gSpaceLength),
@@ -643,7 +643,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                        ' '.ljust(gSpaceLength),
                                                        gUnderline.ljust(maxAreaWidth2, gUnderline),
                                                        ' '.ljust(gSpaceLength),
-                                                       gUnderline.ljust(gOccurancesLabelLength, gUnderline),
+                                                       gUnderline.ljust(gCountLabelLength, gUnderline),
                                                        ' '.ljust(gSpaceLength),
                                                        gUnderline.ljust(gTimeDeltaLength, gUnderline),
                                                        ' '.ljust(gSpaceLength),
@@ -673,7 +673,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                            ' '.ljust(gSpaceLength),
                                                            area2.ljust(maxAreaWidth2),
                                                            ' '.ljust(gSpaceLength),
-                                                           getOccuranceDisplay(profile["count"], gOccurancesLabelLength).ljust(gOccurancesLabelLength),
+                                                           getCountDisplay(profile["count"], gCountLabelLength).ljust(gCountLabelLength),
                                                            ' '.ljust(gSpaceLength),
                                                            getTimeDisplay(profile["tot"], gTimeDeltaLength).ljust(gTimeDeltaLength),
                                                            ' '.ljust(gSpaceLength),
@@ -744,26 +744,26 @@ enddef
 
 #####################################################
 #
-# returns the diff between two time occurances
+# returns the diff between two count counts
 #
 #####################################################
-def getOccurancesDiff(occurance1, occurance2):
+def getCountsDiff(count1, count2):
   global gDiffType
-  if (occurance1 > occurance2):
+  if (count1 > count2):
     if (gDiffType == "percent"):
-      return -round(((float(occurance1-occurance2)/float(occurance1))*100.0), 1)
+      return -round(((float(count1-count2)/float(count1))*100.0), 1)
     else:  # diffType == "time"
-      return -int(occurance1-occurance2)
+      return -int(count1-count2)
     endif
-  elif (occurance2 > occurance1):
+  elif (count2 > count1):
     if (gDiffType == "percent"):
-      if (occurance1 > 0):
-        return round(((float(occurance2-occurance1)/float(occurance1))*100.0), 1)
+      if (count1 > 0):
+        return round(((float(count2-count1)/float(count1))*100.0), 1)
       else:
         return "Infinity"
       endif
     else:  # diffType == "time"
-      return int(occurance2-occurance1)
+      return int(count2-count1)
     endif
   else:
     if (gDiffType == "percent"):
@@ -785,19 +785,19 @@ def diffProfiles(profiles1, profiles2):
   global gLabelSuffix
   global gTimeSuffix
   global gTimeWidthAdjust
-  global gOccuranceSuffix
-  global gOccuranceWidthAdjust
+  global gCountSuffix
+  global gCountWidthAdjust
   if (gDiffType == "percent"):
     gLabelSuffix = " %diff"
     gTimeSuffix = "%"
-    gOccuranceSuffix = "%"
+    gCountSuffix = "%"
     gTimeWidthAdjust = 5
-    gOccuranceWidthAdjust = 5
+    gCountWidthAdjust = 5
   else:  # diffType == "time"
     gLabelSuffix = " diff"
     gTimeSuffix = " Usec"
     gTimeWidthAdjust = 3
-    gOccuranceWidthAdjust = 5
+    gCountWidthAdjust = 5
   endif
   for profile1 in profiles1:
     profile2 = findProfile(profiles2, 
@@ -812,7 +812,7 @@ def diffProfiles(profiles1, profiles2):
                             "function2":profile1["function2"],
                             "line2":profile1["line2"],
                             "areaWidth2":profile1["areaWidth2"],
-                            "count":getOccurancesDiff(profile1["count"], profile2["count"]),
+                            "count":getCountsDiff(profile1["count"], profile2["count"]),
                             "tot":getTimedeltaDiff(profile1["tot"], profile2["tot"]),
                             "min":getTimedeltaDiff(profile1["min"], profile2["min"]),
                             "max":getTimedeltaDiff(profile1["max"], profile2["max"]),
@@ -871,7 +871,7 @@ def showDelta(logfile, outfile, maxTimeDelta, count):
     currLine = NULL
     currTimestampStr = NULL
     currLineNum = 1
-    numOccurances = 0
+    numCounts = 0
     maxTimeDeltaDiff = 0.0
     minTimeDeltaDiff = sys.float_info.max
     if (outfile == "none"):
@@ -896,7 +896,7 @@ def showDelta(logfile, outfile, maxTimeDelta, count):
           prevTimestamp = datetime.datetime.strptime(prevTimestampStr, gTimestampFormat)
           timestampDiff = timeDeltaToSec(currTimestamp - prevTimestamp)
           if (timestampDiff >= maxTimeDelta):
-            numOccurances += 1
+            numCounts += 1
             if (timestampDiff > maxTimeDeltaDiff):
               maxTimeDeltaDiff = timestampDiff
             endif
@@ -922,7 +922,7 @@ def showDelta(logfile, outfile, maxTimeDelta, count):
       outfile.write("Max Delta  (sec) : %f\n" % maxTimeDeltaDiff)
       outfile.write("Min Delta  (sec) : %f\n" % minTimeDeltaDiff)
     endif
-    outfile.write("Total Areas      : %d\n" % numOccurances)
+    outfile.write("Total Areas      : %d\n" % numCounts)
     outfile.write("Displayed Areas  : %d\n" % numDisplayed)
     outfile.write("\n")
   endif
