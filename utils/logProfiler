@@ -72,7 +72,7 @@ gTotalLines = 0
 gClearStatusUpdate = "\r"
 
 gTimestampEndings = (']', '|', ' ')
-gTimestampPositions = {0, 4}
+gTimestampPositions = {0, 1, 4}
 gTimestampFormat = "%H:%M:%S.%f"
 gTimestampRegexp0 = '\d{2}:\d{2}:\d{2}.\d{3}'
 gTimestampRegexp1 = '\d{2}:\d{2}:\d{2}.\d{4}'
@@ -129,6 +129,7 @@ def showUsage():
   print
   print "  my-app | Warning | 14:40:32.377256 | my-file(my-function):my-line | my-message"
   print "  2017-10-12T09:26:04.31081 <WARN> my-hostname: my-app: my-function: my-file@my-line: my-message"
+  print "  2014-08-17 23:11:00.114 WARNING [my-pid:my-function:my-line] my-message"
   print
   print "  where:"
   print "    -tot      : Sort highest to lowest total time"
@@ -283,6 +284,8 @@ def parseLine(line):
   #
   # 2017-10-12T09:26:04.31081 <WARN> my-hostname: my-app: my-function: my-file@my-line: my-message
   #
+  # 2014-08-17 23:11:00.114 WARNING [my-pid:my-function:my-line] my-message
+  #
 
   # parse format: my-app | Warning | 14:40:32.377256 | my-file(my-function):my-line | my-message
   tokenDelimiter = "|"
@@ -291,7 +294,6 @@ def parseLine(line):
   filenameTokenPos = 3
   lineTokenPos = filenameTokenPos
   functionTokenPos = filenameTokenPos
-
   tokens = line.split(tokenDelimiter)
   if (len(tokens) >= expectedNumTokens):
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
@@ -300,33 +302,46 @@ def parseLine(line):
       line = tokens[lineTokenPos].strip().split(":")[-1]
       function = tokens[functionTokenPos].strip().split("(")[-1]
       function = function.split(")")[0]
-      return (filename, function, line, timestamp)
-    else:
-      return (None, None, None, None)
-    endif
-  else:
-    # parse format: 2017-10-12T09:26:04.31081 <WARN> my-hostname: my-app: my-function: my-file@my-line: my-message
-    tokenDelimiter = " "
-    expectedNumTokens = 6
-    timestampTokenPos = 0
-    filenameTokenPos = 5
-    functionTokenPos = 4
-    lineTokenPos = filenameTokenPos
-    tokens = line.split(tokenDelimiter)
-    if (len(tokens) >= expectedNumTokens):
-      timestamp = findTimestamp(tokens[timestampTokenPos].strip())
-      if (timestamp != NULL):
-        filename = tokens[filenameTokenPos].strip().split("@")[0]
-        line = tokens[filenameTokenPos].strip().split("@")[-1][:-1]
-        function = tokens[functionTokenPos].strip().split(":")[0]
-        return (filename, function, line, timestamp)
-      else:
-        return (None, None, None, None)
-      endif
-    else:
-      return (None, None, None, None)
+      return (filename, "("+function+")", ":"+line, timestamp)
     endif
   endif
+  
+  # parse format: 2017-10-12T09:26:04.31081 <WARN> my-hostname: my-app: my-function: my-file@my-line: my-message
+  tokenDelimiter = " "
+  expectedNumTokens = 6
+  timestampTokenPos = 0
+  filenameTokenPos = 5
+  functionTokenPos = 4
+  lineTokenPos = filenameTokenPos
+  tokens = line.split(tokenDelimiter)
+  if (len(tokens) >= expectedNumTokens):
+    timestamp = findTimestamp(tokens[timestampTokenPos].strip())
+    if (timestamp != NULL):
+      filename = tokens[filenameTokenPos].strip().split("@")[0]
+      line = tokens[filenameTokenPos].strip().split("@")[-1][:-1]
+      function = tokens[functionTokenPos].strip().split(":")[0]
+      return (filename, "("+function+")", ":"+line, timestamp)
+    endif
+  endif
+  
+  # parse format: 2014-08-17 23:11:00.114 WARNING [my-pid:my-function:my-line] my-message
+  tokenDelimiter = " "
+  expectedNumTokens = 4
+  timestampTokenPos = 1
+  filenameTokenPos = 3
+  lineTokenPos = filenameTokenPos
+  tokens = line.split(tokenDelimiter)
+  if (len(tokens) >= expectedNumTokens):
+    timestamp = findTimestamp(tokens[timestampTokenPos].strip())
+    if (timestamp != NULL):
+      filename = tokens[filenameTokenPos].strip().split(":")[1]
+      line = tokens[filenameTokenPos].strip().split(":")[-1][:-1]
+      return (filename, NULL, ":"+line, timestamp)
+    endif
+  endif
+  
+  # dropped through, return nothing
+  return (None, None, None, None)
   
 enddef
 
@@ -347,15 +362,14 @@ def updateProfile(profiles, prevLine, currLine):
   if ((filename1 != None) and (filename2 != None)):
   
     # both lines are good, now either update an existing area profile, or create a new one
-
     profile = findProfile(profiles, filename1, function1, line1, filename2, function2, line2)
     currTime = datetime.datetime.strptime(timestamp2, gTimestampFormat)
     prevTime = datetime.datetime.strptime(timestamp1, gTimestampFormat)
     timeDelta = currTime - prevTime
     if (profile == None):
       # create new profile
-      areaWidth1 = len(filename1)+len(function1)+len(line1)+3
-      areaWidth2 = len(filename2)+len(function2)+len(line2)+3
+      areaWidth1 = len(filename1)+len(function1)+len(line1)
+      areaWidth2 = len(filename2)+len(function2)+len(line2)
       profiles.append({"file1":filename1,
                        "function1":function1,
                        "line1":line1,
@@ -422,11 +436,15 @@ def createProfile(logfile, profiles):
     endif
     numLines = 0
     currLine = None
+    currTimestamp = NULL
     for line in file:
       printKeepAlive(numLines, gKeepAliveType)
-      prevLine = currLine
+      if (currTimestamp != NULL):
+        prevLine = currLine
+      endif
       currLine = line
-      if (numLines > 0):
+      currTimestamp = findTimestamp(currLine)
+      if ((numLines > 0) and (currTimestamp != NULL)):
         updateProfile(profiles, prevLine, currLine)
       endif
       numLines += 1
@@ -644,8 +662,8 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
       if (not gDiffRequested):
         totalDisplayedTime += profile["tot"]
       endif
-      area1 = profile["file1"] + "(" + profile["function1"] + "):" + str(profile["line1"])
-      area2 = profile["file2"] + "(" + profile["function2"] + "):" + str(profile["line2"])
+      area1 = profile["file1"] + profile["function1"] + str(profile["line1"])
+      area2 = profile["file2"] + profile["function2"] + str(profile["line2"])
       file.write("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n" % (area1.ljust(maxAreaWidth1),
                                                            ' '.ljust(gSpaceLength),
                                                            area2.ljust(maxAreaWidth2),
