@@ -679,10 +679,10 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
     file.write("\n")
     file.write("RESULTS SUMMARY:\n")
     file.write("%s\n" % gUnderline.ljust(34, gUnderline))
-    file.write("Total areas     : %s\n" % len(profiles))
-    file.write("Displayed areas : %d\n" % numDisplayed)
-    file.write("Profiled time   : %s\n" % str(gTotalProfiledTime))
-    file.write("Displayed time  : %s\n" % str(totalDisplayedTime))
+    file.write("Profiled Time   : %s\n" % str(gTotalProfiledTime))
+    file.write("Displayed Time  : %s\n" % str(totalDisplayedTime))
+    file.write("Total Areas     : %s\n" % len(profiles))
+    file.write("Displayed Areas : %d\n" % numDisplayed)
     file.write("\n")
   endif
 enddef
@@ -893,14 +893,14 @@ def showDelta(logfile, outfile, maxTimeDelta, count):
       endif
     endfor
     outfile.write("RESULTS SUMMARY:\n")
-    outfile.write("===========================\n")
+    outfile.write("=============================\n")
     outfile.write("Time Delta (sec) : %f\n" % maxTimeDelta)
     if (maxTimeDeltaDiff > 0.0):
       outfile.write("Max Delta  (sec) : %f\n" % maxTimeDeltaDiff)
       outfile.write("Min Delta  (sec) : %f\n" % minTimeDeltaDiff)
     endif
-    outfile.write("Num Occurances   : %d\n" % numOccurances)
-    outfile.write("Num Displayed    : %d\n" % numDisplayed)
+    outfile.write("Total Areas      : %d\n" % numOccurances)
+    outfile.write("Displayed Areas  : %d\n" % numDisplayed)
     outfile.write("\n")
   endif
 enddef
