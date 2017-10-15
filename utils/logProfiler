@@ -362,48 +362,52 @@ def updateProfile(profiles, prevLine, currLine):
   if ((filename1 != None) and (filename2 != None)):
   
     # both lines are good, now either update an existing area profile, or create a new one
-    profile = findProfile(profiles, filename1, function1, line1, filename2, function2, line2)
     currTime = datetime.datetime.strptime(timestamp2, gTimestampFormat)
     prevTime = datetime.datetime.strptime(timestamp1, gTimestampFormat)
     timeDelta = currTime - prevTime
-    if (profile == None):
-      # create new profile
-      areaWidth1 = len(filename1)+len(function1)+len(line1)
-      areaWidth2 = len(filename2)+len(function2)+len(line2)
-      profiles.append({"file1":filename1,
-                       "function1":function1,
-                       "line1":line1,
-                       "areaWidth1":areaWidth1,
-                       "file2":filename2,
-                       "function2":function2,
-                       "line2":line2,
-                       "areaWidth2":areaWidth2,
-                       "count":0,
-                       "tot":datetime.timedelta(0),
-                       "min":datetime.timedelta.max,
-                       "max":datetime.timedelta.min,
-                       "avg":datetime.timedelta(0),
-                       "med":datetime.timedelta(0),
-                       "stdDev":datetime.timedelta(0),
-                       "delta":[]})
-      profile = profiles[-1]
-      if (areaWidth1 > gMaxAreaWidth1):
-        gMaxAreaWidth1 = areaWidth1
+    # filter out any negative timeDelta, this could happen if the system time
+    # has changed during the creation of a logfile
+    if (timeDelta >= datetime.timedelta(0)):
+      profile = findProfile(profiles, filename1, function1, line1, filename2, function2, line2)
+      if (profile == None):
+        # create new profile
+        areaWidth1 = len(filename1)+len(function1)+len(line1)
+        areaWidth2 = len(filename2)+len(function2)+len(line2)
+        profiles.append({"file1":filename1,
+                         "function1":function1,
+                         "line1":line1,
+                         "areaWidth1":areaWidth1,
+                         "file2":filename2,
+                         "function2":function2,
+                         "line2":line2,
+                         "areaWidth2":areaWidth2,
+                         "count":0,
+                         "tot":datetime.timedelta(0),
+                         "min":datetime.timedelta.max,
+                         "max":datetime.timedelta.min,
+                         "avg":datetime.timedelta(0),
+                         "med":datetime.timedelta(0),
+                         "stdDev":datetime.timedelta(0),
+                         "delta":[]})
+        profile = profiles[-1]
+        if (areaWidth1 > gMaxAreaWidth1):
+          gMaxAreaWidth1 = areaWidth1
+        endif
+        if (areaWidth2 > gMaxAreaWidth2):
+          gMaxAreaWidth2 = areaWidth2
+        endif
       endif
-      if (areaWidth2 > gMaxAreaWidth2):
-        gMaxAreaWidth2 = areaWidth2
+      profile["count"] += 1
+      profile["tot"] += timeDelta
+      gTotalProfiledTime += timeDelta
+      profile["avg"] = profile["tot"]/profile["count"]
+      profile["delta"].append(timeDelta)
+      if (timeDelta > profile["max"]):
+        profile["max"] = timeDelta
       endif
-    endif
-    profile["count"] += 1
-    profile["tot"] += timeDelta
-    gTotalProfiledTime += timeDelta
-    profile["avg"] = profile["tot"]/profile["count"]
-    profile["delta"].append(timeDelta)
-    if (timeDelta > profile["max"]):
-      profile["max"] = timeDelta
-    endif
-    if (timeDelta < profile["min"]):
-      profile["min"] = timeDelta
+      if (timeDelta < profile["min"]):
+        profile["min"] = timeDelta
+      endif
     endif
   endif
   
