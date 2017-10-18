@@ -960,9 +960,22 @@ enddef
 # show all areas whose time delta is >= specified time
 #
 #######################################################
-def showDelta(logfile, outfile, maxTimeDelta, count):
+def createDelta(logfile, maxTimeDelta):
+  global gKeepAliveType
+  global gTotalLines
   if (os.path.isfile(logfile)):
-    logfile = open(logfile, 'r')
+    file = open(logfile, 'r')
+    print 
+    sys.stdout.write("Creating profile from file: %s, please wait...processing line: " % logfile)
+    if (gKeepAliveType == "lines"):
+      # if we are showing the lines processed keep alive, make an initial
+      # pass of the file so we can sount the total number of lines
+      gTotalLines = 0
+      for line in file:
+        gTotalLines += 1
+      endfor
+      file.seek(0)
+    endif
     numLines = 0
     currLine = NULL
     currTimestampStr = NULL
@@ -970,14 +983,9 @@ def showDelta(logfile, outfile, maxTimeDelta, count):
     numCounts = 0
     maxTimeDeltaDiff = 0.0
     minTimeDeltaDiff = sys.float_info.max
-    if (outfile == "none"):
-      outfile = sys.stdout
-    else:
-      outfile = open(outfile, "w+")
-    endif
-    outfile.write("\n")
     numDisplayed = 0
-    for line in logfile:
+    for line in file:
+      printKeepAlive(numLines, gKeepAliveType)
       numLines += 1
       timestamp = findTimestamp(line)
       if (timestamp != NULL):
@@ -999,29 +1007,72 @@ def showDelta(logfile, outfile, maxTimeDelta, count):
             if (timestampDiff < minTimeDeltaDiff):
               minTimeDeltaDiff = timestampDiff
             endif
-            if ((count == gDisplayAll) or (numDisplayed < int(count))):
-              outfile.write("Time Delta (sec): %f\n" % timestampDiff)
-              outfile.write("===============================\n")
-              outfile.write("%s%d:%s %s\n" % (gHighlight, prevLineNum, gNormal, prevLine[:-1]))
-              outfile.write("%s%d:%s %s\n" % (gHighlight, currLineNum, gNormal, currLine[:-1]))
-              outfile.write("\n")
-              numDisplayed += 1
-            endif
+            gProfiles1.append({"lineNum1":prevLineNum,
+                               "line1":prevLine.strip(),
+                               "lineNum2":currLineNum,
+                               "line2":currLine.strip(),
+                               "delta":timestampDiff})
+
           endif
         endif
       endif
     endfor
-    outfile.write("RESULTS SUMMARY:\n")
-    outfile.write("=============================\n")
-    outfile.write("Time Delta (sec) : %f\n" % maxTimeDelta)
-    if (maxTimeDeltaDiff > 0.0):
-      outfile.write("Max Delta  (sec) : %f\n" % maxTimeDeltaDiff)
-      outfile.write("Min Delta  (sec) : %f\n" % minTimeDeltaDiff)
-    endif
-    outfile.write("Total Areas      : %d\n" % numCounts)
-    outfile.write("Displayed Areas  : %d\n" % numDisplayed)
-    outfile.write("\n")
+    print
+    return (True)
+  else:
+    print "ERROR: logfile: %s not found..." % logfile
+    return (False)
   endif
+enddef
+
+#######################################################
+#
+# show all areas whose time delta is >= specified time
+#
+#######################################################
+def showDelta(outfile, option, count, maxTimeDelta):
+  global gProfiles1
+  # see if we need to sort our profile
+  if (option == "-max"):
+    gProfiles1.sort(key=operator.itemgetter('delta'), reverse=True)
+  elif (option == "-min"):
+    gProfiles1.sort(key=operator.itemgetter('delta'), reverse=False)
+  endif
+  maxTimeDeltaDiff = 0.0
+  minTimeDeltaDiff = sys.float_info.max
+  if (outfile == "none"):
+    outfile = sys.stdout
+  else:
+    outfile = open(outfile, "w+")
+  endif
+  numDisplayed = 0
+  for profile in gProfiles1:
+    if ((count == gDisplayAll) or (numDisplayed < int(count))):
+      outfile.write("\n")
+      outfile.write("Time Delta (sec): %f\n" % profile["delta"])
+      outfile.write("===============================\n")
+      outfile.write("%s%d:%s %s\n" % (gHighlight, profile["lineNum1"], gNormal, profile["line1"]))
+      outfile.write("%s%d:%s %s\n" % (gHighlight, profile["lineNum2"], gNormal, profile["line2"]))
+      numDisplayed += 1
+      if (profile["delta"] > maxTimeDeltaDiff):
+        maxTimeDeltaDiff = profile["delta"]
+      endif
+      if (profile["delta"] < minTimeDeltaDiff):
+        minTimeDeltaDiff = profile["delta"]
+      endif
+    endif
+  endfor
+  outfile.write("\n")
+  outfile.write("RESULTS SUMMARY:\n")
+  outfile.write("=============================\n")
+  outfile.write("Time Delta (sec) : %f\n" % maxTimeDelta)
+  if (maxTimeDeltaDiff > 0.0):
+    outfile.write("Max Delta  (sec) : %f\n" % maxTimeDeltaDiff)
+    outfile.write("Min Delta  (sec) : %f\n" % minTimeDeltaDiff)
+  endif
+  outfile.write("Total Areas      : %d\n" % len(gProfiles1))
+  outfile.write("Displayed Areas  : %d\n" % numDisplayed)
+  outfile.write("\n")
 enddef
 
 #####################################################
@@ -1096,7 +1147,7 @@ else:
         endif
       endif
     endfor
-    if (gDiffRequested == True):
+    if (gDiffRequested):
       # diff two profiles
       logfile1 = sys.argv[firstFileArg]
       logfile2 = sys.argv[firstFileArg+1]
@@ -1104,8 +1155,10 @@ else:
         diffProfiles(gProfiles1, gProfiles2)
         showProfile("Diff: %s->%s" % (logfile1, logfile2), outfile, option, count, fileFilter, functionFilter, gProfilesDiff)
       endif
-    elif (deltaRequested == True):
-      showDelta(sys.argv[firstFileArg], outfile, float(maxTimeDelta), count)
+    elif (deltaRequested):
+      if (createDelta(sys.argv[firstFileArg], float(maxTimeDelta))):
+        showDelta(outfile, option, count, float(maxTimeDelta))
+      endif
     else:
       # normal profile(s)
       for arg in sys.argv[firstFileArg:]:
