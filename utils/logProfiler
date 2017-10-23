@@ -159,7 +159,7 @@ gProfilesDiff = []
 def showUsage():
   print
   print "Usage: logProfiler [-tot | -min | -max | -avg | -med | -std | -count]"
-  print "                   [num=<count>] [app=<id>] [file=<name>] [func=<name>] [out=<outfile>] [diff=<type>] [delta=<time>] "
+  print "                   [num=<count>] [app=<id>] [file=<name>] [func=<name>] [out=<outfile>] [diff=<type>] [delta=<time>]"
   print "                   <logfile1> [<logfile2>...<logfileN>]"
   print
   print "  This program will provide the ability to perform code performance analysis"
@@ -321,11 +321,11 @@ def findProfile(profiles, filename1, function1, line1, filename2, function2, lin
   return (None)
 enddef
 
-#####################################################
+######################################################################
 #
-# find the timestamp from the input line
+# return the file, function, line, and timestamp from the input line
 #
-#####################################################
+######################################################################
 def parseLine(line):
   global gAppFilter
   global gNoFilter
@@ -338,10 +338,10 @@ def parseLine(line):
   # app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
   # 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
   # 2014-08-17 23:11:00.114 level [app:file:line] user-message
-  # 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: Thread ID: <id>: user-message
+  # 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
   #
 
-  # parse format: 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: Thread ID: <id>: user-message
+  # parse format: 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
   expectedNumTokens = 8
   timestampTokenPos = 2
   appTokenPos = 5
@@ -1057,10 +1057,10 @@ def showDelta(logfile, outfile, option, count, maxTimeDelta):
   endif
   numDisplayed = 0
   outfile.write("\n")
-  outfile.write("LOGFILE TIME DELTA PROFILE\n")
-  outfile.write("==========================\n")
-  outfile.write("Logfile    : %s\n" % (logfile))
-  outfile.write("Time Delta : %f\n" % (maxTimeDelta))
+  outfile.write("LOGFILE TIME DELTA PROFILE:\n")
+  outfile.write("================================\n")
+  outfile.write("Logfile          : %s\n" % (logfile))
+  outfile.write("Time Delta (Sec) : %f\n" % (maxTimeDelta))
   for profile in gProfiles1:
     if ((count == gDisplayAll) or (numDisplayed < int(count))):
       outfile.write("\n")
