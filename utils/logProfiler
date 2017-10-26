@@ -354,7 +354,7 @@ def parseLine(line):
     location = tokens[locationTokenPos].strip().split("@")
     if ((timestamp != NULL) and (len(location) == 2) and ((gAppFilter == gNoFilter) or (app == gAppFilter))):
       filename = location[0]
-      line = location[1]
+      line = location[1][:-1]
       function = tokens[functionTokenPos].strip().split(":")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
     endif
@@ -373,7 +373,7 @@ def parseLine(line):
     location = tokens[locationTokenPos].strip().split("@")
     if ((timestamp != NULL) and (len(location) == 2) and ((gAppFilter == gNoFilter) or (app == gAppFilter))):
       filename = location[0]
-      line = location[1]
+      line = location[1][:-1]
       function = tokens[functionTokenPos].strip().split(":")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
     endif
