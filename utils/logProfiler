@@ -327,8 +327,6 @@ enddef
 #
 ######################################################################
 def parseLine(line):
-  global gAppFilter
-  global gNoFilter
   
   # change this line parsing function for different log line formats,
   # we need to extract the file, function, line, and timestamp, an
@@ -344,15 +342,13 @@ def parseLine(line):
   # parse format: 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
   expectedNumTokens = 8
   timestampTokenPos = 2
-  appTokenPos = 5
   functionTokenPos = 6
   locationTokenPos = 7
   tokens = line.split()
   if (len(tokens) >= expectedNumTokens):
-    app = tokens[appTokenPos].strip().split(":")[0]
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
     location = tokens[locationTokenPos].strip().split("@")
-    if ((timestamp != NULL) and (len(location) == 2) and ((gAppFilter == gNoFilter) or (app == gAppFilter))):
+    if ((timestamp != NULL) and (len(location) == 2)):
       filename = location[0]
       line = location[1][:-1]
       function = tokens[functionTokenPos].strip().split(":")[0]
@@ -363,15 +359,13 @@ def parseLine(line):
   # parse format: 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
   expectedNumTokens = 6
   timestampTokenPos = 0
-  appTokenPos = 3
   functionTokenPos = 4
   locationTokenPos = 5
   tokens = line.split()
   if (len(tokens) >= expectedNumTokens):
-    app = tokens[appTokenPos].strip().split(":")[0]
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
     location = tokens[locationTokenPos].strip().split("@")
-    if ((timestamp != NULL) and (len(location) == 2) and ((gAppFilter == gNoFilter) or (app == gAppFilter))):
+    if ((timestamp != NULL) and (len(location) == 2)):
       filename = location[0]
       line = location[1][:-1]
       function = tokens[functionTokenPos].strip().split(":")[0]
@@ -381,16 +375,14 @@ def parseLine(line):
 
   # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
   expectedNumTokens = 6
-  appTokenPos = 0
   timestampTokenPos = 1
   filenameTokenPos = 2
   lineTokenPos = 3
   functionTokenPos = 4
   tokens = line.split("|")
   if (len(tokens) >= expectedNumTokens):
-    app = tokens[appTokenPos].strip()
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
-    if ((timestamp != NULL) and ((gAppFilter == gNoFilter) or (app == gAppFilter))):
+    if (timestamp != NULL):
       filename = os.path.basename(tokens[filenameTokenPos].strip())
       line = tokens[lineTokenPos].strip()
       function = tokens[functionTokenPos].strip()
@@ -400,16 +392,14 @@ def parseLine(line):
   
   # parse format: app | level | 14:40:32.377256 | file(function):line | user-message
   expectedNumTokens = 5
-  appTokenPos = 0
   timestampTokenPos = 2
   filenameTokenPos = 3
   lineTokenPos = filenameTokenPos
   functionTokenPos = filenameTokenPos
   tokens = line.split("|")
   if (len(tokens) >= expectedNumTokens):
-    app = tokens[appTokenPos].strip()
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
-    if ((timestamp != NULL) and ((gAppFilter == gNoFilter) or (app == gAppFilter))):
+    if (timestamp != NULL):
       filename = tokens[filenameTokenPos].strip().split("(")[0]
       line = tokens[lineTokenPos].strip().split(":")[-1]
       function = tokens[functionTokenPos].strip().split("(")[-1]
@@ -427,18 +417,102 @@ def parseLine(line):
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
     location = tokens[locationTokenPos].strip().split(":")
     if ((timestamp != NULL) and (len(location) == 3)):
-      app = location[0][1:]
-      if ((gAppFilter == gNoFilter) or (app == gAppFilter)):
-        filename = location[1]
-        line = location[2][:-1]
-        # this format does not have a function, so we just return NULL
-        return (filename, NULL, ":"+line, timestamp)
-      endif
+      filename = location[1]
+      line = location[2][:-1]
+      # this format does not have a function, so we just return NULL
+      return (filename, NULL, ":"+line, timestamp)
     endif
   endif
   
   # dropped through, return nothing
   return (None, None, None, None)
+  
+enddef
+
+######################################################################
+#
+# return true if line matches app filter
+#
+######################################################################
+def findApp(line):
+  global gAppFilter
+  global gNoFilter
+  
+  # change this line parsing function for different log line formats,
+  # we need to extract the file, function, line, and timestamp, an
+  # example of the currently parsed log line formats are:
+  #
+  # app | level | 14:40:32.377256 | file(function):line | user-message
+  # app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
+  # 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
+  # 2014-08-17 23:11:00.114 level [app:file:line] user-message
+  # 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
+  #
+
+  if (gAppFilter != gNoFilter):
+
+    # parse format: 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
+    expectedNumTokens = 8
+    appTokenPos = 5
+    tokens = line.split()
+    if (len(tokens) >= expectedNumTokens):
+      app = tokens[appTokenPos].strip().split(":")[0]
+      if (app == gAppFilter):
+        return (True)
+      endif
+    endif
+  
+    # parse format: 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
+    expectedNumTokens = 6
+    appTokenPos = 3
+    tokens = line.split()
+    if (len(tokens) >= expectedNumTokens):
+      app = tokens[appTokenPos].strip().split(":")[0]
+      if (app == gAppFilter):
+        return (True)
+      endif
+    endif
+
+    # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
+    expectedNumTokens = 6
+    appTokenPos = 0
+    tokens = line.split("|")
+    if (len(tokens) >= expectedNumTokens):
+      app = tokens[appTokenPos].strip()
+      if (app == gAppFilter):
+        return (True)
+      endif
+    endif
+  
+    # parse format: app | level | 14:40:32.377256 | file(function):line | user-message
+    expectedNumTokens = 5
+    appTokenPos = 0
+    tokens = line.split("|")
+    if (len(tokens) >= expectedNumTokens):
+      app = tokens[appTokenPos].strip()
+      if (app == gAppFilter):
+        return (True)
+      endif
+    endif
+  
+    # parse format: 2014-08-17 23:11:00.114 level [app:file:line] user-message
+    expectedNumTokens = 4
+    locationTokenPos = 3
+    tokens = line.split()
+    if (len(tokens) >= expectedNumTokens):
+      location = tokens[locationTokenPos].strip().split(":")
+      app = location[0][1:]
+      if (app == gAppFilter):
+        return (True)
+      endif
+    endif
+  
+    # dropped through, return nothing
+    return (False)
+  
+  else:
+    return (True)
+  endif
   
 enddef
 
@@ -537,16 +611,19 @@ def createProfile(logfile, profiles):
     endif
     numLines = 0
     currLine = None
+    prevLine = None
     currTimestamp = NULL
     for line in file:
       printKeepAlive(numLines, gKeepAliveType)
-      if (currTimestamp != NULL):
-        prevLine = currLine
-      endif
-      currLine = line
-      currTimestamp = findTimestamp(currLine)
-      if ((numLines > 0) and (currTimestamp != NULL)):
-        updateProfile(profiles, prevLine, currLine)
+      if (findApp(line) == True):
+        if (currTimestamp != NULL):
+          prevLine = currLine
+        endif
+        currLine = line
+        currTimestamp = findTimestamp(currLine)
+        if ((numLines > 0) and (currTimestamp != NULL) and (prevLine != None)):
+          updateProfile(profiles, prevLine, currLine)
+        endif
       endif
       numLines += 1
     endfor
@@ -994,32 +1071,34 @@ def createDelta(logfile, maxTimeDelta):
     for line in file:
       printKeepAlive(numLines, gKeepAliveType)
       numLines += 1
-      timestamp = findTimestamp(line)
-      if (timestamp != NULL):
-        prevLineNum = currLineNum
-        currLineNum = numLines
-        prevLine = currLine
-        currLine = line
-        prevTimestampStr = currTimestampStr
-        currTimestampStr = timestamp
-        if (prevTimestampStr != NULL):
-          currTimestamp = datetime.datetime.strptime(currTimestampStr, gTimestampFormat)
-          prevTimestamp = datetime.datetime.strptime(prevTimestampStr, gTimestampFormat)
-          timestampDiff = timeDeltaToSec(currTimestamp - prevTimestamp)
-          if (timestampDiff >= maxTimeDelta):
-            numCounts += 1
-            if (timestampDiff > gMaxTimeDeltaDiff):
-              gMaxTimeDeltaDiff = timestampDiff
-            endif
-            if (timestampDiff < gMinTimeDeltaDiff):
-              gMinTimeDeltaDiff = timestampDiff
-            endif
-            gProfiles1.append({"lineNum1":prevLineNum,
-                               "line1":prevLine.strip(),
-                               "lineNum2":currLineNum,
-                               "line2":currLine.strip(),
-                               "delta":timestampDiff})
+      if (findApp(line) == True):
+        timestamp = findTimestamp(line)
+        if (timestamp != NULL):
+          prevLineNum = currLineNum
+          currLineNum = numLines
+          prevLine = currLine
+          currLine = line
+          prevTimestampStr = currTimestampStr
+          currTimestampStr = timestamp
+          if (prevTimestampStr != NULL):
+            currTimestamp = datetime.datetime.strptime(currTimestampStr, gTimestampFormat)
+            prevTimestamp = datetime.datetime.strptime(prevTimestampStr, gTimestampFormat)
+            timestampDiff = timeDeltaToSec(currTimestamp - prevTimestamp)
+            if (timestampDiff >= maxTimeDelta):
+              numCounts += 1
+              if (timestampDiff > gMaxTimeDeltaDiff):
+                gMaxTimeDeltaDiff = timestampDiff
+              endif
+              if (timestampDiff < gMinTimeDeltaDiff):
+                gMinTimeDeltaDiff = timestampDiff
+              endif
+              gProfiles1.append({"lineNum1":prevLineNum,
+                                 "line1":prevLine.strip(),
+                                 "lineNum2":currLineNum,
+                                 "line2":currLine.strip(),
+                                 "delta":timestampDiff})
 
+            endif
           endif
         endif
       endif
@@ -1038,6 +1117,8 @@ enddef
 #
 #######################################################
 def showDelta(logfile, outfile, option, count, maxTimeDelta):
+  global gAppFilter
+  global gNoFilter
   global gProfiles1
   global gMaxTimeDeltaDiff
   global gMinTimeDeltaDiff
@@ -1077,6 +1158,9 @@ def showDelta(logfile, outfile, option, count, maxTimeDelta):
       endif
     endif
   endfor
+  if (gAppFilter != gNoFilter):
+    logfile = logfile + "(" + gAppFilter + ")"
+  endif
   outfile.write("\n")
   outfile.write("\n")
   outfile.write("RESULTS SUMMARY:\n")
