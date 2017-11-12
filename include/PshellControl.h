@@ -170,7 +170,7 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
 /*
  * pshell_extractCommands:
  *
- * this function will extract all the commands or a remote pshell
+ * this function will extract all the commands of a remote pshell
  * server and present them in a human readable form, this is useful
  * when writing a multi server control aggregator, see the demo program
  * pshellAggregatorDemo in the demo directory for examples

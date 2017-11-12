@@ -63,16 +63,32 @@ then
   else
     # local install, create .pshellrc env file
     echo "Setting softlink libpshell-server to libpshell-server-full"
-    if [ -e "lib/libpshell-server.so" ]
-    then
-      rm -f lib/libpshell-server.so
-    fi
-    ln -s $localDir/lib/libpshell-server-full.so lib/libpshell-server.so
-    if [ -e "lib/libpshell-server.a" ]
-    then
-      rm -f lib/libpshell-server.a
-    fi
-    ln -s $localDir/lib/libpshell-server-full.a lib/libpshell-server.a
+    cd $localDir/lib
+    rm -f libpshell-server.so
+    ln -s libpshell-server-full.so libpshell-server.so
+    rm -f libpshell-server.a
+    ln -s libpshell-server-full.a libpshell-server.a
+    
+    echo "Setting up Busybox-like demo softlinks"
+    cd $localDir/bin
+    rm -f advancedParsing
+    ln -s pshellNoServerDemo advancedParsing
+    rm -f batch
+    ln -s pshellNoServerDemo batch
+    rm -f enhancedUsage
+    ln -s pshellNoServerDemo enhancedUsage
+    rm -f formatChecking
+    ln -s pshellNoServerDemo formatChecking
+    rm -f getOptions
+    ln -s pshellNoServerDemo getOptions
+    rm -f hello
+    ln -s pshellNoServerDemo hello
+    rm -f wildcardMatch
+    ln -s pshellNoServerDemo wildcardMatch
+    rm -f world
+    ln -s pshellNoServerDemo world
+    
+    cd ..
     rm -f .pshellrc
     echo "#" >> .pshellrc
     echo "# Local PSHELL install env file" >> .pshellrc
@@ -154,24 +170,15 @@ else
   echo "Copying libpshell-control.a to $libDir/pshell"
   cp -f lib/libpshell-control.a $libDir/pshell/.
   
-  echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"
-  if [ -e "$libDir/libpshell-server.so" ]
-  then
-    rm -f $libDir/libpshell-server.so
-  fi
+  echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"  
+  rm -f $libDir/libpshell-server.so
   ln -s $libDir/pshell/libpshell-server-full.so $libDir/libpshell-server.so
   
-  if [ -e "$libDir/libpshell-server.a" ]
-  then
-    rm -f $libDir/libpshell-server.a
-  fi
+  rm -f $libDir/libpshell-server.a
   ln -s $libDir/pshell/libpshell-server-full.a $libDir/libpshell-server.a
 
   echo "Setting softlink $libDir/libpshell-control to $libDir/pshell/libpshell-control"
-  if [ -e "$libDir/libpshell-control.so" ]
-  then
-    rm -f $libDir/libpshell-control.so
-  fi
+  rm -f $libDir/libpshell-control.so
   ln -s $libDir/pshell/libpshell-control.so $libDir/libpshell-control.so
   
   echo "Installing bins..."
