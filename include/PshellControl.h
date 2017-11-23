@@ -45,7 +45,7 @@ extern "C" {
  * that is running a pshell, this is analagous to a remote procedure call (rpc).
  *
  * A complete example of the usage of the API can be found in the included 
- * demo program file pshellControlDemo.cc
+ * demo programs pshellControlDemo.cc and pshellAggregatorDemo.cc
  *
  *******************************************************************************/
 

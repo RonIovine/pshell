@@ -373,7 +373,7 @@ void pshell_sendMulticast(const char *command_, ...)
 int pshell_sendCommand1(int sid_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
-  int retCode= PSHELL_SOCKET_NOT_CONNECTED;
+  int retCode = PSHELL_SOCKET_NOT_CONNECTED;
   int bytesFormatted = 0;
   char command[MAX_STRING_SIZE];
   PshellControl *control;
@@ -402,7 +402,7 @@ int pshell_sendCommand1(int sid_, const char *command_, ...)
 int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
-  int retCode= PSHELL_SOCKET_NOT_CONNECTED;
+  int retCode = PSHELL_SOCKET_NOT_CONNECTED;
   int bytesFormatted = 0;
   char command[MAX_STRING_SIZE];
   PshellControl *control;
