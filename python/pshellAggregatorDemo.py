@@ -41,6 +41,7 @@ NULL = ""
 
 # PshellControl aggregator list
 gControlList = []
+gMaxLength = 0
 
 #################################################################################
 #
@@ -51,12 +52,16 @@ gControlList = []
 #################################################################################
 def addControl(controlName_, description_, remoteServer_, port_, defaultTimeout_):
   global gControlList
+  global gMaxLength
   for control in gControlList:
     if (control["name"] == controlName_):
       # control name already exists, don't add it again
       return
     endif
   endfor
+  if (len(controlName_) > gMaxLength):
+    gMaxLength = len(controlName_)
+  endif
   sid = PshellControl.connectServer(controlName_, remoteServer_, port_, defaultTimeout_)
   gControlList.append({"name":controlName_, "description":description_, "sid":sid})
 enddef
@@ -70,6 +75,7 @@ enddef
 #################################################################################
 def processCommand(command_):
   global gControlList
+  global gMaxLength
   splitCommand = command_.lower().split()
   command = ' '.join(command_.split()[1:])
   if ((splitCommand[0] == "?") or (splitCommand[0] == "help")):
@@ -81,7 +87,7 @@ def processCommand(command_):
     print "quit              -  exit interactive mode"
     print "help              -  show all available commands"
     for control in gControlList:
-      print "%s  -  %s" % (control["name"], control["description"])
+      print "%-*s  -  %s" % (gMaxLength, control["name"], control["description"])
     endif
     print
   else:
