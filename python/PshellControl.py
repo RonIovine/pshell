@@ -304,10 +304,10 @@ def __connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                            "remoteServer":controlName_+"["+remoteServer_+"]",
                            "pshellMsg":OrderedDict([("msgType",0),
                                                     ("respNeeded",True),
-			                                              ("dataNeeded",True),
-			                                              ("pad",0),
-			                                              ("seqNum",0),
-			                                              ("payload",NULL)])})
+                                                    ("dataNeeded",True),
+                                                    ("pad",0),
+                                                    ("seqNum",0),
+                                                    ("payload",NULL)])})
     
     
   else:
@@ -323,10 +323,10 @@ def __connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                            "remoteServer":controlName_+"["+remoteServer_+"]",
                            "pshellMsg":OrderedDict([("msgType",0),
                                                     ("respNeeded",True),
-			                                              ("dataNeeded",True),
-			                                              ("pad",0),
-			                                              ("seqNum",0),
-			                                              ("payload",NULL)])})
+                                                    ("dataNeeded",True),
+                                                    ("pad",0),
+                                                    ("seqNum",0),
+                                                    ("payload",NULL)])})
   endif
   return (len(gPshellControl)-1)
 enddef
