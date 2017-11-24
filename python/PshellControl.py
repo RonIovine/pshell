@@ -374,7 +374,8 @@ def __extractCommands(sid_):
       results += (len(control["remoteServer"])+22)*"*"
       results += "\n"
       results += "\n"
-      results += control["pshellMsg"]["payload"]
+      # for some reason there is an extra newline in this payload, remove it
+      results += control["pshellMsg"]["payload"][:-2]
     endif
   endif
   return (results)
