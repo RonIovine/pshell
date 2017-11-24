@@ -149,7 +149,7 @@ enddef
 # use this function to cleanup any resources for all connected servers, this 
 # function should be called upon program termination, either in a graceful 
 # termination or within an exception signal handler, it is especially important 
-# that ths be called when a unix server is used since there are associated file 
+# that this be called when a unix server is used since there are associated file 
 # handles that need to be cleaned up
 #
 #################################################################################
@@ -280,7 +280,6 @@ enddef
 def __connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   global gPshellControl
   global gUnixSocketPath
-  global gPshellMsgHeaderLength
   global gPshellMsgPayloadLength
   (remoteServer_, port_, defaultTimeout_) = __loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_.lower() == "unix"):
@@ -316,7 +315,7 @@ def __connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
     # bind our source socket so we can get replies
     socketFd.bind((NULL, 0))
     gPshellControl.append({"socket":socketFd,
-                           "timeout":int(defaultTimeout_),
+                           "timeout":defaultTimeout_,
                            "serverType":"udp",
                            "sourceAddress":None,
                            "destAddress":(remoteServer_, int(port_)),
@@ -501,7 +500,6 @@ def __sendCommand(control_, commandType_, command_, timeoutOverride_):
   if (control_ != None):
     control_["pshellMsg"]["msgType"] = commandType_
     control_["pshellMsg"]["respNeeded"] = (timeoutOverride_ > 0)
-    control_["pshellMsg"]["pad"] = 0
     control_["pshellMsg"]["seqNum"] += 1
     seqNum = control_["pshellMsg"]["seqNum"]
     control_["pshellMsg"]["payload"] = command_
@@ -509,7 +507,7 @@ def __sendCommand(control_, commandType_, command_, timeoutOverride_):
                          *control_["pshellMsg"].values())
     sentSize = control_["socket"].sendto(struct.pack(gPshellMsgHeaderFormat+str(len(control_["pshellMsg"]["payload"]))+"s", 
                                          *control_["pshellMsg"].values()), 
-		                                     control_["destAddress"])
+                                         control_["destAddress"])
     if (sentSize == 0):
       retCode = SOCKET_SEND_FAILURE
     elif (timeoutOverride_ > 0):
@@ -517,7 +515,7 @@ def __sendCommand(control_, commandType_, command_, timeoutOverride_):
         inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeoutOverride_)/float(1000.0))
         if (len(inputready) > 0):
           control_["pshellMsg"], addr = control_["socket"].recvfrom(gPshellMsgPayloadLength)
-          control_["pshellMsg"] = PshellMsg._asdict(PshellMsg._make(struct.unpack(gPshellMsgHeaderFormat+str(len(control_["pshellMsg"])-gPshellMsgHeaderLength)+"s", control_["pshellMsg"])))
+          control_["pshellMsg"] = PshellMsg._asdict(PshellMsg._make(struct.unpack(gPshellMsgHeaderFormat+str(len(control_["pshellMsg"])-struct.calcsize(gPshellMsgHeaderFormat))+"s", control_["pshellMsg"])))
           if (seqNum > control_["pshellMsg"]["seqNum"]):
             # make sure we have the correct response, this condition can happen if we had 
             # a very short timeout for the previous call and missed the response, in which 
@@ -575,8 +573,7 @@ enddef
 
 #################################################################################
 #################################################################################
-def __loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
-  
+def __loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):  
   configFile1 = NULL
   configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
@@ -640,11 +637,6 @@ enddef
 # python does not have a native null string identifier, so create one
 NULL = ""
 
-# format of PshellMsg header, 4 bytes and 1 integer, we use this for packing/unpacking
-# the PshellMessage to/from an OrderedDict into a packed binary structure that can
-# be transmitted over-the-wire via a socket
-gPshellMsgHeaderFormat = "4BI"
-
 # list of dictionaries that contains a control structure for each control client
 gPshellControl = []
 
@@ -658,15 +650,17 @@ PSHELL_CONFIG_FILE = "pshell-control.conf"
 
 # these are the valid types we recognize in the msgType field of the pshellMsg structure,
 # that structure is the message passed between the pshell client and server, these values
-# must match their corresponding #define definitions in the C  file PshellCommon.h
+# must match their corresponding #define definitions in the C file PshellCommon.h
 gMsgTypes = {"queryCommands":4, "commandComplete":8, "controlCommand":12}
 
 # fields of PshellMsg, we use this definition to unpack the received PshellMsg response
 # from the server into a corresponding OrderedDict in the PshellControl entry
 PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum payload')
 
-# length in bytes of PshellMsg header
-gPshellMsgHeaderLength = 8
+# format of PshellMsg header, 4 bytes and 1 (4 byte) integer, we use this for packing/unpacking
+# the PshellMessage to/from an OrderedDict into a packed binary structure that can be transmitted 
+# over-the-wire via a socket
+gPshellMsgHeaderFormat = "4BI"
 
 # default PshellMsg payload length, used to receive responses
 gPshellMsgPayloadLength = 4096
