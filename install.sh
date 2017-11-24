@@ -100,9 +100,10 @@ then
     echo export PSHELL_BATCH_DIR=\$PSHELL_INSTALL/batch >> .pshellrc
     echo export PSHELL_STARTUP_DIR=\$PSHELL_INSTALL/startup >> .pshellrc
     echo export PSHELL_CONFIG_DIR=\$PSHELL_INSTALL/config >> .pshellrc
-    echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PATH >> .pshellrc
+    echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PSHELL_INSTALL/python:\$PATH >> .pshellrc
     echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> .pshellrc
     echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/lib:\$LD_LIBRARY_PATH >> .pshellrc
+    echo export PYTHONPATH=\$PSHELL_INSTALL/python:\$PYTHONPATH >> .pshellrc
     echo "Local install environment setup in '.pshellrc'"
     echo "To source enviromnent in current shell run 'source .pshellrc' at the command line"
     if [ $# -eq 2 ]

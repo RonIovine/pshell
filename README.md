@@ -12,7 +12,8 @@ There is also a control mechanism API provided by where any external program can
 make calls into another program that is running a PSHELL server (only supported for 
 UDP or UNIX pshell servers).  This will provide a direct programmatic control access
 mechanism to a remote process' pshell functions without having to fork the calling 
-process to call the pshell command line client program via the 'system' call.
+process to call the pshell command line client program via the 'system' call.  The 
+control API has a C/C++ implementation as well as a Python implementation.
 
 The prototype for the embedded command line shell functions are similar to the 
 'main' in 'C' as follows:
@@ -57,12 +58,12 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, six demo programs are also provided, one to
-show the usage of the pshell server API, one to show the usage of pshell control API, one
-to show the aggergation of multiple pshell servers into a single pshell server via the control
-API, one to show the usage of the trace filter/trace log API, one to show the usage of a 
-stand-alone  (no filtering) trace log application, and one to show the usage of the multi-call 
-binary API.
+In addition to the infrastructure components, eight demo programs are also provided, one to
+show the usage of the pshell server API, two (C and Python) to show the usage of pshell control 
+API, two (C and Python) to show the aggergation of multiple pshell servers into a single pshell 
+server via the control API, one to show the usage of the trace filter/trace log API, one to show 
+the usage of a stand-alone (no filtering) trace log application, and one to show the usage of 
+the multi-call binary API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 
