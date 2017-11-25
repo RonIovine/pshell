@@ -84,8 +84,8 @@ def processCommand(command_):
     print "*             COMMAND LIST             *"
     print "****************************************"
     print
-    print "quit              -  exit interactive mode"
-    print "help              -  show all available commands"
+    print "%-*s  -  exit interactive mode" % (gMaxLength, "quit")
+    print "%-*s  -  show all available commands" % (gMaxLength, "help")
     for control in gControlList:
       print "%-*s  -  %s" % (gMaxLength, control["name"], control["description"])
     endif
