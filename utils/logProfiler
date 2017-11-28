@@ -44,7 +44,8 @@
 # 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
 # 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
 #
-# Modify the function 'parseLine' to add additional log entry formats
+# Modify the functions 'parseLine' and 'findApp' to add additional log 
+# entry formats
 #
 ################################################################################
 
@@ -206,7 +207,7 @@ def showUsage():
   print "    2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message"
   print "    2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message"
   print
-  print "    Modify the function 'parseLine' to add additional log entry formats"
+  print "    Modify the functions 'parseLine' and 'findApp' to add additional log entry formats"
   print
   sys.exit()
 enddef

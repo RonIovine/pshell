@@ -327,6 +327,7 @@ def __connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                                                     ("seqNum",0),
                                                     ("payload",NULL)])})
   endif
+  # return the newly appended list entry as the SID
   return (len(gPshellControl)-1)
 enddef
 

@@ -64,7 +64,7 @@ enddef
 #
 ##############################
 
-if ((len(sys.argv) < 3) or ((len(sys.argv)) > 6)):
+if ((len(sys.argv) < 3) or ((len(sys.argv)) > 5)):
   showUsage()
 endif
 
@@ -89,7 +89,9 @@ sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2],
 while (command.lower() != "q"):
   command = raw_input("pshellControlCmd> ")
   if ((len(command) > 0) and (command.lower() != "q")):
-    if (extract):
+    if ((command.split()[0] == "?") or (command.split()[0] == "help")):
+      print PshellControl.extractCommands(sid)
+    elif (extract):
       results = PshellControl.sendCommand3(sid, command)
       print
       print "%d bytes extracted, results:" % len(results)
