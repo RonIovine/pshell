@@ -94,10 +94,10 @@ def processCommand(command_):
     for control in gControlList:
       if (splitCommand[0] in control["name"]):
         if (((len(splitCommand) == 1) or (len(splitCommand) == 2) and ((splitCommand[1] == "?") or (splitCommand[1] == "help")))):
-          print PshellControl.extractCommands(control["sid"])
+          sys.stdout.write(PshellControl.extractCommands(control["sid"]))
           return
         elif (len(splitCommand) >= 2):
-          print PshellControl.sendCommand3(control["sid"], command)
+          sys.stdout.write(PshellControl.sendCommand3(control["sid"], command))
           return
         endif
       endif

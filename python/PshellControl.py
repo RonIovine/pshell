@@ -30,6 +30,7 @@
 
 # import all our necessary modules
 import os
+import sys
 import time
 import select
 import socket
@@ -375,8 +376,7 @@ def __extractCommands(sid_):
       results += (len(control["remoteServer"])+22)*"*"
       results += "\n"
       results += "\n"
-      # for some reason there is an extra newline in this payload, remove it
-      results += control["pshellMsg"]["payload"][:-2]
+      results += control["pshellMsg"]["payload"]
     endif
   endif
   return (results)
@@ -419,14 +419,14 @@ enddef
 #################################################################################
 def __sendMulticast(command_):
   global gPshellMulticast
+  global NO_WAIT
   for multicast in gPshellMulticast:
     if (command_.split()[0] == multicast["keyword"]):
       for sid in multicast["sidList"]:
         control = __getControl(sid)
         if (control != None):
-          control["respNeeded"] = False
           control["dataNeeded"] = False
-          __sendCommand(control, gMsgTypes["controlCommand"], command_, 0)
+          __sendCommand(control, gMsgTypes["controlCommand"], command_, NO_WAIT)
         endif
       endfor
     endif
@@ -462,10 +462,11 @@ enddef
 #################################################################################
 #################################################################################
 def __sendCommand3(sid_, command_):
+  global NO_WAIT
   results = NULL
   control = __getControl(sid_)
   if (control != None):
-    control["pshellMsg"]["dataNeeded"] = (control["timeout"] > 0)
+    control["pshellMsg"]["dataNeeded"] = (control["timeout"] > NO_WAIT)
     retCode = __sendCommand(control, gMsgTypes["controlCommand"], command_, control["timeout"])
     if (not control["pshellMsg"]["dataNeeded"]):
       print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
@@ -479,10 +480,11 @@ enddef
 #################################################################################
 #################################################################################
 def __sendCommand4(sid_, timeoutOverride_, command_):
+  global NO_WAIT
   results = NULL
   control = __getControl(sid_)
   if (control != None):
-    control["pshellMsg"]["dataNeeded"] = (timeoutOverride_ > 0)
+    control["pshellMsg"]["dataNeeded"] = (timeoutOverride_ > NO_WAIT)
     retCode = __sendCommand(control, gMsgTypes["controlCommand"], command_, timeoutOverride_)
     if (not control["pshellMsg"]["dataNeeded"]):
       print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
@@ -495,26 +497,25 @@ enddef
 
 #################################################################################
 #################################################################################
-def __sendCommand(control_, commandType_, command_, timeoutOverride_):
+def __sendCommand(control_, commandType_, command_, timeout_):
   global gMsgTypes
   global gPshellControlResults
+  global NO_WAIT
   retCode = COMMAND_SUCCESS
   if (control_ != None):
     control_["pshellMsg"]["msgType"] = commandType_
-    control_["pshellMsg"]["respNeeded"] = (timeoutOverride_ > 0)
+    control_["pshellMsg"]["respNeeded"] = (timeout_ > NO_WAIT)
     control_["pshellMsg"]["seqNum"] += 1
     seqNum = control_["pshellMsg"]["seqNum"]
     control_["pshellMsg"]["payload"] = command_
-    packed = struct.pack(gPshellMsgHeaderFormat+str(len(control_["pshellMsg"]["payload"]))+"s", 
-                         *control_["pshellMsg"].values())
     sentSize = control_["socket"].sendto(struct.pack(gPshellMsgHeaderFormat+str(len(control_["pshellMsg"]["payload"]))+"s", 
                                          *control_["pshellMsg"].values()), 
                                          control_["destAddress"])
     if (sentSize == 0):
       retCode = SOCKET_SEND_FAILURE
-    elif (timeoutOverride_ > 0):
+    elif (timeout_ > NO_WAIT):
       while (True):
-        inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeoutOverride_)/float(1000.0))
+        inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
         if (len(inputready) > 0):
           control_["pshellMsg"], addr = control_["socket"].recvfrom(gPshellMsgPayloadLength)
           control_["pshellMsg"] = PshellMsg._asdict(PshellMsg._make(struct.unpack(gPshellMsgHeaderFormat+str(len(control_["pshellMsg"])-struct.calcsize(gPshellMsgHeaderFormat))+"s", control_["pshellMsg"])))

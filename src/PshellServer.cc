@@ -3897,13 +3897,6 @@ static void processCommand(char *command_)
   /* set back to interactive mode */
   _isCommandInteractive = true;
 
-  if ((_pshellMsg->header.msgType == PSHELL_CONTROL_COMMAND) &&
-      (strlen(_pshellMsg->payload) > 0))
-  {
-    /* take out the extra newline for the remote control client */
-    _pshellMsg->payload[strlen(_pshellMsg->payload)-1] = 0;
-  }
-  
   /* see if we need to update the client's payload size */
   if (_pshellPayloadSize > payloadSize)
   {

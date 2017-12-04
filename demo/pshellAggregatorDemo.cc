@@ -122,7 +122,7 @@ void controlServer(int sid, int argc, char *argv[])
     char command[300];
     if (pshell_sendCommand3(sid, results, sizeof(results), buildCommand(command, sizeof(command), argc, argv)) > 0)
     {
-      pshell_printf("%s\n", results);
+      pshell_printf("%s", results);
     }
   }
 }
@@ -169,7 +169,7 @@ void meta(int argc, char *argv[])
 {
   if (pshell_sendCommand3(pshellServerDemoSid, results, sizeof(results), "hello %s %s", argv[0], argv[1]) > 0)
   {
-    pshell_printf("%s\n", results);
+    pshell_printf("%s", results);
   }
   pshell_sendCommand1(traceFilterDemoSid, "set callback %s", argv[2]);
 }
