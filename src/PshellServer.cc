@@ -3715,9 +3715,12 @@ static unsigned findCommand(char *command_)
       pshell_isEqual(command_, "-help") ||
       pshell_isEqual(command_, "--help"))
   {
-    /* the position of the "help" command  */
-    _foundCommand = &_helpCmd;
-    numMatches = 1;
+    if ((_serverType != PSHELL_UDP_SERVER) && (_serverType != PSHELL_UNIX_SERVER))
+    {
+      /* the position of the "help" command  */
+      _foundCommand = &_helpCmd;
+      numMatches = 1;
+    }
   }
   else if ((_serverType == PSHELL_NO_SERVER) && pshell_isEqual(command_, "--setup"))
   {

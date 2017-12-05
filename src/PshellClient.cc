@@ -1047,7 +1047,10 @@ void processInteractiveMode(void)
       tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
       if ((strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) ==
           _nativeInteractiveCommands[HELP_INDEX]) ||
-          (strcmp(_interactiveCommand, "?") == 0))
+          (strcmp(_interactiveCommand, "?") == 0) ||
+          (strcmp(_interactiveCommand, "-h") == 0) ||
+          (strcmp(_interactiveCommand, "-help") == 0) ||
+          (strcmp(_interactiveCommand, "--help") == 0))
       {
         if (numTokens == 1)
         {
@@ -1408,6 +1411,8 @@ int main(int argc, char *argv[])
     {
       if ((strcmp(argv[3], "-h") == 0) ||
           (strcmp(argv[3], "help") == 0) ||
+          (strcmp(argv[3], "-help") == 0) ||
+          (strcmp(argv[3], "--help") == 0) ||
           (strcmp(argv[3], "?") == 0))
         {
           if (init(argv[1], argv[2]))
