@@ -88,16 +88,29 @@ enddef
 
 #################################################################################
 #
+# This function should only be called from a registered callback function
+#
 #################################################################################
 def printf(message_):
-  global gServerType
-  global gPshellMsg
-  if (gServerType == LOCAL_SERVER):
-    sys.stdout.write(message_)
-  else:
-    # remote server
-    gPshellMsg["payload"] += message_
-  endif
+  __printf(message_)
+enddef
+
+#################################################################################
+#
+# This function should only be called from a registered callback function
+#
+#################################################################################
+def showUsage():
+  __showUsage()
+enddef
+
+#################################################################################
+#
+# This function should only be called from a registered callback function
+#
+#################################################################################
+def isHelp():
+  return (__isHelp())
 enddef
 
 #################################################################################
@@ -112,19 +125,24 @@ enddef
 
 #################################################################################
 #################################################################################
-def __addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, showUsage_):
+def __addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, showUsage_, prepend_ = False):
   global gCommandList
   global gMaxLength
   for command in gCommandList:
     if (command["name"] == command_):
       # command name already exists, don't add it again
+      print "PSHELL_ERROR: Command: %s already exists, not adding command" % command_
       return
     endif
   endfor
   if (len(command_) > gMaxLength):
     gMaxLength = len(command_)
   endif
-  gCommandList.append({"function":function_, "name":command_, "description":description_, "usage":usage_, "minArgs":minArgs_, "maxArgs":maxArgs_, "showUsage":showUsage_})
+  if (prepend_ == True):
+    gCommandList.insert(0, {"function":function_, "name":command_, "description":description_, "usage":usage_, "minArgs":minArgs_, "maxArgs":maxArgs_, "showUsage":showUsage_})
+  else:
+    gCommandList.append({"function":function_, "name":command_, "description":description_, "usage":usage_, "minArgs":minArgs_, "maxArgs":maxArgs_, "showUsage":showUsage_})
+  endif
 enddef
 
 #################################################################################
@@ -145,8 +163,8 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
   if (gServerType == LOCAL_SERVER):
     gPrompt = gServerName + "[local]:PSHELL> "
     gTitle = "PSHELL: " + gServerName + "[local], Mode: INTERACTIVE"
-    addCommand(__help, "help", "show all available commands")
-    addCommand(__exit, "exit", "exit interactive mode")
+    __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
+    __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   else:
     gPrompt = "PSHELL> "
     gTitle = "PSHELL"
@@ -204,10 +222,7 @@ enddef
 #################################################################################
 def __runLocalServer():
   global gPrompt
-  global gTitle
-  # put up our window title banner
-  sys.stdout.write("\033]0;" + gTitle + "\007")
-  sys.stdout.flush()
+  __showWelcome()
   command = NULL
   while (command.lower() != "q"):
     command = raw_input(gPrompt)
@@ -270,6 +285,8 @@ def __processCommand(command_):
   global gMsgTypes
   global gPshellMsg
   global gServerType
+  global gArgs
+  global gFoundCommand
   if (gPshellMsg["msgType"] == gMsgTypes["queryVersion"]):
     __processQueryVersion()
   elif (gPshellMsg["msgType"] == gMsgTypes["queryPayloadSize"]):
@@ -288,25 +305,44 @@ def __processCommand(command_):
     __processQueryCommands2()
   else:
     gPshellMsg["payload"] = NULL
-    args = command_.lower().split()[1:]
+    gArgs = command_.lower().split()[1:]
     command_ = command_.lower().split()[0]
-    commandFound = False
-    for command in gCommandList:
-      if (command_ in command["name"]):
-        if ((len(args) == 1) and (args[0] in gCommandHelp) and (command["showUsage"] == True)):
-          printf("Usage: %s %s\n" % (command["name"], command["usage"]))
-        else:
-          command["function"](args)
-          gPshellMsg["msgType"] = gMsgTypes["commandComplete"]
+    numMatches = 0
+    if (command_ == "?"):
+      __help(gArgs)
+      return
+    else:
+      for command in gCommandList:
+        if (command_ in command["name"]):
+          gFoundCommand = command
+          numMatches += 1
         endif
-        commandFound = True
-        break;
+      endfor
+    endif
+    if (numMatches == 0):
+      printf("PSHELL_ERROR: Command: '%s' not found\n" % command_)
+    elif (numMatches > 1):
+      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n" % command_)
+    else:
+      if (not __isValidArgCount()):
+        showUsage()
+      elif (isHelp() and (gFoundCommand["showUsage"] == True)):
+        showUsage()
+      else:
+        gFoundCommand["function"](gArgs)
       endif
-    endfor
-    #printf("PSHELL_ERROR: Command: '%s' not found\n" % command_)
+    endif
   endif
   gPshellMsg["msgType"] = gMsgTypes["commandComplete"]
   __reply()
+enddef
+
+#################################################################################
+#################################################################################
+def __isValidArgCount():
+  global gArgs
+  global gFoundCommand
+  return ((len(gArgs) >= gFoundCommand["minArgs"]) and (len(gArgs) <= gFoundCommand["maxArgs"]))
 enddef
 
 #################################################################################
@@ -391,6 +427,62 @@ enddef
 
 #################################################################################
 #################################################################################
+def __showWelcome():
+  global gServerName
+  global gTitle
+  global gBanner
+  # put up our window title banner
+  sys.stdout.write("\033]0;" + gTitle + "\007")
+  sys.stdout.flush()
+  # show our welcome screen
+  print
+  print "#########################################################"
+  print "#"
+  print "#  %s" % gBanner
+  print "#"
+  print "#  Single session LOCAL server: %s[local]" % gServerName
+  print "#"
+  print "#  Idle session timeout: NONE"
+  print "#"
+  print "#  Type '?' or 'help' at prompt for command summary"
+  print "#  Type '?' or '-h' after command for command usage"
+  print "#"
+  print "#  Command abbreviation supported"
+  print "#"
+  print "#########################################################"
+  print
+enddef
+
+#################################################################################
+#################################################################################
+def __printf(message_):
+  global gServerType
+  global gPshellMsg
+  if (gServerType == LOCAL_SERVER):
+    sys.stdout.write(message_)
+  else:
+    # remote server
+    gPshellMsg["payload"] += message_
+  endif
+enddef
+
+#################################################################################
+#################################################################################
+def __showUsage():
+  global gFoundCommand
+  printf("Usage: %s %s\n" % (gFoundCommand["name"], gFoundCommand["usage"]))
+enddef
+
+#################################################################################
+#################################################################################
+def __isHelp():
+  global gArgs
+  global gCommandHelp
+  return ((len(gArgs) == 1) and (gArgs[0] in gCommandHelp))
+enddef
+
+#################################################################################
+#################################################################################
 def __reply():
   global gFromAddr
   global gSocketFd
@@ -427,6 +519,8 @@ gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 gSocketFd = None 
 gFromAddr = None
 gUnixSocketPath = "/tmp/"
+gArgs = None
+gFoundCommand = None
 
 # these are the valid types we recognize in the msgType field of the pshellMsg structure,
 # that structure is the message passed between the pshell client and server, these values

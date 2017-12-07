@@ -41,11 +41,44 @@ NULL = ""
 
 #################################################################################
 #################################################################################
-def hello(command_):
+def hello(args_):
   PshellServer.printf("hello command dispatched:\n")
-  for index, arg in enumerate(command_):
+  for index, arg in enumerate(args_):
     PshellServer.printf("  argv[%d]: '%s'\n" % (index, arg))
   endfor
+enddef
+
+#################################################################################
+#################################################################################
+def world(args_):
+  PshellServer.printf("world command dispatched:\n")
+enddef
+
+#################################################################################
+#################################################################################
+def enhancedUsage(args_):
+
+  # see if the user asked for help
+  if (PshellServer.isHelp()):
+    # show standard usage 
+    PshellServer.showUsage()
+    # give some enhanced usage 
+    PshellServer.printf("Enhanced usage here...\n")
+  else:
+    # do normal function processing 
+    PshellServer.printf("enhancedUsage command dispatched:\n")
+    for index, arg in enumerate(args_):
+      PshellServer.printf("  argv[%d]: '%s'\n" % (index, arg))
+    endfor
+  endif
+  
+enddef
+
+#################################################################################
+#################################################################################
+def showUsage():
+  print "Usage: pshellServerDemo.py -udp | -unix | -local"
+  sys.exit()
 enddef
 
 ##############################
@@ -53,16 +86,22 @@ enddef
 # start of main program
 #
 ##############################
+
 if (len(sys.argv) != 2):
-  print "Usage: pshellServerDemo.py -udp | -unix | -local"
+  showUsage()
 elif (sys.argv[1] == "-udp"):
-  PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20, True)
-  PshellServer.startServer("pshellServerDemo", PshellServer.UDP_SERVER, PshellServer.BLOCKING_MODE, "anyhost", 9001)
+  serverType = PshellServer.UDP_SERVER
 elif (sys.argv[1] == "-unix"):
+  serverType = PshellServer.UNIX_SERVER
   print "UNIX server not implemented yet"
 elif (sys.argv[1] == "-local"):
-  PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20, True)
-  PshellServer.startServer("pshellServerDemo", PshellServer.LOCAL_SERVER, PshellServer.BLOCKING_MODE, "anyhost", 9001)
+  serverType = PshellServer.LOCAL_SERVER
 else:
-  print "Usage: pshellServerDemo.py -udp | -unix | -local"
+  showUsage()
 endif 
+
+PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20, True)
+PshellServer.addCommand(world, "world", "world command description", NULL, 0, 0, True)
+PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
+
+PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING_MODE, "anyhost", 9001)
