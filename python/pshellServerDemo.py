@@ -30,6 +30,7 @@
 
 # import all our necessary modules
 import sys
+import signal
 import PshellServer
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
@@ -81,6 +82,35 @@ def showUsage():
   sys.exit()
 enddef
 
+#################################################################################
+#################################################################################
+def signalHandler(signal, frame):
+  PshellServer.cleanupResources()
+  sys.exit()
+enddef
+
+#################################################################################
+#################################################################################
+def registerSignalHandlers():
+  # register a signal handlers so we can cleanup our
+  # system resources upon abnormal termination
+  signal.signal(signal.SIGHUP, signalHandler)      # 1  Hangup (POSIX)
+  signal.signal(signal.SIGINT, signalHandler)      # 2  Interrupt (ANSI)
+  signal.signal(signal.SIGQUIT, signalHandler)     # 3  Quit (POSIX)
+  signal.signal(signal.SIGILL, signalHandler)      # 4  Illegal instruction (ANSI)
+  signal.signal(signal.SIGABRT, signalHandler)     # 6  Abort (ANSI)
+  signal.signal(signal.SIGBUS, signalHandler)      # 7  BUS error (4.2 BSD)
+  signal.signal(signal.SIGFPE, signalHandler)      # 8  Floating-point exception (ANSI)
+  signal.signal(signal.SIGSEGV, signalHandler)     # 11 Segmentation violation (ANSI)
+  signal.signal(signal.SIGPIPE, signalHandler)     # 13 Broken pipe (POSIX)
+  signal.signal(signal.SIGALRM, signalHandler)     # 14 Alarm clock (POSIX)
+  signal.signal(signal.SIGTERM, signalHandler)     # 15 Termination (ANSI)
+  signal.signal(signal.SIGXCPU, signalHandler)     # 24 CPU limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGXFSZ, signalHandler)     # 25 File size limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGPWR, signalHandler)      # 30 Power failure restart (System V)
+  signal.signal(signal.SIGSYS, signalHandler)      # 31 Bad system call
+enddef
+
 ##############################
 #
 # start of main program
@@ -93,15 +123,18 @@ elif (sys.argv[1] == "-udp"):
   serverType = PshellServer.UDP_SERVER
 elif (sys.argv[1] == "-unix"):
   serverType = PshellServer.UNIX_SERVER
-  print "UNIX server not implemented yet"
 elif (sys.argv[1] == "-local"):
   serverType = PshellServer.LOCAL_SERVER
 else:
   showUsage()
 endif 
 
+registerSignalHandlers()
+
 PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20, True)
 PshellServer.addCommand(world, "world", "world command description", NULL, 0, 0, True)
 PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
 
 PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING_MODE, "anyhost", 9001)
+
+PshellServer.cleanupResources()

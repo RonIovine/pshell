@@ -88,6 +88,13 @@ enddef
 
 #################################################################################
 #
+#################################################################################
+def cleanupResources():
+  __cleanupResources()
+enddef
+
+#################################################################################
+#
 # This function should only be called from a registered callback function
 #
 #################################################################################
@@ -241,6 +248,7 @@ def __createSocket():
   global gPort
   global gSocketFd
   global gUnixSocketPath
+  global gUnixSourceAddress
   if (gServerType == UDP_SERVER):
     # IP domain socket
     gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -254,10 +262,12 @@ def __createSocket():
   elif (gServerType == UNIX_SERVER):
     # UNIX domain socket
     gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    sourceAddress = gUnixSocketPath+gServerName
-    # cleanup any old handle that mightbe hanging around
-    os.unlink(sourceAddress)
-    gSocketFd.bind(sourceAddress)
+    gUnixSourceAddress = gUnixSocketPath+gServerName
+    # cleanup any old handle that might be hanging around
+    if (os.path.isfile(gUnixSourceAddress)):
+      os.unlink(gUnixSourceAddress)
+    endif
+    gSocketFd.bind(gUnixSourceAddress)
   endif
   return (True)
 enddef
@@ -495,6 +505,20 @@ def __reply():
 enddef
 
 #################################################################################
+#################################################################################
+def __cleanupResources():
+  global gUnixSourceAddress
+  global gServerType
+  global gSocketFd
+  if (gUnixSourceAddress != None):
+    os.unlink(gUnixSourceAddress)
+  endif
+  if (gServerType != LOCAL_SERVER):
+    gSocketFd.close()
+  endif
+enddef
+
+#################################################################################
 #
 # global "private" data
 #
@@ -521,6 +545,7 @@ gFromAddr = None
 gUnixSocketPath = "/tmp/"
 gArgs = None
 gFoundCommand = None
+gUnixSourceAddress = None
 
 # these are the valid types we recognize in the msgType field of the pshellMsg structure,
 # that structure is the message passed between the pshell client and server, these values
