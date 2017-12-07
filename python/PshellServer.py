@@ -36,6 +36,7 @@ import select
 import socket
 import struct
 import random
+import thread
 from collections import OrderedDict
 from collections import namedtuple
 
@@ -180,8 +181,14 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
     __runServer()
   else:
     # spawn thread
-    None
+    thread.start_new_thread(__serverThread, ())
   endif
+enddef
+
+#################################################################################
+#################################################################################
+def __serverThread():
+  __runServer()
 enddef
   
 #################################################################################
