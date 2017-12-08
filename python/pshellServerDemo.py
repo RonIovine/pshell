@@ -37,9 +37,6 @@ import PshellServer
 # list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
 enddef = endif = endwhile = endfor = None
 
-# python does not have a native null string identifier, so create one
-NULL = ""
-
 #################################################################################
 #################################################################################
 def hello(args_):
@@ -132,7 +129,7 @@ endif
 registerSignalHandlers()
 
 PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20, True)
-PshellServer.addCommand(world, "world", "world command description", NULL, 0, 0, True)
+PshellServer.addCommand(world, "world", "world command description")
 PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
 
 PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING_MODE, "anyhost", 9001)

@@ -56,9 +56,9 @@ enddef = endif = endwhile = endfor = None
 #
 #################################################################################
 
-UDP_SERVER = 0
-UNIX_SERVER = 1
-LOCAL_SERVER = 2
+UDP_SERVER = "udp"
+UNIX_SERVER = "unix"
+LOCAL_SERVER = "local"
 
 BLOCKING_MODE = 0
 NON_BLOCKING_MODE = 1
@@ -76,7 +76,7 @@ NON_BLOCKING_MODE = 1
 #################################################################################
 #
 #################################################################################
-def addCommand(function_, command_, description_, usage_ = "", minArgs_ = 0, maxArgs_ = 0, showUsage_ = True):
+def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, maxArgs_ = 0, showUsage_ = True):
   __addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_,  showUsage_)
 enddef
 
@@ -163,20 +163,13 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
   global gPort
   global gPrompt
   global gTitle
+  global gBanner
+  
   gServerName = serverName_
-  gServerType = serverType_
   gServerMode = serverMode_
-  gHostnameOrIpAddr = hostnameOrIpAddr_
-  gPort = port_
-  if (gServerType == LOCAL_SERVER):
-    gPrompt = gServerName + "[local]:PSHELL> "
-    gTitle = "PSHELL: " + gServerName + "[local], Mode: INTERACTIVE"
-    __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
-    __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
-  else:
-    gPrompt = "PSHELL> "
-    gTitle = "PSHELL"
-  endif
+  
+  (gTitle, gBanner, gPrompt, gServerType, gHostnameOrIpAddr, gPort) = __loadConfigFile(gServerName, gTitle, gBanner, gPrompt, serverType_, hostnameOrIpAddr_, port_)
+  
   if (gServerMode == BLOCKING_MODE):
     __runServer()
   else:
@@ -236,6 +229,11 @@ enddef
 #################################################################################
 def __runLocalServer():
   global gPrompt
+  global gTitle
+  gPrompt = gServerName + "[local]:" + gPrompt
+  gTitle = gTitle + gServerName + "[local], Mode: INTERACTIVE"
+  __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
+  __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __showWelcome()
   command = NULL
   while (command.lower() != "q"):
@@ -487,7 +485,11 @@ enddef
 #################################################################################
 def __showUsage():
   global gFoundCommand
-  printf("Usage: %s %s\n" % (gFoundCommand["name"], gFoundCommand["usage"]))
+  if (gFoundCommand["usage"] != None):
+    printf("Usage: %s %s\n" % (gFoundCommand["name"], gFoundCommand["usage"]))
+  else:
+    printf("Usage: %s\n" % gFoundCommand["name"])
+  endif
 enddef
 
 #################################################################################
@@ -526,6 +528,53 @@ def __cleanupResources():
 enddef
 
 #################################################################################
+#################################################################################
+def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_):  
+  configFile1 = NULL
+  configPath = os.getenv('PSHELL_CONFIG_DIR')
+  if (configPath != None):
+    configFile1 = configPath+"/"+PSHELL_CONFIG_FILE
+  endif
+  configFile2 = PSHELL_CONFIG_DIR+"/"+PSHELL_CONFIG_FILE
+  configFile3 = os.getcwd()+"/"+PSHELL_CONFIG_FILE
+  if (os.path.isfile(configFile1)):
+    file = open(configFile1, 'r')
+  elif (os.path.isfile(configFile2)):
+    file = open(configFile2, 'r')
+  elif (os.path.isfile(configFile3)):
+    file = open(configFile3, 'r')
+  else:
+    return (title_, banner_, prompt_, type_, host_, port_)
+  endif
+  # found a config file, process it
+  for line in file:
+    # skip comments
+    if (line[0] != "#"):
+      value = line.split("=");
+      if (len(value) == 2):
+        option = value[0].split(".")
+        if ((len(option) == 2) and  (name_ == option[0])):
+          if (option[1].lower() == "title"):
+            title_ = value[1].strip()
+          elif (option[1].lower() == "banner"):
+            banner_ = value[1].strip()
+          elif (option[1].lower() == "prompt"):
+            prompt__ = value[1].strip()
+          elif (option[1].lower() == "host"):
+            host_ = value[1].strip()
+          elif (option[1].lower() == "port"):
+            port_ = int(value[1].strip())
+          elif (option[1].lower() == "type"):
+            type_ = value[1].strip()
+          endif
+        endif
+      endif
+    endif
+  endfor
+  return (title_, banner_, prompt_, type_, host_, port_)
+enddef
+
+#################################################################################
 #
 # global "private" data
 #
@@ -544,8 +593,8 @@ gServerType = None
 gServerMode = None
 gHostnameOrIpAddr = None
 gPort = None
-gPrompt = None
-gTitle = None
+gPrompt = "PSHELL> "
+gTitle = "PSHELL: "
 gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 gSocketFd = None 
 gFromAddr = None
@@ -592,3 +641,5 @@ gPshellMsg =  OrderedDict([("msgType",0),
                            ("seqNum",0),
                            ("payload",NULL)])
 
+PSHELL_CONFIG_DIR = "/etc/pshell/config"
+PSHELL_CONFIG_FILE = "pshell-server.conf"
