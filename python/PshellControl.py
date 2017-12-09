@@ -28,17 +28,6 @@
 #
 #################################################################################
 
-# import all our necessary modules
-import os
-import sys
-import time
-import select
-import socket
-import struct
-import random
-from collections import OrderedDict
-from collections import namedtuple
-
 #################################################################################
 #
 # This API provides the ability for a client program to invoke pshell commands
@@ -56,6 +45,17 @@ from collections import namedtuple
 # demo programs pshellControlDemo.py and pshellAggregatorDemo.py
 # 
 #################################################################################
+
+# import all our necessary modules
+import os
+import sys
+import time
+import select
+import socket
+import struct
+import random
+from collections import OrderedDict
+from collections import namedtuple
 
 # dummy variables so we can create pseudo end block indicators, add these 
 # identifiers to your list of python keywords in your editor to get syntax 

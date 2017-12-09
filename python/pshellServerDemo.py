@@ -28,6 +28,17 @@
 #
 #################################################################################
 
+#################################################################################
+#
+# This is an example demo program that uses all the basic features of the PSHELL 
+# python module.  This program can be run as either a UDP, UNIX, or local server 
+# based on the command line options.  If it is run as a UDP or UNIX based server, 
+# you must use the provided stand-alone UDP client program 'pshell' to connect to 
+# it, if it is run as a local server, user command line input is solicited directly 
+# from this program, no external client is needed.
+#
+#################################################################################
+
 # import all our necessary modules
 import sys
 import signal

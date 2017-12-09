@@ -26,15 +26,6 @@
  *
  *******************************************************************************/
 
-#include <pthread.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-
-#include <PshellServer.h>
-
 /*******************************************************************************
  *
  * This is an example demo program that uses all the basic features of the
@@ -47,6 +38,15 @@
  * client is needed.
  *
  *******************************************************************************/
+
+#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+
+#include <PshellServer.h>
 
 /*
  * setup our port number, this is the default port number used

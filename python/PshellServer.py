@@ -28,6 +28,28 @@
 #
 #################################################################################
 
+#################################################################################
+#
+# This API provides the Process Specific Embedded Command Line Shell (PSHELL)
+# user API functionality.  It provides the ability for a client program to
+# register functions that can be invoked via a command line user interface.
+# There are several ways to invoke these embedded functions based on how the 
+# pshell server is configured, which is described in documentation further down 
+# in this file.
+# 
+# This module provides the same functionality as the PshellServer.h API and
+# the libpshell-server linkable 'C' library, but implemented as a Python
+# module.  Currently only the server types UDP, UNIX and LOCAL are supported.
+# TCP server functionality will be added at a future date.  Applications using
+# this module can be controlled via the pshell UDP/UNIX stand-alone 'C' client
+# program or via the PshellControl.h/libpshell-control or PshellControl.py 
+# control mechanism.
+# 
+# A complete example of the usage of the API can be found in the included 
+# demo program pshellServerDemo.py.
+#
+#################################################################################
+
 # import all our necessary modules
 import sys
 import os
@@ -40,11 +62,6 @@ import thread
 from collections import OrderedDict
 from collections import namedtuple
 
-#################################################################################
-#
-# 
-#################################################################################
-
 # dummy variables so we can create pseudo end block indicators, add these 
 # identifiers to your list of python keywords in your editor to get syntax 
 # highlighting on these identifiers, sorry Guido
@@ -56,6 +73,7 @@ enddef = endif = endwhile = endfor = None
 #
 #################################################################################
 
+# No TCP server available for now, to be added at a future date
 UDP_SERVER = "udp"
 UNIX_SERVER = "unix"
 LOCAL_SERVER = "local"
@@ -75,12 +93,16 @@ NON_BLOCKING_MODE = 1
 
 #################################################################################
 #
+# Register callback commands to our PSHELL server
+#
 #################################################################################
 def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, maxArgs_ = 0, showUsage_ = True):
   __addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_,  showUsage_)
 enddef
 
 #################################################################################
+#
+# Start our PSHELL server 
 #
 #################################################################################
 def startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_ = None, port_ = 0):
@@ -89,7 +111,16 @@ enddef
 
 #################################################################################
 #
-# Run a command from within the program
+# Cleanup and release any system resources claimed by this module
+#
+#################################################################################
+def cleanupResources():
+  __cleanupResources()
+enddef
+
+#################################################################################
+#
+# Run a registered command from within the program
 #
 #################################################################################
 def runCommand(command_):
@@ -98,8 +129,37 @@ enddef
 
 #################################################################################
 #
+# The following public functions should only be called from within a 
+# registered callback function
+#
+#################################################################################
+
+#################################################################################
+#
+# Display data back to the remote client
+#
+#################################################################################
+def printf(message_ = "\n"):
+  __printf(message_)
+enddef
+
+#################################################################################
+#
+# Flush the reply (i.e. display) buffer to the remote client
+#
+#################################################################################
+def flush():
+  __flush()
+enddef
+
+#################################################################################
+#
 # Commands to keep the remote server from timing out commands that take a 
 # long time to run
+#
+#################################################################################
+
+#################################################################################
 #
 # spinning ascii wheel, user string string is optional
 #
@@ -110,9 +170,6 @@ enddef
 
 #################################################################################
 #
-# Commands to keep the remote server from timing out commands that take a 
-# long time to run
-#
 # march a string or character across the screen
 #
 #################################################################################
@@ -122,25 +179,7 @@ enddef
 
 #################################################################################
 #
-# Flush the reply buffer to the remote client
-#
-#################################################################################
-def flush():
-  __flush()
-enddef
-
-#################################################################################
-#
-# This function should only be called from a registered callback function
-#
-#################################################################################
-def printf(message_ = "\n"):
-  __printf(message_)
-enddef
-
-#################################################################################
-#
-# This function should only be called from a registered callback function
+# Show the command's registered usage
 #
 #################################################################################
 def showUsage():
@@ -149,14 +188,8 @@ enddef
 
 #################################################################################
 #
-#################################################################################
-def cleanupResources():
-  __cleanupResources()
-enddef
-
-#################################################################################
-#
-# This function should only be called from a registered callback function
+# Check if the user has asked for help on this command.  Command must be 
+# registered with the showUsage = False option.
 #
 #################################################################################
 def isHelp():

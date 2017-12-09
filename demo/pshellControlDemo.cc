@@ -26,14 +26,6 @@
  *
  *******************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <signal.h>
-
-#include <PshellControl.h>
-
 /*******************************************************************************
  *
  * This is an example demo program that shows how to use the pshell control
@@ -43,6 +35,14 @@
  * or UNIX pshell server.
  *
  *******************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <signal.h>
+
+#include <PshellControl.h>
 
 /******************************************************************************/
 /******************************************************************************/

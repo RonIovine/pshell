@@ -26,15 +26,6 @@
  *
  *******************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <signal.h>
-
-#include <PshellServer.h>
-#include <PshellControl.h>
-
 /*******************************************************************************
  *
  * This is an example demo program that shows the use of multiple pshell control
@@ -46,6 +37,15 @@
  * is a local pshell server.
  *
  *******************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <signal.h>
+
+#include <PshellServer.h>
+#include <PshellControl.h>
 
 /******************************************************************************/
 /******************************************************************************/

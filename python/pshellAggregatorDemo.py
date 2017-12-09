@@ -28,6 +28,18 @@
 #
 #################################################################################
 
+#################################################################################
+#
+# This is an example demo program that shows the use of multiple pshell control
+# interfaces to aggregate all of the remote commands from all of the connected
+# servers into a single local pshell server.  This can be useful in presenting
+# a consolidated user shell who's functionality spans several discrete pshell
+# servers.  Since this uses the PshellControl API, the external servers must
+# all be either UDP or Unix servers.  The consolidation point in this example 
+# is a local pshell server.
+#
+#################################################################################
+
 # import all our necessary modules
 import sys
 import PshellControl

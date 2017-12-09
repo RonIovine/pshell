@@ -26,16 +26,6 @@
  *
  *******************************************************************************/
 
-#include <pthread.h>
-#include <unistd.h>
-#include <string.h>
-#include <syslog.h>
-#include <stdlib.h>
-#include <signal.h>
-
-#include <PshellServer.h>
-#include <TraceLog.h>
-
 /*******************************************************************************
  *
  * This is an example demo program that shows how to use the dynamically
@@ -45,6 +35,16 @@
  * started as a UDP, UNIX, or TCP server.
  *
  *******************************************************************************/
+
+#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
+#include <syslog.h>
+#include <stdlib.h>
+#include <signal.h>
+
+#include <PshellServer.h>
+#include <TraceLog.h>
 
 /*
  * setup our port number, this is the default port number used

@@ -26,14 +26,6 @@
  *
  *******************************************************************************/
 
-#include <pthread.h>
-#include <unistd.h>
-#include <string.h>
-#include <syslog.h>
-#include <stdlib.h>
-
-#include <TraceLog.h>
-
 /*******************************************************************************
  *
  * This is an example demo program that shows how to use the TraceLog feature as
@@ -41,6 +33,14 @@
  * and PshellServer modules
  *
  *******************************************************************************/
+
+#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
+#include <syslog.h>
+#include <stdlib.h>
+
+#include <TraceLog.h>
 
 /* a couple of functions to show function name filtering */
 

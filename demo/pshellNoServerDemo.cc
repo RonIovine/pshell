@@ -26,15 +26,6 @@
  *
  *******************************************************************************/
 
-#include <pthread.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-
-#include <PshellServer.h>
-
 /*******************************************************************************
  *
  * This is an example demo program that uses all the basic features of the
@@ -47,6 +38,15 @@
  * individual command directly and not through this parent program.
  *
  *******************************************************************************/
+
+#include <pthread.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+
+#include <PshellServer.h>
 
 /*
  * PSHELL user callback functions, the interface is identical to the "main"
