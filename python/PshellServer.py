@@ -93,7 +93,13 @@ NON_BLOCKING_MODE = 1
 
 #################################################################################
 #
-# Register callback commands to our PSHELL server
+# addCommand:
+#
+# Register callback commands to our PSHELL server.  If the command takes no
+# arguments, the default parameters can be provided.  If the command takes
+# an exact number of parameters, set minArgs and maxArgs to be the same.  If
+# the user wants the callback function to handle all help initiated usage,
+# set the showUsage parameter to False.
 #
 #################################################################################
 def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, maxArgs_ = 0, showUsage_ = True):
@@ -102,7 +108,14 @@ enddef
 
 #################################################################################
 #
-# Start our PSHELL server 
+# startServer:
+#
+# Start our PSHELL server, if serverType is UNIX or LOCAL, the default
+# parameters can be used, and will be ignored if provided.  All of these
+# parameters except serverMode can be overridden on a per serverName
+# basis via the pshell-server.conf config file.  All commands in the
+# <serverName>.startup file will be executed in this function at server
+# startup time.
 #
 #################################################################################
 def startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_ = None, port_ = 0):
@@ -111,7 +124,12 @@ enddef
 
 #################################################################################
 #
-# Cleanup and release any system resources claimed by this module
+# cleanupResources
+#
+# Cleanup and release any system resources claimed by this module.  This includes
+# any open socked handles, file descriptors, or system 'tmp' files.  This should
+# be called at program exit time as well as any signal exception handler that
+# results in a program termination.
 #
 #################################################################################
 def cleanupResources():
@@ -120,7 +138,9 @@ enddef
 
 #################################################################################
 #
-# Run a registered command from within the program
+# runCommand:
+#
+# Run a registered command from within the registering program
 #
 #################################################################################
 def runCommand(command_):
@@ -136,6 +156,8 @@ enddef
 
 #################################################################################
 #
+# printf:
+#
 # Display data back to the remote client
 #
 #################################################################################
@@ -145,7 +167,9 @@ enddef
 
 #################################################################################
 #
-# Flush the reply (i.e. display) buffer to the remote client
+# flush:
+#
+# Flush the reply (i.e. display) buffer back to the remote client
 #
 #################################################################################
 def flush():
@@ -155,13 +179,16 @@ enddef
 #################################################################################
 #
 # Commands to keep the remote server from timing out commands that take a 
-# long time to run
+# long time to run (i.e. longer than the pshell client timeout alue, which
+# defaults to 5 seconds).
 #
 #################################################################################
 
 #################################################################################
 #
-# spinning ascii wheel, user string string is optional
+# wheel:
+#
+# spinning ascii wheel keep alive, user string string is optional
 #
 #################################################################################
 def wheel(string_ = None):
@@ -170,7 +197,9 @@ enddef
 
 #################################################################################
 #
-# march a string or character across the screen
+# march:
+#
+# march a string or character keep alive across the screen
 #
 #################################################################################
 def march(string_):
@@ -178,6 +207,8 @@ def march(string_):
 enddef
 
 #################################################################################
+#
+# showUsage:
 #
 # Show the command's registered usage
 #
@@ -187,6 +218,8 @@ def showUsage():
 enddef
 
 #################################################################################
+#
+# isHelp:
 #
 # Check if the user has asked for help on this command.  Command must be 
 # registered with the showUsage = False option.
