@@ -711,8 +711,10 @@ enddef
 def __flush():
   global gCommandInteractive
   global gServerType
+  global gPshellMsg
   if ((gCommandInteractive == True) and (gServerType != LOCAL_SERVER)):
     __reply()
+    gPshellMsg["payload"] = NULL
   endif
 enddef
 
