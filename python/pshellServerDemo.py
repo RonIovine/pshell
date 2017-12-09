@@ -102,8 +102,8 @@ def keepAlive(args_):
       time.sleep(1)
     endfor
   else:
-    PshellServer.printf("ERROR: Invalid input\n")
     PshellServer.showUsage()
+    return
   endif
   PshellServer.printf()
 enddef

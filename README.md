@@ -12,8 +12,11 @@ There is also a control mechanism API provided by where any external program can
 make calls into another program that is running a PSHELL server (only supported for 
 UDP or UNIX pshell servers).  This will provide a direct programmatic control access
 mechanism to a remote process' pshell functions without having to fork the calling 
-process to call the pshell command line client program via the 'system' call.  The 
-control API has a C/C++ implementation as well as a Python implementation.
+process to call the pshell command line client program via the 'system' call.
+
+Note that there are also Python versions of the PshellServer and PshellControl
+functionality.  All of the Python modules along with corresponding demo programs
+can be found in the 'python' sub-directory of this package.
 
 The prototype for the embedded command line shell functions are similar to the 
 'main' in 'C' as follows:
@@ -29,7 +32,7 @@ These functions can be invoked via several methods depending on how the internal
 server is configured.  The following shows the various PSHELL server types along with their 
 associated invokation method:
 
-* TCP Server   : Uses standard 'telnet' interactive client to invoke functions
+* TCP Server   : Uses standard 'telnet' interactive client to invoke functions (C/C++ only)
 * UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
 * UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application 
@@ -45,7 +48,8 @@ is no interactive user prompting, and control is returned to the calling host's 
 shell when the command is complete.  This mode also provides the ability to setup softlink 
 shortcuts to each internal command and to invoke those commands from the host's command line 
 shell directly via the shortcut name  rather than the parent program name, in a manner similar 
-[Busybox](https://busybox.net/about.html) functionality.
+[Busybox](https://busybox.net/about.html) functionality.  Note this is not available with the
+Python modules.
 
 This package also provides an optional integrated interactive dynamic trace filtering mechanism that 
 can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`, 
@@ -58,11 +62,11 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, eight demo programs are also provided, one to
-show the usage of the pshell server API, two (C and Python) to show the usage of pshell control 
-API, two (C and Python) to show the aggergation of multiple pshell servers into a single pshell 
-server via the control API, one to show the usage of the trace filter/trace log API, one to show 
-the usage of a stand-alone (no filtering) trace log application, and one to show the usage of 
+In addition to the infrastructure components, nine demo programs are also provided, two (C and
+Python) to show the usage of the pshell server API, two (C and Python) to show the usage of pshell 
+control API, two (C and Python) to show the aggergation of multiple pshell servers into a single 
+pshell server via the control API, one to show the usage of the trace filter/trace log API, one to 
+show the usage of a stand-alone (no filtering) trace log application, and one to show the usage of 
 the multi-call binary API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell

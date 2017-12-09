@@ -413,7 +413,8 @@ enddef
 #################################################################################
 #################################################################################
 def __processQueryVersion():
-  printf("1")
+  global gServerVersion
+  printf(gServerVersion)
 enddef
 
 #################################################################################
@@ -732,6 +733,7 @@ gListHelp = ('?', 'help')
 gCommandList = []
 gMaxLength = 0
 
+gServerVersion = "1"
 gServerName = None
 gServerType = None
 gServerMode = None

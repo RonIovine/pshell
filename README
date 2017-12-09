@@ -13,8 +13,11 @@ application itself.
 
 There is also a control mechanism API and library provided by where any external
 program can make calls into another program that is running a PSHELL that is
-configured for a UDP or UNIX server.  The control API has a C/C++ implementation
-as well as a Python implementation.
+configured for a UDP or UNIX server.
+
+Note that there are also Python versions of the PshellServer and PshellControl
+functionality.  All of the Python modules along with corresponding demo programs
+can be found in the 'python' sub-directory of this package.
 
 The prototype for the embedded functions are similar to the 'main' in 'C' as follows:
 
@@ -29,7 +32,7 @@ These functions can be invoked in several ways depending on how the internal
 PSHELL server is configured.  The following shows the various PSHELL server
 types along with their associated invokation method:
 
-TCP Server   : Uses standard 'telnet' interactive client to invoke functions
+TCP Server   : Uses standard 'telnet' interactive client to invoke functions (C/C++ only)
 UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
 UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
 LOCAL Server : No client program needed, functions invoked directly from within application 
@@ -57,11 +60,11 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, eight demo programs are also provided, one to
-show the usage of the pshell server API, two (C and Python) to show the usage of pshell control 
-API, two (C and Python) to show the aggergation of multiple pshell servers into a single pshell 
-server via the control API, one to show the usage of the trace filter/trace log API, one to show 
-the usage of a stand-alone (no filtering) trace log application, and one to show the usage of 
+In addition to the infrastructure components, nine demo programs are also provided, two (C and
+Python) to show the usage of the pshell server API, two (C and Python) to show the usage of pshell 
+control API, two (C and Python) to show the aggergation of multiple pshell servers into a single 
+pshell server via the control API, one to show the usage of the trace filter/trace log API, one to 
+show the usage of a stand-alone (no filtering) trace log application, and one to show the usage of 
 the multi-call binary API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
@@ -86,6 +89,7 @@ requires the 'expect' package to be installed.
   - libpshell-server-stub.so -- Stub version of libpshell-server library (shared)
   - libpshell-control.so     -- External pshell program control libpshell-control library (shared)
   - libpshell-control.a      -- External pshell program control libpshell-control library (static)
+  - PshellServer.py          -- Python version of PshellServer functionality (UDP, UNIX and LOCAL only)
   - PshellControl.py         -- External pshell program control Python module
   - pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
   - pshell.exp               -- Expect script telnet wrapper to provide interface similar to the
@@ -94,6 +98,7 @@ requires the 'expect' package to be installed.
   - setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
   - showPshelllLib           -- Shell script to show the current libpshell-server.so softlink setting
   - pshellServerDemo         -- Demo application using the pshell server library features
+  - pshellServerDemo.py      -- Demo application using the pshell server Python module features
   - pshellNoServerDemo       -- Demo application using non-server option of the pshell library
   - pshellControlDemo        -- Demo application using the pshell control library features
   - pshellControlDemo.py     -- Demo application using the pshell control Python module features
@@ -179,21 +184,23 @@ $PSHELL_INSTALL/demo/pshellAggregatorDemo.cc    --  Sample pshell control to agg
 $PSHELL_INSTALL/demo/traceFilterDemo.cc         --  Server demo for dynamic trace filtering
 $PSHELL_INSTALL/demo/traceLogDemo.cc            --  Demo using the stand-alone TraceLog module
 $PSHELL_INSTALL/demo/pshellNoServerDemo.cc      --  Demo using the multi-call binary option
-$PSHELL_INSTALL/pytnon/pshellControlDemo.py     --  Sample pshell control external client
-$PSHELL_INSTALL/pytnon/pshellAggregatorDemo.py  --  Sample pshell control to aggregate multiple servers
+$PSHELL_INSTALL/python/pshellServerDemo.py      --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/python/pshellControlDemo.py     --  Sample pshell control external client (Python)
+$PSHELL_INSTALL/python/pshellAggregatorDemo.py  --  Sample pshell control to aggregate multiple servers (Python)
 
 EXECUTION:
 
-There are 8 demo programs, one to demonstrate a program that incorporates a
-pshell server (pshellServerDemo), one that demonstrates a program that incorporates
-the trace filter functionality (traceFilterDemo), two that demonstrate the control 
-of a program that is running a pshell server from another program (pshellControlDemo
-and pshellControlDemo.py), two that demonstrate the aggregation of multiple pshell 
-servers into a single server via the control API (pshellAggregatorDemo, pshellAggregatorDemo.py), 
-one that just demonstrates the stand-alone usage of the TraceLog API (traceLogDemo), 
-and one that demonstrates the use of the multi-cal binary API (pshellNoServerDemo).
+There are 9 demo programs, two that demonstrate a program that incorporates a
+pshell server (pshellServerDemo and pshellServerDemo.py), one that demonstrates 
+a program that incorporates the trace filter functionality (traceFilterDemo), two 
+that demonstrate the control of a program that is running a pshell server from 
+another program (pshellControlDemo and pshellControlDemo.py), two that demonstrate 
+the aggregation of multiple pshell servers into a single server via the control 
+API (pshellAggregatorDemo, pshellAggregatorDemo.py), one that just demonstrates 
+the stand-alone usage of the TraceLog API (traceLogDemo), and one that demonstrates 
+the use of the multi-cal binary API (pshellNoServerDemo).
 
-All eight demo programs have a usage that can be displayed by typing <programName> -h.
+All nine demo programs have a usage that can be displayed by typing <programName> -h.
 The two demo programs pshellServerDemo and traceFilterDemo can be controlled via
 an interactive client program (either pshell or telnet) that shows the full command
 line functionality.  The demo program pshellControlDemo can control the other two demo

@@ -138,8 +138,8 @@ void keepAlive(int argc, char *argv[])
   }
   else
   {
-    pshell_printf("ERROR: Invalid input\n");
     pshell_showUsage();
+    return;
   }
   pshell_printf("\n");
 }
