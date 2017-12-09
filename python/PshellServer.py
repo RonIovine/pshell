@@ -89,9 +89,44 @@ enddef
 
 #################################################################################
 #
+# Run a command from within the program
+#
 #################################################################################
-def cleanupResources():
-  __cleanupResources()
+def runCommand(command_):
+  __runCommand(command_)
+enddef
+
+#################################################################################
+#
+# Commands to keep the remote server from timing out commands that take a 
+# long time to run
+#
+# spinning ascii wheel, user string string is optional
+#
+#################################################################################
+def wheel(string_ = None):
+  __wheel(string_)
+enddef
+
+#################################################################################
+#
+# Commands to keep the remote server from timing out commands that take a 
+# long time to run
+#
+# march a string or character across the screen
+#
+#################################################################################
+def march(string_):
+  __march(string_)
+enddef
+
+#################################################################################
+#
+# Flush the reply buffer to the remote client
+#
+#################################################################################
+def flush():
+  __flush()
 enddef
 
 #################################################################################
@@ -99,7 +134,7 @@ enddef
 # This function should only be called from a registered callback function
 #
 #################################################################################
-def printf(message_):
+def printf(message_ = "\n"):
   __printf(message_)
 enddef
 
@@ -110,6 +145,13 @@ enddef
 #################################################################################
 def showUsage():
   __showUsage()
+enddef
+
+#################################################################################
+#
+#################################################################################
+def cleanupResources():
+  __cleanupResources()
 enddef
 
 #################################################################################
@@ -130,7 +172,7 @@ enddef
 # API
 #
 #################################################################################
-
+ 
 #################################################################################
 #################################################################################
 def __addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, showUsage_, prepend_ = False):
@@ -164,17 +206,21 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
   global gPrompt
   global gTitle
   global gBanner
+  global gRunning
   
-  gServerName = serverName_
-  gServerMode = serverMode_
+  if (gRunninig == False):
+    gRunning = True
+    gServerName = serverName_
+    gServerMode = serverMode_
   
-  (gTitle, gBanner, gPrompt, gServerType, gHostnameOrIpAddr, gPort) = __loadConfigFile(gServerName, gTitle, gBanner, gPrompt, serverType_, hostnameOrIpAddr_, port_)
-  
-  if (gServerMode == BLOCKING_MODE):
-    __runServer()
-  else:
-    # spawn thread
-    thread.start_new_thread(__serverThread, ())
+    (gTitle, gBanner, gPrompt, gServerType, gHostnameOrIpAddr, gPort) = __loadConfigFile(gServerName, gTitle, gBanner, gPrompt, serverType_, hostnameOrIpAddr_, port_)
+    __loadStartupFile()  
+    if (gServerMode == BLOCKING_MODE):
+      __runServer()
+    else:
+      # spawn thread
+      thread.start_new_thread(__serverThread, ())
+    endif
   endif
 enddef
 
@@ -302,6 +348,8 @@ def __processCommand(command_):
   global gServerType
   global gArgs
   global gFoundCommand
+  global gCommandDispatched
+  
   if (gPshellMsg["msgType"] == gMsgTypes["queryVersion"]):
     __processQueryVersion()
   elif (gPshellMsg["msgType"] == gMsgTypes["queryPayloadSize"]):
@@ -319,6 +367,7 @@ def __processCommand(command_):
   elif (gPshellMsg["msgType"] == gMsgTypes["queryCommands2"]):
     __processQueryCommands2()
   else:
+    gCommandDispatched = True
     gPshellMsg["payload"] = NULL
     gArgs = command_.lower().split()[1:]
     command_ = command_.lower().split()[0]
@@ -348,6 +397,7 @@ def __processCommand(command_):
       endif
     endif
   endif
+  gCommandDispatched = False
   gPshellMsg["msgType"] = gMsgTypes["commandComplete"]
   __reply()
 enddef
@@ -411,7 +461,7 @@ def __processQueryCommands1():
   for command in gCommandList:
     printf("%-*s  -  %s\n" % (gMaxLength, command["name"], command["description"]))
   endif
-  printf("\n")
+  printf()
 enddef
 
 #################################################################################
@@ -426,11 +476,11 @@ enddef
 #################################################################################
 #################################################################################
 def __help(command_):
-    printf("\n")
+    printf()
     printf("****************************************\n")
     printf("*             COMMAND LIST             *\n")
     printf("****************************************\n")
-    printf("\n")
+    printf()
     __processQueryCommands1()
 enddef
 
@@ -473,11 +523,14 @@ enddef
 def __printf(message_):
   global gServerType
   global gPshellMsg
-  if (gServerType == LOCAL_SERVER):
-    sys.stdout.write(message_)
-  else:
-    # remote server
-    gPshellMsg["payload"] += message_
+  global gCommandInteractive
+  if (gCommandInteractive == True):
+    if (gServerType == LOCAL_SERVER):
+      sys.stdout.write(message_)
+    else:
+      # remote server
+      gPshellMsg["payload"] += message_
+    endif
   endif
 enddef
 
@@ -575,6 +628,95 @@ def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_):
 enddef
 
 #################################################################################
+#################################################################################
+def __loadStartupFile():
+  global gServerName
+  startupFile1 = NULL
+  startupPath = os.getenv('PSHELL_STARTUP_DIR')
+  if (startupPath != None):
+    startupFile1 = startupPath+"/"+gServerName+".startup"
+  endif
+  startupFile2 = PSHELL_STARTUP_DIR+"/"+gServerName+".startup"
+  startupFile3 = os.getcwd()+"/"+gServerName+".startup"
+  if (os.path.isfile(startupFile1)):
+    file = open(startupFile1, 'r')
+  elif (os.path.isfile(startupFile2)):
+    file = open(startupFile2, 'r')
+  elif (os.path.isfile(startupFile3)):
+    file = open(startupFile3, 'r')
+  else:
+    return
+  endif
+  # found a config file, process it
+  for line in file:
+    # skip comments
+    line = line.strip()
+    if ((len(line) > 0) and (line[0] != "#")):
+      __runCommand(line)
+    endif
+  endfor
+enddef
+
+#################################################################################
+#################################################################################
+def __runCommand(command_):
+  global gCommandList
+  global gCommandInteractive
+  global gCommandDispatched
+  global gFoundCommand
+  global gArgs
+  if (gCommandDispatched == False):
+    gCommandDispatched = True
+    gCommandInteractive = False
+    numMatches = 0
+    gArgs = command_.lower().split()[1:]
+    command_ = command_.lower().split()[0]
+    for command in gCommandList:
+      if (command_ in command["name"]):
+        gFoundCommand = command
+        numMatches += 1
+      endif
+    endfor
+    if ((numMatches == 1) and __isValidArgCount() and not isHelp()):
+      gFoundCommand["function"](gArgs)
+    endif
+    gCommandDispatched = False
+    gCommandInteractive = True
+  endif
+enddef
+
+#################################################################################
+#################################################################################
+def __wheel(string_):
+  global gWheel
+  global gWheelPos
+  gWheelPos += 1
+  if (string_ != NULL):
+    __printf("\r%s%c" % (string_, gWheel[(gWheelPos)%4]))
+  else:
+    __printf("\r%c" % gWheel[(gWheelPos)%4])
+  endif
+  __flush()
+enddef
+
+#################################################################################
+#################################################################################
+def __march(string_):
+  __printf(string_)
+  __flush()
+enddef
+
+#################################################################################
+#################################################################################
+def __flush():
+  global gCommandInteractive
+  global gServerType
+  if ((gCommandInteractive == True) and (gServerType != LOCAL_SERVER)):
+    __reply()
+  endif
+enddef
+
+#################################################################################
 #
 # global "private" data
 #
@@ -602,6 +744,9 @@ gUnixSocketPath = "/tmp/"
 gArgs = None
 gFoundCommand = None
 gUnixSourceAddress = None
+gRunninig = False
+gCommandDispatched = False
+gCommandInteractive = True
 
 # these are the valid types we recognize in the msgType field of the pshellMsg structure,
 # that structure is the message passed between the pshell client and server, these values
@@ -642,4 +787,8 @@ gPshellMsg =  OrderedDict([("msgType",0),
                            ("payload",NULL)])
 
 PSHELL_CONFIG_DIR = "/etc/pshell/config"
+PSHELL_STARTUP_DIR = "/etc/pshell/startup"
 PSHELL_CONFIG_FILE = "pshell-server.conf"
+
+gWheelPos = 0
+gWheel = "|/-\\"

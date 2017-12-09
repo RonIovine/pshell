@@ -31,6 +31,7 @@
 # import all our necessary modules
 import sys
 import signal
+import time
 import PshellServer
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
@@ -70,6 +71,41 @@ def enhancedUsage(args_):
     endfor
   endif
   
+enddef
+
+#################################################################################
+#################################################################################
+def keepAlive(args_):
+  if (args_[0] == "dots"):
+    PshellServer.printf("marching dots keep alive:\n")
+    for i in range(1,10):
+      PshellServer.march(".")
+      time.sleep(1)
+    endfor
+  elif (args_[0] == "bang"):
+    PshellServer.printf("marching 'bang' keep alive:\n");
+    for  i in range(1,10):
+      PshellServer.march("!")
+      time.sleep(1)
+    endfor
+  elif (args_[0] == "pound"):
+    PshellServer.printf("marching pound keep alive:\n");
+    for  i in range(1,10):
+      PshellServer.march("#")
+      time.sleep(1)
+    endfor
+  elif (args_[0] == "wheel"):
+    PshellServer.printf("spinning wheel keep alive:\n")
+    for  i in range(1,10):
+      # string is optional, use NULL to omit
+      PshellServer.wheel("optional string: ")
+      time.sleep(1)
+    endfor
+  else:
+    PshellServer.printf("ERROR: Invalid input\n")
+    PshellServer.showUsage()
+  endif
+  PshellServer.printf()
 enddef
 
 #################################################################################
@@ -128,9 +164,14 @@ endif
 
 registerSignalHandlers()
 
-PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20, True)
+PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
 PshellServer.addCommand(world, "world", "world command description")
 PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
+if (serverType != PshellServer.LOCAL_SERVER):
+  PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
+endif
+
+PshellServer.runCommand("hello 1 2 3")
 
 PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING_MODE, "anyhost", 9001)
 
