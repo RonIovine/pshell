@@ -602,13 +602,24 @@ def __sendCommand(control_, commandType_, command_, timeout_):
     retCode = SOCKET_NOT_CONNECTED
   endif  
   if ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
-    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, gPshellControlResults[retCode])
+    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, __getControlResults(retCode))
   elif ((retCode != COMMAND_SUCCESS) and (retCode != gMsgTypes["commandComplete"])):
-    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, gPshellControlResults[retCode])
+    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, __getControlResults(retCode))
   else:
     retCode = COMMAND_SUCCESS;
   endif
   return (retCode)
+enddef
+
+#################################################################################
+#################################################################################
+def __getControlResults(retCode):
+  global gPshellControlResults
+  if (retCode < len(gPshellControlResults)):
+    return (gPshellControlResults[retCode])
+  else:
+    return ("Unknown retCode: %d" % retCode)
+  endif
 enddef
 
 #################################################################################

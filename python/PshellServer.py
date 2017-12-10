@@ -409,7 +409,8 @@ def __runLocalServer():
   __showWelcome()
   command = NULL
   while (command.lower() != "q"):
-    command = raw_input(gPrompt)
+    sys.stdout.write(gPrompt)
+    command = raw_input()
     if ((len(command) > 0) and (command.lower() != "q")):
       __processCommand(command)
     endif

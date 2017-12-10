@@ -183,7 +183,7 @@ commandList = PshellControl.extractCommands(gSid)
 commandList = commandList.split("\n")
 for command in commandList:
   splitCommand = command.split("-")
-  if (len(splitCommand ) == 2):
+  if (len(splitCommand ) >= 2):
     commandName = splitCommand[0].strip()
     description = splitCommand[1].strip()
     PshellServer.addCommand(comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
@@ -193,7 +193,8 @@ endif
 # configure our local server to interact with a remote server
 configureLocalServer()
 
-# now start our local server
+# now start our local server which will interact with a remote server 
+# via the pshell control machanism
 PshellServer.startServer("pshellClient", PshellServer.LOCAL_SERVER, PshellServer.BLOCKING_MODE)
 
 cleanupAndExit()
