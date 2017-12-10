@@ -15,9 +15,9 @@ There is also a control mechanism API and library provided by where any external
 program can make calls into another program that is running a PSHELL that is
 configured for a UDP or UNIX server.
 
-Note that there are also Python versions of the PshellServer and PshellControl
-functionality.  All of the Python modules along with corresponding demo programs
-can be found in the 'python' sub-directory of this package.
+Note that there are also Python versions of the PshellServer, PshellControl, and
+PshellClient functionality.  All of the Python modules along with corresponding 
+demo programs can be found in the 'python' sub-directory of this package.
 
 The prototype for the embedded functions are similar to the 'main' in 'C' as follows:
 
@@ -92,6 +92,7 @@ requires the 'expect' package to be installed.
   - PshellServer.py          -- Python version of PshellServer functionality (UDP, UNIX and LOCAL only)
   - PshellControl.py         -- External pshell program control Python module
   - pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
+  - pshell.py                -- Python version of stand-alone PSHELL UDP/UNIX client remote access program
   - pshell.exp               -- Expect script telnet wrapper to provide interface similar to the
                                 UDP/UNIX pshell client when using the TCP server with a telnet client
   - archivePshell            -- Shell script to create a pshell-vX.Y.tar.gz archive

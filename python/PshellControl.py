@@ -367,7 +367,7 @@ def __extractCommands(sid_):
   control = __getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (__sendCommand(control, gMsgTypes["queryCommands"], "query commands", ONE_SEC*5) == COMMAND_SUCCESS):
+    if (__sendCommand(control, gMsgTypes["queryCommands"], NULL, ONE_SEC*5) == COMMAND_SUCCESS):
       results += "\n"
       results += (len(control["remoteServer"])+22)*"*"
       results += "\n"
@@ -377,6 +377,66 @@ def __extractCommands(sid_):
       results += "\n"
       results += "\n"
       results += control["pshellMsg"]["payload"]
+    endif
+  endif
+  return (results)
+enddef
+
+#################################################################################
+#################################################################################
+def __extractName(sid_):
+  global gMsgTypes
+  results = NULL
+  control = __getControl(sid_)
+  if (control != None):
+    control["pshellMsg"]["dataNeeded"] = True
+    if (__sendCommand(control, gMsgTypes["queryName"], NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+      results += control["pshellMsg"]["payload"]
+    endif
+  endif
+  return (results)
+enddef
+
+#################################################################################
+#################################################################################
+def __extractTitle(sid_):
+  global gMsgTypes
+  results = NULL
+  control = __getControl(sid_)
+  if (control != None):
+    control["pshellMsg"]["dataNeeded"] = True
+    if (__sendCommand(control, gMsgTypes["queryTitle"], NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+      results = control["pshellMsg"]["payload"]
+    endif
+  endif
+  return (results)
+enddef
+
+#################################################################################
+#################################################################################
+def __extractBanner(sid_):
+  global gMsgTypes
+  results = NULL
+  control = __getControl(sid_)
+  if (control != None):
+    control["pshellMsg"]["dataNeeded"] = True
+    if (__sendCommand(control, gMsgTypes["queryBanner"], NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+      results = control["pshellMsg"]["payload"]
+    endif
+  endif
+  return (results)
+enddef
+
+#################################################################################
+#################################################################################
+def __extractPrompt(sid_):
+  global gMsgTypes
+  results = NULL
+  control = __getControl(sid_)
+  if (control != None):
+    control["pshellMsg"]["dataNeeded"] = True
+    if (__sendCommand(control, gMsgTypes["queryPrompt"], NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+      results = control["pshellMsg"]["payload"]
     endif
   endif
   return (results)
@@ -654,7 +714,7 @@ PSHELL_CONFIG_FILE = "pshell-control.conf"
 # these are the valid types we recognize in the msgType field of the pshellMsg structure,
 # that structure is the message passed between the pshell client and server, these values
 # must match their corresponding #define definitions in the C file PshellCommon.h
-gMsgTypes = {"queryCommands":4, "commandComplete":8, "controlCommand":12}
+gMsgTypes = {"queryName":3, "queryCommands":4, "commandComplete":8, "queryBanner":9, "queryTitle":10, "queryPrompt":11, "controlCommand":12}
 
 # fields of PshellMsg, we use this definition to unpack the received PshellMsg response
 # from the server into a corresponding OrderedDict in the PshellControl entry

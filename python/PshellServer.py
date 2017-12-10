@@ -339,11 +339,71 @@ enddef
 
 #################################################################################
 #################################################################################
+def __getDisplayServerType():
+  global gServerType
+  global gServerTypeOverride
+  serverType = gServerType
+  if (gServerTypeOverride != None):
+    serverType = gServerTypeOverride
+  enddef
+  return (serverType)
+enddef
+
+#################################################################################
+#################################################################################
+def __getDisplayPrompt():
+  global gPrompt
+  global gPromptOverride
+  prompt = gPrompt
+  if (gPromptOverride != None):
+    prompt = gPromptOverride
+  enddef
+  return (prompt)
+enddef
+
+#################################################################################
+#################################################################################
+def __getDisplayTitle():
+  global gTitle
+  global gTitleOverride
+  title = gTitle
+  if (gTitleOverride != None):
+    title = gTitleOverride
+  enddef
+  return (title)
+enddef
+
+#################################################################################
+#################################################################################
+def __getDisplayServerName():
+  global gServerName
+  global gServerNameOverride
+  serverName = gServerName
+  if (gServerNameOverride != None):
+    serverName = gServerNameOverride
+  enddef
+  return (serverName)
+enddef
+
+#################################################################################
+#################################################################################
+def __getDisplayBanner():
+  global gBanner
+  global gBannerOverride
+  banner = gBanner
+  if (gBannerOverride != None):
+    banner = gBannerOverride
+  enddef
+  return (banner)
+enddef
+
+#################################################################################
+#################################################################################
 def __runLocalServer():
   global gPrompt
   global gTitle
-  gPrompt = gServerName + "[local]:" + gPrompt
-  gTitle = gTitle + gServerName + "[local], Mode: INTERACTIVE"
+  gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
+  gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
   __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __showWelcome()
@@ -413,6 +473,7 @@ def __processCommand(command_):
   global gPshellMsg
   global gServerType
   global gArgs
+  global gFirstArgPos
   global gFoundCommand
   global gCommandDispatched
   
@@ -435,7 +496,7 @@ def __processCommand(command_):
   else:
     gCommandDispatched = True
     gPshellMsg["payload"] = NULL
-    gArgs = command_.lower().split()[1:]
+    gArgs = command_.lower().split()[gFirstArgPos:]
     command_ = command_.lower().split()[0]
     numMatches = 0
     if (command_ == "?"):
@@ -560,19 +621,20 @@ enddef
 #################################################################################
 #################################################################################
 def __showWelcome():
-  global gServerName
   global gTitle
-  global gBanner
   # put up our window title banner
   sys.stdout.write("\033]0;" + gTitle + "\007")
   sys.stdout.flush()
   # show our welcome screen
+  banner = "#  %s" % __getDisplayBanner()
+  server = "#  Single session LOCAL server: %s[%s]" % (__getDisplayServerName(), __getDisplayServerType())
+  maxBorderWidth = max(58, len(banner),len(server))+2
   print
-  print "#########################################################"
+  print "#"*maxBorderWidth
   print "#"
-  print "#  %s" % gBanner
+  print banner
   print "#"
-  print "#  Single session LOCAL server: %s[local]" % gServerName
+  print server
   print "#"
   print "#  Idle session timeout: NONE"
   print "#"
@@ -581,7 +643,7 @@ def __showWelcome():
   print "#"
   print "#  Command abbreviation supported"
   print "#"
-  print "#########################################################"
+  print "#"*maxBorderWidth
   print
 enddef
 
@@ -818,6 +880,13 @@ gRunninig = False
 gCommandDispatched = False
 gCommandInteractive = True
 
+# dislay override setting used by the pshell.py client program
+gPromptOverride = None
+gTitleOverride = None
+gServerNameOverride = None
+gServerTypeOverride = None
+gBannerOverride = None
+
 # these are the valid types we recognize in the msgType field of the pshellMsg structure,
 # that structure is the message passed between the pshell client and server, these values
 # must match their corresponding #define definitions in the C file PshellCommon.h
@@ -859,6 +928,8 @@ gPshellMsg =  OrderedDict([("msgType",0),
 PSHELL_CONFIG_DIR = "/etc/pshell/config"
 PSHELL_STARTUP_DIR = "/etc/pshell/startup"
 PSHELL_CONFIG_FILE = "pshell-server.conf"
+
+gFirstArgPos = 1
 
 gWheelPos = 0
 gWheel = "|/-\\"
