@@ -1,4 +1,5 @@
-This directory contains Python versions of the PshellControl, PshellServer, and
-PshellClient functionality along with three demo Python programs showing their 
-usage.  None of these files are copied/setup on a system wide install.  On a local 
-install, environment variables are setup to allow access to these files and modules.
+This directory contains Python versions of the PshellControl, PshellServer,
+PshellClient,and PshellReadline functionality along with four demo Python 
+programs showing their usage.  None of these files are copied/setup on a 
+system wide install.  On a local install, environment variables are setup 
+to allow access to these files and modules.

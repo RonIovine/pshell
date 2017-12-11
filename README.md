@@ -14,9 +14,10 @@ UDP or UNIX pshell servers).  This will provide a direct programmatic control ac
 mechanism to a remote process' pshell functions without having to fork the calling 
 process to call the pshell command line client program via the 'system' call.
 
-Note that there are also Python versions of the PshellServer, PshellControl, and
-PshellClient functionality.  All of the Python modules along with corresponding 
-demo programs can be found in the 'python' sub-directory of this package.
+Note that there are also Python versions of the PshellServer, PshellControl,
+PshellClient, and PshellReadline functionality.  All of the Python modules along 
+with corresponding demo programs can be found in the 'python' sub-directory of 
+this package.
 
 The prototype for the embedded command line shell functions are similar to the 
 'main' in 'C' as follows:

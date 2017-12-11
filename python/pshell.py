@@ -45,6 +45,7 @@ import sys
 import signal
 import PshellControl
 import PshellServer
+import PshellReadline
 
 #################################################################################
 #

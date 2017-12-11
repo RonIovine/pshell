@@ -35,7 +35,7 @@ def addTabCompletion(keyword_):
     gMaxTabCompletionKeywordLength = len(keyword_)+2
     gMaxCompletionsPerLine = 80/gMaxTabCompletionKeywordLength
   endif
-  gTabCompletions.append(keyword_)
+  gTabCompletions.append(keyword_.strip())
 enddef
 
 #################################################################################
@@ -174,7 +174,7 @@ def getInput(prompt_):
     elif (ord(char) == 27):
       # esc character
       inEsc = True
-    elif ((ord(char) == 9) and (len(command.split()) == 1)):
+    elif ((ord(char) == 9) and ((len(command) == 0) or (len(command.split()) == 1))):
       # tab character
       tabCount += 1
       if (tabCount == 2):
@@ -233,7 +233,7 @@ def getInput(prompt_):
             endif
           endfor
         endif
-      else:
+      elif (len(command) > 0):
         tabCount = 0
       endif
     elif (ord(char) == 127):

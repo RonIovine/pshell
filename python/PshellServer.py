@@ -59,6 +59,7 @@ import socket
 import struct
 import random
 import thread
+import PshellReadline
 from collections import OrderedDict
 from collections import namedtuple
 
@@ -399,6 +400,18 @@ enddef
 
 #################################################################################
 #################################################################################
+def __addTabCompletions():
+  global gCommandList
+  global gServerType
+  if (gServerType == LOCAL_SERVER):
+    for command in gCommandList:
+      PshellReadline.addTabCompletion(command["name"])
+    endfor
+  endif
+enddef
+
+#################################################################################
+#################################################################################
 def __runLocalServer():
   global gPrompt
   global gTitle
@@ -406,15 +419,17 @@ def __runLocalServer():
   gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
   __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
+  __addTabCompletions()
   __showWelcome()
   command = NULL
   while (command.lower() != "q"):
-    sys.stdout.write(gPrompt)
-    command = raw_input()
+    command = PshellReadline.getInput(gPrompt)
     if ((len(command) > 0) and (command.lower() != "q")):
+      print
       __processCommand(command)
     endif
   endwhile
+  print
 enddef
 
 #################################################################################
@@ -642,7 +657,8 @@ def __showWelcome():
   print "#  Type '?' or 'help' at prompt for command summary"
   print "#  Type '?' or '-h' after command for command usage"
   print "#"
-  print "#  Command abbreviation supported"
+  print "#  Full <TAB> completion, up-arrow recall, command"
+  print "#  line editing and command abbreviation supported"
   print "#"
   print "#"*maxBorderWidth
   print

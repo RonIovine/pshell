@@ -91,6 +91,7 @@ requires the 'expect' package to be installed.
   - libpshell-control.a      -- External pshell program control libpshell-control library (static)
   - PshellServer.py          -- Python version of PshellServer functionality (UDP, UNIX and LOCAL only)
   - PshellControl.py         -- External pshell program control Python module
+  - PshellReadline.py        -- Provides a readline like funtionality Python module
   - pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
   - pshell.py                -- Python version of stand-alone PSHELL UDP/UNIX client remote access program
   - pshell.exp               -- Expect script telnet wrapper to provide interface similar to the
@@ -105,6 +106,7 @@ requires the 'expect' package to be installed.
   - pshellControlDemo.py     -- Demo application using the pshell control Python module features
   - pshellAggregatorlDemo    -- Demo application using the pshell control library to aggregate multiple servers
   - pshellAggregatorlDemo.py -- Demo application using the pshell control Python module to aggregate multiple servers
+  - pshellReadlineDemo.py    -- Demo application using the PshellReadline Python module to solicit user input
   - traceFilterDemo          -- Demo application using the optional trace filter features
   - traceLogDemo             -- Demo application using the stand-alone TraceLog module
 
@@ -188,6 +190,7 @@ $PSHELL_INSTALL/demo/pshellNoServerDemo.cc      --  Demo using the multi-call bi
 $PSHELL_INSTALL/python/pshellServerDemo.py      --  Server demo for user defined commands (Python)
 $PSHELL_INSTALL/python/pshellControlDemo.py     --  Sample pshell control external client (Python)
 $PSHELL_INSTALL/python/pshellAggregatorDemo.py  --  Sample pshell control to aggregate multiple servers (Python)
+$PSHELL_INSTALL/python/pshellReadlineDemo.py    --  Sample program to show usage of PshellReadline (Python)
 
 EXECUTION:
 
