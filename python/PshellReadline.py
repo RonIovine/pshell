@@ -184,7 +184,7 @@ def getInput(prompt_):
           for keyword in gTabCompletions:
             sys.stdout.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
             numPrinted += 1
-            if (numPrinted > gMaxCompletionsPerLine):
+            if ((numPrinted == gMaxCompletionsPerLine) and (numPrinted < len(gTabCompletions))):
               sys.stdout.write("\n")
               numPrinted = 0
             endif

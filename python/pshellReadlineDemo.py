@@ -46,8 +46,9 @@ enddef = endif = endwhile = endfor = None
 # python does not have a native null string identifier, so create one
 NULL = ""
 
-PshellReadline.addTabCompletion("hello")
+PshellReadline.addTabCompletion("quit")
 PshellReadline.addTabCompletion("help")
+PshellReadline.addTabCompletion("hello")
 PshellReadline.addTabCompletion("world")
 PshellReadline.addTabCompletion("enhancedUsage")
 PshellReadline.addTabCompletion("keepAlive")
