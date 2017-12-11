@@ -11,6 +11,12 @@ enddef = endif = endwhile = endfor = None
 # python does not have a native null string identifier, so create one
 NULL = ""
 
+PshellReadline.addTabCompletion("hello")
+PshellReadline.addTabCompletion("help")
+PshellReadline.addTabCompletion("world")
+PshellReadline.addTabCompletion("enhancedUsage")
+PshellReadline.addTabCompletion("keepAlive")
+
 command = "xxx"
 while (command not in "quit"):
   command = PshellReadline.getInput("prompt> ")

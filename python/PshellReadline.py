@@ -2,6 +2,7 @@
 
 # import all our necessary modules
 import sys
+import os
 import tty
 import termios
 
@@ -12,23 +13,72 @@ enddef = endif = endwhile = endfor = None
 # python does not have a native null string identifier, so create one
 NULL = ""
 
+gTabCompletions = []
+gMaxTabCompletionKeywordLength = 0
+gMaxCompletionsPerLine = 0
+gCommandHistory = []
+gCommandHistoryPos = 0
+
+#################################################################################
+#################################################################################
+def addTabCompletion(keyword_):
+  global gTabCompletions
+  global gMaxTabCompletionKeywordLength
+  global gMaxCompletionsPerLine
+  for keyword in gTabCompletions:
+    if (keyword == keyword_):
+      # duplicate keyword found, return
+      return
+    endif
+  endfor
+  if (len(keyword_) > gMaxTabCompletionKeywordLength):
+    gMaxTabCompletionKeywordLength = len(keyword_)+2
+    gMaxCompletionsPerLine = 80/gMaxTabCompletionKeywordLength
+  endif
+  gTabCompletions.append(keyword_)
+enddef
+
+#################################################################################
+#################################################################################
 def getInput(prompt_):
+  global gCommandHistory
+  global gCommandHistoryPos
+  global gTabCompletions
+  global gMaxTabCompletionKeywordLength
+  global gMaxCompletionsPerLine
   sys.stdout.write(prompt_)
   inEsc = False
   esc = NULL
   command = NULL
   cursorPos = 0
+  tabCount = 0
   while (True):
-    char = __getch()
+    char = __getChar()
+    if (ord(char) != 9):
+      tabCont = 0
+    endif
     #print ord(char)
     if (inEsc == True):
       if (esc == '['):
         if (char == 'A'):
-          print "\nup-arrow"
+          # up-arrow
+          if (gCommandHistoryPos > 0):
+            gCommandHistoryPos -= 1
+            sys.stdout.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            command = gCommandHistory[gCommandHistoryPos]
+            sys.stdout.write(command)
+            cursorPos = len(command)
+          endif
           inEsc = False
           esc = NULL
         elif (char == 'B'):
-          print "down-arrow"
+          if (gCommandHistoryPos < len(gCommandHistory)-1):
+            gCommandHistoryPos += 1
+            sys.stdout.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            command = gCommandHistory[gCommandHistoryPos]
+            sys.stdout.write(command)
+            cursorPos = len(command)
+          endif
           inEsc = False
           esc = NULL
         elif (char == 'C'):
@@ -106,6 +156,8 @@ def getInput(prompt_):
     elif (ord(char) == 13):
       # carriage return
       if (len(command) > 0):
+        gCommandHistory.append(command)
+        gCommandHistoryPos = len(gCommandHistory)
         return (command)
       else:
         sys.stdout.write("\n"+prompt_)
@@ -122,6 +174,68 @@ def getInput(prompt_):
     elif (ord(char) == 27):
       # esc character
       inEsc = True
+    elif ((ord(char) == 9) and (len(command.split()) == 1)):
+      # tab character
+      tabCount += 1
+      if (tabCount == 2):
+        if (len(command) == 0):
+          sys.stdout.write("\n")
+          numPrinted = 0
+          for keyword in gTabCompletions:
+            sys.stdout.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+            numPrinted += 1
+            if (numPrinted > gMaxCompletionsPerLine):
+              sys.stdout.write("\n")
+              numPrinted = 0
+            endif
+          endfor
+          sys.stdout.write("\n"+prompt_)
+        else:
+          matchFound = False
+          for keyword in gTabCompletions:
+            if (command in keyword):
+              matchFound = True
+              break
+            enddef
+          endfor
+          if (matchFound == True):
+            sys.stdout.write("\n")
+            numPrinted = 0
+            for keyword in gTabCompletions:
+              if (command in keyword):
+                sys.stdout.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+                numPrinted += 1
+                if (numPrinted > gMaxCompletionsPerLine):
+                  sys.stdout.write("\n")
+                  numPrinted = 0
+                endif
+              endif
+            endfor
+            sys.stdout.write("\n"+prompt_+command)
+          endif
+        endif
+        tabCount = 0
+      elif ((tabCount == 1) and (len(command) > 0)):
+        numFound = 0
+        for keyword in gTabCompletions:
+          if (command in keyword):
+            numFound += 1
+          endif
+        endfor
+        if (numFound == 1):
+          tabCount = 0
+          for keyword in gTabCompletions:
+            if ((command != keyword) and command in keyword):
+              sys.stdout.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+              command = keyword
+              sys.stdout.write(command)
+              cursorPos = len(command)           
+            endif
+          endfor
+        endif
+      else:
+        tabCount = 0
+      endif
     elif (ord(char) == 127):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
@@ -135,26 +249,35 @@ def getInput(prompt_):
         cursorPos = 0
         sys.stdout.write("\b"*len(command))
       endif
+    elif (ord(char) == 3):
+      # ctrl-c, exit program
+      print
+      sys.exit(0)
     elif (ord(char) == 5):
       # end
       if (cursorPos < len(command)):
         sys.stdout.write(command[cursorPos:])
         cursorPos = len(command)
       endif
-    else:
-      print "char value: %d" % ord(char)
+    elif (ord(char) != 9):
+      # don't print out tab if multi keyword command
+      #sys.stdout.write("\nchar value: %d" % ord(char))
+      #sys.stdout.write("\n"+prompt_)
+      None
     endif
   endwhile
 enddef
 
-def __getch():
-  fd = sys.stdin.fileno()
-  old_settings = termios.tcgetattr(fd)
+#################################################################################
+#################################################################################
+def __getChar():
+  inFd = sys.stdin
+  old_settings = termios.tcgetattr(inFd)
   try:
-    tty.setraw(fd)
-    ch = sys.stdin.read(1)
+    tty.setraw(inFd)
+    char = inFd.read(1)
   finally:
-    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-  return ch
+    termios.tcsetattr(inFd, termios.TCSADRAIN, old_settings)
+  return (char)
 enddef
 
