@@ -37,6 +37,8 @@
 #################################################################################
 
 import sys
+import select
+import socket
 import PshellReadline
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
@@ -52,6 +54,8 @@ PshellReadline.addTabCompletion("hello")
 PshellReadline.addTabCompletion("world")
 PshellReadline.addTabCompletion("enhancedUsage")
 PshellReadline.addTabCompletion("keepAlive")
+
+PshellReadline.setFileDescriptors(sys.stdin, sys.stdout)
 
 command = "xxx"
 while (command.lower() not in "quit"):

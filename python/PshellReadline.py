@@ -1,27 +1,122 @@
 #!/usr/bin/python
 
+#################################################################################
+# 
+# Copyright (c) 2009, Ron Iovine, All rights reserved.  
+#  
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Ron Iovine nor the names of its contributors 
+#       may be used to endorse or promote products derived from this software 
+#       without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE. 
+#
+#################################################################################
+
+#################################################################################
+#
+# This module implments a readline like functionality for user input.  This can
+# work with any character stream based input/output device, i.e. keyboard input
+# over a serial tty, or over a TCP/telnet connection.  This module will provide
+# up-arrow command history recall, command line editing, and TAB completion of
+# registered keywords.
+#
+#################################################################################
+
 # import all our necessary modules
 import sys
 import os
 import tty
 import termios
 
-# dummy variables so we can create pseudo end block indicators, add these identifiers to your
-# list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
+# dummy variables so we can create pseudo end block indicators, add these 
+# identifiers to your list of python keywords in your editor to get syntax 
+# highlighting on these identifiers, sorry Guido
 enddef = endif = endwhile = endfor = None
 
-# python does not have a native null string identifier, so create one
-NULL = ""
-
-gTabCompletions = []
-gMaxTabCompletionKeywordLength = 0
-gMaxCompletionsPerLine = 0
-gCommandHistory = []
-gCommandHistoryPos = 0
+#################################################################################
+#
+# global "public" data, these are used for various parts of the public API
+#
+#################################################################################
 
 #################################################################################
+#
+# "public" API functions
+#
+# Users of this module should only access functionality via these "public"
+# methods.  This is broken up into "public" and "private" sections for 
+# readability and to not expose the implementation in the API definition
+#
+#################################################################################
+
+#################################################################################
+#
+# Set the input andoutput file descriptors, if this function is not called,
+# the default is stdin and stdout.  The file descriptors given to this function
+# must be opened and running in raw character mode.
+#
+#################################################################################
+def setFileDescriptors(inFd_, outFd_):
+  __setFileDescriptors(inFd_, outFd_)
+enddef
+
+#################################################################################
+#
+# Add a keyword to the TAB completion list.  TAB completion will only be applied
+# to the first keyword of a given user typed command
+#
 #################################################################################
 def addTabCompletion(keyword_):
+  __addTabCompletion(keyword_)
+enddef
+
+#################################################################################
+#
+# Issue the user prompt and return the entered command line value.
+#
+#################################################################################
+def getInput(prompt_):
+  return (__getInput(prompt_))
+enddef
+
+#################################################################################
+#
+# "private" functions and data
+#
+# Users of this module should never access any of these "private" items directly,
+# these are meant to hide the implementation from the presentation of the public
+# API
+#
+#################################################################################
+
+#################################################################################
+#################################################################################
+def __setFileDescriptors(inFd_, outFd_):
+  global gInFd
+  global gOutFd
+  gInFd = inFd_
+  gOUtFd = outFd_
+enddef
+
+#################################################################################
+#################################################################################
+def __addTabCompletion(keyword_):
   global gTabCompletions
   global gMaxTabCompletionKeywordLength
   global gMaxCompletionsPerLine
@@ -40,13 +135,15 @@ enddef
 
 #################################################################################
 #################################################################################
-def getInput(prompt_):
+def __getInput(prompt_):
   global gCommandHistory
   global gCommandHistoryPos
   global gTabCompletions
   global gMaxTabCompletionKeywordLength
   global gMaxCompletionsPerLine
-  sys.stdout.write(prompt_)
+  global gOutFd
+
+  gOutFd.write(prompt_)
   inEsc = False
   esc = NULL
   command = NULL
@@ -64,9 +161,9 @@ def getInput(prompt_):
           # up-arrow
           if (gCommandHistoryPos > 0):
             gCommandHistoryPos -= 1
-            sys.stdout.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
             command = gCommandHistory[gCommandHistoryPos]
-            sys.stdout.write(command)
+            gOutFd.write(command)
             cursorPos = len(command)
           endif
           inEsc = False
@@ -74,9 +171,9 @@ def getInput(prompt_):
         elif (char == 'B'):
           if (gCommandHistoryPos < len(gCommandHistory)-1):
             gCommandHistoryPos += 1
-            sys.stdout.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
             command = gCommandHistory[gCommandHistoryPos]
-            sys.stdout.write(command)
+            gOutFd.write(command)
             cursorPos = len(command)
           endif
           inEsc = False
@@ -84,7 +181,7 @@ def getInput(prompt_):
         elif (char == 'C'):
           # right arrow
           if (cursorPos < len(command)):
-            sys.stdout.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+            gOutFd.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
             cursorPos += 1
           endif
           inEsc = False
@@ -93,7 +190,7 @@ def getInput(prompt_):
           # left arrow
           if (cursorPos > 0):
             cursorPos -= 1
-            sys.stdout.write("\b")
+            gOutFd.write("\b")
           endif
           inEsc = False
           esc = NULL
@@ -101,14 +198,14 @@ def getInput(prompt_):
           print "home2"
           if (cursorPos > 0):
             cursorPos = 0
-            sys.stdout.write("\b"*len(command))
+            gOutFd.write("\b"*len(command))
           endif
         #elif (char == '3'):
         #  print "delete"
         elif (char == '~'):
           # delete under cursor
           if (cursorPos < len(command)):
-            sys.stdout.write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
+            gOutFd.write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
             command = command[:cursorPos] + command[cursorPos+1:]
           endif
           inEsc = False
@@ -116,7 +213,7 @@ def getInput(prompt_):
         elif (char == '4'):
           print "end2"
           if (cursorPos < len(command)):
-            sys.stdout.write(command[cursorPos:])
+            gOutFd.write(command[cursorPos:])
             cursorPos = len(command)
           endif
         endif
@@ -125,12 +222,12 @@ def getInput(prompt_):
           # home
           if (cursorPos > 0):
             cursorPos = 0
-            sys.stdout.write("\b"*len(command))
+            gOutFd.write("\b"*len(command))
           endif
         elif (char == 'F'):
           #end
           if (cursorPos < len(command)):
-            sys.stdout.write(command[cursorPos:])
+            gOutFd.write(command[cursorPos:])
             cursorPos = len(command)
           endif
         endif
@@ -147,10 +244,10 @@ def getInput(prompt_):
       # than when at the beginning or end
       if ((cursorPos > 0) and (cursorPos < len(command))):
         command = command[:cursorPos] + char + command[cursorPos:]
-        sys.stdout.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+        gOutFd.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       else:
         command = command[:cursorPos] + char + command[cursorPos:]
-        sys.stdout.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+        gOutFd.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       endif
       cursorPos += 1
     elif (ord(char) == 13):
@@ -160,15 +257,15 @@ def getInput(prompt_):
         gCommandHistoryPos = len(gCommandHistory)
         return (command)
       else:
-        sys.stdout.write("\n"+prompt_)
+        gOutFd.write("\n"+prompt_)
       endif
     elif (ord(char) == 11):
       # kill to eol
-      sys.stdout.write(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
+      gOutFd.write(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
       command = command[:cursorPos]
     elif (ord(char) == 21):
       # kill whole line
-      sys.stdout.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+      gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
       command = NULL
       cursorPos = 0
     elif (ord(char) == 27):
@@ -179,17 +276,17 @@ def getInput(prompt_):
       tabCount += 1
       if (tabCount == 2):
         if (len(command) == 0):
-          sys.stdout.write("\n")
+          gOutFd.write("\n")
           numPrinted = 0
           for keyword in gTabCompletions:
-            sys.stdout.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+            gOutFd.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
             numPrinted += 1
             if ((numPrinted == gMaxCompletionsPerLine) and (numPrinted < len(gTabCompletions))):
-              sys.stdout.write("\n")
+              gOutFd.write("\n")
               numPrinted = 0
             endif
           endfor
-          sys.stdout.write("\n"+prompt_)
+          gOutFd.write("\n"+prompt_)
         else:
           matchFound = False
           for keyword in gTabCompletions:
@@ -199,19 +296,19 @@ def getInput(prompt_):
             enddef
           endfor
           if (matchFound == True):
-            sys.stdout.write("\n")
+            gOutFd.write("\n")
             numPrinted = 0
             for keyword in gTabCompletions:
               if (command in keyword):
-                sys.stdout.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+                gOutFd.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
                 numPrinted += 1
                 if (numPrinted > gMaxCompletionsPerLine):
-                  sys.stdout.write("\n")
+                  gOutFd.write("\n")
                   numPrinted = 0
                 endif
               endif
             endfor
-            sys.stdout.write("\n"+prompt_+command)
+            gOutFd.write("\n"+prompt_+command)
           endif
         endif
         tabCount = 0
@@ -226,9 +323,9 @@ def getInput(prompt_):
           tabCount = 0
           for keyword in gTabCompletions:
             if ((command != keyword) and command in keyword):
-              sys.stdout.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+              gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
               command = keyword
-              sys.stdout.write(command)
+              gOutFd.write(command)
               cursorPos = len(command)           
             endif
           endfor
@@ -239,7 +336,7 @@ def getInput(prompt_):
     elif (ord(char) == 127):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
-        sys.stdout.write("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
+        gOutFd.write("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
         command = command[:cursorPos-1] + command[cursorPos:]
         cursorPos -= 1
       endif
@@ -247,7 +344,7 @@ def getInput(prompt_):
       # home
       if (cursorPos > 0):
         cursorPos = 0
-        sys.stdout.write("\b"*len(command))
+        gOutFd.write("\b"*len(command))
       endif
     elif (ord(char) == 3):
       # ctrl-c, exit program
@@ -256,13 +353,13 @@ def getInput(prompt_):
     elif (ord(char) == 5):
       # end
       if (cursorPos < len(command)):
-        sys.stdout.write(command[cursorPos:])
+        gOutFd.write(command[cursorPos:])
         cursorPos = len(command)
       endif
     elif (ord(char) != 9):
       # don't print out tab if multi keyword command
-      #sys.stdout.write("\nchar value: %d" % ord(char))
-      #sys.stdout.write("\n"+prompt_)
+      #gOutFd.write("\nchar value: %d" % ord(char))
+      #gOutFd.write("\n"+prompt_)
       None
     endif
   endwhile
@@ -271,13 +368,34 @@ enddef
 #################################################################################
 #################################################################################
 def __getChar():
-  inFd = sys.stdin
-  old_settings = termios.tcgetattr(inFd)
-  try:
-    tty.setraw(inFd)
-    char = inFd.read(1)
-  finally:
-    termios.tcsetattr(inFd, termios.TCSADRAIN, old_settings)
+  global gInFd
+  if (gInFd == sys.stdin):
+    oldSettings = termios.tcgetattr(gInFd)
+    try:
+      tty.setraw(gInFd)
+      char = gInFd.read(1)
+    finally:
+      termios.tcsetattr(gInFd, termios.TCSADRAIN, oldSettings)
+  else:
+    char = gInFd.read(1)
+  endif
   return (char)
 enddef
+
+#################################################################################
+#
+# global "private" data
+#
+#################################################################################
+
+# python does not have a native null string identifier, so create one
+NULL = ""
+
+gInFd = sys.stdin
+gOutFd = sys.stdout
+gTabCompletions = []
+gMaxTabCompletionKeywordLength = 0
+gMaxCompletionsPerLine = 0
+gCommandHistory = []
+gCommandHistoryPos = 0
 
