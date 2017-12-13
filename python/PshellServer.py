@@ -74,11 +74,18 @@ enddef = endif = endwhile = endfor = None
 #
 #################################################################################
 
-# No TCP server available for now, to be added at a future date
+# Valid server types, udp/unix servers require the 'pshell' or 'pshell.py'
+# client programs, tcp servers require a 'telnet' client, local servers
+# resuire no client (all user interaction done directly with server 
+# initiated user input solitication)
 UDP_SERVER = "udp"
+TCP_SERVER = "tcp"
 UNIX_SERVER = "unix"
 LOCAL_SERVER = "local"
 
+# BLOCKING_MODE wil never return control to the caller of startServer,
+# NON_BLOCKING_MODE will spawn a thread to run the server and will
+# return control to the caller of startServer
 BLOCKING_MODE = 0
 NON_BLOCKING_MODE = 1
 
@@ -299,10 +306,45 @@ enddef
   
 #################################################################################
 #################################################################################
+def __createSocket():
+  global gServerName
+  global gServerType
+  global gHostnameOrIpAddr
+  global gPort
+  global gSocketFd
+  global gUnixSocketPath
+  global gUnixSourceAddress
+  if (gServerType == UDP_SERVER):
+    # IP domain socket
+    gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    if (gHostnameOrIpAddr == "anyhost"):
+      gSocketFd.bind((NULL, gPort))
+    elif (gHostnameOrIpAddr == "localhost"):
+      gSocketFd.bind(("127.0.0.1", gPort))
+    else:
+      gSocketFd.bind((gHostnameOrIpAddr, gPort))
+    endif
+  elif (gServerType == UNIX_SERVER):
+    # UNIX domain socket
+    gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    gUnixSourceAddress = gUnixSocketPath+gServerName
+    # cleanup any old handle that might be hanging around
+    if (os.path.isfile(gUnixSourceAddress)):
+      os.unlink(gUnixSourceAddress)
+    endif
+    gSocketFd.bind(gUnixSourceAddress)
+  endif
+  return (True)
+enddef
+
+#################################################################################
+#################################################################################
 def __runServer():
   global gServerType
   if (gServerType == UDP_SERVER):
     __runUDPServer()
+  elif (gServerType == TCP_SERVER):
+    __runTCPServer()
   elif (gServerType == UNIX_SERVER):
     __runUNIXServer()
   else:  # local server 
@@ -336,6 +378,28 @@ def __runUNIXServer():
       __receive()
     endwhile
   endif
+enddef
+
+#################################################################################
+#################################################################################
+def __runLocalServer():
+  global gPrompt
+  global gTitle
+  gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
+  gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
+  __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
+  __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
+  __addTabCompletions()
+  __showWelcome()
+  command = NULL
+  while (command.lower() != "q"):
+    command = PshellReadline.getInput(gPrompt)
+    if ((len(command) > 0) and (command.lower() != "q")):
+      print
+      __processCommand(command)
+    endif
+  endwhile
+  print
 enddef
 
 #################################################################################
@@ -412,61 +476,6 @@ enddef
 
 #################################################################################
 #################################################################################
-def __runLocalServer():
-  global gPrompt
-  global gTitle
-  gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
-  gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
-  __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
-  __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
-  __addTabCompletions()
-  __showWelcome()
-  command = NULL
-  while (command.lower() != "q"):
-    command = PshellReadline.getInput(gPrompt)
-    if ((len(command) > 0) and (command.lower() != "q")):
-      print
-      __processCommand(command)
-    endif
-  endwhile
-  print
-enddef
-
-#################################################################################
-#################################################################################
-def __createSocket():
-  global gServerName
-  global gServerType
-  global gHostnameOrIpAddr
-  global gPort
-  global gSocketFd
-  global gUnixSocketPath
-  global gUnixSourceAddress
-  if (gServerType == UDP_SERVER):
-    # IP domain socket
-    gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    if (gHostnameOrIpAddr == "anyhost"):
-      gSocketFd.bind((NULL, gPort))
-    elif (gHostnameOrIpAddr == "localhost"):
-      gSocketFd.bind(("127.0.0.1", gPort))
-    else:
-      gSocketFd.bind((gHostnameOrIpAddr, gPort))
-    endif
-  elif (gServerType == UNIX_SERVER):
-    # UNIX domain socket
-    gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    gUnixSourceAddress = gUnixSocketPath+gServerName
-    # cleanup any old handle that might be hanging around
-    if (os.path.isfile(gUnixSourceAddress)):
-      os.unlink(gUnixSourceAddress)
-    endif
-    gSocketFd.bind(gUnixSourceAddress)
-  endif
-  return (True)
-enddef
-
-#################################################################################
-#################################################################################
 def __receive():
   global gPshellMsg
   global gSocketFd
@@ -512,8 +521,8 @@ def __processCommand(command_):
   else:
     gCommandDispatched = True
     gPshellMsg["payload"] = NULL
-    gArgs = command_.lower().split()[gFirstArgPos:]
-    command_ = command_.lower().split()[0]
+    gArgs = command_.split()[gFirstArgPos:]
+    command_ = command_.split()[0]
     numMatches = 0
     if (command_ == "?"):
       __help(gArgs)
@@ -638,12 +647,18 @@ enddef
 #################################################################################
 def __showWelcome():
   global gTitle
+  global gServerType
+  global gHostnameOrIpAddr
   # put up our window title banner
   sys.stdout.write("\033]0;" + gTitle + "\007")
   sys.stdout.flush()
   # show our welcome screen
   banner = "#  %s" % __getDisplayBanner()
-  server = "#  Single session LOCAL server: %s[%s]" % (__getDisplayServerName(), __getDisplayServerType())
+  if (gServerType == LOCAL_SERVER):
+    server = "#  Single session LOCAL server: %s[%s]" % (__getDisplayServerName(), __getDisplayServerType())
+  else:
+    server = "#  Single session TCP server: %s[%s]" % (__getDisplayServerName(), gHostnameOrIpAddr)
+  endif
   maxBorderWidth = max(58, len(banner),len(server))+2
   print
   print "#"*maxBorderWidth
@@ -652,7 +667,11 @@ def __showWelcome():
   print "#"
   print server
   print "#"
-  print "#  Idle session timeout: NONE"
+  if (gServerType == LOCAL_SERVER):
+    print "#  Idle session timeout: NONE"
+  else:
+    print "#  Idle session timeout: 10 minutes"
+  endif
   print "#"
   print "#  Type '?' or 'help' at prompt for command summary"
   print "#  Type '?' or '-h' after command for command usage"

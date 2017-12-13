@@ -52,11 +52,12 @@ NULL = ""
 #####################################################
 def showUsage():
   print
-  print "Usage: pshellReadlineDemo.py -tty | -socket"
+  print "Usage: pshellReadlineDemo.py {-tty | -socket} [<idleTimeout>]"
   print
   print "  where:"
-  print "    -tty    - serial terminal using stdin and stdout"
-  print "    -socket - TCP socket using telnet client"
+  print "    -tty          - serial terminal using stdin and stdout"
+  print "    -socket       - TCP socket using telnet client"
+  print "    <idleTimeout> - the idle session timeout in minutes"
   print
   sys.exit(0)
 enddef
@@ -67,7 +68,8 @@ enddef
 #
 ##############################
 
-if (len(sys.argv) != 2):
+idleTimeout = 0
+if ((len(sys.argv) < 2) or (len(sys.argv) > 3)):
   showUsage()
 elif (sys.argv[1] == "-tty"):
   serialType = PshellReadline.TTY
@@ -75,6 +77,10 @@ elif (sys.argv[1] == "-socket"):
   serialType = PshellReadline.SOCKET
 else:
   showUsage()
+endif
+
+if (len(sys.argv) == 3):
+  idleTimeout = PshellReadline.ONE_MINUTE*int(sys.argv[2])
 endif
 
 # add some keywords for TAB completion, the completions
@@ -110,10 +116,12 @@ if (serialType == PshellReadline.SOCKET):
 
 endif
 
+PshellReadline.setIdleTimeout(idleTimeout)
+
 command = "xxx"
-while (command.lower() not in "quit"):
+while (not PshellReadline.IDLE_SESSION and command.lower() not in "quit"):
   command = PshellReadline.getInput("prompt> ")
-  if (command not in "quit"):
+  if (not PshellReadline.IDLE_SESSION and command not in "quit"):
     PshellReadline.write("\ncommand: '%s'\n" % command)
   endif
 endwhile

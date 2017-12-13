@@ -43,6 +43,7 @@ import sys
 import os
 import tty
 import termios
+import select
 
 # dummy variables so we can create pseudo end block indicators, add these 
 # identifiers to your list of python keywords in your editor to get syntax 
@@ -55,8 +56,17 @@ enddef = endif = endwhile = endfor = None
 #
 #################################################################################
 
+# valid serial types, TTY is for serial terminal control and defaults to
+# stdin and stdout, SOCKET uses a serial TCP socket placed in 'telnet'
+# mode for control via a telnet client
+
 TTY = "tty"
 SOCKET = "socket"
+# indicated to the calling app that we got an idle session timeout
+IDLE_SESSION = False
+# use for the timeout value when setting the idleTimeout
+ONE_MINUTE = 60
+IDLE_TIMEOUT_NONE = 0
 
 #################################################################################
 #
@@ -72,14 +82,29 @@ SOCKET = "socket"
 #
 # Set the input andoutput file descriptors, if this function is not called,
 # the default is stdin and stdout.  The file descriptors given to this function
-# must be opened and running in raw character mode.
+# must be opened and running in raw character mode.  The idleTimeout specifies 
+# the time in minutes to return from the getInput function with the 
+# PshellReadline.IDLE_SESSION flag set.  Use the PshellReadline.ONE_MINUTE
+# value to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5
 #
 #################################################################################
-def setFileDescriptors(inFd_, outFd_, serialType_):
-  __setFileDescriptors(inFd_, outFd_, serialType_)
+def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_NONE):
+  __setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_)
 enddef
 
 #################################################################################
+#
+# Set the idle session timeout as described above
+#
+#################################################################################
+def setIdleTimeout(idleTimeout_):
+  __setIdleTimeout(idleTimeout_)
+enddef
+
+#################################################################################
+#
+# Write a string to our output file descriptor
+#
 #################################################################################
 def write(string_):
   __write(string_)
@@ -116,7 +141,7 @@ enddef
 
 #################################################################################
 #################################################################################
-def __setFileDescriptors(inFd_, outFd_, serialType_):
+def __setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_):
   global gInFd
   global gOutFd
   global gTcpNegotiate
@@ -124,11 +149,19 @@ def __setFileDescriptors(inFd_, outFd_, serialType_):
   gInFd = inFd_
   gOutFd = outFd_
   gSerialType = serialType_
+  __setIdleTimeout(idleTimeout_)
   # if a socket serial device, setup for telnet client control
   if (gSerialType == SOCKET):
     __write(gTcpNegotiate)
     gInFd.recv(len(gTcpNegotiate))
   endif
+enddef
+
+#################################################################################
+#################################################################################
+def __setIdleTimeout(idleTimeout_):
+  global gIdleTimeout
+  gIdleTimeout = idleTimeout_
 enddef
 
 #################################################################################
@@ -144,7 +177,7 @@ def __addTabCompletion(keyword_):
     endif
   endfor
   if (len(keyword_) > gMaxTabCompletionKeywordLength):
-    gMaxTabCompletionKeywordLength = len(keyword_)+2
+    gMaxTabCompletionKeywordLength = len(keyword_)+3
     gMaxCompletionsPerLine = 80/gMaxTabCompletionKeywordLength
   endif
   gTabCompletions.append(keyword_.strip())
@@ -159,6 +192,7 @@ def __getInput(prompt_):
   global gMaxTabCompletionKeywordLength
   global gMaxCompletionsPerLine
   global gOutFd
+  global IDLE_SESSION
 
   __write(prompt_)
   inEsc = False
@@ -166,8 +200,12 @@ def __getInput(prompt_):
   command = NULL
   cursorPos = 0
   tabCount = 0
+  IDLE_SESSION = False
   while (True):
     char = __getChar()
+    if (IDLE_SESSION == True):
+      return (command)
+    endif
     if (ord(char) != 9):
       tabCont = 0
     endif
@@ -390,6 +428,7 @@ def __write(string_):
   if (gSerialType == TTY):
     # serial terminal control
     gOutFd.write(string_)
+    gOutFd.flush()
   else:
     # TCP socket with telnet client
     string = NULL
@@ -409,17 +448,41 @@ enddef
 def __getChar():
   global gInFd
   global gSerialType
+  global gIdleTimeout
+  global IDLE_SESSION
   if (gSerialType == TTY):
     # serial terminal control
     oldSettings = termios.tcgetattr(gInFd)
     try:
       tty.setraw(gInFd)
-      char = gInFd.read(1)
+      if (gIdleTimeout > 0):
+        inputready, outputready, exceptready = select.select([gInFd], [], [], gIdleTimeout)
+        if (len(inputready) > 0):
+          char = gInFd.read(1)
+        else:
+          __write("\r\nIdle session timeout");
+          IDLE_SESSION = True
+          char = NULL
+        endif
+      else:
+        char = gInFd.read(1)
+      endif
     finally:
       termios.tcsetattr(gInFd, termios.TCSADRAIN, oldSettings)
   else:
     # TCP socket with telnet client
-    char = gInFd.recv(1)
+    if (gIdleTimeout > 0):
+      inputready, outputready, exceptready = select.select([gInFd], [], [], gIdleTimeout)
+      if (len(inputready) > 0):
+        char = gInFd.recv(1)
+      else:
+        __write("\nIdle session timeout\n");
+        IDLE_SESSION = True
+        char = NULL
+      endif
+    else:
+      char = gInFd.recv(1)
+    endif
   endif
   return (char)
 enddef
@@ -434,6 +497,7 @@ enddef
 NULL = ""
 
 gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
+gIdleTimeout = 0
 gSerialType = TTY
 gInFd = sys.stdin
 gOutFd = sys.stdout

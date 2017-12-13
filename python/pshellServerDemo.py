@@ -51,22 +51,22 @@ enddef = endif = endwhile = endfor = None
 
 #################################################################################
 #################################################################################
-def hello(args_):
+def hello(argv):
   PshellServer.printf("hello command dispatched:\n")
-  for index, arg in enumerate(args_):
+  for index, arg in enumerate(argv):
     PshellServer.printf("  argv[%d]: '%s'\n" % (index, arg))
   endfor
 enddef
 
 #################################################################################
 #################################################################################
-def world(args_):
+def world(argv):
   PshellServer.printf("world command dispatched:\n")
 enddef
 
 #################################################################################
 #################################################################################
-def enhancedUsage(args_):
+def enhancedUsage(argv):
 
   # see if the user asked for help
   if (PshellServer.isHelp()):
@@ -77,7 +77,7 @@ def enhancedUsage(args_):
   else:
     # do normal function processing 
     PshellServer.printf("enhancedUsage command dispatched:\n")
-    for index, arg in enumerate(args_):
+    for index, arg in enumerate(argv):
       PshellServer.printf("  argv[%d]: '%s'\n" % (index, arg))
     endfor
   endif
@@ -86,26 +86,26 @@ enddef
 
 #################################################################################
 #################################################################################
-def keepAlive(args_):
-  if (args_[0] == "dots"):
+def keepAlive(argv):
+  if (argv[0] == "dots"):
     PshellServer.printf("marching dots keep alive:\n")
     for i in range(1,10):
       PshellServer.march(".")
       time.sleep(1)
     endfor
-  elif (args_[0] == "bang"):
+  elif (argv[0] == "bang"):
     PshellServer.printf("marching 'bang' keep alive:\n");
     for  i in range(1,10):
       PshellServer.march("!")
       time.sleep(1)
     endfor
-  elif (args_[0] == "pound"):
+  elif (argv[0] == "pound"):
     PshellServer.printf("marching pound keep alive:\n");
     for  i in range(1,10):
       PshellServer.march("#")
       time.sleep(1)
     endfor
-  elif (args_[0] == "wheel"):
+  elif (argv[0] == "wheel"):
     PshellServer.printf("spinning wheel keep alive:\n")
     for  i in range(1,10):
       # string is optional, use NULL to omit
