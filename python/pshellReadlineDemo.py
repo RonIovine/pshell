@@ -32,7 +32,7 @@
 #
 # This demo programshows the usage of the PshellReadline module.  This module
 # provides functionality similar to the readline library.  This will work with
-# any character based input stream, i.e.  terminal, serial, tcp etc.
+# any character based input stream, i.e.  terminal, serial, TCP etc.
 #
 #################################################################################
 
@@ -48,6 +48,37 @@ enddef = endif = endwhile = endfor = None
 # python does not have a native null string identifier, so create one
 NULL = ""
 
+#####################################################
+#####################################################
+def showUsage():
+  print
+  print "Usage: pshellReadlineDemo.py -tty | -socket"
+  print
+  print "  where:"
+  print "    -tty    - serial terminal using stdin and stdout"
+  print "    -socket - TCP socket using telnet client"
+  print
+  sys.exit(0)
+enddef
+
+##############################
+#
+# start of main program
+#
+##############################
+
+if (len(sys.argv) != 2):
+  showUsage()
+elif (sys.argv[1] == "-tty"):
+  serialType = PshellReadline.TTY
+elif (sys.argv[1] == "-socket"):
+  serialType = PshellReadline.SOCKET
+else:
+  showUsage()
+endif
+
+# add some keywords for TAB completion, the completions
+# only apply to the first keyword of a a given command
 PshellReadline.addTabCompletion("quit")
 PshellReadline.addTabCompletion("help")
 PshellReadline.addTabCompletion("hello")
@@ -55,13 +86,35 @@ PshellReadline.addTabCompletion("world")
 PshellReadline.addTabCompletion("enhancedUsage")
 PshellReadline.addTabCompletion("keepAlive")
 
-PshellReadline.setFileDescriptors(sys.stdin, sys.stdout)
+if (serialType == PshellReadline.SOCKET):
+  
+  # Create a TCP/IP socket
+  sockFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  sockFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  
+  # Bind the socket to the port
+  sockFd.bind((NULL, 9005))
+  
+  # Listen for incoming connections
+  sockFd.listen(1)
+  
+  # Wait for a connection
+  print "waiting for a connection on port 9005, use 'telnet localhost 9005' to connect"
+  connectFd, clientAddr = sockFd.accept()
+  print "connection accepted"
+
+  # set our connected file descriptors
+  PshellReadline.setFileDescriptors(connectFd, connectFd, PshellReadline.SOCKET)
+  
+  sockFd.shutdown(socket.SHUT_RDWR);
+
+endif
 
 command = "xxx"
 while (command.lower() not in "quit"):
   command = PshellReadline.getInput("prompt> ")
   if (command not in "quit"):
-    print "\ncommand: '%s'" % command
+    PshellReadline.write("\ncommand: '%s'\n" % command)
   endif
 endwhile
 print 

@@ -55,6 +55,9 @@ enddef = endif = endwhile = endfor = None
 #
 #################################################################################
 
+TTY = "tty"
+SOCKET = "socket"
+
 #################################################################################
 #
 # "public" API functions
@@ -72,8 +75,14 @@ enddef = endif = endwhile = endfor = None
 # must be opened and running in raw character mode.
 #
 #################################################################################
-def setFileDescriptors(inFd_, outFd_):
-  __setFileDescriptors(inFd_, outFd_)
+def setFileDescriptors(inFd_, outFd_, serialType_):
+  __setFileDescriptors(inFd_, outFd_, serialType_)
+enddef
+
+#################################################################################
+#################################################################################
+def write(string_):
+  __write(string_)
 enddef
 
 #################################################################################
@@ -107,11 +116,19 @@ enddef
 
 #################################################################################
 #################################################################################
-def __setFileDescriptors(inFd_, outFd_):
+def __setFileDescriptors(inFd_, outFd_, serialType_):
   global gInFd
   global gOutFd
+  global gTcpNegotiate
+  global gSerialType
   gInFd = inFd_
-  gOUtFd = outFd_
+  gOutFd = outFd_
+  gSerialType = serialType_
+  # if a socket serial device, setup for telnet client control
+  if (gSerialType == SOCKET):
+    __write(gTcpNegotiate)
+    gInFd.recv(len(gTcpNegotiate))
+  endif
 enddef
 
 #################################################################################
@@ -143,7 +160,7 @@ def __getInput(prompt_):
   global gMaxCompletionsPerLine
   global gOutFd
 
-  gOutFd.write(prompt_)
+  __write(prompt_)
   inEsc = False
   esc = NULL
   command = NULL
@@ -161,9 +178,9 @@ def __getInput(prompt_):
           # up-arrow
           if (gCommandHistoryPos > 0):
             gCommandHistoryPos -= 1
-            gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
             command = gCommandHistory[gCommandHistoryPos]
-            gOutFd.write(command)
+            __write(command)
             cursorPos = len(command)
           endif
           inEsc = False
@@ -171,9 +188,9 @@ def __getInput(prompt_):
         elif (char == 'B'):
           if (gCommandHistoryPos < len(gCommandHistory)-1):
             gCommandHistoryPos += 1
-            gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
             command = gCommandHistory[gCommandHistoryPos]
-            gOutFd.write(command)
+            __write(command)
             cursorPos = len(command)
           endif
           inEsc = False
@@ -181,7 +198,7 @@ def __getInput(prompt_):
         elif (char == 'C'):
           # right arrow
           if (cursorPos < len(command)):
-            gOutFd.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+            __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
             cursorPos += 1
           endif
           inEsc = False
@@ -190,7 +207,7 @@ def __getInput(prompt_):
           # left arrow
           if (cursorPos > 0):
             cursorPos -= 1
-            gOutFd.write("\b")
+            __write("\b")
           endif
           inEsc = False
           esc = NULL
@@ -198,14 +215,14 @@ def __getInput(prompt_):
           print "home2"
           if (cursorPos > 0):
             cursorPos = 0
-            gOutFd.write("\b"*len(command))
+            __write("\b"*len(command))
           endif
         #elif (char == '3'):
         #  print "delete"
         elif (char == '~'):
           # delete under cursor
           if (cursorPos < len(command)):
-            gOutFd.write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
+            __write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
             command = command[:cursorPos] + command[cursorPos+1:]
           endif
           inEsc = False
@@ -213,7 +230,7 @@ def __getInput(prompt_):
         elif (char == '4'):
           print "end2"
           if (cursorPos < len(command)):
-            gOutFd.write(command[cursorPos:])
+            __write(command[cursorPos:])
             cursorPos = len(command)
           endif
         endif
@@ -222,12 +239,12 @@ def __getInput(prompt_):
           # home
           if (cursorPos > 0):
             cursorPos = 0
-            gOutFd.write("\b"*len(command))
+            __write("\b"*len(command))
           endif
         elif (char == 'F'):
           #end
           if (cursorPos < len(command)):
-            gOutFd.write(command[cursorPos:])
+            __write(command[cursorPos:])
             cursorPos = len(command)
           endif
         endif
@@ -244,10 +261,10 @@ def __getInput(prompt_):
       # than when at the beginning or end
       if ((cursorPos > 0) and (cursorPos < len(command))):
         command = command[:cursorPos] + char + command[cursorPos:]
-        gOutFd.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+        __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       else:
         command = command[:cursorPos] + char + command[cursorPos:]
-        gOutFd.write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+        __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       endif
       cursorPos += 1
     elif (ord(char) == 13):
@@ -257,15 +274,15 @@ def __getInput(prompt_):
         gCommandHistoryPos = len(gCommandHistory)
         return (command)
       else:
-        gOutFd.write("\n"+prompt_)
+        __write("\n"+prompt_)
       endif
     elif (ord(char) == 11):
       # kill to eol
-      gOutFd.write(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
+      __write(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
       command = command[:cursorPos]
     elif (ord(char) == 21):
       # kill whole line
-      gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+      __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
       command = NULL
       cursorPos = 0
     elif (ord(char) == 27):
@@ -276,17 +293,17 @@ def __getInput(prompt_):
       tabCount += 1
       if (tabCount == 2):
         if (len(command) == 0):
-          gOutFd.write("\n")
+          __write("\n")
           numPrinted = 0
           for keyword in gTabCompletions:
-            gOutFd.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+            __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
             numPrinted += 1
             if ((numPrinted == gMaxCompletionsPerLine) and (numPrinted < len(gTabCompletions))):
-              gOutFd.write("\n")
+              __write("\n")
               numPrinted = 0
             endif
           endfor
-          gOutFd.write("\n"+prompt_)
+          __write("\n"+prompt_)
         else:
           matchFound = False
           for keyword in gTabCompletions:
@@ -296,19 +313,19 @@ def __getInput(prompt_):
             enddef
           endfor
           if (matchFound == True):
-            gOutFd.write("\n")
+            __write("\n")
             numPrinted = 0
             for keyword in gTabCompletions:
               if (command in keyword):
-                gOutFd.write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+                __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
                 numPrinted += 1
                 if (numPrinted > gMaxCompletionsPerLine):
-                  gOutFd.write("\n")
+                  __write("\n")
                   numPrinted = 0
                 endif
               endif
             endfor
-            gOutFd.write("\n"+prompt_+command)
+            __write("\n"+prompt_+command)
           endif
         endif
         tabCount = 0
@@ -323,9 +340,9 @@ def __getInput(prompt_):
           tabCount = 0
           for keyword in gTabCompletions:
             if ((command != keyword) and command in keyword):
-              gOutFd.write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
               command = keyword
-              gOutFd.write(command)
+              __write(command)
               cursorPos = len(command)           
             endif
           endfor
@@ -336,7 +353,7 @@ def __getInput(prompt_):
     elif (ord(char) == 127):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
-        gOutFd.write("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
+        __write("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
         command = command[:cursorPos-1] + command[cursorPos:]
         cursorPos -= 1
       endif
@@ -344,7 +361,7 @@ def __getInput(prompt_):
       # home
       if (cursorPos > 0):
         cursorPos = 0
-        gOutFd.write("\b"*len(command))
+        __write("\b"*len(command))
       endif
     elif (ord(char) == 3):
       # ctrl-c, exit program
@@ -353,13 +370,13 @@ def __getInput(prompt_):
     elif (ord(char) == 5):
       # end
       if (cursorPos < len(command)):
-        gOutFd.write(command[cursorPos:])
+        __write(command[cursorPos:])
         cursorPos = len(command)
       endif
     elif (ord(char) != 9):
       # don't print out tab if multi keyword command
-      #gOutFd.write("\nchar value: %d" % ord(char))
-      #gOutFd.write("\n"+prompt_)
+      #__write("\nchar value: %d" % ord(char))
+      #__write("\n"+prompt_)
       None
     endif
   endwhile
@@ -367,9 +384,33 @@ enddef
 
 #################################################################################
 #################################################################################
+def __write(string_):
+  global gOutFd
+  global gSerialType
+  if (gSerialType == TTY):
+    # serial terminal control
+    gOutFd.write(string_)
+  else:
+    # TCP socket with telnet client
+    string = NULL
+    for char in string_:
+      if (char == "\n"):
+        string += "\r\n"
+      else:
+        string += char
+      endif
+    endfor
+    gOutFd.send(string)
+  endif
+enddef
+
+#################################################################################
+#################################################################################
 def __getChar():
   global gInFd
-  if (gInFd == sys.stdin):
+  global gSerialType
+  if (gSerialType == TTY):
+    # serial terminal control
     oldSettings = termios.tcgetattr(gInFd)
     try:
       tty.setraw(gInFd)
@@ -377,7 +418,8 @@ def __getChar():
     finally:
       termios.tcsetattr(gInFd, termios.TCSADRAIN, oldSettings)
   else:
-    char = gInFd.read(1)
+    # TCP socket with telnet client
+    char = gInFd.recv(1)
   endif
   return (char)
 enddef
@@ -391,6 +433,8 @@ enddef
 # python does not have a native null string identifier, so create one
 NULL = ""
 
+gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
+gSerialType = TTY
 gInFd = sys.stdin
 gOutFd = sys.stdout
 gTabCompletions = []
