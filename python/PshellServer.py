@@ -421,6 +421,7 @@ def __runTCPServer():
   while (__createSocket() and __acceptConnection()):
     # shutdown original socket to not allow any new connections until we are done with this one
     connectSockName = gConnectFd.getsockname()
+    PshellReadline.setFileDescriptors(gConnectFd, gConnectFd, PshellReadline.SOCKET, 10)
     gSocketFd.shutdown(socket.SHUT_RDWR)
     __receiveTCP()
     gConnectFd.shutdown(socket.SHUT_RDWR)
@@ -514,7 +515,7 @@ enddef
 def __addTabCompletions():
   global gCommandList
   global gServerType
-  if (gServerType == LOCAL_SERVER):
+  if ((gServerType == LOCAL_SERVER) or (gServerType == TCP_SERVER)):
     for command in gCommandList:
       PshellReadline.addTabCompletion(command["name"])
     endfor
@@ -537,7 +538,20 @@ enddef
 #################################################################################
 #################################################################################
 def __receiveTCP():
-  None
+  global gConnectFd
+  global gQuitTcp
+  global gPrompt
+  global gPshellMsg
+  global gMsgTypes
+  gQuitTcp = False
+  __showWelcome()
+  gPshellMsg["msgType"] = gMsgTypes["userCommand"]
+  while (not gQuitTcp and not PshellReadline.IDLE_SESSION):
+    command = PshellReadline.getInput(gPrompt)
+    if (not gQuitTcp and not PshellReadline.IDLE_SESSION):
+      __processCommand(command)
+    endif
+  endwhile
 enddef
 
 #################################################################################
@@ -603,8 +617,10 @@ def __processCommand(command_):
     endif
   endif
   gCommandDispatched = False
-  gPshellMsg["msgType"] = gMsgTypes["commandComplete"]
-  __reply()
+  if (gServerType != TCP_SERVER):
+    gPshellMsg["msgType"] = gMsgTypes["commandComplete"]
+    __reply()
+  enddef
 enddef
 
 #################################################################################
@@ -693,7 +709,16 @@ enddef
 #################################################################################
 #################################################################################
 def __exit(command_):
-  sys.exit()
+  global gQuitTcp
+  global gServerType
+  if (gServerType == TCP_SERVER):
+    # TCP server, signal receiveTCP function to quit
+    gQuitTcp = True
+    printf()
+  else:
+    # local server, exit the process
+    sys.exit()
+  endif
 enddef
 
 #################################################################################
@@ -1025,3 +1050,5 @@ gFirstArgPos = 1
 
 gWheelPos = 0
 gWheel = "|/-\\"
+
+gQuitTcp = False 
