@@ -315,7 +315,7 @@ def __createSocket():
   global gUnixSocketPath
   global gUnixSourceAddress
   if (gServerType == UDP_SERVER):
-    # IP domain socket
+    # IP domain socket (UDP)
     gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if (gHostnameOrIpAddr == "anyhost"):
       gSocketFd.bind((NULL, gPort))
@@ -324,6 +324,20 @@ def __createSocket():
     else:
       gSocketFd.bind((gHostnameOrIpAddr, gPort))
     endif
+  elif (gServerType == TCP_SERVER):
+    # IP domain socket (TCP)
+    gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # Bind the socket to the port
+    if (gHostnameOrIpAddr == "anyhost"):
+      gSocketFd.bind((NULL, gPort))
+    elif (gHostnameOrIpAddr == "localhost"):
+      gSocketFd.bind(("127.0.0.1", gPort))
+    else:
+      gSocketFd.bind((gHostnameOrIpAddr, gPort))
+    endif  
+    # Listen for incoming connections
+    gSocketFd.listen(1)
   elif (gServerType == UNIX_SERVER):
     # UNIX domain socket
     gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -362,7 +376,7 @@ def __runUDPServer():
   # startup our UDP server
   if (__createSocket()):
     while (True):
-      __receive()
+      __receiveDGRAM()
     endwhile
   endif
 enddef
@@ -375,9 +389,42 @@ def __runUNIXServer():
   # startup our UNIX server
   if (__createSocket()):
     while (True):
-      __receive()
+      __receiveDGRAM()
     endwhile
   endif
+enddef
+
+#################################################################################
+#################################################################################
+def __acceptConnection():
+  global gSocketFd
+  global gConnectFd
+  gConnectFd, clientAddr = gSocketFd.accept()
+  return (True)
+enddef
+
+#################################################################################
+#################################################################################
+def __runTCPServer():
+  global gSocketFd
+  global gConnectFd
+  global gServerName
+  global gHostnameOrIpAddr
+  global gPort
+  print "PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" % (gServerName, gHostnameOrIpAddr, gPort)
+  gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
+  gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
+  __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
+  __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
+  __addTabCompletions()
+  # startup our TCP server and accept new connections
+  while (__createSocket() and __acceptConnection()):
+    # shutdown original socket to not allow any new connections until we are done with this one
+    connectSockName = gConnectFd.getsockname()
+    gSocketFd.shutdown(socket.SHUT_RDWR)
+    __receiveTCP()
+    gConnectFd.shutdown(socket.SHUT_RDWR)
+  endwhile
 enddef
 
 #################################################################################
@@ -476,7 +523,7 @@ enddef
 
 #################################################################################
 #################################################################################
-def __receive():
+def __receiveDGRAM():
   global gPshellMsg
   global gSocketFd
   global gPshellMsgPayloadLength
@@ -485,6 +532,12 @@ def __receive():
   gPshellMsg, gFromAddr = gSocketFd.recvfrom(gPshellMsgPayloadLength)
   gPshellMsg = PshellMsg._asdict(PshellMsg._make(struct.unpack(gPshellMsgHeaderFormat+str(len(gPshellMsg)-struct.calcsize(gPshellMsgHeaderFormat))+"s", gPshellMsg)))
   __processCommand(gPshellMsg["payload"])
+enddef
+
+#################################################################################
+#################################################################################
+def __receiveTCP():
+  None
 enddef
 
 #################################################################################
@@ -650,8 +703,7 @@ def __showWelcome():
   global gServerType
   global gHostnameOrIpAddr
   # put up our window title banner
-  sys.stdout.write("\033]0;" + gTitle + "\007")
-  sys.stdout.flush()
+  printf("\033]0;" + gTitle + "\007")
   # show our welcome screen
   banner = "#  %s" % __getDisplayBanner()
   if (gServerType == LOCAL_SERVER):
@@ -660,27 +712,27 @@ def __showWelcome():
     server = "#  Single session TCP server: %s[%s]" % (__getDisplayServerName(), gHostnameOrIpAddr)
   endif
   maxBorderWidth = max(58, len(banner),len(server))+2
-  print
-  print "#"*maxBorderWidth
-  print "#"
-  print banner
-  print "#"
-  print server
-  print "#"
+  printf()
+  printf("#"*maxBorderWidth+"\n")
+  printf("#\n")
+  printf(banner+"\n")
+  printf("#\n")
+  printf(server+"\n")
+  printf("#\n")
   if (gServerType == LOCAL_SERVER):
-    print "#  Idle session timeout: NONE"
+    printf("#  Idle session timeout: NONE\n")
   else:
-    print "#  Idle session timeout: 10 minutes"
+    printf("#  Idle session timeout: 10 minutes\n")
   endif
-  print "#"
-  print "#  Type '?' or 'help' at prompt for command summary"
-  print "#  Type '?' or '-h' after command for command usage"
-  print "#"
-  print "#  Full <TAB> completion, up-arrow recall, command"
-  print "#  line editing and command abbreviation supported"
-  print "#"
-  print "#"*maxBorderWidth
-  print
+  printf("#\n")
+  printf("#  Type '?' or 'help' at prompt for command summary\n")
+  printf("#  Type '?' or '-h' after command for command usage\n")
+  printf("#\n")
+  printf("#  Full <TAB> completion, up-arrow recall, command\n")
+  printf("#  line editing and command abbreviation supported\n")
+  printf("#\n")
+  printf("#"*maxBorderWidth+"\n")
+  printf()
 enddef
 
 #################################################################################
@@ -692,8 +744,11 @@ def __printf(message_):
   if (gCommandInteractive == True):
     if (gServerType == LOCAL_SERVER):
       sys.stdout.write(message_)
+      sys.stdout.flush()
+    elif (gServerType == TCP_SERVER):
+      PshellReadline.write(message_)
     else:
-      # remote server
+      # remote UDP/UNIX server
       gPshellMsg["payload"] += message_
     endif
   endif
@@ -907,6 +962,7 @@ gPrompt = "PSHELL> "
 gTitle = "PSHELL: "
 gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 gSocketFd = None 
+gConnectFd = None 
 gFromAddr = None
 gUnixSocketPath = "/tmp/"
 gArgs = None

@@ -122,7 +122,7 @@ enddef
 #################################################################################
 #################################################################################
 def showUsage():
-  print "Usage: pshellServerDemo.py -udp | -unix | -local"
+  print "Usage: pshellServerDemo.py -udp | -tcp | -unix | -local"
   sys.exit()
 enddef
 
@@ -167,6 +167,8 @@ elif (sys.argv[1] == "-udp"):
   serverType = PshellServer.UDP_SERVER
 elif (sys.argv[1] == "-unix"):
   serverType = PshellServer.UNIX_SERVER
+elif (sys.argv[1] == "-tcp"):
+  serverType = PshellServer.TCP_SERVER
 elif (sys.argv[1] == "-local"):
   serverType = PshellServer.LOCAL_SERVER
 else:
@@ -178,7 +180,7 @@ registerSignalHandlers()
 PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
 PshellServer.addCommand(world, "world", "world command description")
 PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
-if (serverType != PshellServer.LOCAL_SERVER):
+if ((serverType == PshellServer.UDP_SERVER) or (serverType == PshellServer.UNIX_SERVER)):
   PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
 endif
 
