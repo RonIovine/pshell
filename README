@@ -19,9 +19,10 @@ Note that there are also Python versions of the PshellServer, PshellControl, and
 PshellClient functionality.  All of the Python modules along with corresponding 
 demo programs can be found in the 'python' sub-directory of this package.
 
-The Python and 'C' versions are fully interoperable with each other at the interface
-level and can be mixed and matched in any combination, i.e. the 'C' library can 
-control and interface to Python applications and vice-versa.
+The Python and 'C' versions are fully consistent with each other at the API level
+and interoperable with each other at the protocol level and can be mixed and matched 
+in any combination, i.e. the 'C' libraries and UDP/UNIX client can control and 
+interface to Python applications and vice-versa.
 
 The prototype for the embedded functions are similar to the 'main' in 'C' as follows:
 
