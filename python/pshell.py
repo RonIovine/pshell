@@ -30,13 +30,7 @@
 
 #################################################################################
 #
-# This is an example demo program that shows the use of multiple pshell control
-# interfaces to aggregate all of the remote commands from all of the connected
-# servers into a single local pshell server.  This can be useful in presenting
-# a consolidated user shell who's functionality spans several discrete pshell
-# servers.  Since this uses the PshellControl API, the external servers must
-# all be either UDP or Unix servers.  The consolidation point in this example 
-# is a local pshell server.
+# This is a python version of the PshellClient.cc UDP/UNIX client program.
 #
 #################################################################################
 
@@ -46,12 +40,6 @@ import signal
 import PshellControl
 import PshellServer
 import PshellReadline
-
-#################################################################################
-#
-# This is a python version of the PshellClient.cc UDP/UNIX client program.
-#
-#################################################################################
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
 # list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
@@ -76,7 +64,12 @@ def configureLocalServer():
   global gRemoteServer
   global gPort
 
+  # need to set the first arg position to 0 so we can pass
+  # through the exact command to our remote server for dispatching
   PshellServer.gFirstArgPos = 0
+  # supress the automatic invalid arg count messag from the PshellControl.py
+  # module so we can display the returned usage
+  PshellControl.gSupressInvalidArgCountMessage = True
   prompt = PshellControl.__extractPrompt(gSid)
   if (len(prompt) > 0):
     PshellServer.gPromptOverride = prompt
@@ -178,8 +171,10 @@ endfor
 gRemoteServer = sys.argv[1]
 gPort = sys.argv[2]
 
+# connect to our remote server via the control client
 gSid = PshellControl.connectServer("pshellClient", gRemoteServer, gPort, PshellControl.ONE_SEC*timeout)
 
+# extract all the commands from our remote server and add then to our local server
 commandList = PshellControl.extractCommands(gSid)
 commandList = commandList.split("\n")
 for command in commandList:
@@ -191,11 +186,12 @@ for command in commandList:
   endif
 endif
 
-# configure our local server to interact with a remote server
+# configure our local server to interact with a remote server, we override the display settings
+# (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
+# a remote server
 configureLocalServer()
 
-# now start our local server which will interact with a remote server 
-# via the pshell control machanism
+# now start our local server which will interact with a remote server via the pshell control machanism
 PshellServer.startServer("pshellClient", PshellServer.LOCAL_SERVER, PshellServer.BLOCKING_MODE)
 
 cleanupAndExit()

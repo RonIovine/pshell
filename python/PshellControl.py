@@ -560,6 +560,7 @@ enddef
 def __sendCommand(control_, commandType_, command_, timeout_):
   global gMsgTypes
   global gPshellControlResults
+  global gSupressInvalidArgCountMessage
   global NO_WAIT
   retCode = COMMAND_SUCCESS
   if (control_ != None):
@@ -601,12 +602,17 @@ def __sendCommand(control_, commandType_, command_, timeout_):
   else:
     retCode = SOCKET_NOT_CONNECTED
   endif  
-  if ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
+  # the suppress flag is used as a backdoor for the pshell.py client to allow
+  # a remote server to pass the command usage back to the local server that
+  # is run by the client
+  if ((gSupressInvalidArgCountMessage == True) and (retCode == COMMAND_INVALID_ARG_COUNT)):
+    retCode = COMMAND_SUCCESS
+  elif ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
     print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, __getControlResults(retCode))
   elif ((retCode != COMMAND_SUCCESS) and (retCode != gMsgTypes["commandComplete"])):
     print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, __getControlResults(retCode))
   else:
-    retCode = COMMAND_SUCCESS;
+    retCode = COMMAND_SUCCESS
   endif
   return (retCode)
 enddef
@@ -749,3 +755,7 @@ gPshellControlResults = {COMMAND_SUCCESS:"COMMAND_SUCCESS",
                          SOCKET_TIMEOUT:"SOCKET_TIMEOUT",
                          SOCKET_NOT_CONNECTED:"SOCKET_NOT_CONNECTED"}
  
+# the suppress flag is used as a backdoor for the pshell.py client to allow
+# a remote server to pass the command usage back to the local server that
+# is run by the client
+gSupressInvalidArgCountMessage = False

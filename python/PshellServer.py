@@ -449,7 +449,7 @@ def __runLocalServer():
   __showWelcome()
   command = NULL
   while (command.lower() != "q"):
-    command = PshellReadline.getInput(gPrompt)
+    (command, idleSession) = PshellReadline.getInput(gPrompt)
     if ((len(command) > 0) and (command.lower() != "q")):
       print
       __processCommand(command)
@@ -557,7 +557,9 @@ def __receiveTCP():
   while (not gQuitTcp):
     (command, gQuitTcp) = PshellReadline.getInput(gTcpPrompt)
     if (not gQuitTcp):
-      printf()
+      if (command not in "quit"):
+        printf()
+      endif
       __processCommand(command)
     endif
   endwhile
@@ -600,7 +602,7 @@ def __processCommand(command_):
     gArgs = command_.split()[gFirstArgPos:]
     command_ = command_.split()[0]
     numMatches = 0
-    if (command_ == "?"):
+    if ((command_ == "?") or (command_ in "help")):
       __help(gArgs)
       return
     else:
