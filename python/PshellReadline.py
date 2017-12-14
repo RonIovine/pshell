@@ -59,14 +59,13 @@ enddef = endif = endwhile = endfor = None
 # valid serial types, TTY is for serial terminal control and defaults to
 # stdin and stdout, SOCKET uses a serial TCP socket placed in 'telnet'
 # mode for control via a telnet client
-
 TTY = "tty"
 SOCKET = "socket"
-# indicated to the calling app that we got an idle session timeout
-IDLE_SESSION = False
-# use for the timeout value when setting the idleTimeout
-ONE_MINUTE = 60
-IDLE_TIMEOUT_NONE = 0
+
+# use for the timeout value when setting the idleSessionTimeout
+IDLE_TIMEOUT_NONE = 0  # default
+ONE_SECOND = 1
+ONE_MINUTE = ONE_SECOND*60
 
 #################################################################################
 #
@@ -80,12 +79,14 @@ IDLE_TIMEOUT_NONE = 0
 
 #################################################################################
 #
-# Set the input andoutput file descriptors, if this function is not called,
+# setFileDescriptors:
+#
+# Set the input and output file descriptors, if this function is not called,
 # the default is stdin and stdout.  The file descriptors given to this function
-# must be opened and running in raw character mode.  The idleTimeout specifies 
-# the time in minutes to return from the getInput function with the 
-# PshellReadline.IDLE_SESSION flag set.  Use the PshellReadline.ONE_MINUTE
-# value to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5
+# must be opened and running in raw serial character mode.  The idleTimeout 
+# specifies the time to wait for any user activity in the getInput function.
+# Use the identifiers PshellReadline.ONE_SECOND and PshellReadline.ONE_MINUTE
+# to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5
 #
 #################################################################################
 def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_NONE):
@@ -94,7 +95,9 @@ enddef
 
 #################################################################################
 #
-# Set the idle session timeout as described above
+# setIdleTimeout:
+#
+# Set the idle session timeout as described above.
 #
 #################################################################################
 def setIdleTimeout(idleTimeout_):
@@ -102,6 +105,8 @@ def setIdleTimeout(idleTimeout_):
 enddef
 
 #################################################################################
+#
+# write:
 #
 # Write a string to our output file descriptor
 #
@@ -111,6 +116,8 @@ def write(string_):
 enddef
 
 #################################################################################
+#
+# addTabCompletion:
 #
 # Add a keyword to the TAB completion list.  TAB completion will only be applied
 # to the first keyword of a given user typed command
@@ -122,7 +129,15 @@ enddef
 
 #################################################################################
 #
-# Issue the user prompt and return the entered command line value.
+# getInput:
+#
+# Issue the user prompt and return the entered command line value.  This 
+# function will return the tuple (command, idleSession).  If the idle session
+# timeout is set to IDLE_TIMEOUT_NONE (default), the idleSession will always 
+# be false and this function will not return until the user has typed a command
+# and pressed return.  Otherwise this function will set the idleSession value
+# to true and return if no user activity is detected for the idleSessionTimeout 
+# duration
 #
 #################################################################################
 def getInput(prompt_):
@@ -192,7 +207,6 @@ def __getInput(prompt_):
   global gMaxTabCompletionKeywordLength
   global gMaxCompletionsPerLine
   global gOutFd
-  global IDLE_SESSION
 
   __write(prompt_)
   inEsc = False
@@ -200,11 +214,11 @@ def __getInput(prompt_):
   command = NULL
   cursorPos = 0
   tabCount = 0
-  IDLE_SESSION = False
   while (True):
-    char = __getChar()
-    if (IDLE_SESSION == True):
-      return (command)
+    (char, idleSession) = __getChar()
+    # check for idleSession timeout
+    if (idleSession == True):
+      return (command, True)
     endif
     if (ord(char) != 9):
       tabCont = 0
@@ -213,7 +227,7 @@ def __getInput(prompt_):
     if (inEsc == True):
       if (esc == '['):
         if (char == 'A'):
-          # up-arrow
+          # up-arrow key
           if (gCommandHistoryPos > 0):
             gCommandHistoryPos -= 1
             __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
@@ -224,6 +238,7 @@ def __getInput(prompt_):
           inEsc = False
           esc = NULL
         elif (char == 'B'):
+          # down-arrow key
           if (gCommandHistoryPos < len(gCommandHistory)-1):
             gCommandHistoryPos += 1
             __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
@@ -234,7 +249,7 @@ def __getInput(prompt_):
           inEsc = False
           esc = NULL
         elif (char == 'C'):
-          # right arrow
+          # right-arrow key
           if (cursorPos < len(command)):
             __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
             cursorPos += 1
@@ -242,7 +257,7 @@ def __getInput(prompt_):
           inEsc = False
           esc = NULL
         elif (char == 'D'):
-          # left arrow
+          # left-arrow key
           if (cursorPos > 0):
             cursorPos -= 1
             __write("\b")
@@ -258,7 +273,7 @@ def __getInput(prompt_):
         #elif (char == '3'):
         #  print "delete"
         elif (char == '~'):
-          # delete under cursor
+          # delete key, delete under cursor
           if (cursorPos < len(command)):
             __write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
             command = command[:cursorPos] + command[cursorPos+1:]
@@ -274,13 +289,13 @@ def __getInput(prompt_):
         endif
       elif (esc == 'O'):
         if (char == 'H'):
-          # home
+          # home key, go to beginning of line
           if (cursorPos > 0):
             cursorPos = 0
             __write("\b"*len(command))
           endif
         elif (char == 'F'):
-          #end
+          # end key, go to end of line
           if (cursorPos < len(command)):
             __write(command[cursorPos:])
             cursorPos = len(command)
@@ -298,9 +313,11 @@ def __getInput(prompt_):
       # see if we are in the middle of the string, need to insert differently
       # than when at the beginning or end
       if ((cursorPos > 0) and (cursorPos < len(command))):
+        # insert in the middle
         command = command[:cursorPos] + char + command[cursorPos:]
         __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       else:
+        # beginning or end of string
         command = command[:cursorPos] + char + command[cursorPos:]
         __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       endif
@@ -310,7 +327,8 @@ def __getInput(prompt_):
       if (len(command) > 0):
         gCommandHistory.append(command)
         gCommandHistoryPos = len(gCommandHistory)
-        return (command)
+        # return command, no idleSession timeout
+        return (command, False)
       else:
         __write("\n"+prompt_)
       endif
@@ -327,10 +345,10 @@ def __getInput(prompt_):
       # esc character
       inEsc = True
     elif ((ord(char) == 9) and ((len(command) == 0) or (len(command.split()) == 1))):
-      # tab character
+      # tab character, print out any completions
       tabCount += 1
       if (tabCount == 2):
-        if (len(command) == 0):
+        if ((len(command) == 0) and (len(gTabCompletions) > 0)):
           __write("\n")
           numPrinted = 0
           for keyword in gTabCompletions:
@@ -396,7 +414,7 @@ def __getInput(prompt_):
         cursorPos -= 1
       endif
     elif (ord(char) == 1):
-      # home
+      # home, go to beginning of line
       if (cursorPos > 0):
         cursorPos = 0
         __write("\b"*len(command))
@@ -406,7 +424,7 @@ def __getInput(prompt_):
       print
       sys.exit(0)
     elif (ord(char) == 5):
-      # end
+      # end, go to end of line
       if (cursorPos < len(command)):
         __write(command[cursorPos:])
         cursorPos = len(command)
@@ -433,6 +451,7 @@ def __write(string_):
     # TCP socket with telnet client
     string = NULL
     for char in string_:
+      # need to insert carriage return every place we find a newline
       if (char == "\n"):
         string += "\r\n"
       else:
@@ -449,7 +468,7 @@ def __getChar():
   global gInFd
   global gSerialType
   global gIdleTimeout
-  global IDLE_SESSION
+  char = NULL
   if (gSerialType == TTY):
     # serial terminal control
     oldSettings = termios.tcgetattr(gInFd)
@@ -461,8 +480,7 @@ def __getChar():
           char = gInFd.read(1)
         else:
           __write("\r\nIdle session timeout");
-          IDLE_SESSION = True
-          char = NULL
+          return (char, True)
         endif
       else:
         char = gInFd.read(1)
@@ -477,14 +495,13 @@ def __getChar():
         char = gInFd.recv(1)
       else:
         __write("\nIdle session timeout\n");
-        IDLE_SESSION = True
-        char = NULL
+        return (char, True)
       endif
     else:
       char = gInFd.recv(1)
     endif
   endif
-  return (char)
+  return (char, False)
 enddef
 
 #################################################################################

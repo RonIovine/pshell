@@ -281,13 +281,14 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
   global gTitle
   global gBanner
   global gRunning
+  global gTcpTimeout
   
   if (gRunninig == False):
     gRunning = True
     gServerName = serverName_
     gServerMode = serverMode_
   
-    (gTitle, gBanner, gPrompt, gServerType, gHostnameOrIpAddr, gPort) = __loadConfigFile(gServerName, gTitle, gBanner, gPrompt, serverType_, hostnameOrIpAddr_, port_)
+    (gTitle, gBanner, gPrompt, gServerType, gHostnameOrIpAddr, gPort, gTcpTimeout) = __loadConfigFile(gServerName, gTitle, gBanner, gPrompt, serverType_, hostnameOrIpAddr_, port_, gTcpTimeout)
     __loadStartupFile()  
     if (gServerMode == BLOCKING_MODE):
       __runServer()
@@ -410,18 +411,25 @@ def __runTCPServer():
   global gConnectFd
   global gServerName
   global gHostnameOrIpAddr
+  global gTitle
   global gPort
+  global gPrompt
+  global gTcpPrompt
+  global gTcpTitle
+  global gTcpInteractivePrompt
+  global gTcpConnectSockName
+  global gTcpTimeout
   print "PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" % (gServerName, gHostnameOrIpAddr, gPort)
-  gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
-  gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
   __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __addTabCompletions()
   # startup our TCP server and accept new connections
   while (__createSocket() and __acceptConnection()):
     # shutdown original socket to not allow any new connections until we are done with this one
-    connectSockName = gConnectFd.getsockname()
-    PshellReadline.setFileDescriptors(gConnectFd, gConnectFd, PshellReadline.SOCKET, 10)
+    gTcpConnectSockName = gConnectFd.getsockname()[0]
+    gTcpPrompt = gServerName + "[" + gTcpConnectSockName + "]:" + gPrompt
+    gTcpTitle = gTitle + ": " + gServerName + "[" + gTcpConnectSockName + "], Mode: INTERACTIVE"
+    PshellReadline.setFileDescriptors(gConnectFd, gConnectFd, PshellReadline.SOCKET, PshellReadline.ONE_MINUTE*gTcpTimeout)
     gSocketFd.shutdown(socket.SHUT_RDWR)
     __receiveTCP()
     gConnectFd.shutdown(socket.SHUT_RDWR)
@@ -540,15 +548,16 @@ enddef
 def __receiveTCP():
   global gConnectFd
   global gQuitTcp
-  global gPrompt
+  global gTcpPrompt
   global gPshellMsg
   global gMsgTypes
-  gQuitTcp = False
   __showWelcome()
   gPshellMsg["msgType"] = gMsgTypes["userCommand"]
-  while (not gQuitTcp and not PshellReadline.IDLE_SESSION):
-    command = PshellReadline.getInput(gPrompt)
-    if (not gQuitTcp and not PshellReadline.IDLE_SESSION):
+  gQuitTcp = False
+  while (not gQuitTcp):
+    (command, gQuitTcp) = PshellReadline.getInput(gTcpPrompt)
+    if (not gQuitTcp):
+      printf()
       __processCommand(command)
     endif
   endwhile
@@ -727,14 +736,20 @@ def __showWelcome():
   global gTitle
   global gServerType
   global gHostnameOrIpAddr
-  # put up our window title banner
-  printf("\033]0;" + gTitle + "\007")
+  global gTcpTimeout
+  global gServerName
+  global gTcpConnectSockName
+  global gTcpTitle
   # show our welcome screen
   banner = "#  %s" % __getDisplayBanner()
   if (gServerType == LOCAL_SERVER):
+    # put up our window title banner
+    printf("\033]0;" + gTitle + "\007")
     server = "#  Single session LOCAL server: %s[%s]" % (__getDisplayServerName(), __getDisplayServerType())
   else:
-    server = "#  Single session TCP server: %s[%s]" % (__getDisplayServerName(), gHostnameOrIpAddr)
+    # put up our window title banner
+    printf("\033]0;" + gTcpTitle + "\007")
+    server = "#  Single session TCP server: %s[%s]" % (gServerName, gTcpConnectSockName)
   endif
   maxBorderWidth = max(58, len(banner),len(server))+2
   printf()
@@ -747,7 +762,7 @@ def __showWelcome():
   if (gServerType == LOCAL_SERVER):
     printf("#  Idle session timeout: NONE\n")
   else:
-    printf("#  Idle session timeout: 10 minutes\n")
+    printf("#  Idle session timeout: %d minutes\n" % gTcpTimeout)
   endif
   printf("#\n")
   printf("#  Type '?' or 'help' at prompt for command summary\n")
@@ -827,7 +842,7 @@ enddef
 
 #################################################################################
 #################################################################################
-def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_):  
+def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_, tcpTimeout_):  
   configFile1 = NULL
   configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
@@ -842,7 +857,7 @@ def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_):
   elif (os.path.isfile(configFile3)):
     file = open(configFile3, 'r')
   else:
-    return (title_, banner_, prompt_, type_, host_, port_)
+    return (title_, banner_, prompt_, type_, host_, port_, tcpTimeout_)
   endif
   # found a config file, process it
   for line in file:
@@ -864,12 +879,14 @@ def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_):
             port_ = int(value[1].strip())
           elif (option[1].lower() == "type"):
             type_ = value[1].strip()
+          elif (option[1].lower() == "timeout"):
+            tcpTimeout_ = int(value[1].strip())
           endif
         endif
       endif
     endif
   endfor
-  return (title_, banner_, prompt_, type_, host_, port_)
+  return (title_, banner_, prompt_, type_, host_, port_, tcpTimeout_)
 enddef
 
 #################################################################################
@@ -1052,3 +1069,8 @@ gWheelPos = 0
 gWheel = "|/-\\"
 
 gQuitTcp = False 
+gTcpTimeout = 10  # minutes
+gTcpConnectSockName = None 
+gTcpInteractivePrompt = None
+gTcpPrompt = None
+gTcpTitle = None

@@ -1,11 +1,11 @@
 # pshell
-**A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++ Applications**
+**A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++/Python Applications**
 
 This package contains all the necessary code, documentation, and examples for
-building C/C++ applications that incorporate a Process-Specific Embedded
+building C/C++/Python applications that incorporate a Process-Specific Embedded
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
-framework and API to embed functions within a C/C++ application that can be
-invoked either via a separate interactive client program ('telnet' or 'pshell') 
+framework and API to embed functions within a C/C++/Python application that can 
+be invoked either via a separate interactive client program ('telnet' or 'pshell') 
 or via direct interaction from within the application itself.
 
 There is also a control mechanism API provided by where any external program can
@@ -19,21 +19,33 @@ PshellClient, and PshellReadline functionality.  All of the Python modules along
 with corresponding demo programs can be found in the 'python' sub-directory of 
 this package.
 
+The Python and 'C' versions are fully interoperable with each other at the interface
+level and can be mixed and matched in any combination, i.e. the 'C' library can 
+control and interface to Python applications and vice-versa.
+
 The prototype for the embedded command line shell functions are similar to the 
 'main' in 'C' as follows:
 
 `void myFunc(int argc, char *argv[]);`
+
+The prototype for the Python callback shell functions are as follows:
+
+`def myFunc(argv):`
 
 Command line shell functions can also display information back to the interactive
 clients via a mechanism similar to the familiar 'printf' as follows:
 
 `void pshell_printf(const char *format, ...);`
 
+The Python versions have a similar mechanism:
+
+`def printf(string):`
+
 These functions can be invoked via several methods depending on how the internal PSHELL 
 server is configured.  The following shows the various PSHELL server types along with their 
 associated invokation method:
 
-* TCP Server   : Uses standard 'telnet' interactive client to invoke functions (C/C++ only)
+* TCP Server   : Uses standard 'telnet' interactive client to invoke functions
 * UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
 * UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application 
