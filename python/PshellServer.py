@@ -38,11 +38,11 @@
 # in this file.
 # 
 # This module provides the same functionality as the PshellServer.h API and
-# the libpshell-server linkable 'C' library, but implemented as a Python
-# module.  Currently only the server types UDP, UNIX and LOCAL are supported.
-# TCP server functionality will be added at a future date.  Applications using
-# this module can be controlled via the pshell UDP/UNIX stand-alone 'C' client
-# program or via the PshellControl.h/libpshell-control or PshellControl.py 
+# the libpshell-server linkable 'C' library, but implemented as a Python module.  
+# It supports all the server types as the corresponding 'C' impelmentation, TCP, 
+# UDP, UNIX and LOCAL server types are all supported.  Applications using this 
+# module can be controlled via the pshell UDP/UNIX stand-alone 'C' client program 
+# or via the PshellControl.h/libpshell-control or PshellControl.py 
 # control mechanism.
 # 
 # A complete example of the usage of the API can be found in the included 
