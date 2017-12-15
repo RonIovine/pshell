@@ -86,7 +86,10 @@ ONE_MINUTE = ONE_SECOND*60
 # must be opened and running in raw serial character mode.  The idleTimeout 
 # specifies the time to wait for any user activity in the getInput function.
 # Use the identifiers PshellReadline.ONE_SECOND and PshellReadline.ONE_MINUTE
-# to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5
+# to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5, for serialType
+# use the identifiers PshellReadline.TTY and PshellReadline.SOCKET.  For the
+# socket identifier, use the file descriptor that is returned from the TCP 
+# socket server 'accept' call for both the inFd and outFd.
 #
 #################################################################################
 def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_NONE):
@@ -97,7 +100,9 @@ enddef
 #
 # setIdleTimeout:
 #
-# Set the idle session timeout as described above.
+# Set the idle session timeout as described above.  Use the identifiers
+# PshellReadline.ONE_SEC and PshellRedline.ONE_MINUTE as follows,
+# e.g. PshellReadline.ONE_MINUTE*5 for a 5 minute idleSession timeout.
 #
 #################################################################################
 def setIdleTimeout(idleTimeout_):
