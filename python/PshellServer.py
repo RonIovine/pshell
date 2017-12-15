@@ -148,7 +148,7 @@ enddef
 #
 # runCommand:
 #
-# Run a registered command from within the registering program
+# Run a registered command from within its parent process
 #
 #################################################################################
 def runCommand(command_):
@@ -447,10 +447,10 @@ def __runLocalServer():
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __addTabCompletions()
   __showWelcome()
-  command = NULL
-  while (command.lower() != "q"):
+  command = "xxx"
+  while (command.lower() not in "quit"):
     (command, idleSession) = PshellReadline.getInput(gPrompt)
-    if ((len(command) > 0) and (command.lower() != "q")):
+    if ((len(command) > 0) and (command.lower() not in "quit")):
       print
       __processCommand(command)
     endif
@@ -579,7 +579,7 @@ def __processCommand(command_):
   global gFirstArgPos
   global gFoundCommand
   global gCommandDispatched
-  
+
   if (gPshellMsg["msgType"] == gMsgTypes["queryVersion"]):
     __processQueryVersion()
   elif (gPshellMsg["msgType"] == gMsgTypes["queryPayloadSize"]):

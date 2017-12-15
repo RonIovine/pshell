@@ -30,7 +30,7 @@
 
 #################################################################################
 #
-# This module implments a readline like functionality for user input.  This can
+# This module implements a readline like functionality for user input.  This can
 # work with any character stream based input/output device, i.e. keyboard input
 # over a serial tty, or over a TCP/telnet connection.  This module will provide
 # up-arrow command history recall, command line editing, and TAB completion of
@@ -514,7 +514,7 @@ enddef
 NULL = ""
 
 gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
-gIdleTimeout = 0
+gIdleTimeout = IDLE_TIMEOUT_NONE
 gSerialType = TTY
 gInFd = sys.stdin
 gOutFd = sys.stdout
