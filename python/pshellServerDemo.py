@@ -68,7 +68,6 @@ enddef
 #################################################################################
 #################################################################################
 def enhancedUsage(argv):
-
   # see if the user asked for help
   if (PshellServer.isHelp()):
     # show standard usage 

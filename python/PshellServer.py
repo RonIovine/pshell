@@ -420,6 +420,7 @@ def __runTCPServer():
   global gTcpConnectSockName
   global gTcpTimeout
   print "PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" % (gServerName, gHostnameOrIpAddr, gPort)
+  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
   __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __addTabCompletions()
@@ -443,6 +444,7 @@ def __runLocalServer():
   global gTitle
   gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
   gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
+  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 2, True, True)
   __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __addTabCompletions()
@@ -604,6 +606,7 @@ def __processCommand(command_):
     numMatches = 0
     if ((command_ == "?") or (command_ in "help")):
       __help(gArgs)
+      gCommandDispatched = False
       return
     else:
       for command in gCommandList:
@@ -704,6 +707,48 @@ def __processQueryCommands2():
   for command in gCommandList:
     printf("%s%s" % (command["name"], "/"))
   endif
+enddef
+
+#################################################################################
+#################################################################################
+def __batch(command_):
+  global gFirstArgPos
+  if (len(command_) == 1):
+    batchFile = command_[0]
+  else:
+    batchFile = command_[1]
+  endif
+  batchFile1 = NULL
+  batchPath = os.getenv('PSHELL_BATCH_DIR')
+  if (batchPath != None):
+    batchFile1 = batchPath+"/"+batchFile+".batch"
+  endif
+  batchFile2 = PSHELL_BATCH_DIR+"/"+batchFile+".batch"
+  batchFile3 = os.getcwd()+"/"+batchFile+".batch"
+  batchFile4 = batchFile
+  if (os.path.isfile(batchFile1)):
+    file = open(batchFile1, 'r')
+  elif (os.path.isfile(batchFile2)):
+    file = open(batchFile2, 'r')
+  elif (os.path.isfile(batchFile3)):
+    file = open(batchFile3, 'r')
+  elif (os.path.isfile(batchFile4)):
+    file = open(batchFile4, 'r')
+  elif ((gFirstArgPos == 0) and (batchFile in "batch")):
+    __showUsage()
+    return
+  else:
+    printf("ERROR: Could not find batch file: '%s'\n" % batchFile)
+    return
+  endif
+  # found a config file, process it
+  for line in file:
+    # skip comments
+    line = line.strip()
+    if ((len(line) > 0) and (line[0] != "#")):
+      __processCommand(line)
+    endif
+  endfor
 enddef
 
 #################################################################################
@@ -928,13 +973,14 @@ def __runCommand(command_):
   global gCommandInteractive
   global gCommandDispatched
   global gFoundCommand
+  global gFirstArgPos
   global gArgs
   if (gCommandDispatched == False):
     gCommandDispatched = True
     gCommandInteractive = False
     numMatches = 0
-    gArgs = command_.lower().split()[1:]
-    command_ = command_.lower().split()[0]
+    gArgs = command_.split()[gFirstArgPos:]
+    command_ = command_.split()[0]
     for command in gCommandList:
       if (command_ in command["name"]):
         gFoundCommand = command
@@ -1063,6 +1109,7 @@ gPshellMsg =  OrderedDict([("msgType",0),
 
 PSHELL_CONFIG_DIR = "/etc/pshell/config"
 PSHELL_STARTUP_DIR = "/etc/pshell/startup"
+PSHELL_BATCH_DIR = "/etc/pshell/batch"
 PSHELL_CONFIG_FILE = "pshell-server.conf"
 
 gFirstArgPos = 1
