@@ -40,6 +40,7 @@
 
 # import all our necessary modules
 import sys
+import PshellReadline
 import PshellControl
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
@@ -97,7 +98,7 @@ endfor
 sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
 
 while (command.lower() != "q"):
-  command = raw_input("pshellControlCmd> ")
+  (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
   if ((len(command) > 0) and (command.lower() != "q")):
     if ((command.split()[0] == "?") or (command.split()[0] == "help")):
       sys.stdout.write(PshellControl.extractCommands(sid))

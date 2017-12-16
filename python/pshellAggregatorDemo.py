@@ -42,6 +42,7 @@
 
 # import all our necessary modules
 import sys
+import PshellReadline
 import PshellControl
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
@@ -88,7 +89,7 @@ enddef
 def processCommand(command_):
   global gControlList
   global gMaxLength
-  splitCommand = command_.lower().split()
+  splitCommand = command_.split()
   command = ' '.join(command_.split()[1:])
   if ((splitCommand[0] == "?") or (splitCommand[0] == "help")):
     print
@@ -145,13 +146,19 @@ endif
 addControl("pshellServerDemo", "control the remote pshellServerDemo process", sys.argv[1], pshellServerDemoPort, PshellControl.ONE_SEC*5)
 addControl("traceFilterDemo", "control the remote traceFilterDemo process", sys.argv[1], traceFilterDemoPort, PshellControl.ONE_SEC*5)
 
+# add some TAB completors
+PshellReadline.addTabCompletion("quit")
+PshellReadline.addTabCompletion("help")
+PshellReadline.addTabCompletion("pshellServerDemo")
+PshellReadline.addTabCompletion("traceFilterDemo")
+
 # put up our window title banner
 sys.stdout.write("\033]0;PSHELL: pshellAggregatorDemo[local], Mode: INTERACTIVE\007")
 sys.stdout.flush()
 
 command = NULL
 while (command.lower() != "q"):
-  command = raw_input("pshellAggregatorDemo[local]:PSHELL> ")
+  (command, idleSession) = PshellReadline.getInput("pshellAggregatorDemo[local]:PSHELL> ")
   if ((len(command) > 0) and (command.lower() != "q")):
     processCommand(command)
   endif

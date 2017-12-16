@@ -250,6 +250,12 @@ def __getInput(prompt_):
             command = gCommandHistory[gCommandHistoryPos]
             __write(command)
             cursorPos = len(command)
+          else:
+            # kill whole line
+            gCommandHistoryPos = len(gCommandHistory)
+            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            command = NULL
+            cursorPos = 0
           endif
           inEsc = False
           esc = NULL
@@ -333,6 +339,7 @@ def __getInput(prompt_):
         gCommandHistory.append(command)
         gCommandHistoryPos = len(gCommandHistory)
         # return command, no idleSession timeout
+        __write("\n")
         return (command, False)
       else:
         __write("\n"+prompt_)
@@ -368,7 +375,7 @@ def __getInput(prompt_):
         else:
           matchFound = False
           for keyword in gTabCompletions:
-            if (command in keyword):
+            if (command == keyword[:len(command)]):
               matchFound = True
               break
             enddef
@@ -377,7 +384,7 @@ def __getInput(prompt_):
             __write("\n")
             numPrinted = 0
             for keyword in gTabCompletions:
-              if (command in keyword):
+              if (command == keyword[:len(command)]):
                 __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
                 numPrinted += 1
                 if (numPrinted > gMaxCompletionsPerLine):
@@ -393,14 +400,14 @@ def __getInput(prompt_):
       elif ((tabCount == 1) and (len(command) > 0)):
         numFound = 0
         for keyword in gTabCompletions:
-          if (command in keyword):
+          if (command == keyword[:len(command)]):
             numFound += 1
           endif
         endfor
         if (numFound == 1):
           tabCount = 0
           for keyword in gTabCompletions:
-            if ((command != keyword) and command in keyword):
+            if ((command != keyword) and (command == keyword[:len(command)])):
               __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
               command = keyword
               __write(command)

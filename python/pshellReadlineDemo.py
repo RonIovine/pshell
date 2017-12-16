@@ -123,7 +123,6 @@ idleSession = False
 while (not idleSession and command.lower() not in "quit"):
   (command, idleSession) = PshellReadline.getInput("prompt> ")
   if (not idleSession and command not in "quit"):
-    PshellReadline.write("\ncommand: '%s'\n" % command)
+    PshellReadline.write("command: '%s'\n" % command)
   endif
 endwhile
-print 

@@ -76,7 +76,7 @@ enddef = endif = endwhile = endfor = None
 
 # Valid server types, udp/unix servers require the 'pshell' or 'pshell.py'
 # client programs, tcp servers require a 'telnet' client, local servers
-# resuire no client (all user interaction done directly with server 
+# require no client (all user interaction done directly with server 
 # initiated user input solitication)
 UDP_SERVER = "udp"
 TCP_SERVER = "tcp"
@@ -454,11 +454,9 @@ def __runLocalServer():
   while (command.lower() not in "quit"):
     (command, idleSession) = PshellReadline.getInput(gPrompt)
     if ((len(command) > 0) and (command.lower() not in "quit")):
-      print
       __processCommand(command)
     endif
   endwhile
-  print
 enddef
 
 #################################################################################
@@ -560,9 +558,6 @@ def __receiveTCP():
   while (not gQuitTcp):
     (command, gQuitTcp) = PshellReadline.getInput(gTcpPrompt)
     if (not gQuitTcp):
-      if (command not in "quit"):
-        printf()
-      endif
       __processCommand(command)
     endif
   endwhile
@@ -769,7 +764,6 @@ def __exit(command_):
   if (gServerType == TCP_SERVER):
     # TCP server, signal receiveTCP function to quit
     gQuitTcp = True
-    printf()
   else:
     # local server, exit the process
     sys.exit()
@@ -1024,7 +1018,7 @@ def __flush():
   global gCommandInteractive
   global gServerType
   global gPshellMsg
-  if ((gCommandInteractive == True) and (gServerType != LOCAL_SERVER)):
+  if ((gCommandInteractive == True) and ((gServerType == UDP_SERVER) or (gServerType == UNIX_SERVER))):
     __reply()
     gPshellMsg["payload"] = NULL
   endif
