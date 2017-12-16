@@ -34,7 +34,8 @@
 #
 #################################################################################
 
-# import all our necessary modules
+# import all our necessary module
+import os
 import sys
 import signal
 import PshellControl
@@ -135,7 +136,7 @@ enddef
 #####################################################
 def showUsage():
   print
-  print "Usage: pshell.py {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix} [-t<timeout>]"
+  print "Usage: %s {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix} [-t<timeout>]" % os.path.basename(sys.argv[0])
   print
   print "  where:"
   print "    <hostname>       - hostname of UDP server"
