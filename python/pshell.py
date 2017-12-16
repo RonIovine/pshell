@@ -193,6 +193,6 @@ endif
 configureLocalServer()
 
 # now start our local server which will interact with a remote server via the pshell control machanism
-PshellServer.startServer("pshellClient", PshellServer.LOCAL_SERVER, PshellServer.BLOCKING_MODE)
+PshellServer.startServer("pshellClient", PshellServer.LOCAL, PshellServer.BLOCKING)
 
 cleanupAndExit()

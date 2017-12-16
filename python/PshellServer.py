@@ -78,16 +78,16 @@ enddef = endif = endwhile = endfor = None
 # client programs, tcp servers require a 'telnet' client, local servers
 # require no client (all user interaction done directly with server 
 # initiated user input solitication)
-UDP_SERVER = "udp"
-TCP_SERVER = "tcp"
-UNIX_SERVER = "unix"
-LOCAL_SERVER = "local"
+UDP = "udp"
+TCP = "tcp"
+UNIX = "unix"
+LOCAL = "local"
 
-# BLOCKING_MODE wil never return control to the caller of startServer,
-# NON_BLOCKING_MODE will spawn a thread to run the server and will
+# BLOCKING wil never return control to the caller of startServer,
+# NON_BLOCKING will spawn a thread to run the server and will
 # return control to the caller of startServer
-BLOCKING_MODE = 0
-NON_BLOCKING_MODE = 1
+BLOCKING = 0
+NON_BLOCKING = 1
 
 #################################################################################
 #
@@ -290,7 +290,7 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
   
     (gTitle, gBanner, gPrompt, gServerType, gHostnameOrIpAddr, gPort, gTcpTimeout) = __loadConfigFile(gServerName, gTitle, gBanner, gPrompt, serverType_, hostnameOrIpAddr_, port_, gTcpTimeout)
     __loadStartupFile()  
-    if (gServerMode == BLOCKING_MODE):
+    if (gServerMode == BLOCKING):
       __runServer()
     else:
       # spawn thread
@@ -315,7 +315,7 @@ def __createSocket():
   global gSocketFd
   global gUnixSocketPath
   global gUnixSourceAddress
-  if (gServerType == UDP_SERVER):
+  if (gServerType == UDP):
     # IP domain socket (UDP)
     gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     if (gHostnameOrIpAddr == "anyhost"):
@@ -325,7 +325,7 @@ def __createSocket():
     else:
       gSocketFd.bind((gHostnameOrIpAddr, gPort))
     endif
-  elif (gServerType == TCP_SERVER):
+  elif (gServerType == TCP):
     # IP domain socket (TCP)
     gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -339,7 +339,7 @@ def __createSocket():
     endif  
     # Listen for incoming connections
     gSocketFd.listen(1)
-  elif (gServerType == UNIX_SERVER):
+  elif (gServerType == UNIX):
     # UNIX domain socket
     gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     gUnixSourceAddress = gUnixSocketPath+gServerName
@@ -356,11 +356,11 @@ enddef
 #################################################################################
 def __runServer():
   global gServerType
-  if (gServerType == UDP_SERVER):
+  if (gServerType == UDP):
     __runUDPServer()
-  elif (gServerType == TCP_SERVER):
+  elif (gServerType == TCP):
     __runTCPServer()
-  elif (gServerType == UNIX_SERVER):
+  elif (gServerType == UNIX):
     __runUNIXServer()
   else:  # local server 
     __runLocalServer()
@@ -524,7 +524,7 @@ enddef
 def __addTabCompletions():
   global gCommandList
   global gServerType
-  if ((gServerType == LOCAL_SERVER) or (gServerType == TCP_SERVER)):
+  if ((gServerType == LOCAL) or (gServerType == TCP)):
     for command in gCommandList:
       PshellReadline.addTabCompletion(command["name"])
     endfor
@@ -761,7 +761,7 @@ enddef
 def __exit(command_):
   global gQuitTcp
   global gServerType
-  if (gServerType == TCP_SERVER):
+  if (gServerType == TCP):
     # TCP server, signal receiveTCP function to quit
     gQuitTcp = True
   else:
@@ -782,7 +782,7 @@ def __showWelcome():
   global gTcpTitle
   # show our welcome screen
   banner = "#  %s" % __getDisplayBanner()
-  if (gServerType == LOCAL_SERVER):
+  if (gServerType == LOCAL):
     # put up our window title banner
     printf("\033]0;" + gTitle + "\007")
     server = "#  Single session LOCAL server: %s[%s]" % (__getDisplayServerName(), __getDisplayServerType())
@@ -799,7 +799,7 @@ def __showWelcome():
   printf("#\n")
   printf(server+"\n")
   printf("#\n")
-  if (gServerType == LOCAL_SERVER):
+  if (gServerType == LOCAL):
     printf("#  Idle session timeout: NONE\n")
   else:
     printf("#  Idle session timeout: %d minutes\n" % gTcpTimeout)
@@ -822,10 +822,10 @@ def __printf(message_):
   global gPshellMsg
   global gCommandInteractive
   if (gCommandInteractive == True):
-    if (gServerType == LOCAL_SERVER):
+    if (gServerType == LOCAL):
       sys.stdout.write(message_)
       sys.stdout.flush()
-    elif (gServerType == TCP_SERVER):
+    elif (gServerType == TCP):
       PshellReadline.write(message_)
     else:
       # remote UDP/UNIX server
@@ -864,7 +864,7 @@ def __reply():
   # only issue a reply for a 'datagram' oriented remote server, TCP
   # uses a character stream and is not message based and LOCAL uses
   # no client app
-  if ((gServerType == UDP_SERVER) or (gServerType == UNIX_SERVER)):
+  if ((gServerType == UDP) or (gServerType == UNIX)):
     gSocketFd.sendto(struct.pack(gPshellMsgHeaderFormat+str(len(gPshellMsg["payload"]))+"s", *gPshellMsg.values()), gFromAddr)
   endif
 enddef
@@ -878,7 +878,7 @@ def __cleanupResources():
   if (gUnixSourceAddress != None):
     os.unlink(gUnixSourceAddress)
   endif
-  if (gServerType != LOCAL_SERVER):
+  if (gServerType != LOCAL):
     gSocketFd.close()
   endif
 enddef
@@ -1018,7 +1018,7 @@ def __flush():
   global gCommandInteractive
   global gServerType
   global gPshellMsg
-  if ((gCommandInteractive == True) and ((gServerType == UDP_SERVER) or (gServerType == UNIX_SERVER))):
+  if ((gCommandInteractive == True) and ((gServerType == UDP) or (gServerType == UNIX))):
     __reply()
     gPshellMsg["payload"] = NULL
   endif

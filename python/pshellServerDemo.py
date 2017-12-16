@@ -164,13 +164,13 @@ enddef
 if (len(sys.argv) != 2):
   showUsage()
 elif (sys.argv[1] == "-udp"):
-  serverType = PshellServer.UDP_SERVER
+  serverType = PshellServer.UDP
 elif (sys.argv[1] == "-unix"):
-  serverType = PshellServer.UNIX_SERVER
+  serverType = PshellServer.UNIX
 elif (sys.argv[1] == "-tcp"):
-  serverType = PshellServer.TCP_SERVER
+  serverType = PshellServer.TCP
 elif (sys.argv[1] == "-local"):
-  serverType = PshellServer.LOCAL_SERVER
+  serverType = PshellServer.LOCAL
 else:
   showUsage()
 endif 
@@ -181,7 +181,7 @@ registerSignalHandlers()
 PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
 PshellServer.addCommand(world, "world", "world command description")
 PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
-if ((serverType == PshellServer.UDP_SERVER) or (serverType == PshellServer.UNIX_SERVER)):
+if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
   PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
 endif
 
@@ -189,6 +189,6 @@ endif
 PshellServer.runCommand("hello 1 2 3")
 
 # start our pshell server
-PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING_MODE, "anyhost", 9001)
+PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, "anyhost", 9001)
 
 PshellServer.cleanupResources()
