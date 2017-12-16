@@ -30,11 +30,14 @@
 
 #################################################################################
 #
-# This module implements a readline like functionality for user input.  This can
+# This API implements a readline like functionality for user input.  This can
 # work with any character stream based input/output device, i.e. keyboard input
 # over a serial tty, or over a TCP/telnet connection.  This module will provide
 # up-arrow command history recall, command line editing, and TAB completion of
-# registered keywords.
+# registered keywords.  
+#
+# A complete example of the usage of the API can be found in the included demo 
+# program pshellReadlineDemo.py
 #
 #################################################################################
 

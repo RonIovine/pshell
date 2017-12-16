@@ -84,7 +84,8 @@ if (len(sys.argv) == 3):
 endif
 
 # add some keywords for TAB completion, the completions
-# only apply to the first keyword of a a given command
+# only apply to the first keyword (i.e. up to the first
+# whitespace) of a a given command
 PshellReadline.addTabCompletion("quit")
 PshellReadline.addTabCompletion("help")
 PshellReadline.addTabCompletion("hello")
@@ -92,6 +93,9 @@ PshellReadline.addTabCompletion("world")
 PshellReadline.addTabCompletion("enhancedUsage")
 PshellReadline.addTabCompletion("keepAlive")
 
+# socket serial type requested, setup our TCP server socket
+# and pass the connected file descriptors to our PshellReadline
+# module
 if (serialType == PshellReadline.SOCKET):
   
   # Create a TCP/IP socket
