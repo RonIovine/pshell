@@ -335,14 +335,14 @@ def __getInput(prompt_):
       cursorPos += 1
     elif (ord(char) == 13):
       # carriage return
+      __write("\n")
       if (len(command) > 0):
         gCommandHistory.append(command)
         gCommandHistoryPos = len(gCommandHistory)
         # return command, no idleSession timeout
-        __write("\n")
         return (command, False)
       else:
-        __write("\n"+prompt_)
+        __write(prompt_)
       endif
     elif (ord(char) == 11):
       # kill to eol
