@@ -921,7 +921,12 @@ def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_, tcpTi
           elif (option[1].lower() == "port"):
             port_ = int(value[1].strip())
           elif (option[1].lower() == "type"):
-            type_ = value[1].strip()
+            if ((value[1].lower().strip() == UDP) or 
+                (value[1].lower().strip() == TCP) or 
+                (value[1].lower().strip() == UNIX) or 
+                (value[1].lower().strip() == LOCAL)):
+              type_ = value[1].lower().strip()
+            endif
           elif (option[1].lower() == "timeout"):
             tcpTimeout_ = int(value[1].strip())
           endif
