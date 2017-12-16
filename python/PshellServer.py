@@ -400,7 +400,9 @@ enddef
 def __acceptConnection():
   global gSocketFd
   global gConnectFd
-  gConnectFd, clientAddr = gSocketFd.accept()
+  global gTcpConnectSockName
+  (gConnectFd, clientAddr) = gSocketFd.accept()
+  gTcpConnectSockName = clientAddr[0]
   return (True)
 enddef
 
@@ -427,7 +429,6 @@ def __runTCPServer():
   # startup our TCP server and accept new connections
   while (__createSocket() and __acceptConnection()):
     # shutdown original socket to not allow any new connections until we are done with this one
-    gTcpConnectSockName = gConnectFd.getsockname()[0]
     gTcpPrompt = gServerName + "[" + gTcpConnectSockName + "]:" + gPrompt
     gTcpTitle = gTitle + ": " + gServerName + "[" + gTcpConnectSockName + "], Mode: INTERACTIVE"
     PshellReadline.setFileDescriptors(gConnectFd, gConnectFd, PshellReadline.SOCKET, PshellReadline.ONE_MINUTE*gTcpTimeout)
@@ -631,10 +632,8 @@ def __processCommand(command_):
     endif
   endif
   gCommandDispatched = False
-  if (gServerType != TCP_SERVER):
-    gPshellMsg["msgType"] = gMsgTypes["commandComplete"]
-    __reply()
-  enddef
+  gPshellMsg["msgType"] = gMsgTypes["commandComplete"]
+  __reply()
 enddef
 
 #################################################################################
@@ -868,7 +867,10 @@ def __reply():
   global gPshellMsg
   global gServerType
   global gPshellMsgHeaderFormat  
-  if (gServerType != LOCAL_SERVER):
+  # only issue a reply for a 'datagram' oriented remote server, TCP
+  # uses a character stream and is not message based and LOCAL uses
+  # no client app
+  if ((gServerType == UDP_SERVER) or (gServerType == UNIX_SERVER)):
     gSocketFd.sendto(struct.pack(gPshellMsgHeaderFormat+str(len(gPshellMsg["payload"]))+"s", *gPshellMsg.values()), gFromAddr)
   endif
 enddef
