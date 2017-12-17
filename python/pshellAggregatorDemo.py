@@ -91,7 +91,7 @@ def processCommand(command_):
   global gMaxLength
   splitCommand = command_.split()
   command = ' '.join(command_.split()[1:])
-  if ((splitCommand[0] == "?") or (splitCommand[0] == "help")):
+  if ((splitCommand[0] == "?") or (splitCommand[0] == "help"[:len(splitCommand[0])])):
     print
     print "****************************************"
     print "*             COMMAND LIST             *"
@@ -105,7 +105,7 @@ def processCommand(command_):
     print
   else:
     for control in gControlList:
-      if (splitCommand[0] in control["name"]):
+      if (splitCommand[0] == control["name"][:len(splitCommand[0])]):
         if (((len(splitCommand) == 1) or (len(splitCommand) == 2) and ((splitCommand[1] == "?") or (splitCommand[1] == "help")))):
           sys.stdout.write(PshellControl.extractCommands(control["sid"]))
           return
@@ -156,10 +156,10 @@ PshellReadline.addTabCompletion("traceFilterDemo")
 sys.stdout.write("\033]0;PSHELL: pshellAggregatorDemo[local], Mode: INTERACTIVE\007")
 sys.stdout.flush()
 
-command = NULL
-while (command.lower() != "q"):
+command = "xxx"
+while (command.lower() != "quit"[:len(command)]):
   (command, idleSession) = PshellReadline.getInput("pshellAggregatorDemo[local]:PSHELL> ")
-  if ((len(command) > 0) and (command.lower() != "q")):
+  if ((len(command) > 0) and (command.lower() != "quit"[:len(command)])):
     processCommand(command)
   endif
 endwhile

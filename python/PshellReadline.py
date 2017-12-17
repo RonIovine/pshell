@@ -343,7 +343,7 @@ def __getInput(prompt_):
         gCommandHistory.append(command)
         gCommandHistoryPos = len(gCommandHistory)
         # return command, no idleSession timeout
-        return (command, False)
+        return (command.strip(), False)
       else:
         __write(prompt_)
       endif
@@ -412,9 +412,14 @@ def __getInput(prompt_):
           for keyword in gTabCompletions:
             if ((command != keyword) and (command == keyword[:len(command)])):
               __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-              command = keyword
+              command = keyword + " "
               __write(command)
-              cursorPos = len(command)           
+              cursorPos = len(command)
+            elif (command == keyword):
+              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+              command = keyword + " "
+              __write(command )
+              cursorPos = len(command)
             endif
           endfor
         endif

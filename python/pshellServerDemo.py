@@ -31,11 +31,12 @@
 #################################################################################
 #
 # This is an example demo program that uses all the basic features of the PSHELL 
-# python module.  This program can be run as either a UDP, UNIX, or local server 
-# based on the command line options.  If it is run as a UDP or UNIX based server, 
-# you must use the provided stand-alone UDP client program 'pshell' to connect to 
-# it, if it is run as a local server, user command line input is solicited directly 
-# from this program, no external client is needed.
+# server python module.  This program can be run as either a UDP, TCP, UNIX, or 
+# local server based on the command line options.  If it is run as a UDP or UNIX 
+# based server, you must use the provided stand-alone UDP client program 'pshell' 
+# or 'pshell.py' to connect to it, if it is run as a TCP server, you must use
+# 'telnet, if it is run as a local server, user command line input is solicited 
+# directly from this program, no external client is needed.
 #
 #################################################################################
 
@@ -50,6 +51,19 @@ import PshellServer
 # highlighting on these identifiers, sorry Guido
 enddef = endif = endwhile = endfor = None
 
+#################################################################################
+#
+# PSHELL user callback functions, the interface is similar to the "main" in C
+# and Python, with the argv argument being the argument list and the len and
+# contents of argv are the user entered arguments, excluding the actual command
+# itself (arguments only).
+#
+# Use the special 'PshellServer.printf' function call to display data back to 
+# the remote client.  The interface to this function is similar to the standard
+# 'print' function in Python.
+#
+#################################################################################
+ 
 #################################################################################
 #################################################################################
 def hello(argv):
@@ -185,7 +199,7 @@ if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
   PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
 endif
 
-# run a registeredcommand from within it's parent process
+# run a registered command from within it's parent process
 PshellServer.runCommand("hello 1 2 3")
 
 # start our pshell server
