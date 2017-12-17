@@ -410,15 +410,10 @@ def __getInput(prompt_):
         if (numFound == 1):
           tabCount = 0
           for keyword in gTabCompletions:
-            if ((command != keyword) and (command == keyword[:len(command)])):
+            if (command == keyword[:len(command)]):
               __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
               command = keyword + " "
               __write(command)
-              cursorPos = len(command)
-            elif (command == keyword):
-              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-              command = keyword + " "
-              __write(command )
               cursorPos = len(command)
             endif
           endfor
