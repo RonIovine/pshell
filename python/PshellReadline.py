@@ -472,8 +472,11 @@ def __getInput(prompt_):
             __write(command)
             cursorPos = len(command)
           endfor
-        else:
-          print __findLongestMatch(matchList)
+        elif (len(matchList) > 1):
+          __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+          command = __findLongestMatch(matchList)
+          __write(command)
+          cursorPos = len(command)
         endif
       elif (len(command) > 0):
         # TAB count > 2 with command typed, reset TAB count
