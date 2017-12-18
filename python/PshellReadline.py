@@ -208,6 +208,73 @@ enddef
 
 #################################################################################
 #################################################################################
+def __isEqual(string1_, string2_):
+    return (string1_ == string2_)
+enddef
+
+#################################################################################
+#################################################################################
+def __isEqualNoCase(string1_, string2_):
+    return (string1_.lower() == string2_.lower())
+enddef
+
+#################################################################################
+#################################################################################
+def __isSubString(string1_, string2_, minMatchLength_):
+  if (minMatchLength_ == 0):
+    return (string1_ == string2_[:len(string1_)])
+  elif ((minMatchLength_ <= len(string1_)) and (minMatchLength_ <= len(string2_))):
+    return (string1_[:minMatchLength_] == string2_[:minMatchLength_])
+  else:
+    return (False)
+  endif
+enddef
+
+#################################################################################
+#################################################################################
+def __isSubStringNoCase(string1_, string2_, minMatchLength_):
+  if (minMatchLength_ == 0):
+    return (string1_.lower() == string2_[:len(string1_)].lower())
+  elif ((minMatchLength_ <= len(string1_)) and (minMatchLength_ <= len(string2_))):
+    return (string1_[:minMatchLength_].lower() == string2_[:minMatchLength_].lower())
+  else:
+    return (False)
+  endif
+enddef
+
+#################################################################################
+#################################################################################
+def __findTabCompletions(keyword_):
+  global gTabCompletions
+  matchList = []
+  for keyword in gTabCompletions:
+    if (keyword_ == keyword[:len(keyword_)]):
+    #if (__isSubString(keyword_, keyword, 0)):
+      matchList.append(keyword)
+    endif
+  endfor
+  return (matchList)
+enddef
+
+#################################################################################
+#################################################################################
+def __findLongestMatch(matchList_):
+  string = NULL
+  charPos = 0
+  while (True):
+    char = matchList_[0][charPos]
+    for keyword in matchList_:
+       if ((charPos >= len(keyword)) or (char != keyword[charPos])):
+         return (string)
+       endif
+    endfor
+    string += char
+    charPos += 1
+  endwhile
+enddef
+
+#################################################################################
+#################################################################################
 def __getInput(prompt_):
   global gCommandHistory
   global gCommandHistoryPos
@@ -222,6 +289,7 @@ def __getInput(prompt_):
   command = NULL
   cursorPos = 0
   tabCount = 0
+  tabCompletions = []
   while (True):
     (char, idleSession) = __getChar()
     # check for idleSession timeout
@@ -364,6 +432,7 @@ def __getInput(prompt_):
       tabCount += 1
       if (tabCount == 2):
         if ((len(command) == 0) and (len(gTabCompletions) > 0)):
+          # nothing typed, just a double TAB, show all registered TAB completions
           __write("\n")
           numPrinted = 0
           for keyword in gTabCompletions:
@@ -376,49 +445,38 @@ def __getInput(prompt_):
           endfor
           __write("\n"+prompt_)
         else:
-          matchFound = False
-          for keyword in gTabCompletions:
-            if (command == keyword[:len(command)]):
-              matchFound = True
-              break
-            enddef
-          endfor
-          if (matchFound == True):
+          # partial word typed, double TAB, show all possible completions
+          matchList = __findTabCompletions(command)
+          if (len(matchList) > 0):
             __write("\n")
             numPrinted = 0
-            for keyword in gTabCompletions:
-              if (command == keyword[:len(command)]):
-                __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
-                numPrinted += 1
-                if (numPrinted > gMaxCompletionsPerLine):
-                  __write("\n")
-                  numPrinted = 0
-                endif
+            for keyword in matchList:
+              __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+              numPrinted += 1
+              if ((numPrinted > gMaxCompletionsPerLine) and  (numPrinted < len(matchList))):
+                __write("\n")
+                numPrinted = 0
               endif
             endfor
             __write("\n"+prompt_+command)
           endif
-        endif
-        tabCount = 0
-      elif ((tabCount == 1) and (len(command) > 0)):
-        numFound = 0
-        for keyword in gTabCompletions:
-          if (command == keyword[:len(command)]):
-            numFound += 1
-          endif
-        endfor
-        if (numFound == 1):
           tabCount = 0
-          for keyword in gTabCompletions:
-            if (command == keyword[:len(command)]):
-              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-              command = keyword + " "
-              __write(command)
-              cursorPos = len(command)
-            endif
+      elif ((tabCount == 1) and (len(command) > 0)):
+        # partial word typed, single TAB, if we only have one completion, show it
+        matchList = __findTabCompletions(command)
+        if (len(matchList) == 1):
+          tabCount = 0
+          for keyword in matchList:
+            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            command = keyword + " "
+            __write(command)
+            cursorPos = len(command)
           endfor
+        else:
+          print __findLongestMatch(matchList)
         endif
       elif (len(command) > 0):
+        # TAB count > 2 with command typed, reset TAB count
         tabCount = 0
       endif
     elif (ord(char) == 127):

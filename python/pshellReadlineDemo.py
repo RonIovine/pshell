@@ -92,6 +92,14 @@ PshellReadline.addTabCompletion("hello")
 PshellReadline.addTabCompletion("world")
 PshellReadline.addTabCompletion("enhancedUsage")
 PshellReadline.addTabCompletion("keepAlive")
+PshellReadline.addTabCompletion("pshellAggregatorDemo")
+PshellReadline.addTabCompletion("pshellControlDemo")
+PshellReadline.addTabCompletion("pshellReadlineDemo")
+PshellReadline.addTabCompletion("pshellServerDemo")
+PshellReadline.addTabCompletion("myCommand123")
+PshellReadline.addTabCompletion("myCommand456")
+PshellReadline.addTabCompletion("myCommand789")
+PshellReadline.addTabCompletion("myComm")
 
 # socket serial type requested, setup our TCP server socket
 # and pass the connected file descriptors to our PshellReadline
