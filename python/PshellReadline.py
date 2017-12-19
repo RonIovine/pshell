@@ -70,6 +70,11 @@ IDLE_TIMEOUT_NONE = 0  # default
 ONE_SECOND = 1
 ONE_MINUTE = ONE_SECOND*60
 
+# standard bash/readline tabbing method, i.e. initiate via double tabbing
+BASH_TABBING = "bash"
+# fast tabbing, i.e.  initiated via single tabbing, this is the default
+FAST_TABBING = "fast"
+
 #################################################################################
 #
 # "public" API functions
@@ -133,6 +138,20 @@ enddef
 #################################################################################
 def addTabCompletion(keyword_):
   __addTabCompletion(keyword_)
+enddef
+
+#################################################################################
+#
+# setTabType:
+#
+# Set the tabbing method to either be bash/readline style tabbing, i.e. double
+# tabbing to initiate and display completions, or "fast" tabbing, where all
+# completions and displays are initiated via a single tab only, the default is
+# "fast" tabbing
+#
+#################################################################################
+def setTabType(tabType_):
+  __setTabType(tabType_)
 enddef
 
 #################################################################################
@@ -275,12 +294,40 @@ enddef
 
 #################################################################################
 #################################################################################
+def __showTabCompletions(completionList_, prompt_):
+  global gMaxTabCompletionKeywordLength
+  global gMaxCompletionsPerLine
+  if (len(completionList_) > 0):
+    __write("\n")
+    numPrinted = 0
+    for keyword in completionList_:
+      __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+      numPrinted += 1
+      if ((numPrinted == gMaxCompletionsPerLine) and (numPrinted < len(completionList_))):
+        __write("\n")
+        numPrinted = 0
+      endif
+    endfor
+    __write("\n"+prompt_)
+  endif
+enddef
+
+#################################################################################
+#################################################################################
+def __setTabType(tabType_):
+  global gTabType
+  gTabType = tabType_
+enddef
+
+#################################################################################
+#################################################################################
 def __getInput(prompt_):
   global gCommandHistory
   global gCommandHistoryPos
   global gTabCompletions
   global gMaxTabCompletionKeywordLength
   global gMaxCompletionsPerLine
+  global gTabType
   global gOutFd
 
   __write(prompt_)
@@ -297,7 +344,7 @@ def __getInput(prompt_):
       return (command, True)
     endif
     if (ord(char) != 9):
-      tabCont = 0
+      tabCount = 0
     endif
     #print ord(char)
     if (inEsc == True):
@@ -430,57 +477,67 @@ def __getInput(prompt_):
     elif ((ord(char) == 9) and ((len(command) == 0) or (len(command.split()) == 1))):
       # tab character, print out any completions
       tabCount += 1
-      if (tabCount == 2):
-        if ((len(command) == 0) and (len(gTabCompletions) > 0)):
-          # nothing typed, just a double TAB, show all registered TAB completions
-          __write("\n")
-          numPrinted = 0
-          for keyword in gTabCompletions:
-            __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
-            numPrinted += 1
-            if ((numPrinted == gMaxCompletionsPerLine) and (numPrinted < len(gTabCompletions))):
-              __write("\n")
-              numPrinted = 0
+      if (gTabType == FAST_TABBING):
+        if (tabCount == 1):
+          # this tabbing method is a little different than the standard
+          # readline or bash shell tabbing, we always trigger on a single
+          # tab and always show all the possible completions for any
+          # multiple matches
+          if (len(command) == 0):
+            # nothing typed, just TAB, show all registered TAB completions
+            __showTabCompletions(gTabCompletions, prompt_)
+          else:
+            # partial word typed, double TAB, show all possible completions
+            matchList = __findTabCompletions(command)
+            if (len(matchList) == 1):
+              # only one possible completion, show it
+              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+              command = matchList[0] + " "
+              __write(command)
+              cursorPos = len(command)
+            elif (len(matchList) > 1):
+              # multiple possible matches, fill out longest match and
+              # then show all other possibilities
+              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+              command = __findLongestMatch(matchList)
+              __write(command)
+              cursorPos = len(command)
+              __showTabCompletions(matchList, prompt_+command)
             endif
-          endfor
-          __write("\n"+prompt_)
-        else:
-          # partial word typed, double TAB, show all possible completions
-          matchList = __findTabCompletions(command)
-          if (len(matchList) > 0):
-            __write("\n")
-            numPrinted = 0
-            for keyword in matchList:
-              __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
-              numPrinted += 1
-              if ((numPrinted > gMaxCompletionsPerLine) and  (numPrinted < len(matchList))):
-                __write("\n")
-                numPrinted = 0
-              endif
-            endfor
-            __write("\n"+prompt_+command)
           endif
-          tabCount = 0
-      elif ((tabCount == 1) and (len(command) > 0)):
-        # partial word typed, single TAB, if we only have one completion, show it
-        matchList = __findTabCompletions(command)
-        if (len(matchList) == 1):
-          tabCount = 0
-          for keyword in matchList:
+        endif
+      else:  # BASH_TABBING
+        # this code below implements the more standard readline/bash double tabbing method 
+        if (tabCount == 2):
+          if (len(command) == 0):
+            # nothing typed, just a double TAB, show all registered TAB completions
+            __showTabCompletions(gTabCompletions, prompt_)
+          else:
+            # partial word typed, double TAB, show all possible completions
+            matchList = __findTabCompletions(command)
+            __showTabCompletions(gTabCompletions, prompt_+command)
+            tabCount = 0
+        elif ((tabCount == 1) and (len(command) > 0)):
+          # partial word typed, single TAB
+          matchList = __findTabCompletions(command)
+          if (len(matchList) == 1):
+            # we only have one completion, show it
+            tabCount = 0
             __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-            command = keyword + " "
+            command = matchList[0] + " "
             __write(command)
             cursorPos = len(command)
-          endfor
-        elif (len(matchList) > 1):
-          __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-          command = __findLongestMatch(matchList)
-          __write(command)
-          cursorPos = len(command)
+          elif (len(matchList) > 1):
+            # multiple completions, find the longest match and show up to that
+            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
+            command = __findLongestMatch(matchList)
+            __write(command)
+            cursorPos = len(command)
+          endif
+        elif (len(command) > 0):
+          # TAB count > 2 with command typed, reset TAB count
+          tabCount = 0
         endif
-      elif (len(command) > 0):
-        # TAB count > 2 with command typed, reset TAB count
-        tabCount = 0
       endif
     elif (ord(char) == 127):
       # backspace delete
@@ -599,4 +656,4 @@ gMaxTabCompletionKeywordLength = 0
 gMaxCompletionsPerLine = 0
 gCommandHistory = []
 gCommandHistoryPos = 0
-
+gTabType = FAST_TABBING
