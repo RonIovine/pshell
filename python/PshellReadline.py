@@ -469,9 +469,9 @@ def __getInput(prompt_):
         inEsc = False
       endif
     elif ((ord(char) >= 32) and (ord(char) < 127)):
-      # printable single character, add it to our command
-      # see if we are in the middle of the string, need to insert differently
-      # than when at the beginning or end
+      # printable single character, add it to our command,
+      # see if we are in the middle of the string, need to 
+      # insert differently than when at the beginning or end
       if ((cursorPos > 0) and (cursorPos < len(command))):
         # insert in the middle
         command = command[:cursorPos] + char + command[cursorPos:]
@@ -539,11 +539,12 @@ def __getInput(prompt_):
             __showTabCompletions(gTabCompletions, prompt_)
           else:
             # partial word typed, double TAB, show all possible completions
-            matchList = __findTabCompletions(command)
-            __showTabCompletions(gTabCompletions, prompt_+command)
+            __showTabCompletions(__findTabCompletions(command), prompt_+command)
             tabCount = 0
+          endif
         elif ((tabCount == 1) and (len(command) > 0)):
-          # partial word typed, single TAB
+          # partial word typed, single TAB, fill out as much
+          #  as we can and show any possible other matches
           matchList = __findTabCompletions(command)
           if (len(matchList) == 1):
             # we only have one completion, show it
