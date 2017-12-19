@@ -31,10 +31,10 @@
 #################################################################################
 #
 # This API implements a readline like functionality for user input.  This can
-# work with any character stream based input/output device, i.e. keyboard input
-# over a serial tty, or over a TCP/telnet connection.  This module will provide
-# up-arrow command history recall, command line editing, and TAB completion of
-# registered keywords.  
+# work with any character stream based input/output terminal device, i.e. 
+# keyboard input over a serial tty, or over a TCP/telnet connection.  This module 
+# will provide up-arrow command history recall, command line editing, and TAB 
+# completion of registered keywords.  
 #
 # A complete example of the usage of the API can be found in the included demo 
 # program pshellReadlineDemo.py
@@ -147,7 +147,8 @@ enddef
 # Set the tabbing method to either be bash/readline style tabbing, i.e. double
 # tabbing to initiate and display completions, or "fast" tabbing, where all
 # completions and displays are initiated via a single tab only, the default is
-# "fast" tabbing
+# "fast" tabbing, use the identifiers PshellReadline.BASH_TABBING and
+# PshellReadline.FAST_TABBING for the tabType
 #
 #################################################################################
 def setTabType(tabType_):
@@ -277,18 +278,22 @@ enddef
 
 #################################################################################
 #################################################################################
-def __findLongestMatch(matchList_):
-  string = NULL
-  charPos = 0
+def __findLongestMatch(matchList_, command_):
+  string = command_
+  charPos = len(command_)
   while (True):
-    char = matchList_[0][charPos]
-    for keyword in matchList_:
-       if ((charPos >= len(keyword)) or (char != keyword[charPos])):
-         return (string)
-       endif
-    endfor
-    string += char
-    charPos += 1
+    if (charPos < len(matchList_[0])):
+      char = matchList_[0][charPos]
+      for keyword in matchList_:
+         if ((charPos >= len(keyword)) or (char != keyword[charPos])):
+           return (string)
+         endif
+      endfor
+      string += char
+      charPos += 1
+    else:
+      return (string)
+    endif
   endwhile
 enddef
 
@@ -499,7 +504,7 @@ def __getInput(prompt_):
       # esc character
       inEsc = True
     elif ((ord(char) == 9) and ((len(command) == 0) or (len(command.split()) == 1))):
-      # tab character, print out any completions
+      # tab character, print out any completions, we only do tabbing on the first keyword
       tabCount += 1
       if (gTabType == FAST_TABBING):
         if (tabCount == 1):
@@ -521,7 +526,7 @@ def __getInput(prompt_):
               # multiple possible matches, fill out longest match and
               # then show all other possibilities
               __clearLine(cursorPos, command)
-              (cursorPos, command) = __showCommand(__findLongestMatch(matchList))
+              (cursorPos, command) = __showCommand(__findLongestMatch(matchList, command))
               __showTabCompletions(matchList, prompt_+command)
             endif
           endif
@@ -548,7 +553,7 @@ def __getInput(prompt_):
           elif (len(matchList) > 1):
             # multiple completions, find the longest match and show up to that
             __clearLine(cursorPos, command)
-            (cursorPos, command) = __showCommand(__findLongestMatch(matchList))
+            (cursorPos, command) = __showCommand(__findLongestMatch(matchList, command))
           endif
         elif (len(command) > 0):
           # TAB count > 2 with command typed, reset TAB count
@@ -622,7 +627,7 @@ def __getChar():
         if (len(inputready) > 0):
           char = gInFd.read(1)
         else:
-          __write("\r\nIdle session timeout");
+          __write("\r\nIdle session timeout\r\n");
           return (char, True)
         endif
       else:

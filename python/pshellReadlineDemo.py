@@ -52,12 +52,14 @@ NULL = ""
 #####################################################
 def showUsage():
   print
-  print "Usage: pshellReadlineDemo.py {-tty | -socket} [<idleTimeout>]"
+  print "Usage: pshellReadlineDemo.py {-tty | -socket} [-bash | -fast] [<idleTimeout>]"
   print
   print "  where:"
-  print "    -tty          - serial terminal using stdin and stdout"
-  print "    -socket       - TCP socket using telnet client"
-  print "    <idleTimeout> - the idle session timeout in minutes"
+  print "    -tty          - serial terminal using stdin and stdout (default)"
+  print "    -socket       - TCP socket terminal using telnet client"
+  print "    -bash         - Use bash/readline style tabbing"
+  print "    -fast         - Use \"fast\" style tabbing (default)"
+  print "    <idleTimeout> - the idle session timeout in minutes (default=none)"
   print
   sys.exit(0)
 enddef
@@ -69,19 +71,28 @@ enddef
 ##############################
 
 idleTimeout = 0
-if ((len(sys.argv) < 2) or (len(sys.argv) > 3)):
-  showUsage()
-elif (sys.argv[1] == "-tty"):
-  serialType = PshellReadline.TTY
-elif (sys.argv[1] == "-socket"):
-  serialType = PshellReadline.SOCKET
-else:
+serialType = PshellReadline.TTY
+if (len(sys.argv) > 4):
   showUsage()
 endif
 
-if (len(sys.argv) == 3):
-  idleTimeout = PshellReadline.ONE_MINUTE*int(sys.argv[2])
-endif
+for arg in sys.argv[1:]:
+  if (arg == "-bash"):
+    PshellReadline.setTabType(PshellReadline.BASH_TABBING)
+  elif (arg == "-fast"):
+    PshellReadline.setTabType(PshellReadline.FAST_TABBING)
+  elif (arg == "-tty"):
+    serialType = PshellReadline.TTY
+  elif (arg == "-socket"):
+    serialType = PshellReadline.SOCKET
+  elif (arg == "-h"):
+    showUsage()
+  elif (arg.isdigit()):
+    idleTimeout = PshellReadline.ONE_MINUTE*int(arg)
+  else:
+    showUsage()
+  endif
+endfor
 
 # add some keywords for TAB completion, the completions
 # only apply to the first keyword (i.e. up to the first
@@ -96,10 +107,10 @@ PshellReadline.addTabCompletion("pshellAggregatorDemo")
 PshellReadline.addTabCompletion("pshellControlDemo")
 PshellReadline.addTabCompletion("pshellReadlineDemo")
 PshellReadline.addTabCompletion("pshellServerDemo")
+PshellReadline.addTabCompletion("myComm")
 PshellReadline.addTabCompletion("myCommand123")
 PshellReadline.addTabCompletion("myCommand456")
 PshellReadline.addTabCompletion("myCommand789")
-PshellReadline.addTabCompletion("myComm")
 
 # socket serial type requested, setup our TCP server socket
 # and pass the connected file descriptors to our PshellReadline
