@@ -321,6 +321,50 @@ enddef
 
 #################################################################################
 #################################################################################
+def __clearLine(cursorPos_, command_):
+  __write("\b"*cursorPos_ + " "*len(command_) + "\b"*(len(command_)))
+enddef
+
+#################################################################################
+#################################################################################
+def __beginningOfLine(cursorPos_, command_):
+  # home, go to beginning of line
+  if (cursorPos_ > 0):
+    cursorPos_ = 0
+    __write("\b"*len(command_))
+  endif
+  return (cursorPos_)
+enddef
+
+#################################################################################
+#################################################################################
+def __endOfLine(cursorPos_, command_):
+  # end key, go to end of line
+  if (cursorPos_ < len(command_)):
+    __write(command_[cursorPos_:])
+    cursorPos_ = len(command_)
+  endif
+  return (cursorPos_)
+enddef
+
+#################################################################################
+#################################################################################
+def __killLine(cursorPos_, command_):
+  __clearLine(cursorPos_, command_)
+  command_ = NULL
+  cursorPos_ = 0
+  return (cursorPos_, command_)
+enddef
+
+#################################################################################
+#################################################################################
+def __showCommand(command_):
+  __write(command_)
+  return (len(command_), command_)
+enddef
+
+#################################################################################
+#################################################################################
 def __getInput(prompt_):
   global gCommandHistory
   global gCommandHistoryPos
@@ -353,10 +397,8 @@ def __getInput(prompt_):
           # up-arrow key
           if (gCommandHistoryPos > 0):
             gCommandHistoryPos -= 1
-            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-            command = gCommandHistory[gCommandHistoryPos]
-            __write(command)
-            cursorPos = len(command)
+            __clearLine(cursorPos, command)
+            (cursorPos, command) = __showCommand(gCommandHistory[gCommandHistoryPos])
           endif
           inEsc = False
           esc = NULL
@@ -364,16 +406,12 @@ def __getInput(prompt_):
           # down-arrow key
           if (gCommandHistoryPos < len(gCommandHistory)-1):
             gCommandHistoryPos += 1
-            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-            command = gCommandHistory[gCommandHistoryPos]
-            __write(command)
-            cursorPos = len(command)
+            __clearLine(cursorPos, command)
+            (cursorPos, command) = __showCommand(gCommandHistory[gCommandHistoryPos])
           else:
             # kill whole line
             gCommandHistoryPos = len(gCommandHistory)
-            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-            command = NULL
-            cursorPos = 0
+            (cursorPos, command) = __killLine(cursorPos, command)
           endif
           inEsc = False
           esc = NULL
@@ -395,10 +433,7 @@ def __getInput(prompt_):
           esc = NULL
         elif (char == '1'):
           print "home2"
-          if (cursorPos > 0):
-            cursorPos = 0
-            __write("\b"*len(command))
-          endif
+          cursorPos = __beginningOfLine(cursorPos, command)
         #elif (char == '3'):
         #  print "delete"
         elif (char == '~'):
@@ -411,24 +446,15 @@ def __getInput(prompt_):
           esc = NULL
         elif (char == '4'):
           print "end2"
-          if (cursorPos < len(command)):
-            __write(command[cursorPos:])
-            cursorPos = len(command)
-          endif
+          cursorPos = __endOfLine(cursorPos, command)
         endif
       elif (esc == 'O'):
         if (char == 'H'):
-          # home key, go to beginning of line
-          if (cursorPos > 0):
-            cursorPos = 0
-            __write("\b"*len(command))
-          endif
+          # go to beginning of line
+          cursorPos = __beginningOfLine(cursorPos, command)
         elif (char == 'F'):
           # end key, go to end of line
-          if (cursorPos < len(command)):
-            __write(command[cursorPos:])
-            cursorPos = len(command)
-          endif
+          cursorPos = __endOfLine(cursorPos, command)
         endif
         inEsc = False
         esc = NULL
@@ -468,9 +494,7 @@ def __getInput(prompt_):
       command = command[:cursorPos]
     elif (ord(char) == 21):
       # kill whole line
-      __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-      command = NULL
-      cursorPos = 0
+      (cursorPos, command) = __killLine(cursorPos, command)
     elif (ord(char) == 27):
       # esc character
       inEsc = True
@@ -491,17 +515,13 @@ def __getInput(prompt_):
             matchList = __findTabCompletions(command)
             if (len(matchList) == 1):
               # only one possible completion, show it
-              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-              command = matchList[0] + " "
-              __write(command)
-              cursorPos = len(command)
+              __clearLine(cursorPos, command)
+              (cursorPos, command) = __showCommand(matchList[0] + " ")
             elif (len(matchList) > 1):
               # multiple possible matches, fill out longest match and
               # then show all other possibilities
-              __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-              command = __findLongestMatch(matchList)
-              __write(command)
-              cursorPos = len(command)
+              __clearLine(cursorPos, command)
+              (cursorPos, command) = __showCommand(__findLongestMatch(matchList))
               __showTabCompletions(matchList, prompt_+command)
             endif
           endif
@@ -523,16 +543,12 @@ def __getInput(prompt_):
           if (len(matchList) == 1):
             # we only have one completion, show it
             tabCount = 0
-            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-            command = matchList[0] + " "
-            __write(command)
-            cursorPos = len(command)
+            __clearLine(cursorPos, command)
+            (cursorPos, command) = __showCommand(matchList[0] + " ")
           elif (len(matchList) > 1):
             # multiple completions, find the longest match and show up to that
-            __write("\b"*cursorPos + " "*len(command) + "\b"*(len(command)))
-            command = __findLongestMatch(matchList)
-            __write(command)
-            cursorPos = len(command)
+            __clearLine(cursorPos, command)
+            (cursorPos, command) = __showCommand(__findLongestMatch(matchList))
           endif
         elif (len(command) > 0):
           # TAB count > 2 with command typed, reset TAB count
@@ -548,20 +564,14 @@ def __getInput(prompt_):
       endif
     elif (ord(char) == 1):
       # home, go to beginning of line
-      if (cursorPos > 0):
-        cursorPos = 0
-        __write("\b"*len(command))
-      endif
+      cursorPos = __beginningOfLine(cursorPos, command)
     elif (ord(char) == 3):
       # ctrl-c, exit program
       print
       sys.exit(0)
     elif (ord(char) == 5):
       # end, go to end of line
-      if (cursorPos < len(command)):
-        __write(command[cursorPos:])
-        cursorPos = len(command)
-      endif
+      cursorPos = __endOfLine(cursorPos, command)
     elif (ord(char) != 9):
       # don't print out tab if multi keyword command
       #__write("\nchar value: %d" % ord(char))
