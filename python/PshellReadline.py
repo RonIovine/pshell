@@ -266,7 +266,6 @@ def __findTabCompletions(keyword_):
   global gTabCompletions
   matchList = []
   for keyword in gTabCompletions:
-    #if (keyword_ == keyword[:len(keyword_)]):
     if (isSubString(keyword_, keyword)):
       matchList.append(keyword)
     endif
@@ -331,7 +330,6 @@ enddef
 #################################################################################
 #################################################################################
 def __beginningOfLine(cursorPos_, command_):
-  # home, go to beginning of line
   if (cursorPos_ > 0):
     cursorPos_ = 0
     __write("\b"*len(command_))
@@ -342,7 +340,6 @@ enddef
 #################################################################################
 #################################################################################
 def __endOfLine(cursorPos_, command_):
-  # end key, go to end of line
   if (cursorPos_ < len(command_)):
     __write(command_[cursorPos_:])
     cursorPos_ = len(command_)
@@ -372,18 +369,15 @@ def __getInput(prompt_):
   global gCommandHistory
   global gCommandHistoryPos
   global gTabCompletions
-  global gMaxTabCompletionKeywordLength
-  global gMaxCompletionsPerLine
   global gTabStyle
   global gOutFd
-
-  __write(prompt_)
   inEsc = False
   esc = NULL
   command = NULL
   cursorPos = 0
   tabCount = 0
   tabCompletions = []
+  __write(prompt_)
   while (True):
     (char, idleSession) = __getChar()
     # check for idleSession timeout
@@ -391,6 +385,7 @@ def __getInput(prompt_):
       return (command, True)
     endif
     if (ord(char) != 9):
+      # something other than TAB typed, clear out our tabCount
       tabCount = 0
     endif
     #print ord(char)
@@ -453,7 +448,7 @@ def __getInput(prompt_):
         endif
       elif (esc == 'O'):
         if (char == 'H'):
-          # go to beginning of line
+          # home key, go to beginning of line
           cursorPos = __beginningOfLine(cursorPos, command)
         elif (char == 'F'):
           # end key, go to end of line
@@ -468,22 +463,14 @@ def __getInput(prompt_):
       endif
     elif ((ord(char) >= 32) and (ord(char) < 127)):
       # printable single character, add it to our command,
-      # see if we are in the middle of the string, need to 
-      # insert differently than when at the beginning or end
-      if ((cursorPos > 0) and (cursorPos < len(command))):
-        # insert in the middle
-        command = command[:cursorPos] + char + command[cursorPos:]
-        __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
-      else:
-        # beginning or end of string
-        command = command[:cursorPos] + char + command[cursorPos:]
-        __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
-      endif
+      command = command[:cursorPos] + char + command[cursorPos:]
+      __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       cursorPos += 1
     elif (ord(char) == 13):
       # carriage return
       __write("\n")
       if (len(command) > 0):
+        # add command to our command history
         gCommandHistory.append(command)
         gCommandHistoryPos = len(gCommandHistory)
         # return command, no idleSession timeout
@@ -648,6 +635,7 @@ def __getChar():
       char = gInFd.recv(1)
     endif
   endif
+  # return char, no idle timeout
   return (char, False)
 enddef
 
