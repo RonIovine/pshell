@@ -61,12 +61,12 @@ enddef = endif = endwhile = endfor = None
 
 # valid serial types, TTY is for serial terminal control and defaults to
 # stdin and stdout, SOCKET uses a serial TCP socket placed in 'telnet'
-# mode for control via a telnet client
+# mode for control via a telnet client, default=tty with stdin/stdout
 TTY = "tty"
 SOCKET = "socket"
 
-# use for the timeout value when setting the idleSessionTimeout
-IDLE_TIMEOUT_NONE = 0  # default
+# use for the timeout value when setting the idleSessionTimeout, default=none
+IDLE_TIMEOUT_NONE = 0
 ONE_SECOND = 1
 ONE_MINUTE = ONE_SECOND*60
 
@@ -165,7 +165,7 @@ enddef
 # be false and this function will not return until the user has typed a command
 # and pressed return.  Otherwise this function will set the idleSession value
 # to true and return if no user activity is detected for the idleSessionTimeout 
-# duration
+# period
 #
 #################################################################################
 def getInput(prompt_):
@@ -182,8 +182,8 @@ enddef
 # of that many characters to match.  A string that is longer than the min
 # match length must still match for the remaining charactes, e.g. with a
 # minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
-# will match, 'quix' will not match.  This function is useful for wildcard
-# matching.
+# will match, 'quix' or 'uit' will not match.  This function is useful for 
+# wildcard matching.
 #
 #################################################################################
 def isSubString(string1_, string2_, minMatchLength_ = 0):

@@ -70,11 +70,11 @@ enddef
 #
 ##############################
 
-idleTimeout = 0
-serialType = PshellReadline.TTY
 if (len(sys.argv) > 4):
   showUsage()
 endif
+
+serialType = PshellReadline.TTY
 
 for arg in sys.argv[1:]:
   if (arg == "-bash"):
@@ -88,7 +88,7 @@ for arg in sys.argv[1:]:
   elif (arg == "-h"):
     showUsage()
   elif (arg.isdigit()):
-    idleTimeout = PshellReadline.ONE_MINUTE*int(arg)
+    PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*int(arg))
   else:
     showUsage()
   endif
@@ -132,14 +132,13 @@ if (serialType == PshellReadline.SOCKET):
   connectFd, clientAddr = sockFd.accept()
   print "connection accepted"
 
-  # set our connected file descriptors
+  # set our connected file descriptors and serial type
   PshellReadline.setFileDescriptors(connectFd, connectFd, PshellReadline.SOCKET)
   
+  # shutdown our original listening socket
   sockFd.shutdown(socket.SHUT_RDWR);
 
 endif
-
-PshellReadline.setIdleTimeout(idleTimeout)
 
 command = NULL
 idleSession = False
