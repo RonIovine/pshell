@@ -78,9 +78,9 @@ endif
 
 for arg in sys.argv[1:]:
   if (arg == "-bash"):
-    PshellReadline.setTabType(PshellReadline.BASH_TABBING)
+    PshellReadline.setTabStyle(PshellReadline.BASH_TAB)
   elif (arg == "-fast"):
-    PshellReadline.setTabType(PshellReadline.FAST_TABBING)
+    PshellReadline.setTabStyle(PshellReadline.FAST_TAB)
   elif (arg == "-tty"):
     serialType = PshellReadline.TTY
   elif (arg == "-socket"):
@@ -141,11 +141,11 @@ endif
 
 PshellReadline.setIdleTimeout(idleTimeout)
 
-command = "xxx"
+command = NULL
 idleSession = False
-while (not idleSession and command.lower() not in "quit"):
+while (not idleSession and not PshellReadline.isSubString(command, "quit")):
   (command, idleSession) = PshellReadline.getInput("prompt> ")
-  if (not idleSession and command not in "quit"):
+  if (not idleSession and not PshellReadline.isSubString(command, "quit")):
     PshellReadline.write("command: '%s'\n" % command)
   endif
 endwhile

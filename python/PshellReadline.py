@@ -71,9 +71,9 @@ ONE_SECOND = 1
 ONE_MINUTE = ONE_SECOND*60
 
 # standard bash/readline tabbing method, i.e. initiate via double tabbing
-BASH_TABBING = "bash"
+BASH_TAB = "bash"
 # fast tabbing, i.e.  initiated via single tabbing, this is the default
-FAST_TABBING = "fast"
+FAST_TAB = "fast"
 
 #################################################################################
 #
@@ -142,17 +142,17 @@ enddef
 
 #################################################################################
 #
-# setTabType:
+# setTabStyle:
 #
 # Set the tabbing method to either be bash/readline style tabbing, i.e. double
 # tabbing to initiate and display completions, or "fast" tabbing, where all
 # completions and displays are initiated via a single tab only, the default is
-# "fast" tabbing, use the identifiers PshellReadline.BASH_TABBING and
-# PshellReadline.FAST_TABBING for the tabType
+# "fast" tabbing, use the identifiers PshellReadline.BASH_TAB and
+# PshellReadline.FAST_TAB for the tabStyle
 #
 #################################################################################
-def setTabType(tabType_):
-  __setTabType(tabType_)
+def setTabStyle(tabStyle_):
+  __setTabStyle(tabStyle_)
 enddef
 
 #################################################################################
@@ -170,6 +170,24 @@ enddef
 #################################################################################
 def getInput(prompt_):
   return (__getInput(prompt_))
+enddef
+
+#################################################################################
+#
+# isSubString:
+#
+# This function will return True if string1 is a substring of string2 at 
+# position 0.  If the minMatchLength is 0, then it will compare up to the
+# length of string1.  If the minMatchLength > 0, it will require a minimum
+# of that many characters to match.  A string that is longer than the min
+# match length must still match for the remaining charactes, e.g. with a
+# minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
+# will match, 'quix' will not match.  This function is useful for wildcard
+# matching.
+#
+#################################################################################
+def isSubString(string1_, string2_, minMatchLength_ = 0):
+  return (__isSubString(string1_, string2_, minMatchLength_))
 enddef
 
 #################################################################################
@@ -228,37 +246,17 @@ enddef
 
 #################################################################################
 #################################################################################
-def __isEqual(string1_, string2_):
-    return (string1_ == string2_)
-enddef
-
-#################################################################################
-#################################################################################
-def __isEqualNoCase(string1_, string2_):
-    return (string1_.lower() == string2_.lower())
-enddef
-
-#################################################################################
-#################################################################################
 def __isSubString(string1_, string2_, minMatchLength_):
-  if (minMatchLength_ == 0):
+  if (string1_ == NULL):
+    return (False)
+  elif (len(string1_) > len(string2_)):
+    return (False)
+  elif (minMatchLength_ == 0):
     return (string1_ == string2_[:len(string1_)])
-  elif ((minMatchLength_ <= len(string1_)) and (minMatchLength_ <= len(string2_))):
+  elif (len(string1_) > minMatchLength_):
+    return (string1_ == string2_[:len(string1_)])
+  else:
     return (string1_[:minMatchLength_] == string2_[:minMatchLength_])
-  else:
-    return (False)
-  endif
-enddef
-
-#################################################################################
-#################################################################################
-def __isSubStringNoCase(string1_, string2_, minMatchLength_):
-  if (minMatchLength_ == 0):
-    return (string1_.lower() == string2_[:len(string1_)].lower())
-  elif ((minMatchLength_ <= len(string1_)) and (minMatchLength_ <= len(string2_))):
-    return (string1_[:minMatchLength_].lower() == string2_[:minMatchLength_].lower())
-  else:
-    return (False)
   endif
 enddef
 
@@ -268,8 +266,8 @@ def __findTabCompletions(keyword_):
   global gTabCompletions
   matchList = []
   for keyword in gTabCompletions:
-    if (keyword_ == keyword[:len(keyword_)]):
-    #if (__isSubString(keyword_, keyword, 0)):
+    #if (keyword_ == keyword[:len(keyword_)]):
+    if (isSubString(keyword_, keyword)):
       matchList.append(keyword)
     endif
   endfor
@@ -319,9 +317,9 @@ enddef
 
 #################################################################################
 #################################################################################
-def __setTabType(tabType_):
-  global gTabType
-  gTabType = tabType_
+def __setTabStyle(tabStyle_):
+  global gTabStyle
+  gTabStyle = tabStyle_
 enddef
 
 #################################################################################
@@ -376,7 +374,7 @@ def __getInput(prompt_):
   global gTabCompletions
   global gMaxTabCompletionKeywordLength
   global gMaxCompletionsPerLine
-  global gTabType
+  global gTabStyle
   global gOutFd
 
   __write(prompt_)
@@ -506,7 +504,7 @@ def __getInput(prompt_):
     elif ((ord(char) == 9) and ((len(command) == 0) or (len(command.split()) == 1))):
       # tab character, print out any completions, we only do tabbing on the first keyword
       tabCount += 1
-      if (gTabType == FAST_TABBING):
+      if (gTabStyle == FAST_TAB):
         if (tabCount == 1):
           # this tabbing method is a little different than the standard
           # readline or bash shell tabbing, we always trigger on a single
@@ -531,7 +529,7 @@ def __getInput(prompt_):
             endif
           endif
         endif
-      else:  # BASH_TABBING
+      else:  # BASH_TAB
         # this code below implements the more standard readline/bash double tabbing method 
         if (tabCount == 2):
           if (len(command) == 0):
@@ -672,4 +670,4 @@ gMaxTabCompletionKeywordLength = 0
 gMaxCompletionsPerLine = 0
 gCommandHistory = []
 gCommandHistoryPos = 0
-gTabType = FAST_TABBING
+gTabStyle = FAST_TAB

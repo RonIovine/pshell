@@ -239,6 +239,24 @@ enddef
 
 #################################################################################
 #
+# isSubString:
+#
+# This function will return True if string1 is a substring of string2 at 
+# position 0.  If the minMatchLength is 0, then it will compare up to the
+# length of string1.  If the minMatchLength > 0, it will require a minimum
+# of that many characters to match.  A string that is longer than the min
+# match length must still match for the remaining charactes, e.g. with a
+# minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
+# will match, 'quix' will not match.  This function is useful for wildcard
+# matching.
+#
+#################################################################################
+def isSubString(string1_, string2_, minMatchLength_ = 0):
+  return (PshellReadline.isSubString(string1_, string2_, minMatchLength_))
+enddef
+
+#################################################################################
+#
 # "private" functions and data
 #
 # Users of this module should never access any of these "private" items directly,
@@ -450,10 +468,10 @@ def __runLocalServer():
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __addTabCompletions()
   __showWelcome()
-  command = "xxx"
-  while (command.lower() not in "quit"):
+  command = NULL
+  while (not isSubString(command, "quit")):
     (command, idleSession) = PshellReadline.getInput(gPrompt)
-    if ((len(command) > 0) and (command.lower() not in "quit")):
+    if ((len(command) > 0) and not isSubString(command, "quit")):
       __processCommand(command)
     endif
   endwhile
