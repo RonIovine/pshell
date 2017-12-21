@@ -393,6 +393,7 @@ def __runUDPServer():
   global gPort
   print "PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %d" % (gServerName, gHostnameOrIpAddr, gPort)
   # startup our UDP server
+  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
   if (__createSocket()):
     while (True):
       __receiveDGRAM()
@@ -406,6 +407,7 @@ def __runUNIXServer():
   global gServerName
   print "PSHELL_INFO: UNIX Server: %s Started" % gServerName
   # startup our UNIX server
+  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
   if (__createSocket()):
     while (True):
       __receiveDGRAM()
@@ -461,9 +463,12 @@ enddef
 def __runLocalServer():
   global gPrompt
   global gTitle
+  global gNoBatch
   gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
   gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
-  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 2, True, True)
+  if (not gNoBatch):
+    __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 2, True, True)
+  endif
   __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
   __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
   __addTabCompletions()
@@ -1142,3 +1147,8 @@ gTcpConnectSockName = None
 gTcpInteractivePrompt = None
 gTcpPrompt = None
 gTcpTitle = None
+# used so the pshell.py UDP/UNIX client program
+# can supress the adding of the batch command in
+# its local server, since they already exist in
+# the remote servers
+gNoBatch = False 
