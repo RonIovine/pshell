@@ -97,9 +97,10 @@ endfor
 
 sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
 
-while (command.lower() != "q"):
+command = NULL
+while (not PshellReadline.isSubString(command, "quit")):
   (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
-  if ((len(command) > 0) and (command.lower() != "q")):
+  if (not PshellReadline.isSubString(command, "quit")):
     if ((command.split()[0] == "?") or (command.split()[0] == "help")):
       sys.stdout.write(PshellControl.extractCommands(sid))
     elif (extract):

@@ -70,7 +70,7 @@ def configureLocalServer():
   PshellServer.gFirstArgPos = 0
   # we tell the local server not to add the 'batch' command because
   # they are already added in the remote UDP/UNIX servers
-  PshellServer.gNoBatch = True
+  PshellServer.gAddBatch = False
   # supress the automatic invalid arg count messag from the PshellControl.py
   # module so we can display the returned usage
   PshellControl.gSupressInvalidArgCountMessage = True

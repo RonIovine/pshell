@@ -156,10 +156,10 @@ PshellReadline.addTabCompletion("traceFilterDemo")
 sys.stdout.write("\033]0;PSHELL: pshellAggregatorDemo[local], Mode: INTERACTIVE\007")
 sys.stdout.flush()
 
-command = "xxx"
-while (command.lower() != "quit"[:len(command)]):
+command = NULL
+while (not PshellReadline.isSubString(command, "quit")):
   (command, idleSession) = PshellReadline.getInput("pshellAggregatorDemo[local]:PSHELL> ")
-  if ((len(command) > 0) and (command.lower() != "quit"[:len(command)])):
+  if (not PshellReadline.isSubString(command, "quit")):
     processCommand(command)
   endif
 endwhile

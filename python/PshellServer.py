@@ -463,10 +463,10 @@ enddef
 def __runLocalServer():
   global gPrompt
   global gTitle
-  global gNoBatch
+  global gAddBatch
   gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
   gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
-  if (not gNoBatch):
+  if (gAddBatch):
     __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 2, True, True)
   endif
   __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
@@ -476,7 +476,7 @@ def __runLocalServer():
   command = NULL
   while (not isSubString(command, "quit")):
     (command, idleSession) = PshellReadline.getInput(gPrompt)
-    if ((len(command) > 0) and not isSubString(command, "quit")):
+    if (not isSubString(command, "quit")):
       __processCommand(command)
     endif
   endwhile
@@ -1151,4 +1151,4 @@ gTcpTitle = None
 # can supress the adding of the batch command in
 # its local server, since they already exist in
 # the remote servers
-gNoBatch = False 
+gAddBatch = True
