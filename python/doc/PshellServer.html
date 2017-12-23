@@ -71,7 +71,7 @@ demo&nbsp;program&nbsp;pshellServerDemo.py.</tt></p>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-addCommand"><strong>addCommand</strong></a>(function_, command_, description_, usage_<font color="#909090">=None</font>, minArgs_<font color="#909090">=0</font>, maxArgs_<font color="#909090">=0</font>, showUsage_<font color="#909090">=True</font>)</dt><dd><tt>Register&nbsp;callback&nbsp;commands&nbsp;to&nbsp;our&nbsp;PSHELL&nbsp;server.&nbsp;&nbsp;If&nbsp;the&nbsp;command&nbsp;takes&nbsp;no<br>
+<td width="100%"><dl><dt><a name="-addCommand"><strong>addCommand</strong></a>(function, command, description, usage<font color="#909090">=None</font>, minArgs<font color="#909090">=0</font>, maxArgs<font color="#909090">=0</font>, showUsage<font color="#909090">=True</font>)</dt><dd><tt>Register&nbsp;callback&nbsp;commands&nbsp;to&nbsp;our&nbsp;PSHELL&nbsp;server.&nbsp;&nbsp;If&nbsp;the&nbsp;command&nbsp;takes&nbsp;no<br>
 arguments,&nbsp;the&nbsp;default&nbsp;parameters&nbsp;can&nbsp;be&nbsp;provided.&nbsp;&nbsp;If&nbsp;the&nbsp;command&nbsp;takes<br>
 an&nbsp;exact&nbsp;number&nbsp;of&nbsp;parameters,&nbsp;set&nbsp;minArgs&nbsp;and&nbsp;maxArgs&nbsp;to&nbsp;be&nbsp;the&nbsp;same.&nbsp;&nbsp;If<br>
 the&nbsp;user&nbsp;wants&nbsp;the&nbsp;callback&nbsp;function&nbsp;to&nbsp;handle&nbsp;all&nbsp;help&nbsp;initiated&nbsp;usage,<br>
@@ -79,7 +79,7 @@ set&nbsp;the&nbsp;showUsage&nbsp;parameter&nbsp;to&nbsp;False.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;(ptr)&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;User&nbsp;callback&nbsp;function<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Command&nbsp;to&nbsp;dispatch&nbsp;the&nbsp;command&nbsp;(single&nbsp;keyword&nbsp;only)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Command&nbsp;to&nbsp;dispatch&nbsp;the&nbsp;function&nbsp;(single&nbsp;keyword&nbsp;only)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;description&nbsp;(str)&nbsp;:&nbsp;One&nbsp;line&nbsp;description&nbsp;of&nbsp;command<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;usage&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;One&nbsp;line&nbsp;command&nbsp;usage&nbsp;(Unix&nbsp;style&nbsp;preferred)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minArgs&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Minimum&nbsp;number&nbsp;of&nbsp;required&nbsp;arguments<br>
@@ -113,7 +113,7 @@ registered&nbsp;with&nbsp;the&nbsp;showUsage&nbsp;=&nbsp;False&nbsp;option.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;user&nbsp;is&nbsp;requesting&nbsp;command&nbsp;help,&nbsp;False&nbsp;otherwise</tt></dd></dl>
- <dl><dt><a name="-isSubString"><strong>isSubString</strong></a>(string1_, string2_, minMatchLength_<font color="#909090">=0</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;return&nbsp;True&nbsp;if&nbsp;string1&nbsp;is&nbsp;a&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;<br>
+ <dl><dt><a name="-isSubString"><strong>isSubString</strong></a>(string1, string2, minMatchLength<font color="#909090">=0</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;return&nbsp;True&nbsp;if&nbsp;string1&nbsp;is&nbsp;a&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;<br>
 position&nbsp;0.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;is&nbsp;0,&nbsp;then&nbsp;it&nbsp;will&nbsp;compare&nbsp;up&nbsp;to&nbsp;the<br>
 length&nbsp;of&nbsp;string1.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;&gt;&nbsp;0,&nbsp;it&nbsp;will&nbsp;require&nbsp;a&nbsp;minimum<br>
 of&nbsp;that&nbsp;many&nbsp;characters&nbsp;to&nbsp;match.&nbsp;&nbsp;A&nbsp;string&nbsp;that&nbsp;is&nbsp;longer&nbsp;than&nbsp;the&nbsp;min<br>
@@ -129,21 +129,21 @@ matching.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;is&nbsp;substring&nbsp;matches,&nbsp;False&nbsp;otherwise</tt></dd></dl>
- <dl><dt><a name="-march"><strong>march</strong></a>(string_)</dt><dd><tt>March&nbsp;a&nbsp;string&nbsp;or&nbsp;character&nbsp;keep&nbsp;alive&nbsp;across&nbsp;the&nbsp;screen<br>
+ <dl><dt><a name="-march"><strong>march</strong></a>(string)</dt><dd><tt>March&nbsp;a&nbsp;string&nbsp;or&nbsp;character&nbsp;keep&nbsp;alive&nbsp;across&nbsp;the&nbsp;screen<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;String&nbsp;or&nbsp;char&nbsp;to&nbsp;march&nbsp;across&nbsp;the&nbsp;screen<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-printf"><strong>printf</strong></a>(message_<font color="#909090">='<font color="#c040c0">\n</font>'</font>)</dt><dd><tt>Display&nbsp;data&nbsp;back&nbsp;to&nbsp;the&nbsp;remote&nbsp;client<br>
+ <dl><dt><a name="-printf"><strong>printf</strong></a>(message<font color="#909090">='<font color="#c040c0">\n</font>'</font>)</dt><dd><tt>Display&nbsp;data&nbsp;back&nbsp;to&nbsp;the&nbsp;remote&nbsp;client<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;Message&nbsp;to&nbsp;display&nbsp;to&nbsp;the&nbsp;client&nbsp;user<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-runCommand"><strong>runCommand</strong></a>(command_)</dt><dd><tt>Run&nbsp;a&nbsp;registered&nbsp;command&nbsp;from&nbsp;within&nbsp;its&nbsp;parent&nbsp;process<br>
+ <dl><dt><a name="-runCommand"><strong>runCommand</strong></a>(command)</dt><dd><tt>Run&nbsp;a&nbsp;registered&nbsp;command&nbsp;from&nbsp;within&nbsp;its&nbsp;parent&nbsp;process<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;:&nbsp;Registered&nbsp;callback&nbsp;command&nbsp;to&nbsp;run<br>
@@ -157,7 +157,7 @@ matching.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-startServer"><strong>startServer</strong></a>(serverName_, serverType_, serverMode_, hostnameOrIpAddr_<font color="#909090">=None</font>, port_<font color="#909090">=0</font>)</dt><dd><tt>Start&nbsp;our&nbsp;PSHELL&nbsp;server,&nbsp;if&nbsp;serverType&nbsp;is&nbsp;UNIX&nbsp;or&nbsp;LOCAL,&nbsp;the&nbsp;default<br>
+ <dl><dt><a name="-startServer"><strong>startServer</strong></a>(serverName, serverType, serverMode, hostnameOrIpAddr<font color="#909090">=None</font>, port<font color="#909090">=0</font>)</dt><dd><tt>Start&nbsp;our&nbsp;PSHELL&nbsp;server,&nbsp;if&nbsp;serverType&nbsp;is&nbsp;UNIX&nbsp;or&nbsp;LOCAL,&nbsp;the&nbsp;default<br>
 parameters&nbsp;can&nbsp;be&nbsp;used,&nbsp;and&nbsp;will&nbsp;be&nbsp;ignored&nbsp;if&nbsp;provided.&nbsp;&nbsp;All&nbsp;of&nbsp;these<br>
 parameters&nbsp;except&nbsp;serverMode&nbsp;can&nbsp;be&nbsp;overridden&nbsp;on&nbsp;a&nbsp;per&nbsp;serverName<br>
 basis&nbsp;via&nbsp;the&nbsp;pshell-server.conf&nbsp;config&nbsp;file.&nbsp;&nbsp;All&nbsp;commands&nbsp;in&nbsp;the<br>
@@ -173,7 +173,7 @@ startup&nbsp;time.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-wheel"><strong>wheel</strong></a>(string_<font color="#909090">=None</font>)</dt><dd><tt>Spinning&nbsp;ascii&nbsp;wheel&nbsp;keep&nbsp;alive,&nbsp;user&nbsp;string&nbsp;string&nbsp;is&nbsp;optional<br>
+ <dl><dt><a name="-wheel"><strong>wheel</strong></a>(string<font color="#909090">=None</font>)</dt><dd><tt>Spinning&nbsp;ascii&nbsp;wheel&nbsp;keep&nbsp;alive,&nbsp;user&nbsp;string&nbsp;string&nbsp;is&nbsp;optional<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;String&nbsp;to&nbsp;display&nbsp;before&nbsp;the&nbsp;spinning&nbsp;wheel<br>

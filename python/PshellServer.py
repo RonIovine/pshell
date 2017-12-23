@@ -127,7 +127,7 @@ LOCALHOST = "localhost"
 
 #################################################################################
 #################################################################################
-def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, maxArgs_ = 0, showUsage_ = True):
+def addCommand(function, command, description, usage = None, minArgs = 0, maxArgs = 0, showUsage = True):
   """
   Register callback commands to our PSHELL server.  If the command takes no
   arguments, the default parameters can be provided.  If the command takes
@@ -137,7 +137,7 @@ def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, m
 
     Args:
         function (ptr)    : User callback function
-        command (str)     : Command to dispatch the command (single keyword only)
+        command (str)     : Command to dispatch the function (single keyword only)
         description (str) : One line description of command
         usage (str)       : One line command usage (Unix style preferred)
         minArgs (int)     : Minimum number of required arguments
@@ -147,12 +147,12 @@ def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, m
     Returns:
         none
   """
-  _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_,  showUsage_)
+  _addCommand(function, command, description, usage, minArgs,  maxArgs,  showUsage)
 _enddef
 
 #################################################################################
 #################################################################################
-def startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_ = None, port_ = 0):
+def startServer(serverName, serverType, serverMode, hostnameOrIpAddr = None, port = 0):
   """
   Start our PSHELL server, if serverType is UNIX or LOCAL, the default
   parameters can be used, and will be ignored if provided.  All of these
@@ -171,7 +171,7 @@ def startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_ = None,
     Returns:
         none
   """
-  _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_)
+  _startServer(serverName, serverType, serverMode, hostnameOrIpAddr, port)
 _enddef
 
 #################################################################################
@@ -194,7 +194,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def runCommand(command_):
+def runCommand(command):
   """
   Run a registered command from within its parent process
 
@@ -204,7 +204,7 @@ def runCommand(command_):
     Returns:
         none
   """
-  _runCommand(command_)
+  _runCommand(command)
 _enddef
 
 #################################################################################
@@ -216,7 +216,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def printf(message_ = "\n"):
+def printf(message = "\n"):
   """
   Display data back to the remote client
 
@@ -226,7 +226,7 @@ def printf(message_ = "\n"):
     Returns:
         none
   """
-  _printf(message_)
+  _printf(message)
 _enddef
 
 #################################################################################
@@ -249,7 +249,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def wheel(string_ = None):
+def wheel(string = None):
   """
   Spinning ascii wheel keep alive, user string string is optional
 
@@ -259,12 +259,12 @@ def wheel(string_ = None):
     Returns:
         none
   """
-  _wheel(string_)
+  _wheel(string)
 _enddef
 
 #################################################################################
 #################################################################################
-def march(string_):
+def march(string):
   """
   March a string or character keep alive across the screen
 
@@ -274,7 +274,7 @@ def march(string_):
     Returns:
         none
   """
-  _march(string_)
+  _march(string)
 _enddef
 
 #################################################################################
@@ -310,7 +310,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def isSubString(string1_, string2_, minMatchLength_ = 0):
+def isSubString(string1, string2, minMatchLength = 0):
   """
   This function will return True if string1 is a substring of string2 at 
   position 0.  If the minMatchLength is 0, then it will compare up to the
@@ -329,7 +329,7 @@ def isSubString(string1_, string2_, minMatchLength_ = 0):
     Returns:
         bool : True is substring matches, False otherwise
   """
-  return (PshellReadline.isSubString(string1_, string2_, minMatchLength_))
+  return (_isSubString(string1, string2, minMatchLength))
 _enddef
 
 #################################################################################
@@ -342,6 +342,12 @@ _enddef
 #
 #################################################################################
  
+#################################################################################
+#################################################################################
+def _isSubString(string1_, string2_, minMatchLength_):
+  return (PshellReadline.isSubString(string1_, string2_, minMatchLength_))
+_enddef
+
 #################################################################################
 #################################################################################
 def _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, showUsage_, prepend_ = False):

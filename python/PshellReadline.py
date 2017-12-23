@@ -97,7 +97,7 @@ FAST_TAB = "fast"
 
 #################################################################################
 #################################################################################
-def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_NONE):
+def setFileDescriptors(inFd, outFd, serialType, idleTimeout = IDLE_TIMEOUT_NONE):
   """
   Set the input and output file descriptors, if this function is not called,
   the default is stdin and stdout.  The file descriptors given to this function
@@ -118,12 +118,12 @@ def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_N
     Returns:
         none
   """
-  _setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_)
+  _setFileDescriptors(inFd, outFd, serialType, idleTimeout)
 _enddef
 
 #################################################################################
 #################################################################################
-def setIdleTimeout(idleTimeout_):
+def setIdleTimeout(idleTimeout):
   """
   Set the idle session timeout as described above.  Use the identifiers
   PshellReadline.ONE_SEC and PshellRedline.ONE_MINUTE as follows,
@@ -135,12 +135,12 @@ def setIdleTimeout(idleTimeout_):
     Returns:
         none
   """
-  _setIdleTimeout(idleTimeout_)
+  _setIdleTimeout(idleTimeout)
 _enddef
 
 #################################################################################
 #################################################################################
-def write(string_):
+def write(string):
   """
   Write a string to our output file descriptor
 
@@ -150,12 +150,12 @@ def write(string_):
     Returns:
         none
   """
-  _write(string_)
+  _write(string)
 _enddef
 
 #################################################################################
 #################################################################################
-def addTabCompletion(keyword_):
+def addTabCompletion(keyword):
   """
   Add a keyword to the TAB completion list.  TAB completion will only be applied
   to the first keyword of a given user typed command
@@ -166,12 +166,12 @@ def addTabCompletion(keyword_):
     Returns:
         none
   """
-  _addTabCompletion(keyword_)
+  _addTabCompletion(keyword)
 _enddef
 
 #################################################################################
 #################################################################################
-def setTabStyle(tabStyle_):
+def setTabStyle(tabStyle):
   """
   Set the tabbing method to either be bash/readline style tabbing, i.e. double
   tabbing to initiate and display completions, or "fast" tabbing, where all
@@ -185,12 +185,12 @@ def setTabStyle(tabStyle_):
     Returns:
         none
   """
-  _setTabStyle(tabStyle_)
+  _setTabStyle(tabStyle)
 _enddef
 
 #################################################################################
 #################################################################################
-def getInput(prompt_):
+def getInput(prompt):
   """
   Issue the user prompt and return the entered command line value.  This 
   function will return the tuple (command, idleSession).  If the idle session
@@ -207,12 +207,12 @@ def getInput(prompt_):
         str  : The user typed command
         bool : True for idleSession timeout, False otherwise
   """
-  return (_getInput(prompt_))
+  return (_getInput(prompt))
 _enddef
 
 #################################################################################
 #################################################################################
-def isSubString(string1_, string2_, minMatchLength_ = 0):
+def isSubString(string1, string2, minMatchLength = 0):
   """
   This function will return True if string1 is a substring of string2 at 
   position 0.  If the minMatchLength is 0, then it will compare up to the
@@ -231,7 +231,7 @@ def isSubString(string1_, string2_, minMatchLength_ = 0):
     Returns:
         bool : True is substring matches, False otherwise
   """
-  return (_isSubString(string1_, string2_, minMatchLength_))
+  return (_isSubString(string1, string2, minMatchLength))
 _enddef
 
 #################################################################################

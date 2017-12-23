@@ -60,7 +60,7 @@ demo&nbsp;programs&nbsp;pshellControlDemo.py&nbsp;and&nbsp;pshellAggregatorDemo.
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-addMulticast"><strong>addMulticast</strong></a>(sid_, keyword_)</dt><dd><tt>This&nbsp;command&nbsp;will&nbsp;add&nbsp;a&nbsp;given&nbsp;multicast&nbsp;receiver&nbsp;(i.e.&nbsp;sid)&nbsp;to&nbsp;a&nbsp;multicast&nbsp;<br>
+<td width="100%"><dl><dt><a name="-addMulticast"><strong>addMulticast</strong></a>(sid, keyword)</dt><dd><tt>This&nbsp;command&nbsp;will&nbsp;add&nbsp;a&nbsp;given&nbsp;multicast&nbsp;receiver&nbsp;(i.e.&nbsp;sid)&nbsp;to&nbsp;a&nbsp;multicast&nbsp;<br>
 group,&nbsp;multicast&nbsp;groups&nbsp;are&nbsp;based&nbsp;on&nbsp;the&nbsp;command's&nbsp;keyword<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
@@ -69,7 +69,7 @@ group,&nbsp;multicast&nbsp;groups&nbsp;are&nbsp;based&nbsp;on&nbsp;the&nbsp;comm
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-connectServer"><strong>connectServer</strong></a>(controlName_, remoteServer_, port_, defaultTimeout_)</dt><dd><tt>Connect&nbsp;to&nbsp;a&nbsp;pshell&nbsp;server&nbsp;in&nbsp;another&nbsp;process,&nbsp;note&nbsp;that&nbsp;this&nbsp;does<br>
+ <dl><dt><a name="-connectServer"><strong>connectServer</strong></a>(controlName, remoteServer, port, defaultTimeout)</dt><dd><tt>Connect&nbsp;to&nbsp;a&nbsp;pshell&nbsp;server&nbsp;in&nbsp;another&nbsp;process,&nbsp;note&nbsp;that&nbsp;this&nbsp;does<br>
 not&nbsp;do&nbsp;any&nbsp;handshaking&nbsp;to&nbsp;the&nbsp;remote&nbsp;pshell&nbsp;or&nbsp;maintain&nbsp;a&nbsp;connection<br>
 state,&nbsp;it&nbsp;meerly&nbsp;sets&nbsp;the&nbsp;internal&nbsp;destination&nbsp;remote&nbsp;pshell&nbsp;server<br>
 information&nbsp;to&nbsp;use&nbsp;when&nbsp;sending&nbsp;commands&nbsp;via&nbsp;the&nbsp;sendCommandN<br>
@@ -108,7 +108,7 @@ handles&nbsp;that&nbsp;need&nbsp;to&nbsp;be&nbsp;cleaned&nbsp;up<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-disconnectServer"><strong>disconnectServer</strong></a>(sid_)</dt><dd><tt>Cleanup&nbsp;any&nbsp;resources&nbsp;associated&nbsp;with&nbsp;the&nbsp;server&nbsp;connection,&nbsp;including&nbsp;<br>
+ <dl><dt><a name="-disconnectServer"><strong>disconnectServer</strong></a>(sid)</dt><dd><tt>Cleanup&nbsp;any&nbsp;resources&nbsp;associated&nbsp;with&nbsp;the&nbsp;server&nbsp;connection,&nbsp;including&nbsp;<br>
 releasing&nbsp;any&nbsp;temp&nbsp;file&nbsp;handles,&nbsp;closing&nbsp;any&nbsp;local&nbsp;socket&nbsp;handles&nbsp;etc.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
@@ -116,7 +116,7 @@ releasing&nbsp;any&nbsp;temp&nbsp;file&nbsp;handles,&nbsp;closing&nbsp;any&nbsp;
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-extractCommands"><strong>extractCommands</strong></a>(sid_)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;extract&nbsp;all&nbsp;the&nbsp;commands&nbsp;of&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server&nbsp;and&nbsp;<br>
+ <dl><dt><a name="-extractCommands"><strong>extractCommands</strong></a>(sid)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;extract&nbsp;all&nbsp;the&nbsp;commands&nbsp;of&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server&nbsp;and&nbsp;<br>
 present&nbsp;them&nbsp;in&nbsp;a&nbsp;human&nbsp;readable&nbsp;form,&nbsp;this&nbsp;is&nbsp;useful&nbsp;when&nbsp;writing&nbsp;a&nbsp;multi&nbsp;<br>
 server&nbsp;control&nbsp;aggregator,&nbsp;see&nbsp;the&nbsp;demo&nbsp;program&nbsp;pshellAggregatorDemo.py&nbsp;in&nbsp;<br>
 the&nbsp;demo&nbsp;directory&nbsp;for&nbsp;examples<br>
@@ -126,7 +126,7 @@ the&nbsp;demo&nbsp;directory&nbsp;for&nbsp;examples<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;:&nbsp;The&nbsp;remote&nbsp;server's&nbsp;command&nbsp;list&nbsp;in&nbsp;human&nbsp;readable&nbsp;form</tt></dd></dl>
- <dl><dt><a name="-sendCommand1"><strong>sendCommand1</strong></a>(sid_, command_)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call,&nbsp;<br>
+ <dl><dt><a name="-sendCommand1"><strong>sendCommand1</strong></a>(sid, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call,&nbsp;<br>
 if&nbsp;the&nbsp;default&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;the&nbsp;server&nbsp;will&nbsp;not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and<br>
 this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one<br>
 &nbsp;<br>
@@ -144,7 +144,7 @@ this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_RECEIVE_FAILURE<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_TIMEOUT<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_NOT_CONNECTED</tt></dd></dl>
- <dl><dt><a name="-sendCommand2"><strong>sendCommand2</strong></a>(sid_, timeoutOverride_, command_)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout,&nbsp;if&nbsp;the&nbsp;override&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;<br>
+ <dl><dt><a name="-sendCommand2"><strong>sendCommand2</strong></a>(sid, timeoutOverride, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout,&nbsp;if&nbsp;the&nbsp;override&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;<br>
 the&nbsp;server&nbsp;will&nbsp;not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and&nbsp;this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;<br>
 one<br>
 &nbsp;<br>
@@ -163,7 +163,7 @@ one<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_RECEIVE_FAILURE<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_TIMEOUT<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_NOT_CONNECTED</tt></dd></dl>
- <dl><dt><a name="-sendCommand3"><strong>sendCommand3</strong></a>(sid_, command_)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call&nbsp;and&nbsp;<br>
+ <dl><dt><a name="-sendCommand3"><strong>sendCommand3</strong></a>(sid, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call&nbsp;and&nbsp;<br>
 return&nbsp;any&nbsp;results&nbsp;received&nbsp;in&nbsp;the&nbsp;payload,&nbsp;if&nbsp;the&nbsp;default&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;the&nbsp;<br>
 server&nbsp;will&nbsp;not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and&nbsp;this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one,&nbsp;<br>
 and&nbsp;no&nbsp;results&nbsp;will&nbsp;be&nbsp;extracted<br>
@@ -175,7 +175,7 @@ and&nbsp;no&nbsp;results&nbsp;will&nbsp;be&nbsp;extracted<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;The&nbsp;human&nbsp;readable&nbsp;results&nbsp;of&nbsp;the&nbsp;command&nbsp;response&nbsp;or&nbsp;NULL<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;no&nbsp;results&nbsp;or&nbsp;command&nbsp;failure</tt></dd></dl>
- <dl><dt><a name="-sendCommand4"><strong>sendCommand4</strong></a>(sid_, timeoutOverride_, command_)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout&nbsp;and&nbsp;return&nbsp;any&nbsp;results&nbsp;received&nbsp;<br>
+ <dl><dt><a name="-sendCommand4"><strong>sendCommand4</strong></a>(sid, timeoutOverride, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout&nbsp;and&nbsp;return&nbsp;any&nbsp;results&nbsp;received&nbsp;<br>
 in&nbsp;the&nbsp;payload,&nbsp;if&nbsp;the&nbsp;timeout&nbsp;override&nbsp;default&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;the&nbsp;server&nbsp;will&nbsp;<br>
 not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and&nbsp;this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one,&nbsp;and&nbsp;no&nbsp;<br>
 results&nbsp;will&nbsp;be&nbsp;extracted<br>
@@ -188,7 +188,7 @@ results&nbsp;will&nbsp;be&nbsp;extracted<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;The&nbsp;human&nbsp;readable&nbsp;results&nbsp;of&nbsp;the&nbsp;command&nbsp;response&nbsp;or&nbsp;NULL<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;no&nbsp;results&nbsp;or&nbsp;command&nbsp;failure</tt></dd></dl>
- <dl><dt><a name="-sendMulticast"><strong>sendMulticast</strong></a>(command_)</dt><dd><tt>This&nbsp;command&nbsp;will&nbsp;send&nbsp;a&nbsp;given&nbsp;command&nbsp;to&nbsp;all&nbsp;the&nbsp;registered&nbsp;multicast<br>
+ <dl><dt><a name="-sendMulticast"><strong>sendMulticast</strong></a>(command)</dt><dd><tt>This&nbsp;command&nbsp;will&nbsp;send&nbsp;a&nbsp;given&nbsp;command&nbsp;to&nbsp;all&nbsp;the&nbsp;registered&nbsp;multicast<br>
 receivers&nbsp;(i.e.&nbsp;sids)&nbsp;for&nbsp;this&nbsp;multicast&nbsp;group,&nbsp;multicast&nbsp;groups&nbsp;are&nbsp;<br>
 based&nbsp;on&nbsp;the&nbsp;command's&nbsp;keyword,&nbsp;this&nbsp;function&nbsp;will&nbsp;issue&nbsp;the&nbsp;command&nbsp;as&nbsp;<br>
 a&nbsp;best&nbsp;effort&nbsp;fire-and-forget&nbsp;command&nbsp;to&nbsp;each&nbsp;receiver&nbsp;in&nbsp;the&nbsp;multicast&nbsp;<br>
@@ -200,7 +200,7 @@ requested&nbsp;or&nbsp;expected<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-setDefaultTimeout"><strong>setDefaultTimeout</strong></a>(sid_, defaultTimeout_)</dt><dd><tt>Set&nbsp;the&nbsp;default&nbsp;server&nbsp;response&nbsp;timeout&nbsp;that&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;'send'&nbsp;commands&nbsp;<br>
+ <dl><dt><a name="-setDefaultTimeout"><strong>setDefaultTimeout</strong></a>(sid, defaultTimeout)</dt><dd><tt>Set&nbsp;the&nbsp;default&nbsp;server&nbsp;response&nbsp;timeout&nbsp;that&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;'send'&nbsp;commands&nbsp;<br>
 that&nbsp;don't&nbsp;take&nbsp;a&nbsp;timeout&nbsp;override<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
