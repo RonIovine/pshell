@@ -48,20 +48,20 @@ control mechanism.
 
 Functions:
 
-addCommand() -- register a pshell command with the server
-startServer() -- start the pshell server
+addCommand()       -- register a pshell command with the server
+startServer()      -- start the pshell server
 cleanupResources() -- release all resources claimed by the server
-runCommand() -- run a registered command from the parent (i.e. registering) program
+runCommand()       -- run a registered command from the parent (i.e. registering) program
 
 The following commands can only be called from within the context of 
 a pshell callback function
 
-printf() -- display a message from a pshell callback function to the client
-flush() -- flush the transfer buffer to the client (UDP/UNIX servers only)
-wheel() -- spinning ascii wheel to keep UDP/UNIX client alive
-march() -- marching ascii character to keep UDP/UNIX client alive
-showUsage() -- show the usage the command is registered with
-isHelp() -- checks if the user has requested help on this command
+printf()      -- display a message from a pshell callback function to the client
+flush()       -- flush the transfer buffer to the client (UDP/UNIX servers only)
+wheel()       -- spinning ascii wheel to keep UDP/UNIX client alive
+march()       -- marching ascii character to keep UDP/UNIX client alive
+showUsage()   -- show the usage the command is registered with
+isHelp()      -- checks if the user has requested help on this command
 isSubString() -- checks for string1 substring of string2 at position 0
  
  
@@ -134,8 +134,20 @@ def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, m
   an exact number of parameters, set minArgs and maxArgs to be the same.  If
   the user wants the callback function to handle all help initiated usage,
   set the showUsage parameter to False.
+
+    Args:
+        function (ptr)    : User callback function
+        command (str)     : Command to dispatch the command (single keyword only)
+        description (str) : One line description of command
+        usage (str)       : One line command usage (Unix style preferred)
+        minArgs (int)     : Minimum number of required arguments
+        maxArgs (int)     : Maximum number of required arguments
+        showUsage (bool)  : Show registered usage on a '?' or '-h'
+
+    Returns:
+        none
   """
-  __addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_,  showUsage_)
+  _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_,  showUsage_)
 _enddef
 
 #################################################################################
@@ -148,8 +160,18 @@ def startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_ = None,
   basis via the pshell-server.conf config file.  All commands in the
   <serverName>.startup file will be executed in this function at server
   startup time.
+
+    Args:
+        serverName (str)       : Logical name of the Pshell server
+        serverType (str)       : Desired server type (UDP, UNIX, TCP, LOCAL)
+        serverMode (str)       : Desired server mode (BLOCKING, NON_BLOCKING)
+        hostnameOrIpAddr (str) : Hostname or IP address to run server on
+        port (int)             : Port number to run server on (UDP or TCP only)
+
+    Returns:
+        none
   """
-  __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_)
+  _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_)
 _enddef
 
 #################################################################################
@@ -160,8 +182,14 @@ def cleanupResources():
   any open socked handles, file descriptors, or system 'tmp' files.  This should
   be called at program exit time as well as any signal exception handler that
   results in a program termination.
+
+    Args:
+        none
+
+    Returns:
+        none
   """
-  __cleanupResources()
+  _cleanupResources()
 _enddef
 
 #################################################################################
@@ -169,8 +197,14 @@ _enddef
 def runCommand(command_):
   """
   Run a registered command from within its parent process
+
+    Args:
+        command (str) : Registered callback command to run
+
+    Returns:
+        none
   """
-  __runCommand(command_)
+  _runCommand(command_)
 _enddef
 
 #################################################################################
@@ -185,8 +219,14 @@ _enddef
 def printf(message_ = "\n"):
   """
   Display data back to the remote client
+
+    Args:
+        string (str) : Message to display to the client user
+
+    Returns:
+        none
   """
-  __printf(message_)
+  _printf(message_)
 _enddef
 
 #################################################################################
@@ -194,8 +234,14 @@ _enddef
 def flush():
   """
   Flush the reply (i.e. display) buffer back to the remote client
+
+    Args:
+        none
+
+    Returns:
+        none
   """
-  __flush()
+  _flush()
 _enddef
 
 #################################################################################
@@ -205,18 +251,30 @@ _enddef
 #################################################################################
 def wheel(string_ = None):
   """
-  spinning ascii wheel keep alive, user string string is optional
+  Spinning ascii wheel keep alive, user string string is optional
+
+    Args:
+        string (str) : String to display before the spinning wheel
+
+    Returns:
+        none
   """
-  __wheel(string_)
+  _wheel(string_)
 _enddef
 
 #################################################################################
 #################################################################################
 def march(string_):
   """
-  march a string or character keep alive across the screen
+  March a string or character keep alive across the screen
+
+    Args:
+        string (str) : String or char to march across the screen
+
+    Returns:
+        none
   """
-  __march(string_)
+  _march(string_)
 _enddef
 
 #################################################################################
@@ -224,8 +282,14 @@ _enddef
 def showUsage():
   """
   Show the command's registered usage
+
+    Args:
+        none
+
+    Returns:
+        none
   """
-  __showUsage()
+  _showUsage()
 _enddef
 
 #################################################################################
@@ -234,8 +298,14 @@ def isHelp():
   """
   Check if the user has asked for help on this command.  Command must be 
   registered with the showUsage = False option.
+
+    Args:
+        none
+
+    Returns:
+        bool : True if user is requesting command help, False otherwise
   """
-  return (__isHelp())
+  return (_isHelp())
 _enddef
 
 #################################################################################
@@ -250,6 +320,14 @@ def isSubString(string1_, string2_, minMatchLength_ = 0):
   minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
   will match, 'quix' will not match.  This function is useful for wildcard
   matching.
+
+    Args:
+        string1 (str)        : The substring
+        string2 (str)        : The target string
+        minMatchLength (int) : The minimum required characters match
+
+    Returns:
+        bool : True is substring matches, False otherwise
   """
   return (PshellReadline.isSubString(string1_, string2_, minMatchLength_))
 _enddef
@@ -266,7 +344,7 @@ _enddef
  
 #################################################################################
 #################################################################################
-def __addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, showUsage_, prepend_ = False):
+def _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, showUsage_, prepend_ = False):
   global _gCommandList
   global _gMaxLength
   for command in _gCommandList:
@@ -288,7 +366,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_):
+def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_):
   global _gServerName
   global _gServerType
   global _gServerMode
@@ -304,26 +382,26 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
     gRunning = True
     _gServerName = serverName_
     _gServerMode = serverMode_  
-    (_gTitle, _gBanner, _gPrompt, _gServerType, _gHostnameOrIpAddr, _gPort, _gTcpTimeout) = __loadConfigFile(_gServerName, _gTitle, _gBanner, _gPrompt, serverType_, hostnameOrIpAddr_, port_, _gTcpTimeout)
-    __loadStartupFile()  
+    (_gTitle, _gBanner, _gPrompt, _gServerType, _gHostnameOrIpAddr, _gPort, _gTcpTimeout) = _loadConfigFile(_gServerName, _gTitle, _gBanner, _gPrompt, serverType_, hostnameOrIpAddr_, port_, _gTcpTimeout)
+    _loadStartupFile()  
     if (_gServerMode == BLOCKING):
-      __runServer()
+      _runServer()
     else:
       # spawn thread
-      thread.start_new_thread(__serverThread, ())
+      thread.start_new_thread(_serverThread, ())
     _endif
   _endif
 _enddef
 
 #################################################################################
 #################################################################################
-def __serverThread():
-  __runServer()
+def _serverThread():
+  _runServer()
 _enddef
   
 #################################################################################
 #################################################################################
-def __createSocket():
+def _createSocket():
   global _gServerName
   global _gServerType
   global _gHostnameOrIpAddr
@@ -370,52 +448,52 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __runServer():
+def _runServer():
   global _gServerType
   if (_gServerType == UDP):
-    __runUDPServer()
+    _runUDPServer()
   elif (_gServerType == TCP):
-    __runTCPServer()
+    _runTCPServer()
   elif (_gServerType == UNIX):
-    __runUNIXServer()
+    _runUNIXServer()
   else:  # local server 
-    __runLocalServer()
+    _runLocalServer()
   _endif
 _enddef
 
 #################################################################################
 #################################################################################
-def __runUDPServer():
+def _runUDPServer():
   global _gServerName
   global _gHostnameOrIpAddr
   global _gPort
   print "PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %d" % (_gServerName, _gHostnameOrIpAddr, _gPort)
   # startup our UDP server
-  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
-  if (__createSocket()):
+  _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
+  if (_createSocket()):
     while (True):
-      __receiveDGRAM()
+      _receiveDGRAM()
     _endwhile
   _endif
 _enddef
 
 #################################################################################
 #################################################################################
-def __runUNIXServer():
+def _runUNIXServer():
   global _gServerName
   print "PSHELL_INFO: UNIX Server: %s Started" % _gServerName
   # startup our UNIX server
-  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
-  if (__createSocket()):
+  _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
+  if (_createSocket()):
     while (True):
-      __receiveDGRAM()
+      _receiveDGRAM()
     _endwhile
   _endif
 _enddef
 
 #################################################################################
 #################################################################################
-def __acceptConnection():
+def _acceptConnection():
   global _gSocketFd
   global _gConnectFd
   global _gTcpConnectSockName
@@ -426,7 +504,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __runTCPServer():
+def _runTCPServer():
   global _gSocketFd
   global _gConnectFd
   global _gServerName
@@ -440,49 +518,49 @@ def __runTCPServer():
   global _gTcpConnectSockName
   global _gTcpTimeout
   print "PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" % (_gServerName, _gHostnameOrIpAddr, _gPort)
-  __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
-  __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
-  __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
-  __addTabCompletions()
+  _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
+  _addCommand(_help, "help", "show all available commands", "", 0, 0, True, True)
+  _addCommand(_exit, "quit", "exit interactive mode", "", 0, 0, True, True)
+  _addTabCompletions()
   # startup our TCP server and accept new connections
-  while (__createSocket() and __acceptConnection()):
+  while (_createSocket() and _acceptConnection()):
     # shutdown original socket to not allow any new connections until we are done with this one
     _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
     _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
     PshellReadline.setFileDescriptors(_gConnectFd, _gConnectFd, PshellReadline.SOCKET, PshellReadline.ONE_MINUTE*_gTcpTimeout)
     _gSocketFd.shutdown(socket.SHUT_RDWR)
-    __receiveTCP()
+    _receiveTCP()
     _gConnectFd.shutdown(socket.SHUT_RDWR)
   _endwhile
 _enddef
 
 #################################################################################
 #################################################################################
-def __runLocalServer():
+def _runLocalServer():
   global _gPrompt
   global _gTitle
   global _gAddBatch
-  _gPrompt = __getDisplayServerName() + "[" + __getDisplayServerType() + "]:" + __getDisplayPrompt()
-  _gTitle = __getDisplayTitle() + ": " + __getDisplayServerName() + "[" + __getDisplayServerType() + "], Mode: INTERACTIVE"
+  _gPrompt = _getDisplayServerName() + "[" + _getDisplayServerType() + "]:" + _getDisplayPrompt()
+  _gTitle = _getDisplayTitle() + ": " + _getDisplayServerName() + "[" + _getDisplayServerType() + "], Mode: INTERACTIVE"
   if (_gAddBatch):
-    __addCommand(__batch, "batch", "run commands from a batch file", "<filename>", 1, 2, True, True)
+    _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 2, True, True)
   _endif
-  __addCommand(__help, "help", "show all available commands", "", 0, 0, True, True)
-  __addCommand(__exit, "quit", "exit interactive mode", "", 0, 0, True, True)
-  __addTabCompletions()
-  __showWelcome()
+  _addCommand(_help, "help", "show all available commands", "", 0, 0, True, True)
+  _addCommand(_exit, "quit", "exit interactive mode", "", 0, 0, True, True)
+  _addTabCompletions()
+  _showWelcome()
   command = _NULL
   while (not isSubString(command, "quit")):
     (command, idleSession) = PshellReadline.getInput(_gPrompt)
     if (not isSubString(command, "quit")):
-      __processCommand(command)
+      _processCommand(command)
     _endif
   _endwhile
 _enddef
 
 #################################################################################
 #################################################################################
-def __getDisplayServerType():
+def _getDisplayServerType():
   global _gServerType
   global _gServerTypeOverride
   serverType = _gServerType
@@ -494,7 +572,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __getDisplayPrompt():
+def _getDisplayPrompt():
   global _gPrompt
   global _gPromptOverride
   prompt = _gPrompt
@@ -506,7 +584,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __getDisplayTitle():
+def _getDisplayTitle():
   global _gTitle
   global _gTitleOverride
   title = _gTitle
@@ -518,7 +596,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __getDisplayServerName():
+def _getDisplayServerName():
   global _gServerName
   global _gServerNameOverride
   serverName = _gServerName
@@ -530,7 +608,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __getDisplayBanner():
+def _getDisplayBanner():
   global _gBanner
   global _gBannerOverride
   banner = _gBanner
@@ -542,7 +620,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __addTabCompletions():
+def _addTabCompletions():
   global _gCommandList
   global _gServerType
   if ((_gServerType == LOCAL) or (_gServerType == TCP)):
@@ -554,7 +632,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __receiveDGRAM():
+def _receiveDGRAM():
   global _gPshellMsg
   global _gSocketFd
   global _gPshellMsgPayloadLength
@@ -562,31 +640,31 @@ def __receiveDGRAM():
   global _gFromAddr
   (_gPshellMsg, _gFromAddr) = _gSocketFd.recvfrom(_gPshellMsgPayloadLength)
   _gPshellMsg = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg)-struct.calcsize(_gPshellMsgHeaderFormat))+"s", _gPshellMsg)))
-  __processCommand(_gPshellMsg["payload"])
+  _processCommand(_gPshellMsg["payload"])
 _enddef
 
 #################################################################################
 #################################################################################
-def __receiveTCP():
+def _receiveTCP():
   global _gConnectFd
   global _gQuitTcp
   global _gTcpPrompt
   global _gPshellMsg
   global _gMsgTypes
-  __showWelcome()
+  _showWelcome()
   _gPshellMsg["msgType"] = _gMsgTypes["userCommand"]
   _gQuitTcp = False
   while (not _gQuitTcp):
     (command, _gQuitTcp) = PshellReadline.getInput(_gTcpPrompt)
     if (not _gQuitTcp):
-      __processCommand(command)
+      _processCommand(command)
     _endif
   _endwhile
 _enddef
 
 #################################################################################
 #################################################################################
-def __processCommand(command_):
+def _processCommand(command_):
   global _gCommandList
   global _gMaxLength
   global _gCommandHelp
@@ -600,21 +678,21 @@ def __processCommand(command_):
   global _gCommandDispatched
 
   if (_gPshellMsg["msgType"] == _gMsgTypes["queryVersion"]):
-    __processQueryVersion()
+    _processQueryVersion()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryPayloadSize"]):
-    __processQueryPayloadSize()
+    _processQueryPayloadSize()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryName"]):
-    __processQueryName()
+    _processQueryName()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryTitle"]):
-    __processQueryTitle()
+    _processQueryTitle()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryBanner"]):
-    __processQueryBanner()
+    _processQueryBanner()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryPrompt"]):
-    __processQueryPrompt()
+    _processQueryPrompt()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryCommands1"]):
-    __processQueryCommands1()
+    _processQueryCommands1()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryCommands2"]):
-    __processQueryCommands2()
+    _processQueryCommands2()
   else:
     _gCommandDispatched = True
     _gPshellMsg["payload"] = _NULL
@@ -622,7 +700,7 @@ def __processCommand(command_):
     command_ = command_.split()[0]
     numMatches = 0
     if ((command_ == "?") or (command_ in "help")):
-      __help(_gArgs)
+      _help(_gArgs)
       _gCommandDispatched = False
       return
     else:
@@ -638,7 +716,7 @@ def __processCommand(command_):
     elif (numMatches > 1):
       printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n" % command_)
     else:
-      if (not __isValidArgCount()):
+      if (not _isValidArgCount()):
         showUsage()
       elif (isHelp() and (_gFoundCommand["showUsage"] == True)):
         showUsage()
@@ -649,12 +727,12 @@ def __processCommand(command_):
   _endif
   _gCommandDispatched = False
   _gPshellMsg["msgType"] = _gMsgTypes["commandComplete"]
-  __reply()
+  _reply()
 _enddef
 
 #################################################################################
 #################################################################################
-def __isValidArgCount():
+def _isValidArgCount():
   global _gArgs
   global _gFoundCommand
   return ((len(_gArgs) >= _gFoundCommand["minArgs"]) and (len(_gArgs) <= _gFoundCommand["maxArgs"]))
@@ -662,49 +740,49 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryVersion():
+def _processQueryVersion():
   global _gServerVersion
   printf(_gServerVersion)
 _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryPayloadSize():
+def _processQueryPayloadSize():
   global _gPshellMsgPayloadLength
   printf(str(_gPshellMsgPayloadLength))
 _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryName():
+def _processQueryName():
   global _gServerName
   printf(_gServerName)
 _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryTitle():
+def _processQueryTitle():
   global _gTitle
   printf(_gTitle)
 _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryBanner():
+def _processQueryBanner():
   global _gBanner
   printf(_gBanner)
 _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryPrompt():
+def _processQueryPrompt():
   global _gPrompt
   printf(_gPrompt)
 _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryCommands1():
+def _processQueryCommands1():
   global _gCommandList
   global _gMaxLength
   global _gPshellMsg
@@ -717,7 +795,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __processQueryCommands2():
+def _processQueryCommands2():
   global _gCommandList
   for command in _gCommandList:
     printf("%s%s" % (command["name"], "/"))
@@ -726,7 +804,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __batch(command_):
+def _batch(command_):
   global _gFirstArgPos
   if (len(command_) == 1):
     batchFile = command_[0]
@@ -750,7 +828,7 @@ def __batch(command_):
   elif (os.path.isfile(batchFile4)):
     file = open(batchFile4, 'r')
   elif ((_gFirstArgPos == 0) and (batchFile in "batch")):
-    __showUsage()
+    _showUsage()
     return
   else:
     printf("ERROR: Could not find batch file: '%s'\n" % batchFile)
@@ -761,25 +839,25 @@ def __batch(command_):
     # skip comments
     line = line.strip()
     if ((len(line) > 0) and (line[0] != "#")):
-      __processCommand(line)
+      _processCommand(line)
     _endif
   _endfor
 _enddef
 
 #################################################################################
 #################################################################################
-def __help(command_):
+def _help(command_):
     printf()
     printf("****************************************\n")
     printf("*             COMMAND LIST             *\n")
     printf("****************************************\n")
     printf()
-    __processQueryCommands1()
+    _processQueryCommands1()
 _enddef
 
 #################################################################################
 #################################################################################
-def __exit(command_):
+def _exit(command_):
   global _gQuitTcp
   global _gServerType
   if (_gServerType == TCP):
@@ -793,7 +871,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __showWelcome():
+def _showWelcome():
   global _gTitle
   global _gServerType
   global _gHostnameOrIpAddr
@@ -802,11 +880,11 @@ def __showWelcome():
   global _gTcpConnectSockName
   global _gTcpTitle
   # show our welcome screen
-  banner = "#  %s" % __getDisplayBanner()
+  banner = "#  %s" % _getDisplayBanner()
   if (_gServerType == LOCAL):
     # put up our window title banner
     printf("\033]0;" + _gTitle + "\007")
-    server = "#  Single session LOCAL server: %s[%s]" % (__getDisplayServerName(), __getDisplayServerType())
+    server = "#  Single session LOCAL server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
   else:
     # put up our window title banner
     printf("\033]0;" + _gTcpTitle + "\007")
@@ -838,7 +916,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __printf(message_):
+def _printf(message_):
   global _gServerType
   global _gPshellMsg
   global _gCommandInteractive
@@ -857,7 +935,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __showUsage():
+def _showUsage():
   global _gFoundCommand
   if (_gFoundCommand["usage"] != None):
     printf("Usage: %s %s\n" % (_gFoundCommand["name"], _gFoundCommand["usage"]))
@@ -868,7 +946,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __isHelp():
+def _isHelp():
   global _gArgs
   global _gCommandHelp
   return ((len(_gArgs) == 1) and (_gArgs[0] in _gCommandHelp))
@@ -876,7 +954,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __reply():
+def _reply():
   global _gFromAddr
   global _gSocketFd
   global _gPshellMsg
@@ -892,7 +970,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __cleanupResources():
+def _cleanupResources():
   global _gUnixSourceAddress
   global _gServerType
   global _gSocketFd
@@ -906,7 +984,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_, tcpTimeout_):  
+def _loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_, tcpTimeout_):  
   configFile1 = _NULL
   configPath = os.getenv('_PSHELL_CONFIG_DIR')
   if (configPath != None):
@@ -961,7 +1039,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __loadStartupFile():
+def _loadStartupFile():
   global _gServerName
   startupFile1 = _NULL
   startupPath = os.getenv('_PSHELL_STARTUP_DIR')
@@ -984,14 +1062,14 @@ def __loadStartupFile():
     # skip comments
     line = line.strip()
     if ((len(line) > 0) and (line[0] != "#")):
-      __runCommand(line)
+      _runCommand(line)
     _endif
   _endfor
 _enddef
 
 #################################################################################
 #################################################################################
-def __runCommand(command_):
+def _runCommand(command_):
   global _gCommandList
   global _gCommandInteractive
   global _gCommandDispatched
@@ -1010,7 +1088,7 @@ def __runCommand(command_):
         numMatches += 1
       _endif
     _endfor
-    if ((numMatches == 1) and __isValidArgCount() and not isHelp()):
+    if ((numMatches == 1) and _isValidArgCount() and not isHelp()):
       _gFoundCommand["function"](_gArgs)
     _endif
     _gCommandDispatched = False
@@ -1020,33 +1098,33 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __wheel(string_):
+def _wheel(string_):
   global _gWheel
   global _gWheelPos
   _gWheelPos += 1
   if (string_ != _NULL):
-    __printf("\r%s%c" % (string_, _gWheel[(_gWheelPos)%4]))
+    _printf("\r%s%c" % (string_, _gWheel[(_gWheelPos)%4]))
   else:
-    __printf("\r%c" % _gWheel[(_gWheelPos)%4])
+    _printf("\r%c" % _gWheel[(_gWheelPos)%4])
   _endif
-  __flush()
+  _flush()
 _enddef
 
 #################################################################################
 #################################################################################
-def __march(string_):
-  __printf(string_)
-  __flush()
+def _march(string_):
+  _printf(string_)
+  _flush()
 _enddef
 
 #################################################################################
 #################################################################################
-def __flush():
+def _flush():
   global _gCommandInteractive
   global _gServerType
   global _gPshellMsg
   if ((_gCommandInteractive == True) and ((_gServerType == UDP) or (_gServerType == UNIX))):
-    __reply()
+    _reply()
     _gPshellMsg["payload"] = _NULL
   _endif
 _enddef

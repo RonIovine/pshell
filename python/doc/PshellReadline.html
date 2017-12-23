@@ -21,12 +21,12 @@ completion&nbsp;of&nbsp;registered&nbsp;keywords.&nbsp;&nbsp;<br>
 Functions:<br>
 &nbsp;<br>
 <a href="#-setFileDescriptors">setFileDescriptors</a>()&nbsp;--&nbsp;set&nbsp;the&nbsp;input/output&nbsp;file&nbsp;descriptors<br>
-<a href="#-setIdleTimeout">setIdleTimeout</a>()&nbsp;--&nbsp;set&nbsp;the&nbsp;idle&nbsp;session&nbsp;timeout<br>
-<a href="#-addTabCompletion">addTabCompletion</a>()&nbsp;--&nbsp;add&nbsp;a&nbsp;keyword&nbsp;to&nbsp;the&nbsp;TAB&nbsp;completion&nbsp;list<br>
-<a href="#-setTabStyle">setTabStyle</a>()&nbsp;--&nbsp;sets&nbsp;the&nbsp;tab&nbsp;behavour&nbsp;style&nbsp;("fast"&nbsp;or&nbsp;bash)<br>
-<a href="#-getInput">getInput</a>()&nbsp;--&nbsp;get&nbsp;a&nbsp;line&nbsp;of&nbsp;user&nbsp;input&nbsp;from&nbsp;our&nbsp;input&nbsp;file&nbsp;descriptor<br>
-<a href="#-isSubString">isSubString</a>()&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0<br>
-<a href="#-write">write</a>()&nbsp;--&nbsp;write&nbsp;a&nbsp;string&nbsp;to&nbsp;our&nbsp;output&nbsp;file&nbsp;descriptor<br>
+<a href="#-setIdleTimeout">setIdleTimeout</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;idle&nbsp;session&nbsp;timeout<br>
+<a href="#-addTabCompletion">addTabCompletion</a>()&nbsp;&nbsp;&nbsp;--&nbsp;add&nbsp;a&nbsp;keyword&nbsp;to&nbsp;the&nbsp;TAB&nbsp;completion&nbsp;list<br>
+<a href="#-setTabStyle">setTabStyle</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;sets&nbsp;the&nbsp;tab&nbsp;behavour&nbsp;style&nbsp;("fast"&nbsp;or&nbsp;bash)<br>
+<a href="#-getInput">getInput</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;get&nbsp;a&nbsp;line&nbsp;of&nbsp;user&nbsp;input&nbsp;from&nbsp;our&nbsp;input&nbsp;file&nbsp;descriptor<br>
+<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0<br>
+<a href="#-write">write</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;write&nbsp;a&nbsp;string&nbsp;to&nbsp;our&nbsp;output&nbsp;file&nbsp;descriptor<br>
 &nbsp;<br>
 A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included&nbsp;demo&nbsp;<br>
 program&nbsp;pshellReadlineDemo.py</tt></p>
@@ -50,14 +50,27 @@ program&nbsp;pshellReadlineDemo.py</tt></p>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><a name="-addTabCompletion"><strong>addTabCompletion</strong></a>(keyword_)</dt><dd><tt>Add&nbsp;a&nbsp;keyword&nbsp;to&nbsp;the&nbsp;TAB&nbsp;completion&nbsp;list.&nbsp;&nbsp;TAB&nbsp;completion&nbsp;will&nbsp;only&nbsp;be&nbsp;applied<br>
-to&nbsp;the&nbsp;first&nbsp;keyword&nbsp;of&nbsp;a&nbsp;given&nbsp;user&nbsp;typed&nbsp;command</tt></dd></dl>
+to&nbsp;the&nbsp;first&nbsp;keyword&nbsp;of&nbsp;a&nbsp;given&nbsp;user&nbsp;typed&nbsp;command<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keyword&nbsp;(str)&nbsp;:&nbsp;The&nbsp;keyword&nbsp;to&nbsp;add&nbsp;to&nbsp;the&nbsp;TAB&nbsp;completion&nbsp;list<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
  <dl><dt><a name="-getInput"><strong>getInput</strong></a>(prompt_)</dt><dd><tt>Issue&nbsp;the&nbsp;user&nbsp;prompt&nbsp;and&nbsp;return&nbsp;the&nbsp;entered&nbsp;command&nbsp;line&nbsp;value.&nbsp;&nbsp;This&nbsp;<br>
 function&nbsp;will&nbsp;return&nbsp;the&nbsp;tuple&nbsp;(command,&nbsp;idleSession).&nbsp;&nbsp;If&nbsp;the&nbsp;idle&nbsp;session<br>
 timeout&nbsp;is&nbsp;set&nbsp;to&nbsp;IDLE_TIMEOUT_NONE&nbsp;(default),&nbsp;the&nbsp;idleSession&nbsp;will&nbsp;always&nbsp;<br>
 be&nbsp;false&nbsp;and&nbsp;this&nbsp;function&nbsp;will&nbsp;not&nbsp;return&nbsp;until&nbsp;the&nbsp;user&nbsp;has&nbsp;typed&nbsp;a&nbsp;command<br>
 and&nbsp;pressed&nbsp;return.&nbsp;&nbsp;Otherwise&nbsp;this&nbsp;function&nbsp;will&nbsp;set&nbsp;the&nbsp;idleSession&nbsp;value<br>
 to&nbsp;true&nbsp;and&nbsp;return&nbsp;if&nbsp;no&nbsp;user&nbsp;activity&nbsp;is&nbsp;detected&nbsp;for&nbsp;the&nbsp;idleSessionTimeout&nbsp;<br>
-period</tt></dd></dl>
+period<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prompt&nbsp;(str)&nbsp;:&nbsp;The&nbsp;user&nbsp;prompt&nbsp;to&nbsp;display<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;&nbsp;:&nbsp;The&nbsp;user&nbsp;typed&nbsp;command<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;for&nbsp;idleSession&nbsp;timeout,&nbsp;False&nbsp;otherwise</tt></dd></dl>
  <dl><dt><a name="-isSubString"><strong>isSubString</strong></a>(string1_, string2_, minMatchLength_<font color="#909090">=0</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;return&nbsp;True&nbsp;if&nbsp;string1&nbsp;is&nbsp;a&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;<br>
 position&nbsp;0.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;is&nbsp;0,&nbsp;then&nbsp;it&nbsp;will&nbsp;compare&nbsp;up&nbsp;to&nbsp;the<br>
 length&nbsp;of&nbsp;string1.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;&gt;&nbsp;0,&nbsp;it&nbsp;will&nbsp;require&nbsp;a&nbsp;minimum<br>
@@ -65,7 +78,15 @@ of&nbsp;that&nbsp;many&nbsp;characters&nbsp;to&nbsp;match.&nbsp;&nbsp;A&nbsp;str
 match&nbsp;length&nbsp;must&nbsp;still&nbsp;match&nbsp;for&nbsp;the&nbsp;remaining&nbsp;characters,&nbsp;e.g.&nbsp;with&nbsp;a<br>
 minMatchLength&nbsp;of&nbsp;2,&nbsp;'q'&nbsp;will&nbsp;not&nbsp;match&nbsp;'quit',&nbsp;but&nbsp;'qu',&nbsp;'qui'&nbsp;or&nbsp;'quit'<br>
 will&nbsp;match,&nbsp;'quix'&nbsp;or&nbsp;'uit'&nbsp;will&nbsp;not&nbsp;match.&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;useful&nbsp;for&nbsp;<br>
-wildcard&nbsp;matching.</tt></dd></dl>
+wildcard&nbsp;matching.<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string1&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;substring<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string2&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;target&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;minMatchLength&nbsp;(int)&nbsp;:&nbsp;The&nbsp;minimum&nbsp;required&nbsp;characters&nbsp;match<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;is&nbsp;substring&nbsp;matches,&nbsp;False&nbsp;otherwise</tt></dd></dl>
  <dl><dt><a name="-setFileDescriptors"><strong>setFileDescriptors</strong></a>(inFd_, outFd_, serialType_, idleTimeout_<font color="#909090">=0</font>)</dt><dd><tt>Set&nbsp;the&nbsp;input&nbsp;and&nbsp;output&nbsp;file&nbsp;descriptors,&nbsp;if&nbsp;this&nbsp;function&nbsp;is&nbsp;not&nbsp;called,<br>
 the&nbsp;default&nbsp;is&nbsp;stdin&nbsp;and&nbsp;stdout.&nbsp;&nbsp;The&nbsp;file&nbsp;descriptors&nbsp;given&nbsp;to&nbsp;this&nbsp;function<br>
 must&nbsp;be&nbsp;opened&nbsp;and&nbsp;running&nbsp;in&nbsp;raw&nbsp;serial&nbsp;character&nbsp;mode.&nbsp;&nbsp;The&nbsp;idleTimeout&nbsp;<br>
@@ -74,16 +95,43 @@ Use&nbsp;the&nbsp;identifiers&nbsp;PshellReadline.ONE_SECOND&nbsp;and&nbsp;Pshel
 to&nbsp;set&nbsp;this&nbsp;timeout&nbsp;value,&nbsp;e.g.&nbsp;PshellReadline.ONE_MINUTE*5,&nbsp;for&nbsp;serialType<br>
 use&nbsp;the&nbsp;identifiers&nbsp;PshellReadline.TTY&nbsp;and&nbsp;PshellReadline.SOCKET.&nbsp;&nbsp;For&nbsp;the<br>
 socket&nbsp;identifier,&nbsp;use&nbsp;the&nbsp;file&nbsp;descriptor&nbsp;that&nbsp;is&nbsp;returned&nbsp;from&nbsp;the&nbsp;TCP&nbsp;<br>
-socket&nbsp;server&nbsp;'accept'&nbsp;call&nbsp;for&nbsp;both&nbsp;the&nbsp;inFd&nbsp;and&nbsp;outFd.</tt></dd></dl>
+socket&nbsp;server&nbsp;'accept'&nbsp;call&nbsp;for&nbsp;both&nbsp;the&nbsp;inFd&nbsp;and&nbsp;outFd.<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inFd&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;input&nbsp;file&nbsp;descriptor<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;outFd&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;output&nbsp;file&nbsp;descriptor<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;serialType&nbsp;(str)&nbsp;&nbsp;:&nbsp;The&nbsp;serial&nbsp;type&nbsp;(TTY&nbsp;or&nbsp;SOCKET)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;idleTimeout&nbsp;(int)&nbsp;:&nbsp;The&nbsp;idle&nbsp;session&nbsp;timeout<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
  <dl><dt><a name="-setIdleTimeout"><strong>setIdleTimeout</strong></a>(idleTimeout_)</dt><dd><tt>Set&nbsp;the&nbsp;idle&nbsp;session&nbsp;timeout&nbsp;as&nbsp;described&nbsp;above.&nbsp;&nbsp;Use&nbsp;the&nbsp;identifiers<br>
 PshellReadline.ONE_SEC&nbsp;and&nbsp;PshellRedline.ONE_MINUTE&nbsp;as&nbsp;follows,<br>
-e.g.&nbsp;PshellReadline.ONE_MINUTE*5&nbsp;for&nbsp;a&nbsp;5&nbsp;minute&nbsp;idleSession&nbsp;timeout.</tt></dd></dl>
+e.g.&nbsp;PshellReadline.ONE_MINUTE*5&nbsp;for&nbsp;a&nbsp;5&nbsp;minute&nbsp;idleSession&nbsp;timeout.<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;idleTimeout&nbsp;(int)&nbsp;:&nbsp;The&nbsp;idle&nbsp;session&nbsp;timeout<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
  <dl><dt><a name="-setTabStyle"><strong>setTabStyle</strong></a>(tabStyle_)</dt><dd><tt>Set&nbsp;the&nbsp;tabbing&nbsp;method&nbsp;to&nbsp;either&nbsp;be&nbsp;bash/readline&nbsp;style&nbsp;tabbing,&nbsp;i.e.&nbsp;double<br>
 tabbing&nbsp;to&nbsp;initiate&nbsp;and&nbsp;display&nbsp;completions,&nbsp;or&nbsp;"fast"&nbsp;tabbing,&nbsp;where&nbsp;all<br>
 completions&nbsp;and&nbsp;displays&nbsp;are&nbsp;initiated&nbsp;via&nbsp;a&nbsp;single&nbsp;tab&nbsp;only,&nbsp;the&nbsp;default&nbsp;is<br>
 "fast"&nbsp;tabbing,&nbsp;use&nbsp;the&nbsp;identifiers&nbsp;PshellReadline.BASH_TAB&nbsp;and<br>
-PshellReadline.FAST_TAB&nbsp;for&nbsp;the&nbsp;tabStyle</tt></dd></dl>
- <dl><dt><a name="-write"><strong>write</strong></a>(string_)</dt><dd><tt>Write&nbsp;a&nbsp;string&nbsp;to&nbsp;our&nbsp;output&nbsp;file&nbsp;descriptor</tt></dd></dl>
+PshellReadline.FAST_TAB&nbsp;for&nbsp;the&nbsp;tabStyle<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tabStype&nbsp;(str)&nbsp;:&nbsp;The&nbsp;desired&nbsp;TAB&nbsp;&nbsp;behavour&nbsp;style&nbsp;(FAST&nbsp;or&nbsp;BASH)<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-write"><strong>write</strong></a>(string_)</dt><dd><tt>Write&nbsp;a&nbsp;string&nbsp;to&nbsp;our&nbsp;output&nbsp;file&nbsp;descriptor<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;write&nbsp;to&nbsp;the&nbsp;out&nbsp;file&nbsp;descriptor<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">

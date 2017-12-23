@@ -44,8 +44,8 @@ The following Python modules are provided for programs to embed their own
 PshellServer functionality and to programatically control PshellServers 
 running in other processes.
 
-PshellServer.py -- provide PshellServer capability in a given process
-PshellControl.py -- invoke PshellServer callback functions in another process
+PshellServer.py   -- provide PshellServer capability in a given process
+PshellControl.py  -- invoke PshellServer callback functions in another process
 PshellReadline.py -- provide a readline like capability to solicit user input
 
 See the respective 'pydoc' pages (text or HTML) for more detailed documentation
@@ -89,19 +89,19 @@ def _configureLocalServer():
   # supress the automatic invalid arg count messag from the PshellControl.py
   # module so we can display the returned usage
   PshellControl._gSupressInvalidArgCountMessage = True
-  prompt = PshellControl.__extractPrompt(_gSid)
+  prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
   _endif
-  title = PshellControl.__extractTitle(_gSid)
+  title = PshellControl._extractTitle(_gSid)
   if (len(title) > 0):
     PshellServer._gTitleOverride = title
   _endif
-  serverName = PshellControl.__extractName(_gSid)
+  serverName = PshellControl._extractName(_gSid)
   if (len(serverName) > 0):
     PshellServer._gServerNameOverride = serverName
   _endif
-  banner = PshellControl.__extractBanner(_gSid)
+  banner = PshellControl._extractBanner(_gSid)
   if (len(banner) > 0):
     PshellServer._gBannerOverride = banner
   _endif

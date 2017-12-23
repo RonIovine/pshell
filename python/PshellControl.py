@@ -29,14 +29,14 @@
 #################################################################################
 
 """
-A Python to invoke pshell commands in another process
+A Python module to invoke pshell commands in another process
 
 This API provides the ability for a client program to invoke pshell commands
 that are registered in a remote program that is running a pshell UDP or UNIX
 server.  The format of the command string that is sent to the pshell should
 be in the same usage format that the given command is expecting.  This
 provides a very lightweight way to provide a control mechanism into a program
-that is running a pshell, this is analagous to a remote procedure call (rpc).
+that is running a PshellServer, this is analagous to a remote procedure call (rpc).
 
 This module provides the same functionality as the PshellControl.h API and
 the libpshell-control linkable 'C' library, but implemented as a Python
@@ -44,17 +44,17 @@ module.
  
 Functions:
 
-connectServer() -- connect to a remote pshell server
-disconnectServer() -- disconnect from a remote pshell server
+connectServer()        -- connect to a remote pshell server
+disconnectServer()     -- disconnect from a remote pshell server
 disconnectAllServers() -- disconnect from all connected remote pshell servers
-setDefaultTimeout() -- set the default server response timeout
-extractCommands() -- extract all commands from remote server
-addMulticast() -- add a command keyword to a multicast group
-sendMulticast() -- send a command to a multicast group
-sendCommand1() -- send command to server using default timeout, no results extracted
-sendCommand2() -- send command to server using timeout override, no results extracted
-sendCommand3() -- send command to server using default timeout, results extracted
-sendCommand4() -- send command to server using timeout override, results extracted
+setDefaultTimeout()    -- set the default server response timeout
+extractCommands()      -- extract all commands from remote server
+addMulticast()         -- add a command keyword to a multicast group
+sendMulticast()        -- send a command to a multicast group
+sendCommand1()         -- send command to server using default timeout, no results extracted
+sendCommand2()         -- send command to server using timeout override, no results extracted
+sendCommand3()         -- send command to server using default timeout, results extracted
+sendCommand4()         -- send command to server using timeout override, results extracted
 
 A complete example of the usage of the API can be found in the included 
 demo programs pshellControlDemo.py and pshellAggregatorDemo.py
@@ -89,7 +89,7 @@ ONE_SEC = ONE_MSEC*1000
 
 # use this as the "port" identifier for the connectServer call when
 # using a UNIX domain server
-UNIX = "unix"
+UNIX = "unix"  
 
 # the following enum values are returned by the non-extraction
 # based sendCommand1 and sendCommand2 functions
@@ -120,7 +120,7 @@ SOCKET_NOT_CONNECTED = 7
 #################################################################################
 def connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   """
-  connect to a pshell server in another process, note that this does
+  Connect to a pshell server in another process, note that this does
   not do any handshaking to the remote pshell or maintain a connection
   state, it meerly sets the internal destination remote pshell server
   information to use when sending commands via the sendCommandN
@@ -137,79 +137,126 @@ def connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   a valid server name must be provided along with the identifier 
   PshellControl.UNIX for the 'port' parameter
  
-  this function returns a Server ID (sid) handle which must be saved and
-  used for all subsequent calls into this library
+  This function returns a Server ID (sid) handle which must be saved and
+  used for all subsequent calls into this module
+
+    Args:
+        controlName (str)    : The logical name of the control server
+        remoteServer (str)   : The server name (UNIX) or hostname/IP address (UDP) of the remote server
+        port (str)           : The UDP port of the remote server
+        defaultTimeout (int) : The default timeout (in msec) for the remote server response
+
+    Returns:
+        int: The ServerId (sid) handle of the connected server
   """
-  return (__connectServer(controlName_, remoteServer_, port_, defaultTimeout_))
+  return (_connectServer(controlName_, remoteServer_, port_, defaultTimeout_))
 _enddef
 
 #################################################################################
 #################################################################################
 def disconnectServer(sid_):
   """
-  cleanup any resources associated with the server connection, including 
+  Cleanup any resources associated with the server connection, including 
   releasing any temp file handles, closing any local socket handles etc.
+
+    Args:
+        sid (int) : The ServerId as returned from the connectServer call
+
+    Returns:
+        none
   """
-  __disconnectServer(sid_)
+  _disconnectServer(sid_)
 _enddef
 
 #################################################################################
 #################################################################################
 def disconnectAllServers():
   """
-  use this function to cleanup any resources for all connected servers, this 
+  Use this function to cleanup any resources for all connected servers, this 
   function should be called upon program termination, either in a graceful 
   termination or within an exception signal handler, it is especially important 
   that this be called when a unix server is used since there are associated file 
   handles that need to be cleaned up
+
+    Args:
+        none
+
+    Returns:
+        none
   """
-  __disconnectAllServers()
+  _disconnectAllServers()
 _enddef
 
 #################################################################################
 #################################################################################
 def setDefaultTimeout(sid_, defaultTimeout_):
   """
-  set the default server response timeout that is used in the 'send' commands 
+  Set the default server response timeout that is used in the 'send' commands 
   that don't take a timeout override
+
+    Args:
+        sid (int)            : The ServerId as returned from the connectServer call
+        defaultTimeout (int) : The default timeout (in msec) for the remote server response
+
+    Returns:
+        none
   """
-  __setDefaultTimeout(sid_, defaultTimeout_)
+  _setDefaultTimeout(sid_, defaultTimeout_)
 _enddef
 
 #################################################################################
 #################################################################################
 def extractCommands(sid_):
   """ 
-  this function will extract all the commands of a remote pshell server and 
+  This function will extract all the commands of a remote pshell server and 
   present them in a human readable form, this is useful when writing a multi 
   server control aggregator, see the demo program pshellAggregatorDemo.py in 
   the demo directory for examples
+
+    Args:
+        sid (int) : The ServerId as returned from the connectServer call
+
+    Returns:
+        str : The remote server's command list in human readable form
   """
-  return (__extractCommands(sid_))
+  return (_extractCommands(sid_))
 _enddef
 
 #################################################################################
 #################################################################################
 def addMulticast(sid_, keyword_):
   """
-  this command will add a given multicast receiver (i.e. sid) to a multicast 
+  This command will add a given multicast receiver (i.e. sid) to a multicast 
   group, multicast groups are based on the command's keyword
+
+    Args:
+        sid (int)     : The ServerId as returned from the connectServer call
+        keyword (str) : The multicast keyword that the sid is associated with
+
+    Returns:
+        none
   """ 
-  __addMulticast(sid_, keyword_)
+  _addMulticast(sid_, keyword_)
 _enddef
 
 #################################################################################
 #################################################################################
 def sendMulticast(command_):
   """
-  this command will send a given command to all the registered multicast
+  This command will send a given command to all the registered multicast
   receivers (i.e. sids) for this multicast group, multicast groups are 
   based on the command's keyword, this function will issue the command as 
   a best effort fire-and-forget command to each receiver in the multicast 
   group, no results will be requested or expected, and no response will be 
   requested or expected
+
+    Args:
+        command (str) : The command to send to the remote server
+
+    Returns:
+        none
   """ 
-  __sendMulticast(command_)
+  _sendMulticast(command_)
 _enddef
 
 #################################################################################
@@ -219,8 +266,23 @@ def sendCommand1(sid_, command_):
   Send a command using the default timeout setup in the connectServer call, 
   if the default timeout is 0, the server will not reply with a response and
   this function will not wait for one
+
+    Args:
+        sid (int)     : The ServerId as returned from the connectServer call
+        command (str) : The command to send to the remote server
+
+    Returns:
+        int: Return code result of the command:
+               COMMAND_SUCCESS
+               COMMAND_NOT_FOUND
+               COMMAND_INVALID_ARG_COUNT
+               SOCKET_SEND_FAILURE
+               SOCKET_SELECT_FAILURE
+               SOCKET_RECEIVE_FAILURE
+               SOCKET_TIMEOUT
+               SOCKET_NOT_CONNECTED
   """
-  return (__sendCommand1(sid_, command_))
+  return (_sendCommand1(sid_, command_))
 _enddef
 
 #################################################################################
@@ -230,8 +292,24 @@ def sendCommand2(sid_, timeoutOverride_, command_):
   Send a command overriding the default timeout, if the override timeout is 0, 
   the server will not reply with a response and this function will not wait for 
   one
+
+    Args:
+        sid (int)             : The ServerId as returned from the connectServer call
+        timeoutOverride (int) : The server timeout override (in msec) for this command
+        command (str)         : The command to send to the remote server
+
+    Returns:
+        int: Return code result of the command:
+               COMMAND_SUCCESS
+               COMMAND_NOT_FOUND
+               COMMAND_INVALID_ARG_COUNT
+               SOCKET_SEND_FAILURE
+               SOCKET_SELECT_FAILURE
+               SOCKET_RECEIVE_FAILURE
+               SOCKET_TIMEOUT
+               SOCKET_NOT_CONNECTED
   """
-  return (__sendCommand2(sid_, timeoutOverride_, command_))
+  return (_sendCommand2(sid_, timeoutOverride_, command_))
 _enddef
 
 #################################################################################
@@ -242,8 +320,16 @@ def sendCommand3(sid_, command_):
   return any results received in the payload, if the default timeout is 0, the 
   server will not reply with a response and this function will not wait for one, 
   and no results will be extracted
+
+    Args:
+        sid (int)     : The ServerId as returned from the connectServer call
+        command (str) : The command to send to the remote server
+
+    Returns:
+        str: The human readable results of the command response or NULL
+             if no results or command failure
   """
-  return (__sendCommand3(sid_, command_))
+  return (_sendCommand3(sid_, command_))
 _enddef
 
 #################################################################################
@@ -254,8 +340,17 @@ def sendCommand4(sid_, timeoutOverride_, command_):
   in the payload, if the timeout override default timeout is 0, the server will 
   not reply with a response and this function will not wait for one, and no 
   results will be extracted
+
+    Args:
+        sid (int)             : The ServerId as returned from the connectServer call
+        timeoutOverride (int) : The server timeout override (in msec) for this command
+        command (str)         : The command to send to the remote server
+
+    Returns:
+        str: The human readable results of the command response or NULL
+             if no results or command failure
   """
-  return (__sendCommand4(sid_, timeoutOverride_, command_))
+  return (_sendCommand4(sid_, timeoutOverride_, command_))
 _enddef
 
 #################################################################################
@@ -270,11 +365,11 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
+def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   global _gPshellControl
   global _gUnixSocketPath
   global _gPshellMsgPayloadLength
-  (remoteServer_, port_, defaultTimeout_) = __loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
+  (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_.lower() == "unix"):
     # UNIX domain socket
     socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -326,25 +421,25 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __disconnectServer(sid_):
-  control = __getControl(sid_)
+def _disconnectServer(sid_):
+  control = _getControl(sid_)
   if (control != None):
-    __removeControl(control)
+    _removeControl(control)
   _endif
 _enddef
 
 #################################################################################
 #################################################################################
-def __disconnectAllServers():
+def _disconnectAllServers():
   global _gPshellControl
   for control in _gPshellControl:
-    __removeControl(control)
+    _removeControl(control)
   _endif
 _enddef
 
 #################################################################################
 #################################################################################
-def __setDefaultTimeout(sid_, defaultTimeout_):
+def _setDefaultTimeout(sid_, defaultTimeout_):
   control = _getControl(sid_)
   if (control != None):
     control["timeout"] = defaultTimeout_
@@ -353,13 +448,13 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __extractCommands(sid_):
+def _extractCommands(sid_):
   global _gMsgTypes
   results = _NULL
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (__sendCommand(control, _gMsgTypes["queryCommands"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryCommands"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
       results += "\n"
       results += (len(control["remoteServer"])+22)*"*"
       results += "\n"
@@ -376,13 +471,13 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __extractName(sid_):
+def _extractName(sid_):
   global _gMsgTypes
   results = _NULL
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (__sendCommand(control, _gMsgTypes["queryName"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryName"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
       results += control["pshellMsg"]["payload"]
     _endif
   _endif
@@ -391,13 +486,13 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __extractTitle(sid_):
+def _extractTitle(sid_):
   global _gMsgTypes
   results = _NULL
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (__sendCommand(control, _gMsgTypes["queryTitle"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryTitle"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
@@ -406,13 +501,13 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __extractBanner(sid_):
+def _extractBanner(sid_):
   global _gMsgTypes
   results = _NULL
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (__sendCommand(control, _gMsgTypes["queryBanner"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryBanner"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
@@ -421,13 +516,13 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __extractPrompt(sid_):
+def _extractPrompt(sid_):
   global _gMsgTypes
   results = _NULL
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (__sendCommand(control, _gMsgTypes["queryPrompt"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryPrompt"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
@@ -436,7 +531,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __addMulticast(sid_, keyword_):
+def _addMulticast(sid_, keyword_):
   global _gPshellControl
   global _gPshellMulticast
   if (sid_ <  len(_gPshellControl)):
@@ -469,16 +564,16 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __sendMulticast(command_):
+def _sendMulticast(command_):
   global _gPshellMulticast
   global NO_WAIT
   for multicast in _gPshellMulticast:
     if (command_.split()[0] == multicast["keyword"]):
       for sid in multicast["sidList"]:
-        control = __getControl(sid)
+        control = _getControl(sid)
         if (control != None):
           control["dataNeeded"] = False
-          __sendCommand(control, _gMsgTypes["controlCommand"], command_, NO_WAIT)
+          _sendCommand(control, _gMsgTypes["controlCommand"], command_, NO_WAIT)
         _endif
       _endfor
     _endif
@@ -487,39 +582,39 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __sendCommand1(sid_, command_):
+def _sendCommand1(sid_, command_):
   global _gMsgTypes
   retCode = SOCKET_NOT_CONNECTED
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = False
-    retCode = __sendCommand(control, _gMsgTypes["controlCommand"], command_, control["timeout"])
+    retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, control["timeout"])
   _endif
   return (retCode)
 _enddef
 
 #################################################################################
 #################################################################################
-def __sendCommand2(sid_, timeoutOverride_, command_):
+def _sendCommand2(sid_, timeoutOverride_, command_):
   global _gMsgTypes
   retCode = SOCKET_NOT_CONNECTED
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = False
-    retCode = __sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
+    retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
   _endif
   return (retCode)
 _enddef
 
 #################################################################################
 #################################################################################
-def __sendCommand3(sid_, command_):
+def _sendCommand3(sid_, command_):
   global NO_WAIT
   results = _NULL
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = (control["timeout"] > NO_WAIT)
-    retCode = __sendCommand(control, _gMsgTypes["controlCommand"], command_, control["timeout"])
+    retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, control["timeout"])
     if (not control["pshellMsg"]["dataNeeded"]):
       print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
     elif (retCode == COMMAND_SUCCESS):
@@ -531,13 +626,13 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __sendCommand4(sid_, timeoutOverride_, command_):
+def _sendCommand4(sid_, timeoutOverride_, command_):
   global NO_WAIT
   results = _NULL
-  control = __getControl(sid_)
+  control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = (timeoutOverride_ > NO_WAIT)
-    retCode = __sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
+    retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
     if (not control["pshellMsg"]["dataNeeded"]):
       print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
     elif (retCode == COMMAND_SUCCESS):
@@ -549,7 +644,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __sendCommand(control_, commandType_, command_, timeout_):
+def _sendCommand(control_, commandType_, command_, timeout_):
   global _gMsgTypes
   global _gPshellControlResults
   global _gSupressInvalidArgCountMessage
@@ -600,9 +695,9 @@ def __sendCommand(control_, commandType_, command_, timeout_):
   if ((_gSupressInvalidArgCountMessage == True) and (retCode == COMMAND_INVALID_ARG_COUNT)):
     retCode = COMMAND_SUCCESS
   elif ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
-    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, __getControlResults(retCode))
+    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode))
   elif ((retCode != COMMAND_SUCCESS) and (retCode != _gMsgTypes["commandComplete"])):
-    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, __getControlResults(retCode))
+    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode))
   else:
     retCode = COMMAND_SUCCESS
   _endif
@@ -611,7 +706,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __getControlResults(retCode):
+def _getControlResults(retCode):
   global _gPshellControlResults
   if (retCode < len(_gPshellControlResults)):
     return (_gPshellControlResults[retCode])
@@ -622,7 +717,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __removeControl(control_):
+def _removeControl(control_):
   global _gPshellControl
   if (control_["serverType"] == "unix"):
     os.unlink(control_["sourceAddress"])
@@ -633,7 +728,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __getControl(sid_):
+def _getControl(sid_):
   global _gPshellControl
   if (sid_ < len(_gPshellControl)):
     return (_gPshellControl[sid_])
@@ -645,7 +740,7 @@ _enddef
 
 #################################################################################
 #################################################################################
-def __loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):  
+def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):  
   configFile1 = _NULL
   configPath = os.getenv('_PSHELL_CONFIG_DIR')
   if (configPath != None):
