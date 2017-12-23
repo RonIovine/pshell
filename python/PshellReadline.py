@@ -96,19 +96,6 @@ FAST_TAB = "fast"
 #################################################################################
 
 #################################################################################
-#
-# setFileDescriptors:
-#
-# Set the input and output file descriptors, if this function is not called,
-# the default is stdin and stdout.  The file descriptors given to this function
-# must be opened and running in raw serial character mode.  The idleTimeout 
-# specifies the time to wait for any user activity in the getInput function.
-# Use the identifiers PshellReadline.ONE_SECOND and PshellReadline.ONE_MINUTE
-# to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5, for serialType
-# use the identifiers PshellReadline.TTY and PshellReadline.SOCKET.  For the
-# socket identifier, use the file descriptor that is returned from the TCP 
-# socket server 'accept' call for both the inFd and outFd.
-#
 #################################################################################
 def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_NONE):
   """
@@ -126,13 +113,6 @@ def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_N
 _enddef
 
 #################################################################################
-#
-# setIdleTimeout:
-#
-# Set the idle session timeout as described above.  Use the identifiers
-# PshellReadline.ONE_SEC and PshellRedline.ONE_MINUTE as follows,
-# e.g. PshellReadline.ONE_MINUTE*5 for a 5 minute idleSession timeout.
-#
 #################################################################################
 def setIdleTimeout(idleTimeout_):
   """
@@ -150,11 +130,6 @@ def setIdleTimeout(idleTimeout_):
 _enddef
 
 #################################################################################
-#
-# write:
-#
-# Write a string to our output file descriptor
-#
 #################################################################################
 def write(string_):
   """
@@ -164,12 +139,6 @@ def write(string_):
 _enddef
 
 #################################################################################
-#
-# addTabCompletion:
-#
-# Add a keyword to the TAB completion list.  TAB completion will only be applied
-# to the first keyword of a given user typed command
-#
 #################################################################################
 def addTabCompletion(keyword_):
   """
@@ -180,15 +149,6 @@ def addTabCompletion(keyword_):
 _enddef
 
 #################################################################################
-#
-# setTabStyle:
-#
-# Set the tabbing method to either be bash/readline style tabbing, i.e. double
-# tabbing to initiate and display completions, or "fast" tabbing, where all
-# completions and displays are initiated via a single tab only, the default is
-# "fast" tabbing, use the identifiers PshellReadline.BASH_TAB and
-# PshellReadline.FAST_TAB for the tabStyle
-#
 #################################################################################
 def setTabStyle(tabStyle_):
   """
@@ -202,17 +162,6 @@ def setTabStyle(tabStyle_):
 _enddef
 
 #################################################################################
-#
-# getInput:
-#
-# Issue the user prompt and return the entered command line value.  This 
-# function will return the tuple (command, idleSession).  If the idle session
-# timeout is set to IDLE_TIMEOUT_NONE (default), the idleSession will always 
-# be false and this function will not return until the user has typed a command
-# and pressed return.  Otherwise this function will set the idleSession value
-# to true and return if no user activity is detected for the idleSessionTimeout 
-# period
-#
 #################################################################################
 def getInput(prompt_):
   """
@@ -228,18 +177,6 @@ def getInput(prompt_):
 _enddef
 
 #################################################################################
-#
-# isSubString:
-#
-# This function will return True if string1 is a substring of string2 at 
-# position 0.  If the minMatchLength is 0, then it will compare up to the
-# length of string1.  If the minMatchLength > 0, it will require a minimum
-# of that many characters to match.  A string that is longer than the min
-# match length must still match for the remaining characters, e.g. with a
-# minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
-# will match, 'quix' or 'uit' will not match.  This function is useful for 
-# wildcard matching.
-#
 #################################################################################
 def isSubString(string1_, string2_, minMatchLength_ = 0):
   """

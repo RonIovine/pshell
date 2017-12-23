@@ -126,15 +126,6 @@ LOCALHOST = "localhost"
 #################################################################################
 
 #################################################################################
-#
-# addCommand:
-#
-# Register callback commands to our PSHELL server.  If the command takes no
-# arguments, the default parameters can be provided.  If the command takes
-# an exact number of parameters, set minArgs and maxArgs to be the same.  If
-# the user wants the callback function to handle all help initiated usage,
-# set the showUsage parameter to False.
-#
 #################################################################################
 def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, maxArgs_ = 0, showUsage_ = True):
   """
@@ -148,16 +139,6 @@ def addCommand(function_, command_, description_, usage_ = None, minArgs_ = 0, m
 _enddef
 
 #################################################################################
-#
-# startServer:
-#
-# Start our PSHELL server, if serverType is UNIX or LOCAL, the default
-# parameters can be used, and will be ignored if provided.  All of these
-# parameters except serverMode can be overridden on a per serverName
-# basis via the pshell-server.conf config file.  All commands in the
-# <serverName>.startup file will be executed in this function at server
-# startup time.
-#
 #################################################################################
 def startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_ = None, port_ = 0):
   """
@@ -172,14 +153,6 @@ def startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_ = None,
 _enddef
 
 #################################################################################
-#
-# cleanupResources
-#
-# Cleanup and release any system resources claimed by this module.  This includes
-# any open socked handles, file descriptors, or system 'tmp' files.  This should
-# be called at program exit time as well as any signal exception handler that
-# results in a program termination.
-#
 #################################################################################
 def cleanupResources():
   """
@@ -192,11 +165,6 @@ def cleanupResources():
 _enddef
 
 #################################################################################
-#
-# runCommand:
-#
-# Run a registered command from within its parent process
-#
 #################################################################################
 def runCommand(command_):
   """
@@ -213,11 +181,6 @@ _enddef
 #################################################################################
 
 #################################################################################
-#
-# printf:
-#
-# Display data back to the remote client
-#
 #################################################################################
 def printf(message_ = "\n"):
   """
@@ -227,11 +190,6 @@ def printf(message_ = "\n"):
 _enddef
 
 #################################################################################
-#
-# flush:
-#
-# Flush the reply (i.e. display) buffer back to the remote client
-#
 #################################################################################
 def flush():
   """
@@ -241,19 +199,9 @@ def flush():
 _enddef
 
 #################################################################################
-#
-# Commands to keep the remote server from timing out commands that take a 
-# long time to run (i.e. longer than the pshell client timeout alue, which
-# defaults to 5 seconds).
-#
 #################################################################################
 
 #################################################################################
-#
-# wheel:
-#
-# spinning ascii wheel keep alive, user string string is optional
-#
 #################################################################################
 def wheel(string_ = None):
   """
@@ -263,11 +211,6 @@ def wheel(string_ = None):
 _enddef
 
 #################################################################################
-#
-# march:
-#
-# march a string or character keep alive across the screen
-#
 #################################################################################
 def march(string_):
   """
@@ -277,11 +220,6 @@ def march(string_):
 _enddef
 
 #################################################################################
-#
-# showUsage:
-#
-# Show the command's registered usage
-#
 #################################################################################
 def showUsage():
   """
@@ -291,12 +229,6 @@ def showUsage():
 _enddef
 
 #################################################################################
-#
-# isHelp:
-#
-# Check if the user has asked for help on this command.  Command must be 
-# registered with the showUsage = False option.
-#
 #################################################################################
 def isHelp():
   """
@@ -307,18 +239,6 @@ def isHelp():
 _enddef
 
 #################################################################################
-#
-# isSubString:
-#
-# This function will return True if string1 is a substring of string2 at 
-# position 0.  If the minMatchLength is 0, then it will compare up to the
-# length of string1.  If the minMatchLength > 0, it will require a minimum
-# of that many characters to match.  A string that is longer than the min
-# match length must still match for the remaining charactes, e.g. with a
-# minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
-# will match, 'quix' will not match.  This function is useful for wildcard
-# matching.
-#
 #################################################################################
 def isSubString(string1_, string2_, minMatchLength_ = 0):
   """

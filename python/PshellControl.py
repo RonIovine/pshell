@@ -117,29 +117,6 @@ SOCKET_NOT_CONNECTED = 7
 #################################################################################
 
 #################################################################################
-#
-# connectServer:
-#
-# connect to a pshell server in another process, note that this does
-# not do any handshaking to the remote pshell or maintain a connection
-# state, it meerly sets the internal destination remote pshell server
-# information to use when sending commands via the sendCommandN
-# functions and sets up any resources necessary for the source socket,
-# the timeout value is the number of milliseconds to wait for a response
-# from the remote command in the sendCommandN functions, a timeout
-# value of 0 will not wait for a response, in which case the function
-# will return either SOCKET_NOT_CONNECTED, SOCKET_SEND_FAILURE, or
-# COMMAND_SUCCESS, the timeout value entered in this funcition will
-# be used as the default timeout for all calls to sendCommandN that
-# do not provide an override timeout value, for a UDP server, the 
-# remoteServer must be either a valid hostname or IP address and a 
-# valid destination port must be provided, for a UNIX server, only 
-# a valid server name must be provided along with the identifier 
-# PshellControl.UNIX for the 'port' parameter
-# 
-# this function returns a Server ID (sid) handle which must be saved and
-# used for all subsequent calls into this library
-#
 #################################################################################
 def connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   """
@@ -167,12 +144,6 @@ def connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
 _enddef
 
 #################################################################################
-#
-# disconnectServer:
-#
-# cleanup any resources associated with the server connection, including 
-# releasing any temp file handles, closing any local socket handles etc.
-#
 #################################################################################
 def disconnectServer(sid_):
   """
@@ -183,15 +154,6 @@ def disconnectServer(sid_):
 _enddef
 
 #################################################################################
-#
-# disconnectAllServers:
-#
-# use this function to cleanup any resources for all connected servers, this 
-# function should be called upon program termination, either in a graceful 
-# termination or within an exception signal handler, it is especially important 
-# that this be called when a unix server is used since there are associated file 
-# handles that need to be cleaned up
-#
 #################################################################################
 def disconnectAllServers():
   """
@@ -205,12 +167,6 @@ def disconnectAllServers():
 _enddef
 
 #################################################################################
-#
-# setDefaultTimeout:
-#
-# set the default server response timeout that is used in the 'send' commands 
-# that don't take a timeout override
-#
 #################################################################################
 def setDefaultTimeout(sid_, defaultTimeout_):
   """
@@ -221,14 +177,6 @@ def setDefaultTimeout(sid_, defaultTimeout_):
 _enddef
 
 #################################################################################
-#
-# extractCommands:
-# 
-# this function will extract all the commands of a remote pshell server and 
-# present them in a human readable form, this is useful when writing a multi 
-# server control aggregator, see the demo program pshellAggregatorDemo.py in 
-# the demo directory for examples
-#
 #################################################################################
 def extractCommands(sid_):
   """ 
@@ -241,12 +189,6 @@ def extractCommands(sid_):
 _enddef
 
 #################################################################################
-#
-# addMulticast:
-#
-# this command will add a given multicast receiver (i.e. sid) to a multicast 
-# group, multicast groups are based on the command's keyword
-# 
 #################################################################################
 def addMulticast(sid_, keyword_):
   """
@@ -257,16 +199,6 @@ def addMulticast(sid_, keyword_):
 _enddef
 
 #################################################################################
-#
-# sendMulticast:
-#
-# this command will send a given command to all the registered multicast
-# receivers (i.e. sids) for this multicast group, multicast groups are 
-# based on the command's keyword, this function will issue the command as 
-# a best effort fire-and-forget command to each receiver in the multicast 
-# group, no results will be requested or expected, and no response will be 
-# requested or expected
-# 
 #################################################################################
 def sendMulticast(command_):
   """
@@ -281,13 +213,6 @@ def sendMulticast(command_):
 _enddef
 
 #################################################################################
-#
-# sendCommand1:
-#
-# Send a command using the default timeout setup in the connectServer call, 
-# if the default timeout is 0, the server will not reply with a response and
-# this function will not wait for one
-#
 #################################################################################
 def sendCommand1(sid_, command_):
   """
@@ -299,13 +224,6 @@ def sendCommand1(sid_, command_):
 _enddef
 
 #################################################################################
-#
-# sendCommand2:
-#
-# Send a command overriding the default timeout, if the override timeout is 0, 
-# the server will not reply with a response and this function will not wait for 
-# one
-#
 #################################################################################
 def sendCommand2(sid_, timeoutOverride_, command_):
   """
@@ -317,14 +235,6 @@ def sendCommand2(sid_, timeoutOverride_, command_):
 _enddef
 
 #################################################################################
-#
-# sendCommand3:
-#
-# Send a command using the default timeout setup in the connectServer call and 
-# return any results received in the payload, if the default timeout is 0, the 
-# server will not reply with a response and this function will not wait for one, 
-# and no results will be extracted
-#
 #################################################################################
 def sendCommand3(sid_, command_):
   """
@@ -337,14 +247,6 @@ def sendCommand3(sid_, command_):
 _enddef
 
 #################################################################################
-#
-# sendCommand4:
-#
-# Send a command overriding the default timeout and return any results received 
-# in the payload, if the timeout override default timeout is 0, the server will 
-# not reply with a response and this function will not wait for one, and no 
-# results will be extracted
-#
 #################################################################################
 def sendCommand4(sid_, timeoutOverride_, command_):
   """
