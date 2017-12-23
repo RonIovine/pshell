@@ -47,6 +47,33 @@ getInput()           -- get a line of user input from our input file descriptor
 isSubString()        -- checks for string1 substring of string2 at position 0
 write()              -- write a string to our output file descriptor
 
+Integer constants:
+
+Use for the timeout value when setting the idleSessionTimeout, default=none
+
+IDLE_TIMEOUT_NONE
+ONE_SECOND
+ONE_MINUTE
+
+String constants:
+
+Valid serial types, TTY is for serial terminal control and defaults to
+stdin and stdout, SOCKET uses a serial TCP socket placed in 'telnet'
+mode for control via a telnet client, default=tty with stdin/stdout
+
+TTY
+SOCKET
+
+Valid TAB style identifiers
+
+Standard bash/readline tabbing method, i.e. initiate via double tabbing
+
+BASH_TAB
+
+Fast tabbing, i.e.  initiated via single tabbing, this is the default
+
+FAST_TAB
+
 A complete example of the usage of the API can be found in the included demo 
 program pshellReadlineDemo.py
 """

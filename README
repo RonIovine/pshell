@@ -169,10 +169,10 @@ export PSHELL_INSTALL=<myLocalInstallDir>
 export PSHELL_BATCH_DIR=$PSHELL_INSTALL/batch
 export PSHELL_STARTUP_DIR=$PSHELL_INSTALL/startup
 export PSHELL_CONFIG_DIR=$PSHELL_INSTALL/config
-export PATH=$PSHELL_INSTALL/bin:$PSHELL_INSTALL/utils:$PSHELL_INSTALL/python:$PATH
+export PATH=$PSHELL_INSTALL/bin:$PSHELL_INSTALL/utils:$PSHELL_INSTALL/python:$PSHELL_INSTALL/python/demo:$PATH
 export MANPATH=$PSHELL_INSTALL/man:$MANPATH
 export LD_LIBRARY_PATH=$PSHELL_INSTALL/lib:$LD_LIBRARY_PATH
-export PYTHONPATH=$PSHELL_INSTALL/python:$PYTHONPATH
+export PYTHONPATH=$PSHELL_INSTALL/python:$PSHELL_INSTALL/python/demo:$PYTHONPATH
 
 Note that if a system wide install is done, none of the 'demo' programs are installed
 in any system wide 'bin' directories.  They can only be executed directly from the 'bin'
@@ -191,19 +191,27 @@ PshellControl(3) - Describes the API and usage of the PshellControl utility
 TraceFilter(3)   - Describes the API and usage of the TraceFilter utility
 TraceLog(3)      - Describes the API and usage of the TraceLog utility
 
+The following HTML 'pydoc' generated documentation is available in the
+$PSHELL_INSTALL/python/doc directory:
+
+pshell.html
+PshellServer.html
+PshellControl.html
+PshellReadline.html
+
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
-$PSHELL_INSTALL/demo/pshellServerDemo.cc        --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc       --  Sample pshell control external client
-$PSHELL_INSTALL/demo/pshellAggregatorDemo.cc    --  Sample pshell control to aggregate multiple servers
-$PSHELL_INSTALL/demo/traceFilterDemo.cc         --  Server demo for dynamic trace filtering
-$PSHELL_INSTALL/demo/traceLogDemo.cc            --  Demo using the stand-alone TraceLog module
-$PSHELL_INSTALL/demo/pshellNoServerDemo.cc      --  Demo using the multi-call binary option
-$PSHELL_INSTALL/python/pshellServerDemo.py      --  Server demo for user defined commands (Python)
-$PSHELL_INSTALL/python/pshellControlDemo.py     --  Sample pshell control external client (Python)
-$PSHELL_INSTALL/python/pshellAggregatorDemo.py  --  Sample pshell control to aggregate multiple servers (Python)
-$PSHELL_INSTALL/python/pshellReadlineDemo.py    --  Sample program to show usage of PshellReadline (Python)
+$PSHELL_INSTALL/demo/pshellServerDemo.cc             --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.cc            --  Sample pshell control external client
+$PSHELL_INSTALL/demo/pshellAggregatorDemo.cc         --  Sample pshell control to aggregate multiple servers
+$PSHELL_INSTALL/demo/traceFilterDemo.cc              --  Server demo for dynamic trace filtering
+$PSHELL_INSTALL/demo/traceLogDemo.cc                 --  Demo using the stand-alone TraceLog module
+$PSHELL_INSTALL/demo/pshellNoServerDemo.cc           --  Demo using the multi-call binary option
+$PSHELL_INSTALL/python/demo/pshellServerDemo.py      --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/python/demo/pshellControlDemo.py     --  Sample pshell control external client (Python)
+$PSHELL_INSTALL/python/demo/pshellAggregatorDemo.py  --  Sample pshell control to aggregate multiple servers (Python)
+$PSHELL_INSTALL/python/demo/pshellReadlineDemo.py    --  Sample program to show usage of PshellReadline (Python)
 
 EXECUTION:
 

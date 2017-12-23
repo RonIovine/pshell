@@ -56,6 +56,32 @@ sendCommand2()         -- send command to server using timeout override, no resu
 sendCommand3()         -- send command to server using default timeout, results extracted
 sendCommand4()         -- send command to server using timeout override, results extracted
 
+Integer constants:
+
+Helpful items used for the server response timeout values 
+
+NO_WAIT
+ONE_MSEC
+ONE_SEC
+
+These are returned from the sendCommand1 and sendCommand2 functions
+
+COMMAND_SUCCESS
+COMMAND_NOT_FOUND
+COMMAND_INVALID_ARG_COUNT
+SOCKET_SEND_FAILURE
+SOCKET_SELECT_FAILURE
+SOCKET_RECEIVE_FAILURE
+SOCKET_TIMEOUT
+SOCKET_NOT_CONNECTED
+
+String constants:
+
+Use this as the "port" identifier for the connectServer 
+call when using a UNIX domain server
+
+UNIX = "unix"  
+
 A complete example of the usage of the API can be found in the included 
 demo programs pshellControlDemo.py and pshellAggregatorDemo.py
 """

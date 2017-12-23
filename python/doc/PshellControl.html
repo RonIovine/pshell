@@ -37,6 +37,32 @@ Functions:<br>
 <a href="#-sendCommand3">sendCommand3</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;default&nbsp;timeout,&nbsp;results&nbsp;extracted<br>
 <a href="#-sendCommand4">sendCommand4</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;timeout&nbsp;override,&nbsp;results&nbsp;extracted<br>
 &nbsp;<br>
+Integer&nbsp;constants:<br>
+&nbsp;<br>
+Helpful&nbsp;items&nbsp;used&nbsp;for&nbsp;the&nbsp;server&nbsp;response&nbsp;timeout&nbsp;values&nbsp;<br>
+&nbsp;<br>
+NO_WAIT<br>
+ONE_MSEC<br>
+ONE_SEC<br>
+&nbsp;<br>
+These&nbsp;are&nbsp;returned&nbsp;from&nbsp;the&nbsp;sendCommand1&nbsp;and&nbsp;sendCommand2&nbsp;functions<br>
+&nbsp;<br>
+COMMAND_SUCCESS<br>
+COMMAND_NOT_FOUND<br>
+COMMAND_INVALID_ARG_COUNT<br>
+SOCKET_SEND_FAILURE<br>
+SOCKET_SELECT_FAILURE<br>
+SOCKET_RECEIVE_FAILURE<br>
+SOCKET_TIMEOUT<br>
+SOCKET_NOT_CONNECTED<br>
+&nbsp;<br>
+String&nbsp;constants:<br>
+&nbsp;<br>
+Use&nbsp;this&nbsp;as&nbsp;the&nbsp;"port"&nbsp;identifier&nbsp;for&nbsp;the&nbsp;connectServer&nbsp;<br>
+call&nbsp;when&nbsp;using&nbsp;a&nbsp;UNIX&nbsp;domain&nbsp;server<br>
+&nbsp;<br>
+UNIX&nbsp;=&nbsp;"unix"&nbsp;&nbsp;<br>
+&nbsp;<br>
 A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included&nbsp;<br>
 demo&nbsp;programs&nbsp;pshellControlDemo.py&nbsp;and&nbsp;pshellAggregatorDemo.py</tt></p>
 <p>

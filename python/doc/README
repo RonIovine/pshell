@@ -1,2 +1,3 @@
 This directory contains all the HTML documention for the Python modules
-PshellServer, PshellControl, and PshellReadline.
+PshellServer, PshellControl, PshellReadline and the stand-alone Python
+UDP/UNIX client program pshell.

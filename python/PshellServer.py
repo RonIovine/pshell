@@ -63,8 +63,36 @@ march()       -- marching ascii character to keep UDP/UNIX client alive
 showUsage()   -- show the usage the command is registered with
 isHelp()      -- checks if the user has requested help on this command
 isSubString() -- checks for string1 substring of string2 at position 0
+
+Integer constants:
+
+These are the identifiers for the serverMode.  BLOCKING wil never return 
+control to the caller of startServer, NON_BLOCKING will spawn a thread to 
+run the server and will return control to the caller of startServer
+
+BLOCKING
+NON_BLOCKING
+
+String constants: 
  
- 
+Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
+client programs, TCP servers require a 'telnet' client, local servers
+require no client (all user interaction done directly with server running
+in the parent host program)
+
+UDP
+TCP
+UNIX
+LOCAL
+
+These two identifiers that can be used for the hostnameOrIpAddr argument 
+of the startServer call.  PshellServer.ANYHOST will bind the server socket
+to all interfaces of a multi-homed host, PshellServer.LOCALHOST will bind 
+the server socket to the local loopback address (i.e. 127.0.0.1)
+
+ANYHOST
+LOCALHOST
+
 A complete example of the usage of the API can be found in the included 
 demo program pshellServerDemo.py.
 """

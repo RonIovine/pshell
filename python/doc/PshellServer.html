@@ -45,6 +45,34 @@ a&nbsp;pshell&nbsp;callback&nbsp;function<br>
 <a href="#-isHelp">isHelp</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;requested&nbsp;help&nbsp;on&nbsp;this&nbsp;command<br>
 <a href="#-isSubString">isSubString</a>()&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0<br>
 &nbsp;<br>
+Integer&nbsp;constants:<br>
+&nbsp;<br>
+These&nbsp;are&nbsp;the&nbsp;identifiers&nbsp;for&nbsp;the&nbsp;serverMode.&nbsp;&nbsp;BLOCKING&nbsp;wil&nbsp;never&nbsp;return&nbsp;<br>
+control&nbsp;to&nbsp;the&nbsp;caller&nbsp;of&nbsp;startServer,&nbsp;NON_BLOCKING&nbsp;will&nbsp;spawn&nbsp;a&nbsp;thread&nbsp;to&nbsp;<br>
+run&nbsp;the&nbsp;server&nbsp;and&nbsp;will&nbsp;return&nbsp;control&nbsp;to&nbsp;the&nbsp;caller&nbsp;of&nbsp;startServer<br>
+&nbsp;<br>
+BLOCKING<br>
+NON_BLOCKING<br>
+&nbsp;<br>
+String&nbsp;constants:&nbsp;<br>
+&nbsp;<br>
+Valid&nbsp;server&nbsp;types,&nbsp;UDP/UNIX&nbsp;servers&nbsp;require&nbsp;the&nbsp;'pshell'&nbsp;or&nbsp;'pshell.py'<br>
+client&nbsp;programs,&nbsp;TCP&nbsp;servers&nbsp;require&nbsp;a&nbsp;'telnet'&nbsp;client,&nbsp;local&nbsp;servers<br>
+require&nbsp;no&nbsp;client&nbsp;(all&nbsp;user&nbsp;interaction&nbsp;done&nbsp;directly&nbsp;with&nbsp;server&nbsp;running<br>
+in&nbsp;the&nbsp;parent&nbsp;host&nbsp;program)<br>
+&nbsp;<br>
+UDP<br>
+TCP<br>
+UNIX<br>
+LOCAL<br>
+&nbsp;<br>
+These&nbsp;two&nbsp;identifiers&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;hostnameOrIpAddr&nbsp;argument&nbsp;<br>
+of&nbsp;the&nbsp;startServer&nbsp;call.&nbsp;&nbsp;PshellServer.ANYHOST&nbsp;will&nbsp;bind&nbsp;the&nbsp;server&nbsp;socket<br>
+to&nbsp;all&nbsp;interfaces&nbsp;of&nbsp;a&nbsp;multi-homed&nbsp;host,&nbsp;PshellServer.LOCALHOST&nbsp;will&nbsp;bind&nbsp;<br>
+the&nbsp;server&nbsp;socket&nbsp;to&nbsp;the&nbsp;local&nbsp;loopback&nbsp;address&nbsp;(i.e.&nbsp;127.0.0.1)<br>
+&nbsp;<br>
+ANYHOST<br>
+LOCALHOST<br>
 &nbsp;<br>
 A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included&nbsp;<br>
 demo&nbsp;program&nbsp;pshellServerDemo.py.</tt></p>
