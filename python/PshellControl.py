@@ -272,7 +272,7 @@ enddef
 #
 # Users of this module should never access any of these "private" items directly,
 # these are meant to hide the implementation from the presentation of the public
-# API
+# API above
 #
 #################################################################################
 

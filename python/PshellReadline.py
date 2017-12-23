@@ -180,7 +180,7 @@ enddef
 # position 0.  If the minMatchLength is 0, then it will compare up to the
 # length of string1.  If the minMatchLength > 0, it will require a minimum
 # of that many characters to match.  A string that is longer than the min
-# match length must still match for the remaining charactes, e.g. with a
+# match length must still match for the remaining characters, e.g. with a
 # minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
 # will match, 'quix' or 'uit' will not match.  This function is useful for 
 # wildcard matching.
@@ -196,7 +196,7 @@ enddef
 #
 # Users of this module should never access any of these "private" items directly,
 # these are meant to hide the implementation from the presentation of the public
-# API
+# API above
 #
 #################################################################################
 

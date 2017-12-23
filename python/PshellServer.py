@@ -268,7 +268,7 @@ enddef
 #
 # Users of this module should never access any of these "private" items directly,
 # these are meant to hide the implementation from the presentation of the public
-# API
+# API above
 #
 #################################################################################
  
@@ -568,7 +568,7 @@ def __receiveDGRAM():
   global gPshellMsgPayloadLength
   global gPshellMsgHeaderFormat
   global gFromAddr
-  gPshellMsg, gFromAddr = gSocketFd.recvfrom(gPshellMsgPayloadLength)
+  (gPshellMsg, gFromAddr) = gSocketFd.recvfrom(gPshellMsgPayloadLength)
   gPshellMsg = PshellMsg._asdict(PshellMsg._make(struct.unpack(gPshellMsgHeaderFormat+str(len(gPshellMsg)-struct.calcsize(gPshellMsgHeaderFormat))+"s", gPshellMsg)))
   __processCommand(gPshellMsg["payload"])
 enddef
@@ -935,29 +935,30 @@ def __loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_, tcpTi
   for line in file:
     # skip comments
     if (line[0] != "#"):
-      value = line.split("=");
+      value = line.strip().split("=");
       if (len(value) == 2):
         option = value[0].split(".")
+        value[1] = value[1].strip()
         if ((len(option) == 2) and  (name_ == option[0])):
           if (option[1].lower() == "title"):
-            title_ = value[1].strip()
+            title_ = value[1]
           elif (option[1].lower() == "banner"):
-            banner_ = value[1].strip()
+            banner_ = value[1]
           elif (option[1].lower() == "prompt"):
-            prompt__ = value[1].strip()
+            prompt_ = value[1]+" "
           elif (option[1].lower() == "host"):
-            host_ = value[1].strip()
-          elif (option[1].lower() == "port"):
-            port_ = int(value[1].strip())
+            host_ = value[1].lower()
+          elif ((option[1].lower() == "port") and (value[1].isdigit())):
+            port_ = int(value[1])
           elif (option[1].lower() == "type"):
-            if ((value[1].lower().strip() == UDP) or 
-                (value[1].lower().strip() == TCP) or 
-                (value[1].lower().strip() == UNIX) or 
-                (value[1].lower().strip() == LOCAL)):
-              type_ = value[1].lower().strip()
+            if ((value[1].lower() == UDP) or 
+                (value[1].lower() == TCP) or 
+                (value[1].lower() == UNIX) or 
+                (value[1].lower() == LOCAL)):
+              type_ = value[1].lower()
             endif
-          elif (option[1].lower() == "timeout"):
-            tcpTimeout_ = int(value[1].strip())
+          elif ((option[1].lower() == "timeout") and (value[1].isdigit())):
+            tcpTimeout_ = int(value[1])
           endif
         endif
       endif
