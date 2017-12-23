@@ -133,6 +133,7 @@ const char *pshell_getResultsString(int results_);
 #define PSHELL_NO_WAIT      0
 #define PSHELL_ONE_MSEC     1
 #define PSHELL_ONE_SEC      PSHELL_ONE_MSEC*1000
+#define PSHELL_LOCALHOST    "localhost"
 
 int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,

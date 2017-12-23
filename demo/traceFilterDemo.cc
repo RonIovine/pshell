@@ -409,7 +409,7 @@ int main (int argc, char *argv[])
   TRACE_INFO("First trace");
 
   /* start our pshell server */
-  pshell_startServer("traceFilterDemo", serverType, PSHELL_NON_BLOCKING, "localhost", port);
+  pshell_startServer("traceFilterDemo", serverType, PSHELL_NON_BLOCKING, PSHELL_LOCALHOST, port);
    
   /* create a sample thread to show thread based filtering */
   pthread_t threadId;

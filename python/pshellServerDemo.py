@@ -203,6 +203,6 @@ endif
 PshellServer.runCommand("hello 1 2 3")
 
 # start our pshell server
-PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, "anyhost", 9001)
+PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)
 
 PshellServer.cleanupResources()

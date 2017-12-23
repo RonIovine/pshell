@@ -74,20 +74,27 @@ enddef = endif = endwhile = endfor = None
 #
 #################################################################################
 
-# Valid server types, udp/unix servers require the 'pshell' or 'pshell.py'
-# client programs, tcp servers require a 'telnet' client, local servers
-# require no client (all user interaction done directly with server 
-# initiated user input solitication)
+# Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
+# client programs, TCP servers require a 'telnet' client, local servers
+# require no client (all user interaction done directly with server running
+# in the parent host program)
 UDP = "udp"
 TCP = "tcp"
 UNIX = "unix"
 LOCAL = "local"
 
-# BLOCKING wil never return control to the caller of startServer,
-# NON_BLOCKING will spawn a thread to run the server and will
-# return control to the caller of startServer
+# These are the identifiers for the serverMode.  BLOCKING wil never return 
+# control to the caller of startServer, NON_BLOCKING will spawn a thread to 
+# run the server and will return control to the caller of startServer
 BLOCKING = 0
 NON_BLOCKING = 1
+
+# These two identifiers that can be used for the hostnameOrIpAddr argument 
+# of the startServer call.  PshellServer.ANYHOST will bind the server socket
+# to all interfaces of a multi-homed host, PshellServer.LOCALHOST will bind 
+# the server socket to the local loopback address (i.e. 127.0.0.1)
+ANYHOST = "anyhost"
+LOCALHOST = "localhost"
 
 #################################################################################
 #
@@ -304,8 +311,7 @@ def __startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port
   if (gRunninig == False):
     gRunning = True
     gServerName = serverName_
-    gServerMode = serverMode_
-  
+    gServerMode = serverMode_  
     (gTitle, gBanner, gPrompt, gServerType, gHostnameOrIpAddr, gPort, gTcpTimeout) = __loadConfigFile(gServerName, gTitle, gBanner, gPrompt, serverType_, hostnameOrIpAddr_, port_, gTcpTimeout)
     __loadStartupFile()  
     if (gServerMode == BLOCKING):
@@ -336,9 +342,9 @@ def __createSocket():
   if (gServerType == UDP):
     # IP domain socket (UDP)
     gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    if (gHostnameOrIpAddr == "anyhost"):
+    if (gHostnameOrIpAddr == ANYHOST):
       gSocketFd.bind((NULL, gPort))
-    elif (gHostnameOrIpAddr == "localhost"):
+    elif (gHostnameOrIpAddr == LOCALHOST):
       gSocketFd.bind(("127.0.0.1", gPort))
     else:
       gSocketFd.bind((gHostnameOrIpAddr, gPort))
@@ -348,9 +354,9 @@ def __createSocket():
     gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     # Bind the socket to the port
-    if (gHostnameOrIpAddr == "anyhost"):
+    if (gHostnameOrIpAddr == ANYHOST):
       gSocketFd.bind((NULL, gPort))
-    elif (gHostnameOrIpAddr == "localhost"):
+    elif (gHostnameOrIpAddr == LOCALHOST):
       gSocketFd.bind(("127.0.0.1", gPort))
     else:
       gSocketFd.bind((gHostnameOrIpAddr, gPort))

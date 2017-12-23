@@ -3483,11 +3483,11 @@ static bool createSocket(void)
     if (inet_aton(_hostnameOrIpAddr, &_localIpAddress.sin_addr) == 0)
     {
       strcpy(requestedHost, _hostnameOrIpAddr);
-      if (pshell_isEqual(requestedHost, "anyhost"))
+      if (pshell_isEqual(requestedHost, PSHELL_ANYHOST))
       {
         _localIpAddress.sin_addr.s_addr = htonl(INADDR_ANY);
       }
-      else if (pshell_isEqual(requestedHost, "localhost"))
+      else if (pshell_isEqual(requestedHost, PSHELL_LOCALHOST))
       {
         _localIpAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
         strcpy(_ipAddress, "127.0.0.1");
@@ -3495,7 +3495,7 @@ static bool createSocket(void)
       else
       {
         /* see if they are requesting our local host address */
-        if (pshell_isEqual(requestedHost, "myhost"))
+        if (pshell_isEqual(requestedHost, PSHELL_MYHOST))
         {
           gethostname(requestedHost, sizeof(requestedHost));
         }

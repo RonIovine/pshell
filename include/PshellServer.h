@@ -89,6 +89,17 @@ enum PshellServerMode
   PSHELL_NON_BLOCKING 
 };
 
+/*
+ * These three identifiers that can be used for the hostnameOrIpAddr argument 
+ * of the startServer call.  PSHELL_ANYHOST will bind the server socket
+ * to all interfaces of a multi-homed host, PSHELL_LOCALHOST will bind 
+ * the server socket to the local loopback address (i.e. 127.0.0.1), and
+ * PSHELL_MYHOST will bind to the default interface (i.e. eth0)
+ */
+#define PSHELL_ANYHOST "anyhost"
+#define PSHELL_LOCALHOST "localhost"
+#define PSHELL_MYHOST "myhost"
+
 /***************************************
  * public "member" function prototypes
  ***************************************/

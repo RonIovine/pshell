@@ -652,7 +652,7 @@ int main(int argc, char *argv[])
    *
    */
    
-  pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, "anyhost", port);
+  pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, PSHELL_ANYHOST, port);
   
   /* should never get here, but cleanup any pshell system resources as good practice */
   pshell_cleanupResources();

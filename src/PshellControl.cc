@@ -606,7 +606,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
     else if (inet_aton(remoteServer_, &control_->destIpAddress.sin_addr) == 0)
     {
       /* they supplied a hostname, see if it is one of our special hostnames */
-      if (strcmp(remoteServer_, "localhost") == 0)
+      if (strcmp(remoteServer_, PSHELL_LOCALHOST) == 0)
       {
         control_->destIpAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
       }
