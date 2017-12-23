@@ -75,15 +75,9 @@ to&nbsp;set&nbsp;this&nbsp;timeout&nbsp;value,&nbsp;e.g.&nbsp;PshellReadline.ONE
 use&nbsp;the&nbsp;identifiers&nbsp;PshellReadline.TTY&nbsp;and&nbsp;PshellReadline.SOCKET.&nbsp;&nbsp;For&nbsp;the<br>
 socket&nbsp;identifier,&nbsp;use&nbsp;the&nbsp;file&nbsp;descriptor&nbsp;that&nbsp;is&nbsp;returned&nbsp;from&nbsp;the&nbsp;TCP&nbsp;<br>
 socket&nbsp;server&nbsp;'accept'&nbsp;call&nbsp;for&nbsp;both&nbsp;the&nbsp;inFd&nbsp;and&nbsp;outFd.</tt></dd></dl>
- <dl><dt><a name="-setIdleTimeout"><strong>setIdleTimeout</strong></a>(idleTimeout_)</dt><dd><tt>Set&nbsp;the&nbsp;input&nbsp;and&nbsp;output&nbsp;file&nbsp;descriptors,&nbsp;if&nbsp;this&nbsp;function&nbsp;is&nbsp;not&nbsp;called,<br>
-the&nbsp;default&nbsp;is&nbsp;stdin&nbsp;and&nbsp;stdout.&nbsp;&nbsp;The&nbsp;file&nbsp;descriptors&nbsp;given&nbsp;to&nbsp;this&nbsp;function<br>
-must&nbsp;be&nbsp;opened&nbsp;and&nbsp;running&nbsp;in&nbsp;raw&nbsp;serial&nbsp;character&nbsp;mode.&nbsp;&nbsp;The&nbsp;idleTimeout&nbsp;<br>
-specifies&nbsp;the&nbsp;time&nbsp;to&nbsp;wait&nbsp;for&nbsp;any&nbsp;user&nbsp;activity&nbsp;in&nbsp;the&nbsp;getInput&nbsp;function.<br>
-Use&nbsp;the&nbsp;identifiers&nbsp;PshellReadline.ONE_SECOND&nbsp;and&nbsp;PshellReadline.ONE_MINUTE<br>
-to&nbsp;set&nbsp;this&nbsp;timeout&nbsp;value,&nbsp;e.g.&nbsp;PshellReadline.ONE_MINUTE*5,&nbsp;for&nbsp;serialType<br>
-use&nbsp;the&nbsp;identifiers&nbsp;PshellReadline.TTY&nbsp;and&nbsp;PshellReadline.SOCKET.&nbsp;&nbsp;For&nbsp;the<br>
-socket&nbsp;identifier,&nbsp;use&nbsp;the&nbsp;file&nbsp;descriptor&nbsp;that&nbsp;is&nbsp;returned&nbsp;from&nbsp;the&nbsp;TCP&nbsp;<br>
-socket&nbsp;server&nbsp;'accept'&nbsp;call&nbsp;for&nbsp;both&nbsp;the&nbsp;inFd&nbsp;and&nbsp;outFd.</tt></dd></dl>
+ <dl><dt><a name="-setIdleTimeout"><strong>setIdleTimeout</strong></a>(idleTimeout_)</dt><dd><tt>Set&nbsp;the&nbsp;idle&nbsp;session&nbsp;timeout&nbsp;as&nbsp;described&nbsp;above.&nbsp;&nbsp;Use&nbsp;the&nbsp;identifiers<br>
+PshellReadline.ONE_SEC&nbsp;and&nbsp;PshellRedline.ONE_MINUTE&nbsp;as&nbsp;follows,<br>
+e.g.&nbsp;PshellReadline.ONE_MINUTE*5&nbsp;for&nbsp;a&nbsp;5&nbsp;minute&nbsp;idleSession&nbsp;timeout.</tt></dd></dl>
  <dl><dt><a name="-setTabStyle"><strong>setTabStyle</strong></a>(tabStyle_)</dt><dd><tt>Set&nbsp;the&nbsp;tabbing&nbsp;method&nbsp;to&nbsp;either&nbsp;be&nbsp;bash/readline&nbsp;style&nbsp;tabbing,&nbsp;i.e.&nbsp;double<br>
 tabbing&nbsp;to&nbsp;initiate&nbsp;and&nbsp;display&nbsp;completions,&nbsp;or&nbsp;"fast"&nbsp;tabbing,&nbsp;where&nbsp;all<br>
 completions&nbsp;and&nbsp;displays&nbsp;are&nbsp;initiated&nbsp;via&nbsp;a&nbsp;single&nbsp;tab&nbsp;only,&nbsp;the&nbsp;default&nbsp;is<br>
