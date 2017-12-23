@@ -28,18 +28,26 @@
 #
 #################################################################################
 
-#################################################################################
-#
-# This API implements a readline like functionality for user input.  This can
-# work with any character stream based input/output terminal device, i.e. 
-# keyboard input over a serial tty, or over a TCP/telnet connection.  This module 
-# will provide up-arrow command history recall, command line editing, and TAB 
-# completion of registered keywords.  
-#
-# A complete example of the usage of the API can be found in the included demo 
-# program pshellReadlineDemo.py
-#
-#################################################################################
+"""
+This API implements a readline like functionality for user input.  This can
+work with any character stream based input/output terminal device, i.e. 
+keyboard input over a serial tty, or over a TCP/telnet connection.  This module 
+will provide up-arrow command history recall, command line editing, and TAB 
+completion of registered keywords.  
+
+Functions:
+
+setFileDescriptors() -- set the input/output file descriptors
+setIdleTimeout() -- set the idle session timeout
+addTabCompletion() -- add a keyword to the TAB completion list
+setTabStyle() -- sets the tab behavour style ("fast" or bash)
+getInput() -- get a line of user input from our input file descriptor
+isSubString() -- checks for string1 substring of string2 at position 0
+write() -- write a string to our output file descriptor
+
+A complete example of the usage of the API can be found in the included demo 
+program pshellReadlineDemo.py
+"""
 
 # import all our necessary modules
 import sys
@@ -51,7 +59,7 @@ import select
 # dummy variables so we can create pseudo end block indicators, add these 
 # identifiers to your list of python keywords in your editor to get syntax 
 # highlighting on these identifiers, sorry Guido
-enddef = endif = endwhile = endfor = None
+_enddef = _endif = _endwhile = _endfor = None
 
 #################################################################################
 #
@@ -101,8 +109,19 @@ FAST_TAB = "fast"
 #
 #################################################################################
 def setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_ = IDLE_TIMEOUT_NONE):
+  """
+  Set the input and output file descriptors, if this function is not called,
+  the default is stdin and stdout.  The file descriptors given to this function
+  must be opened and running in raw serial character mode.  The idleTimeout 
+  specifies the time to wait for any user activity in the getInput function.
+  Use the identifiers PshellReadline.ONE_SECOND and PshellReadline.ONE_MINUTE
+  to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5, for serialType
+  use the identifiers PshellReadline.TTY and PshellReadline.SOCKET.  For the
+  socket identifier, use the file descriptor that is returned from the TCP 
+  socket server 'accept' call for both the inFd and outFd.
+  """
   __setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_)
-enddef
+_enddef
 
 #################################################################################
 #
@@ -114,8 +133,19 @@ enddef
 #
 #################################################################################
 def setIdleTimeout(idleTimeout_):
+  """
+  Set the input and output file descriptors, if this function is not called,
+  the default is stdin and stdout.  The file descriptors given to this function
+  must be opened and running in raw serial character mode.  The idleTimeout 
+  specifies the time to wait for any user activity in the getInput function.
+  Use the identifiers PshellReadline.ONE_SECOND and PshellReadline.ONE_MINUTE
+  to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5, for serialType
+  use the identifiers PshellReadline.TTY and PshellReadline.SOCKET.  For the
+  socket identifier, use the file descriptor that is returned from the TCP 
+  socket server 'accept' call for both the inFd and outFd.
+  """
   __setIdleTimeout(idleTimeout_)
-enddef
+_enddef
 
 #################################################################################
 #
@@ -125,8 +155,11 @@ enddef
 #
 #################################################################################
 def write(string_):
+  """
+  Write a string to our output file descriptor
+  """
   __write(string_)
-enddef
+_enddef
 
 #################################################################################
 #
@@ -137,8 +170,12 @@ enddef
 #
 #################################################################################
 def addTabCompletion(keyword_):
+  """
+  Add a keyword to the TAB completion list.  TAB completion will only be applied
+  to the first keyword of a given user typed command
+  """
   __addTabCompletion(keyword_)
-enddef
+_enddef
 
 #################################################################################
 #
@@ -152,8 +189,15 @@ enddef
 #
 #################################################################################
 def setTabStyle(tabStyle_):
+  """
+  Set the tabbing method to either be bash/readline style tabbing, i.e. double
+  tabbing to initiate and display completions, or "fast" tabbing, where all
+  completions and displays are initiated via a single tab only, the default is
+  "fast" tabbing, use the identifiers PshellReadline.BASH_TAB and
+  PshellReadline.FAST_TAB for the tabStyle
+  """
   __setTabStyle(tabStyle_)
-enddef
+_enddef
 
 #################################################################################
 #
@@ -169,8 +213,17 @@ enddef
 #
 #################################################################################
 def getInput(prompt_):
+  """
+  Issue the user prompt and return the entered command line value.  This 
+  function will return the tuple (command, idleSession).  If the idle session
+  timeout is set to IDLE_TIMEOUT_NONE (default), the idleSession will always 
+  be false and this function will not return until the user has typed a command
+  and pressed return.  Otherwise this function will set the idleSession value
+  to true and return if no user activity is detected for the idleSessionTimeout 
+  period
+  """
   return (__getInput(prompt_))
-enddef
+_enddef
 
 #################################################################################
 #
@@ -187,8 +240,18 @@ enddef
 #
 #################################################################################
 def isSubString(string1_, string2_, minMatchLength_ = 0):
+  """
+  This function will return True if string1 is a substring of string2 at 
+  position 0.  If the minMatchLength is 0, then it will compare up to the
+  length of string1.  If the minMatchLength > 0, it will require a minimum
+  of that many characters to match.  A string that is longer than the min
+  match length must still match for the remaining characters, e.g. with a
+  minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
+  will match, 'quix' or 'uit' will not match.  This function is useful for 
+  wildcard matching.
+  """
   return (__isSubString(string1_, string2_, minMatchLength_))
-enddef
+_enddef
 
 #################################################################################
 #
@@ -203,51 +266,51 @@ enddef
 #################################################################################
 #################################################################################
 def __setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_):
-  global gInFd
-  global gOutFd
-  global gTcpNegotiate
-  global gSerialType
-  gInFd = inFd_
-  gOutFd = outFd_
-  gSerialType = serialType_
+  global _gInFd
+  global _gOutFd
+  global _gTcpNegotiate
+  global _gSerialType
+  _gInFd = inFd_
+  _gOutFd = outFd_
+  _gSerialType = serialType_
   __setIdleTimeout(idleTimeout_)
   # if a socket serial device, setup for telnet client control
-  if (gSerialType == SOCKET):
-    __write(gTcpNegotiate)
-    gInFd.recv(len(gTcpNegotiate))
-  endif
-enddef
+  if (_gSerialType == SOCKET):
+    __write(_gTcpNegotiate)
+    _gInFd.recv(len(_gTcpNegotiate))
+  _endif
+_enddef
 
 #################################################################################
 #################################################################################
 def __setIdleTimeout(idleTimeout_):
-  global gIdleTimeout
-  gIdleTimeout = idleTimeout_
-enddef
+  global _gIdleTimeout
+  _gIdleTimeout = idleTimeout_
+_enddef
 
 #################################################################################
 #################################################################################
 def __addTabCompletion(keyword_):
-  global gTabCompletions
-  global gMaxTabCompletionKeywordLength
-  global gMaxCompletionsPerLine
-  for keyword in gTabCompletions:
+  global _gTabCompletions
+  global _gMaxTabCompletionKeywordLength
+  global _gMaxCompletionsPerLine
+  for keyword in _gTabCompletions:
     if (keyword == keyword_):
       # duplicate keyword found, return
       return
-    endif
-  endfor
-  if (len(keyword_) > gMaxTabCompletionKeywordLength):
-    gMaxTabCompletionKeywordLength = len(keyword_)+3
-    gMaxCompletionsPerLine = 80/gMaxTabCompletionKeywordLength
-  endif
-  gTabCompletions.append(keyword_.strip())
-enddef
+    _endif
+  _endfor
+  if (len(keyword_) > _gMaxTabCompletionKeywordLength):
+    _gMaxTabCompletionKeywordLength = len(keyword_)+3
+    _gMaxCompletionsPerLine = 80/_gMaxTabCompletionKeywordLength
+  _endif
+  _gTabCompletions.append(keyword_.strip())
+_enddef
 
 #################################################################################
 #################################################################################
 def __isSubString(string1_, string2_, minMatchLength_):
-  if (string1_ == NULL):
+  if (string1_ == _NULL):
     return (False)
   elif (len(string1_) > len(string2_)):
     return (False)
@@ -257,21 +320,21 @@ def __isSubString(string1_, string2_, minMatchLength_):
     return (string1_ == string2_[:len(string1_)])
   else:
     return (string1_[:minMatchLength_] == string2_[:minMatchLength_])
-  endif
-enddef
+  _endif
+_enddef
 
 #################################################################################
 #################################################################################
 def __findTabCompletions(keyword_):
-  global gTabCompletions
+  global _gTabCompletions
   matchList = []
-  for keyword in gTabCompletions:
+  for keyword in _gTabCompletions:
     if (isSubString(keyword_, keyword)):
       matchList.append(keyword)
-    endif
-  endfor
+    _endif
+  _endfor
   return (matchList)
-enddef
+_enddef
 
 #################################################################################
 #################################################################################
@@ -284,48 +347,48 @@ def __findLongestMatch(matchList_, command_):
       for keyword in matchList_:
          if ((charPos >= len(keyword)) or (char != keyword[charPos])):
            return (string)
-         endif
-      endfor
+         _endif
+      _endfor
       string += char
       charPos += 1
     else:
       return (string)
-    endif
-  endwhile
-enddef
+    _endif
+  _endwhile
+_enddef
 
 #################################################################################
 #################################################################################
 def __showTabCompletions(completionList_, prompt_):
-  global gMaxTabCompletionKeywordLength
-  global gMaxCompletionsPerLine
+  global _gMaxTabCompletionKeywordLength
+  global _gMaxCompletionsPerLine
   if (len(completionList_) > 0):
     __write("\n")
     numPrinted = 0
     for keyword in completionList_:
-      __write("%-*s" % (gMaxTabCompletionKeywordLength, keyword))
+      __write("%-*s" % (_gMaxTabCompletionKeywordLength, keyword))
       numPrinted += 1
-      if ((numPrinted == gMaxCompletionsPerLine) and (numPrinted < len(completionList_))):
+      if ((numPrinted == _gMaxCompletionsPerLine) and (numPrinted < len(completionList_))):
         __write("\n")
         numPrinted = 0
-      endif
-    endfor
+      _endif
+    _endfor
     __write("\n"+prompt_)
-  endif
-enddef
+  _endif
+_enddef
 
 #################################################################################
 #################################################################################
 def __setTabStyle(tabStyle_):
-  global gTabStyle
-  gTabStyle = tabStyle_
-enddef
+  global _gTabStyle
+  _gTabStyle = tabStyle_
+_enddef
 
 #################################################################################
 #################################################################################
 def __clearLine(cursorPos_, command_):
   __write("\b"*cursorPos_ + " "*len(command_) + "\b"*(len(command_)))
-enddef
+_enddef
 
 #################################################################################
 #################################################################################
@@ -333,9 +396,9 @@ def __beginningOfLine(cursorPos_, command_):
   if (cursorPos_ > 0):
     cursorPos_ = 0
     __write("\b"*len(command_))
-  endif
+  _endif
   return (cursorPos_)
-enddef
+_enddef
 
 #################################################################################
 #################################################################################
@@ -343,37 +406,37 @@ def __endOfLine(cursorPos_, command_):
   if (cursorPos_ < len(command_)):
     __write(command_[cursorPos_:])
     cursorPos_ = len(command_)
-  endif
+  _endif
   return (cursorPos_)
-enddef
+_enddef
 
 #################################################################################
 #################################################################################
 def __killLine(cursorPos_, command_):
   __clearLine(cursorPos_, command_)
-  command_ = NULL
+  command_ = _NULL
   cursorPos_ = 0
   return (cursorPos_, command_)
-enddef
+_enddef
 
 #################################################################################
 #################################################################################
 def __showCommand(command_):
   __write(command_)
   return (len(command_), command_)
-enddef
+_enddef
 
 #################################################################################
 #################################################################################
 def __getInput(prompt_):
-  global gCommandHistory
-  global gCommandHistoryPos
-  global gTabCompletions
-  global gTabStyle
-  global gOutFd
+  global _gCommandHistory
+  global _gCommandHistoryPos
+  global _gTabCompletions
+  global _gTabStyle
+  global _gOutFd
   inEsc = False
-  esc = NULL
-  command = NULL
+  esc = _NULL
+  command = _NULL
   cursorPos = 0
   tabCount = 0
   tabCompletions = []
@@ -383,52 +446,52 @@ def __getInput(prompt_):
     # check for idleSession timeout
     if (idleSession == True):
       return (command, True)
-    endif
+    _endif
     if (ord(char) != 9):
       # something other than TAB typed, clear out our tabCount
       tabCount = 0
-    endif
+    _endif
     #print ord(char)
     if (inEsc == True):
       if (esc == '['):
         if (char == 'A'):
           # up-arrow key
-          if (gCommandHistoryPos > 0):
-            gCommandHistoryPos -= 1
+          if (_gCommandHistoryPos > 0):
+            _gCommandHistoryPos -= 1
             __clearLine(cursorPos, command)
-            (cursorPos, command) = __showCommand(gCommandHistory[gCommandHistoryPos])
-          endif
+            (cursorPos, command) = __showCommand(_gCommandHistory[_gCommandHistoryPos])
+          _endif
           inEsc = False
-          esc = NULL
+          esc = _NULL
         elif (char == 'B'):
           # down-arrow key
-          if (gCommandHistoryPos < len(gCommandHistory)-1):
-            gCommandHistoryPos += 1
+          if (_gCommandHistoryPos < len(_gCommandHistory)-1):
+            _gCommandHistoryPos += 1
             __clearLine(cursorPos, command)
-            (cursorPos, command) = __showCommand(gCommandHistory[gCommandHistoryPos])
+            (cursorPos, command) = __showCommand(_gCommandHistory[_gCommandHistoryPos])
           else:
             # kill whole line
-            gCommandHistoryPos = len(gCommandHistory)
+            _gCommandHistoryPos = len(_gCommandHistory)
             (cursorPos, command) = __killLine(cursorPos, command)
-          endif
+          _endif
           inEsc = False
-          esc = NULL
+          esc = _NULL
         elif (char == 'C'):
           # right-arrow key
           if (cursorPos < len(command)):
             __write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
             cursorPos += 1
-          endif
+          _endif
           inEsc = False
-          esc = NULL
+          esc = _NULL
         elif (char == 'D'):
           # left-arrow key
           if (cursorPos > 0):
             cursorPos -= 1
             __write("\b")
-          endif
+          _endif
           inEsc = False
-          esc = NULL
+          esc = _NULL
         elif (char == '1'):
           print "home2"
           cursorPos = __beginningOfLine(cursorPos, command)
@@ -439,13 +502,13 @@ def __getInput(prompt_):
           if (cursorPos < len(command)):
             __write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
             command = command[:cursorPos] + command[cursorPos+1:]
-          endif
+          _endif
           inEsc = False
-          esc = NULL
+          esc = _NULL
         elif (char == '4'):
           print "end2"
           cursorPos = __endOfLine(cursorPos, command)
-        endif
+        _endif
       elif (esc == 'O'):
         if (char == 'H'):
           # home key, go to beginning of line
@@ -453,14 +516,14 @@ def __getInput(prompt_):
         elif (char == 'F'):
           # end key, go to end of line
           cursorPos = __endOfLine(cursorPos, command)
-        endif
+        _endif
         inEsc = False
-        esc = NULL
+        esc = _NULL
       elif ((char == '[') or (char == 'O')):
         esc = char
       else:
         inEsc = False
-      endif
+      _endif
     elif ((ord(char) >= 32) and (ord(char) < 127)):
       # printable single character, add it to our command,
       command = command[:cursorPos] + char + command[cursorPos:]
@@ -471,13 +534,13 @@ def __getInput(prompt_):
       __write("\n")
       if (len(command) > 0):
         # add command to our command history
-        gCommandHistory.append(command)
-        gCommandHistoryPos = len(gCommandHistory)
+        _gCommandHistory.append(command)
+        _gCommandHistoryPos = len(_gCommandHistory)
         # return command, no idleSession timeout
         return (command.strip(), False)
       else:
         __write(prompt_)
-      endif
+      _endif
     elif (ord(char) == 11):
       # kill to eol
       __write(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
@@ -491,7 +554,7 @@ def __getInput(prompt_):
     elif ((ord(char) == 9) and ((len(command) == 0) or (len(command.split()) == 1))):
       # tab character, print out any completions, we only do tabbing on the first keyword
       tabCount += 1
-      if (gTabStyle == FAST_TAB):
+      if (_gTabStyle == FAST_TAB):
         if (tabCount == 1):
           # this tabbing method is a little different than the standard
           # readline or bash shell tabbing, we always trigger on a single
@@ -499,7 +562,7 @@ def __getInput(prompt_):
           # multiple matches
           if (len(command) == 0):
             # nothing typed, just TAB, show all registered TAB completions
-            __showTabCompletions(gTabCompletions, prompt_)
+            __showTabCompletions(_gTabCompletions, prompt_)
           else:
             # partial word typed, double TAB, show all possible completions
             matchList = __findTabCompletions(command)
@@ -513,20 +576,20 @@ def __getInput(prompt_):
               __clearLine(cursorPos, command)
               (cursorPos, command) = __showCommand(__findLongestMatch(matchList, command))
               __showTabCompletions(matchList, prompt_+command)
-            endif
-          endif
-        endif
+            _endif
+          _endif
+        _endif
       else:  # BASH_TAB
         # this code below implements the more standard readline/bash double tabbing method 
         if (tabCount == 2):
           if (len(command) == 0):
             # nothing typed, just a double TAB, show all registered TAB completions
-            __showTabCompletions(gTabCompletions, prompt_)
+            __showTabCompletions(_gTabCompletions, prompt_)
           else:
             # partial word typed, double TAB, show all possible completions
             __showTabCompletions(__findTabCompletions(command), prompt_+command)
             tabCount = 0
-          endif
+          _endif
         elif ((tabCount == 1) and (len(command) > 0)):
           # partial word typed, single TAB, fill out as much
           #  as we can and show any possible other matches
@@ -540,19 +603,19 @@ def __getInput(prompt_):
             # multiple completions, find the longest match and show up to that
             __clearLine(cursorPos, command)
             (cursorPos, command) = __showCommand(__findLongestMatch(matchList, command))
-          endif
+          _endif
         elif (len(command) > 0):
           # TAB count > 2 with command typed, reset TAB count
           tabCount = 0
-        endif
-      endif
+        _endif
+      _endif
     elif (ord(char) == 127):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
         __write("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
         command = command[:cursorPos-1] + command[cursorPos:]
         cursorPos -= 1
-      endif
+      _endif
     elif (ord(char) == 1):
       # home, go to beginning of line
       cursorPos = __beginningOfLine(cursorPos, command)
@@ -568,76 +631,76 @@ def __getInput(prompt_):
       #__write("\nchar value: %d" % ord(char))
       #__write("\n"+prompt_)
       None
-    endif
-  endwhile
-enddef
+    _endif
+  _endwhile
+_enddef
 
 #################################################################################
 #################################################################################
 def __write(string_):
-  global gOutFd
-  global gSerialType
-  if (gSerialType == TTY):
+  global _gOutFd
+  global _gSerialType
+  if (_gSerialType == TTY):
     # serial terminal control
-    gOutFd.write(string_)
-    gOutFd.flush()
+    _gOutFd.write(string_)
+    _gOutFd.flush()
   else:
     # TCP socket with telnet client
-    string = NULL
+    string = _NULL
     for char in string_:
       # need to insert carriage return every place we find a newline
       if (char == "\n"):
         string += "\r\n"
       else:
         string += char
-      endif
-    endfor
-    gOutFd.send(string)
-  endif
-enddef
+      _endif
+    _endfor
+    _gOutFd.send(string)
+  _endif
+_enddef
 
 #################################################################################
 #################################################################################
 def __getChar():
-  global gInFd
-  global gSerialType
-  global gIdleTimeout
-  char = NULL
-  if (gSerialType == TTY):
+  global _gInFd
+  global _gSerialType
+  global _gIdleTimeout
+  char = _NULL
+  if (_gSerialType == TTY):
     # serial terminal control
-    oldSettings = termios.tcgetattr(gInFd)
+    oldSettings = termios.tcgetattr(_gInFd)
     try:
-      tty.setraw(gInFd)
-      if (gIdleTimeout > 0):
-        inputready, outputready, exceptready = select.select([gInFd], [], [], gIdleTimeout)
+      tty.setraw(_gInFd)
+      if (_gIdleTimeout > 0):
+        inputready, outputready, exceptready = select.select([_gInFd], [], [], _gIdleTimeout)
         if (len(inputready) > 0):
-          char = gInFd.read(1)
+          char = _gInFd.read(1)
         else:
           __write("\r\nIdle session timeout\r\n");
           return (char, True)
-        endif
+        _endif
       else:
-        char = gInFd.read(1)
-      endif
+        char = _gInFd.read(1)
+      _endif
     finally:
-      termios.tcsetattr(gInFd, termios.TCSADRAIN, oldSettings)
+      termios.tcsetattr(_gInFd, termios.TCSADRAIN, oldSettings)
   else:
     # TCP socket with telnet client
-    if (gIdleTimeout > 0):
-      inputready, outputready, exceptready = select.select([gInFd], [], [], gIdleTimeout)
+    if (_gIdleTimeout > 0):
+      inputready, outputready, exceptready = select.select([_gInFd], [], [], _gIdleTimeout)
       if (len(inputready) > 0):
-        char = gInFd.recv(1)
+        char = _gInFd.recv(1)
       else:
         __write("\nIdle session timeout\n");
         return (char, True)
-      endif
+      _endif
     else:
-      char = gInFd.recv(1)
-    endif
-  endif
+      char = _gInFd.recv(1)
+    _endif
+  _endif
   # return char, no idle timeout
   return (char, False)
-enddef
+_enddef
 
 #################################################################################
 #
@@ -646,16 +709,16 @@ enddef
 #################################################################################
 
 # python does not have a native null string identifier, so create one
-NULL = ""
+_NULL = ""
 
-gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
-gIdleTimeout = IDLE_TIMEOUT_NONE
-gSerialType = TTY
-gInFd = sys.stdin
-gOutFd = sys.stdout
-gTabCompletions = []
-gMaxTabCompletionKeywordLength = 0
-gMaxCompletionsPerLine = 0
-gCommandHistory = []
-gCommandHistoryPos = 0
-gTabStyle = FAST_TAB
+_gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
+_gIdleTimeout = IDLE_TIMEOUT_NONE
+_gSerialType = TTY
+_gInFd = sys.stdin
+_gOutFd = sys.stdout
+_gTabCompletions = []
+_gMaxTabCompletionKeywordLength = 0
+_gMaxCompletionsPerLine = 0
+_gCommandHistory = []
+_gCommandHistoryPos = 0
+_gTabStyle = FAST_TAB

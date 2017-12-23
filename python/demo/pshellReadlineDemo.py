@@ -69,82 +69,85 @@ enddef
 # start of main program
 #
 ##############################
+if (__name__ == '__main__'):
 
-if (len(sys.argv) > 4):
-  showUsage()
-endif
-
-serialType = PshellReadline.TTY
-
-for arg in sys.argv[1:]:
-  if (arg == "-bash"):
-    PshellReadline.setTabStyle(PshellReadline.BASH_TAB)
-  elif (arg == "-fast"):
-    PshellReadline.setTabStyle(PshellReadline.FAST_TAB)
-  elif (arg == "-tty"):
-    serialType = PshellReadline.TTY
-  elif (arg == "-socket"):
-    serialType = PshellReadline.SOCKET
-  elif (arg == "-h"):
-    showUsage()
-  elif (arg.isdigit()):
-    PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*int(arg))
-  else:
+  if (len(sys.argv) > 4):
     showUsage()
   endif
-endfor
 
-# add some keywords for TAB completion, the completions
-# only apply to the first keyword (i.e. up to the first
-# whitespace) of a a given command
-PshellReadline.addTabCompletion("quit")
-PshellReadline.addTabCompletion("help")
-PshellReadline.addTabCompletion("hello")
-PshellReadline.addTabCompletion("world")
-PshellReadline.addTabCompletion("enhancedUsage")
-PshellReadline.addTabCompletion("keepAlive")
-PshellReadline.addTabCompletion("pshellAggregatorDemo")
-PshellReadline.addTabCompletion("pshellControlDemo")
-PshellReadline.addTabCompletion("pshellReadlineDemo")
-PshellReadline.addTabCompletion("pshellServerDemo")
-PshellReadline.addTabCompletion("myComm")
-PshellReadline.addTabCompletion("myCommand123")
-PshellReadline.addTabCompletion("myCommand456")
-PshellReadline.addTabCompletion("myCommand789")
+  serialType = PshellReadline.TTY
 
-# socket serial type requested, setup our TCP server socket
-# and pass the connected file descriptors to our PshellReadline
-# module
-if (serialType == PshellReadline.SOCKET):
-  
-  # Create a TCP/IP socket
-  sockFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  sockFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-  
-  # Bind the socket to the port
-  sockFd.bind((NULL, 9005))
-  
-  # Listen for incoming connections
-  sockFd.listen(1)
-  
-  # Wait for a connection
-  print "waiting for a connection on port 9005, use 'telnet localhost 9005' to connect"
-  connectFd, clientAddr = sockFd.accept()
-  print "connection accepted"
+  for arg in sys.argv[1:]:
+    if (arg == "-bash"):
+      PshellReadline.setTabStyle(PshellReadline.BASH_TAB)
+    elif (arg == "-fast"):
+      PshellReadline.setTabStyle(PshellReadline.FAST_TAB)
+    elif (arg == "-tty"):
+      serialType = PshellReadline.TTY
+    elif (arg == "-socket"):
+      serialType = PshellReadline.SOCKET
+    elif (arg == "-h"):
+      showUsage()
+    elif (arg.isdigit()):
+      PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*int(arg))
+    else:
+      showUsage()
+    endif
+  endfor
 
-  # set our connected file descriptors and serial type
-  PshellReadline.setFileDescriptors(connectFd, connectFd, PshellReadline.SOCKET)
+  # add some keywords for TAB completion, the completions
+  # only apply to the first keyword (i.e. up to the first
+  # whitespace) of a a given command
+  PshellReadline.addTabCompletion("quit")
+  PshellReadline.addTabCompletion("help")
+  PshellReadline.addTabCompletion("hello")
+  PshellReadline.addTabCompletion("world")
+  PshellReadline.addTabCompletion("enhancedUsage")
+  PshellReadline.addTabCompletion("keepAlive")
+  PshellReadline.addTabCompletion("pshellAggregatorDemo")
+  PshellReadline.addTabCompletion("pshellControlDemo")
+  PshellReadline.addTabCompletion("pshellReadlineDemo")
+  PshellReadline.addTabCompletion("pshellServerDemo")
+  PshellReadline.addTabCompletion("myComm")
+  PshellReadline.addTabCompletion("myCommand123")
+  PshellReadline.addTabCompletion("myCommand456")
+  PshellReadline.addTabCompletion("myCommand789")
+
+  # socket serial type requested, setup our TCP server socket
+  # and pass the connected file descriptors to our PshellReadline
+  # module
+  if (serialType == PshellReadline.SOCKET):
   
-  # shutdown our original listening socket
-  sockFd.shutdown(socket.SHUT_RDWR);
+    # Create a TCP/IP socket
+    sockFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sockFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  
+    # Bind the socket to the port
+    sockFd.bind((NULL, 9005))
+  
+    # Listen for incoming connections
+    sockFd.listen(1)
+  
+    # Wait for a connection
+    print "waiting for a connection on port 9005, use 'telnet localhost 9005' to connect"
+    connectFd, clientAddr = sockFd.accept()
+    print "connection accepted"
+
+    # set our connected file descriptors and serial type
+    PshellReadline.setFileDescriptors(connectFd, connectFd, PshellReadline.SOCKET)
+  
+    # shutdown our original listening socket
+    sockFd.shutdown(socket.SHUT_RDWR);
+
+  endif
+
+  command = NULL
+  idleSession = False
+  while (not idleSession and not PshellReadline.isSubString(command, "quit")):
+    (command, idleSession) = PshellReadline.getInput("prompt> ")
+    if (not idleSession and not PshellReadline.isSubString(command, "quit")):
+      PshellReadline.write("command: '%s'\n" % command)
+    endif
+  endwhile
 
 endif
-
-command = NULL
-idleSession = False
-while (not idleSession and not PshellReadline.isSubString(command, "quit")):
-  (command, idleSession) = PshellReadline.getInput("prompt> ")
-  if (not idleSession and not PshellReadline.isSubString(command, "quit")):
-    PshellReadline.write("command: '%s'\n" % command)
-  endif
-endwhile

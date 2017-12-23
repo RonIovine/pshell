@@ -67,35 +67,35 @@ def configureLocalServer():
 
   # need to set the first arg position to 0 so we can pass
   # through the exact command to our remote server for dispatching
-  PshellServer.gFirstArgPos = 0
+  PshellServer._gFirstArgPos = 0
   # we tell the local server not to add the 'batch' command because
   # they are already added in the remote UDP/UNIX servers
-  PshellServer.gAddBatch = False
+  PshellServer._gAddBatch = False
   # supress the automatic invalid arg count messag from the PshellControl.py
   # module so we can display the returned usage
-  PshellControl.gSupressInvalidArgCountMessage = True
+  PshellControl._gSupressInvalidArgCountMessage = True
   prompt = PshellControl.__extractPrompt(gSid)
   if (len(prompt) > 0):
-    PshellServer.gPromptOverride = prompt
+    PshellServer._gPromptOverride = prompt
   endif
   title = PshellControl.__extractTitle(gSid)
   if (len(title) > 0):
-    PshellServer.gTitleOverride = title
+    PshellServer._gTitleOverride = title
   endif
   serverName = PshellControl.__extractName(gSid)
   if (len(serverName) > 0):
-    PshellServer.gServerNameOverride = serverName
+    PshellServer._gServerNameOverride = serverName
   endif
   banner = PshellControl.__extractBanner(gSid)
   if (len(banner) > 0):
-    PshellServer.gBannerOverride = banner
+    PshellServer._gBannerOverride = banner
   endif
   if (gPort == PshellControl.UNIX):
-    PshellServer.gServerTypeOverride = PshellControl.UNIX
+    PshellServer._gServerTypeOverride = PshellControl.UNIX
   elif (gRemoteServer == "localhost"):
-    PshellServer.gServerTypeOverride = "127.0.0.1"
+    PshellServer._gServerTypeOverride = "127.0.0.1"
   else:
-    PshellServer.gServerTypeOverride = gRemoteServer
+    PshellServer._gServerTypeOverride = gRemoteServer
   endif
 enddef
 
@@ -157,45 +157,48 @@ enddef
 # start of main program
 #
 ##############################
-
-if ((len(sys.argv) < 3) or ((len(sys.argv)) > 4)):
-  showUsage()
-endif
-
-timeout = 5
-
-for arg in sys.argv[3:]:
-  if ("-t" in arg):
-    timeout = int(arg[2:])
-  else:
+if (__name__ == '__main__'):
+  
+  if ((len(sys.argv) < 3) or ((len(sys.argv)) > 4)):
     showUsage()
   endif
-endfor
 
-gRemoteServer = sys.argv[1]
-gPort = sys.argv[2]
+  timeout = 5
 
-# connect to our remote server via the control client
-gSid = PshellControl.connectServer("pshellClient", gRemoteServer, gPort, PshellControl.ONE_SEC*timeout)
+  for arg in sys.argv[3:]:
+    if ("-t" in arg):
+      timeout = int(arg[2:])
+    else:
+      showUsage()
+    endif
+  endfor
 
-# extract all the commands from our remote server and add then to our local server
-commandList = PshellControl.extractCommands(gSid)
-commandList = commandList.split("\n")
-for command in commandList:
-  splitCommand = command.split("-")
-  if (len(splitCommand ) >= 2):
-    commandName = splitCommand[0].strip()
-    description = splitCommand[1].strip()
-    PshellServer.addCommand(comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+  gRemoteServer = sys.argv[1]
+  gPort = sys.argv[2]
+
+  # connect to our remote server via the control client
+  gSid = PshellControl.connectServer("pshellClient", gRemoteServer, gPort, PshellControl.ONE_SEC*timeout)
+
+  # extract all the commands from our remote server and add then to our local server
+  commandList = PshellControl.extractCommands(gSid)
+  commandList = commandList.split("\n")
+  for command in commandList:
+    splitCommand = command.split("-")
+    if (len(splitCommand ) >= 2):
+      commandName = splitCommand[0].strip()
+      description = splitCommand[1].strip()
+      PshellServer.addCommand(comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+    endif
   endif
+
+  # configure our local server to interact with a remote server, we override the display settings
+  # (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
+  # a remote server
+  configureLocalServer()
+
+  # now start our local server which will interact with a remote server via the pshell control machanism
+  PshellServer.startServer("pshellClient", PshellServer.LOCAL, PshellServer.BLOCKING)
+
+  cleanupAndExit()
+  
 endif
-
-# configure our local server to interact with a remote server, we override the display settings
-# (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
-# a remote server
-configureLocalServer()
-
-# now start our local server which will interact with a remote server via the pshell control machanism
-PshellServer.startServer("pshellClient", PshellServer.LOCAL, PshellServer.BLOCKING)
-
-cleanupAndExit()

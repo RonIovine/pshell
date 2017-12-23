@@ -103,7 +103,7 @@ then
     echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PSHELL_INSTALL/python:\$PATH >> .pshellrc
     echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> .pshellrc
     echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/lib:\$LD_LIBRARY_PATH >> .pshellrc
-    echo export PYTHONPATH=\$PSHELL_INSTALL/python:\$PYTHONPATH >> .pshellrc
+    echo export PYTHONPATH=\$PSHELL_INSTALL/python:\$PSHELL_INSTALL/python/demo:\$PYTHONPATH >> .pshellrc
     echo "Local install environment setup in '.pshellrc'"
     echo "To source enviromnent in current shell run 'source .pshellrc' at the command line"
     if [ $# -eq 2 ]

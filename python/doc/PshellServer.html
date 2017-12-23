@@ -1,0 +1,118 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module PshellServer</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>PshellServer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/riovine/tools/pshell/python/PshellServer.py">/home/riovine/tools/pshell/python/PshellServer.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;API&nbsp;provides&nbsp;the&nbsp;Process&nbsp;Specific&nbsp;Embedded&nbsp;Command&nbsp;Line&nbsp;Shell&nbsp;(PSHELL)<br>
+user&nbsp;API&nbsp;functionality.&nbsp;&nbsp;It&nbsp;provides&nbsp;the&nbsp;ability&nbsp;for&nbsp;a&nbsp;client&nbsp;program&nbsp;to<br>
+register&nbsp;functions&nbsp;that&nbsp;can&nbsp;be&nbsp;invoked&nbsp;via&nbsp;a&nbsp;command&nbsp;line&nbsp;user&nbsp;interface.<br>
+There&nbsp;are&nbsp;several&nbsp;ways&nbsp;to&nbsp;invoke&nbsp;these&nbsp;embedded&nbsp;functions&nbsp;based&nbsp;on&nbsp;how&nbsp;the&nbsp;<br>
+pshell&nbsp;server&nbsp;is&nbsp;configured,&nbsp;which&nbsp;is&nbsp;described&nbsp;in&nbsp;documentation&nbsp;further&nbsp;down&nbsp;<br>
+in&nbsp;this&nbsp;file.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;provides&nbsp;the&nbsp;same&nbsp;functionality&nbsp;as&nbsp;the&nbsp;PshellServer.h&nbsp;API&nbsp;and<br>
+the&nbsp;libpshell-server&nbsp;linkable&nbsp;'C'&nbsp;library,&nbsp;but&nbsp;implemented&nbsp;as&nbsp;a&nbsp;Python&nbsp;module.&nbsp;&nbsp;<br>
+It&nbsp;supports&nbsp;all&nbsp;the&nbsp;server&nbsp;types&nbsp;as&nbsp;the&nbsp;corresponding&nbsp;'C'&nbsp;impelmentation,&nbsp;TCP,&nbsp;<br>
+UDP,&nbsp;UNIX&nbsp;and&nbsp;LOCAL&nbsp;server&nbsp;types&nbsp;are&nbsp;all&nbsp;supported.&nbsp;&nbsp;Applications&nbsp;using&nbsp;this&nbsp;<br>
+module&nbsp;can&nbsp;be&nbsp;controlled&nbsp;via&nbsp;the&nbsp;pshell&nbsp;UDP/UNIX&nbsp;stand-alone&nbsp;'C'&nbsp;client&nbsp;program&nbsp;<br>
+or&nbsp;via&nbsp;the&nbsp;PshellControl.h/libpshell-control&nbsp;or&nbsp;PshellControl.py&nbsp;<br>
+control&nbsp;mechanism.<br>
+&nbsp;<br>
+Functions:<br>
+&nbsp;<br>
+<a href="#-addCommand">addCommand</a>()&nbsp;--&nbsp;register&nbsp;a&nbsp;pshell&nbsp;command&nbsp;with&nbsp;the&nbsp;server<br>
+<a href="#-startServer">startServer</a>()&nbsp;--&nbsp;start&nbsp;the&nbsp;pshell&nbsp;server<br>
+<a href="#-cleanupResources">cleanupResources</a>()&nbsp;--&nbsp;release&nbsp;all&nbsp;resources&nbsp;claimed&nbsp;by&nbsp;the&nbsp;server<br>
+<a href="#-runCommand">runCommand</a>()&nbsp;--&nbsp;run&nbsp;a&nbsp;registered&nbsp;command&nbsp;from&nbsp;the&nbsp;parent&nbsp;(i.e.&nbsp;registering)&nbsp;program<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;commands&nbsp;can&nbsp;only&nbsp;be&nbsp;called&nbsp;from&nbsp;within&nbsp;the&nbsp;context&nbsp;of&nbsp;<br>
+a&nbsp;pshell&nbsp;callback&nbsp;function<br>
+&nbsp;<br>
+<a href="#-printf">printf</a>()&nbsp;--&nbsp;display&nbsp;a&nbsp;message&nbsp;from&nbsp;a&nbsp;pshell&nbsp;callback&nbsp;function&nbsp;to&nbsp;the&nbsp;client<br>
+<a href="#-flush">flush</a>()&nbsp;--&nbsp;flush&nbsp;the&nbsp;transfer&nbsp;buffer&nbsp;to&nbsp;the&nbsp;client&nbsp;(UDP/UNIX&nbsp;servers&nbsp;only)<br>
+<a href="#-wheel">wheel</a>()&nbsp;--&nbsp;spinning&nbsp;ascii&nbsp;wheel&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive<br>
+<a href="#-march">march</a>()&nbsp;--&nbsp;marching&nbsp;ascii&nbsp;character&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive<br>
+<a href="#-showUsage">showUsage</a>()&nbsp;--&nbsp;show&nbsp;the&nbsp;usage&nbsp;the&nbsp;command&nbsp;is&nbsp;registered&nbsp;with<br>
+<a href="#-isHelp">isHelp</a>()&nbsp;--&nbsp;checks&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;requested&nbsp;help&nbsp;on&nbsp;this&nbsp;command<br>
+<a href="#-isSubString">isSubString</a>()&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0<br>
+&nbsp;<br>
+&nbsp;<br>
+A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included&nbsp;<br>
+demo&nbsp;program&nbsp;pshellServerDemo.py.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PshellReadline.html">PshellReadline</a><br>
+<a href="os.html">os</a><br>
+<a href="random.html">random</a><br>
+</td><td width="25%" valign=top><a href="select.html">select</a><br>
+<a href="socket.html">socket</a><br>
+<a href="struct.html">struct</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+<a href="thread.html">thread</a><br>
+<a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-addCommand"><strong>addCommand</strong></a>(function_, command_, description_, usage_<font color="#909090">=None</font>, minArgs_<font color="#909090">=0</font>, maxArgs_<font color="#909090">=0</font>, showUsage_<font color="#909090">=True</font>)</dt><dd><tt>Register&nbsp;callback&nbsp;commands&nbsp;to&nbsp;our&nbsp;PSHELL&nbsp;server.&nbsp;&nbsp;If&nbsp;the&nbsp;command&nbsp;takes&nbsp;no<br>
+arguments,&nbsp;the&nbsp;default&nbsp;parameters&nbsp;can&nbsp;be&nbsp;provided.&nbsp;&nbsp;If&nbsp;the&nbsp;command&nbsp;takes<br>
+an&nbsp;exact&nbsp;number&nbsp;of&nbsp;parameters,&nbsp;set&nbsp;minArgs&nbsp;and&nbsp;maxArgs&nbsp;to&nbsp;be&nbsp;the&nbsp;same.&nbsp;&nbsp;If<br>
+the&nbsp;user&nbsp;wants&nbsp;the&nbsp;callback&nbsp;function&nbsp;to&nbsp;handle&nbsp;all&nbsp;help&nbsp;initiated&nbsp;usage,<br>
+set&nbsp;the&nbsp;showUsage&nbsp;parameter&nbsp;to&nbsp;False.</tt></dd></dl>
+ <dl><dt><a name="-cleanupResources"><strong>cleanupResources</strong></a>()</dt><dd><tt>Cleanup&nbsp;and&nbsp;release&nbsp;any&nbsp;system&nbsp;resources&nbsp;claimed&nbsp;by&nbsp;this&nbsp;module.&nbsp;&nbsp;This&nbsp;includes<br>
+any&nbsp;open&nbsp;socked&nbsp;handles,&nbsp;file&nbsp;descriptors,&nbsp;or&nbsp;system&nbsp;'tmp'&nbsp;files.&nbsp;&nbsp;This&nbsp;should<br>
+be&nbsp;called&nbsp;at&nbsp;program&nbsp;exit&nbsp;time&nbsp;as&nbsp;well&nbsp;as&nbsp;any&nbsp;signal&nbsp;exception&nbsp;handler&nbsp;that<br>
+results&nbsp;in&nbsp;a&nbsp;program&nbsp;termination.</tt></dd></dl>
+ <dl><dt><a name="-flush"><strong>flush</strong></a>()</dt><dd><tt>Flush&nbsp;the&nbsp;reply&nbsp;(i.e.&nbsp;display)&nbsp;buffer&nbsp;back&nbsp;to&nbsp;the&nbsp;remote&nbsp;client</tt></dd></dl>
+ <dl><dt><a name="-isHelp"><strong>isHelp</strong></a>()</dt><dd><tt>Check&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;asked&nbsp;for&nbsp;help&nbsp;on&nbsp;this&nbsp;command.&nbsp;&nbsp;Command&nbsp;must&nbsp;be&nbsp;<br>
+registered&nbsp;with&nbsp;the&nbsp;showUsage&nbsp;=&nbsp;False&nbsp;option.</tt></dd></dl>
+ <dl><dt><a name="-isSubString"><strong>isSubString</strong></a>(string1_, string2_, minMatchLength_<font color="#909090">=0</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;return&nbsp;True&nbsp;if&nbsp;string1&nbsp;is&nbsp;a&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;<br>
+position&nbsp;0.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;is&nbsp;0,&nbsp;then&nbsp;it&nbsp;will&nbsp;compare&nbsp;up&nbsp;to&nbsp;the<br>
+length&nbsp;of&nbsp;string1.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;&gt;&nbsp;0,&nbsp;it&nbsp;will&nbsp;require&nbsp;a&nbsp;minimum<br>
+of&nbsp;that&nbsp;many&nbsp;characters&nbsp;to&nbsp;match.&nbsp;&nbsp;A&nbsp;string&nbsp;that&nbsp;is&nbsp;longer&nbsp;than&nbsp;the&nbsp;min<br>
+match&nbsp;length&nbsp;must&nbsp;still&nbsp;match&nbsp;for&nbsp;the&nbsp;remaining&nbsp;charactes,&nbsp;e.g.&nbsp;with&nbsp;a<br>
+minMatchLength&nbsp;of&nbsp;2,&nbsp;'q'&nbsp;will&nbsp;not&nbsp;match&nbsp;'quit',&nbsp;but&nbsp;'qu',&nbsp;'qui'&nbsp;or&nbsp;'quit'<br>
+will&nbsp;match,&nbsp;'quix'&nbsp;will&nbsp;not&nbsp;match.&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;useful&nbsp;for&nbsp;wildcard<br>
+matching.</tt></dd></dl>
+ <dl><dt><a name="-march"><strong>march</strong></a>(string_)</dt><dd><tt>march&nbsp;a&nbsp;string&nbsp;or&nbsp;character&nbsp;keep&nbsp;alive&nbsp;across&nbsp;the&nbsp;screen</tt></dd></dl>
+ <dl><dt><a name="-printf"><strong>printf</strong></a>(message_<font color="#909090">='<font color="#c040c0">\n</font>'</font>)</dt><dd><tt>Display&nbsp;data&nbsp;back&nbsp;to&nbsp;the&nbsp;remote&nbsp;client</tt></dd></dl>
+ <dl><dt><a name="-runCommand"><strong>runCommand</strong></a>(command_)</dt><dd><tt>Run&nbsp;a&nbsp;registered&nbsp;command&nbsp;from&nbsp;within&nbsp;its&nbsp;parent&nbsp;process</tt></dd></dl>
+ <dl><dt><a name="-showUsage"><strong>showUsage</strong></a>()</dt><dd><tt>Show&nbsp;the&nbsp;command's&nbsp;registered&nbsp;usage</tt></dd></dl>
+ <dl><dt><a name="-startServer"><strong>startServer</strong></a>(serverName_, serverType_, serverMode_, hostnameOrIpAddr_<font color="#909090">=None</font>, port_<font color="#909090">=0</font>)</dt><dd><tt>Start&nbsp;our&nbsp;PSHELL&nbsp;server,&nbsp;if&nbsp;serverType&nbsp;is&nbsp;UNIX&nbsp;or&nbsp;LOCAL,&nbsp;the&nbsp;default<br>
+parameters&nbsp;can&nbsp;be&nbsp;used,&nbsp;and&nbsp;will&nbsp;be&nbsp;ignored&nbsp;if&nbsp;provided.&nbsp;&nbsp;All&nbsp;of&nbsp;these<br>
+parameters&nbsp;except&nbsp;serverMode&nbsp;can&nbsp;be&nbsp;overridden&nbsp;on&nbsp;a&nbsp;per&nbsp;serverName<br>
+basis&nbsp;via&nbsp;the&nbsp;pshell-server.conf&nbsp;config&nbsp;file.&nbsp;&nbsp;All&nbsp;commands&nbsp;in&nbsp;the<br>
+&lt;serverName&gt;.startup&nbsp;file&nbsp;will&nbsp;be&nbsp;executed&nbsp;in&nbsp;this&nbsp;function&nbsp;at&nbsp;server<br>
+startup&nbsp;time.</tt></dd></dl>
+ <dl><dt><a name="-wheel"><strong>wheel</strong></a>(string_<font color="#909090">=None</font>)</dt><dd><tt>spinning&nbsp;ascii&nbsp;wheel&nbsp;keep&nbsp;alive,&nbsp;user&nbsp;string&nbsp;string&nbsp;is&nbsp;optional</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ANYHOST</strong> = 'anyhost'<br>
+<strong>BLOCKING</strong> = 0<br>
+<strong>LOCAL</strong> = 'local'<br>
+<strong>LOCALHOST</strong> = 'localhost'<br>
+<strong>NON_BLOCKING</strong> = 1<br>
+<strong>TCP</strong> = 'tcp'<br>
+<strong>UDP</strong> = 'udp'<br>
+<strong>UNIX</strong> = 'unix'</td></tr></table>
+</body></html>

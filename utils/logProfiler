@@ -1200,81 +1200,84 @@ enddef
 # start of main program
 #
 ##############################
+if (__name__ == '__main__'):
 
-# set default command line args
-outfile = "none"
-filter = "none"
-filterParmNeeded = False
-option = gNoOption
-count = gDisplayAll
-fileFilter = gNoFilter
-functionFilter = gNoFilter
-gAppFilter = gNoFilter
-gDiffType = gValidDiffs[0]
-deltaRequested = False
+  # set default command line args
+  outfile = "none"
+  filter = "none"
+  filterParmNeeded = False
+  option = gNoOption
+  count = gDisplayAll
+  fileFilter = gNoFilter
+  functionFilter = gNoFilter
+  gAppFilter = gNoFilter
+  gDiffType = gValidDiffs[0]
+  deltaRequested = False
 
-# validate usage and create profile
-if ((len(sys.argv) < 2) or ((len(sys.argv)) == 2) and (sys.argv[1] == "-h")):
-  showUsage()
-else:
-  firstFileArg = findFirstFileArg(sys.argv)
-  if (firstFileArg < len(sys.argv)):
-    for arg in sys.argv[1:firstFileArg]:
-      if (arg in gValidOptions):
-        option = arg
-      else:
-        tokens = arg.split("=")
-        if (len(tokens) == 2):
-          filter = tokens[0].strip()
-          parm = tokens[1].strip()
-          if (filter == "file"):
-            fileFilter = parm
-          elif (filter == "app"):
-            gAppFilter = parm
-          elif (filter == "func"):
-            functionFilter = parm
-          elif (filter == "num"):
-            count = parm
-          elif (filter == "out"):
-            outfile = parm
-          elif (filter == "delta"):
-            maxTimeDelta = parm
-            deltaRequested = True
-          elif ((filter == "diff") and (parm in gValidDiffs) and ((firstFileArg+2) == len(sys.argv))):
-            gDiffType = parm
-            gDiffRequested = True
+  # validate usage and create profile
+  if ((len(sys.argv) < 2) or ((len(sys.argv)) == 2) and (sys.argv[1] == "-h")):
+    showUsage()
+  else:
+    firstFileArg = findFirstFileArg(sys.argv)
+    if (firstFileArg < len(sys.argv)):
+      for arg in sys.argv[1:firstFileArg]:
+        if (arg in gValidOptions):
+          option = arg
+        else:
+          tokens = arg.split("=")
+          if (len(tokens) == 2):
+            filter = tokens[0].strip()
+            parm = tokens[1].strip()
+            if (filter == "file"):
+              fileFilter = parm
+            elif (filter == "app"):
+              gAppFilter = parm
+            elif (filter == "func"):
+              functionFilter = parm
+            elif (filter == "num"):
+              count = parm
+            elif (filter == "out"):
+              outfile = parm
+            elif (filter == "delta"):
+              maxTimeDelta = parm
+              deltaRequested = True
+            elif ((filter == "diff") and (parm in gValidDiffs) and ((firstFileArg+2) == len(sys.argv))):
+              gDiffType = parm
+              gDiffRequested = True
+            else:
+              showUsage()
+            endif
           else:
             showUsage()
           endif
-        else:
-          showUsage()
-        endif
-      endif
-    endfor
-    if (gDiffRequested):
-      # diff two profiles
-      logfile1 = sys.argv[firstFileArg]
-      logfile2 = sys.argv[firstFileArg+1]
-      if ((createProfile(logfile1, gProfiles1)) and (createProfile(logfile2, gProfiles2))):
-        diffProfiles(gProfiles1, gProfiles2)
-        showProfile("Diff: %s->%s" % (logfile1, logfile2), outfile, option, count, fileFilter, functionFilter, gProfilesDiff)
-      endif
-    elif (deltaRequested):
-      # find all areas that exceed the specified time delta
-      if (createDelta(sys.argv[firstFileArg], float(maxTimeDelta))):
-        showDelta(sys.argv[firstFileArg], outfile, option, count, float(maxTimeDelta))
-      endif
-    else:
-      # normal profile(s)
-      for arg in sys.argv[firstFileArg:]:
-        logfile = arg
-        gProfiles1 = []
-        if (createProfile(logfile, gProfiles1)):
-          showProfile(logfile, outfile, option, count, fileFilter, functionFilter, gProfiles1)
         endif
       endfor
+      if (gDiffRequested):
+        # diff two profiles
+        logfile1 = sys.argv[firstFileArg]
+        logfile2 = sys.argv[firstFileArg+1]
+        if ((createProfile(logfile1, gProfiles1)) and (createProfile(logfile2, gProfiles2))):
+          diffProfiles(gProfiles1, gProfiles2)
+          showProfile("Diff: %s->%s" % (logfile1, logfile2), outfile, option, count, fileFilter, functionFilter, gProfilesDiff)
+        endif
+      elif (deltaRequested):
+        # find all areas that exceed the specified time delta
+        if (createDelta(sys.argv[firstFileArg], float(maxTimeDelta))):
+          showDelta(sys.argv[firstFileArg], outfile, option, count, float(maxTimeDelta))
+        endif
+      else:
+        # normal profile(s)
+        for arg in sys.argv[firstFileArg:]:
+          logfile = arg
+          gProfiles1 = []
+          if (createProfile(logfile, gProfiles1)):
+            showProfile(logfile, outfile, option, count, fileFilter, functionFilter, gProfiles1)
+          endif
+        endfor
+      endif
+    else:
+      showUsage()
     endif
-  else:
-    showUsage()
   endif
-endif
+
+endif 

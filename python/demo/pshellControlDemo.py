@@ -74,43 +74,46 @@ enddef
 # start of main program
 #
 ##############################
+if (__name__ == '__main__'):
 
-if ((len(sys.argv) < 3) or ((len(sys.argv)) > 5)):
-  showUsage()
-endif
-
-extract = False
-timeout = 1000
-command = NULL
-
-for arg in sys.argv[3:]:
-  if ("-t" in arg):
-    timeout = int(arg[2:])
-  elif (arg == "-extract"):
-    extract = True
-  else:
+  if ((len(sys.argv) < 3) or ((len(sys.argv)) > 5)):
     showUsage()
   endif
-endfor
 
-#print "server: %s, port: %s, timeout: %s, extract: %d" % (sys.argv[1], sys.argv[2], timeout, extract)
+  extract = False
+  timeout = 1000
+  command = NULL
 
-sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
-
-command = NULL
-while (not PshellReadline.isSubString(command, "quit")):
-  (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
-  if (not PshellReadline.isSubString(command, "quit")):
-    if ((command.split()[0] == "?") or (command.split()[0] == "help")):
-      sys.stdout.write(PshellControl.extractCommands(sid))
-    elif (extract):
-      results = PshellControl.sendCommand3(sid, command)
-      print "%d bytes extracted, results:" % len(results)
-      sys.stdout.write("%s" % results)
+  for arg in sys.argv[3:]:
+    if ("-t" in arg):
+      timeout = int(arg[2:])
+    elif (arg == "-extract"):
+      extract = True
     else:
-      PshellControl.sendCommand1(sid, command)
+      showUsage()
     endif
-  endif
-endwhile
+  endfor
 
-PshellControl.disconnectServer(sid)
+  #print "server: %s, port: %s, timeout: %s, extract: %d" % (sys.argv[1], sys.argv[2], timeout, extract)
+
+  sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
+
+  command = NULL
+  while (not PshellReadline.isSubString(command, "quit")):
+    (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
+    if (not PshellReadline.isSubString(command, "quit")):
+      if ((command.split()[0] == "?") or (command.split()[0] == "help")):
+        sys.stdout.write(PshellControl.extractCommands(sid))
+      elif (extract):
+        results = PshellControl.sendCommand3(sid, command)
+        print "%d bytes extracted, results:" % len(results)
+        sys.stdout.write("%s" % results)
+      else:
+        PshellControl.sendCommand1(sid, command)
+      endif
+    endif
+  endwhile
+
+  PshellControl.disconnectServer(sid)
+
+endif 

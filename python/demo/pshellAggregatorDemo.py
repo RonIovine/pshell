@@ -124,45 +124,48 @@ enddef
 # start of main program
 #
 ##############################
+if (__name__ == '__main__'):
 
-# default ports
-pshellServerDemoPort = "6001"
-traceFilterDemoPort = "6002"
+  # default ports
+  pshellServerDemoPort = "6001"
+  traceFilterDemoPort = "6002"
 
-# verify usage
-if ((len(sys.argv) != 2) and (len(sys.argv) != 4)):
-    print "Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]"
-    exit (0)
-elif ((len(sys.argv) == 2) and (sys.argv[1] == "-h")):
-    print "Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]"
-    exit (0)
-elif (len(sys.argv) == 4):
-    pshellServerDemoPort = sys.argv[2]
-    traceFilterDemoPort = sys.argv[3]
-endif
-  
-# add PshellControl entries to our aggregator list, the hostname/ipAddress,
-# port and timeout values can be overridden via the pshell-control.conf file
-addControl("pshellServerDemo", "control the remote pshellServerDemo process", sys.argv[1], pshellServerDemoPort, PshellControl.ONE_SEC*5)
-addControl("traceFilterDemo", "control the remote traceFilterDemo process", sys.argv[1], traceFilterDemoPort, PshellControl.ONE_SEC*5)
-
-# add some TAB completors
-PshellReadline.addTabCompletion("quit")
-PshellReadline.addTabCompletion("help")
-PshellReadline.addTabCompletion("pshellServerDemo")
-PshellReadline.addTabCompletion("traceFilterDemo")
-
-# put up our window title banner
-sys.stdout.write("\033]0;PSHELL: pshellAggregatorDemo[local], Mode: INTERACTIVE\007")
-sys.stdout.flush()
-
-command = NULL
-while (not PshellReadline.isSubString(command, "quit")):
-  (command, idleSession) = PshellReadline.getInput("pshellAggregatorDemo[local]:PSHELL> ")
-  if (not PshellReadline.isSubString(command, "quit")):
-    processCommand(command)
+  # verify usage
+  if ((len(sys.argv) != 2) and (len(sys.argv) != 4)):
+      print "Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]"
+      exit (0)
+  elif ((len(sys.argv) == 2) and (sys.argv[1] == "-h")):
+      print "Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]"
+      exit (0)
+  elif (len(sys.argv) == 4):
+      pshellServerDemoPort = sys.argv[2]
+      traceFilterDemoPort = sys.argv[3]
   endif
-endwhile
+  
+  # add PshellControl entries to our aggregator list, the hostname/ipAddress,
+  # port and timeout values can be overridden via the pshell-control.conf file
+  addControl("pshellServerDemo", "control the remote pshellServerDemo process", sys.argv[1], pshellServerDemoPort, PshellControl.ONE_SEC*5)
+  addControl("traceFilterDemo", "control the remote traceFilterDemo process", sys.argv[1], traceFilterDemoPort, PshellControl.ONE_SEC*5)
 
-# cleanup all system resources
-PshellControl.disconnectAllServers()
+  # add some TAB completors
+  PshellReadline.addTabCompletion("quit")
+  PshellReadline.addTabCompletion("help")
+  PshellReadline.addTabCompletion("pshellServerDemo")
+  PshellReadline.addTabCompletion("traceFilterDemo")
+
+  # put up our window title banner
+  sys.stdout.write("\033]0;PSHELL: pshellAggregatorDemo[local], Mode: INTERACTIVE\007")
+  sys.stdout.flush()
+
+  command = NULL
+  while (not PshellReadline.isSubString(command, "quit")):
+    (command, idleSession) = PshellReadline.getInput("pshellAggregatorDemo[local]:PSHELL> ")
+    if (not PshellReadline.isSubString(command, "quit")):
+      processCommand(command)
+    endif
+  endwhile
+
+  # cleanup all system resources
+  PshellControl.disconnectAllServers()
+
+endif 

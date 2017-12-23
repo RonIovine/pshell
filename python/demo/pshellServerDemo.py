@@ -174,35 +174,38 @@ enddef
 # start of main program
 #
 ##############################
+if (__name__ == '__main__'):
 
-if (len(sys.argv) != 2):
-  showUsage()
-elif (sys.argv[1] == "-udp"):
-  serverType = PshellServer.UDP
-elif (sys.argv[1] == "-unix"):
-  serverType = PshellServer.UNIX
-elif (sys.argv[1] == "-tcp"):
-  serverType = PshellServer.TCP
-elif (sys.argv[1] == "-local"):
-  serverType = PshellServer.LOCAL
-else:
-  showUsage()
-endif 
+  if (len(sys.argv) != 2):
+    showUsage()
+  elif (sys.argv[1] == "-udp"):
+    serverType = PshellServer.UDP
+  elif (sys.argv[1] == "-unix"):
+    serverType = PshellServer.UNIX
+  elif (sys.argv[1] == "-tcp"):
+    serverType = PshellServer.TCP
+  elif (sys.argv[1] == "-local"):
+    serverType = PshellServer.LOCAL
+  else:
+    showUsage()
+  endif 
 
-registerSignalHandlers()
+  registerSignalHandlers()
 
-# register our callback commands
-PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
-PshellServer.addCommand(world, "world", "world command description")
-PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
-if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
-  PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
+  # register our callback commands
+  PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
+  PshellServer.addCommand(world, "world", "world command description")
+  PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
+  if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
+    PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
+  endif
+
+  # run a registered command from within it's parent process
+  PshellServer.runCommand("hello 1 2 3")
+
+  # start our pshell server
+  PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)
+
+  PshellServer.cleanupResources()
+
 endif
-
-# run a registered command from within it's parent process
-PshellServer.runCommand("hello 1 2 3")
-
-# start our pshell server
-PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)
-
-PshellServer.cleanupResources()
