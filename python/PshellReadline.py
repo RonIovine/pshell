@@ -29,6 +29,8 @@
 #################################################################################
 
 """
+A Python module to provide readline like user input functionality
+
 This API implements a readline like functionality for user input.  This can
 work with any character stream based input/output terminal device, i.e. 
 keyboard input over a serial tty, or over a TCP/telnet connection.  This module 

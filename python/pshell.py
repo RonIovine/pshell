@@ -28,11 +28,29 @@
 #
 #################################################################################
 
-#################################################################################
-#
-# This is a python version of the PshellClient.cc UDP/UNIX client program.
-#
-#################################################################################
+"""
+A Python program to provide remote client access to UDP/UNIX PshellServers
+
+This stand-alone client process will provide remote user interaction to 
+any process that is running a UDP or UNIX PshellServer (TCP PshellServers 
+are controlled via a standard 'telnet' client).  It can control processes 
+that are running either the 'C' version of the PshellServer, which is 
+provided via the PshellServer.h API and the libpshell-server link libaray, 
+or the Python version that is provided via the PshellServer.py module.
+
+Modules:
+
+The following Python modules are provided for programs to embed their own
+PshellServer functionality and to programatically control PshellServers 
+running in other processes.
+
+PshellServer.py -- provide PshellServer capability in a given process
+PshellControl.py -- invoke PshellServer callback functions in another process
+PshellReadline.py -- provide a readline like capability to solicit user input
+
+See the respective 'pydoc' pages (text or HTML) for more detailed documentation
+on the above modules.
+"""
 
 # import all our necessary module
 import os
@@ -44,24 +62,21 @@ import PshellReadline
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
 # list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
-enddef = endif = endwhile = endfor = None
+_enddef = _endif = _endwhile = _endfor = None
 
-# python does not have a native null string identifier, so create one
-NULL = ""
-
-gSid = None
+_gSid = None
 
 #################################################################################
 #################################################################################
-def comandDispatcher(args_):
-  global gSid
-  sys.stdout.write(PshellControl.sendCommand3(gSid, ' '.join(args_)))
-enddef
+def _comandDispatcher(args_):
+  global _gSid
+  sys.stdout.write(PshellControl.sendCommand3(_gSid, ' '.join(args_)))
+_enddef
 
 #################################################################################
 #################################################################################
-def configureLocalServer():
-  global gSid
+def _configureLocalServer():
+  global _gSid
   global gRemoteServer
   global gPort
 
@@ -74,70 +89,70 @@ def configureLocalServer():
   # supress the automatic invalid arg count messag from the PshellControl.py
   # module so we can display the returned usage
   PshellControl._gSupressInvalidArgCountMessage = True
-  prompt = PshellControl.__extractPrompt(gSid)
+  prompt = PshellControl.__extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
-  endif
-  title = PshellControl.__extractTitle(gSid)
+  _endif
+  title = PshellControl.__extractTitle(_gSid)
   if (len(title) > 0):
     PshellServer._gTitleOverride = title
-  endif
-  serverName = PshellControl.__extractName(gSid)
+  _endif
+  serverName = PshellControl.__extractName(_gSid)
   if (len(serverName) > 0):
     PshellServer._gServerNameOverride = serverName
-  endif
-  banner = PshellControl.__extractBanner(gSid)
+  _endif
+  banner = PshellControl.__extractBanner(_gSid)
   if (len(banner) > 0):
     PshellServer._gBannerOverride = banner
-  endif
+  _endif
   if (gPort == PshellControl.UNIX):
     PshellServer._gServerTypeOverride = PshellControl.UNIX
   elif (gRemoteServer == "localhost"):
     PshellServer._gServerTypeOverride = "127.0.0.1"
   else:
     PshellServer._gServerTypeOverride = gRemoteServer
-  endif
-enddef
+  _endif
+_enddef
 
 #################################################################################
 #################################################################################
-def cleanupAndExit():
+def _cleanupAndExit():
   PshellServer.cleanupResources()
   PshellControl.disconnectAllServers()
   sys.exit()
-enddef
+_enddef
 
 #################################################################################
 #################################################################################
-def signalHandler(signal, frame):
-  cleanupAndExit()
-enddef
+def _signalHandler(signal, frame):
+  _cleanupAndExit()
+_enddef
 
 #################################################################################
 #################################################################################
-def registerSignalHandlers():
+def _registerSignalHandlers():
   # register a signal handlers so we can cleanup our
   # system resources upon abnormal termination
-  signal.signal(signal.SIGHUP, signalHandler)      # 1  Hangup (POSIX)
-  signal.signal(signal.SIGINT, signalHandler)      # 2  Interrupt (ANSI)
-  signal.signal(signal.SIGQUIT, signalHandler)     # 3  Quit (POSIX)
-  signal.signal(signal.SIGILL, signalHandler)      # 4  Illegal instruction (ANSI)
-  signal.signal(signal.SIGABRT, signalHandler)     # 6  Abort (ANSI)
-  signal.signal(signal.SIGBUS, signalHandler)      # 7  BUS error (4.2 BSD)
-  signal.signal(signal.SIGFPE, signalHandler)      # 8  Floating-point exception (ANSI)
-  signal.signal(signal.SIGSEGV, signalHandler)     # 11 Segmentation violation (ANSI)
-  signal.signal(signal.SIGPIPE, signalHandler)     # 13 Broken pipe (POSIX)
-  signal.signal(signal.SIGALRM, signalHandler)     # 14 Alarm clock (POSIX)
-  signal.signal(signal.SIGTERM, signalHandler)     # 15 Termination (ANSI)
-  signal.signal(signal.SIGXCPU, signalHandler)     # 24 CPU limit exceeded (4.2 BSD)
-  signal.signal(signal.SIGXFSZ, signalHandler)     # 25 File size limit exceeded (4.2 BSD)
-  signal.signal(signal.SIGPWR, signalHandler)      # 30 Power failure restart (System V)
-  signal.signal(signal.SIGSYS, signalHandler)      # 31 Bad system call
-enddef
+  signal.signal(signal.SIGHUP, _signalHandler)      # 1  Hangup (POSIX)
+  signal.signal(signal.SIGINT, _signalHandler)      # 2  Interrupt (ANSI)
+  signal.signal(signal.SIGQUIT, _signalHandler)     # 3  Quit (POSIX)
+  signal.signal(signal.SIGILL, _signalHandler)      # 4  Illegal instruction (ANSI)
+  signal.signal(signal.SIGABRT, _signalHandler)     # 6  Abort (ANSI)
+  signal.signal(signal.SIGBUS, _signalHandler)      # 7  BUS error (4.2 BSD)
+  signal.signal(signal.SIGFPE, _signalHandler)      # 8  Floating-point exception (ANSI)
+  signal.signal(signal.SIGSEGV, _signalHandler)     # 11 Segmentation violation (ANSI)
+  signal.signal(signal.SIGPIPE, _signalHandler)     # 13 Broken pipe (POSIX)
+  signal.signal(signal.SIGALRM, _signalHandler)     # 14 Alarm clock (POSIX)
+  signal.signal(signal.SIGTERM, _signalHandler)     # 15 Termination (ANSI)
+  signal.signal(signal.SIGXCPU, _signalHandler)     # 24 CPU limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGXFSZ, _signalHandler)     # 25 File size limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGPWR, _signalHandler)      # 30 Power failure restart (System V)
+  signal.signal(signal.SIGSYS, _signalHandler)      # 31 Bad system call
+_enddef
 
 #####################################################
 #####################################################
-def showUsage():
+def _showUsage():
   print
   print "Usage: %s {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix} [-t<timeout>]" % os.path.basename(sys.argv[0])
   print
@@ -150,7 +165,7 @@ def showUsage():
   print "    <timeout>        - wait timeout for response in sec (default=5)"
   print
   exit(0)
-enddef
+_enddef
 
 ##############################
 #
@@ -160,8 +175,8 @@ enddef
 if (__name__ == '__main__'):
   
   if ((len(sys.argv) < 3) or ((len(sys.argv)) > 4)):
-    showUsage()
-  endif
+    _showUsage()
+  _endif
 
   timeout = 5
 
@@ -169,36 +184,36 @@ if (__name__ == '__main__'):
     if ("-t" in arg):
       timeout = int(arg[2:])
     else:
-      showUsage()
-    endif
-  endfor
+      _showUsage()
+    _endif
+  _endfor
 
   gRemoteServer = sys.argv[1]
   gPort = sys.argv[2]
 
   # connect to our remote server via the control client
-  gSid = PshellControl.connectServer("pshellClient", gRemoteServer, gPort, PshellControl.ONE_SEC*timeout)
+  _gSid = PshellControl.connectServer("pshellClient", gRemoteServer, gPort, PshellControl.ONE_SEC*timeout)
 
   # extract all the commands from our remote server and add then to our local server
-  commandList = PshellControl.extractCommands(gSid)
+  commandList = PshellControl.extractCommands(_gSid)
   commandList = commandList.split("\n")
   for command in commandList:
     splitCommand = command.split("-")
     if (len(splitCommand ) >= 2):
       commandName = splitCommand[0].strip()
       description = splitCommand[1].strip()
-      PshellServer.addCommand(comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
-    endif
-  endif
+      PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+    _endif
+  _endif
 
   # configure our local server to interact with a remote server, we override the display settings
   # (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
   # a remote server
-  configureLocalServer()
+  _configureLocalServer()
 
   # now start our local server which will interact with a remote server via the pshell control machanism
   PshellServer.startServer("pshellClient", PshellServer.LOCAL, PshellServer.BLOCKING)
 
-  cleanupAndExit()
+  _cleanupAndExit()
   
-endif
+_endif

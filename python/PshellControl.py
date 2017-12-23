@@ -29,6 +29,8 @@
 #################################################################################
 
 """
+A Python to invoke pshell commands in another process
+
 This API provides the ability for a client program to invoke pshell commands
 that are registered in a remote program that is running a pshell UDP or UNIX
 server.  The format of the command string that is sent to the pshell should

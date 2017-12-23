@@ -29,6 +29,8 @@
 #################################################################################
 
 """
+A Python module to provide remote command line access to external processes
+
 This API provides the Process Specific Embedded Command Line Shell (PSHELL)
 user API functionality.  It provides the ability for a client program to
 register functions that can be invoked via a command line user interface.
