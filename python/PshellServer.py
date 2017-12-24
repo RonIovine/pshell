@@ -355,7 +355,7 @@ def isSubString(string1, string2, minMatchLength = 0):
         minMatchLength (int) : The minimum required characters match
 
     Returns:
-        bool : True is substring matches, False otherwise
+        bool : True if substring matches, False otherwise
   """
   return (_isSubString(string1, string2, minMatchLength))
 _enddef

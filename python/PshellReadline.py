@@ -70,7 +70,7 @@ Standard bash/readline tabbing method, i.e. initiate via double tabbing
 
 BASH_TAB
 
-Fast tabbing, i.e.  initiated via single tabbing, this is the default
+Fast tabbing, i.e. initiated via single tabbing, this is the default
 
 FAST_TAB
 
@@ -109,7 +109,7 @@ ONE_MINUTE = ONE_SECOND*60
 
 # standard bash/readline tabbing method, i.e. initiate via double tabbing
 BASH_TAB = "bash"
-# fast tabbing, i.e.  initiated via single tabbing, this is the default
+# fast tabbing, i.e. initiated via single tabbing, this is the default
 FAST_TAB = "fast"
 
 #################################################################################
@@ -256,7 +256,7 @@ def isSubString(string1, string2, minMatchLength = 0):
         minMatchLength (int) : The minimum required characters match
 
     Returns:
-        bool : True is substring matches, False otherwise
+        bool : True if substring matches, False otherwise
   """
   return (_isSubString(string1, string2, minMatchLength))
 _enddef
