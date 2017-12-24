@@ -80,7 +80,7 @@ String constants:
 Use this as the "port" identifier for the connectServer 
 call when using a UNIX domain server
 
-UNIX = "unix"  
+UNIX
 
 A complete example of the usage of the API can be found in the included 
 demo programs pshellControlDemo.py and pshellAggregatorDemo.py
