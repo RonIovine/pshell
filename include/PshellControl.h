@@ -182,9 +182,12 @@ void pshell_extractCommands(int sid_, char *results_, int size_);
  * pshell_addMulticast:
  * 
  * this command will add a given multicast receiver (i.e. sid) to a multicast 
- * group, multicast groups are based on the command's keyword
+ * group, multicast groups are based either on the command's keyword, or if 
+ * no keyword is supplied, the given sid will receive all multicast commands
  */
-void pshell_addMulticast(int sid_, const char *keyword_);
+#define PSHELL_MULTICAST_ALL "__all__"
+
+void pshell_addMulticast(int sid_, const char *keyword_ = PSHELL_MULTICAST_ALL);
 
 /*
  * pshell_sendMulticast:

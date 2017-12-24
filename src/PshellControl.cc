@@ -341,7 +341,8 @@ void pshell_sendMulticast(const char *command_, ...)
   {
     for (int group = 0; group < _multicastList.numGroups; group++)
     {
-      if (((keyword = strstr(command, _multicastList.groups[group].keyword)) != NULL) && (keyword == command))
+      if ((strcmp(_multicastList.groups[group].keyword, PSHELL_MULTICAST_ALL) == 0) || 
+          (((keyword = strstr(command, _multicastList.groups[group].keyword)) != NULL) && (keyword == command)))
       {
         /* we found a match, send command to all of our sids */
         for (int sid = 0; sid < _multicastList.groups[group].numSids; sid++)

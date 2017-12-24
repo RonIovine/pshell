@@ -85,12 +85,15 @@ TCP
 UNIX
 LOCAL
 
-These two identifiers that can be used for the hostnameOrIpAddr argument 
+These three identifiers that can be used for the hostnameOrIpAddr argument 
 of the startServer call.  PshellServer.ANYHOST will bind the server socket
-to all interfaces of a multi-homed host, PshellServer.LOCALHOST will bind 
-the server socket to the local loopback address (i.e. 127.0.0.1)
+to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
+255.255.255.255, PshellServer.LOCALHOST will bind the server socket to 
+the local loopback address (i.e. 127.0.0.1), note that subnet broadcast 
+it also supported, e.g. x.y.z.255
 
 ANYHOST
+ANYBCAST
 LOCALHOST
 
 A complete example of the usage of the API can be found in the included 
@@ -136,11 +139,14 @@ LOCAL = "local"
 BLOCKING = 0
 NON_BLOCKING = 1
 
-# These two identifiers that can be used for the hostnameOrIpAddr argument 
+# These three identifiers that can be used for the hostnameOrIpAddr argument 
 # of the startServer call.  PshellServer.ANYHOST will bind the server socket
-# to all interfaces of a multi-homed host, PshellServer.LOCALHOST will bind 
-# the server socket to the local loopback address (i.e. 127.0.0.1)
+# to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
+# 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to 
+# the local loopback address (i.e. 127.0.0.1), note that subnet broadcast 
+# it also supported, e.g. x.y.z.255
 ANYHOST = "anyhost"
+ANYBCAST = "anybcast"
 LOCALHOST = "localhost"
 
 #################################################################################
@@ -446,10 +452,19 @@ def _createSocket():
   if (_gServerType == UDP):
     # IP domain socket (UDP)
     _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    ipAddrOctets = _gHostnameOrIpAddr.split(".")
     if (_gHostnameOrIpAddr == ANYHOST):
       _gSocketFd.bind((_NULL, _gPort))
     elif (_gHostnameOrIpAddr == LOCALHOST):
       _gSocketFd.bind(("127.0.0.1", _gPort))
+    elif (_gHostnameOrIpAddr == ANYBCAST):
+      # global broadcast address
+      _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+      _gSocketFd.bind(("255.255.255.255", _gPort))
+    elif ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
+      # subnet broadcast address
+      _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+      _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
     else:
       _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
     _endif
@@ -846,7 +861,7 @@ def _batch(command_):
     batchFile = command_[1]
   _endif
   batchFile1 = _NULL
-  batchPath = os.getenv('_PSHELL_BATCH_DIR')
+  batchPath = os.getenv('PSHELL_BATCH_DIR')
   if (batchPath != None):
     batchFile1 = batchPath+"/"+batchFile+".batch"
   _endif
@@ -1020,7 +1035,7 @@ _enddef
 #################################################################################
 def _loadConfigFile(name_, title_, banner_, prompt_, type_, host_, port_, tcpTimeout_):  
   configFile1 = _NULL
-  configPath = os.getenv('_PSHELL_CONFIG_DIR')
+  configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
     configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
   _endif
@@ -1076,7 +1091,7 @@ _enddef
 def _loadStartupFile():
   global _gServerName
   startupFile1 = _NULL
-  startupPath = os.getenv('_PSHELL_STARTUP_DIR')
+  startupPath = os.getenv('PSHELL_STARTUP_DIR')
   if (startupPath != None):
     startupFile1 = startupPath+"/"+_gServerName+".startup"
   _endif

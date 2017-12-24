@@ -64,7 +64,7 @@ NO_WAIT
 ONE_MSEC
 ONE_SEC
 
-These are returned from the sendCommand1 and sendCommand2 functions
+These are returned from the sendCommandN functions
 
 COMMAND_SUCCESS
 COMMAND_NOT_FOUND
@@ -81,6 +81,10 @@ Use this as the "port" identifier for the connectServer
 call when using a UNIX domain server
 
 UNIX
+
+Specifies if the addMulticast should add the given sid to all commands
+
+MULTICAST_ALL
 
 A complete example of the usage of the API can be found in the included 
 demo programs pshellControlDemo.py and pshellAggregatorDemo.py
@@ -131,6 +135,9 @@ SOCKET_SELECT_FAILURE = 4
 SOCKET_RECEIVE_FAILURE = 5
 SOCKET_TIMEOUT = 6
 SOCKET_NOT_CONNECTED = 7
+
+# specifies if the addMulticast should add the given sid to all commands
+MULTICAST_ALL = "__all__"
 
 #################################################################################
 #
@@ -250,14 +257,17 @@ _enddef
 
 #################################################################################
 #################################################################################
-def addMulticast(sid, keyword):
+def addMulticast(sid, keyword = MULTICAST_ALL):
   """
   This command will add a given multicast receiver (i.e. sid) to a multicast 
-  group, multicast groups are based on the command's keyword
+  group, multicast groups are either based on the command's keyword, or if 
+  no keyword is supplied, the given sid will receive all multicast commands
 
     Args:
         sid (int)     : The ServerId as returned from the connectServer call
         keyword (str) : The multicast keyword that the sid is associated with
+                        If no keyword is supplied, all multicast commands will
+                        go to the corresponding sid
 
     Returns:
         none
@@ -354,6 +364,15 @@ def sendCommand3(sid, command):
     Returns:
         str: The human readable results of the command response or NULL
              if no results or command failure
+        int: Return code result of the command:
+               COMMAND_SUCCESS
+               COMMAND_NOT_FOUND
+               COMMAND_INVALID_ARG_COUNT
+               SOCKET_SEND_FAILURE
+               SOCKET_SELECT_FAILURE
+               SOCKET_RECEIVE_FAILURE
+               SOCKET_TIMEOUT
+               SOCKET_NOT_CONNECTED
   """
   return (_sendCommand3(sid, command))
 _enddef
@@ -375,6 +394,15 @@ def sendCommand4(sid, timeoutOverride, command):
     Returns:
         str: The human readable results of the command response or NULL
              if no results or command failure
+        int: Return code result of the command:
+               COMMAND_SUCCESS
+               COMMAND_NOT_FOUND
+               COMMAND_INVALID_ARG_COUNT
+               SOCKET_SEND_FAILURE
+               SOCKET_SELECT_FAILURE
+               SOCKET_RECEIVE_FAILURE
+               SOCKET_TIMEOUT
+               SOCKET_NOT_CONNECTED
   """
   return (_sendCommand4(sid, timeoutOverride, command))
 _enddef
@@ -410,36 +438,42 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
         sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
     _endwhile
     _gPshellControl.append({"socket":socketFd,
-                           "timeout":defaultTimeout_,
-                           "serverType":"unix",
-                           "sourceAddress":sourceAddress,
-                           "destAddress":_gUnixSocketPath+remoteServer_,
-                           "remoteServer":controlName_+"["+remoteServer_+"]",
-                           "pshellMsg":OrderedDict([("msgType",0),
-                                                    ("respNeeded",True),
-                                                    ("dataNeeded",True),
-                                                    ("pad",0),
-                                                    ("seqNum",0),
-                                                    ("payload",_NULL)])})
+                            "timeout":defaultTimeout_,
+                            "serverType":"unix",
+                            "sourceAddress":sourceAddress,
+                            "destAddress":_gUnixSocketPath+remoteServer_,
+                            "remoteServer":controlName_+"["+remoteServer_+"]",
+                            "pshellMsg":OrderedDict([("msgType",0),
+                                                     ("respNeeded",True),
+                                                     ("dataNeeded",True),
+                                                     ("pad",0),
+                                                     ("seqNum",0),
+                                                     ("payload",_NULL)])})
     
     
   else:
     # IP domain socket
     socketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    ipAddrOctets = remoteServer_.split(".")
+    # if we are trying to use a subnet broadcast address, set our socket option
+    if ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
+      # subnet broadcast address
+      socketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    _endif
     # bind our source socket so we can get replies
     socketFd.bind((_NULL, 0))
     _gPshellControl.append({"socket":socketFd,
-                           "timeout":defaultTimeout_,
-                           "serverType":"udp",
-                           "sourceAddress":None,
-                           "destAddress":(remoteServer_, int(port_)),
-                           "remoteServer":controlName_+"["+remoteServer_+"]",
-                           "pshellMsg":OrderedDict([("msgType",0),
-                                                    ("respNeeded",True),
-                                                    ("dataNeeded",True),
-                                                    ("pad",0),
-                                                    ("seqNum",0),
-                                                    ("payload",_NULL)])})
+                            "timeout":defaultTimeout_,
+                            "serverType":"udp",
+                            "sourceAddress":None,
+                            "destAddress":(remoteServer_, int(port_)),
+                            "remoteServer":controlName_+"["+remoteServer_+"]",
+                            "pshellMsg":OrderedDict([("msgType",0),
+                                                     ("respNeeded",True),
+                                                     ("dataNeeded",True),
+                                                     ("pad",0),
+                                                     ("seqNum",0),
+                                                     ("payload",_NULL)])})
   _endif
   # return the newly appended list entry as the SID
   return (len(_gPshellControl)-1)
@@ -594,7 +628,7 @@ def _sendMulticast(command_):
   global _gPshellMulticast
   global NO_WAIT
   for multicast in _gPshellMulticast:
-    if (command_.split()[0] == multicast["keyword"]):
+    if ((multicast["keyword"] == MULTICAST_ALL) or (command_.split()[0] == multicast["keyword"])):
       for sid in multicast["sidList"]:
         control = _getControl(sid)
         if (control != None):
@@ -637,6 +671,7 @@ _enddef
 def _sendCommand3(sid_, command_):
   global NO_WAIT
   results = _NULL
+  retCode = SOCKET_NOT_CONNECTED
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = (control["timeout"] > NO_WAIT)
@@ -647,7 +682,7 @@ def _sendCommand3(sid_, command_):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
-  return (results)
+  return (results, retCode)
 _enddef
 
 #################################################################################
@@ -655,6 +690,7 @@ _enddef
 def _sendCommand4(sid_, timeoutOverride_, command_):
   global NO_WAIT
   results = _NULL
+  retCode = SOCKET_NOT_CONNECTED
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = (timeoutOverride_ > NO_WAIT)
@@ -665,7 +701,7 @@ def _sendCommand4(sid_, timeoutOverride_, command_):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
-  return (results)
+  return (results, retCode)
 _enddef
 
 #################################################################################
@@ -768,7 +804,7 @@ _enddef
 #################################################################################
 def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):  
   configFile1 = _NULL
-  configPath = os.getenv('_PSHELL_CONFIG_DIR')
+  configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
     configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
   _endif

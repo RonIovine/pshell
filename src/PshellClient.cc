@@ -439,9 +439,13 @@ bool getPayloadSize(void)
 bool init(char *destination_, char *server_)
 {
   char requestedHost[180];
+  char destination[180];
   struct hostent *host;
   int destPort;
   int retCode = -1;
+  char *ipAddrOctets[MAX_TOKENS];
+  unsigned numTokens;
+  int on = 1;
 
    /* see if it is a named server, numeric port, or UNIX domain server */
   if (strcmp(destination_, "unix") == 0)
@@ -478,6 +482,18 @@ bool init(char *destination_, char *server_)
     {
       printf("PSHELL_ERROR: Cannot create UDP socket\n");
       return (false);
+    }
+
+    /* 
+     * see if we are trying to connect to a broadcast address,
+     * if so, set our socket options to allow for broadcast
+     */
+    strcpy(destination, destination_);
+    tokenize(destination, ".", ipAddrOctets, MAX_TOKENS, &numTokens);
+    if ((numTokens == 4) && (strcmp(ipAddrOctets[3], "255") == 0))
+    {
+      /* setup socket for broadcast */
+      setsockopt(_socketFd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
     }
 
     /* bind to our source socket */

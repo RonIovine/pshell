@@ -105,7 +105,7 @@ if (__name__ == '__main__'):
       if ((command.split()[0] == "?") or (command.split()[0] == "help")):
         sys.stdout.write(PshellControl.extractCommands(sid))
       elif (extract):
-        results = PshellControl.sendCommand3(sid, command)
+        (results, retCode) = PshellControl.sendCommand3(sid, command)
         print "%d bytes extracted, results:" % len(results)
         sys.stdout.write("%s" % results)
       else:

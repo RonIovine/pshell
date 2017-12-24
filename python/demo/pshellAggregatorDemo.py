@@ -110,7 +110,8 @@ def processCommand(command_):
           sys.stdout.write(PshellControl.extractCommands(control["sid"]))
           return
         elif (len(splitCommand) >= 2):
-          sys.stdout.write(PshellControl.sendCommand3(control["sid"], command))
+          (results, retCode) = PshellControl.sendCommand3(control["sid"], command)
+          sys.stdout.write(results)
           return
         endif
       endif

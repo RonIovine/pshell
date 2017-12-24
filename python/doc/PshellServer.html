@@ -66,12 +66,15 @@ TCP<br>
 UNIX<br>
 LOCAL<br>
 &nbsp;<br>
-These&nbsp;two&nbsp;identifiers&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;hostnameOrIpAddr&nbsp;argument&nbsp;<br>
+These&nbsp;three&nbsp;identifiers&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;hostnameOrIpAddr&nbsp;argument&nbsp;<br>
 of&nbsp;the&nbsp;startServer&nbsp;call.&nbsp;&nbsp;PshellServer.ANYHOST&nbsp;will&nbsp;bind&nbsp;the&nbsp;server&nbsp;socket<br>
-to&nbsp;all&nbsp;interfaces&nbsp;of&nbsp;a&nbsp;multi-homed&nbsp;host,&nbsp;PshellServer.LOCALHOST&nbsp;will&nbsp;bind&nbsp;<br>
-the&nbsp;server&nbsp;socket&nbsp;to&nbsp;the&nbsp;local&nbsp;loopback&nbsp;address&nbsp;(i.e.&nbsp;127.0.0.1)<br>
+to&nbsp;all&nbsp;interfaces&nbsp;of&nbsp;a&nbsp;multi-homed&nbsp;host,&nbsp;PSHELL_ANYBCAST&nbsp;will&nbsp;bind&nbsp;to<br>
+255.255.255.255,&nbsp;PshellServer.LOCALHOST&nbsp;will&nbsp;bind&nbsp;the&nbsp;server&nbsp;socket&nbsp;to&nbsp;<br>
+the&nbsp;local&nbsp;loopback&nbsp;address&nbsp;(i.e.&nbsp;127.0.0.1),&nbsp;note&nbsp;that&nbsp;subnet&nbsp;broadcast&nbsp;<br>
+it&nbsp;also&nbsp;supported,&nbsp;e.g.&nbsp;x.y.z.255<br>
 &nbsp;<br>
 ANYHOST<br>
+ANYBCAST<br>
 LOCALHOST<br>
 &nbsp;<br>
 A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included&nbsp;<br>
@@ -215,7 +218,8 @@ startup&nbsp;time.<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>ANYHOST</strong> = 'anyhost'<br>
+<td width="100%"><strong>ANYBCAST</strong> = 'anybcast'<br>
+<strong>ANYHOST</strong> = 'anyhost'<br>
 <strong>BLOCKING</strong> = 0<br>
 <strong>LOCAL</strong> = 'local'<br>
 <strong>LOCALHOST</strong> = 'localhost'<br>

@@ -3518,6 +3518,28 @@ static bool createSocket(void)
     {
       setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
     }
+    else if (_serverType == PSHELL_UDP_SERVER)
+    {
+      /* see if they have supplied a broadcast address */
+      /* set to true so we can call pshell_tokenize, need to make sure we call cleanupTokens after each call */
+      _isCommandDispatched = true;
+      PshellTokens *ipAddrOctets = pshell_tokenize(requestedHost, ".");
+      if (strcmp(requestedHost, PSHELL_ANYBCAST) == 0)
+      {
+        _localIpAddress.sin_addr.s_addr = inet_addr("255.255.255.255");
+        strcpy(_ipAddress, "255.255.255.255");
+        /* setup socket for broadcast */
+        setsockopt(_socketFd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+      }
+      else if ((ipAddrOctets->numTokens == 4) && (strcmp(ipAddrOctets->tokens[3], "255") == 0))
+      {
+        /* setup socket for broadcast */
+        setsockopt(_socketFd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+      }
+      /* set back to false so we prevent a call to the pshell_tokenize function outside of a callback function */
+      _isCommandDispatched = false;
+      cleanupTokens();
+    }
 
     /* bind to our source socket */
     if (bind(_socketFd,
