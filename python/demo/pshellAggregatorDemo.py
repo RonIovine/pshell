@@ -42,7 +42,7 @@
 
 # import all our necessary modules
 import sys
-import PshellReadline
+import PshellServer
 import PshellControl
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
@@ -52,72 +52,73 @@ enddef = endif = endwhile = endfor = None
 # python does not have a native null string identifier, so create one
 NULL = ""
 
-# PshellControl aggregator list
-gControlList = []
-gMaxLength = 0
+# this function is the common generic function to control any server
+# based on only the SID and entered command, it should be called from 
+# every control specific callback for this aggregator
 
 #################################################################################
-#
-# addControl:
-#
-# add a PshellControl entry to our PshellControl aggregator list
-#
 #################################################################################
-def addControl(controlName_, description_, remoteServer_, port_, defaultTimeout_):
-  global gControlList
-  global gMaxLength
-  for control in gControlList:
-    if (control["name"] == controlName_):
-      # control name already exists, don't add it again
-      return
+def controlServer(sid, argv):
+  # reconstitute the original command
+  command = ' '.join(argv)
+  if (PshellServer.isHelp() or (argv[0] == "help")):
+    PshellServer.printf(PshellControl.extractCommands(sid))
+  else:
+    (results, retCode) = PshellControl.sendCommand3(sid, command)
+    if (retCode == PshellControl.COMMAND_SUCCESS):
+      PshellServer.printf(results)
     endif
-  endfor
-  if (len(controlName_) > gMaxLength):
-    gMaxLength = len(controlName_)
   endif
-  sid = PshellControl.connectServer(controlName_, remoteServer_, port_, defaultTimeout_)
-  gControlList.append({"name":controlName_, "description":description_, "sid":sid})
+enddef
+
+# the following two functions are the control specific functions that interface
+# directly to a given remote server via the control API for a give SID, this is
+# how multiple remote pshell servers can be aggregated into a single local pshell
+# server, each separate SID for each remote server needs it's own dedicated
+# callback that is registered to the local pshell server, the only thing these
+# local pshell functions need to do is call the common 'controlServer' function
+# with the passed in argc, argv, and their unique SID identifier
+
+#################################################################################
+#################################################################################
+def pshellServerDemo(argv):
+  global pshellServerDemoSid
+  controlServer(pshellServerDemoSid,  argv)
 enddef
 
 #################################################################################
-#
-# processCommand:
-#
-# process a command as typed on the command line prompt
-#
 #################################################################################
-def processCommand(command_):
-  global gControlList
-  global gMaxLength
-  splitCommand = command_.split()
-  command = ' '.join(command_.split()[1:])
-  if ((splitCommand[0] == "?") or (splitCommand[0] == "help"[:len(splitCommand[0])])):
-    print
-    print "****************************************"
-    print "*             COMMAND LIST             *"
-    print "****************************************"
-    print
-    print "%-*s  -  exit interactive mode" % (gMaxLength, "quit")
-    print "%-*s  -  show all available commands" % (gMaxLength, "help")
-    for control in gControlList:
-      print "%-*s  -  %s" % (gMaxLength, control["name"], control["description"])
-    endif
-    print
-  else:
-    for control in gControlList:
-      if (splitCommand[0] == control["name"][:len(splitCommand[0])]):
-        if (((len(splitCommand) == 1) or (len(splitCommand) == 2) and ((splitCommand[1] == "?") or (splitCommand[1] == "help")))):
-          sys.stdout.write(PshellControl.extractCommands(control["sid"]))
-          return
-        elif (len(splitCommand) >= 2):
-          (results, retCode) = PshellControl.sendCommand3(control["sid"], command)
-          sys.stdout.write(results)
-          return
-        endif
-      endif
-    endfor
-    print "PSHELL_ERROR: Command: '%s' not found" % command_
+def traceFilterDemo(argv):
+  global traceFilterDemoSid
+  controlServer(traceFilterDemoSid, argv)
+enddef
+
+# example meta command that will call multiple discrete pshell commands from
+# multiple pshell servers
+
+#################################################################################
+#################################################################################
+def meta(argv):
+  global pshellServerDemoSid
+  global traceFilterDemoSid
+  (results, retCode) = PshellControl.sendCommand3(pshellServerDemoSid, "hello %s %s" % (argv[0], argv[1]))
+  if (retCode == PshellControl.COMMAND_SUCCESS):
+    PshellServer.printf(results)
   endif
+  PshellControl.sendCommand1(traceFilterDemoSid, "set callback %s" % argv[2])
+enddef
+
+# example multicast command, this will send a given command to all the registered
+# multicast receivers for that multicast group, multicast groups are based on
+# the command's keyword
+ 
+#################################################################################
+#################################################################################
+def multicast(argv):
+  PshellControl.sendMulticast("test")
+  PshellControl.sendMulticast("trace 1 2 3 4")
+  PshellControl.sendMulticast("trace on")
+  PshellControl.sendMulticast("hello")
 enddef
 
 ##############################
@@ -145,28 +146,37 @@ if (__name__ == '__main__'):
   
   # add PshellControl entries to our aggregator list, the hostname/ipAddress,
   # port and timeout values can be overridden via the pshell-control.conf file
-  addControl("pshellServerDemo", "control the remote pshellServerDemo process", sys.argv[1], pshellServerDemoPort, PshellControl.ONE_SEC*5)
-  addControl("traceFilterDemo", "control the remote traceFilterDemo process", sys.argv[1], traceFilterDemoPort, PshellControl.ONE_SEC*5)
+  pshellServerDemoSid = PshellControl.connectServer("pshellServerDemo", sys.argv[1], pshellServerDemoPort, PshellControl.ONE_SEC*5)
+  traceFilterDemoSid = PshellControl.connectServer("traceFilterDemo", sys.argv[1], traceFilterDemoPort, PshellControl.ONE_SEC*5)
 
-  # add some TAB completors
-  PshellReadline.addTabCompletion("quit")
-  PshellReadline.addTabCompletion("help")
-  PshellReadline.addTabCompletion("pshellServerDemo")
-  PshellReadline.addTabCompletion("traceFilterDemo")
+  # add some multicast groups for our control sids, a multicast group is based
+  # on the command's keyword
+  PshellControl.addMulticast(pshellServerDemoSid, "trace");
+  PshellControl.addMulticast(traceFilterDemoSid, "trace");  
+  
+  PshellControl.addMulticast(pshellServerDemoSid, "test");
+  PshellControl.addMulticast(traceFilterDemoSid, "test");
 
-  # put up our window title banner
-  sys.stdout.write("\033]0;PSHELL: pshellAggregatorDemo[local], Mode: INTERACTIVE\007")
-  sys.stdout.flush()
+  # register our callback commands
+  PshellServer.addCommand(pshellServerDemo, "pshellServerDemo", "control the remote pshellServerDemo process", "<command> | ? | -h", 1, 30, False)
+  PshellServer.addCommand(traceFilterDemo, "traceFilterDemo", "control the remote traceFilterDemo process", "<command> | ? | -h", 1, 30, False)
 
-  command = NULL
-  while (not PshellReadline.isSubString(command, "quit")):
-    (command, idleSession) = PshellReadline.getInput("pshellAggregatorDemo[local]:PSHELL> ")
-    if (not PshellReadline.isSubString(command, "quit")):
-      processCommand(command)
-    endif
-  endwhile
+  # add any "meta" commands here, meta commands can aggregate multiple discrete
+  # pshell commands, either within one server or across multiple servers, into
+  # one command
+  PshellServer.addCommand(meta, "meta", "meta command, wraps multiple seperate functions", "<arg1> <arg2> <arg3>", 3, 3)
 
-  # cleanup all system resources
+  # add an example command that uses the one-to-many multicast feature of
+  # the control API
+  PshellServer.addCommand(multicast, "multicast", "example multicast command to several servers")
+
+  # start our local pshell server
+  PshellServer.startServer("pshellAggregatorDemo", PshellServer.LOCAL, PshellServer.BLOCKING)
+  
+  # disconnect all our remote control servers
   PshellControl.disconnectAllServers()
+  
+  # cleanup our local server's resources
+  PshellServer.cleanupResources()
 
 endif 
