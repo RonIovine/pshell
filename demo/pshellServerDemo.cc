@@ -468,7 +468,9 @@ void registerSignalHandlers(void)
   signal(SIGPIPE, signalHandler);   /* 13 Broken pipe (POSIX).  */
   signal(SIGALRM, signalHandler);   /* 14 Alarm clock (POSIX).  */
   signal(SIGTERM, signalHandler);   /* 15 Termination (ANSI).  */
+#ifdef LINUX
   signal(SIGSTKFLT, signalHandler); /* 16 Stack fault.  */
+#endif
   signal(SIGXCPU, signalHandler);   /* 24 CPU limit exceeded (4.2 BSD).  */
   signal(SIGXFSZ, signalHandler);   /* 25 File size limit exceeded (4.2 BSD).  */
   signal(SIGPWR, signalHandler);    /* 30 Power failure restart (System V).  */

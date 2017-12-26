@@ -55,6 +55,11 @@ else
     exit 1
   fi
 
+  if [ $OSTYPE == "cygwin" ]
+  then
+    fileExt=".exe"
+  fi
+
   binDir="/usr/bin"
   includeDir="/usr/include"
   pshellDir="/etc/pshell"
@@ -85,8 +90,8 @@ else
   echo "Removing softlink $libDir/libpshell-control"
   rm -f $libDir/libpshell-control.so
   
-  echo "Removing pshell from $binDir"
-  rm -f $binDir/pshell
+  echo "Removing pshell$fileExt from $binDir"
+  rm -f $binDir/pshell$fileExt
   
   echo "Removing includes..."
   

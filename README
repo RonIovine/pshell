@@ -420,7 +420,7 @@ are desired in the build settings, there is no need to copy 'defconfig' to
 be done automatically by the makefile processing.
 
 This package has been successfully re-built and run on a Raspberry Pi/ARM based
-system running Raspbian Linux.  
+system running Raspbian Linux as well as a Windows/Cygwin based system.
 
 NOTE: While an overriding design goal was to write all the code in standard ANSI
       C and use standard C linkages, and a standard functional 'C' API, there are

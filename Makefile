@@ -36,7 +36,13 @@ WARNINGS = -Wall
 
 STATIC_OBJ = $(WARNINGS) -c
 STATIC_LIB = ar rcs
-SHARED_OBJ = $(WARNINGS) -fPIC -c
+ifeq ($(OS),Windows_NT)
+  SHARED_OBJ = $(WARNINGS) -c
+  CCFLAGS += -D WIN32
+else
+  SHARED_OBJ = $(WARNINGS) -fPIC -c
+  CCFLAGS += -D LINUX
+endif
 SHARED_LIB = $(CC) -shared -o
 
 SRC_DIR = src
@@ -98,7 +104,9 @@ PSHELL_OBJS = PshellServer.o
 #
 # PshellClient libraries
 #
-CLIENT_LIBS = -lnsl
+ifneq ($(OS),Windows_NT)
+  CLIENT_LIBS = -lnsl
+endif
 
 #########################
 #
@@ -358,7 +366,7 @@ endif
 	@echo "Building traceLogDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) -o $(BIN_DIR)/traceLogDemo
 
-all: lib pshell demo
+all: clean lib pshell demo
 	@echo "PSHELL package successfully built..."
 
 install: all
@@ -366,7 +374,8 @@ install: all
 
 clean:	
 	@echo "Cleaning directory bin..."
-	$(VERBOSE)rm $(BIN_DIR)/*
+	$(VERBOSE)rm -f $(BIN_DIR)/*Demo
+	$(VERBOSE)rm -f $(BIN_DIR)/pshell
 	@echo "Cleaning directory lib..."
-	$(VERBOSE)rm $(LIB_DIR)/*.so
-	$(VERBOSE)rm $(LIB_DIR)/*.a
+	$(VERBOSE)rm -f $(LIB_DIR)/*.so
+	$(VERBOSE)rm -f $(LIB_DIR)/*.a

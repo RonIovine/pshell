@@ -35,6 +35,11 @@ then
   exit 1
 fi
 
+if [ $OSTYPE == "cygwin" ]
+then
+  fileExt=".exe"
+fi
+
 if [ $# -ge 1 ]
 then
   if [ "$1" != "-local" -o $# -gt 2 ]
@@ -71,22 +76,22 @@ then
     
     echo "Setting up Busybox-like demo softlinks"
     cd $localDir/bin
-    rm -f advancedParsing
-    ln -s pshellNoServerDemo advancedParsing
-    rm -f batch
-    ln -s pshellNoServerDemo batch
-    rm -f enhancedUsage
-    ln -s pshellNoServerDemo enhancedUsage
-    rm -f formatChecking
-    ln -s pshellNoServerDemo formatChecking
-    rm -f getOptions
-    ln -s pshellNoServerDemo getOptions
-    rm -f hello
-    ln -s pshellNoServerDemo hello
-    rm -f wildcardMatch
-    ln -s pshellNoServerDemo wildcardMatch
-    rm -f world
-    ln -s pshellNoServerDemo world
+    rm -f advancedParsing*
+    ln -s pshellNoServerDemo$fileExt advancedParsing$fileExt
+    rm -f batch*
+    ln -s pshellNoServerDemo$fileExt batch$fileExt
+    rm -f enhancedUsage*
+    ln -s pshellNoServerDemo$fileExt enhancedUsage$fileExt
+    rm -f formatChecking*
+    ln -s pshellNoServerDemo$fileExt formatChecking$fileExt
+    rm -f getOptions*
+    ln -s pshellNoServerDemo$fileExt getOptions$fileExt
+    rm -f hello*
+    ln -s pshellNoServerDemo$fileExt hello$fileExt
+    rm -f wildcardMatch*
+    ln -s pshellNoServerDemo$fileExt wildcardMatch$fileExt
+    rm -f world*
+    ln -s pshellNoServerDemo$fileExt world$fileExt
     
     cd ..
     rm -f .pshellrc
@@ -183,9 +188,9 @@ else
   ln -s $libDir/pshell/libpshell-control.so $libDir/libpshell-control.so
   
   echo "Installing bins..."
-  echo "Copying pshell to $binDir"
+  echo "Copying pshell$fileExt to $binDir"
   cp -f bin/pshell $binDir/.
-  chmod +x $binDir/pshell
+  chmod +x $binDir/pshell$fileExt
   
   echo "Installing includes..."
   echo "Copying PshellServer.h to $includeDir"
