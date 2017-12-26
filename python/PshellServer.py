@@ -970,13 +970,9 @@ def _printf(message_):
   global _gPshellMsg
   global _gCommandInteractive
   if (_gCommandInteractive == True):
-    if (_gServerType == LOCAL):
-      sys.stdout.write(message_)
-      sys.stdout.flush()
-    elif (_gServerType == TCP):
+    if ((_gServerType == LOCAL) or (_gServerType == TCP)):
       PshellReadline.write(message_)
-    else:
-      # remote UDP/UNIX server
+    else:   # UDP/UNIX server
       _gPshellMsg["payload"] += message_
     _endif
   _endif

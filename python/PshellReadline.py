@@ -648,22 +648,14 @@ _enddef
 def _write(string_):
   global _gOutFd
   global _gSerialType
+  string_ = string_.replace("\n", "\r\n")
   if (_gSerialType == TTY):
     # serial terminal control
     _gOutFd.write(string_)
     _gOutFd.flush()
   else:
     # TCP socket with telnet client
-    string = _NULL
-    for char in string_:
-      # need to insert carriage return every place we find a newline
-      if (char == "\n"):
-        string += "\r\n"
-      else:
-        string += char
-      _endif
-    _endfor
-    _gOutFd.send(string)
+    _gOutFd.send(string_)
   _endif
 _enddef
 

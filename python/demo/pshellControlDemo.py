@@ -103,11 +103,11 @@ if (__name__ == '__main__'):
     (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
     if (not PshellReadline.isSubString(command, "quit")):
       if ((command.split()[0] == "?") or (command.split()[0] == "help")):
-        sys.stdout.write(PshellControl.extractCommands(sid))
+        PshellReadline.write(PshellControl.extractCommands(sid))
       elif (extract):
         (results, retCode) = PshellControl.sendCommand3(sid, command)
-        print "%d bytes extracted, results:" % len(results)
-        sys.stdout.write("%s" % results)
+        PshellReadline.write("%d bytes extracted, results:\n" % len(results))
+        PshellReadline.write("%s" % results)
       else:
         PshellControl.sendCommand1(sid, command)
       endif

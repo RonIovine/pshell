@@ -71,7 +71,7 @@ _gSid = None
 def _comandDispatcher(args_):
   global _gSid
   (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
-  sys.stdout.write(results)
+  PshellServer.printf(results)
 _enddef
 
 #################################################################################
