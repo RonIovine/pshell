@@ -580,6 +580,8 @@ def _runTCPServer():
     _gSocketFd.shutdown(socket.SHUT_RDWR)
     _receiveTCP()
     _gConnectFd.shutdown(socket.SHUT_RDWR)
+    _gConnectFd.close()
+    _gSocketFd.close()
   _endwhile
 _enddef
 

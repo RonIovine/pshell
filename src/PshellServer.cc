@@ -1959,6 +1959,8 @@ static void runTCPServer(void)
     shutdown(_socketFd, SHUT_RDWR);
     receiveTCP();
     shutdown(_connectFd, SHUT_RDWR);
+    close(_connectFd);
+    close(_socketFd);
   }
 }
 
