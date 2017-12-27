@@ -78,7 +78,7 @@ def _showWelcome():
   sys.stdout.write("\033]0;PSHELL: %s[%s], Mode: INTERACTIVE\007" % (_gClientName, _gRemoteServer))
   sys.stdout.flush()    
   banner = "#  PSHELL: Process Specific Embedded Command Line Shell"
-  server = "#  Broadcast server: %s[%s]" % (_gClientName, _gRemoteServer)
+  server = "#  Multi-session BROADCAST server: %s[%s]" % (_gClientName, _gRemoteServer)
   maxBorderWidth = max(58, len(banner),len(server))+2
   print
   print "#"*maxBorderWidth
@@ -97,11 +97,29 @@ def _showWelcome():
   print "#"
   print "#  NOTE: Connected to a broadcast address, all commands"
   print "#        are single-shot, 'fire-and'forget', with no"
-  print "#        response requested or expected and no results"
+  print "#        response requested or expected, and no results"
   print "#        displayed.  All commands are 'invisible' since"
-  print "#        since no remote command query is requested."
+  print "#        no remote command query is requested."
   print "#"
   print "#"*maxBorderWidth
+  print
+_enddef
+
+#################################################################################
+#################################################################################
+def _showHelp():
+  print
+  print "****************************************"
+  print "*             COMMAND LIST             *"
+  print "****************************************"
+  print
+  print "quit   -  exit interactive mode"
+  print "help   -  show all available commands"
+  print
+  print "NOTE: Connected to a broadcast address, all remote server"
+  print "      commands are 'invisible' to this client application"
+  print "      and are single-shot, 'fire-and-forget', with no response"
+  print "      requested or expected, and no results displayed"
   print
 _enddef
 
@@ -110,22 +128,7 @@ _enddef
 def _processCommand(command_):
   global _gSid
   if ((command_.split()[0] == "?") or (PshellReadline.isSubString(command_.split()[0], "help"))):
-    print
-    print "****************************************"
-    print "*             COMMAND LIST             *"
-    print "****************************************"
-    print
-    print "quit   -  exit interactive mode"
-    print "help   -  show all available commands"
-    print "batch  -  run commands from a batch file"
-    print
-    print "NOTE: Connected to a broadcast address, all remote server"
-    print "      commands are 'invisible' to this client application"
-    print "      and are single-shot, 'fire-and-forget', with no response"
-    print "      requested or expected, and no results displayed"
-    print
-  elif (PshellReadline.isSubString(command_.split()[0], "batch")):
-    print "processing batch file"
+    _showHelp()
   else:
     PshellControl.sendCommand1(_gSid, command_)
   _endif
@@ -149,12 +152,16 @@ def _configureLocalServer():
   # need to set the first arg position to 0 so we can pass
   # through the exact command to our remote server for dispatching
   PshellServer._gFirstArgPos = 0
-  # we tell the local server not to add the 'batch' command because
-  # they are already added in the remote UDP/UNIX servers
-  PshellServer._gAddBatch = False
+  # we tell the local server we are the special UDP/UNIX command 
+  # line client so it can process commands correctly and display
+  # the correct banner  information
+  PshellServer._gPshellClient = True
   # supress the automatic invalid arg count messag from the PshellControl.py
   # module so we can display the returned usage
   PshellControl._gSupressInvalidArgCountMessage = True
+  # extract information from our remote server via the special
+  # "private" control API so we can feed the info to our local
+  # pshell server to make it look like a remote server
   prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
@@ -172,7 +179,7 @@ def _configureLocalServer():
     PshellServer._gBannerOverride = banner
   _endif
   if (_gPort == PshellControl.UNIX):
-    PshellServer._gServerTypeOverride = PshellControl.UNIX
+    PshellServer._gServerTypeOverride = PshellServer.UNIX
   elif (_gRemoteServer == "localhost"):
     PshellServer._gServerTypeOverride = "127.0.0.1"
   else:
@@ -284,12 +291,11 @@ if (__name__ == '__main__'):
   
   else:
 
-    _gClientName = "pshellClient"
+    _gClientName = "broadcastServer"
 
     # add some TAB completors
     PshellReadline.addTabCompletion("quit")
     PshellReadline.addTabCompletion("help")
-    PshellReadline.addTabCompletion("batch")
 
     _showWelcome()
 

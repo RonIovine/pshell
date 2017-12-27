@@ -590,10 +590,10 @@ _enddef
 def _runLocalServer():
   global _gPrompt
   global _gTitle
-  global _gAddBatch
+  global _gPshellClient
   _gPrompt = _getDisplayServerName() + "[" + _getDisplayServerType() + "]:" + _getDisplayPrompt()
   _gTitle = _getDisplayTitle() + ": " + _getDisplayServerName() + "[" + _getDisplayServerType() + "], Mode: INTERACTIVE"
-  if (_gAddBatch):
+  if (not _gPshellClient):
     _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 2, True, True)
   _endif
   _addCommand(_help, "help", "show all available commands", "", 0, 0, True, True)
@@ -930,9 +930,14 @@ def _showWelcome():
   global _gServerName
   global _gTcpConnectSockName
   global _gTcpTitle
+  global  _gPshellClient
   # show our welcome screen
   banner = "#  %s" % _getDisplayBanner()
-  if (_gServerType == LOCAL):
+  if (_gPshellClient == True):
+    # put up our window title banner
+    printf("\033]0;" + _gTitle + "\007")
+    server = "#  Multi-session UDP server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
+  elif (_gServerType == LOCAL):
     # put up our window title banner
     printf("\033]0;" + _gTitle + "\007")
     server = "#  Single session LOCAL server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
@@ -955,6 +960,10 @@ def _showWelcome():
     printf("#  Idle session timeout: %d minutes\n" % _gTcpTimeout)
   _endif
   printf("#\n")
+  if (_gPshellClient == True):
+    printf("#  Command response timeout: 5 seconds\n")
+    printf("#\n")
+  _endif
   printf("#  Type '?' or 'help' at prompt for command summary\n")
   printf("#  Type '?' or '-h' after command for command usage\n")
   printf("#\n")
@@ -1274,8 +1283,5 @@ _gTcpConnectSockName = None
 _gTcpInteractivePrompt = None
 _gTcpPrompt = None
 _gTcpTitle = None
-# used so the pshell.py UDP/UNIX client program
-# can supress the adding of the batch command in
-# its local server, since they already exist in
-# the remote servers
-_gAddBatch = True
+# flag to indicate the special pshell.py client
+_gPshellClient = False 
