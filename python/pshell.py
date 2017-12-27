@@ -65,7 +65,6 @@ import PshellReadline
 _enddef = _endif = _endwhile = _endfor = None
 
 _gSid = None
-_gBroadcastServer = False
 _NULL = ""
 
 #################################################################################
@@ -264,10 +263,16 @@ if (__name__ == '__main__'):
   _gRemoteServer = sys.argv[1]
   _gPort = sys.argv[2]
 
+  # see if we are requesting a server sitting on a subnet broadcast address,
+  # if so, we configure for one-way, fire-and-forget messaging since there may
+  # be many hosts/servers on our subnet which might all be listening on the
+  # same broadcast address/port
+  _gIsBroadcastAddr = ((len(_gRemoteServer.split(".")) == 4) and (_gRemoteServer.split(".")[3] == "255"))
+
   # connect to our remote server via the control client
   _gSid = PshellControl.connectServer("pshellClient", _gRemoteServer, _gPort, PshellControl.ONE_SEC*timeout)
 
-  if (PshellControl._gBroadcastServer == False):
+  if (_gIsBroadcastAddr == False):
     
     # if not a broadcast server address, extract all the commands from
     # our unicast remote server and add then to our local server
@@ -292,7 +297,7 @@ if (__name__ == '__main__'):
   
   else:
 
-    _gServerName = "broadcastServer"
+    _gServerName = "broadcastAddr"
 
     # add some TAB completors
     PshellReadline.addTabCompletion("quit")

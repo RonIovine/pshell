@@ -423,7 +423,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   global _gPshellControl
   global _gUnixSocketPath
   global _gPshellMsgPayloadLength
-  global _gBroadcastServer
+  isBroadcastAddress = False
   (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_.lower() == "unix"):
     # UNIX domain socket
@@ -441,6 +441,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
     _gPshellControl.append({"socket":socketFd,
                             "timeout":defaultTimeout_,
                             "serverType":"unix",
+                            "isBroadcastAddress":isBroadcastAddress,
                             "sourceAddress":sourceAddress,
                             "destAddress":_gUnixSocketPath+remoteServer_,
                             "remoteServer":controlName_+"["+remoteServer_+"]",
@@ -459,7 +460,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
     # if we are trying to use a subnet broadcast address, set our socket option
     if ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
       # subnet broadcast address
-      _gBroadcastServer = True
+      isBroadcastAddress = True
       defaultTimeout_ = NO_WAIT
       socketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     _endif
@@ -468,6 +469,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
     _gPshellControl.append({"socket":socketFd,
                             "timeout":defaultTimeout_,
                             "serverType":"udp",
+                            "isBroadcastAddress":isBroadcastAddress,
                             "sourceAddress":None,
                             "destAddress":(remoteServer_, int(port_)),
                             "remoteServer":controlName_+"["+remoteServer_+"]",
@@ -673,7 +675,6 @@ _enddef
 #################################################################################
 def _sendCommand3(sid_, command_):
   global NO_WAIT
-  global _gBroadcastServer
   results = _NULL
   retCode = SOCKET_NOT_CONNECTED
   control = _getControl(sid_)
@@ -682,8 +683,8 @@ def _sendCommand3(sid_, command_):
     # so no need to force it here
     control["pshellMsg"]["dataNeeded"] = (control["timeout"] > NO_WAIT)
     retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, control["timeout"])
-    if (_gBroadcastServer == False):
-      # if talking to a broadcast address, we don't request ot expect any results
+    # only try to extract data if not talking to a broadcast address
+    if (control["isBroadcastAddress"] == False):
       if (not control["pshellMsg"]["dataNeeded"]):
         print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
       elif (retCode == COMMAND_SUCCESS):
@@ -698,20 +699,19 @@ _enddef
 #################################################################################
 def _sendCommand4(sid_, timeoutOverride_, command_):
   global NO_WAIT
-  global _gBroadcastServer
   results = _NULL
   retCode = SOCKET_NOT_CONNECTED
   control = _getControl(sid_)
   if (control != None):
-    if (_gBroadcastServer == True):
-      # if talking to a broadcast server, force our wait time to 0
+    if (control["isBroadcastAddress"] == True):
+      # if talking to a broadcast address, force our wait time to 0
       # because we do not request or expecet a response
       timeoutOverride_ = NO_WAIT
     _endif
     control["pshellMsg"]["dataNeeded"] = (timeoutOverride_ > NO_WAIT)
     retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
-    if (_gBroadcastServer == False):
-      # if talking to a broadcast address, we don't request ot expect any results
+    # only try to extract data if not talking to a broadcast address
+    if (control["isBroadcastAddress"] == False):
       if (not control["pshellMsg"]["dataNeeded"]):
         print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
       elif (retCode == COMMAND_SUCCESS):
@@ -729,11 +729,10 @@ def _sendCommand(control_, commandType_, command_, timeout_):
   global _gPshellControlResults
   global _gSupressInvalidArgCountMessage
   global NO_WAIT
-  global _gBroadcastServer
   retCode = COMMAND_SUCCESS
   if (control_ != None):
-    if (_gBroadcastServer == True):
-      # if talking to a broadcast server, force our wait time to 0
+    if (control_["isBroadcastAddress"] == True):
+      # if talking to a broadcast address, force our wait time to 0
       # because we do not request or expecet a response
       timeout_ = NO_WAIT
     _endif
@@ -932,7 +931,3 @@ _gPshellControlResults = {COMMAND_SUCCESS:"COMMAND_SUCCESS",
 # a remote server to pass the command usage back to the local server that
 # is run by the client
 _gSupressInvalidArgCountMessage = False
-
-# indicated if we have connected to a subnet broadcast address,
-# we use this to supress the requesting of any response or results
-_gBroadcastServer = False
