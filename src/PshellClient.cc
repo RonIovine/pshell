@@ -121,6 +121,7 @@ enum ServerType
  * or trailing underscores for local stack variables
  */
 
+bool _isBroadcastServer = false;
 bool _serverResponseTimeoutOverride = false;
 int _serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
 int _socketFd;
@@ -245,7 +246,11 @@ void showWelcome(void)
 {
   printf("\n");
   char sessionInfo[256];
-  if (_serverType == UDP)
+  if (_isBroadcastServer)
+  {
+    sprintf(sessionInfo, "Multi-session BROADCAST server: %s[%s]", _serverName, _ipAddress);
+  }
+  else if (_serverType == UDP)
   {
     sprintf(sessionInfo, "Multi-session UDP server: %s[%s]", _serverName, _ipAddress);
   }
@@ -273,6 +278,15 @@ void showWelcome(void)
 #else
   printf("%s  Command abbreviation supported\n", PSHELL_WELCOME_BORDER);
 #endif
+  if (_isBroadcastServer)
+  {
+  printf("%s\n", PSHELL_WELCOME_BORDER);
+    printf("%s  NOTE: Connected to a broadcast address, all commands\n", PSHELL_WELCOME_BORDER);
+    printf("%s        are single-shot, 'fire-and'forget', with no\n", PSHELL_WELCOME_BORDER);
+    printf("%s        response requested or expected, and no results\n", PSHELL_WELCOME_BORDER);
+    printf("%s        displayed.  All commands are 'invisible' since\n", PSHELL_WELCOME_BORDER);
+    printf("%s        no remote command query is requested.\n", PSHELL_WELCOME_BORDER);
+  }
   printf("%s\n", PSHELL_WELCOME_BORDER);
   PSHELL_PRINT_WELCOME_BORDER(printf, maxLength);
   printf("\n");
@@ -494,6 +508,7 @@ bool init(char *destination_, char *server_)
     {
       /* setup socket for broadcast */
       setsockopt(_socketFd, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
+      _isBroadcastServer = true;
     }
 
     /* bind to our source socket */
@@ -576,13 +591,23 @@ bool init(char *destination_, char *server_)
     strcpy(_ipAddress, "unix");
   }
 
-  return (getVersion() && 
-          getPayloadSize() && 
-          getServerName() && 
-          getTitle() && 
-          getBanner() && 
-          getPrompt());
-
+  if (_isBroadcastServer)
+  {
+    /* for a broadcast server, we cannot query any information  */
+    _pshellSendMsg.header.respNeeded = false;
+    _pshellSendMsg.header.dataNeeded = false;
+    strcpy(_serverName, "broadcastServer");
+    return (true);
+  }
+  else
+  {
+    return (getVersion() && 
+            getPayloadSize() && 
+            getServerName() && 
+            getTitle() && 
+            getBanner() && 
+            getPrompt());
+  }
 }
 
 /******************************************************************************/
@@ -700,19 +725,22 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, bool clear_, 
     _pshellRcvMsg->header.msgType = msgType_;
     if (send())
     {
-      while (_pshellRcvMsg->header.msgType != PSHELL_COMMAND_COMPLETE)
+      if (!_isBroadcastServer)
       {
-        if (receive())
+        while (_pshellRcvMsg->header.msgType != PSHELL_COMMAND_COMPLETE)
         {
-          if (!silent_)
+          if (receive())
           {
-            fprintf(stdout, "%s", _pshellRcvMsg->payload);
-            fflush(stdout);
+            if (!silent_)
+            {
+              fprintf(stdout, "%s", _pshellRcvMsg->payload);
+              fflush(stdout);
+            }
           }
-        }
-        else
-        {
-          return (false);
+          else
+          {
+            return (false);
+          }
         }
       }
     }
@@ -843,8 +871,8 @@ void buildCommandList(void)
         {
           _maxPshellCommands += PSHELL_COMMAND_CHUNK;
           _pshellCommandList = (const char**)realloc(_pshellCommandList,
-                                                   (_maxPshellCommands+_numNativeInteractiveCommands)*sizeof(char*));
-                                                   _pshellCommandList[_numPshellCommands++] = strdup(str);
+                                                     (_maxPshellCommands+_numNativeInteractiveCommands)*sizeof(char*));
+                                                     _pshellCommandList[_numPshellCommands++] = strdup(str);
         }
       }
     }
@@ -926,11 +954,14 @@ bool initInteractiveMode(void)
    * with native interactive commands and build up a list for
    * the TAB completion if that feature is enabled
    */
-  if (!processCommand(PSHELL_QUERY_COMMANDS2, NULL, 0, false, true))
+  if  (!_isBroadcastServer)
   {
-    return (false);
+    if (!processCommand(PSHELL_QUERY_COMMANDS2, NULL, 0, false, true))
+    {
+      return (false);
+    }
+    buildCommandList();
   }
-  buildCommandList();
 
 #ifdef PSHELL_READLINE
   /* register our TAB completion function */
@@ -1242,7 +1273,19 @@ void showCommands(void)
       printf("  -  %s\n", _nativeInteractiveCommandDescriptions[i]);
     }
   }
-  processCommand(PSHELL_QUERY_COMMANDS1, NULL, 0, false, false);
+  if (!_isBroadcastServer)
+  {
+    processCommand(PSHELL_QUERY_COMMANDS1, NULL, 0, false, false);
+  }
+  else
+  {
+    printf("\n");
+    printf("NOTE: Connected to a broadcast address, all remote server\n");
+    printf("      commands are 'invisible' to this client application\n");
+    printf("      and are single-shot, 'fire-and-forget', with no response\n");
+    printf("      requested or expected, and no results displayed\n");
+    printf("\n");
+  }
 }
 
 /******************************************************************************/
