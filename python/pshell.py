@@ -65,6 +65,71 @@ import PshellReadline
 _enddef = _endif = _endwhile = _endfor = None
 
 _gSid = None
+_gBroadcastServer = False
+_NULL = ""
+
+#################################################################################
+#################################################################################
+def _showWelcome():
+  global _gClientName
+  global _gRemoteServer
+  # show our welcome screen
+  # put up our window title banner
+  sys.stdout.write("\033]0;PSHELL: %s[%s], Mode: INTERACTIVE\007" % (_gClientName, _gRemoteServer))
+  sys.stdout.flush()    
+  banner = "#  PSHELL: Process Specific Embedded Command Line Shell"
+  server = "#  Broadcast server: %s[%s]" % (_gClientName, _gRemoteServer)
+  maxBorderWidth = max(58, len(banner),len(server))+2
+  print
+  print "#"*maxBorderWidth
+  print "#"
+  print banner
+  print "#"
+  print server
+  print "#"
+  print "#  Idle session timeout: NONE"
+  print "#"
+  print "#  Type '?' or 'help' at prompt for command summary"
+  print "#  Type '?' or '-h' after command for command usage"
+  print "#"
+  print "#  Full <TAB> completion, up-arrow recall, command"
+  print "#  line editing and command abbreviation supported"
+  print "#"
+  print "#  NOTE: Connected to a broadcast address, all commands"
+  print "#        are single-shot, 'fire-and'forget', with no"
+  print "#        response requested or expected and no results"
+  print "#        displayed.  All commands are 'invisible' since"
+  print "#        since no remote command query is requested."
+  print "#"
+  print "#"*maxBorderWidth
+  print
+_enddef
+
+#################################################################################
+#################################################################################
+def _processCommand(command_):
+  global _gSid
+  if ((command_.split()[0] == "?") or (PshellReadline.isSubString(command_.split()[0], "help"))):
+    print
+    print "****************************************"
+    print "*             COMMAND LIST             *"
+    print "****************************************"
+    print
+    print "quit   -  exit interactive mode"
+    print "help   -  show all available commands"
+    print "batch  -  run commands from a batch file"
+    print
+    print "NOTE: Connected to a broadcast address, all remote server"
+    print "      commands are 'invisible' to this client application"
+    print "      and are single-shot, 'fire-and-forget', with no response"
+    print "      requested or expected, and no results displayed"
+    print
+  elif (PshellReadline.isSubString(command_.split()[0], "batch")):
+    print "processing batch file"
+  else:
+    PshellControl.sendCommand1(_gSid, command_)
+  _endif
+_enddef
 
 #################################################################################
 #################################################################################
@@ -78,8 +143,8 @@ _enddef
 #################################################################################
 def _configureLocalServer():
   global _gSid
-  global gRemoteServer
-  global gPort
+  global _gRemoteServer
+  global _gPort
 
   # need to set the first arg position to 0 so we can pass
   # through the exact command to our remote server for dispatching
@@ -106,12 +171,12 @@ def _configureLocalServer():
   if (len(banner) > 0):
     PshellServer._gBannerOverride = banner
   _endif
-  if (gPort == PshellControl.UNIX):
+  if (_gPort == PshellControl.UNIX):
     PshellServer._gServerTypeOverride = PshellControl.UNIX
-  elif (gRemoteServer == "localhost"):
+  elif (_gRemoteServer == "localhost"):
     PshellServer._gServerTypeOverride = "127.0.0.1"
   else:
-    PshellServer._gServerTypeOverride = gRemoteServer
+    PshellServer._gServerTypeOverride = _gRemoteServer
   _endif
 _enddef
 
@@ -189,32 +254,56 @@ if (__name__ == '__main__'):
     _endif
   _endfor
 
-  gRemoteServer = sys.argv[1]
-  gPort = sys.argv[2]
+  _gRemoteServer = sys.argv[1]
+  _gPort = sys.argv[2]
 
   # connect to our remote server via the control client
-  _gSid = PshellControl.connectServer("pshellClient", gRemoteServer, gPort, PshellControl.ONE_SEC*timeout)
+  _gSid = PshellControl.connectServer("pshellClient", _gRemoteServer, _gPort, PshellControl.ONE_SEC*timeout)
 
-  # extract all the commands from our remote server and add then to our local server
-  commandList = PshellControl.extractCommands(_gSid)
-  commandList = commandList.split("\n")
-  for command in commandList:
-    splitCommand = command.split("-")
-    if (len(splitCommand ) >= 2):
-      commandName = splitCommand[0].strip()
-      description = splitCommand[1].strip()
-      PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+  if (PshellControl._gBroadcastServer == False):
+    # if not a broadcast server address, extract all the commands from
+    # our unicast remote server and add then to our local server
+    commandList = PshellControl.extractCommands(_gSid)
+    commandList = commandList.split("\n")
+    for command in commandList:
+      splitCommand = command.split("-")
+      if (len(splitCommand ) >= 2):
+        commandName = splitCommand[0].strip()
+        description = splitCommand[1].strip()
+        PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+      _endif
     _endif
+
+    # configure our local server to interact with a remote server, we override the display settings
+    # (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
+    # a remote server
+    _configureLocalServer()
+
+    # now start our local server which will interact with a remote server via the pshell control machanism
+    PshellServer.startServer("pshellClient", PshellServer.LOCAL, PshellServer.BLOCKING)
+  
+  else:
+
+    _gClientName = "pshellClient"
+
+    # add some TAB completors
+    PshellReadline.addTabCompletion("quit")
+    PshellReadline.addTabCompletion("help")
+    PshellReadline.addTabCompletion("batch")
+
+    _showWelcome()
+
+    command = _NULL
+    while (not PshellReadline.isSubString(command, "quit")):
+      (command, idleSession) = PshellReadline.getInput("%s[%s]:PSHELL> " % (_gClientName, _gRemoteServer))
+      if (not PshellReadline.isSubString(command, "quit")):
+        _processCommand(command)
+      _endif
+    _endwhile
+
   _endif
-
-  # configure our local server to interact with a remote server, we override the display settings
-  # (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
-  # a remote server
-  _configureLocalServer()
-
-  # now start our local server which will interact with a remote server via the pshell control machanism
-  PshellServer.startServer("pshellClient", PshellServer.LOCAL, PshellServer.BLOCKING)
 
   _cleanupAndExit()
   
 _endif
+

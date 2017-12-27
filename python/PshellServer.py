@@ -1021,11 +1021,14 @@ def _cleanupResources():
   global _gUnixSourceAddress
   global _gServerType
   global _gSocketFd
-  if (_gUnixSourceAddress != None):
-    os.unlink(_gUnixSourceAddress)
-  _endif
-  if (_gServerType != LOCAL):
-    _gSocketFd.close()
+  global _gRunninig
+  if (_gRunninig == True):
+    if (_gUnixSourceAddress != None):
+      os.unlink(_gUnixSourceAddress)
+    _endif
+    if (_gServerType != LOCAL):
+      _gSocketFd.close()
+    _endif
   _endif
 _enddef
 
