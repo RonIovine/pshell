@@ -417,7 +417,6 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
   global _gBanner
   global gRunning
   global _gTcpTimeout
-  
   if (_gRunninig == False):
     gRunning = True
     _gServerName = serverName_

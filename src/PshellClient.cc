@@ -266,8 +266,11 @@ void showWelcome(void)
   printf("%s  %s\n", PSHELL_WELCOME_BORDER, sessionInfo);
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Idle session timeout: NONE\n", PSHELL_WELCOME_BORDER);
-  printf("%s\n", PSHELL_WELCOME_BORDER);
-  printf("%s  Command response timeout: %d seconds\n", PSHELL_WELCOME_BORDER, _serverResponseTimeout);
+  if (!_isBroadcastServer)
+  {
+    printf("%s\n", PSHELL_WELCOME_BORDER);
+    printf("%s  Command response timeout: %d seconds\n", PSHELL_WELCOME_BORDER, _serverResponseTimeout);
+  }
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);

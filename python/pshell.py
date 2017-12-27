@@ -71,14 +71,14 @@ _NULL = ""
 #################################################################################
 #################################################################################
 def _showWelcome():
-  global _gClientName
+  global _gServerName
   global _gRemoteServer
   # show our welcome screen
   # put up our window title banner
-  sys.stdout.write("\033]0;PSHELL: %s[%s], Mode: INTERACTIVE\007" % (_gClientName, _gRemoteServer))
+  sys.stdout.write("\033]0;PSHELL: %s[%s], Mode: INTERACTIVE\007" % (_gServerName, _gRemoteServer))
   sys.stdout.flush()    
   banner = "#  PSHELL: Process Specific Embedded Command Line Shell"
-  server = "#  Multi-session BROADCAST server: %s[%s]" % (_gClientName, _gRemoteServer)
+  server = "#  Multi-session BROADCAST server: %s[%s]" % (_gServerName, _gRemoteServer)
   maxBorderWidth = max(58, len(banner),len(server))+2
   print
   print "#"*maxBorderWidth
@@ -268,6 +268,7 @@ if (__name__ == '__main__'):
   _gSid = PshellControl.connectServer("pshellClient", _gRemoteServer, _gPort, PshellControl.ONE_SEC*timeout)
 
   if (PshellControl._gBroadcastServer == False):
+    
     # if not a broadcast server address, extract all the commands from
     # our unicast remote server and add then to our local server
     commandList = PshellControl.extractCommands(_gSid)
@@ -287,11 +288,11 @@ if (__name__ == '__main__'):
     _configureLocalServer()
 
     # now start our local server which will interact with a remote server via the pshell control machanism
-    PshellServer.startServer("pshellClient", PshellServer.LOCAL, PshellServer.BLOCKING)
+    PshellServer.startServer("pshellServer", PshellServer.LOCAL, PshellServer.BLOCKING)
   
   else:
 
-    _gClientName = "broadcastServer"
+    _gServerName = "broadcastServer"
 
     # add some TAB completors
     PshellReadline.addTabCompletion("quit")
@@ -301,7 +302,7 @@ if (__name__ == '__main__'):
 
     command = _NULL
     while (not PshellReadline.isSubString(command, "quit")):
-      (command, idleSession) = PshellReadline.getInput("%s[%s]:PSHELL> " % (_gClientName, _gRemoteServer))
+      (command, idleSession) = PshellReadline.getInput("%s[%s]:PSHELL> " % (_gServerName, _gRemoteServer))
       if (not PshellReadline.isSubString(command, "quit")):
         _processCommand(command)
       _endif
