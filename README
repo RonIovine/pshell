@@ -11,13 +11,20 @@ framework and API to embed functions within a C/C++/Python application that can
 be invoked either via a separate client program or directly from the within
 application itself.
 
-There is also a control mechanism API and library provided by where any external
-program can make calls into another program that is running a PSHELL that is
-configured for a UDP or UNIX server.
+There is also a control API provided by where any external program can make registered
+pshell calls into another program that is running a PSHELL server (only supported for 
+UDP or UNIX pshell servers) to invoke any of their registered pshell commands.  This 
+will provide a direct programmatic control access mechanism to a remote process' pshell 
+functions without having to fork the calling process to call the pshell command line 
+client program via the 'system' call.
 
-Note that there are also Python versions of the PshellServer, PshellControl, and
-PshellClient functionality.  All of the Python modules along with corresponding 
-demo programs can be found in the 'python' sub-directory of this package.
+This control API can function as an IPC mechanism between processes.  The API supports 
+unicast and multicast messaging paradigms.  It also supports messaging to broadcast 
+type servers (i.e. UDP server running at a subnet broadcast address, e.g. x.y.z.255).
+
+There are also Python versions of the PshellServer, PshellControl, and PshellClient 
+functionality.  All of the Python modules along with corresponding demo programs can 
+be found in the 'python' sub-directory of this package.
 
 The Python and 'C' versions are fully consistent with each other at the API level
 and interoperable with each other at the protocol level and can be mixed and matched 
@@ -131,8 +138,9 @@ in the top level of the unzipped package (i.e. same directory as this README fil
 that will do the different installs.  This package has binaries built for an x86_64
 target that have been tested on CentOs (RedHat derivitave) and Mint (Ubuntu derivitave)
 Linux distributions.  It has also been successfully built and run on a ARM based
-Raspberry Pi system running Raspbian Linux.  If using this package for a a different
-target, see the following section on building from source.
+Raspberry Pi system running Raspbian Linux as well as a Windows/Cygwin based system.  
+If using this package for a a different target, see the following section on building 
+from source.
 
 To see the usage of the script 'cd' to the top level pshell directory and type:
 
