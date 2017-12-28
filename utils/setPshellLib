@@ -54,12 +54,12 @@ then
     rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-stub.a $LIB_DIR/libpshell-server.a
   fi
-  if [ ! -e "$PYTHON_DIR/PshellServer-stub.py" ]
+  if [ ! -e "$PYTHON_DIR/PshellServer_stub.py" ]
   then
-    echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-stub.py'"
+    echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer_stub.py'"
   else
     rm -f $PYTHON_DIR/PshellServer.py
-    ln -s $PYTHON_DIR/PshellServer-stub.py $PYTHON_DIR/PshellServer.py 
+    ln -s $PYTHON_DIR/PshellServer_stub.py $PYTHON_DIR/PshellServer.py 
   fi
 elif [ "$1" == "-full" ] 
 then
@@ -75,12 +75,12 @@ then
     rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-full.a $LIB_DIR/libpshell-server.a
   fi
-  if [ ! -e "$PYTHON_DIR/PshellServer-full.py" ]
+  if [ ! -e "$PYTHON_DIR/PshellServer_full.py" ]
   then
-    echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-full.py'"
+    echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer_full.py'"
   else
     rm -f $PYTHON_DIR/PshellServer.py
-    ln -s $PYTHON_DIR/PshellServer-full.py $PYTHON_DIR/PshellServer.py 
+    ln -s $PYTHON_DIR/PshellServer_full.py $PYTHON_DIR/PshellServer.py 
   fi
 else
   echo "Usage: setPshellLib -stub | -full"

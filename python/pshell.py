@@ -57,7 +57,7 @@ import os
 import sys
 import signal
 import PshellControl
-import PshellServer
+import PshellServer_full
 import PshellReadline
 
 # dummy variables so we can create pseudo end block indicators, add these identifiers to your
@@ -138,7 +138,7 @@ _enddef
 def _comandDispatcher(args_):
   global _gSid
   (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
-  PshellServer.printf(results)
+  PshellServer_full.printf(results)
 _enddef
 
 #################################################################################
@@ -150,11 +150,11 @@ def _configureLocalServer():
 
   # need to set the first arg position to 0 so we can pass
   # through the exact command to our remote server for dispatching
-  PshellServer._gFirstArgPos = 0
+  PshellServer_full._gFirstArgPos = 0
   # we tell the local server we are the special UDP/UNIX command 
   # line client so it can process commands correctly and display
   # the correct banner  information
-  PshellServer._gPshellClient = True
+  PshellServer_full._gPshellClient = True
   # supress the automatic invalid arg count messag from the PshellControl.py
   # module so we can display the returned usage
   PshellControl._gSupressInvalidArgCountMessage = True
@@ -163,33 +163,33 @@ def _configureLocalServer():
   # pshell server to make it look like a remote server
   prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
-    PshellServer._gPromptOverride = prompt
+    PshellServer_full._gPromptOverride = prompt
   _endif
   title = PshellControl._extractTitle(_gSid)
   if (len(title) > 0):
-    PshellServer._gTitleOverride = title
+    PshellServer_full._gTitleOverride = title
   _endif
   serverName = PshellControl._extractName(_gSid)
   if (len(serverName) > 0):
-    PshellServer._gServerNameOverride = serverName
+    PshellServer_full._gServerNameOverride = serverName
   _endif
   banner = PshellControl._extractBanner(_gSid)
   if (len(banner) > 0):
-    PshellServer._gBannerOverride = banner
+    PshellServer_full._gBannerOverride = banner
   _endif
   if (_gPort == PshellControl.UNIX):
-    PshellServer._gServerTypeOverride = PshellServer.UNIX
+    PshellServer_full._gServerTypeOverride = PshellServer_full.UNIX
   elif (_gRemoteServer == "localhost"):
-    PshellServer._gServerTypeOverride = "127.0.0.1"
+    PshellServer_full._gServerTypeOverride = "127.0.0.1"
   else:
-    PshellServer._gServerTypeOverride = _gRemoteServer
+    PshellServer_full._gServerTypeOverride = _gRemoteServer
   _endif
 _enddef
 
 #################################################################################
 #################################################################################
 def _cleanupAndExit():
-  PshellServer.cleanupResources()
+  PshellServer_full.cleanupResources()
   PshellControl.disconnectAllServers()
   sys.exit()
 _enddef
@@ -283,7 +283,7 @@ if (__name__ == '__main__'):
       if (len(splitCommand ) >= 2):
         commandName = splitCommand[0].strip()
         description = splitCommand[1].strip()
-        PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+        PshellServer_full.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
       _endif
     _endif
 
@@ -293,7 +293,7 @@ if (__name__ == '__main__'):
     _configureLocalServer()
 
     # now start our local server which will interact with a remote server via the pshell control machanism
-    PshellServer.startServer("pshellServer", PshellServer.LOCAL, PshellServer.BLOCKING)
+    PshellServer_full.startServer("pshellServer", PshellServer_full.LOCAL, PshellServer_full.BLOCKING)
   
   else:
 

@@ -77,7 +77,7 @@ then
     echo "Setting softlink PshellServer.py PshellServer-full.py"
     cd $localDir/python
     rm -f PshellServer.py
-    ln -s PshellServer-full.py PshellServer.py 
+    ln -s PshellServer_full.py PshellServer.py 
 
     echo "Setting up Busybox-like demo softlinks"
     cd $localDir/bin
