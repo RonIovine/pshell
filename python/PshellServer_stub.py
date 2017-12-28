@@ -32,7 +32,7 @@
 A Python module to provide remote command line access to external processes
 
 This is the STUB version of the PshellServer module, to use the actual version, 
-set the PshellServer.py softlink to PshellServer-full.py, or use the provided 
+set the PshellServer.py softlink to PshellServer_full.py, or use the provided 
 utility shell script 'setPshellLib' to set the desired softlink and 'showPshellLib'
 to display the current softlink settings.
 """
@@ -80,9 +80,8 @@ LOCALHOST = "localhost"
 #
 # "public" API functions
 #
-# Users of this module should only access functionality via these "public"
-# methods.  This is broken up into "public" and "private" sections for 
-# readability and to not expose the implementation in the API definition
+# This module implements the public API of the PshellServer_full.py module
+# but with all the underlying functionality stubbed out.
 #
 #################################################################################
 
@@ -90,7 +89,7 @@ LOCALHOST = "localhost"
 #################################################################################
 def addCommand(function, command, description, usage = None, minArgs = 0, maxArgs = 0, showUsage = True):
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -99,10 +98,10 @@ _enddef
 #################################################################################
 def startServer(serverName, serverType, serverMode, hostnameOrIpAddr = None, port = 0):
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
+  print "PSHELL_INFO: STUB Server: %s Started" % serverName
   if (serverMode == BLOCKING):
-    print "PSHELL_INFO: STUB Server: %s Started" % serverName
     while (True):
       time.sleep(100000)
     _endwhile
@@ -113,7 +112,7 @@ _enddef
 #################################################################################
 def cleanupResources():
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -122,7 +121,7 @@ _enddef
 #################################################################################
 def runCommand(command):
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -131,7 +130,7 @@ _enddef
 #################################################################################
 def printf(message = "\n"):
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -140,7 +139,7 @@ _enddef
 #################################################################################
 def flush():
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -149,7 +148,7 @@ _enddef
 #################################################################################
 def wheel(string = None):
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -158,7 +157,7 @@ _enddef
 #################################################################################
 def march(string):
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -167,7 +166,7 @@ _enddef
 #################################################################################
 def showUsage():
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
 _enddef
@@ -176,7 +175,7 @@ _enddef
 #################################################################################
 def isHelp():
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   return (True)
 _enddef
@@ -185,7 +184,7 @@ _enddef
 #################################################################################
 def isSubString(string1, string2, minMatchLength = 0):
   """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   return (True)
 _enddef
