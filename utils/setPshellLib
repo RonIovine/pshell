@@ -36,8 +36,9 @@ fi
 if [ -n "$PSHELL_INSTALL" ]
 then
   LIB_DIR=${PSHELL_INSTALL}/lib
+  PYTHON_DIR=${PSHELL_INSTALL}/python
 else
-  LIB_DIR=$(pwd)/lib
+  PYTHON_DIR=$(pwd)/python
 fi
 if [ "$1" == "-stub" ] 
 then
@@ -48,16 +49,17 @@ then
   then
     echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-stub.a'"
   else
-    if [ -e "$LIB_DIR/libpshell-server.so" ]
-    then
-      rm $LIB_DIR/libpshell-server.so
-    fi
+    rm -f $LIB_DIR/libpshell-server.so
     ln -s $LIB_DIR/libpshell-server-stub.so $LIB_DIR/libpshell-server.so 
-    if [ -e "$LIB_DIR/libpshell-server.a" ]
-    then
-      rm $LIB_DIR/libpshell-server.a
-    fi
+    rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-stub.a $LIB_DIR/libpshell-server.a
+  fi
+  if [ ! -e "$PYTHON_DIR/PshellServer-stub.py" ]
+  then
+    echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-stub.py'"
+  else
+    rm -f $PYTHON_DIR/PshellServer.py
+    ln -s $PYTHON_DIR/PshellServer-stub.py $PYTHON_DIR/PshellServer.py 
   fi
 elif [ "$1" == "-full" ] 
 then
@@ -68,16 +70,17 @@ then
   then
     echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-full.a'"
   else
-    if [ -e "$LIB_DIR/libpshell-server.so" ]
-    then
-      rm $LIB_DIR/libpshell-server.so
-    fi
+    rm -f $LIB_DIR/libpshell-server.so
     ln -s $LIB_DIR/libpshell-server-full.so $LIB_DIR/libpshell-server.so 
-    if [ -e "$LIB_DIR/libpshell-server.a" ]
-    then
-      rm $LIB_DIR/libpshell-server.a
-    fi
+    rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-full.a $LIB_DIR/libpshell-server.a
+  fi
+  if [ ! -e "$PYTHON_DIR/PshellServer-full.py" ]
+  then
+    echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-full.py'"
+  else
+    rm -f $PYTHON_DIR/PshellServer.py
+    ln -s $PYTHON_DIR/PshellServer-full.py $PYTHON_DIR/PshellServer.py 
   fi
 else
   echo "Usage: setPshellLib -stub | -full"
