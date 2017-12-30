@@ -10,9 +10,9 @@ or via direct interaction from within the application itself.
 
 There is also a control API provided by where any external program can invoke another
 program's registered pshell functions (only supported for UDP or UNIX pshell servers).
-This will provide a direct programmatic control access mechanism to a remote process' 
-pshell functions without having to fork the calling process to call the 'pshell' command 
-line client program via the 'system' call.
+This will provide direct programmatic control of a remote process' pshell functions 
+without having to fork the calling process to call the 'pshell' command line client 
+program via the 'system' call.
 
 The control API can function as an IPC mechanism for control between processes.  If 
 all process control is implemented as a collection of pshell commands, you can get 
@@ -20,15 +20,15 @@ a programmitic IPC mechanism along with manual CLI/Shell access via the same cod
 base.  There is no need to write separate CLI/Shell processing code and control/message
 event handling code.
 
-The control API supports both unicast and multicast messaging paradigms.  It also supports 
-messaging to broadcast type pshell servers (i.e. UDP server running at a subnet broadcast 
-address, e.g. x.y.z.255).
+The control API supports both unicast and multicast messaging paradigms.  It also 
+supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
+broadcast address, e.g. x.y.z.255).
 
 The Python and 'C' versions are consistent with each other at the API level (i.e. similar 
-functional API, usage etc) and fully interoperable with each other at the protocol level 
-and can be mixed and matched in any combination, i.e. the 'C' libraries and UDP/UNIX client 
-can control and interface transparently to the Python applications and vice-versa.  A 
-telnet client can interface to both 'C' and Python based pshell servers.
+functional API, usage, process interaction etc) and fully interoperable with each other at 
+the protocol level and can be mixed and matched in any combination, i.e. the 'C' libraries 
+and UDP/UNIX client can control and interface transparently to the Python applications and 
+vice-versa.  A telnet client can interface to both 'C' and Python based pshell servers.
 
 The prototype for the 'C' callback functions are similar to the 'main' in 'C' as follows:
 

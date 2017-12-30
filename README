@@ -13,9 +13,9 @@ application itself.
 
 There is also a control API provided by where any external program can invoke another
 program's registered pshell functions (only supported for UDP or UNIX pshell servers).
-This will provide a direct programmatic control access mechanism to a remote process' 
-pshell functions without having to fork the calling process to call the 'pshell' command 
-line client program via the 'system' call.
+This will provide direct programmatic control of a remote process' pshell functions 
+without having to fork the calling process to call the 'pshell' command line client 
+program via the 'system' call.
 
 The control API can function as an IPC mechanism for control between processes.  If 
 all process control is implemented as a collection of pshell commands, you can get 
@@ -23,15 +23,15 @@ a programmitic IPC mechanism along with manual CLI/Shell access via the same cod
 base.  There is no need to write separate CLI/Shell processing code and control/message
 event handling code.
 
-The control API supports both unicast and multicast messaging paradigms.  It also supports 
-messaging to broadcast type pshell servers (i.e. UDP server running at a subnet broadcast 
-address, e.g. x.y.z.255).
+The control API supports both unicast and multicast messaging paradigms.  It also 
+supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
+broadcast address, e.g. x.y.z.255).
 
 The Python and 'C' versions are consistent with each other at the API level (i.e. similar 
-functional API, usage etc) and fully interoperable with each other at the protocol level 
-and can be mixed and matched in any combination, i.e. the 'C' libraries and UDP/UNIX client 
-can control and interface transparently to the Python applications and vice-versa.  A 
-telnet client can interface to both 'C' and Python based pshell servers.
+functional API, usage, process interaction etc) and fully interoperable with each other at 
+the protocol level and can be mixed and matched in any combination, i.e. the 'C' libraries 
+and UDP/UNIX client can control and interface transparently to the Python applications and 
+vice-versa.  A telnet client can interface to both 'C' and Python based pshell servers.
 
 The prototype for the 'C' callback functions are similar to the 'main' in 'C' as follows:
 
@@ -44,7 +44,7 @@ def myFunc(argv):
 Command line pshell functions can also display information back to the interactive clients 
 via a mechanism similar to the familiar 'printf' as follows:
 
-void pshell_printf(const char *format_, ...);
+void pshell_printf(const char *format, ...);
 
 The Python versions have a similar mechanism:
 
@@ -82,7 +82,7 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, nine demo programs are also provided, two (C and
+In addition to the infrastructure components, ten demo programs are also provided, two (C and
 Python) to show the usage of the pshell server API, two (C and Python) to show the usage of pshell 
 control API, two (C and Python) to show the aggergation of multiple pshell servers into a single 
 pshell server via the control API, one to show the usage of the trace filter/trace log API, one to 
@@ -225,17 +225,18 @@ $PSHELL_INSTALL/python/demo/pshellReadlineDemo.py    --  Sample program to show 
 
 EXECUTION:
 
-There are 9 demo programs, two that demonstrate a program that incorporates a
+There are 10 demo programs, two that demonstrate a program that incorporates a
 pshell server (pshellServerDemo and pshellServerDemo.py), one that demonstrates 
 a program that incorporates the trace filter functionality (traceFilterDemo), two 
 that demonstrate the control of a program that is running a pshell server from 
 another program (pshellControlDemo and pshellControlDemo.py), two that demonstrate 
-the aggregation of multiple pshell servers into a single server via the control 
-API (pshellAggregatorDemo, pshellAggregatorDemo.py), one that just demonstrates 
-the stand-alone usage of the TraceLog API (traceLogDemo), and one that demonstrates 
-the use of the multi-cal binary API (pshellNoServerDemo).
+the aggregation of multiple pshell servers into a single server via the control
+API (pshellAggregatorDemo, pshellAggregatorDemo.py), one that demonstrates the 
+usage of readline-like command line user input (pshellReadlineDemo.py), one that 
+demonstrates the stand-alone usage of the TraceLog API (traceLogDemo), and one 
+that demonstrates the use of the multi-call binary API (pshellNoServerDemo).
 
-All nine demo programs have a usage that can be displayed by typing <programName> -h.
+All demo programs have a usage that can be displayed by typing <programName> -h.
 The two demo programs pshellServerDemo and traceFilterDemo can be controlled via
 an interactive client program (either pshell or telnet) that shows the full command
 line functionality.  The demo program pshellControlDemo can control the other two demo
