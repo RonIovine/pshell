@@ -14,11 +14,11 @@ This will provide direct programmatic control of a remote process' pshell functi
 without having to fork the calling process to call the 'pshell' command line client 
 program via the 'system' call.
 
-The control API can function as an IPC mechanism for control between processes.  If 
-all process control is implemented as a collection of pshell commands, you can get 
-a programmitic IPC mechanism along with manual CLI/Shell access via the same code 
-base.  There is no need to write separate CLI/Shell processing code and control/message
-event handling code.
+The control API can function as an IPC mechanism for control between processes.  
+If all process control is implemented as a collection of pshell commands, a user 
+can get a programmatic IPC mechanism along with manual CLI/Shell access via the 
+same code base.  There is no need to write separate code for CLI/Shell processing 
+and control/message event processing.
 
 The control API supports both unicast and multicast messaging paradigms.  It also 
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
@@ -27,8 +27,9 @@ broadcast address, e.g. x.y.z.255).
 The Python and 'C' versions are consistent with each other at the API level (i.e. similar 
 functional API, usage, process interaction etc) and fully interoperable with each other at 
 the protocol level and can be mixed and matched in any combination, i.e. the 'C' libraries 
-and UDP/UNIX client can control and interface transparently to the Python applications and 
-vice-versa.  A telnet client can interface to both 'C' and Python based pshell servers.
+and UDP/UNIX client can control and interface transparently to the Python applications and
+Python UDP/UNIX client and vice-versa.  A telnet client can interface to both 'C' and Python 
+based pshell servers.
 
 The prototype for the 'C' callback functions are similar to the 'main' in 'C' as follows:
 
