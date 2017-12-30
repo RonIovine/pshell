@@ -8,28 +8,29 @@ framework and API to embed functions within a C/C++/Python application that can
 be invoked either via a separate interactive client program ('telnet' or 'pshell') 
 or via direct interaction from within the application itself.
 
-There is also a control API provided by where any external program can make registered
-pshell calls into another program that is running a PSHELL server (only supported for 
-UDP or UNIX pshell servers) to invoke any of their registered pshell commands.  This 
-will provide a direct programmatic control access mechanism to a remote process' pshell 
-functions without having to fork the calling process to call the pshell command line 
-client program via the 'system' call.
+There is also a control API provided by where any external program can invoke another
+program's registered pshell functions (only supported for UDP or UNIX pshell servers).
+This will provide a direct programmatic control access mechanism to a remote process' 
+pshell functions without having to fork the calling process to call the 'pshell' command 
+line client program via the 'system' call.
 
-This control API can function as an IPC mechanism between processes.  The API supports 
-unicast and multicast messaging paradigms.  It also supports messaging to broadcast 
-type servers (i.e. UDP server running at a subnet broadcast address, e.g. x.y.z.255).
+The control API can function as an IPC mechanism for control between processes.  If 
+all process control is implemented as a collection of pshell commands, you can get 
+a programmitic IPC mechanism along with manual CLI/Shell access via the same code 
+base.  There is no need to write separate CLI/Shell processing code and control/message
+event handling code.
 
-There are also Python versions of the PshellServer, PshellControl, and PshellClient 
-functionality.  All of the Python modules along with corresponding demo programs can 
-be found in the 'python' sub-directory of this package.
+The control API supports both unicast and multicast messaging paradigms.  It also supports 
+messaging to broadcast type pshell servers (i.e. UDP server running at a subnet broadcast 
+address, e.g. x.y.z.255).
 
-The Python and 'C' versions are fully consistent with each other at the API level
-and interoperable with each other at the protocol level and can be mixed and matched 
-in any combination, i.e. the 'C' libraries and UDP/UNIX client can control and 
-interface to Python applications and vice-versa.
+The Python and 'C' versions are consistent with each other at the API level (i.e. similar 
+functional API, usage etc) and fully interoperable with each other at the protocol level 
+and can be mixed and matched in any combination, i.e. the 'C' libraries and UDP/UNIX client 
+can control and interface transparently to the Python applications and vice-versa.  A 
+telnet client can interface to both 'C' and Python based pshell servers.
 
-The prototype for the embedded command line shell functions are similar to the 
-'main' in 'C' as follows:
+The prototype for the 'C' callback functions are similar to the 'main' in 'C' as follows:
 
 `void myFunc(int argc, char *argv[]);`
 
@@ -91,7 +92,7 @@ Finally, a stub module/library is provided that will honor the complete API of t
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 
 functionality to easily be completly removed from an application without requiring any code 
 changes or recompilation, only a re-link (for static linking) or restart (when using a shared 
-library acessed via a softlink) of the target program is necessary.
+library/module acessed via a softlink) of the target program is necessary.
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 

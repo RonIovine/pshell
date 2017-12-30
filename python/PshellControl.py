@@ -860,7 +860,6 @@ def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
           elif (control[1].lower() == "port"):
             port_ = option[1].strip()
           elif (control[1].lower() == "timeout"):
-            print  option
             if (option[1].lower().strip() == "none"):
               defaultTimeout_ = 0
             else:
