@@ -12,13 +12,13 @@ There is also a control API provided by where any external program can invoke an
 program's registered pshell functions (only supported for UDP or UNIX pshell servers).
 This will provide direct programmatic control of a remote process' pshell functions 
 without having to fork the calling process to call the 'pshell' command line client 
-program via the 'system' call.
+program via the 'system' call.  This provides functionality similar to the familiar 
+Remote Procedure Call (RPC) mechanism.
 
-The control API can function as an IPC mechanism for control between processes.  
-If all process control is implemented as a collection of pshell commands, a user 
-can get a programmatic IPC mechanism along with manual CLI/Shell access via the 
-same code base.  There is no need to write separate code for CLI/Shell processing 
-and control/message event processing.
+The control API can function as an IPC mechanism for control between processes.  If all 
+process control is implemented as a collection of pshell commands, a user can get a programmatic 
+IPC mechanism along with manual CLI/Shell access via the same code base.  There is no need 
+to write separate code for CLI/Shell processing and control/message event processing.
 
 The control API supports both unicast and multicast messaging paradigms.  It also 
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
