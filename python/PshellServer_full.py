@@ -29,14 +29,13 @@
 #################################################################################
 
 """
-A Python module to provide remote command line access to external processes
+A Lightweight, Process-Specific, Embedded Command Line Shell
 
 This API provides the Process Specific Embedded Command Line Shell (PSHELL)
-user API functionality.  It provides the ability for a client program to
-register functions that can be invoked via a command line user interface.
-There are several ways to invoke these embedded functions based on how the 
-pshell server is configured, which is described in documentation further down 
-in this file.
+user API functionality.  It provides the ability for a program to register 
+functions that can be invoked via a command line user interface.  There are 
+several ways to invoke these embedded functions based on how the pshell server 
+is configured, which is described in documentation further down in this file.
  
 This module provides the same functionality as the PshellServer.h API and
 the libpshell-server linkable 'C' library, but implemented as a Python module.  
@@ -87,7 +86,7 @@ LOCAL
 
 These three identifiers that can be used for the hostnameOrIpAddr argument 
 of the startServer call.  PshellServer.ANYHOST will bind the server socket
-to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
+to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to 
 the local loopback address (i.e. 127.0.0.1), note that subnet broadcast 
 it also supported, e.g. x.y.z.255

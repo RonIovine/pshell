@@ -50,7 +50,7 @@ extern "C" {
  *******************************************************************************/
 
 /*
- * pshell_setCotrolLogLevel:
+ * pshell_setControlLogLevel:
  *
  * function and constants to let the client set the internal debug log level,
  * if the client of this API does not want to see any internal message printed,
