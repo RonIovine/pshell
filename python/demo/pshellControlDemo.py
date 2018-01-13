@@ -53,19 +53,19 @@ NULL = ""
 #####################################################
 #####################################################
 def showUsage():
-  print
-  print "Usage: pshellControlDemo.py {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix}"
-  print "                            [-t<timeout>] [-extract]"
-  print
-  print "  where:"
-  print "    <hostname>       - hostname of UDP server"
-  print "    <ipAddress>      - IP address of UDP server"
-  print "    <unixServerName> - name of UNIX server"
-  print "    unix             - specifies a UNIX server"
-  print "    <port>           - port number of UDP server"
-  print "    <timeout>        - wait timeout for response in mSec (default=100)"
-  print "    extract          - extract data contents of response (must have non-0 wait timeout)"
-  print
+  print("")
+  print("Usage: pshellControlDemo.py {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix}")
+  print("                            [-t<timeout>] [-extract]")
+  print("")
+  print("  where:")
+  print("    <hostname>       - hostname of UDP server")
+  print("    <ipAddress>      - IP address of UDP server")
+  print("    <unixServerName> - name of UNIX server")
+  print("    unix             - specifies a UNIX server")
+  print("    <port>           - port number of UDP server")
+  print("    <timeout>        - wait timeout for response in mSec (default=100)")
+  print("    extract          - extract data contents of response (must have non-0 wait timeout)")
+  print("")
   exit(0)
 enddef
 
@@ -94,7 +94,7 @@ if (__name__ == '__main__'):
     endif
   endfor
 
-  #print "server: %s, port: %s, timeout: %s, extract: %d" % (sys.argv[1], sys.argv[2], timeout, extract)
+  #print("server: %s, port: %s, timeout: %s, extract: %d" % (sys.argv[1], sys.argv[2], timeout, extract))
 
   sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
 

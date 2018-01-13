@@ -459,7 +459,7 @@ def _getInput(prompt_):
       # something other than TAB typed, clear out our tabCount
       tabCount = 0
     _endif
-    #print ord(char)
+    #print(ord(char))
     if (inEsc == True):
       if (esc == '['):
         if (char == 'A'):
@@ -501,10 +501,10 @@ def _getInput(prompt_):
           inEsc = False
           esc = _NULL
         elif (char == '1'):
-          print "home2"
+          print("home2")
           cursorPos = _beginningOfLine(cursorPos, command)
         #elif (char == '3'):
-        #  print "delete"
+        #  print("delete")
         elif (char == '~'):
           # delete key, delete under cursor
           if (cursorPos < len(command)):
@@ -514,7 +514,7 @@ def _getInput(prompt_):
           inEsc = False
           esc = _NULL
         elif (char == '4'):
-          print "end2"
+          print("end2")
           cursorPos = _endOfLine(cursorPos, command)
         _endif
       elif (esc == 'O'):
@@ -629,7 +629,7 @@ def _getInput(prompt_):
       cursorPos = _beginningOfLine(cursorPos, command)
     elif (ord(char) == 3):
       # ctrl-c, exit program
-      print
+      print("")
       sys.exit(0)
     elif (ord(char) == 5):
       # end, go to end of line

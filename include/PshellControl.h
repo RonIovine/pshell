@@ -214,7 +214,7 @@ void pshell_sendMulticast(const char *command_, ...);
  * there are 4 version of this command, since we are using standard 'C' linkage,
  * we cannot overload the function names, hence the separate names
  * 
- * the return of the following 2 functions is one of the PshellControlResults
+ * the return of the following 4 functions is one of the PshellControlResults
  */
 int pshell_sendCommand1(int sid_, const char *command_, ...);
 int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...);
@@ -223,9 +223,9 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
  * the following two commands will issue the remote command and extract any
  * results that are returned in the payload of the message, this will only
  * work with a non-0 timeout and a return result of PSHELL_COMMAND_SUCCESS,
- * the data in the payload is ascii formatted character data, it is the
- * responsibility of the calling application to parse & understand the results,
- * the return code of these functions is the number of bytes extracted
+ * the data in the payload is NULL terminated ascii formatted character data, 
+ * it is the responsibility of the calling application to parse & understand 
+ * the results
  */
 int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command_, ...);
 int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...);

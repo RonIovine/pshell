@@ -389,7 +389,7 @@ def _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, 
   for command in _gCommandList:
     if (command["name"] == command_):
       # command name already exists, don't add it again
-      print "PSHELL_ERROR: Command: %s already exists, not adding command" % command_
+      print("PSHELL_ERROR: Command: %s already exists, not adding command" % command_)
       return
     _endif
   _endfor
@@ -514,7 +514,7 @@ def _runUDPServer():
   global _gServerName
   global _gHostnameOrIpAddr
   global _gPort
-  print "PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %d" % (_gServerName, _gHostnameOrIpAddr, _gPort)
+  print("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %d" % (_gServerName, _gHostnameOrIpAddr, _gPort))
   # startup our UDP server
   _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
   if (_createSocket()):
@@ -528,7 +528,7 @@ _enddef
 #################################################################################
 def _runUNIXServer():
   global _gServerName
-  print "PSHELL_INFO: UNIX Server: %s Started" % _gServerName
+  print("PSHELL_INFO: UNIX Server: %s Started" % _gServerName)
   # startup our UNIX server
   _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
   if (_createSocket()):
@@ -564,7 +564,7 @@ def _runTCPServer():
   global _gTcpInteractivePrompt
   global _gTcpConnectSockName
   global _gTcpTimeout
-  print "PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" % (_gServerName, _gHostnameOrIpAddr, _gPort)
+  print("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" % (_gServerName, _gHostnameOrIpAddr, _gPort))
   _addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
   _addCommand(_help, "help", "show all available commands", "", 0, 0, True, True)
   _addCommand(_exit, "quit", "exit interactive mode", "", 0, 0, True, True)

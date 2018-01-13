@@ -686,7 +686,7 @@ def _sendCommand3(sid_, command_):
     # only try to extract data if not talking to a broadcast address
     if (control["isBroadcastAddress"] == False):
       if (not control["pshellMsg"]["dataNeeded"]):
-        print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
+        print("PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted")
       elif (retCode == COMMAND_SUCCESS):
         results = control["pshellMsg"]["payload"]
       _endif
@@ -713,7 +713,7 @@ def _sendCommand4(sid_, timeoutOverride_, command_):
     # only try to extract data if not talking to a broadcast address
     if (control["isBroadcastAddress"] == False):
       if (not control["pshellMsg"]["dataNeeded"]):
-        print "PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted"
+        print("PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted")
       elif (retCode == COMMAND_SUCCESS):
         results = control["pshellMsg"]["payload"]
       _endif
@@ -759,7 +759,7 @@ def _sendCommand(control_, commandType_, command_, timeout_):
             # our current expected response, when we detect that condition, we read the 
             # socket until we either find the correct response or timeout, we toss any previous 
             # unmatched responses
-            print "PSHELL_WARNING: Received seqNum: %d, does not match sent seqNum: %d" % (control_["pshellMsg"]["seqNum"], seqNum)
+            print("PSHELL_WARNING: Received seqNum: %d, does not match sent seqNum: %d" % (control_["pshellMsg"]["seqNum"], seqNum))
           else:
             retCode = control_["pshellMsg"]["msgType"]
             break
@@ -780,9 +780,9 @@ def _sendCommand(control_, commandType_, command_, timeout_):
   if ((_gSupressInvalidArgCountMessage == True) and (retCode == COMMAND_INVALID_ARG_COUNT)):
     retCode = COMMAND_SUCCESS
   elif ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
-    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode))
+    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode)))
   elif ((retCode != COMMAND_SUCCESS) and (retCode != _gMsgTypes["commandComplete"])):
-    print "PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode))
+    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode)))
   else:
     retCode = COMMAND_SUCCESS
   _endif
@@ -818,7 +818,7 @@ def _getControl(sid_):
   if (sid_ < len(_gPshellControl)):
     return (_gPshellControl[sid_])
   else:
-    print "PSHELL_ERROR: No control defined for sid: %d" % sid_
+    print("PSHELL_ERROR: No control defined for sid: %d" % sid_)
     return (None)
   _endif
 _enddef

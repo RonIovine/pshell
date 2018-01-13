@@ -79,47 +79,47 @@ def _showWelcome():
   banner = "#  PSHELL: Process Specific Embedded Command Line Shell"
   server = "#  Multi-session BROADCAST server: %s[%s]" % (_gServerName, _gRemoteServer)
   maxBorderWidth = max(58, len(banner),len(server))+2
-  print
-  print "#"*maxBorderWidth
-  print "#"
-  print banner
-  print "#"
-  print server
-  print "#"
-  print "#  Idle session timeout: NONE"
-  print "#"
-  print "#  Type '?' or 'help' at prompt for command summary"
-  print "#  Type '?' or '-h' after command for command usage"
-  print "#"
-  print "#  Full <TAB> completion, up-arrow recall, command"
-  print "#  line editing and command abbreviation supported"
-  print "#"
-  print "#  NOTE: Connected to a broadcast address, all commands"
-  print "#        are single-shot, 'fire-and'forget', with no"
-  print "#        response requested or expected, and no results"
-  print "#        displayed.  All commands are 'invisible' since"
-  print "#        no remote command query is requested."
-  print "#"
-  print "#"*maxBorderWidth
-  print
+  print("")
+  print("#"*maxBorderWidth)
+  print("#")
+  print(banner)
+  print("#")
+  print(server)
+  print("#")
+  print("#  Idle session timeout: NONE")
+  print("#")
+  print("#  Type '?' or 'help' at prompt for command summary")
+  print("#  Type '?' or '-h' after command for command usage")
+  print("#")
+  print("#  Full <TAB> completion, up-arrow recall, command")
+  print("#  line editing and command abbreviation supported")
+  print("#")
+  print("#  NOTE: Connected to a broadcast address, all commands")
+  print("#        are single-shot, 'fire-and'forget', with no")
+  print("#        response requested or expected, and no results")
+  print("#        displayed.  All commands are 'invisible' since")
+  print("#        no remote command query is requested.")
+  print("#")
+  print("#"*maxBorderWidth)
+  print("")
 _enddef
 
 #################################################################################
 #################################################################################
 def _showHelp():
-  print
-  print "****************************************"
-  print "*             COMMAND LIST             *"
-  print "****************************************"
-  print
-  print "quit   -  exit interactive mode"
-  print "help   -  show all available commands"
-  print
-  print "NOTE: Connected to a broadcast address, all remote server"
-  print "      commands are 'invisible' to this client application"
-  print "      and are single-shot, 'fire-and-forget', with no response"
-  print "      requested or expected, and no results displayed"
-  print
+  print("")
+  print("****************************************")
+  print("*             COMMAND LIST             *")
+  print("****************************************")
+  print("")
+  print("quit   -  exit interactive mode")
+  print("help   -  show all available commands")
+  print("")
+  print("NOTE: Connected to a broadcast address, all remote server")
+  print("      commands are 'invisible' to this client application")
+  print("      and are single-shot, 'fire-and-forget', with no response")
+  print("      requested or expected, and no results displayed")
+  print("")
 _enddef
 
 #################################################################################
@@ -225,17 +225,17 @@ _enddef
 #####################################################
 #####################################################
 def _showUsage():
-  print
-  print "Usage: %s {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix} [-t<timeout>]" % os.path.basename(sys.argv[0])
-  print
-  print "  where:"
-  print "    <hostname>       - hostname of UDP server"
-  print "    <ipAddress>      - IP address of UDP server"
-  print "    <unixServerName> - name of UNIX server"
-  print "    unix             - specifies a UNIX server"
-  print "    <port>           - port number of UDP server"
-  print "    <timeout>        - wait timeout for response in sec (default=5)"
-  print
+  print("")
+  print("Usage: %s {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("")
+  print("  where:")
+  print("    <hostname>       - hostname of UDP server")
+  print("    <ipAddress>      - IP address of UDP server")
+  print("    <unixServerName> - name of UNIX server")
+  print("    unix             - specifies a UNIX server")
+  print("    <port>           - port number of UDP server")
+  print("    <timeout>        - wait timeout for response in sec (default=5)")
+  print("")
   exit(0)
 _enddef
 

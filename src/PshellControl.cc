@@ -432,11 +432,15 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
 int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
-  int bytesExtracted = 0;
+  int retCode = PSHELL_SOCKET_NOT_CONNECTED;
   int bytesFormatted = 0;
   char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
+  if (results_ != NULL)
+  {
+    results_[0] = 0;
+  }
   if ((control = getControl(sid_)) != NULL)
   {
     va_start(args, command_);
@@ -448,10 +452,10 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
       {
         PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
       }
-      if ((sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, control->defaultTimeout) == PSHELL_COMMAND_SUCCESS) &&
-          (control->pshellMsg.header.dataNeeded))
+      if (((retCode = sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, control->defaultTimeout)) == PSHELL_COMMAND_SUCCESS) &&
+           (control->pshellMsg.header.dataNeeded))
       {
-        bytesExtracted = extractResults(control, results_, size_);
+        extractResults(control, results_, size_);
       }
     }
     else
@@ -459,8 +463,8 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
       PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
-  pthread_mutex_unlock(&_mutex);  
-  return (bytesExtracted);
+  pthread_mutex_unlock(&_mutex);
+  return (retCode);
 }
 
 /******************************************************************************/
@@ -468,11 +472,15 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
 int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
-  int bytesExtracted = 0;
+  int retCode = PSHELL_SOCKET_NOT_CONNECTED;
   int bytesFormatted = 0;
   char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
+  if (results_ != NULL)
+  {
+    results_[0] = 0;
+  }
   if ((control = getControl(sid_)) != NULL)
   {
     va_start(args, command_);
@@ -484,10 +492,10 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
       {
         PSHELL_WARNING("Trying to extract data with a 0 wait timeout, no data will be extracted");
       }
-      if ((sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, timeoutOverride_) == PSHELL_COMMAND_SUCCESS) &&
-          (control->pshellMsg.header.dataNeeded))
+      if (((retCode = sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, timeoutOverride_)) == PSHELL_COMMAND_SUCCESS) &&
+           (control->pshellMsg.header.dataNeeded))
       {
-        bytesExtracted = extractResults(control, results_, size_);
+        extractResults(control, results_, size_);
       }
     }
     else
@@ -496,7 +504,7 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
     }
   }
   pthread_mutex_unlock(&_mutex);  
-  return (bytesExtracted);
+  return (retCode);
 }
 
 /******************************************************************************/

@@ -136,7 +136,7 @@ enddef
 #################################################################################
 #################################################################################
 def showUsage():
-  print "Usage: pshellServerDemo.py -udp | -tcp | -unix | -local"
+  print("Usage: pshellServerDemo.py -udp | -tcp | -unix | -local")
   sys.exit()
 enddef
 

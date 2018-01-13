@@ -166,7 +166,7 @@ int main (int argc, char *argv[])
       {
         if (extract)
         {
-          if ((bytesRead = pshell_sendCommand3(sid, results, sizeof(results), inputLine)) > 0)
+          if ((pshell_sendCommand3(sid, results, sizeof(results), inputLine) == PSHELL_COMMAND_SUCCESS) && ((bytesRead = strlen(results)) > 0))
           {
             printf("%d bytes extracted, results:\n", bytesRead);
             printf("%s", results);

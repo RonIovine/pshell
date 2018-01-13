@@ -134,10 +134,10 @@ if (__name__ == '__main__'):
 
   # verify usage
   if ((len(sys.argv) != 2) and (len(sys.argv) != 4)):
-      print "Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]"
+      print("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]")
       exit (0)
   elif ((len(sys.argv) == 2) and (sys.argv[1] == "-h")):
-      print "Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]"
+      print("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]")
       exit (0)
   elif (len(sys.argv) == 4):
       pshellServerDemoPort = sys.argv[2]

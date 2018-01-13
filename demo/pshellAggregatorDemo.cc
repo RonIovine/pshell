@@ -122,7 +122,10 @@ void controlServer(int sid, int argc, char *argv[])
   {
     /* this contains the re-constituted command */
     char command[300];
-    if (pshell_sendCommand3(sid, results, sizeof(results), buildCommand(command, sizeof(command), argc, argv)) > 0)
+    if ((pshell_sendCommand3(sid, 
+                             results, 
+                             sizeof(results), 
+                             buildCommand(command, sizeof(command), argc, argv)) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
     {
       pshell_printf("%s", results);
     }
@@ -169,7 +172,10 @@ void traceFilterDemo(int argc, char *argv[])
 /******************************************************************************/
 void meta(int argc, char *argv[])
 {
-  if (pshell_sendCommand3(pshellServerDemoSid, results, sizeof(results), "hello %s %s", argv[0], argv[1]) > 0)
+    if ((pshell_sendCommand3(pshellServerDemoSid, 
+                             results, 
+                             sizeof(results), 
+                             "hello %s %s", argv[0], argv[1]) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
   {
     pshell_printf("%s", results);
   }

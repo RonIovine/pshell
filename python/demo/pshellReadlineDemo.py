@@ -51,16 +51,16 @@ NULL = ""
 #####################################################
 #####################################################
 def showUsage():
-  print
-  print "Usage: pshellReadlineDemo.py {-tty | -socket} [-bash | -fast] [<idleTimeout>]"
-  print
-  print "  where:"
-  print "    -tty          - serial terminal using stdin and stdout (default)"
-  print "    -socket       - TCP socket terminal using telnet client"
-  print "    -bash         - Use bash/readline style tabbing"
-  print "    -fast         - Use \"fast\" style tabbing (default)"
-  print "    <idleTimeout> - the idle session timeout in minutes (default=none)"
-  print
+  print("")
+  print("Usage: pshellReadlineDemo.py {-tty | -socket} [-bash | -fast] [<idleTimeout>]")
+  print("")
+  print("  where:")
+  print("    -tty          - serial terminal using stdin and stdout (default)")
+  print("    -socket       - TCP socket terminal using telnet client")
+  print("    -bash         - Use bash/readline style tabbing")
+  print("    -fast         - Use \"fast\" style tabbing (default)")
+  print("    <idleTimeout> - the idle session timeout in minutes (default=none)")
+  print("")
   sys.exit(0)
 enddef
 
@@ -129,9 +129,9 @@ if (__name__ == '__main__'):
     sockFd.listen(1)
   
     # Wait for a connection
-    print "waiting for a connection on port 9005, use 'telnet localhost 9005' to connect"
+    print("waiting for a connection on port 9005, use 'telnet localhost 9005' to connect")
     connectFd, clientAddr = sockFd.accept()
-    print "connection accepted"
+    print("connection accepted")
 
     # set our connected file descriptors and serial type
     PshellReadline.setFileDescriptors(connectFd, connectFd, PshellReadline.SOCKET)

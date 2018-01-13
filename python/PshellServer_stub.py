@@ -29,7 +29,7 @@
 #################################################################################
 
 """
-A Python module to provide remote command line access to external processes
+A Lightweight, Process-Specific, Embedded Command Line Shell
 
 This is the STUB version of the PshellServer module, to use the actual version, 
 set the PshellServer.py softlink to PshellServer_full.py, or use the provided 
@@ -100,7 +100,7 @@ def startServer(serverName, serverType, serverMode, hostnameOrIpAddr = None, por
   """
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
-  print "PSHELL_INFO: STUB Server: %s Started" % serverName
+  print("PSHELL_INFO: STUB Server: %s Started" % serverName)
   if (serverMode == BLOCKING):
     while (True):
       time.sleep(100000)

@@ -1,1 +1,1 @@
-PshellServer_full.py
+/home/riovine/tools/pshell/python/PshellServer_full.py
