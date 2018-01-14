@@ -277,23 +277,27 @@ if (__name__ == '__main__'):
     # if not a broadcast server address, extract all the commands from
     # our unicast remote server and add then to our local server
     commandList = PshellControl.extractCommands(_gSid)
-    commandList = commandList.split("\n")
-    for command in commandList:
-      splitCommand = command.split("-")
-      if (len(splitCommand ) >= 2):
-        commandName = splitCommand[0].strip()
-        description = splitCommand[1].strip()
-        PshellServer_full.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+    if (len(commandList) > 0):
+      commandList = commandList.split("\n")
+      for command in commandList:
+        splitCommand = command.split("-")
+        if (len(splitCommand ) >= 2):
+          commandName = splitCommand[0].strip()
+          description = splitCommand[1].strip()
+          PshellServer_full.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+        _endif
       _endif
+
+      # configure our local server to interact with a remote server, we override the display settings
+      # (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
+      # a remote server
+      _configureLocalServer()
+
+      # now start our local server which will interact with a remote server via the pshell control machanism
+      PshellServer_full.startServer("pshellServer", PshellServer_full.LOCAL, PshellServer_full.BLOCKING)
+    else:
+      print("PSHELL_ERROR: Could not connect to server: '%s:%s'" % (_gRemoteServer, _gPort))
     _endif
-
-    # configure our local server to interact with a remote server, we override the display settings
-    # (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
-    # a remote server
-    _configureLocalServer()
-
-    # now start our local server which will interact with a remote server via the pshell control machanism
-    PshellServer_full.startServer("pshellServer", PshellServer_full.LOCAL, PshellServer_full.BLOCKING)
   
   else:
 

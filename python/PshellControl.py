@@ -519,7 +519,7 @@ def _extractCommands(sid_):
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (_sendCommand(control, _gMsgTypes["queryCommands"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryCommands"], "query commands", ONE_SEC*5) == COMMAND_SUCCESS):
       results += "\n"
       results += (len(control["remoteServer"])+22)*"*"
       results += "\n"
@@ -542,7 +542,7 @@ def _extractName(sid_):
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (_sendCommand(control, _gMsgTypes["queryName"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryName"], "query name", ONE_SEC*5) == COMMAND_SUCCESS):
       results += control["pshellMsg"]["payload"]
     _endif
   _endif
@@ -557,7 +557,7 @@ def _extractTitle(sid_):
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (_sendCommand(control, _gMsgTypes["queryTitle"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryTitle"], "query title", ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
@@ -572,7 +572,7 @@ def _extractBanner(sid_):
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (_sendCommand(control, _gMsgTypes["queryBanner"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryBanner"], "query banner", ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
@@ -587,7 +587,7 @@ def _extractPrompt(sid_):
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
-    if (_sendCommand(control, _gMsgTypes["queryPrompt"], _NULL, ONE_SEC*5) == COMMAND_SUCCESS):
+    if (_sendCommand(control, _gMsgTypes["queryPrompt"], "query prompt", ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
     _endif
   _endif
