@@ -934,7 +934,11 @@ def _showWelcome():
   if (_gPshellClient == True):
     # put up our window title banner
     printf("\033]0;" + _gTitle + "\007")
-    server = "#  Multi-session UDP server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
+    if (_getDisplayServerType() == UNIX):
+      server = "#  Multi-session UNIX server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
+    else:
+      server = "#  Multi-session UDP server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
+    _endif
   elif (_gServerType == LOCAL):
     # put up our window title banner
     printf("\033]0;" + _gTitle + "\007")

@@ -426,33 +426,35 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   isBroadcastAddress = False
   (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_.lower() == "unix"):
-    # UNIX domain socket
-    socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    # bind our source socket so we can get replies
-    sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
-    bound = False
-    while (not bound):
-      try:
-        socketFd.bind(sourceAddress)
-        bound = True
-      except Exception as e: 
-        sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
-    _endwhile
-    _gPshellControl.append({"socket":socketFd,
-                            "timeout":defaultTimeout_,
-                            "serverType":"unix",
-                            "isBroadcastAddress":isBroadcastAddress,
-                            "sourceAddress":sourceAddress,
-                            "destAddress":_gUnixSocketPath+remoteServer_,
-                            "remoteServer":controlName_+"["+remoteServer_+"]",
-                            "pshellMsg":OrderedDict([("msgType",0),
-                                                     ("respNeeded",True),
-                                                     ("dataNeeded",True),
-                                                     ("pad",0),
-                                                     ("seqNum",0),
-                                                     ("payload",_NULL)])})
-    
-    
+    if (os.path.exists(_gUnixSocketPath+remoteServer_)):
+      # UNIX domain socket
+      socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+      # bind our source socket so we can get replies
+      sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
+      bound = False
+      while (not bound):
+        try:
+          socketFd.bind(sourceAddress)
+          bound = True
+        except Exception as e: 
+          sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
+      _endwhile
+      _gPshellControl.append({"socket":socketFd,
+                              "timeout":defaultTimeout_,
+                              "serverType":"unix",
+                              "isBroadcastAddress":isBroadcastAddress,
+                              "sourceAddress":sourceAddress,
+                              "destAddress":_gUnixSocketPath+remoteServer_,
+                              "remoteServer":controlName_+"["+remoteServer_+"]",
+                              "pshellMsg":OrderedDict([("msgType",0),
+                                                       ("respNeeded",True),
+                                                       ("dataNeeded",True),
+                                                       ("pad",0),
+                                                       ("seqNum",0),
+                                                       ("payload",_NULL)])})
+    else:
+      print("PSHELL_ERROR: Could not find unix server: '%s'" % (_gUnixSocketPath+remoteServer_))
+    _endif
   else:
     # IP domain socket
     socketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -815,7 +817,7 @@ _enddef
 #################################################################################
 def _getControl(sid_):
   global _gPshellControl
-  if (sid_ < len(_gPshellControl)):
+  if ((sid_ >= 0) and (sid_ < len(_gPshellControl))):
     return (_gPshellControl[sid_])
   else:
     print("PSHELL_ERROR: No control defined for sid: %d" % sid_)
