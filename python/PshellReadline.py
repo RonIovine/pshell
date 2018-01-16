@@ -84,6 +84,7 @@ import os
 import tty
 import termios
 import select
+import signal
 
 # dummy variables so we can create pseudo end block indicators, add these 
 # identifiers to your list of python keywords in your editor to get syntax 
@@ -628,9 +629,8 @@ def _getInput(prompt_):
       # home, go to beginning of line
       cursorPos = _beginningOfLine(cursorPos, command)
     elif (ord(char) == 3):
-      # ctrl-c, exit program
-      print("")
-      sys.exit(0)
+      # ctrl-c, raise signal SIGINT to our own process
+      os.kill(os.getpid(), signal.SIGINT)
     elif (ord(char) == 5):
       # end, go to end of line
       cursorPos = _endOfLine(cursorPos, command)

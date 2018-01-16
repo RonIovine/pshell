@@ -189,6 +189,7 @@ _enddef
 #################################################################################
 #################################################################################
 def _cleanupAndExit():
+  print("")
   PshellServer_full.cleanupResources()
   PshellControl.disconnectAllServers()
   sys.exit()
@@ -260,6 +261,9 @@ if (__name__ == '__main__'):
     _endif
   _endfor
 
+  # make sure we cleanup any system resorces on any exceptions
+  _registerSignalHandlers()
+  
   _gRemoteServer = sys.argv[1]
   _gPort = sys.argv[2]
 
