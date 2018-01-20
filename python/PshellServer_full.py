@@ -963,7 +963,7 @@ def _showWelcome():
   _endif
   printf("#\n")
   if (_gPshellClient == True):
-    printf("#  Command response timeout: 5 seconds\n")
+    printf("#  Command response timeout: %d seconds\n" % _gTcpTimeout)
     printf("#\n")
   _endif
   printf("#  Type '?' or 'help' at prompt for command summary\n")

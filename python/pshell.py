@@ -146,6 +146,7 @@ _enddef
 def _configureLocalServer():
   global _gSid
   global _gRemoteServer
+  global _gTimeout
   global _gPort
 
   # need to set the first arg position to 0 so we can pass
@@ -184,6 +185,7 @@ def _configureLocalServer():
   else:
     PshellServer_full._gServerTypeOverride = _gRemoteServer
   _endif
+  PshellServer_full._gTcpTimeout = _gTimeout
 _enddef
 
 #################################################################################
@@ -227,15 +229,13 @@ _enddef
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("Usage: %s {{<hostNameOrIpAddr> <port>} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
   print("")
   print("  where:")
-  print("    <hostname>       - hostname of UDP server")
-  print("    <ipAddress>      - IP address of UDP server")
-  print("    <unixServerName> - name of UNIX server")
-  print("    unix             - specifies a UNIX server")
-  print("    <port>           - port number of UDP server")
-  print("    <timeout>        - wait timeout for response in sec (default=5)")
+  print("    <hostNameOrIpAddr> - hostname or IP address of UDP server")
+  print("    <port>             - port number of UDP server")
+  print("    <unixServerName>   - name of UNIX server")
+  print("    <timeout>          - response wait timeout in sec (default=5)")
   print("")
   exit(0)
 _enddef
@@ -247,25 +247,26 @@ _enddef
 ##############################
 if (__name__ == '__main__'):
   
-  if ((len(sys.argv) < 3) or ((len(sys.argv)) > 4)):
+  if ((len(sys.argv) < 2) or ((len(sys.argv)) > 4)):
     _showUsage()
   _endif
 
-  timeout = 5
+  _gTimeout = 5
 
-  for arg in sys.argv[3:]:
+  _gPort = PshellServer_full.UNIX
+  
+  for arg in sys.argv[2:]:
     if ("-t" in arg):
-      timeout = int(arg[2:])
+      _gTimeout = int(arg[2:])
     else:
-      _showUsage()
+      _gPort = arg
     _endif
   _endfor
 
-  # make sure we cleanup any system resorces on any exceptions
+  # make sure we cleanup any system resorces on an abnormal termination
   _registerSignalHandlers()
   
   _gRemoteServer = sys.argv[1]
-  _gPort = sys.argv[2]
 
   # see if we are requesting a server sitting on a subnet broadcast address,
   # if so, we configure for one-way, fire-and-forget messaging since there may
@@ -274,7 +275,7 @@ if (__name__ == '__main__'):
   _gIsBroadcastAddr = ((len(_gRemoteServer.split(".")) == 4) and (_gRemoteServer.split(".")[3] == "255"))
 
   # connect to our remote server via the control client
-  _gSid = PshellControl.connectServer("pshellClient", _gRemoteServer, _gPort, PshellControl.ONE_SEC*timeout)
+  _gSid = PshellControl.connectServer("pshellClient", _gRemoteServer, _gPort, PshellControl.ONE_SEC*_gTimeout)
 
   if (_gIsBroadcastAddr == False):
     
@@ -293,7 +294,7 @@ if (__name__ == '__main__'):
       _endif
 
       # configure our local server to interact with a remote server, we override the display settings
-      # (i.e. prompt, server name, banner, title etc, to make it appear that our local server is really
+      # (i.e. prompt, server name, banner, title etc), to make it appear that our local server is really
       # a remote server
       _configureLocalServer()
 
