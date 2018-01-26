@@ -60,12 +60,7 @@ import PshellControl
 import PshellServer_full
 import PshellReadline
 
-# dummy variables so we can create pseudo end block indicators, add these identifiers to your
-# list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
-_enddef = _endif = _endwhile = _endfor = None
-
 _gSid = None
-_NULL = ""
 
 #################################################################################
 #################################################################################
@@ -102,7 +97,6 @@ def _showWelcome():
   print("#")
   print("#"*maxBorderWidth)
   print("")
-_enddef
 
 #################################################################################
 #################################################################################
@@ -120,7 +114,6 @@ def _showHelp():
   print("      and are single-shot, 'fire-and-forget', with no response")
   print("      requested or expected, and no results displayed")
   print("")
-_enddef
 
 #################################################################################
 #################################################################################
@@ -130,8 +123,6 @@ def _processCommand(command_):
     _showHelp()
   else:
     PshellControl.sendCommand1(_gSid, command_)
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -139,7 +130,6 @@ def _comandDispatcher(args_):
   global _gSid
   (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
   PshellServer_full.printf(results)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -165,28 +155,27 @@ def _configureLocalServer():
   prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer_full._gPromptOverride = prompt
-  _endif
+    
   title = PshellControl._extractTitle(_gSid)
   if (len(title) > 0):
     PshellServer_full._gTitleOverride = title
-  _endif
+    
   serverName = PshellControl._extractName(_gSid)
   if (len(serverName) > 0):
     PshellServer_full._gServerNameOverride = serverName
-  _endif
+    
   banner = PshellControl._extractBanner(_gSid)
   if (len(banner) > 0):
     PshellServer_full._gBannerOverride = banner
-  _endif
+
   if (_gPort == PshellControl.UNIX):
     PshellServer_full._gServerTypeOverride = PshellServer_full.UNIX
   elif (_gRemoteServer == "localhost"):
     PshellServer_full._gServerTypeOverride = "127.0.0.1"
   else:
     PshellServer_full._gServerTypeOverride = _gRemoteServer
-  _endif
+
   PshellServer_full._gTcpTimeout = _gTimeout
-_enddef
 
 #################################################################################
 #################################################################################
@@ -194,14 +183,12 @@ def _cleanupAndExit():
   PshellServer_full.cleanupResources()
   PshellControl.disconnectAllServers()
   sys.exit()
-_enddef
 
 #################################################################################
 #################################################################################
 def _signalHandler(signal, frame):
   print("")
   _cleanupAndExit()
-_enddef
 
 #################################################################################
 #################################################################################
@@ -223,7 +210,6 @@ def _registerSignalHandlers():
   signal.signal(signal.SIGXFSZ, _signalHandler)     # 25 File size limit exceeded (4.2 BSD)
   signal.signal(signal.SIGPWR, _signalHandler)      # 30 Power failure restart (System V)
   signal.signal(signal.SIGSYS, _signalHandler)      # 31 Bad system call
-_enddef
 
 #####################################################
 #####################################################
@@ -238,7 +224,6 @@ def _showUsage():
   print("    <timeout>          - response wait timeout in sec (default=5)")
   print("")
   exit(0)
-_enddef
 
 ##############################
 #
@@ -249,7 +234,6 @@ if (__name__ == '__main__'):
   
   if ((len(sys.argv) < 2) or ((len(sys.argv)) > 4)):
     _showUsage()
-  _endif
 
   _gTimeout = 5
 
@@ -260,8 +244,6 @@ if (__name__ == '__main__'):
       _gTimeout = int(arg[2:])
     else:
       _gPort = arg
-    _endif
-  _endfor
 
   # make sure we cleanup any system resorces on an abnormal termination
   _registerSignalHandlers()
@@ -290,8 +272,6 @@ if (__name__ == '__main__'):
           commandName = splitCommand[0].strip()
           description = splitCommand[1].strip()
           PshellServer_full.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
-        _endif
-      _endif
 
       # configure our local server to interact with a remote server, we override the display settings
       # (i.e. prompt, server name, banner, title etc), to make it appear that our local server is really
@@ -302,7 +282,6 @@ if (__name__ == '__main__'):
       PshellServer_full.startServer("pshellServer", PshellServer_full.LOCAL, PshellServer_full.BLOCKING)
     else:
       print("PSHELL_ERROR: Could not connect to server: '%s:%s'" % (_gRemoteServer, _gPort))
-    _endif
   
   else:
 
@@ -314,17 +293,12 @@ if (__name__ == '__main__'):
 
     _showWelcome()
 
-    command = _NULL
+    command = ""
     while (not PshellReadline.isSubString(command, "quit")):
       (command, idleSession) = PshellReadline.getInput("%s[%s]:PSHELL> " % (_gServerName, _gRemoteServer))
       if (not PshellReadline.isSubString(command, "quit")):
         _processCommand(command)
-      _endif
-    _endwhile
-
-  _endif
 
   _cleanupAndExit()
   
-_endif
 

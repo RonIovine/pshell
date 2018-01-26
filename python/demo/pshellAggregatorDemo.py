@@ -45,13 +45,6 @@ import sys
 import PshellServer
 import PshellControl
 
-# dummy variables so we can create pseudo end block indicators, add these identifiers to your
-# list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
-enddef = endif = endwhile = endfor = None
-
-# python does not have a native null string identifier, so create one
-NULL = ""
-
 # this function is the common generic function to control any server
 # based on only the SID and entered command, it should be called from 
 # every control specific callback for this aggregator
@@ -67,10 +60,7 @@ def controlServer(sid, argv):
     (results, retCode) = PshellControl.sendCommand3(sid, command)
     if (retCode == PshellControl.COMMAND_SUCCESS):
       PshellServer.printf(results)
-    endif
-  endif
-enddef
-
+    
 # the following two functions are the control specific functions that interface
 # directly to a given remote server via the control API for a give SID, this is
 # how multiple remote pshell servers can be aggregated into a single local pshell
@@ -84,14 +74,12 @@ enddef
 def pshellServerDemo(argv):
   global pshellServerDemoSid
   controlServer(pshellServerDemoSid,  argv)
-enddef
 
 #################################################################################
 #################################################################################
 def traceFilterDemo(argv):
   global traceFilterDemoSid
   controlServer(traceFilterDemoSid, argv)
-enddef
 
 # example meta command that will call multiple discrete pshell commands from
 # multiple pshell servers
@@ -104,9 +92,8 @@ def meta(argv):
   (results, retCode) = PshellControl.sendCommand3(pshellServerDemoSid, "hello %s %s" % (argv[0], argv[1]))
   if (retCode == PshellControl.COMMAND_SUCCESS):
     PshellServer.printf(results)
-  endif
+  
   PshellControl.sendCommand1(traceFilterDemoSid, "set callback %s" % argv[2])
-enddef
 
 # example multicast command, this will send a given command to all the registered
 # multicast receivers for that multicast group, multicast groups are based on
@@ -119,7 +106,6 @@ def multicast(argv):
   PshellControl.sendMulticast("trace 1 2 3 4")
   PshellControl.sendMulticast("trace on")
   PshellControl.sendMulticast("hello")
-enddef
 
 ##############################
 #
@@ -134,15 +120,14 @@ if (__name__ == '__main__'):
 
   # verify usage
   if ((len(sys.argv) != 2) and (len(sys.argv) != 4)):
-      print("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]")
-      exit (0)
+    print("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]")
+    exit (0)
   elif ((len(sys.argv) == 2) and (sys.argv[1] == "-h")):
-      print("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]")
-      exit (0)
+    print("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]")
+    exit (0)
   elif (len(sys.argv) == 4):
-      pshellServerDemoPort = sys.argv[2]
-      traceFilterDemoPort = sys.argv[3]
-  endif
+    pshellServerDemoPort = sys.argv[2]
+    traceFilterDemoPort = sys.argv[3]  
   
   # add PshellControl entries to our aggregator list, the hostname/ipAddress,
   # port and timeout values can be overridden via the pshell-control.conf file
@@ -179,4 +164,4 @@ if (__name__ == '__main__'):
   # cleanup our local server's resources
   PshellServer.cleanupResources()
 
-endif 
+ 

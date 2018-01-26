@@ -62,13 +62,6 @@ import operator
 #
 ##############################
 
-# dummy variables so we can create pseudo end block indicators, add these identifiers to your
-# list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
-enddef = endif = endwhile = endfor = None
-
-# python does not have a native null string identifier, so create one
-NULL = ""
-
 # modify the following items for different trace log line formats
 gTimestampFormat = "%H:%M:%S.%f"
 
@@ -95,7 +88,7 @@ gMinTimeLabel = "MIN TIME"
 gAvgTimeLabel = "AVG TIME"
 gMedTimeLabel = "MED TIME"
 gStdDevLabel = "STD DEV"
-gLabelSuffix = NULL
+gLabelSuffix = ""
 
 gTimeDeltaLength = 14
 gTimeDeltaCount = 6
@@ -133,9 +126,9 @@ gWheelIndex = 0
 gValidOptions = ('-tot', '-min', '-max', '-avg', '-med', '-std', '-count')
 gValidDiffs = ('percent', 'time')
 gDiffRequested = False
-gTimeSuffix = NULL
+gTimeSuffix = ""
 gTimeWidthAdjust = 0
-gCountSuffix = NULL
+gCountSuffix = ""
 gCountWidthAdjust = 0
 gTotalRunTime = datetime.timedelta(0)
 gTotalProfiledTime = datetime.timedelta(0)
@@ -210,7 +203,6 @@ def showUsage():
   print("    Modify the functions 'parseLine' and 'findApp' to add additional log entry formats")
   print("")
   sys.exit()
-enddef
 
 #####################################################
 #
@@ -226,22 +218,18 @@ def printKeepAlive(numLines, type):
     if (numLines == 0):
       sys.stdout.write("%s%s%s" % ("\b"*17, " "*17, "\b"*17))
       sys.stdout.flush()
-    endif
     if ((numLines % 1000) == 0):
       sys.stdout.write("%s\b" % gWheel[gWheelIndex])
       sys.stdout.flush()
       gWheelIndex += 1
       gWheelIndex = gWheelIndex % len(gWheel)
-    endif
   elif (type == "dots"):
     if (numLines == 0):
       sys.stdout.write("%s%s%s" % ("\b"*20, " "*20, "\b"*20))
       sys.stdout.flush()
-    endif
     if ((numLines % 5000) == 0):
       sys.stdout.write(".")
       sys.stdout.flush()
-    endif
   elif (type == "lines"):
     gClearStatusUpdate = "\n\n"
     sys.stdout.write("%s of %s%s" % (str(numLines+1).ljust(len(str(gTotalLines))), gTotalLines, "\b"*(len(str(gTotalLines))*2+4)))
@@ -250,9 +238,6 @@ def printKeepAlive(numLines, type):
     if (numLines == 0):
       sys.stdout.write("%s%s%s" % ("\b"*17, " "*17, "\b"*17))
       sys.stdout.flush()
-    endif
-  endif
-enddef
 
 #####################################################
 #
@@ -261,7 +246,6 @@ enddef
 #####################################################
 def timeDeltaToSec(timeDelta):
   return float(timeDeltaToUsec(timeDelta) / 1000000.0)
-enddef
 
 #####################################################
 #
@@ -270,7 +254,6 @@ enddef
 #####################################################
 def timeDeltaToUsec(timeDelta):
   return abs(timeDelta.microseconds + (timeDelta.seconds + timeDelta.days * 86400) * 1000000)
-enddef
 
 #####################################################
 #
@@ -288,9 +271,6 @@ def calculateMedian(profiles):
       profile["med"] = (timeDelta1+timeDelta2)/2
     else:
       profile["med"] = profile["delta"][len(profile["delta"])/2]
-    endif
-  endfor
-enddef
 
 #########################################################
 #
@@ -302,10 +282,7 @@ def calculateStdDeviation(profiles):
     sumDiffSquared = 0.0
     for timeDelta in profile["delta"]:
       sumDiffSquared = (timeDeltaToUsec(timeDelta)-timeDeltaToUsec(profile["avg"]))**2 + sumDiffSquared
-    endfor
     profile["stdDev"] = datetime.timedelta(microseconds=((sumDiffSquared)/len(profile["delta"]))**(1.0/2.0))
-  endfor
-enddef
 
 #####################################################
 #
@@ -317,10 +294,7 @@ def findProfile(profiles, filename1, function1, line1, filename2, function2, lin
     if ((profile["file1"] == filename1) and (profile["function1"] == function1) and (profile["line1"] == line1) and
         (profile["file2"] == filename2) and (profile["function2"] == function2) and (profile["line2"] == line2)):
       return (profile)
-    endif
-  endfor
   return (None)
-enddef
 
 ######################################################################
 #
@@ -349,13 +323,11 @@ def parseLine(line):
   if (len(tokens) >= expectedNumTokens):
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
     location = tokens[locationTokenPos].strip().split("@")
-    if ((timestamp != NULL) and (len(location) == 2)):
+    if ((timestamp != "") and (len(location) == 2)):
       filename = location[0]
       line = location[1][:-1]
       function = tokens[functionTokenPos].strip().split(":")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
-    endif
-  endif
   
   # parse format: 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
   expectedNumTokens = 6
@@ -366,13 +338,11 @@ def parseLine(line):
   if (len(tokens) >= expectedNumTokens):
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
     location = tokens[locationTokenPos].strip().split("@")
-    if ((timestamp != NULL) and (len(location) == 2)):
+    if ((timestamp != "") and (len(location) == 2)):
       filename = location[0]
       line = location[1][:-1]
       function = tokens[functionTokenPos].strip().split(":")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
-    endif
-  endif
 
   # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
   expectedNumTokens = 6
@@ -383,13 +353,11 @@ def parseLine(line):
   tokens = line.split("|")
   if (len(tokens) >= expectedNumTokens):
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
-    if (timestamp != NULL):
+    if (timestamp != ""):
       filename = os.path.basename(tokens[filenameTokenPos].strip())
       line = tokens[lineTokenPos].strip()
       function = tokens[functionTokenPos].strip()
       return (filename, "("+function+")", ":"+line, timestamp)
-    endif
-  endif
   
   # parse format: app | level | 14:40:32.377256 | file(function):line | user-message
   expectedNumTokens = 5
@@ -400,14 +368,12 @@ def parseLine(line):
   tokens = line.split("|")
   if (len(tokens) >= expectedNumTokens):
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
-    if (timestamp != NULL):
+    if (timestamp != ""):
       filename = tokens[filenameTokenPos].strip().split("(")[0]
       line = tokens[lineTokenPos].strip().split(":")[-1]
       function = tokens[functionTokenPos].strip().split("(")[-1]
       function = function.split(")")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
-    endif
-  endif
   
   # parse format: 2014-08-17 23:11:00.114 level [app:file:line] user-message
   expectedNumTokens = 4
@@ -417,19 +383,15 @@ def parseLine(line):
   if (len(tokens) >= expectedNumTokens):
     timestamp = findTimestamp(tokens[timestampTokenPos].strip())
     location = tokens[locationTokenPos].strip().split(":")
-    if ((timestamp != NULL) and (len(location) == 3)):
+    if ((timestamp != "") and (len(location) == 3)):
       filename = location[1]
       line = location[2][:-1]
-      # this format does not have a function, so we just return NULL
-      return (filename, NULL, ":"+line, timestamp)
-    endif
-  endif
+      # this format does not have a function, so we just return ""
+      return (filename, "", ":"+line, timestamp)
   
   # dropped through, return nothing
   return (None, None, None, None)
   
-enddef
-
 ######################################################################
 #
 # return true if line matches app filter
@@ -460,8 +422,6 @@ def findApp(line):
       app = tokens[appTokenPos].strip().split(":")[0]
       if (app == gAppFilter):
         return (True)
-      endif
-    endif
   
     # parse format: 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
     expectedNumTokens = 6
@@ -471,8 +431,6 @@ def findApp(line):
       app = tokens[appTokenPos].strip().split(":")[0]
       if (app == gAppFilter):
         return (True)
-      endif
-    endif
 
     # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
     expectedNumTokens = 6
@@ -482,8 +440,6 @@ def findApp(line):
       app = tokens[appTokenPos].strip()
       if (app == gAppFilter):
         return (True)
-      endif
-    endif
   
     # parse format: app | level | 14:40:32.377256 | file(function):line | user-message
     expectedNumTokens = 5
@@ -493,8 +449,6 @@ def findApp(line):
       app = tokens[appTokenPos].strip()
       if (app == gAppFilter):
         return (True)
-      endif
-    endif
   
     # parse format: 2014-08-17 23:11:00.114 level [app:file:line] user-message
     expectedNumTokens = 4
@@ -505,17 +459,12 @@ def findApp(line):
       app = location[0][1:]
       if (app == gAppFilter):
         return (True)
-      endif
-    endif
   
     # dropped through, return nothing
     return (False)
   
   else:
     return (True)
-  endif
-  
-enddef
 
 ######################################################
 #
@@ -564,11 +513,8 @@ def updateProfile(profiles, prevLine, currLine):
         profile = profiles[-1]
         if (areaWidth1 > gMaxAreaWidth1):
           gMaxAreaWidth1 = areaWidth1
-        endif
         if (areaWidth2 > gMaxAreaWidth2):
           gMaxAreaWidth2 = areaWidth2
-        endif
-      endif
       profile["count"] += 1
       profile["tot"] += timeDelta
       gTotalProfiledTime += timeDelta
@@ -576,14 +522,8 @@ def updateProfile(profiles, prevLine, currLine):
       profile["delta"].append(timeDelta)
       if (timeDelta > profile["max"]):
         profile["max"] = timeDelta
-      endif
       if (timeDelta < profile["min"]):
         profile["min"] = timeDelta
-      endif
-    endif
-  endif
-  
-enddef
 
 #####################################################
 #
@@ -607,27 +547,21 @@ def createProfile(logfile, profiles):
       gTotalLines = 0
       for line in file:
         gTotalLines += 1
-      endfor
       file.seek(0)
-    endif
     numLines = 0
     currLine = None
     prevLine = None
-    currTimestamp = NULL
+    currTimestamp = ""
     for line in file:
       printKeepAlive(numLines, gKeepAliveType)
       if (findApp(line) == True):
-        if (currTimestamp != NULL):
+        if (currTimestamp != ""):
           prevLine = currLine
-        endif
         currLine = line
         currTimestamp = findTimestamp(currLine)
-        if ((numLines > 0) and (currTimestamp != NULL) and (prevLine != None)):
+        if ((numLines > 0) and (currTimestamp != "") and (prevLine != None)):
           updateProfile(profiles, prevLine, currLine)
-        endif
-      endif
       numLines += 1
-    endfor
     gTotalRunTime = lastTimestamp - firstTimestamp
     calculateMedian(profiles)
     calculateStdDeviation(profiles)
@@ -635,8 +569,6 @@ def createProfile(logfile, profiles):
   else:
     print("ERROR: logfile: '%s' not found..." % logfile)
     return (False)
-  endif
-enddef
 
 #####################################################
 #
@@ -652,22 +584,17 @@ def getTimeDisplay(time, labelLength):
   # a 0 time delta does not display the microseconds by default
   if (time == datetime.timedelta(0)):
     time = "0:00:00.000000"
-  endif
   if (gDiffRequested):
     if (gDiffType == "percent"):
       width = 10
     else:
       width = 9
-    endif
     if (time > 0):
       return (("+"+str(time)).rjust(width)+gTimeSuffix).rjust(labelLength-gTimeWidthAdjust)
     else:
       return (str(time).rjust(width)+gTimeSuffix).rjust(labelLength-gTimeWidthAdjust)
-    endif
   else:
     return (str(time)+gTimeSuffix).rjust(labelLength-gTimeWidthAdjust)
-  endif
-enddef
 
 #####################################################
 #
@@ -683,11 +610,8 @@ def getCountDisplay(count, labelLength):
       return (("+"+str(count)).rjust(8)+gCountSuffix).rjust(labelLength-gCountWidthAdjust)
     else:
       return (str(count).rjust(8)+gCountSuffix).rjust(labelLength-gCountWidthAdjust)
-    endif
   else:
     return (str(count).ljust(labelLength)+gCountSuffix).rjust(labelLength-gCountWidthAdjust)
-  endif
-enddef
 
 #####################################################
 #
@@ -744,7 +668,6 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   else:
     file = open(outfile, "w+")
     gClearStatusUpdate = "\n"
-  endif
 
   # see if we need to sort our profile
   if (option == "-max"):
@@ -761,7 +684,6 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
     profiles.sort(key=operator.itemgetter('tot'), reverse=True)
   elif (option == "-count"):
     profiles.sort(key=operator.itemgetter('count'), reverse=True)
-  endif
 
   maxAreaWidth1 = gMinArea1Width
   maxAreaWidth2 = gMinArea2Width
@@ -775,16 +697,12 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
         numDisplayed += 1
         maxAreaWidth1 = max(maxAreaWidth1, profile["areaWidth1"])
         maxAreaWidth2 = max(maxAreaWidth2, profile["areaWidth2"])
-      endif
       if ((count != gDisplayAll) and (numDisplayed >= int(count))):
         break
-      endif
-    endfor
   else:
     # we're displaying everything
     maxAreaWidth1 = gMaxAreaWidth1
     maxAreaWidth2 = gMaxAreaWidth2
-  endif
 
   # display our header
   maxFieldWidth = maxAreaWidth1 + \
@@ -795,7 +713,6 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   file.write("%s%s\n" % (gClearStatusUpdate, gBanner.center(maxFieldWidth)))
   if (gAppFilter != gNoFilter):
     logfile = logfile + "(" + gAppFilter + ")"
-  endif
   file.write("%s\n" % (gUnderline*max(len(logfile), gBannerLength)).center(maxFieldWidth))
   file.write("%s\n" % logfile.center(maxFieldWidth))
   file.write("\n")
@@ -843,7 +760,6 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
       numDisplayed += 1
       if (not gDiffRequested):
         totalDisplayedTime += profile["tot"]
-      endif
       area1 = profile["file1"] + profile["function1"] + str(profile["line1"])
       area2 = profile["file2"] + profile["function2"] + str(profile["line2"])
       file.write("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n" % (area1.ljust(maxAreaWidth1),
@@ -863,17 +779,13 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                            getTimeDisplay(profile["avg"], gTimeDeltaLength).ljust(gTimeDeltaLength),
                                                            ' '.ljust(gSpaceLength),
                                                            getTimeDisplay(profile["stdDev"], gTimeDeltaLength).ljust(gTimeDeltaLength)))
-    endif
     if ((count != gDisplayAll) and (numDisplayed >= int(count))):
       break
-    endif
-  endfor
   if (outfile != "none"):
     print("")
     print("")
     print("Results written to output file: %s" % outfile)
     print("")
-  endif
   file.write("\n")
   if (not gDiffRequested):
     file.write("\n")
@@ -885,8 +797,6 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
     file.write("Total Areas     : %s\n" % len(profiles))
     file.write("Displayed Areas : %d\n" % numDisplayed)
     file.write("\n")
-  endif
-enddef
 
 #####################################################
 #
@@ -900,25 +810,19 @@ def getTimedeltaDiff(timedelta1, timedelta2):
       return -round((float(timeDeltaToUsec(timedelta1)-timeDeltaToUsec(timedelta2))/float(timeDeltaToUsec(timedelta1))*100.0), 1)
     else:  # diffType == "time"
       return -int(timeDeltaToUsec(timedelta1)-timeDeltaToUsec(timedelta2))
-    endif
   elif (timedelta2 > timedelta1):
     if (gDiffType == "percent"):
       if (timeDeltaToUsec(timedelta1) > 0):
         return round((float(timeDeltaToUsec(timedelta2)-timeDeltaToUsec(timedelta1))/float(timeDeltaToUsec(timedelta1))*100.0), 1)
       else:
         return "Infinity"
-      endif
     else:  # diffType == "time"
       return int(timeDeltaToUsec(timedelta2)-timeDeltaToUsec(timedelta1))
-    endif
   else:
     if (gDiffType == "percent"):
       return 0.0
     else:  # diffType == "time"
       return 0
-    endif
-  endif
-enddef
 
 #####################################################
 #
@@ -932,25 +836,19 @@ def getCountsDiff(count1, count2):
       return -round(((float(count1-count2)/float(count1))*100.0), 1)
     else:  # diffType == "time"
       return -int(count1-count2)
-    endif
   elif (count2 > count1):
     if (gDiffType == "percent"):
       if (count1 > 0):
         return round(((float(count2-count1)/float(count1))*100.0), 1)
       else:
         return "Infinity"
-      endif
     else:  # diffType == "time"
       return int(count2-count1)
-    endif
   else:
     if (gDiffType == "percent"):
       return 0.0
     else:  # diffType == "time"
       return 0
-    endif
-  endif
-enddef
 
 #####################################################
 #
@@ -976,7 +874,6 @@ def diffProfiles(profiles1, profiles2):
     gTimeSuffix = " Usec"
     gTimeWidthAdjust = 3
     gCountWidthAdjust = 5
-  endif
   for profile1 in profiles1:
     profile2 = findProfile(profiles2, 
                            profile1["file1"], profile1["function1"], profile1["line1"], 
@@ -997,10 +894,6 @@ def diffProfiles(profiles1, profiles2):
                             "avg":getTimedeltaDiff(profile1["avg"], profile2["avg"]),
                             "med":getTimedeltaDiff(profile1["med"], profile2["med"]),
                             "stdDev":getTimedeltaDiff(profile1["stdDev"], profile2["stdDev"])})
-      endif
-    endif
-  endfor
-enddef
 
 #####################################################
 #
@@ -1022,20 +915,14 @@ def findTimestamp(line):
         timestamp = timestamp[position][:-1].strip()
       else:
         timestamp = timestamp[position].strip()
-      endif
       if ('T' in timestamp):
         timestamp = timestamp.split("T")[-1]
-      endif
       if (re.match(gTimestampRegexp0, timestamp) or
           re.match(gTimestampRegexp1, timestamp) or
           re.match(gTimestampRegexp2, timestamp) or
           re.match(gTimestampRegexp3, timestamp)):
         return (timestamp)
-      endif
-    endif
-  endfor
-  return (NULL)
-enddef
+  return ("")
 
 #######################################################
 #
@@ -1058,12 +945,10 @@ def createDelta(logfile, maxTimeDelta):
       gTotalLines = 0
       for line in file:
         gTotalLines += 1
-      endfor
       file.seek(0)
-    endif
     numLines = 0
-    currLine = NULL
-    currTimestampStr = NULL
+    currLine = ""
+    currTimestampStr = ""
     currLineNum = 1
     numCounts = 0
     gMaxTimeDeltaDiff = 0.0
@@ -1074,14 +959,14 @@ def createDelta(logfile, maxTimeDelta):
       numLines += 1
       if (findApp(line) == True):
         timestamp = findTimestamp(line)
-        if (timestamp != NULL):
+        if (timestamp != ""):
           prevLineNum = currLineNum
           currLineNum = numLines
           prevLine = currLine
           currLine = line
           prevTimestampStr = currTimestampStr
           currTimestampStr = timestamp
-          if (prevTimestampStr != NULL):
+          if (prevTimestampStr != ""):
             currTimestamp = datetime.datetime.strptime(currTimestampStr, gTimestampFormat)
             prevTimestamp = datetime.datetime.strptime(prevTimestampStr, gTimestampFormat)
             timestampDiff = timeDeltaToSec(currTimestamp - prevTimestamp)
@@ -1089,28 +974,18 @@ def createDelta(logfile, maxTimeDelta):
               numCounts += 1
               if (timestampDiff > gMaxTimeDeltaDiff):
                 gMaxTimeDeltaDiff = timestampDiff
-              endif
               if (timestampDiff < gMinTimeDeltaDiff):
                 gMinTimeDeltaDiff = timestampDiff
-              endif
               gProfiles1.append({"lineNum1":prevLineNum,
                                  "line1":prevLine.strip(),
                                  "lineNum2":currLineNum,
                                  "line2":currLine.strip(),
                                  "delta":timestampDiff})
-
-            endif
-          endif
-        endif
-      endif
-    endfor
     print("")
     return (True)
   else:
     print("ERROR: logfile: '%s' not found..." % logfile)
     return (False)
-  endif
-enddef
 
 #######################################################
 #
@@ -1129,14 +1004,12 @@ def showDelta(logfile, outfile, option, count, maxTimeDelta):
     gProfiles1.sort(key=operator.itemgetter('delta'), reverse=True)
   elif (option == "-min"):
     gProfiles1.sort(key=operator.itemgetter('delta'), reverse=False)
-  endif
   maxTimeDeltaDiff = 0.0
   minTimeDeltaDiff = sys.float_info.max
   if (outfile == "none"):
     outfile = sys.stdout
   else:
     outfile = open(outfile, "w+")
-  endif
   numDisplayed = 0
   outfile.write("\n")
   outfile.write("LOGFILE TIME DELTA PROFILE:\n")
@@ -1153,15 +1026,10 @@ def showDelta(logfile, outfile, option, count, maxTimeDelta):
       numDisplayed += 1
       if (profile["delta"] > maxTimeDeltaDiff):
         maxTimeDeltaDiff = profile["delta"]
-      endif
       if (profile["delta"] < minTimeDeltaDiff):
         minTimeDeltaDiff = profile["delta"]
-      endif
-    endif
-  endfor
   if (gAppFilter != gNoFilter):
     logfile = logfile + "(" + gAppFilter + ")"
-  endif
   outfile.write("\n")
   outfile.write("\n")
   outfile.write("RESULTS SUMMARY:\n")
@@ -1173,11 +1041,9 @@ def showDelta(logfile, outfile, option, count, maxTimeDelta):
     outfile.write("Displayed Max Delta (sec) : %f\n" % maxTimeDeltaDiff)
     outfile.write("Total Min Delta (sec)     : %f\n" % gMinTimeDeltaDiff)
     outfile.write("Displayed Min Delta (sec) : %f\n" % minTimeDeltaDiff)
-  endif
   outfile.write("Total Areas               : %d\n" % len(gProfiles1))
   outfile.write("Displayed Areas           : %d\n" % numDisplayed)
   outfile.write("\n")
-enddef
 
 #####################################################
 #
@@ -1189,11 +1055,8 @@ def findFirstFileArg(args):
   for arg in sys.argv[index:]:
     if (os.path.isfile(arg)):
       break
-    endif
     index += 1
-  endfor
   return index
-enddef
 
 ##############################
 #
@@ -1246,12 +1109,8 @@ if (__name__ == '__main__'):
               gDiffRequested = True
             else:
               showUsage()
-            endif
           else:
             showUsage()
-          endif
-        endif
-      endfor
       if (gDiffRequested):
         # diff two profiles
         logfile1 = sys.argv[firstFileArg]
@@ -1259,12 +1118,10 @@ if (__name__ == '__main__'):
         if ((createProfile(logfile1, gProfiles1)) and (createProfile(logfile2, gProfiles2))):
           diffProfiles(gProfiles1, gProfiles2)
           showProfile("Diff: %s->%s" % (logfile1, logfile2), outfile, option, count, fileFilter, functionFilter, gProfilesDiff)
-        endif
       elif (deltaRequested):
         # find all areas that exceed the specified time delta
         if (createDelta(sys.argv[firstFileArg], float(maxTimeDelta))):
           showDelta(sys.argv[firstFileArg], outfile, option, count, float(maxTimeDelta))
-        endif
       else:
         # normal profile(s)
         for arg in sys.argv[firstFileArg:]:
@@ -1272,12 +1129,5 @@ if (__name__ == '__main__'):
           gProfiles1 = []
           if (createProfile(logfile, gProfiles1)):
             showProfile(logfile, outfile, option, count, fileFilter, functionFilter, gProfiles1)
-          endif
-        endfor
-      endif
     else:
       print("ERROR: logfile: '%s' not found..." % sys.argv[firstFileArg-1])
-    endif
-  endif
-
-endif 

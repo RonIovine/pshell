@@ -46,11 +46,6 @@ import signal
 import time
 import PshellServer
 
-# dummy variables so we can create pseudo end block indicators, add these 
-# identifiers to your list of python keywords in your editor to get syntax 
-# highlighting on these identifiers, sorry Guido
-enddef = endif = endwhile = endfor = None
-
 #################################################################################
 #
 # PSHELL user callback functions, the interface is similar to the "main" in C
@@ -70,14 +65,11 @@ def hello(argv):
   PshellServer.printf("hello command dispatched:\n")
   for index, arg in enumerate(argv):
     PshellServer.printf("  argv[%d]: '%s'\n" % (index, arg))
-  endfor
-enddef
 
 #################################################################################
 #################################################################################
 def world(argv):
   PshellServer.printf("world command dispatched:\n")
-enddef
 
 #################################################################################
 #################################################################################
@@ -93,10 +85,6 @@ def enhancedUsage(argv):
     PshellServer.printf("enhancedUsage command dispatched:\n")
     for index, arg in enumerate(argv):
       PshellServer.printf("  argv[%d]: '%s'\n" % (index, arg))
-    endfor
-  endif
-  
-enddef
 
 #################################################################################
 #################################################################################
@@ -106,46 +94,39 @@ def keepAlive(argv):
     for i in range(1,10):
       PshellServer.march(".")
       time.sleep(1)
-    endfor
   elif (argv[0] == "bang"):
     PshellServer.printf("marching 'bang' keep alive:\n");
     for  i in range(1,10):
       PshellServer.march("!")
       time.sleep(1)
-    endfor
   elif (argv[0] == "pound"):
     PshellServer.printf("marching pound keep alive:\n");
     for  i in range(1,10):
       PshellServer.march("#")
       time.sleep(1)
-    endfor
   elif (argv[0] == "wheel"):
     PshellServer.printf("spinning wheel keep alive:\n")
     for  i in range(1,10):
       # string is optional, use NULL to omit
       PshellServer.wheel("optional string: ")
       time.sleep(1)
-    endfor
   else:
     PshellServer.showUsage()
     return
-  endif
   PshellServer.printf()
-enddef
 
 #################################################################################
 #################################################################################
 def showUsage():
   print("Usage: pshellServerDemo.py -udp | -tcp | -unix | -local")
   sys.exit()
-enddef
 
 #################################################################################
 #################################################################################
 def signalHandler(signal, frame):
   PshellServer.cleanupResources()
+  print("")
   sys.exit()
-enddef
 
 #################################################################################
 #################################################################################
@@ -167,7 +148,6 @@ def registerSignalHandlers():
   signal.signal(signal.SIGXFSZ, signalHandler)     # 25 File size limit exceeded (4.2 BSD)
   signal.signal(signal.SIGPWR, signalHandler)      # 30 Power failure restart (System V)
   signal.signal(signal.SIGSYS, signalHandler)      # 31 Bad system call
-enddef
 
 ##############################
 #
@@ -188,7 +168,6 @@ if (__name__ == '__main__'):
     serverType = PshellServer.LOCAL
   else:
     showUsage()
-  endif 
 
   registerSignalHandlers()
 
@@ -198,7 +177,6 @@ if (__name__ == '__main__'):
   PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
   if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
     PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
-  endif
 
   # run a registered command from within it's parent process
   PshellServer.runCommand("hello 1 2 3")
@@ -207,5 +185,3 @@ if (__name__ == '__main__'):
   PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)
 
   PshellServer.cleanupResources()
-
-endif

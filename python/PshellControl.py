@@ -101,11 +101,6 @@ import random
 from collections import OrderedDict
 from collections import namedtuple
 
-# dummy variables so we can create pseudo end block indicators, add these 
-# identifiers to your list of python keywords in your editor to get syntax 
-# highlighting on these identifiers, sorry Guido
-_enddef = _endif = _endwhile = _endfor = None
-
 #################################################################################
 #
 # global "public" data, these are used for various parts of the public API
@@ -183,7 +178,6 @@ def connectServer(controlName, remoteServer, port, defaultTimeout):
         int: The ServerId (sid) handle of the connected server
   """
   return (_connectServer(controlName, remoteServer, port, defaultTimeout))
-_enddef
 
 #################################################################################
 #################################################################################
@@ -199,7 +193,6 @@ def disconnectServer(sid):
         none
   """
   _disconnectServer(sid)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -218,7 +211,6 @@ def disconnectAllServers():
         none
   """
   _disconnectAllServers()
-_enddef
 
 #################################################################################
 #################################################################################
@@ -235,7 +227,6 @@ def setDefaultTimeout(sid, defaultTimeout):
         none
   """
   _setDefaultTimeout(sid, defaultTimeout)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -253,7 +244,6 @@ def extractCommands(sid):
         str : The remote server's command list in human readable form
   """
   return (_extractCommands(sid))
-_enddef
 
 #################################################################################
 #################################################################################
@@ -273,7 +263,6 @@ def addMulticast(sid, keyword = MULTICAST_ALL):
         none
   """ 
   _addMulticast(sid, keyword)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -293,7 +282,6 @@ def sendMulticast(command):
         none
   """ 
   _sendMulticast(command)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -319,7 +307,6 @@ def sendCommand1(sid, command):
                SOCKET_NOT_CONNECTED
   """
   return (_sendCommand1(sid, command))
-_enddef
 
 #################################################################################
 #################################################################################
@@ -346,7 +333,6 @@ def sendCommand2(sid, timeoutOverride, command):
                SOCKET_NOT_CONNECTED
   """
   return (_sendCommand2(sid, timeoutOverride, command))
-_enddef
 
 #################################################################################
 #################################################################################
@@ -375,7 +361,6 @@ def sendCommand3(sid, command):
                SOCKET_NOT_CONNECTED
   """
   return (_sendCommand3(sid, command))
-_enddef
 
 #################################################################################
 #################################################################################
@@ -405,7 +390,6 @@ def sendCommand4(sid, timeoutOverride, command):
                SOCKET_NOT_CONNECTED
   """
   return (_sendCommand4(sid, timeoutOverride, command))
-_enddef
 
 #################################################################################
 #
@@ -438,7 +422,6 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
           bound = True
         except Exception as e: 
           sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
-      _endwhile
       _gPshellControl.append({"socket":socketFd,
                               "timeout":defaultTimeout_,
                               "serverType":"unix",
@@ -451,10 +434,9 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                                                        ("dataNeeded",True),
                                                        ("pad",0),
                                                        ("seqNum",0),
-                                                       ("payload",_NULL)])})
+                                                       ("payload","")])})
     else:
       print("PSHELL_ERROR: Could not find unix server: '%s'" % (_gUnixSocketPath+remoteServer_))
-    _endif
   else:
     # IP domain socket
     socketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -465,9 +447,8 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
       isBroadcastAddress = True
       defaultTimeout_ = NO_WAIT
       socketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    _endif
     # bind our source socket so we can get replies
-    socketFd.bind((_NULL, 0))
+    socketFd.bind(("", 0))
     _gPshellControl.append({"socket":socketFd,
                             "timeout":defaultTimeout_,
                             "serverType":"udp",
@@ -480,11 +461,9 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                                                      ("dataNeeded",True),
                                                      ("pad",0),
                                                      ("seqNum",0),
-                                                     ("payload",_NULL)])})
-  _endif
+                                                     ("payload","")])})
   # return the newly appended list entry as the SID
   return (len(_gPshellControl)-1)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -492,8 +471,6 @@ def _disconnectServer(sid_):
   control = _getControl(sid_)
   if (control != None):
     _removeControl(control)
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -501,8 +478,6 @@ def _disconnectAllServers():
   global _gPshellControl
   for control in _gPshellControl:
     _removeControl(control)
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -510,14 +485,12 @@ def _setDefaultTimeout(sid_, defaultTimeout_):
   control = _getControl(sid_)
   if (control != None):
     control["timeout"] = defaultTimeout_
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
 def _extractCommands(sid_):
   global _gMsgTypes
-  results = _NULL
+  results = ""
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
@@ -531,70 +504,55 @@ def _extractCommands(sid_):
       results += "\n"
       results += "\n"
       results += control["pshellMsg"]["payload"]
-    _endif
-  _endif
   return (results)
-_enddef
 
 #################################################################################
 #################################################################################
 def _extractName(sid_):
   global _gMsgTypes
-  results = _NULL
+  results = ""
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryName"], "query name", ONE_SEC*5) == COMMAND_SUCCESS):
       results += control["pshellMsg"]["payload"]
-    _endif
-  _endif
   return (results)
-_enddef
 
 #################################################################################
 #################################################################################
 def _extractTitle(sid_):
   global _gMsgTypes
-  results = _NULL
+  results = ""
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryTitle"], "query title", ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
-    _endif
-  _endif
   return (results)
-_enddef
 
 #################################################################################
 #################################################################################
 def _extractBanner(sid_):
   global _gMsgTypes
-  results = _NULL
+  results = ""
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryBanner"], "query banner", ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
-    _endif
-  _endif
   return (results)
-_enddef
 
 #################################################################################
 #################################################################################
 def _extractPrompt(sid_):
   global _gMsgTypes
-  results = _NULL
+  results = ""
   control = _getControl(sid_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryPrompt"], "query prompt", ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
-    _endif
-  _endif
   return (results)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -608,26 +566,18 @@ def _addMulticast(sid_, keyword_):
         multicastFound = True
         sidList = multicast["sidList"]
         break
-      _endif
-    _endfor
     if (not multicastFound):
       # multicast entry not found for this keyword, add a new one
       _gPshellMulticast.append({"keyword":keyword_, "sidList":[]})
       sidList = _gPshellMulticast[-1]["sidList"]
-    _endif
     sidFound = False
     for sid in sidList:
       if (sid == sid_):
         sidFound = True
         break
-      _endif
-    _endfor
     if (not sidFound):
       # sid not found for this multicast group, add it for this group
       sidList.append(sid_)
-    _endif
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -641,11 +591,6 @@ def _sendMulticast(command_):
         if (control != None):
           control["dataNeeded"] = False
           _sendCommand(control, _gMsgTypes["controlCommand"], command_, NO_WAIT)
-        _endif
-      _endfor
-    _endif
-  _endfor
-_enddef
 
 #################################################################################
 #################################################################################
@@ -656,9 +601,7 @@ def _sendCommand1(sid_, command_):
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = False
     retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, control["timeout"])
-  _endif
   return (retCode)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -669,15 +612,13 @@ def _sendCommand2(sid_, timeoutOverride_, command_):
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = False
     retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
-  _endif
   return (retCode)
-_enddef
 
 #################################################################################
 #################################################################################
 def _sendCommand3(sid_, command_):
   global NO_WAIT
-  results = _NULL
+  results = ""
   retCode = SOCKET_NOT_CONNECTED
   control = _getControl(sid_)
   if (control != None):
@@ -691,17 +632,13 @@ def _sendCommand3(sid_, command_):
         print("PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted")
       elif (retCode == COMMAND_SUCCESS):
         results = control["pshellMsg"]["payload"]
-      _endif
-    _endif
-  _endif
   return (results, retCode)
-_enddef
 
 #################################################################################
 #################################################################################
 def _sendCommand4(sid_, timeoutOverride_, command_):
   global NO_WAIT
-  results = _NULL
+  results = ""
   retCode = SOCKET_NOT_CONNECTED
   control = _getControl(sid_)
   if (control != None):
@@ -709,7 +646,6 @@ def _sendCommand4(sid_, timeoutOverride_, command_):
       # if talking to a broadcast address, force our wait time to 0
       # because we do not request or expecet a response
       timeoutOverride_ = NO_WAIT
-    _endif
     control["pshellMsg"]["dataNeeded"] = (timeoutOverride_ > NO_WAIT)
     retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
     # only try to extract data if not talking to a broadcast address
@@ -718,11 +654,7 @@ def _sendCommand4(sid_, timeoutOverride_, command_):
         print("PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted")
       elif (retCode == COMMAND_SUCCESS):
         results = control["pshellMsg"]["payload"]
-      _endif
-    _endif
-  _endif
   return (results, retCode)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -737,7 +669,6 @@ def _sendCommand(control_, commandType_, command_, timeout_):
       # if talking to a broadcast address, force our wait time to 0
       # because we do not request or expecet a response
       timeout_ = NO_WAIT
-    _endif
     control_["pshellMsg"]["msgType"] = commandType_
     control_["pshellMsg"]["respNeeded"] = (timeout_ > NO_WAIT)
     control_["pshellMsg"]["seqNum"] += 1
@@ -765,17 +696,12 @@ def _sendCommand(control_, commandType_, command_, timeout_):
           else:
             retCode = control_["pshellMsg"]["msgType"]
             break
-          _endif
         else:
           retCode = SOCKET_TIMEOUT
           break
-        _endif
-      _endwhile
       control_["pshellMsg"]["seqNum"] = seqNum
-    _endif
   else:
     retCode = SOCKET_NOT_CONNECTED
-  _endif  
   # the suppress flag is used as a backdoor for the pshell.py client to allow
   # a remote server to pass the command usage back to the local server that
   # is run by the client
@@ -787,9 +713,7 @@ def _sendCommand(control_, commandType_, command_, timeout_):
     print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode)))
   else:
     retCode = COMMAND_SUCCESS
-  _endif
   return (retCode)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -799,8 +723,6 @@ def _getControlResults(retCode):
     return (_gPshellControlResults[retCode])
   else:
     return ("Unknown retCode: %d" % retCode)
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -808,10 +730,8 @@ def _removeControl(control_):
   global _gPshellControl
   if (control_["serverType"] == "unix"):
     os.unlink(control_["sourceAddress"])
-  _endif
   control_["socket"].close()
   _gPshellControl.remove(control_)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -822,17 +742,14 @@ def _getControl(sid_):
   else:
     print("PSHELL_ERROR: No control defined for sid: %d" % sid_)
     return (None)
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
 def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):  
-  configFile1 = _NULL
+  configFile1 = ""
   configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
     configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
-  _endif
   configFile2 = _PSHELL_CONFIG_DIR+"/"+_PSHELL_CONFIG_FILE
   configFile3 = os.getcwd()+"/"+_PSHELL_CONFIG_FILE
   if (os.path.isfile(configFile1)):
@@ -843,7 +760,6 @@ def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
     file = open(configFile3, 'r')
   else:
     return (remoteServer_, port_, defaultTimeout_)
-  _endif
   # found a config file, process it
   isUnix = False
   for line in file:
@@ -866,29 +782,18 @@ def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
               defaultTimeout_ = 0
             else:
               defaultTimeout_ = int(option[1].strip())
-            _endif
-          _endif
-        _endif
-      _endif
-    _endif
-  _endfor
   # make this check in case they changed the server
   # from udp to unix and forgot to comment out the
   # port
   if (isUnix):
     port_ = "unix"
-  _endif
   return (remoteServer_, port_, defaultTimeout_)
-_enddef
 
 #################################################################################
 #
 # global "private" data
 #
 #################################################################################
-
-# python does not have a native null string identifier, so create one
-_NULL = ""
 
 # list of dictionaries that contains a control structure for each control client
 _gPshellControl = []

@@ -86,11 +86,6 @@ import termios
 import select
 import signal
 
-# dummy variables so we can create pseudo end block indicators, add these 
-# identifiers to your list of python keywords in your editor to get syntax 
-# highlighting on these identifiers, sorry Guido
-_enddef = _endif = _endwhile = _endfor = None
-
 #################################################################################
 #
 # global "public" data, these are used for various parts of the public API
@@ -147,7 +142,6 @@ def setFileDescriptors(inFd, outFd, serialType, idleTimeout = IDLE_TIMEOUT_NONE)
         none
   """
   _setFileDescriptors(inFd, outFd, serialType, idleTimeout)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -164,7 +158,6 @@ def setIdleTimeout(idleTimeout):
         none
   """
   _setIdleTimeout(idleTimeout)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -179,7 +172,6 @@ def write(string):
         none
   """
   _write(string)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -195,7 +187,6 @@ def addTabCompletion(keyword):
         none
   """
   _addTabCompletion(keyword)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -214,7 +205,6 @@ def setTabStyle(tabStyle):
         none
   """
   _setTabStyle(tabStyle)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -236,7 +226,6 @@ def getInput(prompt):
         bool : True for idleSession timeout, False otherwise
   """
   return (_getInput(prompt))
-_enddef
 
 #################################################################################
 #################################################################################
@@ -260,7 +249,6 @@ def isSubString(string1, string2, minMatchLength = 0):
         bool : True if substring matches, False otherwise
   """
   return (_isSubString(string1, string2, minMatchLength))
-_enddef
 
 #################################################################################
 #
@@ -287,15 +275,12 @@ def _setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_):
   if (_gSerialType == SOCKET):
     _write(_gTcpNegotiate)
     _gInFd.recv(len(_gTcpNegotiate))
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
 def _setIdleTimeout(idleTimeout_):
   global _gIdleTimeout
   _gIdleTimeout = idleTimeout_
-_enddef
 
 #################################################################################
 #################################################################################
@@ -307,19 +292,15 @@ def _addTabCompletion(keyword_):
     if (keyword == keyword_):
       # duplicate keyword found, return
       return
-    _endif
-  _endfor
   if (len(keyword_) > _gMaxTabCompletionKeywordLength):
     _gMaxTabCompletionKeywordLength = len(keyword_)+3
     _gMaxCompletionsPerLine = 80/_gMaxTabCompletionKeywordLength
-  _endif
   _gTabCompletions.append(keyword_.strip())
-_enddef
 
 #################################################################################
 #################################################################################
 def _isSubString(string1_, string2_, minMatchLength_):
-  if (string1_ == _NULL):
+  if (string1_ == ""):
     return (False)
   elif (len(string1_) > len(string2_)):
     return (False)
@@ -329,8 +310,6 @@ def _isSubString(string1_, string2_, minMatchLength_):
     return (string1_ == string2_[:len(string1_)])
   else:
     return (string1_[:minMatchLength_] == string2_[:minMatchLength_])
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -340,10 +319,7 @@ def _findTabCompletions(keyword_):
   for keyword in _gTabCompletions:
     if (isSubString(keyword_, keyword)):
       matchList.append(keyword)
-    _endif
-  _endfor
   return (matchList)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -356,15 +332,10 @@ def _findLongestMatch(matchList_, command_):
       for keyword in matchList_:
          if ((charPos >= len(keyword)) or (char != keyword[charPos])):
            return (string)
-         _endif
-      _endfor
       string += char
       charPos += 1
     else:
       return (string)
-    _endif
-  _endwhile
-_enddef
 
 #################################################################################
 #################################################################################
@@ -380,24 +351,18 @@ def _showTabCompletions(completionList_, prompt_):
       if ((numPrinted == _gMaxCompletionsPerLine) and (numPrinted < len(completionList_))):
         _write("\n")
         numPrinted = 0
-      _endif
-    _endfor
     _write("\n"+prompt_)
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
 def _setTabStyle(tabStyle_):
   global _gTabStyle
   _gTabStyle = tabStyle_
-_enddef
 
 #################################################################################
 #################################################################################
 def _clearLine(cursorPos_, command_):
   _write("\b"*cursorPos_ + " "*len(command_) + "\b"*(len(command_)))
-_enddef
 
 #################################################################################
 #################################################################################
@@ -405,9 +370,7 @@ def _beginningOfLine(cursorPos_, command_):
   if (cursorPos_ > 0):
     cursorPos_ = 0
     _write("\b"*len(command_))
-  _endif
   return (cursorPos_)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -415,25 +378,21 @@ def _endOfLine(cursorPos_, command_):
   if (cursorPos_ < len(command_)):
     _write(command_[cursorPos_:])
     cursorPos_ = len(command_)
-  _endif
   return (cursorPos_)
-_enddef
 
 #################################################################################
 #################################################################################
 def _killLine(cursorPos_, command_):
   _clearLine(cursorPos_, command_)
-  command_ = _NULL
+  command_ = ""
   cursorPos_ = 0
   return (cursorPos_, command_)
-_enddef
 
 #################################################################################
 #################################################################################
 def _showCommand(command_):
   _write(command_)
   return (len(command_), command_)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -444,8 +403,8 @@ def _getInput(prompt_):
   global _gTabStyle
   global _gOutFd
   inEsc = False
-  esc = _NULL
-  command = _NULL
+  esc = ""
+  command = ""
   cursorPos = 0
   tabCount = 0
   tabCompletions = []
@@ -455,11 +414,9 @@ def _getInput(prompt_):
     # check for idleSession timeout
     if (idleSession == True):
       return (command, True)
-    _endif
     if (ord(char) != 9):
       # something other than TAB typed, clear out our tabCount
       tabCount = 0
-    _endif
     #print(ord(char))
     if (inEsc == True):
       if (esc == '['):
@@ -469,9 +426,8 @@ def _getInput(prompt_):
             _gCommandHistoryPos -= 1
             _clearLine(cursorPos, command)
             (cursorPos, command) = _showCommand(_gCommandHistory[_gCommandHistoryPos])
-          _endif
           inEsc = False
-          esc = _NULL
+          esc = ""
         elif (char == 'B'):
           # down-arrow key
           if (_gCommandHistoryPos < len(_gCommandHistory)-1):
@@ -482,25 +438,22 @@ def _getInput(prompt_):
             # kill whole line
             _gCommandHistoryPos = len(_gCommandHistory)
             (cursorPos, command) = _killLine(cursorPos, command)
-          _endif
           inEsc = False
-          esc = _NULL
+          esc = ""
         elif (char == 'C'):
           # right-arrow key
           if (cursorPos < len(command)):
             _write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
             cursorPos += 1
-          _endif
           inEsc = False
-          esc = _NULL
+          esc = ""
         elif (char == 'D'):
           # left-arrow key
           if (cursorPos > 0):
             cursorPos -= 1
             _write("\b")
-          _endif
           inEsc = False
-          esc = _NULL
+          esc = ""
         elif (char == '1'):
           print("home2")
           cursorPos = _beginningOfLine(cursorPos, command)
@@ -511,13 +464,11 @@ def _getInput(prompt_):
           if (cursorPos < len(command)):
             _write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
             command = command[:cursorPos] + command[cursorPos+1:]
-          _endif
           inEsc = False
-          esc = _NULL
+          esc = ""
         elif (char == '4'):
           print("end2")
           cursorPos = _endOfLine(cursorPos, command)
-        _endif
       elif (esc == 'O'):
         if (char == 'H'):
           # home key, go to beginning of line
@@ -525,14 +476,12 @@ def _getInput(prompt_):
         elif (char == 'F'):
           # end key, go to end of line
           cursorPos = _endOfLine(cursorPos, command)
-        _endif
         inEsc = False
-        esc = _NULL
+        esc = ""
       elif ((char == '[') or (char == 'O')):
         esc = char
       else:
         inEsc = False
-      _endif
     elif ((ord(char) >= 32) and (ord(char) < 127)):
       # printable single character, add it to our command,
       command = command[:cursorPos] + char + command[cursorPos:]
@@ -549,7 +498,6 @@ def _getInput(prompt_):
         return (command.strip(), False)
       else:
         _write(prompt_)
-      _endif
     elif (ord(char) == 11):
       # kill to eol
       _write(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
@@ -585,9 +533,6 @@ def _getInput(prompt_):
               _clearLine(cursorPos, command)
               (cursorPos, command) = _showCommand(_findLongestMatch(matchList, command))
               _showTabCompletions(matchList, prompt_+command)
-            _endif
-          _endif
-        _endif
       else:  # BASH_TAB
         # this code below implements the more standard readline/bash double tabbing method 
         if (tabCount == 2):
@@ -598,7 +543,6 @@ def _getInput(prompt_):
             # partial word typed, double TAB, show all possible completions
             _showTabCompletions(_findTabCompletions(command), prompt_+command)
             tabCount = 0
-          _endif
         elif ((tabCount == 1) and (len(command) > 0)):
           # partial word typed, single TAB, fill out as much
           #  as we can and show any possible other matches
@@ -612,19 +556,15 @@ def _getInput(prompt_):
             # multiple completions, find the longest match and show up to that
             _clearLine(cursorPos, command)
             (cursorPos, command) = _showCommand(_findLongestMatch(matchList, command))
-          _endif
         elif (len(command) > 0):
           # TAB count > 2 with command typed, reset TAB count
           tabCount = 0
-        _endif
-      _endif
     elif (ord(char) == 127):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
         _write("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
         command = command[:cursorPos-1] + command[cursorPos:]
         cursorPos -= 1
-      _endif
     elif (ord(char) == 1):
       # home, go to beginning of line
       cursorPos = _beginningOfLine(cursorPos, command)
@@ -639,9 +579,6 @@ def _getInput(prompt_):
       #_write("\nchar value: %d" % ord(char))
       #_write("\n"+prompt_)
       None
-    _endif
-  _endwhile
-_enddef
 
 #################################################################################
 #################################################################################
@@ -656,8 +593,6 @@ def _write(string_):
   else:
     # TCP socket with telnet client
     _gOutFd.send(string_)
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -665,7 +600,7 @@ def _getChar():
   global _gInFd
   global _gSerialType
   global _gIdleTimeout
-  char = _NULL
+  char = ""
   if (_gSerialType == TTY):
     # serial terminal control
     oldSettings = termios.tcgetattr(_gInFd)
@@ -678,10 +613,8 @@ def _getChar():
         else:
           _write("\r\nIdle session timeout\r\n");
           return (char, True)
-        _endif
       else:
         char = _gInFd.read(1)
-      _endif
     finally:
       termios.tcsetattr(_gInFd, termios.TCSADRAIN, oldSettings)
   else:
@@ -693,23 +626,16 @@ def _getChar():
       else:
         _write("\nIdle session timeout\n");
         return (char, True)
-      _endif
     else:
       char = _gInFd.recv(1)
-    _endif
-  _endif
   # return char, no idle timeout
   return (char, False)
-_enddef
 
 #################################################################################
 #
 # global "private" data
 #
 #################################################################################
-
-# python does not have a native null string identifier, so create one
-_NULL = ""
 
 _gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
 _gIdleTimeout = IDLE_TIMEOUT_NONE

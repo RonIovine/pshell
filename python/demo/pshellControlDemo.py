@@ -43,13 +43,6 @@ import sys
 import PshellReadline
 import PshellControl
 
-# dummy variables so we can create pseudo end block indicators, add these identifiers to your
-# list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
-enddef = endif = endwhile = endfor = None
-
-# python does not have a native null string identifier, so create one
-NULL = ""
-
 #####################################################
 #####################################################
 def showUsage():
@@ -67,7 +60,6 @@ def showUsage():
   print("    extract          - extract data contents of response (must have non-0 wait timeout)")
   print("")
   exit(0)
-enddef
 
 ##############################
 #
@@ -78,11 +70,9 @@ if (__name__ == '__main__'):
 
   if ((len(sys.argv) < 3) or ((len(sys.argv)) > 5)):
     showUsage()
-  endif
 
   extract = False
   timeout = 1000
-  command = NULL
 
   for arg in sys.argv[3:]:
     if ("-t" in arg):
@@ -91,14 +81,12 @@ if (__name__ == '__main__'):
       extract = True
     else:
       showUsage()
-    endif
-  endfor
 
   #print("server: %s, port: %s, timeout: %s, extract: %d" % (sys.argv[1], sys.argv[2], timeout, extract))
 
   sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
 
-  command = NULL
+  command = ""
   while (not PshellReadline.isSubString(command, "quit")):
     (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
     if (not PshellReadline.isSubString(command, "quit")):
@@ -110,10 +98,5 @@ if (__name__ == '__main__'):
         PshellReadline.write("%s" % results)
       else:
         PshellControl.sendCommand1(sid, command)
-      endif
-    endif
-  endwhile
 
   PshellControl.disconnectServer(sid)
-
-endif 

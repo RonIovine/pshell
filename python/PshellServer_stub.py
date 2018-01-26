@@ -40,11 +40,6 @@ to display the current softlink settings.
 # import all our necessary modules
 import time
 
-# dummy variables so we can create pseudo end block indicators, add these 
-# identifiers to your list of python keywords in your editor to get syntax 
-# highlighting on these identifiers, sorry Guido
-_enddef = _endif = _endwhile = _endfor = None
-
 #################################################################################
 #
 # global "public" data, these are used for various parts of the public API
@@ -92,7 +87,6 @@ def addCommand(function, command, description, usage = None, minArgs = 0, maxArg
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -104,9 +98,6 @@ def startServer(serverName, serverType, serverMode, hostnameOrIpAddr = None, por
   if (serverMode == BLOCKING):
     while (True):
       time.sleep(100000)
-    _endwhile
-  _endif
-_enddef
 
 #################################################################################
 #################################################################################
@@ -115,7 +106,6 @@ def cleanupResources():
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -124,7 +114,6 @@ def runCommand(command):
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -133,7 +122,6 @@ def printf(message = "\n"):
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -142,7 +130,6 @@ def flush():
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -151,7 +138,6 @@ def wheel(string = None):
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -160,7 +146,6 @@ def march(string):
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -169,7 +154,6 @@ def showUsage():
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   None
-_enddef
 
 #################################################################################
 #################################################################################
@@ -178,7 +162,6 @@ def isHelp():
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   return (True)
-_enddef
 
 #################################################################################
 #################################################################################
@@ -187,4 +170,3 @@ def isSubString(string1, string2, minMatchLength = 0):
   Stub function, set PshellServer.py softlink to PshellServer_full.py for full functionality
   """
   return (True)
-_enddef

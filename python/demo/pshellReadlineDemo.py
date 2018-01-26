@@ -41,13 +41,6 @@ import select
 import socket
 import PshellReadline
 
-# dummy variables so we can create pseudo end block indicators, add these identifiers to your
-# list of python keywords in your editor to get syntax highlighting on these identifiers, sorry Guido
-enddef = endif = endwhile = endfor = None
-
-# python does not have a native null string identifier, so create one
-NULL = ""
-
 #####################################################
 #####################################################
 def showUsage():
@@ -62,7 +55,6 @@ def showUsage():
   print("    <idleTimeout> - the idle session timeout in minutes (default=none)")
   print("")
   sys.exit(0)
-enddef
 
 ##############################
 #
@@ -73,7 +65,6 @@ if (__name__ == '__main__'):
 
   if (len(sys.argv) > 4):
     showUsage()
-  endif
 
   serialType = PshellReadline.TTY
 
@@ -92,8 +83,6 @@ if (__name__ == '__main__'):
       PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*int(arg))
     else:
       showUsage()
-    endif
-  endfor
 
   # add some keywords for TAB completion, the completions
   # only apply to the first keyword (i.e. up to the first
@@ -123,7 +112,7 @@ if (__name__ == '__main__'):
     sockFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   
     # Bind the socket to the port
-    sockFd.bind((NULL, 9005))
+    sockFd.bind(("", 9005))
   
     # Listen for incoming connections
     sockFd.listen(1)
@@ -139,15 +128,9 @@ if (__name__ == '__main__'):
     # shutdown our original listening socket
     sockFd.shutdown(socket.SHUT_RDWR);
 
-  endif
-
-  command = NULL
+  command = ""
   idleSession = False
   while (not idleSession and not PshellReadline.isSubString(command, "quit")):
     (command, idleSession) = PshellReadline.getInput("prompt> ")
     if (not idleSession and not PshellReadline.isSubString(command, "quit")):
       PshellReadline.write("command: '%s'\n" % command)
-    endif
-  endwhile
-
-endif
