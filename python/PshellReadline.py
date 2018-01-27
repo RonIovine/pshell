@@ -199,7 +199,7 @@ def setTabStyle(tabStyle):
   PshellReadline.FAST_TAB for the tabStyle
 
     Args:
-        tabStype (str) : The desired TAB  behavour style (FAST or BASH)
+        tabStyle (str) : The desired TAB  behavour style (FAST or BASH)
 
     Returns:
         none

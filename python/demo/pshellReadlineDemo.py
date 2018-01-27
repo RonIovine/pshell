@@ -112,13 +112,14 @@ if (__name__ == '__main__'):
     sockFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   
     # Bind the socket to the port
-    sockFd.bind(("", 9005))
+    port = 9005
+    sockFd.bind(("", port))
   
     # Listen for incoming connections
     sockFd.listen(1)
   
     # Wait for a connection
-    print("waiting for a connection on port 9005, use 'telnet localhost 9005' to connect")
+    print("waiting for a connection on port %d, use 'telnet localhost %d' to connect" % (port, port))
     connectFd, clientAddr = sockFd.accept()
     print("connection accepted")
 
