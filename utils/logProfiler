@@ -661,6 +661,13 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
 
   maxAreaWidth1 = gMinArea1Width
   maxAreaWidth2 = gMinArea2Width
+  maxTotTimeWidth = gTimeDeltaLength
+  maxMaxTimeWidth = gTimeDeltaLength
+  maxMinTimeWidth = gTimeDeltaLength
+  maxMedTimeWidth = gTimeDeltaLength
+  maxAvgTimeWidth = gTimeDeltaLength
+  maxStdDevTimeWidth = gTimeDeltaLength
+
   if ((count != gDisplayAll) or (fileFilter != gNoFilter) or (functionFilter != gNoFilter)):
     numDisplayed = 0
     for profile in profiles:
@@ -671,6 +678,12 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
         numDisplayed += 1
         maxAreaWidth1 = max(maxAreaWidth1, profile["areaWidth1"])
         maxAreaWidth2 = max(maxAreaWidth2, profile["areaWidth2"])
+        maxTotTimeWidth = max(maxTotTimeWidth, len(str(profile["tot"])))
+        maxMaxTimeWidth = max(maxMaxTimeWidth, len(str(profile["max"])))
+        maxMinTimeWidth = max(maxMinTimeWidth, len(str(profile["min"])))
+        maxMedTimeWidth = max(maxMedTimeWidth, len(str(profile["med"])))
+        maxAvgTimeWidth = max(maxAvgTimeWidth, len(str(profile["avg"])))
+        maxStdDevTimeWidth = max(maxStdDevTimeWidth, len(str(profile["stdDev"])))
       if ((count != gDisplayAll) and (numDisplayed >= int(count))):
         break
   else:
@@ -682,7 +695,12 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   maxFieldWidth = maxAreaWidth1 + \
                   maxAreaWidth2 + \
                   gCountLabelLength + \
-                  gTimeDeltaLength*gTimeDeltaCount + \
+                  maxTotTimeWidth + \
+                  maxMaxTimeWidth + \
+                  maxMinTimeWidth + \
+                  maxMedTimeWidth + \
+                  maxAvgTimeWidth + \
+                  maxStdDevTimeWidth + \
                   gNormalDisplayPadLength
   file.write("%s%s\n" % (gClearStatusUpdate, gBanner.center(maxFieldWidth)))
   file.write("%s\n" % (gUnderline*max(len(logfile), gBannerLength)).center(maxFieldWidth))
@@ -694,34 +712,34 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                        ' '.ljust(gSpaceLength),
                                                        (gCountLabel+gLabelSuffix).ljust(gCountLabelLength),
                                                        ' '.ljust(gSpaceLength),
-                                                       (gTotTimeLabel+gLabelSuffix).ljust(gTimeDeltaLength),
+                                                       (gTotTimeLabel+gLabelSuffix).ljust(maxTotTimeWidth),
                                                        ' '.ljust(gSpaceLength),
-                                                       (gMaxTimeLabel+gLabelSuffix).ljust(gTimeDeltaLength),
+                                                       (gMaxTimeLabel+gLabelSuffix).ljust(maxMaxTimeWidth),
                                                        ' '.ljust(gSpaceLength),
-                                                       (gMinTimeLabel+gLabelSuffix).ljust(gTimeDeltaLength),
+                                                       (gMinTimeLabel+gLabelSuffix).ljust(maxMinTimeWidth),
                                                        ' '.ljust(gSpaceLength),
-                                                       (gMedTimeLabel+gLabelSuffix).ljust(gTimeDeltaLength),
+                                                       (gMedTimeLabel+gLabelSuffix).ljust(maxMedTimeWidth),
                                                        ' '.ljust(gSpaceLength),
-                                                       (gAvgTimeLabel+gLabelSuffix).ljust(gTimeDeltaLength),
+                                                       (gAvgTimeLabel+gLabelSuffix).ljust(maxAvgTimeWidth),
                                                        ' '.ljust(gSpaceLength),
-                                                       (gStdDevLabel+gLabelSuffix).ljust(gTimeDeltaLength)))
+                                                       (gStdDevLabel+gLabelSuffix).ljust(maxStdDevTimeWidth)))
   file.write("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n" % (gUnderline.ljust(maxAreaWidth1, gUnderline),
                                                        ' '.ljust(gSpaceLength),
                                                        gUnderline.ljust(maxAreaWidth2, gUnderline),
                                                        ' '.ljust(gSpaceLength),
                                                        gUnderline.ljust(gCountLabelLength, gUnderline),
                                                        ' '.ljust(gSpaceLength),
-                                                       gUnderline.ljust(gTimeDeltaLength, gUnderline),
+                                                       gUnderline.ljust(maxTotTimeWidth, gUnderline),
                                                        ' '.ljust(gSpaceLength),
-                                                       gUnderline.ljust(gTimeDeltaLength, gUnderline),
+                                                       gUnderline.ljust(maxMaxTimeWidth, gUnderline),
                                                        ' '.ljust(gSpaceLength),
-                                                       gUnderline.ljust(gTimeDeltaLength, gUnderline),
+                                                       gUnderline.ljust(maxMinTimeWidth, gUnderline),
                                                        ' '.ljust(gSpaceLength),
-                                                       gUnderline.ljust(gTimeDeltaLength, gUnderline),
+                                                       gUnderline.ljust(maxMedTimeWidth, gUnderline),
                                                        ' '.ljust(gSpaceLength),
-                                                       gUnderline.ljust(gTimeDeltaLength, gUnderline),
+                                                       gUnderline.ljust(maxAvgTimeWidth, gUnderline),
                                                        ' '.ljust(gSpaceLength),
-                                                       gUnderline.ljust(gTimeDeltaLength, gUnderline)))
+                                                       gUnderline.ljust(maxStdDevTimeWidth, gUnderline)))
   # display our profile
   numDisplayed = 0
   for profile in profiles:
@@ -740,17 +758,17 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                            ' '.ljust(gSpaceLength),
                                                            getCountDisplay(profile["count"], gCountLabelLength).ljust(gCountLabelLength),
                                                            ' '.ljust(gSpaceLength),
-                                                           getTimeDisplay(profile["tot"], gTimeDeltaLength).ljust(gTimeDeltaLength),
+                                                           getTimeDisplay(profile["tot"], maxTotTimeWidth).ljust(maxTotTimeWidth),
                                                            ' '.ljust(gSpaceLength),
-                                                           getTimeDisplay(profile["max"], gTimeDeltaLength).ljust(gTimeDeltaLength),
+                                                           getTimeDisplay(profile["max"], maxMaxTimeWidth).ljust(maxMaxTimeWidth),
                                                            ' '.ljust(gSpaceLength),
-                                                           getTimeDisplay(profile["min"], gTimeDeltaLength).ljust(gTimeDeltaLength),
+                                                           getTimeDisplay(profile["min"], maxMinTimeWidth).ljust(maxMinTimeWidth),
                                                            ' '.ljust(gSpaceLength),
-                                                           getTimeDisplay(profile["med"], gTimeDeltaLength).ljust(gTimeDeltaLength),
+                                                           getTimeDisplay(profile["med"], maxMedTimeWidth).ljust(maxMedTimeWidth),
                                                            ' '.ljust(gSpaceLength),
-                                                           getTimeDisplay(profile["avg"], gTimeDeltaLength).ljust(gTimeDeltaLength),
+                                                           getTimeDisplay(profile["avg"], maxAvgTimeWidth).ljust(maxAvgTimeWidth),
                                                            ' '.ljust(gSpaceLength),
-                                                           getTimeDisplay(profile["stdDev"], gTimeDeltaLength).ljust(gTimeDeltaLength)))
+                                                           getTimeDisplay(profile["stdDev"], maxStdDevTimeWidth).ljust(maxStdDevTimeWidth)))
     if ((count != gDisplayAll) and (numDisplayed >= int(count))):
       break
   if (outfile != "none"):
@@ -762,7 +780,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   if (not gDiffRequested):
     file.write("\n")
     file.write("RESULTS SUMMARY:\n")
-    file.write("%s\n" % gUnderline.ljust(34, gUnderline))
+    file.write("%s\n" % gUnderline.ljust(max(len(logfile), len(str(gTotalProfiledTime)), len(str(totalDisplayedTime)))+20, gUnderline))
     file.write("Logfile         : %s\n" % logfile)
     file.write("Profiled Time   : %s\n" % str(gTotalProfiledTime))
     file.write("Displayed Time  : %s\n" % str(totalDisplayedTime))
