@@ -505,6 +505,7 @@ def createProfile(logfile):
   global gTotalProfiledTime
   global gProfiles
   global gNoFilter
+  gTotalProfiledTime = datetime.timedelta(0)
   appFilter = logfile.split(":")
   if (len(appFilter) == 2):
     logfile = appFilter[0]
@@ -537,6 +538,7 @@ def createProfile(logfile):
         if ((numLines > 0) and (currTimestamp != "") and (prevLine != None)):
           updateProfile(profile, prevLine, currLine)
       numLines += 1
+    profile["profiledTime"] = gTotalProfiledTime;
     calculateMedian(profile["profile"])
     calculateStdDeviation(profile["profile"])
     # add new profile to our profile list
@@ -645,19 +647,19 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
 
   # see if we need to sort our profile
   if (option == "max"):
-    profiles.sort(key=operator.itemgetter('max'), reverse=True)
+    profiles["profile"].sort(key=operator.itemgetter('max'), reverse=True)
   elif (option == "min"):
-    profiles.sort(key=operator.itemgetter('min'), reverse=True)
+    profiles["profile"].sort(key=operator.itemgetter('min'), reverse=True)
   elif (option == "avg"):
-    profiles.sort(key=operator.itemgetter('avg'), reverse=True)
+    profiles["profile"].sort(key=operator.itemgetter('avg'), reverse=True)
   elif (option == "med"):
-    profiles.sort(key=operator.itemgetter('med'), reverse=True)
+    profiles["profile"].sort(key=operator.itemgetter('med'), reverse=True)
   elif (option == "std"):
-    profiles.sort(key=operator.itemgetter('stdDev'), reverse=True)
+    profiles["profile"].sort(key=operator.itemgetter('stdDev'), reverse=True)
   elif (option == "tot"):
-    profiles.sort(key=operator.itemgetter('tot'), reverse=True)
+    profiles["profile"].sort(key=operator.itemgetter('tot'), reverse=True)
   elif (option == "count"):
-    profiles.sort(key=operator.itemgetter('count'), reverse=True)
+    profiles["profile"].sort(key=operator.itemgetter('count'), reverse=True)
 
   maxAreaWidth1 = gMinArea1Width
   maxAreaWidth2 = gMinArea2Width
@@ -670,7 +672,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
 
   if ((count != gDisplayAll) or (fileFilter != gNoFilter) or (functionFilter != gNoFilter)):
     numDisplayed = 0
-    for profile in profiles:
+    for profile in profiles["profile"]:
       if ((((fileFilter == gNoFilter) and (functionFilter == gNoFilter)) or
            ((fileFilter != gNoFilter) and (functionFilter == gNoFilter) and ((fileFilter in profile["file1"]) or (fileFilter in profile["file2"]))) or
            ((functionFilter != gNoFilter) and (fileFilter == gNoFilter) and ((functionFilter in profile["function1"]) or (functionFilter in profile["function2"]))) or
@@ -742,7 +744,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                                                        gUnderline.ljust(maxStdDevTimeWidth, gUnderline)))
   # display our profile
   numDisplayed = 0
-  for profile in profiles:
+  for profile in profiles["profile"]:
     if ((((fileFilter == gNoFilter) and (functionFilter == gNoFilter)) or
          ((fileFilter != gNoFilter) and (functionFilter == gNoFilter) and ((fileFilter in profile["file1"]) or (fileFilter in profile["file2"]))) or
          ((functionFilter != gNoFilter) and (fileFilter == gNoFilter) and ((functionFilter in profile["function1"]) or (functionFilter in profile["function2"]))) or
@@ -780,11 +782,11 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
   if (not gDiffRequested):
     file.write("\n")
     file.write("RESULTS SUMMARY:\n")
-    file.write("%s\n" % gUnderline.ljust(max(len(logfile), len(str(gTotalProfiledTime)), len(str(totalDisplayedTime)))+20, gUnderline))
+    file.write("%s\n" % gUnderline.ljust(max(len(logfile), len(str(profiles["profiledTime"])), len(str(totalDisplayedTime)))+20, gUnderline))
     file.write("Logfile         : %s\n" % logfile)
-    file.write("Profiled Time   : %s\n" % str(gTotalProfiledTime))
+    file.write("Profiled Time   : %s\n" % str(profiles["profiledTime"]))
     file.write("Displayed Time  : %s\n" % str(totalDisplayedTime))
-    file.write("Total Areas     : %s\n" % len(profiles))
+    file.write("Total Areas     : %s\n" % len(profiles["profile"]))
     file.write("Displayed Areas : %d\n" % numDisplayed)
     file.write("\n")
 
@@ -853,7 +855,6 @@ def diffProfiles(profiles1, profiles2):
   global gTimeWidthAdjust
   global gCountSuffix
   global gCountWidthAdjust
-  gProfilesDiff = []
   if (gDiffType == "percent"):
     gLabelSuffix = " %diff"
     gTimeSuffix = "%"
@@ -865,26 +866,27 @@ def diffProfiles(profiles1, profiles2):
     gTimeSuffix = " Usec"
     gTimeWidthAdjust = 3
     gCountWidthAdjust = 5
+  gProfilesDiff = {"profile":[]}
   for profile1 in profiles1:
     profile2 = findProfile(profiles2, 
                            profile1["file1"], profile1["function1"], profile1["line1"], 
                            profile1["file2"], profile1["function2"], profile1["line2"])
     if (profile2 != None):
-      gProfilesDiff.append({"file1":profile1["file1"],
-                            "function1":profile1["function1"],
-                            "line1":profile1["line1"],
-                            "areaWidth1":profile1["areaWidth1"],
-                            "file2":profile1["file2"],
-                            "function2":profile1["function2"],
-                            "line2":profile1["line2"],
-                            "areaWidth2":profile1["areaWidth2"],
-                            "count":getCountsDiff(profile1["count"], profile2["count"]),
-                            "tot":getTimedeltaDiff(profile1["tot"], profile2["tot"]),
-                            "min":getTimedeltaDiff(profile1["min"], profile2["min"]),
-                            "max":getTimedeltaDiff(profile1["max"], profile2["max"]),
-                            "avg":getTimedeltaDiff(profile1["avg"], profile2["avg"]),
-                            "med":getTimedeltaDiff(profile1["med"], profile2["med"]),
-                            "stdDev":getTimedeltaDiff(profile1["stdDev"], profile2["stdDev"])})
+      gProfilesDiff["profile"].append({"file1":profile1["file1"],
+                                       "function1":profile1["function1"],
+                                       "line1":profile1["line1"],
+                                       "areaWidth1":profile1["areaWidth1"],
+                                       "file2":profile1["file2"],
+                                       "function2":profile1["function2"],
+                                       "line2":profile1["line2"],
+                                       "areaWidth2":profile1["areaWidth2"],
+                                       "count":getCountsDiff(profile1["count"], profile2["count"]),
+                                       "tot":getTimedeltaDiff(profile1["tot"], profile2["tot"]),
+                                       "min":getTimedeltaDiff(profile1["min"], profile2["min"]),
+                                       "max":getTimedeltaDiff(profile1["max"], profile2["max"]),
+                                       "avg":getTimedeltaDiff(profile1["avg"], profile2["avg"]),
+                                       "med":getTimedeltaDiff(profile1["med"], profile2["med"]),
+                                       "stdDev":getTimedeltaDiff(profile1["stdDev"], profile2["stdDev"])})
 
 #####################################################
 #
@@ -987,7 +989,7 @@ def showDelta(outfile, option, count):
   numDisplayed = 0
   outfile.write("\n")
   outfile.write("LOGFILE TIME DELTA PROFILE:\n")
-  outfile.write("================================\n")
+  outfile.write("=====================================\n")
   outfile.write("Logfile          : %s\n" % gProfilesDelta["logfile"])
   outfile.write("Time Delta (Sec) : %f\n" % gProfilesDelta["maxTimeDelta"])
   for profile in gProfilesDelta["delta"]:
@@ -1005,7 +1007,7 @@ def showDelta(outfile, option, count):
   outfile.write("\n")
   outfile.write("\n")
   outfile.write("RESULTS SUMMARY:\n")
-  outfile.write("=========================================\n")
+  outfile.write("==============================================\n")
   outfile.write("Logfile                   : %s\n" % gProfilesDelta["logfile"])
   outfile.write("Time Delta (sec)          : %f\n" % gProfilesDelta["maxTimeDelta"])
   if (gProfilesDelta["maxTimeDeltaDiff"] > 0.0):
@@ -1042,11 +1044,11 @@ def showProfiles():
   print("*       PROFILE LIST       *")
   print("****************************")
   print("")
-  print("ID   APP FILTER     LOGFILE")
-  print("===  =============  ==================")
+  print("ID   TOT PROFILED TIME  APP FILTER     LOGFILE")
+  print("===  =================  =============  ==================")
   id = 1
   for profile in gProfiles:
-    print("%-3d  %-13s  %s" % (id, profile["appFilter"], profile["logfile"]))
+    print("%-3d  %17s  %-13s  %s" % (id, str(profile["profiledTime"]), profile["appFilter"], profile["logfile"]))
     id += 1
   print("")
 
@@ -1126,6 +1128,7 @@ def getInput():
         showProfiles()
         continue
       else:
+        validInput = True
         for arg in args[1:]:
           option = arg.split("=")
           if (len(option) == 2):
@@ -1137,10 +1140,12 @@ def getInput():
                 intId = int(id)-1
                 if (intId in idList):
                   print("ERROR: ID: %d already in idList" % (intId+1))
-                  continue
+                  validInput = False
+                  break
                 elif (intId >= len(gProfiles)):
                   print("ERROR: ID: %d out of profile ID range, 1-%d" % (intId+1, len(gProfiles)))
-                  continue
+                  validInput = False
+                  break
                 else:
                   idList.append(intId)
             elif (PshellReadline.isSubString(option[0], "sort")):
@@ -1148,7 +1153,8 @@ def getInput():
                 sort = option[1]
               else:
                 print("ERROR: Invalid sort specifier: '%s'" % option[1])
-                continue
+                validInput = False
+                break
             elif (PshellReadline.isSubString(option[0], "disp", 3)):
               count = option[1]
             elif (PshellReadline.isSubString(option[0], "file", 2)):
@@ -1166,32 +1172,36 @@ def getInput():
                 gDiffType = option[1]
               else:
                 print("ERROR: Invalid diff type: '%s'" % option[1])
-                continue
+                validInput = False
+                break
             else:
               print("ERROR: Invalid option: '%s'" % option[0])
-              continue
+              validInput = False
+              break
           else:
-            print("ERROR: Invalid arg: '%s'", arg)
-            continue
-      # process command line selections
-      # if not idList populated, default to 0
-      if (len(idList) == 0):
-        idList = [0]        
-      if (deltaRequested):
-        if (len(idList) == 1):
-          createDelta(gProfiles[idList[0]], float(maxTimeDelta))
-          showDelta(outfile, sort, count)
-        else:
-          print("ERROR: Can only supply one profile ID for time delta")
-      elif (gDiffRequested):
-        if (len(idList) == 2):
-          diffProfiles(gProfiles[idList[0]]["profile"], gProfiles[idList[1]]["profile"])
-          showProfile("Diff: %s->%s" % (gProfiles[idList[0]]["logfile"], gProfiles[idList[1]]["logfile"]), outfile, option, count, fileFilter, functionFilter, gProfilesDiff)
-        else:
-          print("ERROR: Diff must supply exactly two profile IDs")
-      elif (len(gProfiles) > 0):
-        for id in idList:
-          showProfile(gProfiles[id]["logfile"], outfile, sort, count, fileFilter, functionFilter, gProfiles[id]["profile"])
+            print("ERROR: Invalid arg: '%s'" % arg)
+            validInput = False
+            break
+      if (validInput):
+        # process command line selections
+        # if not idList populated, default to 0
+        if (len(idList) == 0):
+          idList = [0]        
+        if (deltaRequested):
+          if (len(idList) == 1):
+            createDelta(gProfiles[idList[0]], float(maxTimeDelta))
+            showDelta(outfile, sort, count)
+          else:
+            print("ERROR: Can only supply one profile ID for time delta")
+        elif (gDiffRequested):
+          if (len(idList) == 2):
+            diffProfiles(gProfiles[idList[0]]["profile"], gProfiles[idList[1]]["profile"])
+            showProfile("Diff: %s->%s" % (gProfiles[idList[0]]["logfile"], gProfiles[idList[1]]["logfile"]), outfile, sort, count, fileFilter, functionFilter, gProfilesDiff)
+          else:
+            print("ERROR: Diff must supply exactly two profile IDs")
+        elif (len(gProfiles) > 0):
+          for id in idList:
+            showProfile(gProfiles[id]["logfile"], outfile, sort, count, fileFilter, functionFilter, gProfiles[id])
 
 ##############################
 #
