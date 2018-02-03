@@ -597,7 +597,7 @@ def getCountDisplay(count, labelLength):
 # shows the current profile
 #
 #####################################################
-def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, profiles):
+def showProfile(profiles, outfile, option, count, fileFilter, functionFilter):
   global gBanner
   global gBannerLength
 
@@ -705,8 +705,8 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
                   maxStdDevTimeWidth + \
                   gNormalDisplayPadLength
   file.write("%s%s\n" % (gClearStatusUpdate, gBanner.center(maxFieldWidth)))
-  file.write("%s\n" % (gUnderline*max(len(logfile), gBannerLength)).center(maxFieldWidth))
-  file.write("%s\n" % logfile.center(maxFieldWidth))
+  file.write("%s\n" % (gUnderline*max(len(profiles["logfile"]), gBannerLength)).center(maxFieldWidth))
+  file.write("%s\n" % profiles["logfile"].center(maxFieldWidth))
   file.write("\n")
   file.write("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n" % (gAreaLabel1.ljust(maxAreaWidth1),
                                                        ' '.ljust(gSpaceLength),
@@ -783,7 +783,7 @@ def showProfile(logfile, outfile, option, count, fileFilter, functionFilter, pro
     file.write("\n")
     file.write("RESULTS SUMMARY:\n")
     file.write("%s\n" % gUnderline.ljust(max(len(logfile), len(str(profiles["profiledTime"])), len(str(totalDisplayedTime)))+20, gUnderline))
-    file.write("Logfile         : %s\n" % logfile)
+    file.write("Logfile         : %s\n" % profiles["logfile"])
     file.write("Profiled Time   : %s\n" % str(profiles["profiledTime"]))
     file.write("Displayed Time  : %s\n" % str(totalDisplayedTime))
     file.write("Total Areas     : %s\n" % len(profiles["profile"]))
@@ -866,9 +866,9 @@ def diffProfiles(profiles1, profiles2):
     gTimeSuffix = " Usec"
     gTimeWidthAdjust = 3
     gCountWidthAdjust = 5
-  gProfilesDiff = {"profile":[]}
-  for profile1 in profiles1:
-    profile2 = findProfile(profiles2, 
+  gProfilesDiff = {"logfile":"Diff: %s->%s" % (profiles1["logfile"], profiles2["logfile"]), "profile":[]}
+  for profile1 in profiles1["profile"]:
+    profile2 = findProfile(profiles2["profile"], 
                            profile1["file1"], profile1["function1"], profile1["line1"], 
                            profile1["file2"], profile1["function2"], profile1["line2"])
     if (profile2 != None):
@@ -1106,6 +1106,10 @@ def getInput():
   global gValidDiffs
   global gValidSort
   global gDiffRequested
+  global gLabelSuffix
+  global gTimeSuffix
+  global gTimeWidthAdjust
+  global gCountWidthAdjust
 
   command = ""
   while (not PshellReadline.isSubString(command, "quit")):
@@ -1117,6 +1121,10 @@ def getInput():
       count = gDisplayAll
       fileFilter = gNoFilter
       functionFilter = gNoFilter
+      gLabelSuffix = ""
+      gTimeSuffix = ""
+      gTimeWidthAdjust = 0
+      gCountWidthAdjust = 0
       gDiffRequested = False
       deltaRequested = False
       idList = []
@@ -1195,13 +1203,13 @@ def getInput():
             print("ERROR: Can only supply one profile ID for time delta")
         elif (gDiffRequested):
           if (len(idList) == 2):
-            diffProfiles(gProfiles[idList[0]]["profile"], gProfiles[idList[1]]["profile"])
-            showProfile("Diff: %s->%s" % (gProfiles[idList[0]]["logfile"], gProfiles[idList[1]]["logfile"]), outfile, sort, count, fileFilter, functionFilter, gProfilesDiff)
+            diffProfiles(gProfiles[idList[0]], gProfiles[idList[1]])
+            showProfile(gProfilesDiff, outfile, sort, count, fileFilter, functionFilter)
           else:
             print("ERROR: Diff must supply exactly two profile IDs")
         elif (len(gProfiles) > 0):
           for id in idList:
-            showProfile(gProfiles[id]["logfile"], outfile, sort, count, fileFilter, functionFilter, gProfiles[id])
+            showProfile(gProfiles[id], outfile, sort, count, fileFilter, functionFilter)
 
 ##############################
 #
