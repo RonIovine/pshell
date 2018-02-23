@@ -143,6 +143,8 @@ char _ipAddress[PSHELL_PAYLOAD_SIZE];
 char _title[PSHELL_PAYLOAD_SIZE];
 char _banner[PSHELL_PAYLOAD_SIZE];
 char _prompt[PSHELL_PAYLOAD_SIZE];
+const char *_host;
+const char *_server;
 unsigned _version;
 Mode _mode;
 unsigned _maxCommandLength = strlen("batch");
@@ -207,15 +209,15 @@ bool _completionEnabled;
 
 /* function prototypes */
 
-bool isNumeric(char *string_);
-unsigned findServerPort(char *name_);
+bool isNumeric(const char *string_);
+unsigned findServerPort(const char *name_);
 bool getServerName(void);
 bool getTitle(void);
 bool getBanner(void);
 bool getPrompt(void);
 bool getPayloadSize(void);
 bool getVersion(void);
-bool init(char *destination_, char *server_);
+bool init(const char *destination_, const char *server_);
 bool send(void);
 bool receive(void);
 void tokenize(char *string_, const char *delimeter_, char *tokens_[], unsigned maxTokens_, unsigned *numTokens_);
@@ -234,6 +236,8 @@ bool isDuplicate(char *command_);
 void clearScreen(void);
 void showWelcome(void);
 void exitProgram(int exitCode_);
+void registerSignalHandlers(void);
+void parseCommandLine(int *argc, char *argv[], char *host, char *port);
 
 #ifdef PSHELL_READLINE
 char **commandCompletion (const char *command_, int start_, int end_);
@@ -305,22 +309,29 @@ void clearScreen(void)
 
 /******************************************************************************/
 /******************************************************************************/
-bool isNumeric(char *string_)
+bool isNumeric(const char *string_)
 {
   unsigned i;
-  for (i = 0; i < strlen(string_); i++)
+  if (string_ != NULL)
   {
-    if (!isdigit(string_[i]))
+    for (i = 0; i < strlen(string_); i++)
     {
-      return (false);
+      if (!isdigit(string_[i]))
+      {
+        return (false);
+      }
     }
+    return (true);
   }
-  return (true);
+  else
+  {
+    return (false);
+  }
 }
 
 /******************************************************************************/
 /******************************************************************************/
-unsigned findServerPort(char *name_)
+unsigned findServerPort(const char *name_)
 {
   unsigned server;
 
@@ -453,7 +464,7 @@ bool getPayloadSize(void)
 
 /******************************************************************************/
 /******************************************************************************/
-bool init(char *destination_, char *server_)
+bool init(const char *destination_, const char *server_)
 {
   char requestedHost[180];
   char destination[180];
@@ -1004,11 +1015,9 @@ void processBatchFile(char *filename_, unsigned rate_, bool clear_)
     sprintf(batchFile, "%s/%s", batchPath, filename_);
     if ((fp = fopen(batchFile, "r")) == NULL)
     {
-      printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile);
       sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
       if ((fp = fopen(batchFile, "r")) == NULL)
       {
-        printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile);
         strcpy(batchFile, filename_);
         fp = fopen(batchFile, "r");
       }
@@ -1021,7 +1030,6 @@ void processBatchFile(char *filename_, unsigned rate_, bool clear_)
     {
       if ((fp = fopen(batchFile, "r")) == NULL)
       {
-        printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile);
         strcpy(batchFile, filename_);
         fp = fopen(batchFile, "r");
       }
@@ -1296,25 +1304,22 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<serverName> | <portNum>}\n");
-  printf("              [-h | ? | {<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]\n");
+  printf("Usage: pshell -s | [-t<timeout>] {{<hostNameOrIpAddr> <port>} | <unixServerName>}\n");
+  printf("              [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
-  printf("    -h,?       - show pshell usage or command set of specified PSHELL server\n");
-  printf("    -s         - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file\n");
-  printf("    -f         - run commands from a batch file\n");
-  printf("    -t         - change the default server response timeout\n");
-  printf("    hostName   - hostname of desired PSHELL server (UDP only)\n");
-  printf("    ipAddress  - IP address of desired PSHELL server (UDP only)\n");
-  printf("    unix       - Specifies server is a UNIX domain server\n");
-  printf("    serverName - name of desired PSHELL server (UDP or UNIX)\n");
-  printf("    portNum    - port number of desired PSHELL server (UDP only)\n");
-  printf("    timeout    - value in seconds to use for server response timeout\n");
-  printf("    command    - optional command to execute\n");
-  printf("    fileName   - optional batch file to execute\n");
-  printf("    rate       - optional rate to repeat command or batch file (in seconds)\n");
-  printf("    clear      - clear screen between commands or batch file passes\n");
+  printf("    -s               - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file\n");
+  printf("    -f               - run commands from a batch file\n");
+  printf("    -t               - change the default server response timeout\n");
+  printf("    hostNameOrIpAddr - hostname or IP address of UDP server\n");
+  printf("    port             - port number of UDP server\n");
+  printf("    unixServerName   - name of UNIX server\n");
+  printf("    timeout          - response wait timeout in sec (default=5)\n");
+  printf("    command          - optional command to execute\n");
+  printf("    fileName         - optional batch file to execute\n");
+  printf("    rate             - optional rate to repeat command or batch file (in seconds)\n");
+  printf("    clear            - clear screen between commands or batch file passes\n");
   printf("\n");
   printf("    NOTE: If no <command> is given, pshell will be started\n");
   printf("          up in interactive mode, commands issued in command\n");
@@ -1331,7 +1336,7 @@ void showUsage(void)
 #ifdef PSHELL_READLINE
   printf("  Use TAB completion\n");
   printf("          to fill out partial commands and up-arrow to recall\n");
-  printf("          the last entered command.\n");
+  printf("          for command history.\n");
 #else
   printf("\n");
 #endif
@@ -1341,50 +1346,85 @@ void showUsage(void)
 
 /******************************************************************************/
 /******************************************************************************/
-bool isDec(char *string_)
-{
-  unsigned i;
-  if (string_ != NULL)
-  {
-    for (i = 0; i < strlen(string_); i++)
-    {
-      if (!isdigit(string_[i]))
-      {
-        return (false);
-      }
-    }
-    return (true);
-  }
-  else
-  {
-    return (false);
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
-void checkForTimeoutOverride(int *argc, char *argv[])
+void parseCommandLine(int *argc, char *argv[])
 {
   int i;
-  if (*argc > 3)
+  getNamedServers();
+  for (i = 0; i < (*argc-1); i++)
   {
-    if (strstr(argv[1], "-t") == argv[1])
-    {
-      if ((strlen(argv[1]) > 2) && (isDec(&argv[1][2])))
+    argv[i] = argv[i+1];
+  }
+  (*argc)--;
+  if (*argc == 0)
+  {
+    showUsage();
+  }
+  else if (*argc == 1)
+  {
+      if ((strcmp(argv[0], "-h") == 0) || (strcmp(argv[0], "?") == 0))
       {
-        _serverResponseTimeout = atoi(&argv[1][2]);
+        showUsage();
+      }
+      else if (strcmp(argv[0], "-s") == 0)
+      {
+        showNamedServers();
+      }
+      else
+      {
+        _host = "unix";
+        _server = argv[0];
+        *argc = 0;
+      }
+  }
+  else if (*argc < 8)
+  {
+    if (strstr(argv[0], "-t") == argv[0])
+    {
+      if ((strlen(argv[0]) > 2) && (isNumeric(&argv[0][2])))
+      {
+        _serverResponseTimeout = atoi(&argv[0][2]);
         _serverResponseTimeoutOverride = true;
       }
       else
       {
         printf("PSHELL_ERROR: Must provide value for timeout, e.g. -t20\n");
       }
-      for (i = 1; i < (*argc-1); i++)
+      for (i = 0; i < (*argc-1); i++)
       {
         argv[i] = argv[i+1];
       }
       (*argc)--;
     }
+    if (*argc == 1)
+    {
+      _host = "unix";
+      _server = argv[0];
+      *argc = 0;
+    }
+    else if (isNumeric(argv[1]))
+    {
+      _host = argv[0];
+      _server = argv[1];
+      for (i = 0; i < (*argc-1); i++)
+      {
+        argv[i] = argv[i+2];
+      }
+      (*argc) -= 2;
+    }
+    else
+    {
+      _host = "unix";
+      _server = argv[0];
+      for (i = 0; i < (*argc-1); i++)
+      {
+        argv[i] = argv[i+1];
+      }
+      (*argc)--;
+    }
+  }
+  else
+  {
+    showUsage();
   }
 }
 
@@ -1446,145 +1486,123 @@ int main(int argc, char *argv[])
   strcpy(_banner, "PSHELL: Process Specific Embedded Command Line Shell");
   strcpy(_prompt, "PSHELL> ");
 
-  checkForTimeoutOverride(&argc, argv);
+  parseCommandLine(&argc, argv);
 
-  /* check for the proper usage */
-  if ((argc >= 2) && (argc <= 7))
+  if (argc == 0)
   {
-    getNamedServers();
-    if (argc == 2)
+    _mode = INTERACTIVE;
+  }
+  else if (argc == 1)
+  {
+    if ((strcmp(argv[0], "-h") == 0) ||
+        (strcmp(argv[0], "help") == 0) ||
+        (strcmp(argv[0], "-help") == 0) ||
+        (strcmp(argv[0], "--help") == 0) ||
+        (strcmp(argv[0], "?") == 0))
     {
-      if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "?") == 0))
+      if (init(_host, _server))
       {
-        showUsage();
+        showCommands();
       }
-      else if (strcmp(argv[1], "-s") == 0)
-      {
-        showNamedServers();
-      }
-      else
-      {
-        showUsage();
-      }
+      exitProgram(0);
     }
-    else if (argc == 3)
+    _mode = COMMAND_LINE;
+  }
+  else if (argc == 2)
+  {
+    if (strcmp(argv[0], "-f") == 0)
     {
-      _mode = INTERACTIVE;
+      _mode = BATCH;
     }
-    else if (argc == 4)
+    else
     {
-      if ((strcmp(argv[3], "-h") == 0) ||
-          (strcmp(argv[3], "help") == 0) ||
-          (strcmp(argv[3], "-help") == 0) ||
-          (strcmp(argv[3], "--help") == 0) ||
-          (strcmp(argv[3], "?") == 0))
-        {
-          if (init(argv[1], argv[2]))
-          {
-            showCommands();
-          }
-          exitProgram(0);
-        }
-        _mode = COMMAND_LINE;
-    }
-    else if (argc == 5)
-    {
-      if (strcmp(argv[3], "-f") == 0)
-      {
-        _mode = BATCH;
-      }
-      else
-      {
-        _mode = COMMAND_LINE;
-        rate = atoi(argv[4]);
-      }
-    }
-    else  if (argc == 6)
-    {
-      if (strcmp(argv[3], "-f") == 0)
-      {
-        _mode = BATCH;
-        rate = atoi(argv[5]);
-      }
-      else if (strcmp(argv[5], "clear") == 0)
-      {
-        _mode = COMMAND_LINE;
-        rate = atoi(argv[4]);
-        clear = true;
-      }
-      else
-      {
-        showUsage();
-      }
-    }
-    else  /* argc == 7 */
-    {
-      if ((strcmp(argv[3], "-f") == 0) && (strcmp(argv[6], "clear") == 0))
-      {
-        _mode = BATCH;
-        rate = atoi(argv[5]);
-        clear = true;
-      }
-      else
-      {
-        showUsage();
-      }
-    }
-    if (init(argv[1], argv[2]))
-    {
-      if (_mode == INTERACTIVE)
-      {
-        showWelcome();
-        processInteractiveMode();
-      }
-      else if (_mode == COMMAND_LINE)
-      {
-        /*
-        * setup our title bar, no real need to do this if we are not
-        * repeating the command, since it will be too quick to see
-        * anyway
-        */
-        if (rate)
-        {
-          /* just get the command name and not any parameters for the title */
-          strcpy(commandName, argv[3]);
-          str = strtok(commandName, " ");
-          fprintf(stdout,
-                  "\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007",
-                  _title,
-                  _serverName,
-                  _ipAddress,
-                  str,
-                  rate);
-                  fflush(stdout);
-        }
-        processCommand(PSHELL_USER_COMMAND, argv[3], rate, clear, false);
-      }
-      else  /* _mode == BATCH */
-      {
-        /*
-        * setup our title bar, no real need to do this if we are not
-        * repeating the command, since it will be too quick to see
-        * anyway
-        */
-        if (rate)
-        {
-          fprintf(stdout,
-                  "\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007",
-                  _title,
-                  _serverName,
-                  _ipAddress,
-                  argv[4],
-                  rate);
-                  fflush(stdout);
-        }
-        processBatchFile(argv[4], rate, clear);
-      }
+      _mode = COMMAND_LINE;
+      rate = atoi(argv[1]);
     }
   }
-  else
+  else  if (argc == 3)
   {
-    showUsage();
+    if (strcmp(argv[0], "-f") == 0)
+    {
+      _mode = BATCH;
+      rate = atoi(argv[2]);
+    }
+    else if (strcmp(argv[2], "clear") == 0)
+    {
+      _mode = COMMAND_LINE;
+      rate = atoi(argv[1]);
+      clear = true;
+    }
+    else
+    {
+      showUsage();
+    }
+  }
+  else  /* argc == 4 */
+  {
+    if ((strcmp(argv[0], "-f") == 0) && (strcmp(argv[3], "clear") == 0))
+    {
+      _mode = BATCH;
+      rate = atoi(argv[2]);
+      clear = true;
+    }
+    else
+    {
+      showUsage();
+    }
+  }
+  
+  /* command line processed, now execute results */
+  if (init(_host, _server))
+  {
+    if (_mode == INTERACTIVE)
+    {
+      showWelcome();
+      processInteractiveMode();
+    }
+    else if (_mode == COMMAND_LINE)
+    {
+      /*
+      * setup our title bar, no real need to do this if we are not
+      * repeating the command, since it will be too quick to see
+      * anyway
+      */
+      if (rate)
+      {
+        /* just get the command name and not any parameters for the title */
+        strcpy(commandName, argv[0]);
+        str = strtok(commandName, " ");
+        fprintf(stdout,
+                "\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007",
+                _title,
+                _serverName,
+                _ipAddress,
+                str,
+                rate);
+                fflush(stdout);
+      }
+      processCommand(PSHELL_USER_COMMAND, argv[0], rate, clear, false);
+    }
+    else  /* _mode == BATCH */
+    {
+      /*
+      * setup our title bar, no real need to do this if we are not
+      * repeating the command, since it will be too quick to see
+      * anyway
+      */
+      if (rate)
+      {
+        fprintf(stdout,
+                "\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007",
+                _title,
+                _serverName,
+                _ipAddress,
+                argv[1],
+                rate);
+                fflush(stdout);
+      }
+      processBatchFile(argv[1], rate, clear);
+    }
   }
   exitProgram(0);
 }
