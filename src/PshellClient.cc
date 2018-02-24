@@ -187,7 +187,7 @@ unsigned _pshellPayloadSize = PSHELL_PAYLOAD_SIZE;
 struct PshellServers
 {
   const char *serverName;
-  unsigned portNum;
+  const char *portNum;
   unsigned timeout;
 };
 
@@ -210,7 +210,7 @@ bool _completionEnabled;
 /* function prototypes */
 
 bool isNumeric(const char *string_);
-unsigned findServerPort(const char *name_);
+const char *findServerPort(const char *name_);
 bool getServerName(void);
 bool getTitle(void);
 bool getBanner(void);
@@ -331,7 +331,7 @@ bool isNumeric(const char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
-unsigned findServerPort(const char *name_)
+const char *findServerPort(const char *name_)
 {
   unsigned server;
 
@@ -347,8 +347,7 @@ unsigned findServerPort(const char *name_)
       return (_pshellServersList[server].portNum);
     }
   }
-  /* 0 should never be a valid server port, so we can use it to indicate a failure */
-  return (0);
+  return (NULL);
 }
 
 /******************************************************************************/
@@ -469,7 +468,8 @@ bool init(const char *destination_, const char *server_)
   char requestedHost[180];
   char destination[180];
   struct hostent *host;
-  int destPort;
+  int destPort = 0;
+  const char *port;
   int retCode = -1;
   char *ipAddrOctets[MAX_TOKENS];
   unsigned numTokens;
@@ -484,9 +484,9 @@ bool init(const char *destination_, const char *server_)
   {
     destPort = atoi(server_);
   }
-  else
+  else if ((port = findServerPort(server_)) != NULL)
   {
-    destPort = findServerPort(server_);
+    destPort = atoi(port);
   }
 
   /* see if our destination is a UDP or UNIX domain socket */
@@ -1081,9 +1081,11 @@ void tokenize(char *string_,
   *numTokens_ = 0;
   if ((str = strtok(string_, delimeter_)) != NULL)
   {
+    stripWhitespace(str);
     tokens_[(*numTokens_)++] = str;
     while ((str = strtok(NULL, delimeter_)) != NULL)
     {
+      stripWhitespace(str);
       tokens_[(*numTokens_)++] = str;
     }
   }
@@ -1175,7 +1177,7 @@ void getNamedServers(void)
          if (_numPshellServers < _pshellServersListSize)
           { 
             _pshellServersList[_numPshellServers].serverName = strdup(tokens[0]);
-            _pshellServersList[_numPshellServers].portNum = atoi(tokens[1]);
+            _pshellServersList[_numPshellServers].portNum = strdup(tokens[1]);
             if (numTokens == 3)
             {
               _pshellServersList[_numPshellServers].timeout = atoi(tokens[2]);
@@ -1198,7 +1200,7 @@ void getNamedServers(void)
                                                         _pshellServersListSize*sizeof(PshellServers));
             /* now add the new server */
             _pshellServersList[_numPshellServers].serverName = strdup(tokens[0]);
-            _pshellServersList[_numPshellServers].portNum = atoi(tokens[1]);
+            _pshellServersList[_numPshellServers].portNum = strdup(tokens[1]);
             if (numTokens == 3)
             {
               _pshellServersList[_numPshellServers].timeout = atoi(tokens[2]);
@@ -1256,7 +1258,7 @@ void showNamedServers(void)
     {
       printf(" ");
     }
-    printf("  %-11d  %d seconds\n", _pshellServersList[server].portNum, _pshellServersList[server].timeout);
+    printf("  %-11s  %d seconds\n", _pshellServersList[server].portNum, _pshellServersList[server].timeout);
   }
   printf("\n");
   exitProgram(0);
@@ -1405,6 +1407,15 @@ void parseCommandLine(int *argc, char *argv[])
     {
       _host = argv[0];
       _server = argv[1];
+      for (i = 0; i < (*argc-1); i++)
+      {
+        argv[i] = argv[i+2];
+      }
+      (*argc) -= 2;
+    }
+    else if ((_server = findServerPort(argv[1])) != NULL)
+    {
+      _host = argv[0];
       for (i = 0; i < (*argc-1); i++)
       {
         argv[i] = argv[i+2];
