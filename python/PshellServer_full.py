@@ -389,10 +389,10 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
   global _gPrompt
   global _gTitle
   global _gBanner
-  global gRunning
+  global _gRunning
   global _gTcpTimeout
-  if (_gRunninig == False):
-    gRunning = True
+  if (_gRunning == False):
+    _gRunning = True
     _gServerName = serverName_
     _gServerMode = serverMode_  
     (_gTitle, _gBanner, _gPrompt, _gServerType, _gHostnameOrIpAddr, _gPort, _gTcpTimeout) = _loadConfigFile(_gServerName, _gTitle, _gBanner, _gPrompt, serverType_, hostnameOrIpAddr_, port_, _gTcpTimeout)
@@ -926,8 +926,8 @@ def _cleanupResources():
   global _gUnixSourceAddress
   global _gServerType
   global _gSocketFd
-  global _gRunninig
-  if (_gRunninig == True):
+  global _gRunning
+  if (_gRunning == True):
     if (_gUnixSourceAddress != None):
       os.unlink(_gUnixSourceAddress)
     if (_gServerType != LOCAL):
@@ -1083,7 +1083,7 @@ _gUnixSocketPath = "/tmp/"
 _gArgs = None
 _gFoundCommand = None
 _gUnixSourceAddress = None
-_gRunninig = False
+_gRunning = False
 _gCommandDispatched = False
 _gCommandInteractive = True
 
