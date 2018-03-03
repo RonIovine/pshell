@@ -2150,7 +2150,7 @@ static void setup(int argc, char *argv[])
     {
       pshell_printf("Busybox softlink setup:\n");
       pshell_printf("\n");
-      for (unsigned i = 1; i < _numCommands; i++)
+      for (unsigned i = 2; i < _numCommands; i++)
       {
         pshell_printf("Setting up softlink: %s -> %s\n", _commandTable[i].command, _serverName);
         sprintf(command, "rm -f %s", _commandTable[i].command);

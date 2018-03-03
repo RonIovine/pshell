@@ -113,7 +113,7 @@ char results[4096];
 /******************************************************************************/
 void controlServer(int sid, int argc, char *argv[])
 {
-  if (pshell_isHelp() || pshell_isEqual(argv[0], "help"))
+  if ((argc == 0) || pshell_isHelp() || pshell_isEqual(argv[0], "help"))
   {
     pshell_extractCommands(sid, results, sizeof(results));
     pshell_printf("%s", results);
@@ -256,16 +256,16 @@ int main (int argc, char *argv[])
   pshell_addCommand(pshellServerDemo,                               /* function */
                     "pshellServerDemo",                             /* command */
                     "control the remote pshellServerDemo process",  /* description */
-                    "<command> | ? | -h",                           /* usage */
-                    1,                                              /* minArgs */
+                    "[<command> | ? | -h]",                         /* usage */
+                    0,                                              /* minArgs */
                     30,                                             /* maxArgs */
                     false);                                         /* showUsage on "?" */
 
   pshell_addCommand(traceFilterDemo,                               /* function */
                     "traceFilterDemo",                             /* command */
                     "control the remote traceFilterDemo process",  /* description */
-                    "<command> | ? | -h",                          /* usage */
-                    1,                                             /* minArgs */
+                    "[<command> | ? | -h]",                        /* usage */
+                    0,                                             /* minArgs */
                     30,                                            /* maxArgs */
                     false);                                        /* showUsage on "?" */
                     

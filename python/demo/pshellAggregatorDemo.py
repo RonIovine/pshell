@@ -54,7 +54,7 @@ import PshellControl
 def controlServer(sid, argv):
   # reconstitute the original command
   command = ' '.join(argv)
-  if (PshellServer.isHelp() or (argv[0] == "help")):
+  if ((len(argv) == 0) or PshellServer.isHelp() or (argv[0] == "help")):
     PshellServer.printf(PshellControl.extractCommands(sid))
   else:
     (results, retCode) = PshellControl.sendCommand3(sid, command)
@@ -143,8 +143,8 @@ if (__name__ == '__main__'):
   PshellControl.addMulticast(traceFilterDemoSid, "test");
 
   # register our callback commands
-  PshellServer.addCommand(pshellServerDemo, "pshellServerDemo", "control the remote pshellServerDemo process", "<command> | ? | -h", 1, 30, False)
-  PshellServer.addCommand(traceFilterDemo, "traceFilterDemo", "control the remote traceFilterDemo process", "<command> | ? | -h", 1, 30, False)
+  PshellServer.addCommand(pshellServerDemo, "pshellServerDemo", "control the remote pshellServerDemo process", "[<command> | ? | -h]", 0, 30, False)
+  PshellServer.addCommand(traceFilterDemo, "traceFilterDemo", "control the remote traceFilterDemo process", "[<command> | ? | -h]", 0, 30, False)
 
   # add any "meta" commands here, meta commands can aggregate multiple discrete
   # pshell commands, either within one server or across multiple servers, into

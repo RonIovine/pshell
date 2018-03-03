@@ -1223,6 +1223,8 @@ if (__name__ == '__main__'):
     showUsage()
   else:
     # read in all our logfiles & create profiles
+    sys.stdout.write("\033]0;logProfiler\007")
+    sys.stdout.flush()    
     gProfiles = []
     for arg in sys.argv[1:]:
       logfile = arg

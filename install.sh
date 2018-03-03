@@ -83,8 +83,6 @@ then
     cd $localDir/bin
     rm -f advancedParsing*
     ln -s pshellNoServerDemo$fileExt advancedParsing$fileExt
-    rm -f batch*
-    ln -s pshellNoServerDemo$fileExt batch$fileExt
     rm -f enhancedUsage*
     ln -s pshellNoServerDemo$fileExt enhancedUsage$fileExt
     rm -f formatChecking*
