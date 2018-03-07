@@ -660,6 +660,7 @@ def _processCommand(command_):
   global _gFoundCommand
   global _gCommandDispatched
 
+  _gPshellMsg["payload"] = ""
   if (_gPshellMsg["msgType"] == _gMsgTypes["queryVersion"]):
     _processQueryVersion()
   elif (_gPshellMsg["msgType"] == _gMsgTypes["queryPayloadSize"]):
@@ -678,7 +679,6 @@ def _processCommand(command_):
     _processQueryCommands2()
   else:
     _gCommandDispatched = True
-    _gPshellMsg["payload"] = ""
     _gArgs = command_.split()[_gFirstArgPos:]
     command_ = command_.split()[0]
     numMatches = 0

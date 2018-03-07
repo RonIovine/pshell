@@ -74,6 +74,11 @@ then
     rm -f libpshell-server.a
     ln -s libpshell-server-full.a libpshell-server.a
     
+    echo "Setting softlink PshellServer.py PshellServer-full.py"	
+    cd $localDir/python	
+    rm -f PshellServer.py	
+    ln -s PshellServer-full.py PshellServer.py 
+
     echo "Setting up Busybox-like demo softlinks"
     cd $localDir/bin
     rm -f advancedParsing*
