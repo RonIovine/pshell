@@ -32,7 +32,7 @@
 A Lightweight, Process-Specific, Embedded Command Line Shell
 
 This is the STUB version of the PshellServer module, to use the actual version, 
-set the PshellServer.py softlink to PshellServer_full.py, or use the provided 
+set the PshellServer.py softlink to PshellServer-full.py, or use the provided 
 utility shell script 'setPshellLib' to set the desired softlink and 'showPshellLib'
 to display the current softlink settings.
 """

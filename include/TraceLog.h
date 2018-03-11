@@ -48,7 +48,7 @@ extern "C" {
  *******************************************************************************/
 
 /*
- * these trace levels must be register into the trace filter service via the
+ * these trace levels must be registered into the trace filter service via the
  * 'tf_addLevel' function, that function must be called before calling 'tf_init',
  * in this example, all the levels are added in the function 'trace_registerLevels'
  */

@@ -95,7 +95,7 @@ enum PshellServerMode
  * to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
  * 255.255.255.255, PSHELL_LOCALHOST will bind the server socket to the 
  * local loopback address (i.e. 127.0.0.1), and PSHELL_MYHOST will bind 
- * to the default interface (i.e. eth0), note that subnet broadcast it 
+ * to the default interface (i.e. eth0), note that subnet broadcast is
  * also supported, e.g. x.y.z.255
  */
 #define PSHELL_ANYHOST "anyhost"
