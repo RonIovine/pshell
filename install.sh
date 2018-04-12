@@ -66,7 +66,7 @@ then
     echo
     exit 1
   else
-    # local install, create .pshellrc env file
+    # local install, setup some softlinks and create .pshellrc env file
     echo "Setting softlink libpshell-server to libpshell-server-full"
     cd $localDir/lib
     rm -f libpshell-server.so

@@ -68,7 +68,7 @@ is no interactive user prompting, and control is returned to the calling host's 
 shell when the command is complete.  This mode also provides the ability to setup softlink 
 shortcuts to each internal command and to invoke those commands from the host's command line 
 shell directly via the shortcut name  rather than the parent program name, in a manner similar 
-[Busybox](https://busybox.net/about.html) functionality.  Note this is not available with the
+to [Busybox](https://busybox.net/about.html) functionality.  Note this is not available with the
 Python modules.
 
 This package also provides an optional integrated interactive dynamic trace filtering mechanism that 
