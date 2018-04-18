@@ -146,7 +146,7 @@ def _configureLocalServer():
   # line client so it can process commands correctly and display
   # the correct banner  information
   PshellServer._gPshellClient = True
-  # supress the automatic invalid arg count messag from the PshellControl.py
+  # supress the automatic invalid arg count message from the PshellControl.py
   # module so we can display the returned usage
   PshellControl._gSupressInvalidArgCountMessage = True
   # extract information from our remote server via the special
@@ -262,7 +262,7 @@ if (__name__ == '__main__'):
   if (_gIsBroadcastAddr == False):
     
     # if not a broadcast server address, extract all the commands from
-    # our unicast remote server and add then to our local server
+    # our unicast remote server and add them to our local server
     commandList = PshellControl.extractCommands(_gSid)
     if (len(commandList) > 0):
       commandList = commandList.split("\n")

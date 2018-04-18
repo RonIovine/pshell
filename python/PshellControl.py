@@ -428,7 +428,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                               "isBroadcastAddress":isBroadcastAddress,
                               "sourceAddress":sourceAddress,
                               "destAddress":_gUnixSocketPath+remoteServer_,
-                              "remoteServer":controlName_+"["+remoteServer_+"]",
+                              "remoteServer":controlName_+"[unix]",
                               "pshellMsg":OrderedDict([("msgType",0),
                                                        ("respNeeded",True),
                                                        ("dataNeeded",True),

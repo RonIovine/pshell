@@ -344,11 +344,13 @@ def _showTabCompletions(completionList_, prompt_):
   global _gMaxCompletionsPerLine
   if (len(completionList_) > 0):
     _write("\n")
+    totPrinted = 0
     numPrinted = 0
     for keyword in completionList_:
       _write("%-*s" % (_gMaxTabCompletionKeywordLength, keyword))
       numPrinted += 1
-      if ((numPrinted == _gMaxCompletionsPerLine) and (numPrinted < len(completionList_))):
+      totPrinted += 1
+      if ((numPrinted == _gMaxCompletionsPerLine) and (totPrinted < len(completionList_))):
         _write("\n")
         numPrinted = 0
     _write("\n"+prompt_)

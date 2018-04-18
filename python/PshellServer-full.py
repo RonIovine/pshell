@@ -366,6 +366,7 @@ def _isSubString(string1_, string2_, minMatchLength_):
 def _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, showUsage_, prepend_ = False):
   global _gCommandList
   global _gMaxLength
+  global _gServerType
   for command in _gCommandList:
     if (command["name"] == command_):
       # command name already exists, don't add it again
@@ -696,9 +697,12 @@ def _processCommand(command_):
     elif (numMatches > 1):
       printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n" % command_)
     else:
-      if (not _isValidArgCount()):
-        showUsage()
-      elif (isHelp() and (_gFoundCommand["showUsage"] == True)):
+      if (isHelp()):
+        if (_gFoundCommand["showUsage"] == True):
+          showUsage()          
+        else:
+          _gFoundCommand["function"](_gArgs)
+      elif (not _isValidArgCount()):
         showUsage()
       else:
         _gFoundCommand["function"](_gArgs)
@@ -901,10 +905,27 @@ def _showUsage():
 
 #################################################################################
 #################################################################################
+def _setFirstArgPos(position):
+  global _gFirstArgPos
+  global _gHelpPos
+  global _gHelpLength
+  if (position == 0):
+    _gFirstArgPos = 0
+    _gHelpLength = 2
+    _gHelpPos = 1
+  elif (position == 1):
+    _gFirstArgPos = 1
+    _gHelpLength = 1
+    _gHelpPos = 0
+    
+#################################################################################
+#################################################################################
 def _isHelp():
   global _gArgs
   global _gCommandHelp
-  return ((len(_gArgs) == 1) and (_gArgs[0] in _gCommandHelp))
+  global _gHelpPos
+  global _gHelpLength
+  return ((len(_gArgs) == _gHelpLength) and (_gArgs[_gHelpPos] in _gCommandHelp))
 
 #################################################################################
 #################################################################################
@@ -1138,6 +1159,8 @@ _PSHELL_BATCH_DIR = "/etc/pshell/batch"
 _PSHELL_CONFIG_FILE = "pshell-server.conf"
 
 _gFirstArgPos = 1
+_gHelpPos = 0
+_gHelpLength = 1
 
 _gWheelPos = 0
 _gWheel = "|/-\\"
