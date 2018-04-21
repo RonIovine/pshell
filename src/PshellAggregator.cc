@@ -126,8 +126,9 @@ char *buildCommand(char *command, unsigned size, int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
-void controlServer(int sid, int argc, char *argv[])
+void controlServer(int argc, char *argv[])
 {
+  int sid = 0;
   if ((argc == 0) || pshell_isHelp() || pshell_isEqual(argv[0], "help"))
   {
     pshell_extractCommands(sid, results, sizeof(results));
@@ -208,13 +209,15 @@ void add(int argc, char *argv[])
                                                        port, 
                                                        PSHELL_ONE_SEC*5);
         numServers++;
-        //pshell_addCommand(_controlServer, 
-        //                        argv[1], 
-        //                        "control the remote " + argv[1] + " process", 
-        //                        "[<command> | ? | -h]", 
-        //                        0, 
-        //                        30, 
-        //                        False)
+        char description[MAX_STRING_SIZE];
+        sprintf(description, "control the remote %s process", argv[1]);
+        pshell_addCommand(controlServer, 
+                          argv[1], 
+                          description, 
+                          "[<command> | ? | -h]", 
+                          0, 
+                          30, 
+                          false);
         //pshell__addTabCompletions()
       }
       else
@@ -426,6 +429,8 @@ void registerSignalHandlers(void)
 }
 
 extern char *pshell_origCommandKeyword;
+extern bool pshell_copyAddCommandStrings;
+extern bool pshell_allowDuplicateFunction;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -449,6 +454,9 @@ int main (int argc, char *argv[])
 
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
+  
+  pshell_copyAddCommandStrings = true;
+  pshell_allowDuplicateFunction = true;
   
   /* register our callback commands */
   pshell_addCommand(add, 

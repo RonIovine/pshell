@@ -324,6 +324,12 @@ static unsigned _maxTabColumns = 0;
 #endif
 
 char *pshell_origCommandKeyword;
+bool pshell_allowDuplicateFunction = false;
+#ifdef PSHELL_COPY_ADD_COMMAND_STRINGS
+bool pshell_copyAddCommandStrings = true;
+#else
+bool pshell_copyAddCommandStrings = false;
+#endif
 
 static bool _isRunning = false;
 static bool _isCommandDispatched = false;
@@ -594,7 +600,7 @@ void pshell_addCommand(PshellFunction function_,
     }
 
     /* check for duplicate function pointers */
-    if (_commandTable[entry].function == function_)
+    if ((_commandTable[entry].function == function_) && (!pshell_allowDuplicateFunction))
     {
       PSHELL_ERROR("Duplicate function found, command: '%s' not added", command_);
       pthread_mutex_unlock(&_mutex);
@@ -627,63 +633,65 @@ void pshell_addCommand(PshellFunction function_,
     _commandTableSize += PSHELL_COMMAND_CHUNK;
     _commandTable = (PshellCmd*)ptr;
   }
-
-#ifdef PSHELL_COPY_ADD_COMMAND_STRINGS
-
-  /*
-   * make a duplicate of the command, usage and description strings,
-   * this compile time flag should be set if there is a chance of
-   * any of these strings used in the addCommand call going out of
-   * scope
-   */
-
-  /* now populate the table with the new entry */
-  if ((_commandTable[_numCommands].command = strdup(command_)) == NULL)
+  
+  if (pshell_copyAddCommandStrings)
   {
-    PSHELL_ERROR("Could not allocate memory for command name, size: %d, command: '%s' not added",
-                 (pshell_getLength(command_)),
-                 command_);
-    pthread_mutex_unlock(&_mutex);
-    return;
-  }
 
-  /* strdup will segment fault on a NULL pointer, so catch that */
-  if (usage_ != NULL)
-  {
-    if ((_commandTable[_numCommands].usage = strdup(usage_)) == NULL)
+    /*
+     * make a duplicate of the command, usage and description strings,
+     * this compile time flag should be set if there is a chance of
+     * any of these strings used in the addCommand call going out of
+     * scope
+     */
+
+    /* now populate the table with the new entry */
+    if ((_commandTable[_numCommands].command = strdup(command_)) == NULL)
     {
-      PSHELL_ERROR("Could not allocate memory for command usage, size: %d, command: '%s' not added",
-                   (pshell_getLength(usage_)),
+      PSHELL_ERROR("Could not allocate memory for command name, size: %d, command: '%s' not added",
+                   (pshell_getLength(command_)),
                    command_);
-      free(_commandTable[_numCommands].command);
       pthread_mutex_unlock(&_mutex);
       return;
     }
+
+    /* strdup will segment fault on a NULL pointer, so catch that */
+    if (usage_ != NULL)
+    {
+      if ((_commandTable[_numCommands].usage = strdup(usage_)) == NULL)
+      {
+        PSHELL_ERROR("Could not allocate memory for command usage, size: %d, command: '%s' not added",
+                     (pshell_getLength(usage_)),
+                     command_);
+        free((void *)_commandTable[_numCommands].command);
+        pthread_mutex_unlock(&_mutex);
+        return;
+      }
+    }
+    else
+    {
+      _commandTable[_numCommands].usage = usage_;
+    }
+
+    if ((_commandTable[_numCommands].description = strdup(description_)) == NULL)
+    {
+      PSHELL_ERROR("Could not allocate memory for command description, size: %d, command: '%s' not added",
+                   (pshell_getLength(description_)),
+                   command_);
+      free((void *)_commandTable[_numCommands].command);
+      free((void *)_commandTable[_numCommands].usage);
+      pthread_mutex_unlock(&_mutex);
+      return;
+    }  
   }
   else
   {
+
+    /* just set the pointers but don't clone the strings, this will use less memory */
+    _commandTable[_numCommands].command = command_;
+    _commandTable[_numCommands].description = description_;
     _commandTable[_numCommands].usage = usage_;
+
   }
-
-  if ((_commandTable[_numCommands].description = strdup(description_)) == NULL)
-  {
-    PSHELL_ERROR("Could not allocate memory for command description, size: %d, command: '%s' not added",
-                 (pshell_getLength(description_)),
-                 command_);
-    free(_commandTable[_numCommands].command);
-    free(_commandTable[_numCommands].usage);
-    pthread_mutex_unlock(&_mutex);
-    return;
-  }
-
-#else
-
-  /* just set the pointers but don't clone the strings, this will use less memory */
-  _commandTable[_numCommands].command = command_;
-  _commandTable[_numCommands].description = description_;
-  _commandTable[_numCommands].usage = usage_;
-
-#endif
 
   _commandTable[_numCommands].function = function_;
   _commandTable[_numCommands].minArgs = minArgs_;
