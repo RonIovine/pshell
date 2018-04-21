@@ -53,6 +53,10 @@
 #define MAX_STRING_SIZE 180
 #define MAX_COMMAND_SIZE 300
 
+extern char *pshell_origCommandKeyword;
+extern bool pshell_copyAddCommandStrings;
+extern bool pshell_allowDuplicateFunction;
+
 struct Server
 {
   char localName[MAX_STRING_SIZE];
@@ -128,22 +132,25 @@ char *buildCommand(char *command, unsigned size, int argc, char *argv[])
 /******************************************************************************/
 void controlServer(int argc, char *argv[])
 {
-  int sid = 0;
-  if ((argc == 0) || pshell_isHelp() || pshell_isEqual(argv[0], "help"))
+  Server *server = getServer(pshell_origCommandKeyword);
+  if (server != NULL)
   {
-    pshell_extractCommands(sid, results, sizeof(results));
-    pshell_printf("%s", results);
-  }
-  else
-  {
-    /* this contains the re-constituted command */
-    char command[MAX_COMMAND_SIZE];
-    if ((pshell_sendCommand3(sid, 
-                             results, 
-                             sizeof(results), 
-                             buildCommand(command, sizeof(command), argc, argv)) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
+    if ((argc == 0) || pshell_isHelp() || pshell_isEqual(argv[0], "help"))
     {
+      pshell_extractCommands(server->sid, results, sizeof(results));
       pshell_printf("%s", results);
+    }
+    else
+    {
+      /* this contains the re-constituted command */
+      char command[MAX_COMMAND_SIZE];
+      if ((pshell_sendCommand3(server->sid, 
+                               results, 
+                               sizeof(results), 
+                               buildCommand(command, sizeof(command), argc, argv)) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
+      {
+        pshell_printf("%s", results);
+      }
     }
   }
 }
@@ -218,7 +225,7 @@ void add(int argc, char *argv[])
                           0, 
                           30, 
                           false);
-        //pshell__addTabCompletions()
+        //pshell_addTabCompletions()
       }
       else
       {
@@ -289,7 +296,6 @@ void strrpt(int count, const char *string)
 /******************************************************************************/
 void show(int argc, char *argv[])
 {
-  pshell_printf("hello\n");
   if (pshell_isSubString(argv[0], "server", 1))
   {
     pshell_printf("\n");
@@ -378,14 +384,15 @@ void show(int argc, char *argv[])
 void multicast(int argc, char *argv[])
 {
   char command[MAX_COMMAND_SIZE];
-  if (pshell_isHelp())
+  if ((argc == 0) || pshell_isHelp())
   {
     pshell_printf("\n");
     pshell_showUsage();
     pshell_printf("\n");
     pshell_printf("  Send a registered multicast command to the associated\n");
     pshell_printf("  multicast remote server group\n");
-    //_show(('show', 'multicast'));
+    const char *argv[] = {"multicast"};
+    show(1, (char **)argv);
   }
   else
   {
@@ -427,10 +434,6 @@ void registerSignalHandlers(void)
   signal(SIGPWR, signalHandler);    /* 30 Power failure restart (System V).  */
   signal(SIGSYS, signalHandler);    /* 31 Bad system call.  */
 }
-
-extern char *pshell_origCommandKeyword;
-extern bool pshell_copyAddCommandStrings;
-extern bool pshell_allowDuplicateFunction;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -479,7 +482,7 @@ int main (int argc, char *argv[])
                     "multicast", 
                     "send multicast command to registered server group",
                     "<command>",
-                    1,
+                    0,
                     30,
                     false);
   
