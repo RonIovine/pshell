@@ -5,8 +5,8 @@ This package contains all the necessary code, documentation, and examples for
 building C/C++/Python applications that incorporate a Process-Specific Embedded
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
 framework and API to embed functions within a C/C++/Python application that can 
-be invoked either via a separate interactive client program ('telnet' or 'pshell') 
-or via direct interaction from within the application itself.
+be invoked either via a separate interactive client program ('telnet', 'pshell',
+or 'pshellAggregator')  or via direct interaction from within the application itself.
 
 There is also a control API provided by where any external program can invoke another
 program's registered pshell functions (only supported for UDP or UNIX pshell servers).
@@ -54,9 +54,9 @@ These functions can be invoked via several methods depending on how the internal
 server is configured.  The following shows the various PSHELL server types along with their 
 associated invokation method:
 
-* TCP Server   : Uses standard 'telnet' interactive client to invoke functions
-* UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
-* UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
+* TCP Server   : Uses standard telnet interactive client to invoke functions
+* UDP Server   : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
+* UNIX Server  : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application 
                  itself via local command line interactive prompting
 
@@ -84,12 +84,11 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, nine demo programs are also provided, two (C and
+In addition to the infrastructure components, eight demo programs are also provided, two (C and
 Python) to show the usage of the pshell server API, two (C and Python) to show the usage of pshell 
-control API, two (C and Python) to show the aggergation of multiple pshell servers into a single 
-pshell server via the control API, one to show the usage of the trace filter/trace log API, one to 
-show the usage of a stand-alone (no filtering) trace log application, and one to show the usage of 
-the multi-call binary API.
+control APIone to show the usage of the trace filter/trace log API, one to show the usage of a 
+stand-alone (no filtering) trace log application, and one to show the usage of the multi-call binary 
+API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 

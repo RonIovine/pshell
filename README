@@ -83,12 +83,11 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
-In addition to the infrastructure components, ten demo programs are also provided, two (C and
+In addition to the infrastructure components, eight demo programs are also provided, two (C and
 Python) to show the usage of the pshell server API, two (C and Python) to show the usage of pshell 
-control API, two (C and Python) to show the aggergation of multiple pshell servers into a single 
-pshell server via the control API, one to show the usage of the trace filter/trace log API, one to 
-show the usage of a stand-alone (no filtering) trace log application, and one to show the usage of 
-the multi-call binary API.
+control APIone to show the usage of the trace filter/trace log API, one to show the usage of a 
+stand-alone (no filtering) trace log application, and one to show the usage of the multi-call binary 
+API.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 
@@ -116,8 +115,9 @@ the 'expect' package to be installed.
   - PshellControl.py         -- External pshell program control Python module
   - PshellReadline.py        -- Provides a readline like funtionality Python module
   - pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
+  - pshellAggregator         -- Dynamic server aggregator client for UDP/UNIX servers
   - pshell.py                -- Python version of stand-alone PSHELL UDP/UNIX client remote access program
-  - pshellAggregator.py      -- Python remote pshell server aggragator client program for UDP/UNIX servers
+  - pshellAggregator.py      -- Python version of Dynamic server aggregator client for UDP/UNIX servers
   - pshell.exp               -- Expect script telnet wrapper to provide interface similar to the
                                 UDP/UNIX pshell client when using the TCP server with a telnet client
   - archivePshell            -- Shell script to create a pshell-vX.Y.tar.gz archive
@@ -128,7 +128,6 @@ the 'expect' package to be installed.
   - pshellNoServerDemo       -- Demo application using non-server option of the pshell library
   - pshellControlDemo        -- Demo application using the pshell control library features
   - pshellControlDemo.py     -- Demo application using the pshell control Python module features
-  - pshellAggregatorlDemo    -- Demo application using the pshell control library to aggregate multiple servers
   - pshellReadlineDemo.py    -- Demo application using the PshellReadline Python module to solicit user input
   - traceFilterDemo          -- Demo application using the optional trace filter features
   - traceLogDemo             -- Demo application using the stand-alone TraceLog module

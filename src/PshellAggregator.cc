@@ -53,6 +53,7 @@
 #define MAX_STRING_SIZE 180
 #define MAX_COMMAND_SIZE 300
 
+/* some special backdoor settings in PshellServer.cc to us to run as both server and client */
 extern char *pshell_origCommandKeyword;
 extern bool pshell_copyAddCommandStrings;
 extern bool pshell_allowDuplicateFunction;
@@ -458,6 +459,7 @@ int main (int argc, char *argv[])
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
   
+  /* set some special backdoor settings in PshellServer.cc us to run as both server and client */
   pshell_copyAddCommandStrings = true;
   pshell_allowDuplicateFunction = true;
   
