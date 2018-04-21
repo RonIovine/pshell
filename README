@@ -99,8 +99,8 @@ library/module acessed via a softlink) of the target program is necessary.
 GETTING STARTED:
 
 This package consists of the following components, all provided binaries (libs
-and executables) were built for the x86_64 target.  The script pshell.exp
-requires the 'expect' package to be installed.
+and executables) were built for the x86_64 target.  The script pshell.exp requires 
+the 'expect' package to be installed.
 
   - install.sh               -- Install shell script for this package
   - uninstall.sh             -- Uninstall shell script for this package
@@ -117,6 +117,7 @@ requires the 'expect' package to be installed.
   - PshellReadline.py        -- Provides a readline like funtionality Python module
   - pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
   - pshell.py                -- Python version of stand-alone PSHELL UDP/UNIX client remote access program
+  - pshellAggregator.py      -- Python remote pshell server aggragator client program for UDP/UNIX servers
   - pshell.exp               -- Expect script telnet wrapper to provide interface similar to the
                                 UDP/UNIX pshell client when using the TCP server with a telnet client
   - archivePshell            -- Shell script to create a pshell-vX.Y.tar.gz archive
@@ -128,7 +129,6 @@ requires the 'expect' package to be installed.
   - pshellControlDemo        -- Demo application using the pshell control library features
   - pshellControlDemo.py     -- Demo application using the pshell control Python module features
   - pshellAggregatorlDemo    -- Demo application using the pshell control library to aggregate multiple servers
-  - pshellAggregatorlDemo.py -- Demo application using the pshell control Python module to aggregate multiple servers
   - pshellReadlineDemo.py    -- Demo application using the PshellReadline Python module to solicit user input
   - traceFilterDemo          -- Demo application using the optional trace filter features
   - traceLogDemo             -- Demo application using the stand-alone TraceLog module

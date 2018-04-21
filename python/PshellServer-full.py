@@ -393,11 +393,11 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
   global _gRunning
   global _gTcpTimeout
   if (_gRunning == False):
-    _gRunning = True
     _gServerName = serverName_
     _gServerMode = serverMode_  
     (_gTitle, _gBanner, _gPrompt, _gServerType, _gHostnameOrIpAddr, _gPort, _gTcpTimeout) = _loadConfigFile(_gServerName, _gTitle, _gBanner, _gPrompt, serverType_, hostnameOrIpAddr_, port_, _gTcpTimeout)
     _loadStartupFile()  
+    _gRunning = True
     if (_gServerMode == BLOCKING):
       _runServer()
     else:
@@ -614,7 +614,8 @@ def _getDisplayBanner():
 def _addTabCompletions():
   global _gCommandList
   global _gServerType
-  if ((_gServerType == LOCAL) or (_gServerType == TCP)):
+  global _gRunning
+  if (((_gServerType == LOCAL) or (_gServerType == TCP)) and (_gRunning  == True)):
     for command in _gCommandList:
       PshellReadline.addTabCompletion(command["name"])
 

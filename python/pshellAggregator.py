@@ -28,17 +28,26 @@
 #
 #################################################################################
 
-#################################################################################
-#
-# This is an example demo program that shows the use of multiple pshell control
-# interfaces to aggregate all of the remote commands from all of the connected
-# servers into a single local pshell server.  This can be useful in presenting
-# a consolidated user shell who's functionality spans several discrete pshell
-# servers.  Since this uses the PshellControl API, the external servers must
-# all be either UDP or Unix servers.  The consolidation point in this example 
-# is a local pshell server.
-#
-#################################################################################
+"""
+Remote pshell server aggregator
+
+This is a pshell client program that aggregates several remote pshell servers
+into single local pshell server.  This can be useful in presenting a consolidated 
+user shell who's functionality spans several discrete pshell servers.  Since this 
+uses the PshellControl API, the external servers must all be either UDP or Unix 
+servers.  The consolidation point a local pshell server.
+
+This is a generic dynamic aggregator, i.e. it is server agnostic.  Servers can
+be added to the aggregation via the 'add server' command either at startup via
+the pshellAggregator.startup file or interactively via the interactive command 
+line.
+
+This program can also add 'multicast' commands to be setup to be sent to multiple
+aggregated servers.
+
+This program replaces the old, static, hard-wired, pshellAggregatorDemo.py program
+which hard-coded the remote servers to aggregate.
+"""
 
 # import all our necessary modules
 import sys
@@ -59,7 +68,7 @@ _gKeywordLabel = "Keyword"
 
 #################################################################################
 #################################################################################
-def getMulticast(keyword):
+def _getMulticast(keyword):
   global _gMulticast
   for multicast in _gMulticast:
     if (keyword == multicast["keyword"]):
@@ -68,7 +77,7 @@ def getMulticast(keyword):
 
 #################################################################################
 #################################################################################
-def getServer(localName):
+def _getServer(localName):
   global _gPshellServers
   for server in _gPshellServers:
     if (PshellServer.isSubString(localName, server["localName"])):
@@ -77,7 +86,7 @@ def getServer(localName):
   
 #################################################################################
 #################################################################################
-def executeCommand(sid, argv):
+def _executeCommand(sid, argv):
   # reconstitute the original command
   command = ' '.join(argv)
   if ((len(argv) == 0) or 
@@ -95,14 +104,14 @@ def executeCommand(sid, argv):
 
 #################################################################################
 #################################################################################
-def controlServer(argv):
-  server = getServer(argv[0])
+def _controlServer(argv):
+  server = _getServer(argv[0])
   if (server != None):
-    executeCommand(server["sid"], argv[1:])
+    _executeCommand(server["sid"], argv[1:])
     
 #################################################################################
 #################################################################################
-def isDuplicate(localName_, remoteServer_, port_):
+def _isDuplicate(localName_, remoteServer_, port_):
   global _gPshellServers
   for server in _gPshellServers:
     if ((localName_ == server["localName"]) or ((remoteServer_ == server["remoteServer"]) and (port_ == server["port"]))):
@@ -112,7 +121,7 @@ def isDuplicate(localName_, remoteServer_, port_):
 
 #################################################################################
 #################################################################################
-def add(argv):
+def _add(argv):
   global _gPshellServers
   global _gMaxLocalName
   global _gMaxRemoteName
@@ -137,7 +146,7 @@ def add(argv):
     port = PshellServer.UNIX
     if (len(argv) == 5):
       port = argv[4]
-    if (not isDuplicate(argv[2], argv[3], port)):
+    if (not _isDuplicate(argv[2], argv[3], port)):
       if (len(argv[2]) > _gMaxLocalName):
         _gMaxLocalName = max(len(argv[2]), len(_gLocalNameLabel))
       if (len(argv[3]) > _gMaxRemoteName):
@@ -149,17 +158,18 @@ def add(argv):
                                                                 argv[3], 
                                                                 port, 
                                                                 PshellControl.ONE_SEC*5)})
-      PshellServer.addCommand(controlServer, 
+      PshellServer.addCommand(_controlServer, 
                               argv[2], 
                               "control the remote " + argv[2] + " process", 
                               "[<command> | ? | -h]", 
                               0, 
                               30, 
                               False)
+      PshellServer._addTabCompletions()
     else:
       PshellServer.printf("ERROR: Local name: %s, remote server: %s, port: %s already exists\n" % (argv[2], argv[3], argv[4]))
   elif (PshellServer.isSubString(argv[1], "multicast")):
-    multicast = getMulticast(argv[2])
+    multicast = _getMulticast(argv[2])
     if (multicast == None):
       # new keyword
       if (len(argv[2]) > _gMaxMulticastKeyword):
@@ -168,7 +178,7 @@ def add(argv):
       multicast = _gMulticast[-1]
     # add servers to this keyword
     for localName in argv[3:]:
-      server = getServer(localName)
+      server = _getServer(localName)
       if (server != None):
         PshellControl.addMulticast(server["sid"], argv[2])
         multicast["servers"].append(server)
@@ -177,7 +187,7 @@ def add(argv):
 
 #################################################################################
 #################################################################################
-def show(argv):
+def _show(argv):
   global _gPshellServers
   global _gMaxLocalName
   global _gMaxRemoteName
@@ -229,7 +239,7 @@ def show(argv):
 
 #################################################################################
 #################################################################################
-def multicast(argv):
+def _multicast(argv):
   # reconstitute the original command
   command = ' '.join(argv[1:])
   PshellControl.sendMulticast(command)
@@ -255,7 +265,7 @@ if (__name__ == '__main__'):
   PshellControl._gSupressInvalidArgCountMessage = True
 
   # register our callback commands
-  PshellServer.addCommand(add, 
+  PshellServer.addCommand(_add, 
                           "add", 
                           "add a new remote server or multicast entry", 
                           "{server <localName> <remoteServer> [<port>]} | {multicast <keyword> <localName1> [<localName2>...<localNameN>]}",
@@ -263,7 +273,7 @@ if (__name__ == '__main__'):
                           30, 
                           False)
                           
-  PshellServer.addCommand(show, 
+  PshellServer.addCommand(_show, 
                           "show", 
                           "show server or multicast info", 
                           "servers | multicast", 
@@ -271,7 +281,7 @@ if (__name__ == '__main__'):
                           2, 
                           True)
                           
-  PshellServer.addCommand(multicast, 
+  PshellServer.addCommand(_multicast, 
                           "multicast", 
                           "send multicast command to registered servers",
                           "<command>",

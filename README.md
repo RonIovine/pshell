@@ -15,10 +15,12 @@ without having to fork the calling process to call the 'pshell' command line cli
 program via the 'system' call.  This provides functionality similar to the familiar 
 Remote Procedure Call (RPC) mechanism.
 
-The control API can function as an IPC mechanism for control between processes.  If all 
-process control is implemented as a collection of pshell commands, a user can get a programmatic 
-IPC mechanism along with manual CLI/Shell access via the same code base.  There is no need 
-to write separate code for CLI/Shell processing and control/message event processing.
+The control API can function as a simple control plane IPC mechanism for inter-process
+control.  If all process control is implemented as a collection of pshell commands, a 
+user can get a programmatic IPC mechanism along with manual CLI/Shell access via the 
+same code base.  There is no need to write separate code for CLI/Shell processing and 
+control/message event processing.  All inter-process control can then be driven and 
+tested manually via one of the client programs (pshell or pshellAggregator).
 
 The control API supports both unicast and multicast messaging paradigms.  It also 
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
