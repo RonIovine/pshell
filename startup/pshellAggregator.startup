@@ -43,8 +43,8 @@
 
 add server traceFilterUdp localhost 6002
 add server traceFilterUnix traceFilterDemo
-add server pshellServerUnix pshellServerDemo
 add server pshellServerUdp 127.0.0.1 6001
+add server pshellServerUnix pshellServerDemo
 
 add multicast trace traceFilterUdp traceFilterUnix
 

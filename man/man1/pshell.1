@@ -16,25 +16,22 @@ that are running a TCP based PshellServer as the 'pshell' UDP/UNIX client progra
 the 'pshell.exp' script is optional, the 'telnet' client can be used directly to interface
 to a TCP PshellServer, however, only interactive mode is supported.
 .SH USAGE
-Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<serverName> | <portNum>}
-              [-h | ? | {<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]
+Usage: pshell -s | [-t<timeout>] {{<hostNameOrIpAddr> <port>} | <unixServerName>}
+              [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]
 
   where:
 
-    -h,?       - show pshell usage or command set of specified PSHELL server
-    -s         - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file
-    -f         - run commands from a batch file
-    -t         - change the default server response timeout
-    hostName   - hostname of desired PSHELL server (UDP only)
-    ipAddress  - IP address of desired PSHELL server (UDP only)
-    unix       - Specifies server is a UNIX domain server
-    serverName - name of desired PSHELL server (UDP or UNIX)
-    portNum    - port number of desired PSHELL server (UDP only)
-    timeout    - value in seconds to use for server response timeout
-    command    - optional command to execute
-    fileName   - optional batch file to execute
-    rate       - optional rate to repeat command or batch file (in seconds)
-    clear      - clear screen between commands or batch file passes
+    -s               - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file
+    -f               - run commands from a batch file
+    -t               - change the default server response timeout
+    hostNameOrIpAddr - hostname or IP address of UDP server
+    port             - port number of UDP server
+    unixServerName   - name of UNIX server
+    timeout          - response wait timeout in sec (default=5)
+    command          - optional command to execute
+    fileName         - optional batch file to execute
+    rate             - optional rate to repeat command or batch file (in seconds)
+    clear            - clear screen between commands or batch file passes
 
     NOTE: If no <command> is given, pshell will be started
           up in interactive mode, commands issued in command
@@ -49,11 +46,11 @@ Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix} {<se
           see all available commands, to get help on a single
           command, type '<command> {? | -h}'.  Use TAB completion
           to fill out partial commands and up-arrow to recall
-          the last entered command.
+          for command history.
 .SH EXAMPLES
 See the 'README' file that is distributed with this package for detailed instructions
 on using this framework.
 .SH SEE ALSO
-PshellServer(3), PshellControl(3), TraceFilter(3), TraceLog(3)
+pshellAggregator(1), PshellServer(3), PshellControl(3), TraceFilter(3), TraceLog(3)
 .SH AUTHOR
 Ron Iovine  --  github.com/RonIovine/pshell

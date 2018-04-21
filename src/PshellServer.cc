@@ -323,6 +323,8 @@ static unsigned _maxTabColumns = 0;
 #define PSHELL_BASE_ARG_OFFSET 1
 #endif
 
+char *pshell_origCommandKeyword;
+
 static bool _isRunning = false;
 static bool _isCommandDispatched = false;
 static bool _isCommandInteractive = true;
@@ -3686,6 +3688,7 @@ static char *createArgs(char *command_)
   if (args->numTokens > 0)
   {
     command = args->tokens[0];
+    pshell_origCommandKeyword = command;
     _argc = args->numTokens-PSHELL_BASE_ARG_OFFSET;
     _argv = &args->tokens[PSHELL_BASE_ARG_OFFSET];
   }

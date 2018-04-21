@@ -93,6 +93,9 @@ else
   echo "Removing pshell$fileExt from $binDir"
   rm -f $binDir/pshell$fileExt
   
+  echo "Removing pshellAggregator$fileExt from $binDir"
+  rm -f $binDir/pshellAggregator$fileExt
+  
   echo "Removing includes..."
   
   echo "Removing PshellServer.h from $includeDir"

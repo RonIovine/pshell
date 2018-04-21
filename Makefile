@@ -342,6 +342,9 @@ lib:
 	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full
 
 pshell:
+	@echo "Building pshellAggregator stand-alone UDP/UNIX aggregator client..."
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellAggregator.$(SRC_EXT) $(CLIENT_LIBS) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregator
+
 	@echo "Building pshell stand-alone UDP/UNIX client..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
@@ -354,9 +357,6 @@ demo:
 
 	@echo "Building pshellControlDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
-	
-	@echo "Building pshellAggregatorDemo program..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellAggregatorDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregatorDemo
 	
 ifeq ($(TF_INTEGRATED_TRACE_LOG),y)
 	@echo "Building traceFilterDemo program..."

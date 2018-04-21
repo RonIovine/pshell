@@ -51,6 +51,8 @@ which hard-coded the remote servers to aggregate.
 
 # import all our necessary modules
 import sys
+import os
+import signal
 import PshellServer
 import PshellControl
 
@@ -59,12 +61,12 @@ _gPshellServers = []
 
 _gMulticast = []
 
-_gMaxLocalName = 0
-_gMaxRemoteName = 0
-_gMaxMulticastKeyword = 0
-_gRemoteNameLabel = "Remote Name"
-_gLocalNameLabel = "Local Name"
+_gLocalNameLabel = "Local Server Name"
+_gRemoteNameLabel = "Remote Server"
 _gKeywordLabel = "Keyword"
+_gMaxLocalName = len(_gLocalNameLabel)
+_gMaxRemoteName = len(_gRemoteNameLabel)
+_gMaxMulticastKeyword = len(_gKeywordLabel)
 
 #################################################################################
 #################################################################################
@@ -86,28 +88,25 @@ def _getServer(localName):
   
 #################################################################################
 #################################################################################
-def _executeCommand(sid, argv):
-  # reconstitute the original command
-  command = ' '.join(argv)
-  if ((len(argv) == 0) or 
-      (argv[0] == "help") or 
-      (argv[0] == "-h") or 
-      (argv[0] == "-help") or 
-      (argv[0] == "--h") or 
-      (argv[0] == "--help") or 
-      (argv[0] == "?")):
-    PshellServer.printf(PshellControl.extractCommands(sid))
-  else:
-    (results, retCode) = PshellControl.sendCommand3(sid, command)
-    if (retCode == PshellControl.COMMAND_SUCCESS):
-      PshellServer.printf(results)
-
-#################################################################################
-#################################################################################
 def _controlServer(argv):
   server = _getServer(argv[0])
   if (server != None):
-    _executeCommand(server["sid"], argv[1:])
+    # see if they asked for help
+    if ((len(argv) == 1) or 
+        (argv[1] == "help") or 
+        (argv[1] == "-h") or 
+        (argv[1] == "-help") or 
+        (argv[1] == "--h") or 
+        (argv[1] == "--help") or 
+        (argv[1] == "?")):
+      # user asked for help, display all the registered commands of the remote server
+      PshellServer.printf(PshellControl.extractCommands(server["sid"]))
+    else:
+      # reconstitute and dispatch original command to remote server minus the first keyword
+      (results, retCode) = PshellControl.sendCommand3(server["sid"], ' '.join(argv[1:]))
+      # good return, display results back to user
+      if (retCode == PshellControl.COMMAND_SUCCESS):
+        PshellServer.printf(results)
     
 #################################################################################
 #################################################################################
@@ -116,8 +115,7 @@ def _isDuplicate(localName_, remoteServer_, port_):
   for server in _gPshellServers:
     if ((localName_ == server["localName"]) or ((remoteServer_ == server["remoteServer"]) and (port_ == server["port"]))):
       return (True)
-    else:
-      return (False)
+  return (False)
 
 #################################################################################
 #################################################################################
@@ -139,7 +137,7 @@ def _add(argv):
     PshellServer.printf("    <localName>    - Local logical name of the server, must be unique\n")
     PshellServer.printf("    <remoteServer> - Hostname or IP address of UDP server or name of UNIX server\n")
     PshellServer.printf("    <port>         - UDP port number or 'unix' for UNIX server (can be omitted for UNIX)\n")
-    PshellServer.printf("    <keyword>      - Multicast group keyword, must be valid registered command\n")
+    PshellServer.printf("    <keyword>      - Multicast group keyword, must be valid registered remote command\n")
     PshellServer.printf()
   elif (PshellServer.isSubString(argv[1], "server")):
     # default port
@@ -198,9 +196,9 @@ def _show(argv):
   global _gKeywordLabel
   if (PshellServer.isSubString(argv[1], "server")):
     PshellServer.printf()
-    PshellServer.printf("***************************************\n")
-    PshellServer.printf("*      AGGREGATED REMOTE SERVERS      *\n")
-    PshellServer.printf("***************************************\n")
+    PshellServer.printf("*************************************************\n")
+    PshellServer.printf("*           AGGREGATED REMOTE SERVERS           *\n")
+    PshellServer.printf("*************************************************\n")
     PshellServer.printf()
     PshellServer.printf("%s    %s    Port\n" % (_gLocalNameLabel.ljust(_gMaxLocalName),
                                                 _gRemoteNameLabel.ljust(_gMaxRemoteName)))
@@ -211,9 +209,9 @@ def _show(argv):
     PshellServer.printf()
   elif (PshellServer.isSubString(argv[1], "multicast")):
     PshellServer.printf()
-    PshellServer.printf("************************************************\n")
-    PshellServer.printf("*               MULTICAST GROUPS               *\n")
-    PshellServer.printf("************************************************\n")
+    PshellServer.printf("*****************************************************\n")
+    PshellServer.printf("*            REGISTERED MULTICAST GROUPS            *\n")
+    PshellServer.printf("*****************************************************\n")
     PshellServer.printf()
     PshellServer.printf("%s    %s    %s    Port\n" % (_gKeywordLabel.ljust(_gMaxMulticastKeyword),
                                                       _gLocalNameLabel.ljust(_gMaxLocalName),
@@ -225,14 +223,10 @@ def _show(argv):
       PshellServer.printf("%s    " % multicast["keyword"].ljust(_gMaxMulticastKeyword))
       for index, server in enumerate(multicast["servers"]):
         if (index > 0):
-          PshellServer.printf("%s    %s    %s    %s\n" % (" ".ljust(_gMaxMulticastKeyword, " "),
-                                                          server["localName"].ljust(_gMaxLocalName), 
-                                                          server["remoteServer"].ljust(_gMaxRemoteName), 
-                                                          server["port"]))
-        else:
-          PshellServer.printf("%s    %s    %s\n" % (server["localName"].ljust(_gMaxLocalName), 
-                                                    server["remoteServer"].ljust(_gMaxRemoteName), 
-                                                    server["port"]))
+          PshellServer.printf("%s    " % " ".ljust(_gMaxMulticastKeyword, " "))
+        PshellServer.printf("%s    %s    %s\n" % (server["localName"].ljust(_gMaxLocalName), 
+                                                      server["remoteServer"].ljust(_gMaxRemoteName), 
+                                                      server["port"]))
     PshellServer.printf()
   else:
     PshellServer.showUsage()
@@ -240,10 +234,51 @@ def _show(argv):
 #################################################################################
 #################################################################################
 def _multicast(argv):
-  # reconstitute the original command
-  command = ' '.join(argv[1:])
-  PshellControl.sendMulticast(command)
+  if (PshellServer.isHelp()):
+    PshellServer.printf()
+    PshellServer.showUsage()
+    PshellServer.printf()
+    PshellServer.printf("  Send a registered multicast command to the associated\n")
+    PshellServer.printf("  multicast remote server group\n")
+    _show(('show', 'multicast'))
+  else:
+    # reconstitute the original command
+    PshellControl.sendMulticast(' '.join(argv[1:]))
   
+#################################################################################
+#################################################################################
+def _cleanupAndExit():
+  PshellServer.cleanupResources()
+  PshellControl.disconnectAllServers()
+  sys.exit()
+
+#################################################################################
+#################################################################################
+def _signalHandler(signal, frame):
+  print("")
+  _cleanupAndExit()
+
+#################################################################################
+#################################################################################
+def _registerSignalHandlers():
+  # register a signal handlers so we can cleanup our
+  # system resources upon abnormal termination
+  signal.signal(signal.SIGHUP, _signalHandler)      # 1  Hangup (POSIX)
+  signal.signal(signal.SIGINT, _signalHandler)      # 2  Interrupt (ANSI)
+  signal.signal(signal.SIGQUIT, _signalHandler)     # 3  Quit (POSIX)
+  signal.signal(signal.SIGILL, _signalHandler)      # 4  Illegal instruction (ANSI)
+  signal.signal(signal.SIGABRT, _signalHandler)     # 6  Abort (ANSI)
+  signal.signal(signal.SIGBUS, _signalHandler)      # 7  BUS error (4.2 BSD)
+  signal.signal(signal.SIGFPE, _signalHandler)      # 8  Floating-point exception (ANSI)
+  signal.signal(signal.SIGSEGV, _signalHandler)     # 11 Segmentation violation (ANSI)
+  signal.signal(signal.SIGPIPE, _signalHandler)     # 13 Broken pipe (POSIX)
+  signal.signal(signal.SIGALRM, _signalHandler)     # 14 Alarm clock (POSIX)
+  signal.signal(signal.SIGTERM, _signalHandler)     # 15 Termination (ANSI)
+  signal.signal(signal.SIGXCPU, _signalHandler)     # 24 CPU limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGXFSZ, _signalHandler)     # 25 File size limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGPWR, _signalHandler)      # 30 Power failure restart (System V)
+  signal.signal(signal.SIGSYS, _signalHandler)      # 31 Bad system call
+
 ##############################
 #
 # start of main program
@@ -253,8 +288,19 @@ if (__name__ == '__main__'):
 
   # verify usage
   if (len(sys.argv) != 1):
-    print("Usage: pshellAggregator\n")
+    print("")
+    print("Usage: %s" % os.path.basename(sys.argv[0]))
+    print("")
+    print("  Client program that will allow for the aggregation of multiple remote")
+    print("  UDP/UNIX pshell servers into one consolidated client shell.  This program")
+    print("  can also create multicast groups for sets of remote servers.  The remote")
+    print("  servers and multicast groups can be added interactively via the 'add'")
+    print("  command or at startup via the 'pshellAggregator.startup' file.")
+    print("")
     exit (0)
+
+  # make sure we cleanup any system resorces on an abnormal termination
+  _registerSignalHandlers()
 
   # need to set the first arg position to 0 so we can pass
   # through the exact command to our remote server for dispatching
@@ -267,7 +313,7 @@ if (__name__ == '__main__'):
   # register our callback commands
   PshellServer.addCommand(_add, 
                           "add", 
-                          "add a new remote server or multicast entry", 
+                          "add a new remote server or multicast group entry", 
                           "{server <localName> <remoteServer> [<port>]} | {multicast <keyword> <localName1> [<localName2>...<localNameN>]}",
                           4, 
                           30, 
@@ -275,7 +321,7 @@ if (__name__ == '__main__'):
                           
   PshellServer.addCommand(_show, 
                           "show", 
-                          "show server or multicast info", 
+                          "show aggregated servers or multicast group info", 
                           "servers | multicast", 
                           2, 
                           2, 
@@ -283,11 +329,11 @@ if (__name__ == '__main__'):
                           
   PshellServer.addCommand(_multicast, 
                           "multicast", 
-                          "send multicast command to registered servers",
+                          "send multicast command to registered server group",
                           "<command>",
                           2,
                           30,
-                          True)
+                          False)
 
   # start our local pshell server
   PshellServer.startServer("pshellAggregator", PshellServer.LOCAL, PshellServer.BLOCKING)

@@ -194,6 +194,9 @@ else
   echo "Copying pshell$fileExt to $binDir"
   cp -f bin/pshell $binDir/.
   chmod +x $binDir/pshell$fileExt
+  echo "Copying pshellAggregator$fileExt to $binDir"
+  cp -f bin/pshellAggregator $binDir/.
+  chmod +x $binDir/pshellAggregator$fileExt
   
   echo "Installing includes..."
   echo "Copying PshellServer.h to $includeDir"

@@ -29,6 +29,8 @@
 #ifndef PSHELL_COMMON_H
 #define PSHELL_COMMON_H
 
+#include <netdb.h>
+
 /* 
  * this file contains items that are used in common
  * between the pshell UDP/UNIX client and server

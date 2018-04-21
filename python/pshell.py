@@ -232,7 +232,9 @@ def _showUsage():
 ##############################
 if (__name__ == '__main__'):
   
-  if ((len(sys.argv) < 2) or ((len(sys.argv)) > 4)):
+  if ((len(sys.argv) < 2) or 
+      ((len(sys.argv)) > 4) or 
+      ((len(sys.argv) > 1) and (sys.argv[1] == "-h"))):
     _showUsage()
 
   _gTimeout = 5
