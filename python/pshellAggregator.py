@@ -42,11 +42,15 @@ be added to the aggregation via the 'add server' command either at startup via
 the pshellAggregator.startup file or interactively via the interactive command 
 line.
 
-This program can also add 'multicast' commands to be setup to be sent to multiple
-aggregated servers.
+This program can also create multicast groups commands via the 'add multicast' command 
+(also at startup or interactively).  The multicast commands can then be distributed 
+to multiple aggregated servers.
 
 This program replaces the old, static, hard-wired, pshellAggregatorDemo.py program
 which hard-coded the remote servers to aggregate.
+
+The aggregation and multicast functionality can be useful to manually drive a set 
+of processes that use the pshell control mechanism as a control plane IPC.
 """
 
 # import all our necessary modules

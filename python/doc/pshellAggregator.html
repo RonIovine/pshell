@@ -23,11 +23,15 @@ be&nbsp;added&nbsp;to&nbsp;the&nbsp;aggregation&nbsp;via&nbsp;the&nbsp;'add&nbsp
 the&nbsp;pshellAggregator.startup&nbsp;file&nbsp;or&nbsp;interactively&nbsp;via&nbsp;the&nbsp;interactive&nbsp;command&nbsp;<br>
 line.<br>
 &nbsp;<br>
-This&nbsp;program&nbsp;can&nbsp;also&nbsp;add&nbsp;'multicast'&nbsp;commands&nbsp;to&nbsp;be&nbsp;setup&nbsp;to&nbsp;be&nbsp;sent&nbsp;to&nbsp;multiple<br>
-aggregated&nbsp;servers.<br>
+This&nbsp;program&nbsp;can&nbsp;also&nbsp;create&nbsp;multicast&nbsp;groups&nbsp;commands&nbsp;via&nbsp;the&nbsp;'add&nbsp;multicast'&nbsp;command&nbsp;<br>
+(also&nbsp;at&nbsp;startup&nbsp;or&nbsp;interactively).&nbsp;&nbsp;The&nbsp;multicast&nbsp;commands&nbsp;can&nbsp;then&nbsp;be&nbsp;distributed&nbsp;<br>
+to&nbsp;multiple&nbsp;aggregated&nbsp;servers.<br>
 &nbsp;<br>
 This&nbsp;program&nbsp;replaces&nbsp;the&nbsp;old,&nbsp;static,&nbsp;hard-wired,&nbsp;pshellAggregatorDemo.py&nbsp;program<br>
-which&nbsp;hard-coded&nbsp;the&nbsp;remote&nbsp;servers&nbsp;to&nbsp;aggregate.</tt></p>
+which&nbsp;hard-coded&nbsp;the&nbsp;remote&nbsp;servers&nbsp;to&nbsp;aggregate.<br>
+&nbsp;<br>
+The&nbsp;aggregation&nbsp;and&nbsp;multicast&nbsp;functionality&nbsp;can&nbsp;be&nbsp;useful&nbsp;to&nbsp;manually&nbsp;drive&nbsp;a&nbsp;set&nbsp;<br>
+of&nbsp;processes&nbsp;that&nbsp;use&nbsp;the&nbsp;pshell&nbsp;control&nbsp;mechanism&nbsp;as&nbsp;a&nbsp;control&nbsp;plane&nbsp;IPC.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -36,7 +40,9 @@ which&nbsp;hard-coded&nbsp;the&nbsp;remote&nbsp;servers&nbsp;to&nbsp;aggregate.<
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PshellControl.html">PshellControl</a><br>
-</td><td width="25%" valign=top><a href="PshellServer.html">PshellServer</a><br>
+<a href="PshellServer.html">PshellServer</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="signal.html">signal</a><br>
 </td><td width="25%" valign=top><a href="sys.html">sys</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table>
 </body></html>

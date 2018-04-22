@@ -1,5 +1,5 @@
-This directory contains the binary executable images for the six
-demo programs along with the 'pshell' UDP/UNIX client program.  On 
-a systen wide install only the 'pshell' client program will be copied
-to /usr/bin.
+This directory contains the binary executable images for the five
+demo programs along with the pshell/pshellAggregator UDP/UNIX 
+client programs.  On a systen wide install only the client programs 
+will be copied to /usr/bin.
 
