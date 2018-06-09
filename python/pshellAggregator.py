@@ -310,6 +310,11 @@ if (__name__ == '__main__'):
   # through the exact command to our remote server for dispatching
   PshellServer._setFirstArgPos(0)
 
+  # we tell the local server we are the special UDP/UNIX command 
+  # line client so it can process commands correctly and display
+  # the correct banner  information
+  PshellServer._gPshellClient = True
+
   # supress the automatic invalid arg count message from the PshellControl.py
   # module so we can display the returned usage
   PshellControl._gSupressInvalidArgCountMessage = True
@@ -347,5 +352,3 @@ if (__name__ == '__main__'):
   
   # cleanup our local server's resources
   PshellServer.cleanupResources()
-
- 

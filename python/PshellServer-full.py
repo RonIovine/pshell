@@ -367,17 +367,61 @@ def _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, 
   global _gCommandList
   global _gMaxLength
   global _gServerType
+  global _gPshellClient
+  
+  # see if we have a NULL command name 
+  if ((command_ == None) or (len(command_) == 0)):
+    print("PSHELL_ERROR: NULL command name, command not added")
+    return
+
+  # see if we have a NULL description 
+  if ((description_ == None) or (len(description_) == 0)):
+    print("PSHELL_ERROR: NULL description, command: '%s' not added" % command_)
+    return
+
+  # see if we have a NULL function
+  if (function_ == None):
+    print("PSHELL_ERROR: NULL function, command: '%s' not added" % command_)
+    return
+
+  # see if they provided a usage for a function with no arguments
+  if ((_gPshellClient == False) and (minArgs_ == 0) and (maxArgs_ == 0) and (usage_ != None)):
+    print("PSHELL_ERROR: Usage provided for function that takes no arguments, command: '%s' not added" % command_)
+    return
+
+  # if they provided no usage for a function with arguments
+  if (((maxArgs_ > 0) or (minArgs_ > 0)) and ((usage_ == None) or (len(usage_) == 0))):
+    print("PSHELL_ERROR: NULL usage for command that takes arguments, command: '%s' not added" % command_)
+    return
+
+  # see if their minArgs is greater than their maxArgs, we ignore if maxArgs is 0
+  # because that is the default value and we will set maxArgs to minArgs if that
+  # case later on in this function
+  if ((minArgs_ > maxArgs_) and (maxArgs_ > 0)):
+    print("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added" % (minArgs_, maxArgs_, command_))
+    return
+    
   for command in _gCommandList:
     if (command["name"] == command_):
       # command name already exists, don't add it again
       print("PSHELL_ERROR: Command: %s already exists, not adding command" % command_)
       return
+      
+  # everything ok, good to add command
+  
+  # see if they gave the default for maxArgs, if so, set maxArgs to minArgs 
+  if (maxArgs_ == 0):
+    maxArgs = minArgs_
+  else:
+    maxArgs = maxArgs_
+    
   if (len(command_) > _gMaxLength):
     _gMaxLength = len(command_)
+    
   if (prepend_ == True):
-    _gCommandList.insert(0, {"function":function_, "name":command_, "description":description_, "usage":usage_, "minArgs":minArgs_, "maxArgs":maxArgs_, "showUsage":showUsage_})
+    _gCommandList.insert(0, {"function":function_, "name":command_, "description":description_, "usage":usage_, "minArgs":minArgs_, "maxArgs":maxArgs, "showUsage":showUsage_})
   else:
-    _gCommandList.append({"function":function_, "name":command_, "description":description_, "usage":usage_, "minArgs":minArgs_, "maxArgs":maxArgs_, "showUsage":showUsage_})
+    _gCommandList.append({"function":function_, "name":command_, "description":description_, "usage":usage_, "minArgs":minArgs_, "maxArgs":maxArgs, "showUsage":showUsage_})
 
 #################################################################################
 #################################################################################

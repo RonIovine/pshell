@@ -169,19 +169,69 @@ if (__name__ == '__main__'):
   else:
     showUsage()
 
+  # register signal handlers so we can do a graceful termination and cleanup any system resources
   registerSignalHandlers()
 
-  # register our callback commands
+  # register our callback commands, commands consist of single keyword only
   PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
   PshellServer.addCommand(world, "world", "world command description")
   PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
   if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
     PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
 
-  # run a registered command from within it's parent process
+  # run a registered command from within it's parent process, this can be done before
+  # or after the server is started, as long as the command being called is regstered
   PshellServer.runCommand("hello 1 2 3")
 
-  # start our pshell server
+  # Now start our PSHELL server with the pshell_startServer function call.
+  #
+  # The 1st argument is our serverName (i.e. "pshellServerDemo").
+  #
+  # The 2nd argument specifies the type of PSHELL server, the four valid values are:
+  # 
+  #   PshellServer.UDP   - Server runs as a multi-session UDP based server.  This requires
+  #                        the special stand-alone command line UDP/UNIX client program
+  #                        'pshell'.  This server has no timeout for idle client sessions.
+  #                        It can be also be controlled programatically via an external
+  #                        program running the PshellControl.h API and library.
+  #   PshellServer.UNIX  - Server runs as a multi-session UNIX based server.  This requires
+  #                        the special stand-alone command line UDP/UNIX client program
+  #                        'pshell'.  This server has no timeout for idle client sessions.
+  #                        It can be also be controlled programatically via an external
+  #                        program running the PshellControl.h API and library.
+  #   PshellServer.TCP   - Server runs as a single session TCP based server with a 10 minute
+  #                        idle client session timeout.  The TCP server can be connected to
+  #                        using a standard 'telnet' based client.
+  #   PshellServer.LOCAL - Server solicits it's own command input via the system command line
+  #                        shell, there is no access via a separate client program, when the
+  #                        user input is terminated via the 'quit' command, the program is
+  #                        exited.
+  #
+  # The 3rd argument is the server mode, the two valid values are:
+  #
+  #   PshellServer.NON_BLOCKING - A separate thread will be created to process user input, when
+  #                               this function is called as non-blocking, the function will return
+  #                               control to the calling context.
+  #   PshellServer.BLOCKING     - No thread is created, all processing of user input is done within
+  #                               this function call, it will never return control to the calling context.
+  # 
+  # The 4th and 5th arguments must be provided for a UDP or TCP server, for a LOCAL or
+  # UNIX server they can be omitted, and if provided they will be ignored.
+  # 
+  # For the 4th argument, a valid IP address or hostname can be used.  There are also 3 special
+  # "hostname" type identifiers defined as follows:
+  #
+  #   localhost - the loopback address (i.e. 127.0.0.1)
+  #   myhost    - the hostname assigned to this host, this is usually defined in the
+  #               /etc/hosts file and is assigned to the default interface
+  #   anyhost   - all interfaces on a multi-homed host (including loopback)
+  #
+  # Finally, the 5th argument is the desired port number.
+  #
+  # All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden 
+  # via the 'pshell-server.conf' file on a per-server basis.
+
   PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)
 
+  # should never get here, but cleanup any pshell system resources as good practice
   PshellServer.cleanupResources()

@@ -16,13 +16,14 @@ program via the 'system' call.  This provides functionality similar to the famil
 Remote Procedure Call (RPC) mechanism.
 
 The control API can function as a simple control plane IPC mechanism for inter-process
-control.  If all process control is implemented as a collection of pshell commands, a 
-user can get a programmatic IPC mechanism along with manual CLI/Shell access via the 
-same code base.  There is no need to write separate code for CLI/Shell processing and 
-control/message event processing.  All inter-process control can then be driven and 
-tested manually via one of the client programs (pshell or pshellAggregator).
+communication and control.  If all process control is implemented as a collection of pshell 
+commands, a user can get a programmatic IPC mechanism along with manual CLI/Shell access 
+via the same code base.  There is no need to write separate code for CLI/Shell processing 
+and control/message event processing.  All inter-process control can then be driven and 
+tested manually via one of the interactive client programs (pshell or pshellAggregator).
 
-The control API supports both unicast and multicast messaging paradigms.  It also 
+The control API supports both unicast and 'multicast' (not true subscriber based multicast
+like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.  It also 
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
 broadcast address, e.g. x.y.z.255).
 
@@ -84,9 +85,11 @@ API.  The output of this logging system can be controlled via the trace filter p
 This example logging system can also be compiled out via the build-time config files if an existing
 logging system is used.
 
+All of the trace logging/filtering features are only available via the C based library.
+
 In addition to the infrastructure components, eight demo programs are also provided, two (C and
 Python) to show the usage of the pshell server API, two (C and Python) to show the usage of pshell 
-control APIone to show the usage of the trace filter/trace log API, one to show the usage of a 
+control API, one to show the usage of the trace filter/trace log API, one to show the usage of a 
 stand-alone (no filtering) trace log application, and one to show the usage of the multi-call binary 
 API.
 

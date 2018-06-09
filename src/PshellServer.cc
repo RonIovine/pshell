@@ -513,7 +513,7 @@ void pshell_addCommand(PshellFunction function_,
   if ((command_ == NULL) || (strlen(command_) == 0))
   {
     PSHELL_ERROR("NULL command name, command not added");
-     pthread_mutex_unlock(&_mutex);
+    pthread_mutex_unlock(&_mutex);
     return;
   }
 

@@ -226,7 +226,6 @@ void add(int argc, char *argv[])
                           0, 
                           30, 
                           false);
-        //pshell_addTabCompletions()
       }
       else
       {
