@@ -208,7 +208,7 @@ def _registerSignalHandlers():
   signal.signal(signal.SIGTERM, _signalHandler)     # 15 Termination (ANSI)
   signal.signal(signal.SIGXCPU, _signalHandler)     # 24 CPU limit exceeded (4.2 BSD)
   signal.signal(signal.SIGXFSZ, _signalHandler)     # 25 File size limit exceeded (4.2 BSD)
-  signal.signal(signal.SIGPWR, _signalHandler)      # 30 Power failure restart (System V)
+  #signal.signal(signal.SIGPWR, _signalHandler)      # 30 Power failure restart (System V)
   signal.signal(signal.SIGSYS, _signalHandler)      # 31 Bad system call
 
 #####################################################

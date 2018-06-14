@@ -384,11 +384,6 @@ def _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, 
     print("PSHELL_ERROR: NULL function, command: '%s' not added" % command_)
     return
 
-  # see if they provided a usage for a function with no arguments
-  if ((_gPshellClient == False) and (minArgs_ == 0) and (maxArgs_ == 0) and (usage_ != None)):
-    print("PSHELL_ERROR: Usage provided for function that takes no arguments, command: '%s' not added" % command_)
-    return
-
   # if they provided no usage for a function with arguments
   if (((maxArgs_ > 0) or (minArgs_ > 0)) and ((usage_ == None) or (len(usage_) == 0))):
     print("PSHELL_ERROR: NULL usage for command that takes arguments, command: '%s' not added" % command_)
@@ -935,9 +930,9 @@ def _printf(message_):
   global _gCommandInteractive
   if (_gCommandInteractive == True):
     if ((_gServerType == LOCAL) or (_gServerType == TCP)):
-      PshellReadline.write(message_)
+      PshellReadline.write(str(message_))
     else:   # UDP/UNIX server
-      _gPshellMsg["payload"] += message_
+      _gPshellMsg["payload"] += str(message_)
 
 #################################################################################
 #################################################################################
