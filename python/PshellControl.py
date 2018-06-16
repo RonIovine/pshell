@@ -673,7 +673,7 @@ def _sendCommand(control_, commandType_, command_, timeout_):
     control_["pshellMsg"]["respNeeded"] = (timeout_ > NO_WAIT)
     control_["pshellMsg"]["seqNum"] += 1
     seqNum = control_["pshellMsg"]["seqNum"]
-    control_["pshellMsg"]["payload"] = command_
+    control_["pshellMsg"]["payload"] = str(command_)
     sentSize = control_["socket"].sendto(struct.pack(_gPshellMsgHeaderFormat+str(len(control_["pshellMsg"]["payload"]))+"s", 
                                          *control_["pshellMsg"].values()), 
                                          control_["destAddress"])

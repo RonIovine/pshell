@@ -1474,7 +1474,6 @@ void registerSignalHandlers(void)
 #endif
   signal(SIGXCPU, exitProgram);   /* 24 CPU limit exceeded (4.2 BSD).  */
   signal(SIGXFSZ, exitProgram);   /* 25 File size limit exceeded (4.2 BSD).  */
-  signal(SIGPWR, exitProgram);    /* 30 Power failure restart (System V).  */
   signal(SIGSYS, exitProgram);    /* 31 Bad system call.  */
 }
 
