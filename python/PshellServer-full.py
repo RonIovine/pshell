@@ -572,7 +572,10 @@ def _runTCPServer():
     _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
     _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
     PshellReadline.setFileDescriptors(_gConnectFd, _gConnectFd, PshellReadline.SOCKET, PshellReadline.ONE_MINUTE*_gTcpTimeout)
-    _gSocketFd.shutdown(socket.SHUT_RDWR)
+    try:
+      _gSocketFd.shutdown(socket.SHUT_RDWR)
+    except:
+      None
     _receiveTCP()
     _gConnectFd.shutdown(socket.SHUT_RDWR)
     _gConnectFd.close()
