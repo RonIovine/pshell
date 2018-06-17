@@ -494,8 +494,10 @@ def _createSocket():
     _gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     _gUnixSourceAddress = _gUnixSocketPath+_gServerName
     # cleanup any old handle that might be hanging around
-    if (os.path.isfile(_gUnixSourceAddress)):
+    try:
       os.unlink(_gUnixSourceAddress)
+    except:
+      None
     _gSocketFd.bind(_gUnixSourceAddress)
   return (True)
 
@@ -988,14 +990,17 @@ def _reply():
 #################################################################################
 def _cleanupResources():
   global _gUnixSourceAddress
-  global _gServerType
   global _gSocketFd
-  global _gRunning
-  if (_gRunning == True):
-    if (_gUnixSourceAddress != None):
+  if (_gUnixSourceAddress != None):
+    try:
       os.unlink(_gUnixSourceAddress)
-    if (_gServerType != LOCAL):
+    except:
+      None
+  if (_gSocketFd != None):
+    try:
       _gSocketFd.close()
+    except:
+      None
 
 #################################################################################
 #################################################################################
