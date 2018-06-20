@@ -607,7 +607,7 @@ def _getChar():
     # serial terminal control
     oldSettings = termios.tcgetattr(_gInFd)
     try:
-      tty.setraw(_gInFd)
+      tty.setraw(_gInFd, termios.TCSADRAIN)
       if (_gIdleTimeout > 0):
         inputready, outputready, exceptready = select.select([_gInFd], [], [], _gIdleTimeout)
         if (len(inputready) > 0):
