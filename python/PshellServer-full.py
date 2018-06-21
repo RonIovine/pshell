@@ -984,7 +984,10 @@ def _reply():
   # uses a character stream and is not message based and LOCAL uses
   # no client app
   if ((_gServerType == UDP) or (_gServerType == UNIX)):
-    _gSocketFd.sendto(struct.pack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg["payload"]))+"s", *_gPshellMsg.values()), _gFromAddr)
+    try:
+      _gSocketFd.sendto(struct.pack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg["payload"]))+"s", *_gPshellMsg.values()), _gFromAddr)
+    except:
+      None
 
 #################################################################################
 #################################################################################
