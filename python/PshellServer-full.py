@@ -671,9 +671,11 @@ def _receiveDGRAM():
   global _gPshellMsgPayloadLength
   global _gPshellMsgHeaderFormat
   global _gFromAddr
-  (_gPshellMsg, _gFromAddr) = _gSocketFd.recvfrom(_gPshellMsgPayloadLength)
-  _gPshellMsg = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg)-struct.calcsize(_gPshellMsgHeaderFormat))+"s", _gPshellMsg)))
-  _processCommand(_gPshellMsg["payload"])
+  try:
+    (_gPshellMsg, _gFromAddr) = _gSocketFd.recvfrom(_gPshellMsgPayloadLength)
+  finally:
+    _gPshellMsg = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg)-struct.calcsize(_gPshellMsgHeaderFormat))+"s", _gPshellMsg)))
+    _processCommand(_gPshellMsg["payload"])
 
 #################################################################################
 #################################################################################
@@ -1224,3 +1226,12 @@ _gTcpPrompt = None
 _gTcpTitle = None
 # flag to indicate the special pshell.py client
 _gPshellClient = False 
+
+##############################
+#
+# start of main program
+#
+##############################
+if (__name__ == '__main__'):
+  # just print out a message identifying this as the 'full' module
+  print("PSHELL_INFO: FULL PshellServer")

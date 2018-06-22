@@ -132,7 +132,7 @@ SOCKET_TIMEOUT = 6
 SOCKET_NOT_CONNECTED = 7
 
 # specifies if the addMulticast should add the given sid to all commands
-MULTICAST_ALL = "__all__"
+MULTICAST_ALL = "__multicast_all__"
 
 #################################################################################
 #
@@ -684,7 +684,10 @@ def _sendCommand(control_, commandType_, command_, timeout_):
       retCode = SOCKET_SEND_FAILURE
     elif (timeout_ > NO_WAIT):
       while (True):
-        inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
+        try:
+          inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
+        except:
+          inputready = []
         if (len(inputready) > 0):
           control_["pshellMsg"], addr = control_["socket"].recvfrom(_gPshellMsgPayloadLength)
           control_["pshellMsg"] = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(control_["pshellMsg"])-struct.calcsize(_gPshellMsgHeaderFormat))+"s", control_["pshellMsg"])))

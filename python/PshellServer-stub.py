@@ -170,3 +170,13 @@ def isSubString(string1, string2, minMatchLength = 0):
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
   """
   return (True)
+  
+##############################
+#
+# start of main program
+#
+##############################
+if (__name__ == '__main__'):
+  # just print out a message identifying this as the 'stub' module
+  print("PSHELL_INFO: STUB PshellServer")
+
