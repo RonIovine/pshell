@@ -117,7 +117,7 @@ def runCommand(command):
 
 #################################################################################
 #################################################################################
-def printf(message = "\n"):
+def printf(message = "", newline = True):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
   """

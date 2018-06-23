@@ -240,17 +240,18 @@ def runCommand(command):
 
 #################################################################################
 #################################################################################
-def printf(message = "\n"):
+def printf(message = "", newline = True):
   """
   Display data back to the remote client
 
     Args:
-        string (str) : Message to display to the client user
+        string (str)   : Message to display to the client user
+        newline (bool) : Automatically add a newline to message
 
     Returns:
         none
   """
-  _printf(message)
+  _printf(message, newline)
 
 #################################################################################
 #################################################################################
@@ -611,7 +612,7 @@ def _getDisplayServerType():
   serverType = _gServerType
   if (_gServerTypeOverride != None):
     serverType = _gServerTypeOverride
-  return (serverType)
+  return (serverType.strip())
 
 #################################################################################
 #################################################################################
@@ -621,7 +622,7 @@ def _getDisplayPrompt():
   prompt = _gPrompt
   if (_gPromptOverride != None):
     prompt = _gPromptOverride
-  return (prompt)
+  return (prompt.strip() + " ")
 
 #################################################################################
 #################################################################################
@@ -631,7 +632,7 @@ def _getDisplayTitle():
   title = _gTitle
   if (_gTitleOverride != None):
     title = _gTitleOverride
-  return (title)
+  return (title.strip())
 
 #################################################################################
 #################################################################################
@@ -641,7 +642,7 @@ def _getDisplayServerName():
   serverName = _gServerName
   if (_gServerNameOverride != None):
     serverName = _gServerNameOverride
-  return (serverName)
+  return (serverName.strip())
 
 #################################################################################
 #################################################################################
@@ -651,7 +652,7 @@ def _getDisplayBanner():
   banner = _gBanner
   if (_gBannerOverride != None):
     banner = _gBannerOverride
-  return (banner)
+  return (banner.strip())
 
 #################################################################################
 #################################################################################
@@ -738,9 +739,9 @@ def _processCommand(command_):
           _gFoundCommand = command
           numMatches += 1
     if (numMatches == 0):
-      printf("PSHELL_ERROR: Command: '%s' not found\n" % command_)
+      printf("PSHELL_ERROR: Command: '%s' not found" % command_)
     elif (numMatches > 1):
-      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n" % command_)
+      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'" % command_)
     else:
       if (isHelp()):
         if (_gFoundCommand["showUsage"] == True):
@@ -766,37 +767,37 @@ def _isValidArgCount():
 #################################################################################
 def _processQueryVersion():
   global _gServerVersion
-  printf(_gServerVersion)
+  printf(_gServerVersion, newline=False)
 
 #################################################################################
 #################################################################################
 def _processQueryPayloadSize():
   global _gPshellMsgPayloadLength
-  printf(str(_gPshellMsgPayloadLength))
+  printf(str(_gPshellMsgPayloadLength), newline=False)
 
 #################################################################################
 #################################################################################
 def _processQueryName():
   global _gServerName
-  printf(_gServerName)
+  printf(_gServerName, newline=False)
 
 #################################################################################
 #################################################################################
 def _processQueryTitle():
   global _gTitle
-  printf(_gTitle)
+  printf(_gTitle, newline=False)
 
 #################################################################################
 #################################################################################
 def _processQueryBanner():
   global _gBanner
-  printf(_gBanner)
+  printf(_gBanner, newline=False)
 
 #################################################################################
 #################################################################################
 def _processQueryPrompt():
   global _gPrompt
-  printf(_gPrompt)
+  printf(_gPrompt, newline=False)
 
 #################################################################################
 #################################################################################
@@ -806,7 +807,7 @@ def _processQueryCommands1():
   global _gPshellMsg
   _gPshellMsg["payload"] = ""
   for command in _gCommandList:
-    printf("%-*s  -  %s\n" % (_gMaxLength, command["name"], command["description"]))
+    printf("%-*s  -  %s" % (_gMaxLength, command["name"], command["description"]))
   printf()
 
 #################################################################################
@@ -814,7 +815,7 @@ def _processQueryCommands1():
 def _processQueryCommands2():
   global _gCommandList
   for command in _gCommandList:
-    printf("%s%s" % (command["name"], "/"))
+    printf("%s%s" % (command["name"], "/"), newline=False)
 
 #################################################################################
 #################################################################################
@@ -843,7 +844,7 @@ def _batch(command_):
     _showUsage()
     return
   else:
-    printf("ERROR: Could not find batch file: '%s'\n" % batchFile)
+    printf("ERROR: Could not find batch file: '%s'" % batchFile)
     return
   # found a config file, process it
   for line in file:
@@ -856,9 +857,9 @@ def _batch(command_):
 #################################################################################
 def _help(command_):
     printf()
-    printf("****************************************\n")
-    printf("*             COMMAND LIST             *\n")
-    printf("****************************************\n")
+    printf("****************************************")
+    printf("*             COMMAND LIST             *")
+    printf("****************************************")
     printf()
     _processQueryCommands1()
 
@@ -889,51 +890,53 @@ def _showWelcome():
   banner = "#  %s" % _getDisplayBanner()
   if (_gPshellClient == True):
     # put up our window title banner
-    printf("\033]0;" + _gTitle + "\007")
+    printf("\033]0;" + _gTitle + "\007", newline=False)
     if (_getDisplayServerType() == UNIX):
       server = "#  Multi-session UNIX server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
     else:
       server = "#  Multi-session UDP server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
   elif (_gServerType == LOCAL):
     # put up our window title banner
-    printf("\033]0;" + _gTitle + "\007")
+    printf("\033]0;" + _gTitle + "\007", newline=False)
     server = "#  Single session LOCAL server: %s[%s]" % (_getDisplayServerName(), _getDisplayServerType())
   else:
     # put up our window title banner
-    printf("\033]0;" + _gTcpTitle + "\007")
+    printf("\033]0;" + _gTcpTitle + "\007", newline=False)
     server = "#  Single session TCP server: %s[%s]" % (_gServerName, _gTcpConnectSockName)
   maxBorderWidth = max(58, len(banner),len(server))+2
   printf()
-  printf("#"*maxBorderWidth+"\n")
-  printf("#\n")
-  printf(banner+"\n")
-  printf("#\n")
-  printf(server+"\n")
-  printf("#\n")
+  printf("#"*maxBorderWidth)
+  printf("#")
+  printf(banner)
+  printf("#")
+  printf(server)
+  printf("#")
   if (_gServerType == LOCAL):
-    printf("#  Idle session timeout: NONE\n")
+    printf("#  Idle session timeout: NONE")
   else:
-    printf("#  Idle session timeout: %d minutes\n" % _gTcpTimeout)
-  printf("#\n")
+    printf("#  Idle session timeout: %d minutes" % _gTcpTimeout)
+  printf("#")
   if (_gPshellClient == True):
-    printf("#  Command response timeout: %d seconds\n" % _gTcpTimeout)
-    printf("#\n")
-  printf("#  Type '?' or 'help' at prompt for command summary\n")
-  printf("#  Type '?' or '-h' after command for command usage\n")
-  printf("#\n")
-  printf("#  Full <TAB> completion, up-arrow recall, command\n")
-  printf("#  line editing and command abbreviation supported\n")
-  printf("#\n")
-  printf("#"*maxBorderWidth+"\n")
+    printf("#  Command response timeout: %d seconds" % _gTcpTimeout)
+    printf("#")
+  printf("#  Type '?' or 'help' at prompt for command summary")
+  printf("#  Type '?' or '-h' after command for command usage")
+  printf("#")
+  printf("#  Full <TAB> completion, up-arrow recall, command")
+  printf("#  line editing and command abbreviation supported")
+  printf("#")
+  printf("#"*maxBorderWidth+"")
   printf()
 
 #################################################################################
 #################################################################################
-def _printf(message_):
+def _printf(message_, newline_):
   global _gServerType
   global _gPshellMsg
   global _gCommandInteractive
   if (_gCommandInteractive == True):
+    if (newline_ == True):
+      message_ += "\n"
     if ((_gServerType == LOCAL) or (_gServerType == TCP)):
       PshellReadline.write(str(message_))
     else:   # UDP/UNIX server
@@ -944,9 +947,9 @@ def _printf(message_):
 def _showUsage():
   global _gFoundCommand
   if (_gFoundCommand["usage"] != None):
-    printf("Usage: %s %s\n" % (_gFoundCommand["name"], _gFoundCommand["usage"]))
+    printf("Usage: %s %s" % (_gFoundCommand["name"], _gFoundCommand["usage"]))
   else:
-    printf("Usage: %s\n" % _gFoundCommand["name"])
+    printf("Usage: %s" % _gFoundCommand["name"])
 
 #################################################################################
 #################################################################################
@@ -1107,15 +1110,15 @@ def _wheel(string_):
   global _gWheelPos
   _gWheelPos += 1
   if (string_ != ""):
-    _printf("\r%s%c" % (string_, _gWheel[(_gWheelPos)%4]))
+    _printf("\r%s%c" % (string_, _gWheel[(_gWheelPos)%4]), newline=False)
   else:
-    _printf("\r%c" % _gWheel[(_gWheelPos)%4])
+    _printf("\r%c" % _gWheel[(_gWheelPos)%4], newline=False)
   _flush()
 
 #################################################################################
 #################################################################################
 def _march(string_):
-  _printf(string_)
+  _printf(string_, newline=False)
   _flush()
 
 #################################################################################

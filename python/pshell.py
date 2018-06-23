@@ -129,7 +129,7 @@ def _processCommand(command_):
 def _comandDispatcher(args_):
   global _gSid
   (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
-  PshellServer.printf(results)
+  PshellServer.printf(results, newline=False)
 
 #################################################################################
 #################################################################################
