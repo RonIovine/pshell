@@ -1589,7 +1589,7 @@ int main(int argc, char *argv[])
                 _ipAddress,
                 str,
                 rate);
-                fflush(stdout);
+        fflush(stdout);
       }
       processCommand(PSHELL_USER_COMMAND, argv[0], rate, clear, false);
     }
@@ -1609,7 +1609,7 @@ int main(int argc, char *argv[])
                 _ipAddress,
                 argv[1],
                 rate);
-                fflush(stdout);
+        fflush(stdout);
       }
       processBatchFile(argv[1], rate, clear);
     }

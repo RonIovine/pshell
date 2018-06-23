@@ -56,6 +56,7 @@ on the above modules.
 import os
 import sys
 import signal
+import time
 import PshellControl
 import PshellServer
 import PshellReadline
@@ -128,9 +129,73 @@ def _processCommand(command_):
 #################################################################################
 def _comandDispatcher(args_):
   global _gSid
+  global _gInteractive
   (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
-  PshellServer.printf(results, newline=False)
+  if (_gInteractive == True):
+    PshellServer.printf(results, newline=False)
+  else:
+    # command line mode
+    sys.stdout.write(results)
 
+#################################################################################
+#################################################################################
+def _getIpAddress():
+  global _gRemoteServer
+  global _gPort
+  if (_gPort == "unix"):
+    return (_gPort)
+  elif (_gRemoteServer == "localhost"):
+    return ("127.0.0.1")
+  else:
+    return (_gRemoteServer)
+    
+#################################################################################
+#################################################################################
+def _processCommandLine():
+  global _gRate
+  global _gClear
+  global _gCommand
+  global _gServerName
+  global _gTitle
+  command = _gCommand.split()
+  sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gCommand, _gRate))
+  while (True):
+    if (_gClear != False):
+      sys.stdout.write(_gClear)
+    _comandDispatcher(command)
+    if (_gRate > 0):
+      time.sleep(_gRate)
+    else:
+      break
+  
+#################################################################################
+#################################################################################
+def _processBatchFile():
+  global _gRate
+  global _gClear
+  global _gFilename
+  global _gServerName
+  global _gTitle
+  if (os.path.isfile(_gFilename)):
+    file = open(_gFilename, 'r')
+    sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
+    while (True):
+      if (_gClear != False):
+        sys.stdout.write(_gClear)
+      file.seek(0, 0)
+      for line in file:
+        # skip comments
+        line = line.strip()
+        if ((len(line) > 0) and (line[0] != "#")):
+          command = line.split()
+          _comandDispatcher(command)
+      if (_gRate > 0):
+        time.sleep(_gRate) 
+      else:
+        break
+  else:
+    print("ERROR: Could not open file: '%s'" % _gFilename)
+  
 #################################################################################
 #################################################################################
 def _configureLocalServer():
@@ -215,12 +280,35 @@ def _registerSignalHandlers():
 def _showUsage():
   print("")
   print("Usage: %s {{<hostNameOrIpAddr> <port>} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("                 [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]")
   print("")
   print("  where:")
-  print("    <hostNameOrIpAddr> - hostname or IP address of UDP server")
-  print("    <port>             - port number of UDP server")
-  print("    <unixServerName>   - name of UNIX server")
-  print("    <timeout>          - response wait timeout in sec (default=5)")
+  print("")
+  print("    -f               - run commands from a batch file")
+  print("    -t               - change the default server response timeout")
+  print("    hostNameOrIpAddr - hostname or IP address of UDP server")
+  print("    port             - port number of UDP server")
+  print("    unixServerName   - name of UNIX server")
+  print("    timeout          - response wait timeout in sec (default=5)")
+  print("    command          - optional command to execute")
+  print("    fileName         - optional batch file to execute")
+  print("    rate             - optional rate to repeat command or batch file (in seconds)")
+  print("    clear            - clear screen between commands or batch file passes")
+  print("")
+  print("    NOTE: If no <command> is given, pshell will be started")
+  print("          up in interactive mode, commands issued in command")
+  print("          line mode that require arguments must be enclosed")
+  print("          in double quotes, commands issued in interactive")
+  print("          mode that require arguments do not require double")
+  print("          quotes.")
+  print("")
+  print("          To get help on a command in command line mode, type")
+  print("          \"<command> ?\" or \"<command> -h\".  To get help in")
+  print("          interactive mode type 'help' or '?' at the prompt to")
+  print("          see all available commands, to get help on a single")
+  print("          command, type '<command> {? | -h}'.  Use TAB completion")
+  print("          to fill out partial commands and up-arrow to recall")
+  print("          for command history.")
   print("")
   exit(0)
 
@@ -232,7 +320,7 @@ def _showUsage():
 if (__name__ == '__main__'):
   
   if ((len(sys.argv) < 2) or 
-      ((len(sys.argv)) > 4) or 
+      ((len(sys.argv)) > 8) or 
       ((len(sys.argv) > 1) and (sys.argv[1] == "-h"))):
     _showUsage()
 
@@ -240,12 +328,35 @@ if (__name__ == '__main__'):
 
   _gPort = PshellServer.UNIX
   
-  for arg in sys.argv[2:]:
+  _gRate = 0
+  _gClear = False
+  _gFilename = None
+  _gCommand = None
+  _gInteractive = False
+  
+  needFile = False
+  
+  for index, arg in enumerate(sys.argv[2:]):
     if ("-t" in arg):
       _gTimeout = int(arg[2:])
+    elif (arg.isdigit()):
+      if (index == 0):
+        _gPort = arg
+      else:
+        _gRate = int(arg)
+    elif (arg == "clear"):
+      _gClear = "\033[H\033[J"
+    elif (arg == "-f"):
+      needFile = True
+    elif (needFile == True):
+      if (not arg.isdigit()):
+        _gFilename = arg
+        needFile = False
+      else:
+        _showUsage()
     else:
-      _gPort = arg
-
+      _gCommand = arg
+  
   # make sure we cleanup any system resorces on an abnormal termination
   _registerSignalHandlers()
   
@@ -259,46 +370,59 @@ if (__name__ == '__main__'):
 
   # connect to our remote server via the control client
   _gSid = PshellControl.connectServer("pshellClient", _gRemoteServer, _gPort, PshellControl.ONE_SEC*_gTimeout)
+  _gServerName = PshellControl._extractName(_gSid)
+  _gTitle = PshellControl._extractTitle(_gSid)
 
-  if (_gIsBroadcastAddr == False):
-    
-    # if not a broadcast server address, extract all the commands from
-    # our unicast remote server and add them to our local server
-    commandList = PshellControl.extractCommands(_gSid)
-    if (len(commandList) > 0):
-      commandList = commandList.split("\n")
-      for command in commandList:
-        splitCommand = command.split("-")
-        if (len(splitCommand ) >= 2):
-          commandName = splitCommand[0].strip()
-          description = splitCommand[1].strip()
-          PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
-
-      # configure our local server to interact with a remote server, we override the display settings
-      # (i.e. prompt, server name, banner, title etc), to make it appear that our local server is really
-      # a remote server
-      _configureLocalServer()
-
-      # now start our local server which will interact with a remote server via the pshell control machanism
-      PshellServer.startServer("pshellServer", PshellServer.LOCAL, PshellServer.BLOCKING)
-    else:
-      print("PSHELL_ERROR: Could not connect to server: '%s:%s'" % (_gRemoteServer, _gPort))
-  
+  if (_gCommand != None):
+    # command line mode, execute command
+    _processCommandLine()
+  elif (_gFilename != None):
+    # command line mode, using batch file containing commands
+    _processBatchFile()
   else:
+    
+    # interactive mode, setup local server and interact with user
+    _gInteractive = True
+  
+    if (_gIsBroadcastAddr == False):
+    
+      # if not a broadcast server address, extract all the commands from
+      # our unicast remote server and add them to our local server
+      commandList = PshellControl.extractCommands(_gSid)
+      if (len(commandList) > 0):
+        commandList = commandList.split("\n")
+        for command in commandList:
+          splitCommand = command.split("-")
+          if (len(splitCommand ) >= 2):
+            commandName = splitCommand[0].strip()
+            description = splitCommand[1].strip()
+            PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
 
-    _gServerName = "broadcastAddr"
+        # configure our local server to interact with a remote server, we override the display settings
+        # (i.e. prompt, server name, banner, title etc), to make it appear that our local server is really
+        # a remote server
+        _configureLocalServer()
 
-    # add some TAB completors
-    PshellReadline.addTabCompletion("quit")
-    PshellReadline.addTabCompletion("help")
+        # now start our local server which will interact with a remote server via the pshell control machanism
+        PshellServer.startServer("pshellServer", PshellServer.LOCAL, PshellServer.BLOCKING)
+      else:
+        print("PSHELL_ERROR: Could not connect to server: '%s:%s'" % (_gRemoteServer, _gPort))
+  
+    else:
 
-    _showWelcome()
+      _gServerName = "broadcastAddr"
 
-    command = ""
-    while (not PshellReadline.isSubString(command, "quit")):
-      (command, idleSession) = PshellReadline.getInput("%s[%s]:PSHELL> " % (_gServerName, _gRemoteServer))
-      if (not PshellReadline.isSubString(command, "quit")):
-        _processCommand(command)
+      # add some TAB completors
+      PshellReadline.addTabCompletion("quit")
+      PshellReadline.addTabCompletion("help")
+
+      _showWelcome()
+
+      command = ""
+      while (not PshellReadline.isSubString(command, "quit")):
+        (command, idleSession) = PshellReadline.getInput("%s[%s]:PSHELL> " % (_gServerName, _gRemoteServer))
+        if (not PshellReadline.isSubString(command, "quit")):
+          _processCommand(command)
 
   _cleanupAndExit()
   
