@@ -588,7 +588,7 @@ bool init(const char *destination_, const char *server_)
     /* bind to our source socket */
     for (int i = 0; ((i < MAX_UNIX_CLIENTS) && (retCode < 0)); i++)
     {
-      sprintf(_sourceUnixAddress.sun_path, "%s/pshellCliClient%d", PSHELL_UNIX_SOCKET_PATH, (rand()%MAX_UNIX_CLIENTS));
+      sprintf(_sourceUnixAddress.sun_path, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, server_, (rand()%MAX_UNIX_CLIENTS));
       retCode = bind(_socketFd, (struct sockaddr *) &_sourceUnixAddress, sizeof(_sourceUnixAddress));
     }
     

@@ -671,11 +671,9 @@ def _receiveDGRAM():
   global _gPshellMsgPayloadLength
   global _gPshellMsgHeaderFormat
   global _gFromAddr
-  try:
-    (_gPshellMsg, _gFromAddr) = _gSocketFd.recvfrom(_gPshellMsgPayloadLength)
-  finally:
-    _gPshellMsg = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg)-struct.calcsize(_gPshellMsgHeaderFormat))+"s", _gPshellMsg)))
-    _processCommand(_gPshellMsg["payload"])
+  (_gPshellMsg, _gFromAddr) = _gSocketFd.recvfrom(_gPshellMsgPayloadLength)
+  _gPshellMsg = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg)-struct.calcsize(_gPshellMsgHeaderFormat))+"s", _gPshellMsg)))
+  _processCommand(_gPshellMsg["payload"])
 
 #################################################################################
 #################################################################################
