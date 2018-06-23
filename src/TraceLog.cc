@@ -339,7 +339,7 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   
   if (_printLocation && _printTimestamp)
   {
-    sprintf(outputString_, "%s%-*s | %s.%-6ld | %s(%s):%d | ", _printPrefix, _maxTypeLength, type_, timestamp, tv.tv_usec, file, function_, line_);
+    sprintf(outputString_, "%s%-*s | %s.%-6ld | %s(%s):%d | ", _printPrefix, _maxTypeLength, type_, timestamp, (long)tv.tv_usec, file, function_, line_);
   }
   else if (_printLocation)
   {
@@ -347,7 +347,7 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   }
   else if (_printTimestamp)
   {
-    sprintf(outputString_, "%s%-*s | %s.%-6ld | ", _printPrefix, _maxTypeLength, type_, timestamp, tv.tv_usec);
+    sprintf(outputString_, "%s%-*s | %s.%-6ld | ", _printPrefix, _maxTypeLength, type_, timestamp, (long)tv.tv_usec);
   }
   else
   {

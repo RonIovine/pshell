@@ -145,9 +145,9 @@ in the top level of the unzipped package (i.e. same directory as this README fil
 that will do the different installs.  This package has binaries built for an x86_64
 target that have been tested on CentOs (RedHat derivitave) and Mint (Ubuntu derivitave)
 Linux distributions.  It has also been successfully built and run on a ARM based
-Raspberry Pi system running Raspbian Linux as well as a Windows/Cygwin based system.  
-If using this package for a a different target, see the following section on building 
-from source.
+Raspberry Pi system running Raspbian Linux as well as a Windows/Cygwin based system
+and a MAC/OSX based system.  If using this package for a a different target, see the 
+following section on building from source.
 
 To see the usage of the script 'cd' to the top level pshell directory and type:
 
@@ -436,7 +436,8 @@ are desired in the build settings, there is no need to copy 'defconfig' to
 be done automatically by the makefile processing.
 
 This package has been successfully re-built and run on a Raspberry Pi/ARM based
-system running Raspbian Linux as well as a Windows/Cygwin based system.
+system running Raspbian Linux as well as a Windows/Cygwin based system and a
+MAC/OSX based system.
 
 NOTE: While an overriding design goal was to write all the code in standard ANSI
       C and use standard C linkages, and a standard functional 'C' API, there are

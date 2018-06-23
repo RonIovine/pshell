@@ -26,7 +26,7 @@
 #
 #################################################################################
 
-CC=gcc -lstdc++
+CC=gcc
 
 SRC_EXT=cc
 
@@ -36,13 +36,25 @@ WARNINGS = -Wall
 
 STATIC_OBJ = $(WARNINGS) -c
 STATIC_LIB = ar rcs
+
 ifeq ($(OS),Windows_NT)
   SHARED_OBJ = $(WARNINGS) -c
   CCFLAGS += -D WIN32
-else
+  CLIENT_LIBS =
+endif
+
+ifeq ($(shell uname),Linux)
   SHARED_OBJ = $(WARNINGS) -fPIC -c
   CCFLAGS += -D LINUX
+  CLIENT_LIBS = -lnsl
 endif
+
+ifeq ($(shell uname),Darwin)
+  SHARED_OBJ = $(WARNINGS) -fPIC -c
+  CCFLAGS += -D OSX
+  CLIENT_LIBS =
+endif
+
 SHARED_LIB = $(CC) -shared -o
 
 SRC_DIR = src
@@ -100,13 +112,6 @@ endif
 # PshellServer objects
 #
 PSHELL_OBJS = PshellServer.o
-
-#
-# PshellClient libraries
-#
-ifneq ($(OS),Windows_NT)
-  CLIENT_LIBS = -lnsl
-endif
 
 #########################
 #

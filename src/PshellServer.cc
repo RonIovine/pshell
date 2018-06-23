@@ -4093,7 +4093,7 @@ static void reply(PshellMsg *pshellMsg_)
   {
     replyUDP(pshellMsg_);
   }
-  else if ((_serverType == PSHELL_UNIX_SERVER))
+  else if (_serverType == PSHELL_UNIX_SERVER)
   {
     replyUNIX(pshellMsg_);
   }
