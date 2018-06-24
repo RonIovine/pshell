@@ -178,5 +178,5 @@ def isSubString(string1, string2, minMatchLength = 0):
 ##############################
 if (__name__ == '__main__'):
   # just print out a message identifying this as the 'stub' module
-  print("PSHELL_INFO: STUB PshellServer")
+  print("PSHELL_INFO: PshellServer STUB Module")
 

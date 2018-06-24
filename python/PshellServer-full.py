@@ -1235,4 +1235,4 @@ _gPshellClient = False
 ##############################
 if (__name__ == '__main__'):
   # just print out a message identifying this as the 'full' module
-  print("PSHELL_INFO: FULL PshellServer")
+  print("PSHELL_INFO: PshellServer FULL Module")
