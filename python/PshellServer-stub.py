@@ -165,6 +165,14 @@ def isHelp():
 
 #################################################################################
 #################################################################################
+def getOption(arg):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (False, "", "")
+
+#################################################################################
+#################################################################################
 def isSubString(string1, string2, minMatchLength = 0):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality

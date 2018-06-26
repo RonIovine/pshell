@@ -62,6 +62,7 @@ march()       -- marching ascii character to keep UDP/UNIX client alive
 showUsage()   -- show the usage the command is registered with
 isHelp()      -- checks if the user has requested help on this command
 isSubString() -- checks for string1 substring of string2 at position 0
+getOption()   -- parses arg of format -<key><value> or <key>=<value>
 
 Integer constants:
 
@@ -348,6 +349,26 @@ def isSubString(string1, string2, minMatchLength = 0):
   return (_isSubString(string1, string2, minMatchLength))
 
 #################################################################################
+#################################################################################
+def getOption(arg):
+  """
+  This function will parse an argument string of the formats -<key><value> where
+  key is one letter only, i.e. '-t', or <key>=<value> where key can be any length
+  word, i.e. 'timeout', and return a 3-tuple indicating if the arg was parsed
+  correctly, along with the associated key and corresponding value.  An example 
+  of the two valid formats are -t10, timeout=10.
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if string parses correctly, i.e. -<key><value> or <key>=<value>
+        str  : The key value found
+        str  : The value associated with the key
+  """
+  return (_getOption(arg))
+
+#################################################################################
 #
 # "private" functions and data
 #
@@ -361,6 +382,20 @@ def isSubString(string1, string2, minMatchLength = 0):
 #################################################################################
 def _isSubString(string1_, string2_, minMatchLength_):
   return (PshellReadline.isSubString(string1_, string2_, minMatchLength_))
+
+#################################################################################
+#################################################################################
+def _getOption(arg):
+  if (len(arg) < 3):
+    return (False, "", "")
+  elif (arg[0] == "-"):
+    return (True, arg[:2], arg[2:])
+  else:
+    value = arg.split("=")
+    if (len(value) != 2):
+      return (False, "", "")
+    else:
+      return (True, value[0], value[1])
 
 #################################################################################
 #################################################################################

@@ -117,6 +117,13 @@ def keepAlive(argv):
 
 #################################################################################
 #################################################################################
+def getOptions(argv):
+ for index, arg in enumerate(argv):
+   (parsed, key, value) = PshellServer.getOption(arg)
+   PshellServer.printf("arg[%d]: '%s', parsed: %s, key: '%s', value: '%s'" % (index, arg, parsed, key, value))
+
+#################################################################################
+#################################################################################
 def showUsage():
   print("Usage: pshellServerDemo.py -udp | -tcp | -unix | -local")
   sys.exit()
@@ -175,6 +182,7 @@ if (__name__ == '__main__'):
   PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
   PshellServer.addCommand(world, "world", "world command description")
   PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
+  PshellServer.addCommand(getOptions, "getOptions", "example of parsing command line options", "<arg1> [<argv2>...<argN>]", 1, 20, False)
   if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
     PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
 
