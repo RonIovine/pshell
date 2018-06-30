@@ -118,9 +118,20 @@ def keepAlive(argv):
 #################################################################################
 #################################################################################
 def getOptions(argv):
- for index, arg in enumerate(argv):
-   (parsed, key, value) = PshellServer.getOption(arg)
-   PshellServer.printf("arg[%d]: '%s', parsed: %s, key: '%s', value: '%s'" % (index, arg, parsed, key, value))
+  if (PshellServer.isHelp()):
+    PshellServer.printf()
+    PshellServer.showUsage()
+    PshellServer.printf()
+    PshellServer.printf("  where:")
+    PshellServer.printf("    arg - agrument of the format -<key><value> or <key>=<value>")
+    PshellServer.printf()
+    PshellServer.printf("  For the first form, the <key> must be a single character, e.g. -t10")
+    PshellServer.printf("  for the second form, <key> can be any length, e.g. timeout=10")
+    PshellServer.printf()
+  else:
+    for index, arg in enumerate(argv):
+      (parsed, key, value) = PshellServer.getOption(arg)
+      PshellServer.printf("arg[%d]: '%s', parsed: %s, key: '%s', value: '%s'" % (index, arg, parsed, key, value))
 
 #################################################################################
 #################################################################################
@@ -200,7 +211,7 @@ if (__name__ == '__main__'):
   PshellServer.addCommand(function    = getOptions, 
                           command     = "getOptions", 
                           description = "example of parsing command line options", 
-                          usage       = "<arg1> [<argv2>...<argN>]", 
+                          usage       = "<arg1> [<arg2>...<argN>]", 
                           minArgs     = 1, 
                           maxArgs     = 20, 
                           showUsage   = False)
