@@ -204,7 +204,9 @@ if (__name__ == '__main__'):
                           minArgs     = 1, 
                           maxArgs     = 20, 
                           showUsage   = False)
-                          
+                    
+  # TCP or LOCAL servers don't need a keep-alive, so only add 
+  # this command for connectionless datagram type servers
   if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
     PshellServer.addCommand(function    = keepAlive, 
                             command     = "keepAlive", 
