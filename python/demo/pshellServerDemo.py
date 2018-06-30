@@ -179,12 +179,38 @@ if (__name__ == '__main__'):
   registerSignalHandlers()
 
   # register our callback commands, commands consist of single keyword only
-  PshellServer.addCommand(hello, "hello", "hello command description", "[<arg1> ... <arg20>]", 0, 20)
-  PshellServer.addCommand(world, "world", "world command description")
-  PshellServer.addCommand(enhancedUsage, "enhancedUsage", "command with enhanced usage", "<arg1>", 1, 1, False)
-  PshellServer.addCommand(getOptions, "getOptions", "example of parsing command line options", "<arg1> [<argv2>...<argN>]", 1, 20, False)
+  PshellServer.addCommand(function    = hello, 
+                          command     = "hello", 
+                          description = "hello command description", 
+                          usage       = "[<arg1> ... <arg20>]", 
+                          minArgs     = 0, 
+                          maxArgs     = 20)
+                          
+  PshellServer.addCommand(function    = world, 
+                          command     = "world", 
+                          description = "world command description")
+                          
+  PshellServer.addCommand(function    = enhancedUsage, 
+                          command     = "enhancedUsage", 
+                          description = "command with enhanced usage", 
+                          usage       = "<arg1>", 
+                          minArgs     = 1,
+                          showUsage   = False)
+                          
+  PshellServer.addCommand(function    = getOptions, 
+                          command     = "getOptions", 
+                          description = "example of parsing command line options", 
+                          usage       = "<arg1> [<argv2>...<argN>]", 
+                          minArgs     = 1, 
+                          maxArgs     = 20, 
+                          showUsage   = False)
+                          
   if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
-    PshellServer.addCommand(keepAlive, "keepAlive", "command to show client keep-alive", "dots | bang | pound | wheel", 1, 1)
+    PshellServer.addCommand(function    = keepAlive, 
+                            command     = "keepAlive", 
+                            description = "command to show client keep-alive", 
+                            usage       = "dots | bang | pound | wheel", 
+                            minArgs     = 1)
 
   # run a registered command from within it's parent process, this can be done before
   # or after the server is started, as long as the command being called is regstered
@@ -200,12 +226,12 @@ if (__name__ == '__main__'):
   #                        the special stand-alone command line UDP/UNIX client program
   #                        'pshell'.  This server has no timeout for idle client sessions.
   #                        It can be also be controlled programatically via an external
-  #                        program running the PshellControl.h API and library.
+  #                        program running the PshellControl API and library.
   #   PshellServer.UNIX  - Server runs as a multi-session UNIX based server.  This requires
   #                        the special stand-alone command line UDP/UNIX client program
   #                        'pshell'.  This server has no timeout for idle client sessions.
   #                        It can be also be controlled programatically via an external
-  #                        program running the PshellControl.h API and library.
+  #                        program running the PshellControl API and library.
   #   PshellServer.TCP   - Server runs as a single session TCP based server with a 10 minute
   #                        idle client session timeout.  The TCP server can be connected to
   #                        using a standard 'telnet' based client.
