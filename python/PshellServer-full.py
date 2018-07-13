@@ -657,7 +657,7 @@ def _getDisplayPrompt():
   prompt = _gPrompt
   if (_gPromptOverride != None):
     prompt = _gPromptOverride
-  return (prompt.strip() + " ")
+  return (prompt.rstrip(' \t\r\n\0') + " ")
 
 #################################################################################
 #################################################################################
