@@ -1,5 +1,5 @@
 # pshell
-**A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++/Python Applications**
+**A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++/Python/Go Applications**
 
 This package contains all the necessary code, documentation, and examples for
 building C/C++/Python applications that incorporate a Process-Specific Embedded

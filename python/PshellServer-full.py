@@ -432,6 +432,7 @@ def _addCommand(function_, command_, description_, usage_, minArgs_,  maxArgs_, 
     print("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added" % (minArgs_, maxArgs_, command_))
     return
     
+  # see if it is a duplicate command
   for command in _gCommandList:
     if (command["name"] == command_):
       # command name already exists, don't add it again

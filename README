@@ -7,7 +7,7 @@ INTRODUCTION:
 This package contains all the necessary code, documentation and examples for
 building C/C++/Python applications that incorporate a Process Specific Embedded 
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
-framework and API to embed functions within a C/C++/Python application that can 
+framework and API to embed functions within a C/C++/Python/Go application that can 
 be invoked either via a separate client program or directly from the within
 application itself.
 

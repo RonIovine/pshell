@@ -45,7 +45,7 @@ type pshellMulticast struct {
 }
 var gMulticastList = []pshellMulticast{}
 
-var gResults = map[int]string {
+var gRetCodes = map[int]string {
   INVALID_SID:"INVALID_SID",
   COMMAND_SUCCESS:"COMMAND_SUCCESS",
   COMMAND_NOT_FOUND:"COMMAND_NOT_FOUND",
@@ -96,8 +96,8 @@ func SendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func GetResultsString(results_ int) string {
-  return gResults[results_]
+func GetRetCodeString(retCode_ int) string {
+  return gRetCodes[retCode_]
 }
 
 /////////////////////////////////
@@ -116,8 +116,8 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
                           pshellControl{udpSocket,
                                         defaultTimeout_, 
                                         "udp", 
-                                        []byte{},
-                                        make([]byte, 2048), 
+                                        []byte{},           // sendMsg
+                                        make([]byte, 2048), // recvMsg
                                         strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
     return len(gControlList)-1
   } else {

@@ -11,6 +11,6 @@ func main() {
   if (retCode == PshellControl.COMMAND_SUCCESS) {
     fmt.Printf("%s", results)
   }
-  fmt.Printf("retCode: %s:\n", PshellControl.GetResultsString(retCode))
+  fmt.Printf("retCode: %s:\n", PshellControl.GetRetCodeString(retCode))
 }
 
