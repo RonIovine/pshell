@@ -4,6 +4,7 @@ import "encoding/binary"
 import "net"
 import "fmt"
 import "strings"
+import "bytes"
 //import "time"
 //import "strings"
 
@@ -74,7 +75,7 @@ var _gFoundCommand pshellCmd
 
 var _gCommandList = []pshellCmd{}
 var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
-var _gPshellSendPayload string
+var _gPshellSendPayload = ""
 var _gUdpSocket *net.UDPConn
 var _gRecvAddr net.Addr
 
@@ -111,7 +112,6 @@ func StartServer(serverName string,
 func Printf(format_ string, message_ ...interface{}) {
   if (_gCommandInteractive == true) {
     _gPshellSendPayload += fmt.Sprintf(format_, message_...)
-    //fmt.Printf("payload: '%s'\n", _gPshellSendPayload)
   }
 }
 
@@ -230,9 +230,13 @@ func createSocket() bool {
 ////////////////////////////////////////////////////////////////////////////////
 func receiveDGRAM() {
   var err error
+  //var size int
   _, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
   if (err == nil) {
-    processCommand(string(getPayload(_gPshellRcvMsg)))
+    //fmt.Printf("size: %d bytes read\n", size)
+    //_gPshellRcvMsg[size] = 0
+    // trim all trailing NULL characters from incoming payload
+    processCommand(string(bytes.Trim(getPayload(_gPshellRcvMsg), "\000")))
   }
 }
 
@@ -329,7 +333,7 @@ func processCommand(command string) {
     processQueryCommands2()
   } else {
     _gCommandDispatched = true
-    _gArgs = strings.Fields(command)
+    _gArgs = strings.Split(strings.TrimSpace(command), " ")
     command := _gArgs[0]
     _gArgs = _gArgs[1:]
     numMatches := 0
@@ -375,7 +379,6 @@ func reply() {
                                  getDataNeeded(_gPshellRcvMsg), 
                                  getSeqNum(_gPshellRcvMsg), 
                                  _gPshellSendPayload)
-  fmt.Printf("payload: '%s'\n", getPayload(pshellSendMsg))
   _gUdpSocket.WriteTo(pshellSendMsg, _gRecvAddr)
   _gPshellSendPayload = ""
 }
@@ -472,7 +475,10 @@ func setSeqNum(message []byte, seqNum uint32) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func createMessage(msgType byte, respNeeded byte, dataNeeded byte, seqNum uint32, command string) []byte {
+  //message := make([]byte, 8)
   message := []byte{msgType, respNeeded, dataNeeded, 0, 0, 0, 0, 0}
+  //setRespNeeded(message, respNeeded)
+  //setDataNeeded(message, dataNeeded)
   setSeqNum(message, seqNum)
   message = append(message, []byte(command)...)
   return (message)
