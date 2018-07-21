@@ -6,10 +6,11 @@ import "PshellServer"
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func hello(argv []string) {
-  PshellServer.Printf("hello command dispatched:")
+  PshellServer.Printf("hello command dispatched:\n")
   for index, arg := range argv {
-    PshellServer.Printf("arg[%d]: %s\n", index, arg)
+    PshellServer.Printf("  arg[%d]: %s\n", index, arg)
   }
+  PshellServer.Printf("hello command dispatched:\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

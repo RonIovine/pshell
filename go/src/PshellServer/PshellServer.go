@@ -73,7 +73,8 @@ var _gArgs []string
 var _gFoundCommand pshellCmd
 
 var _gCommandList = []pshellCmd{}
-var _gPshellMsg = make([]byte, _gPshellMsgPayloadLength)
+var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
+var _gPshellSendPayload string
 var _gUdpSocket *net.UDPConn
 var _gRecvAddr net.Addr
 
@@ -107,10 +108,10 @@ func StartServer(serverName string,
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func Printf(message_ string, a ...interface{}) {
+func Printf(format_ string, message_ ...interface{}) {
   if (_gCommandInteractive == true) {
-    appendPayload(_gPshellMsg, message_)
-    fmt.Printf("payload: '%s'\n", getPayload(_gPshellMsg))
+    _gPshellSendPayload += fmt.Sprintf(format_, message_...)
+    //fmt.Printf("payload: '%s'\n", _gPshellSendPayload)
   }
 }
 
@@ -128,8 +129,7 @@ func addCommand(function pshellFunction,
                 usage string, 
                 minArgs int, 
                 maxArgs int, 
-                showUsage bool) {
-  
+                showUsage bool) {  
   _gCommandList = append(_gCommandList, 
                          pshellCmd{command, 
                                    usage,
@@ -220,10 +220,8 @@ func createSocket() bool {
   udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
   if err == nil {
     _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
-    fmt.Printf("socket %s created\n", serverAddr)
     return (true)
   } else {
-    fmt.Printf("socket %s not created\n", serverAddr)
     return (false)
   }
 }
@@ -232,9 +230,9 @@ func createSocket() bool {
 ////////////////////////////////////////////////////////////////////////////////
 func receiveDGRAM() {
   var err error
-  _, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellMsg)
+  _, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
   if (err == nil) {
-    processCommand(string(getPayload(_gPshellMsg)))
+    processCommand(string(getPayload(_gPshellRcvMsg)))
   }
 }
 
@@ -259,7 +257,7 @@ func showUsage() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryVersion() {
-  Printf("%d", _gServerVersion)
+  Printf("%s", _gServerVersion)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -313,22 +311,21 @@ func processQueryCommands2() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processCommand(command string) {
-  clearPayload(_gPshellMsg)
-  if (getMsgType(_gPshellMsg) == QUERY_VERSION) {
+  if (getMsgType(_gPshellRcvMsg) == QUERY_VERSION) {
     processQueryVersion()
-  } else if (getMsgType(_gPshellMsg) == QUERY_PAYLOAD_SIZE) {
+  } else if (getMsgType(_gPshellRcvMsg) == QUERY_PAYLOAD_SIZE) {
     processQueryPayloadSize()
-  } else if (getMsgType(_gPshellMsg) == QUERY_NAME) {
+  } else if (getMsgType(_gPshellRcvMsg) == QUERY_NAME) {
     processQueryName()
-  } else if (getMsgType(_gPshellMsg) == QUERY_TITLE) {
+  } else if (getMsgType(_gPshellRcvMsg) == QUERY_TITLE) {
     processQueryTitle()
-  } else if (getMsgType(_gPshellMsg) == QUERY_BANNER) {
+  } else if (getMsgType(_gPshellRcvMsg) == QUERY_BANNER) {
     processQueryBanner()
-  } else if (getMsgType(_gPshellMsg) == QUERY_PROMPT) {
+  } else if (getMsgType(_gPshellRcvMsg) == QUERY_PROMPT) {
     processQueryPrompt()
-  } else if (getMsgType(_gPshellMsg) == QUERY_COMMANDS1) {
+  } else if (getMsgType(_gPshellRcvMsg) == QUERY_COMMANDS1) {
     processQueryCommands1()
-  } else if (getMsgType(_gPshellMsg) == QUERY_COMMANDS2) {
+  } else if (getMsgType(_gPshellRcvMsg) == QUERY_COMMANDS2) {
     processQueryCommands2()
   } else {
     _gCommandDispatched = true
@@ -367,14 +364,20 @@ func processCommand(command string) {
     }
   }
   _gCommandDispatched = false
-  setMsgType(_gPshellMsg, COMMAND_COMPLETE)
   reply()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func reply() {
-  _gUdpSocket.WriteTo(_gPshellMsg, _gRecvAddr)
+  pshellSendMsg := createMessage(COMMAND_COMPLETE, 
+                                 getRespNeeded(_gPshellRcvMsg), 
+                                 getDataNeeded(_gPshellRcvMsg), 
+                                 getSeqNum(_gPshellRcvMsg), 
+                                 _gPshellSendPayload)
+  fmt.Printf("payload: '%s'\n", getPayload(pshellSendMsg))
+  _gUdpSocket.WriteTo(pshellSendMsg, _gRecvAddr)
+  _gPshellSendPayload = ""
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -416,27 +419,6 @@ const (
 ////////////////////////////////////////////////////////////////////////////////
 func getPayload(message []byte) []byte {
   return (message[PAYLOAD_OFFSET:])
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func setPayload(message []byte, payload string) {
-  copy(message[PAYLOAD_OFFSET:], []byte(payload))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func appendPayload(message []byte, payload string) {
-  fmt.Printf("appendPayload: '%s'\n", payload)
-  newPayload := append(message[PAYLOAD_OFFSET:], []byte(payload)...)
-  copy(message, []byte(newPayload))
-  //setPayload(message, string(newPayload))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func clearPayload(message []byte) {
-  message[PAYLOAD_OFFSET] = 0
 }
 
 ////////////////////////////////////////////////////////////////////////////////
