@@ -4,7 +4,7 @@ import "encoding/binary"
 import "net"
 import "fmt"
 import "strings"
-import "bytes"
+//import "bytes"
 //import "time"
 //import "strings"
 
@@ -62,6 +62,7 @@ var _gTitle = "PSHELL: "
 var _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 var _gServerVersion = "1"
 var _gPshellMsgPayloadLength = 2048
+var _gPshellMsgHeaderLength = 8
 var _gServerType = UDP
 var _gServerName = "None"
 var _gServerMode = BLOCKING
@@ -113,6 +114,18 @@ func Printf(format_ string, message_ ...interface{}) {
   if (_gCommandInteractive == true) {
     _gPshellSendPayload += fmt.Sprintf(format_, message_...)
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func IsHelp() bool {
+  return false
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func ShowUsage() {
+
 }
 
 /////////////////////////////////
@@ -230,13 +243,11 @@ func createSocket() bool {
 ////////////////////////////////////////////////////////////////////////////////
 func receiveDGRAM() {
   var err error
-  //var size int
-  _, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
+  var size int
+  size, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
   if (err == nil) {
-    //fmt.Printf("size: %d bytes read\n", size)
-    //_gPshellRcvMsg[size] = 0
-    // trim all trailing NULL characters from incoming payload
-    processCommand(string(bytes.Trim(getPayload(_gPshellRcvMsg), "\000")))
+    //processCommand(string(bytes.Trim(getPayload(_gPshellRcvMsg)[:size-_gPshellMsgHeaderLength], "\000")))
+    processCommand(string(getPayload(_gPshellRcvMsg)[:size-_gPshellMsgHeaderLength]))
   }
 }
 
@@ -244,18 +255,6 @@ func receiveDGRAM() {
 ////////////////////////////////////////////////////////////////////////////////
 func isValidArgCount() bool {
   return true
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func isHelp() bool {
-  return false
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func showUsage() {
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -354,14 +353,14 @@ func processCommand(command string) {
     } else if (numMatches > 1) {
       fmt.Printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'", command)
     } else {
-      if (isHelp()) {
+      if (IsHelp()) {
         if (_gFoundCommand.showUsage == true) {
-          showUsage()          
+          ShowUsage()          
         } else {
           _gFoundCommand.function(_gArgs)
         }
       } else if (!isValidArgCount()) {
-        showUsage()
+        ShowUsage()
       } else {
         _gFoundCommand.function(_gArgs)
       }
@@ -475,10 +474,7 @@ func setSeqNum(message []byte, seqNum uint32) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func createMessage(msgType byte, respNeeded byte, dataNeeded byte, seqNum uint32, command string) []byte {
-  //message := make([]byte, 8)
   message := []byte{msgType, respNeeded, dataNeeded, 0, 0, 0, 0, 0}
-  //setRespNeeded(message, respNeeded)
-  //setDataNeeded(message, dataNeeded)
   setSeqNum(message, seqNum)
   message = append(message, []byte(command)...)
   return (message)
