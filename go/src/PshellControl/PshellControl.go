@@ -57,6 +57,8 @@ var gRetCodes = map[int]string {
   SOCKET_NOT_CONNECTED:"SOCKET_NOT_CONNECTED",
 }
 
+var _recvPayload string
+
 /////////////////////////////////
 //
 // Public functions
@@ -152,7 +154,7 @@ func sendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
 func sendCommand3(sid_ int, command_ string) (int, string) {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(control, command_, control.defaultTimeout, DATA_NEEDED), string(getPayload(control.recvMsg))
+    return sendCommand(control, command_, control.defaultTimeout, DATA_NEEDED), _recvPayload
   } else {
     return INVALID_SID, ""
   }
@@ -163,7 +165,7 @@ func sendCommand3(sid_ int, command_ string) (int, string) {
 func sendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string) {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(control, command_, timeoutOverride_, DATA_NEEDED), string(getPayload(control.recvMsg))
+    return sendCommand(control, command_, timeoutOverride_, DATA_NEEDED), _recvPayload
   } else {
     return INVALID_SID, ""
   }
@@ -184,9 +186,9 @@ func sendCommand(control_ pshellControl, command_ string, timeout_ int, dataNeed
   if (err == nil) {
     if (timeout_ > 0) {
       for {
-        clearPayload(control_.recvMsg)
         control_.socket.SetReadDeadline(time.Now().Add(time.Second*time.Duration(timeout_)))
-        _, err := control_.socket.Read(control_.recvMsg)
+        size, err := control_.socket.Read(control_.recvMsg)
+        _recvPayload = string(getPayload(control_.recvMsg)[:size-8])
         if (err == nil) {
           retCode = int(getMsgType(control_.recvMsg))
           recvSeqNum := getSeqNum(control_.recvMsg)
@@ -254,12 +256,6 @@ func getPayload(message []byte) []byte {
 ////////////////////////////////////////////////////////////////////////////////
 func setPayload(message []byte, payload string) {
   copy(message[PAYLOAD_OFFSET:], []byte(payload))
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func clearPayload(message []byte) {
-  message[PAYLOAD_OFFSET] = 0
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -4,9 +4,6 @@ import "encoding/binary"
 import "net"
 import "fmt"
 import "strings"
-//import "bytes"
-//import "time"
-//import "strings"
 
 // the following enum values are returned by the non-extraction
 // based sendCommand1 and sendCommand2 functions
@@ -246,7 +243,6 @@ func receiveDGRAM() {
   var size int
   size, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
   if (err == nil) {
-    //processCommand(string(bytes.Trim(getPayload(_gPshellRcvMsg)[:size-_gPshellMsgHeaderLength], "\000")))
     processCommand(string(getPayload(_gPshellRcvMsg)[:size-_gPshellMsgHeaderLength]))
   }
 }
