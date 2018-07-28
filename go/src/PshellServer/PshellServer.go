@@ -5,6 +5,37 @@ import "net"
 import "fmt"
 import "strings"
 
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global "public" data, these are used for various parts of the public API
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+// Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
+// client programs, TCP servers require a 'telnet' client, local servers
+// require no client (all user interaction done directly with server running
+// in the parent host program)
+const (
+  UDP = "udp"
+  TCP = "tcp"
+  UNIX = "unix"
+  LOCAL = "local"
+)
+
+// These are the identifiers for the serverMode.  BLOCKING wil never return 
+// control to the caller of startServer, NON_BLOCKING will spawn a thread to 
+// run the server and will return control to the caller of startServer
+const (
+  BLOCKING = 0
+  NON_BLOCKING = 1
+)
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global "private" data
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 // the following enum values are returned by the non-extraction
 // based sendCommand1 and sendCommand2 functions
 //
@@ -12,25 +43,25 @@ import "strings"
 // and must match their corresponding values in PshellServer.cc
 // msgType return codes for control client
 const (
-  COMMAND_SUCCESS = 0
-  COMMAND_NOT_FOUND = 1
-  COMMAND_INVALID_ARG_COUNT = 2
+  _COMMAND_SUCCESS = 0
+  _COMMAND_NOT_FOUND = 1
+  _COMMAND_INVALID_ARG_COUNT = 2
 )
 
 // msgType codes between client and server
 const (
-  QUERY_VERSION = 1
-  QUERY_PAYLOAD_SIZE = 2
-  QUERY_NAME = 3
-  QUERY_COMMANDS1 = 4
-  QUERY_COMMANDS2 = 5
-  UPDATE_PAYLOAD_SIZE = 6
-  USER_COMMAND = 7
-  COMMAND_COMPLETE = 8
-  QUERY_BANNER = 9
-  QUERY_TITLE = 10
-  QUERY_PROMPT = 11
-  CONTROL_COMMAND = 12
+  _QUERY_VERSION = 1
+  _QUERY_PAYLOAD_SIZE = 2
+  _QUERY_NAME = 3
+  _QUERY_COMMANDS1 = 4
+  _QUERY_COMMANDS2 = 5
+  _UPDATE_PAYLOAD_SIZE = 6
+  _USER_COMMAND = 7
+  _COMMAND_COMPLETE = 8
+  _QUERY_BANNER = 9
+  _QUERY_TITLE = 10
+  _QUERY_PROMPT = 11
+  _CONTROL_COMMAND = 12
 )
 
 type pshellFunction func([]string)
@@ -44,27 +75,6 @@ type pshellCmd struct {
   maxArgs int
   showUsage bool
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-//
-// global "public" data, these are used for various parts of the public API
-//
-/////////////////////////////////////////////////////////////////////////////////
-
-// Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
-// client programs, TCP servers require a 'telnet' client, local servers
-// require no client (all user interaction done directly with server running
-// in the parent host program)
-const UDP = "udp"
-const TCP = "tcp"
-const UNIX = "unix"
-const LOCAL = "local"
-
-// These are the identifiers for the serverMode.  BLOCKING wil never return 
-// control to the caller of startServer, NON_BLOCKING will spawn a thread to 
-// run the server and will return control to the caller of startServer
-const BLOCKING = 0
-const NON_BLOCKING = 1
 
 var _gPrompt = "PSHELL> "
 var _gTitle = "PSHELL: "
@@ -355,21 +365,21 @@ func processQueryCommands2() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processCommand(command string) {
-  if (getMsgType(_gPshellRcvMsg) == QUERY_VERSION) {
+  if (getMsgType(_gPshellRcvMsg) == _QUERY_VERSION) {
     processQueryVersion()
-  } else if (getMsgType(_gPshellRcvMsg) == QUERY_PAYLOAD_SIZE) {
+  } else if (getMsgType(_gPshellRcvMsg) == _QUERY_PAYLOAD_SIZE) {
     processQueryPayloadSize()
-  } else if (getMsgType(_gPshellRcvMsg) == QUERY_NAME) {
+  } else if (getMsgType(_gPshellRcvMsg) == _QUERY_NAME) {
     processQueryName()
-  } else if (getMsgType(_gPshellRcvMsg) == QUERY_TITLE) {
+  } else if (getMsgType(_gPshellRcvMsg) == _QUERY_TITLE) {
     processQueryTitle()
-  } else if (getMsgType(_gPshellRcvMsg) == QUERY_BANNER) {
+  } else if (getMsgType(_gPshellRcvMsg) == _QUERY_BANNER) {
     processQueryBanner()
-  } else if (getMsgType(_gPshellRcvMsg) == QUERY_PROMPT) {
+  } else if (getMsgType(_gPshellRcvMsg) == _QUERY_PROMPT) {
     processQueryPrompt()
-  } else if (getMsgType(_gPshellRcvMsg) == QUERY_COMMANDS1) {
+  } else if (getMsgType(_gPshellRcvMsg) == _QUERY_COMMANDS1) {
     processQueryCommands1()
-  } else if (getMsgType(_gPshellRcvMsg) == QUERY_COMMANDS2) {
+  } else if (getMsgType(_gPshellRcvMsg) == _QUERY_COMMANDS2) {
     processQueryCommands2()
   } else {
     _gCommandDispatched = true
@@ -418,7 +428,7 @@ func processCommand(command string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func reply() {
-  pshellSendMsg := createMessage(COMMAND_COMPLETE, 
+  pshellSendMsg := createMessage(_COMMAND_COMPLETE, 
                                  getRespNeeded(_gPshellRcvMsg), 
                                  getDataNeeded(_gPshellRcvMsg), 
                                  getSeqNum(_gPshellRcvMsg), 
@@ -455,65 +465,65 @@ func reply() {
 
 // create offsets into the byte slice for the various items in the msg header
 const (
-  MSG_TYPE_OFFSET = 0
-  RESP_NEEDED_OFFSET = 1
-  DATA_NEEDED_OFFSET = 2
-  SEQ_NUM_OFFSET = 4
-  PAYLOAD_OFFSET = 8
+  _MSG_TYPE_OFFSET = 0
+  _RESP_NEEDED_OFFSET = 1
+  _DATA_NEEDED_OFFSET = 2
+  _SEQ_NUM_OFFSET = 4
+  _PAYLOAD_OFFSET = 8
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getPayload(message []byte, recvSize int) string {
-  return (string(message[PAYLOAD_OFFSET:recvSize]))
+  return (string(message[_PAYLOAD_OFFSET:recvSize]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getMsgType(message []byte) byte {
-  return (message[MSG_TYPE_OFFSET])
+  return (message[_MSG_TYPE_OFFSET])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func setMsgType(message []byte, msgType byte) {
-  message[MSG_TYPE_OFFSET] = msgType
+  message[_MSG_TYPE_OFFSET] = msgType
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getRespNeeded(message []byte) byte {
-  return (message[RESP_NEEDED_OFFSET])
+  return (message[_RESP_NEEDED_OFFSET])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func setRespNeeded(message []byte, respNeeded byte) {
-  message[RESP_NEEDED_OFFSET] = respNeeded
+  message[_RESP_NEEDED_OFFSET] = respNeeded
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getDataNeeded(message []byte) byte {
-  return (message[DATA_NEEDED_OFFSET])
+  return (message[_DATA_NEEDED_OFFSET])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func setDataNeeded(message []byte, dataNeeded byte) {
-  message[DATA_NEEDED_OFFSET] = dataNeeded
+  message[_DATA_NEEDED_OFFSET] = dataNeeded
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getSeqNum(message []byte) uint32 {
-  return (binary.BigEndian.Uint32(message[SEQ_NUM_OFFSET:]))
+  return (binary.BigEndian.Uint32(message[_SEQ_NUM_OFFSET:]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func setSeqNum(message []byte, seqNum uint32) {
-  binary.BigEndian.PutUint32(message[SEQ_NUM_OFFSET:], seqNum)
+  binary.BigEndian.PutUint32(message[_SEQ_NUM_OFFSET:], seqNum)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
