@@ -44,15 +44,27 @@ type pshellCmd struct {
   maxArgs int
   showUsage bool
 }
-// server types
-const UDP = "UDP"
-const TCP = "TCP"
-const UNIX = "UNIX"
-const LOCAL = "LOCAL"
 
-// server modes
-const BLOCKING = "BLOCKING"
-const NON_BLOCKING = "NON_BLOCKING"
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global "public" data, these are used for various parts of the public API
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+// Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
+// client programs, TCP servers require a 'telnet' client, local servers
+// require no client (all user interaction done directly with server running
+// in the parent host program)
+const UDP = "udp"
+const TCP = "tcp"
+const UNIX = "unix"
+const LOCAL = "local"
+
+// These are the identifiers for the serverMode.  BLOCKING wil never return 
+// control to the caller of startServer, NON_BLOCKING will spawn a thread to 
+// run the server and will return control to the caller of startServer
+const BLOCKING = 0
+const NON_BLOCKING = 1
 
 var _gPrompt = "PSHELL> "
 var _gTitle = "PSHELL: "
@@ -76,6 +88,7 @@ var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
 var _gPshellSendPayload = ""
 var _gUdpSocket *net.UDPConn
 var _gRecvAddr net.Addr
+var _gMaxLength = 0
 
 /////////////////////////////////
 //
@@ -99,7 +112,7 @@ func AddCommand(function pshellFunction,
 ////////////////////////////////////////////////////////////////////////////////
 func StartServer(serverName string,
                  serverType string,
-                 serverMode string,
+                 serverMode int,
                  hostnameOrIpAddr string, 
                  port string) {
   startServer(serverName, serverType, serverMode, hostnameOrIpAddr, port)
@@ -116,13 +129,22 @@ func Printf(format_ string, message_ ...interface{}) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func IsHelp() bool {
-  return false
+  return ((len(_gArgs) == 1) &&
+          ((_gArgs[0] == "?") ||
+           (_gArgs[0] == "-h") ||
+           (_gArgs[0] == "--h") ||
+           (_gArgs[0] == "-help") ||
+           (_gArgs[0] == "--help")))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func ShowUsage() {
-
+  if (len(_gFoundCommand.usage) > 0) {
+    Printf("Usage: %s %s\n", _gFoundCommand.command, _gFoundCommand.usage)
+  } else {
+    Printf("Usage: %s\n", _gFoundCommand.command)
+  }
 }
 
 /////////////////////////////////
@@ -140,6 +162,11 @@ func addCommand(function pshellFunction,
                 minArgs int, 
                 maxArgs int, 
                 showUsage bool) {  
+                  
+  if (len(command) > _gMaxLength) {
+    _gMaxLength = len(command)
+  }
+    
   _gCommandList = append(_gCommandList, 
                          pshellCmd{command, 
                                    usage,
@@ -154,7 +181,7 @@ func addCommand(function pshellFunction,
 ////////////////////////////////////////////////////////////////////////////////
 func startServer(serverName string,
                  serverType string,
-                 serverMode string,
+                 serverMode int,
                  hostnameOrIpAddr string, 
                  port string) {
   if (_gRunning == false) {
@@ -240,17 +267,18 @@ func createSocket() bool {
 ////////////////////////////////////////////////////////////////////////////////
 func receiveDGRAM() {
   var err error
-  var size int
-  size, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
+  var recvSize int
+  recvSize, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
   if (err == nil) {
-    processCommand(string(getPayload(_gPshellRcvMsg)[:size-_gPshellMsgHeaderLength]))
+    processCommand(getPayload(_gPshellRcvMsg, recvSize))
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isValidArgCount() bool {
-  return true
+  return ((len(_gArgs) >= _gFoundCommand.minArgs) &&
+          (len(_gArgs) <= _gFoundCommand.maxArgs))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +321,7 @@ func processQueryPrompt() {
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryCommands1() {
   for _, command := range _gCommandList {
-    Printf("%s  -  %s\n", command.command, command.description)
+    Printf("%-*s  -  %s\n", _gMaxLength, command.command, command.description)
     //printf("%-*s  -  %s\n" % (_gMaxLength, command["name"], command["description"]))
   }
   Printf("\n")
@@ -330,7 +358,11 @@ func processCommand(command string) {
     _gCommandDispatched = true
     _gArgs = strings.Split(strings.TrimSpace(command), " ")
     command := _gArgs[0]
-    _gArgs = _gArgs[1:]
+    if (len(_gArgs) > 1) {
+      _gArgs = _gArgs[1:]
+    } else {
+      _gArgs = []string{}
+    }
     numMatches := 0
     if ((command == "?") || (command == "help")) {
       //help(_gArgs)
@@ -415,8 +447,8 @@ const (
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getPayload(message []byte) []byte {
-  return (message[PAYLOAD_OFFSET:])
+func getPayload(message []byte, recvSize int) string {
+  return (string(message[PAYLOAD_OFFSET:recvSize]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

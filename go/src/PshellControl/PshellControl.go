@@ -4,6 +4,7 @@ import "encoding/binary"
 import "net"
 import "time"
 import "strings"
+//import "fmt"
 
 // the following enum values are returned by the non-extraction
 // based sendCommand1 and sendCommand2 functions
@@ -35,6 +36,7 @@ type pshellControl struct {
   serverType string
   sendMsg []byte
   recvMsg []byte
+  recvSize int
   remoteServer string
 }
 var gControlList = []pshellControl{}
@@ -56,8 +58,6 @@ var gRetCodes = map[int]string {
   SOCKET_TIMEOUT:"SOCKET_TIMEOUT",
   SOCKET_NOT_CONNECTED:"SOCKET_NOT_CONNECTED",
 }
-
-var _recvPayload string
 
 /////////////////////////////////
 //
@@ -120,6 +120,7 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
                                         "udp", 
                                         []byte{},           // sendMsg
                                         make([]byte, 2048), // recvMsg
+                                        0,                  // recvSize
                                         strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
     return len(gControlList)-1
   } else {
@@ -132,7 +133,7 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
 func sendCommand1(sid_ int, command_ string) int {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(control, command_, control.defaultTimeout, NO_DATA_NEEDED)
+    return sendCommand(&control, command_, control.defaultTimeout, NO_DATA_NEEDED)
   } else {
     return INVALID_SID
   }
@@ -143,7 +144,7 @@ func sendCommand1(sid_ int, command_ string) int {
 func sendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(control, command_, timeoutOverride_, NO_DATA_NEEDED)
+    return sendCommand(&control, command_, timeoutOverride_, NO_DATA_NEEDED)
   } else {
     return INVALID_SID
   }
@@ -154,7 +155,8 @@ func sendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
 func sendCommand3(sid_ int, command_ string) (int, string) {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(control, command_, control.defaultTimeout, DATA_NEEDED), _recvPayload
+    return sendCommand(&control, command_, control.defaultTimeout, DATA_NEEDED),
+           getPayload(control.recvMsg, control.recvSize)
   } else {
     return INVALID_SID, ""
   }
@@ -165,7 +167,8 @@ func sendCommand3(sid_ int, command_ string) (int, string) {
 func sendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string) {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(control, command_, timeoutOverride_, DATA_NEEDED), _recvPayload
+    return sendCommand(&control, command_, timeoutOverride_, DATA_NEEDED),
+           getPayload(control.recvMsg, control.recvSize)
   } else {
     return INVALID_SID, ""
   }
@@ -173,7 +176,7 @@ func sendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand(control_ pshellControl, command_ string, timeout_ int, dataNeeded_ byte) int {
+func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNeeded_ byte) int {
   retCode := COMMAND_SUCCESS
   sendSeqNum := getSeqNum(control_.recvMsg)+1
   if (timeout_ > 0) {
@@ -187,8 +190,8 @@ func sendCommand(control_ pshellControl, command_ string, timeout_ int, dataNeed
     if (timeout_ > 0) {
       for {
         control_.socket.SetReadDeadline(time.Now().Add(time.Second*time.Duration(timeout_)))
-        size, err := control_.socket.Read(control_.recvMsg)
-        _recvPayload = string(getPayload(control_.recvMsg)[:size-8])
+        var err error
+        control_.recvSize, err = control_.socket.Read(control_.recvMsg)
         if (err == nil) {
           retCode = int(getMsgType(control_.recvMsg))
           recvSeqNum := getSeqNum(control_.recvMsg)
@@ -248,50 +251,14 @@ const (
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getPayload(message []byte) []byte {
-  return (message[PAYLOAD_OFFSET:])
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func setPayload(message []byte, payload string) {
-  copy(message[PAYLOAD_OFFSET:], []byte(payload))
+func getPayload(message []byte, recvSize int) string {
+  return (string(message[PAYLOAD_OFFSET:recvSize]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getMsgType(message []byte) byte {
   return (message[MSG_TYPE_OFFSET])
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func setMsgType(message []byte, msgType byte) {
-  message[MSG_TYPE_OFFSET] = msgType
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func getRespNeeded(message []byte) byte {
-  return (message[RESP_NEEDED_OFFSET])
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func setRespNeeded(message []byte, respNeeded byte) {
-  message[RESP_NEEDED_OFFSET] = respNeeded
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func getDataNeeded(message []byte) byte {
-  return (message[DATA_NEEDED_OFFSET])
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func setDataNeeded(message []byte, dataNeeded byte) {
-  message[DATA_NEEDED_OFFSET] = dataNeeded
 }
 
 ////////////////////////////////////////////////////////////////////////////////
