@@ -121,30 +121,19 @@ func StartServer(serverName string,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func Printf(format_ string, message_ ...interface{}) {
-  if (_gCommandInteractive == true) {
-    _gPshellSendPayload += fmt.Sprintf(format_, message_...)
-  }
+  printf(format_, message_...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func IsHelp() bool {
-  return ((len(_gArgs) == 1) &&
-          ((_gArgs[0] == "?") ||
-           (_gArgs[0] == "-h") ||
-           (_gArgs[0] == "--h") ||
-           (_gArgs[0] == "-help") ||
-           (_gArgs[0] == "--help")))
+  return (isHelp())
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func ShowUsage() {
-  if (len(_gFoundCommand.usage) > 0) {
-    Printf("Usage: %s %s\n", _gFoundCommand.command, _gFoundCommand.usage)
-  } else {
-    Printf("Usage: %s\n", _gFoundCommand.command)
-  }
+  showUsage()
 }
 
 /////////////////////////////////
@@ -196,6 +185,35 @@ func startServer(serverName string,
     } else {
       go runServer()
     }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printf(format_ string, message_ ...interface{}) {
+  if (_gCommandInteractive == true) {
+    _gPshellSendPayload += fmt.Sprintf(format_, message_...)
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isHelp() bool {
+  return ((len(_gArgs) == 1) &&
+          ((_gArgs[0] == "?") ||
+           (_gArgs[0] == "-h") ||
+           (_gArgs[0] == "--h") ||
+           (_gArgs[0] == "-help") ||
+           (_gArgs[0] == "--help")))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func showUsage() {
+  if (len(_gFoundCommand.usage) > 0) {
+    Printf("Usage: %s %s\n", _gFoundCommand.command, _gFoundCommand.usage)
+  } else {
+    Printf("Usage: %s\n", _gFoundCommand.command)
   }
 }
 
@@ -322,7 +340,6 @@ func processQueryPrompt() {
 func processQueryCommands1() {
   for _, command := range _gCommandList {
     Printf("%-*s  -  %s\n", _gMaxLength, command.command, command.description)
-    //printf("%-*s  -  %s\n" % (_gMaxLength, command["name"], command["description"]))
   }
   Printf("\n")
 }

@@ -119,9 +119,9 @@ func main() {
   PshellServer.AddCommand(hello,                           // function
                           "hello",                         // command
                           "example hello command",         // description
-                          "",                              // usage          
+                          "[<arg1> ... <arg20>]",          // usage          
                           0,                               // minArgs
-                          0,                               // maxArgs
+                          20,                              // maxArgs
                           true)                            // showUsage on '?'
   
   PshellServer.AddCommand(world,                         // function
