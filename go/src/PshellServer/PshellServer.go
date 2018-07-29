@@ -4,6 +4,7 @@ import "encoding/binary"
 import "net"
 import "fmt"
 import "strings"
+import "os"
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -97,6 +98,10 @@ var _gCommandList = []pshellCmd{}
 var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
 var _gPshellSendPayload = ""
 var _gUdpSocket *net.UDPConn
+var _gUnixSocket *net.UnixConn
+var _gUnixSocketPath = "/tmp/"
+var _gUnixSourceAddress string
+var _gTcpSocket *net.TCPConn
 var _gRecvAddr net.Addr
 var _gMaxLength = 0
 
@@ -106,44 +111,184 @@ var _gMaxLength = 0
 //
 /////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func AddCommand(function pshellFunction, 
-                command string, 
-                description string, 
-                usage string, 
-                minArgs int, 
-                maxArgs int, 
-                showUsage bool) {
+//
+//  Register callback commands to our PSHELL server.  If the command takes no
+//  arguments, the default parameters can be provided.  If the command takes
+//  an exact number of parameters, set minArgs and maxArgs to be the same.  If
+//  the user wants the callback function to handle all help initiated usage,
+//  set the showUsage parameter to False.
+//
+//    Args:
+//        function (ptr)    : User callback function
+//        command (str)     : Command to dispatch the function (single keyword only)
+//        description (str) : One line description of command
+//        usage (str)       : One line command usage (Unix style preferred)
+//        minArgs (int)     : Minimum number of required arguments
+//        maxArgs (int)     : Maximum number of required arguments
+//        showUsage (bool)  : Show registered usage on a '?' or '-h'
+//
+//    Returns:
+//        none
+//
+func AddCommand(function pshellFunction, command string, description string, usage string, minArgs int, maxArgs int, showUsage bool) {
   addCommand(function, command, description, usage, minArgs, maxArgs, showUsage)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func StartServer(serverName string,
-                 serverType string,
-                 serverMode int,
-                 hostnameOrIpAddr string, 
-                 port string) {
+//
+//  Start our PSHELL server, if serverType is UNIX or LOCAL, the default
+//  parameters can be used, and will be ignored if provided.  All of these
+//  parameters except serverMode can be overridden on a per serverName
+//  basis via the pshell-server.conf config file.  All commands in the
+//  <serverName>.startup file will be executed in this function at server
+//  startup time.
+//
+//    Args:
+//        serverName (str)       : Logical name of the Pshell server
+//        serverType (str)       : Desired server type (UDP, UNIX, TCP, LOCAL)
+//        serverMode (str)       : Desired server mode (BLOCKING, NON_BLOCKING)
+//        hostnameOrIpAddr (str) : Hostname or IP address to run server on
+//        port (int)             : Port number to run server on (UDP or TCP only)
+//
+//    Returns:
+//        none
+//
+func StartServer(serverName string, serverType string, serverMode int, hostnameOrIpAddr string, port string) {
   startServer(serverName, serverType, serverMode, hostnameOrIpAddr, port)
 }
 
+//
+//  Cleanup and release any system resources claimed by this module.  This includes
+//  any open socked handles, file descriptors, or system 'tmp' files.  This should
+//  be called at program exit time as well as any signal exception handler that
+//  results in a program termination.
+//
+//    Args:
+//        none
+//
+//    Returns:
+//        none
+//
+func CleanupResources() {
+  cleanupResources()
+}
+
+//
+//  Run a registered command from within its parent process
+//
+//    Args:
+//        command (str) : Registered callback command to run
+//
+//    Returns:
+//        none
+//
+func RunCommand(command string) {
+  runCommand(command)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
+//
+// The following public functions should only be called from within a 
+// registered callback function
+//
 ////////////////////////////////////////////////////////////////////////////////
+
+//
+//  Display data back to the remote client
+//
+//    Args:
+//        string (str)   : Message to display to the client user
+//        newline (bool) : Automatically add a newline to message
+//
+//    Returns:
+//        none
+//
 func Printf(format_ string, message_ ...interface{}) {
   printf(format_, message_...)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+//
+//  Flush the reply (i.e. display) buffer back to the remote client
+//
+//    Args:
+//        none
+//
+//    Returns:
+//        none
+//
+func Flush() {
+}
+
+//
+//  Spinning ascii wheel keep alive, user string string is optional
+//
+//    Args:
+//        message (str) : String to display before the spinning wheel
+//
+//    Returns:
+//        none
+//
+func Wheel(message string) {
+}
+
+//
+//  March a message or character keep alive across the screen
+//
+//    Args:
+//        message (str) : String or char to march across the screen
+//
+//    Returns:
+//        none
+//
+func March(message string) {
+}
+
+//
+//  Check if the user has asked for help on this command.  Command must be 
+//  registered with the showUsage = False option.
+//
+//    Args:
+//        none
+//
+//    Returns:
+//        bool : True if user is requesting command help, False otherwise
+//
 func IsHelp() bool {
   return (isHelp())
 }
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+//
+//  Show the command's registered usage
+//
+//    Args:
+//        none
+//
+//    Returns:
+//        none
+//
 func ShowUsage() {
   showUsage()
+}
+
+//
+//  This function will return True if string1 is a substring of string2 at 
+//  position 0.  If the minMatchLength is 0, then it will compare up to the
+//  length of string1.  If the minMatchLength > 0, it will require a minimum
+//  of that many characters to match.  A string that is longer than the min
+//  match length must still match for the remaining charactes, e.g. with a
+//  minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
+//  will match, 'quix' will not match.  This function is useful for wildcard
+//  matching.
+//
+//    Args:
+//        string1 (str)        : The substring
+//        string2 (str)        : The target string
+//        minMatchLength (int) : The minimum required characters match
+//
+//    Returns:
+//        bool : True if substring matches, False otherwise
+//
+func IsSubString(string1 string, string2 string, minMatchLength int) bool {
+  return true
 }
 
 /////////////////////////////////
@@ -196,6 +341,19 @@ func startServer(serverName string,
       go runServer()
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func cleanupResources() {
+  if _gServerType == UNIX {
+    os.Remove(_gUnixSourceAddress)
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func runCommand(command string) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -281,10 +439,27 @@ func runTCPServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func createSocket() bool {
-  serverAddr := _gHostnameOrIpAddr + ":" + _gPort
-  udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
-  if err == nil {
-    _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
+  if (_gServerType == UDP) {
+    serverAddr := _gHostnameOrIpAddr + ":" + _gPort
+    udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
+    if err == nil {
+      _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
+      return (true)
+    } else {
+      return (false)
+    }
+  } else if (_gServerType == UNIX) {
+    _gUnixSourceAddress = _gUnixSocketPath + _gServerName
+    os.Remove(_gUnixSourceAddress)
+    unixAddr, err := net.ResolveUnixAddr("unixgram", _gUnixSourceAddress)
+    if err == nil {
+      _gUnixSocket, err = net.ListenUnixgram("unixgram", unixAddr)
+      return (true)
+    } else {
+      return (false)
+    }
+    return (true)
+  } else if (_gServerType == TCP) {
     return (true)
   } else {
     return (false)
@@ -296,7 +471,11 @@ func createSocket() bool {
 func receiveDGRAM() {
   var err error
   var recvSize int
-  recvSize, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
+  if (_gServerType == UDP) {
+    recvSize, _gRecvAddr, err = _gUdpSocket.ReadFrom(_gPshellRcvMsg)
+  } else if (_gServerType == UNIX) {
+    recvSize, _gRecvAddr, err = _gUnixSocket.ReadFrom(_gPshellRcvMsg)
+  }
   if (err == nil) {
     processCommand(getPayload(_gPshellRcvMsg, recvSize))
   }
@@ -433,7 +612,11 @@ func reply() {
                                  getDataNeeded(_gPshellRcvMsg), 
                                  getSeqNum(_gPshellRcvMsg), 
                                  _gPshellSendPayload)
-  _gUdpSocket.WriteTo(pshellSendMsg, _gRecvAddr)
+  if (_gServerType == UDP) {
+    _gUdpSocket.WriteTo(pshellSendMsg, _gRecvAddr)
+  } else if (_gServerType == UNIX) {
+    _gUnixSocket.WriteTo(pshellSendMsg, _gRecvAddr)
+  }
   _gPshellSendPayload = ""
 }
 

@@ -40,6 +40,7 @@
 
 # import all our necessary modules
 import sys
+import signal
 import PshellReadline
 import PshellControl
 
@@ -60,6 +61,33 @@ def showUsage():
   print("    extract          - extract data contents of response (must have non-0 wait timeout)")
   print("")
   exit(0)
+
+#################################################################################
+#################################################################################
+def signalHandler(signal, frame):
+  PshellControl.disconnectAllServers()
+  print("")
+  exit(0)
+
+#################################################################################
+#################################################################################
+def registerSignalHandlers():
+  # register a signal handlers so we can cleanup our
+  # system resources upon abnormal termination
+  signal.signal(signal.SIGHUP, signalHandler)      # 1  Hangup (POSIX)
+  signal.signal(signal.SIGINT, signalHandler)      # 2  Interrupt (ANSI)
+  signal.signal(signal.SIGQUIT, signalHandler)     # 3  Quit (POSIX)
+  signal.signal(signal.SIGILL, signalHandler)      # 4  Illegal instruction (ANSI)
+  signal.signal(signal.SIGABRT, signalHandler)     # 6  Abort (ANSI)
+  signal.signal(signal.SIGBUS, signalHandler)      # 7  BUS error (4.2 BSD)
+  signal.signal(signal.SIGFPE, signalHandler)      # 8  Floating-point exception (ANSI)
+  signal.signal(signal.SIGSEGV, signalHandler)     # 11 Segmentation violation (ANSI)
+  signal.signal(signal.SIGPIPE, signalHandler)     # 13 Broken pipe (POSIX)
+  signal.signal(signal.SIGALRM, signalHandler)     # 14 Alarm clock (POSIX)
+  signal.signal(signal.SIGTERM, signalHandler)     # 15 Termination (ANSI)
+  signal.signal(signal.SIGXCPU, signalHandler)     # 24 CPU limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGXFSZ, signalHandler)     # 25 File size limit exceeded (4.2 BSD)
+  signal.signal(signal.SIGSYS, signalHandler)      # 31 Bad system call
 
 ##############################
 #
@@ -82,7 +110,8 @@ if (__name__ == '__main__'):
     else:
       showUsage()
 
-  #print("server: %s, port: %s, timeout: %s, extract: %d" % (sys.argv[1], sys.argv[2], timeout, extract))
+  # register signal handlers so we can do a graceful termination and cleanup any system resources
+  registerSignalHandlers()
 
   sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
 

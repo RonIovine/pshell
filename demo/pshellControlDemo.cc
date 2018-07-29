@@ -143,8 +143,6 @@ int main (int argc, char *argv[])
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
 
-  //printf("port: %d, timeout: %d, logLevel: %d, extract: %d\n", port, timeout, logLevel, extract);
-
   if ((sid = pshell_connectServer(argv[0], argv[1], port, timeout)) != PSHELL_INVALID_SID)
   {
     // set our debug level

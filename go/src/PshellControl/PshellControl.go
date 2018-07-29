@@ -65,6 +65,7 @@ var gRetCodes = map[int]string {
 //
 /////////////////////////////////
 
+//
 //  Connect to a pshell server in another process, note that this does
 //  not do any handshaking to the remote pshell or maintain a connection
 //  state, it meerly sets the internal destination remote pshell server
@@ -93,10 +94,12 @@ var gRetCodes = map[int]string {
 //
 //    Returns:
 //        int: The ServerId (sid) handle of the connected server
+//
 func ConnectServer(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) int {
   return (connectServer(controlName_, remoteServer_, port_, defaultTimeout_))
 }
 
+//
 //  Cleanup any resources associated with the server connection, including 
 //  releasing any temp file handles, closing any local socket handles etc.
 //
@@ -105,9 +108,11 @@ func ConnectServer(controlName_ string, remoteServer_ string, port_ string, defa
 //
 //    Returns:
 //        none
+//
 func DisconnectServer(sid int) {
 }
 
+//
 //  Use this function to cleanup any resources for all connected servers, this 
 //  function should be called upon program termination, either in a graceful 
 //  termination or within an exception signal handler, it is especially important 
@@ -119,9 +124,11 @@ func DisconnectServer(sid int) {
 //
 //    Returns:
 //        none
+//
 func DisconnectAllServers() {
 }
 
+//
 //  Set the default server response timeout that is used in the 'send' commands 
 //  that don't take a timeout override
 //
@@ -131,9 +138,11 @@ func DisconnectAllServers() {
 //
 //    Returns:
 //        none
+//
 func SetDefaultTimeout(sid int, defaultTimeout int) {
 }
 
+//
 //  This function will extract all the commands of a remote pshell server and 
 //  present them in a human readable form, this is useful when writing a multi 
 //  server control aggregator, see the demo program pshellAggregatorDemo.py in 
@@ -144,10 +153,12 @@ func SetDefaultTimeout(sid int, defaultTimeout int) {
 //
 //    Returns:
 //        str : The remote server's command list in human readable form
+//
 func ExtractCommands(sid int) string {
   return ""
 }
 
+//
 //  This command will add a given multicast receiver (i.e. sid) to a multicast 
 //  group, multicast groups are either based on the command's keyword, or if 
 //  no keyword is supplied, the given sid will receive all multicast commands
@@ -160,9 +171,11 @@ func ExtractCommands(sid int) string {
 //
 //    Returns:
 //        none
+//
 func AddMulticast(sid int, keyword string) {
 }
 
+//
 //  This command will send a given command to all the registered multicast
 //  receivers (i.e. sids) for this multicast group, multicast groups are 
 //  based on the command's keyword, this function will issue the command as 
@@ -175,9 +188,11 @@ func AddMulticast(sid int, keyword string) {
 //
 //    Returns:
 //        none
+//
 func SendMulticast(command string) {
 }
 
+//
 //  Send a command using the default timeout setup in the connectServer call, 
 //  if the default timeout is 0, the server will not reply with a response and
 //  this function will not wait for one
@@ -196,10 +211,12 @@ func SendMulticast(command string) {
 //               SOCKET_RECEIVE_FAILURE
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
+//
 func SendCommand1(sid_ int, command_ string) int {
   return (sendCommand1(sid_, command_))
 }
 
+//
 //  Send a command overriding the default timeout, if the override timeout is 0, 
 //  the server will not reply with a response and this function will not wait for 
 //  one
@@ -219,10 +236,12 @@ func SendCommand1(sid_ int, command_ string) int {
 //               SOCKET_RECEIVE_FAILURE
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
+//
 func SendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
   return (sendCommand2(sid_, timeoutOverride_, command_))
 }
 
+//
 //  Send a command using the default timeout setup in the connectServer call and 
 //  return any results received in the payload, if the default timeout is 0, the 
 //  server will not reply with a response and this function will not wait for one, 
@@ -244,10 +263,12 @@ func SendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
 //               SOCKET_RECEIVE_FAILURE
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
+//
 func SendCommand3(sid_ int, command_ string) (int, string) {
   return (sendCommand3(sid_, command_))
 }
 
+//
 //  Send a command overriding the default timeout and return any results received 
 //  in the payload, if the timeout override default timeout is 0, the server will 
 //  not reply with a response and this function will not wait for one, and no 
@@ -270,10 +291,12 @@ func SendCommand3(sid_ int, command_ string) (int, string) {
 //               SOCKET_RECEIVE_FAILURE
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
+//
 func SendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string) {
   return (sendCommand4(sid_, timeoutOverride_, command_))
 }
 
+//
 // Returns the string value corresponding to a received response code
 //
 //  Args:
@@ -281,6 +304,7 @@ func SendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string)
 //
 //  Returns:
 //      str: The string representation of the enum value
+//
 func GetRetCodeString(retCode_ int) string {
   return gRetCodes[retCode_]
 }

@@ -6,6 +6,43 @@ import "os"
 import "bufio"
 import "strconv"
 import "strings"
+import "syscall"
+import "os/signal"
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func signalHandler(signalChan chan os.Signal) {
+	for {
+		<-signalChan // This line will block until a signal is received
+    PshellControl.DisconnectAllServers()
+    fmt.Printf("\n")
+    os.Exit(0)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func registerSignalHandlers() {
+  // register a signal handler so we can cleanup our
+  // system resources upon abnormal termination
+  signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan,
+                syscall.SIGHUP,       // 1  Hangup (POSIX)
+                syscall.SIGINT,       // 2  Interrupt (ANSI)
+                syscall.SIGQUIT,      // 3  Quit (POSIX)
+                syscall.SIGILL,       // 4  Illegal instruction (ANSI)
+                syscall.SIGABRT,      // 6  Abort (ANSI)
+                syscall.SIGBUS,       // 7  BUS error (4.2 BSD)
+                syscall.SIGFPE,       // 8  Floating-point exception (ANSI)
+                syscall.SIGSEGV,      // 11 Segmentation violation (ANSI)
+                syscall.SIGPIPE,      // 13 Broken pipe (POSIX)
+                syscall.SIGALRM,      // 14 Alarm clock (POSIX)
+                syscall.SIGTERM,      // 15 Termination (ANSI)
+                syscall.SIGXCPU,      // 24 CPU limit exceeded (4.2 BSD)
+                syscall.SIGXFSZ,      // 25 File size limit exceeded (4.2 BSD)
+                syscall.SIGSYS)       // 31 Bad system call
+	go signalHandler(signalChan)
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,6 +82,9 @@ func main() {
       showUsage()
     }
   }
+
+  // register signal handlers so we can do a graceful termination and cleanup any system resources
+  registerSignalHandlers()
   
   sid := PshellControl.ConnectServer("pshellControlDemo", os.Args[1], os.Args[2], timeout) 
   
