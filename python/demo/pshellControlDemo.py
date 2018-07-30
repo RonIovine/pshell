@@ -116,6 +116,7 @@ if (__name__ == '__main__'):
   sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
 
   command = ""
+  print("Enter command or 'q' to quit");
   while (not PshellReadline.isSubString(command, "quit")):
     (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
     if (not PshellReadline.isSubString(command, "quit")):

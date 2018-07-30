@@ -90,6 +90,7 @@ func main() {
   
   command := ""
   scanner := bufio.NewScanner(os.Stdin)
+  fmt.Printf("Enter command or 'q' to quit\n");
   for (command == "") || !strings.HasPrefix("quit", command) {
     fmt.Print("pshellControlCmd> ")
     scanner.Scan()
@@ -98,12 +99,11 @@ func main() {
       if (extract == true) {
         retCode, results := PshellControl.SendCommand3(sid, command)
         if (retCode == PshellControl.COMMAND_SUCCESS) {  
+          fmt.Printf("%d bytes extracted, results:\n", len(results))
           fmt.Printf("%s", results)
         }
-        fmt.Printf("retCode: %s\n", PshellControl.GetRetCodeString(retCode))
       } else {
-        retCode := PshellControl.SendCommand1(sid, command)
-        fmt.Printf("retCode: %s\n", PshellControl.GetRetCodeString(retCode))
+        PshellControl.SendCommand1(sid, command)
       }
     }
   }

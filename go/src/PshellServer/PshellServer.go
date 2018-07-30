@@ -131,7 +131,7 @@ var _gMaxLength = 0
 //        none
 //
 func AddCommand(function pshellFunction, command string, description string, usage string, minArgs int, maxArgs int, showUsage bool) {
-  addCommand(function, command, description, usage, minArgs, maxArgs, showUsage)
+  addCommand(function, command, description, usage, minArgs, maxArgs, showUsage, false)
 }
 
 //
@@ -305,20 +305,73 @@ func addCommand(function pshellFunction,
                 usage string, 
                 minArgs int, 
                 maxArgs int, 
-                showUsage bool) {  
+                showUsage bool,
+                prepend bool) {  
                   
+  // see if we have a NULL command name 
+  if ((command == "") || (len(command) == 0)) {
+    fmt.Printf("PSHELL_ERROR: NULL command name, command not added\n")
+    return
+  }
+
+  // see if we have a NULL description 
+  if ((description == "") || (len(description) == 0)) {
+    fmt.Printf("PSHELL_ERROR: NULL description, command: '%s' not added\n", command)
+    return
+  }
+
+  // see if we have a NULL function
+  if (function == nil) {
+    fmt.Printf("PSHELL_ERROR: NULL function, command: '%s' not added\n", command)
+    return
+  }
+
+  // if they provided no usage for a function with arguments
+  if (((maxArgs > 0) || (minArgs > 0)) && ((usage == "") || (len(usage) == 0))) {
+    fmt.Printf("PSHELL_ERROR: NULL usage for command that takes arguments, command: '%s' not added\n", command)
+    return
+  }
+
+  // see if their minArgs is greater than their maxArgs
+  if (minArgs > maxArgs) {
+    fmt.Printf("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added\n", minArgs, maxArgs, command)
+    return
+  }
+    
+  // see if it is a duplicate command
+  for _, entry := range _gCommandList {
+    if (entry.command == command) {
+      // command name already exists, don't add it again
+      fmt.Printf("PSHELL_ERROR: Command: %s already exists, not adding command\n", command)
+      return
+    }
+  }
+      
+  // everything ok, good to add command
+  
   if (len(command) > _gMaxLength) {
     _gMaxLength = len(command)
   }
     
-  _gCommandList = append(_gCommandList, 
-                         pshellCmd{command, 
-                                   usage,
-                                   description, 
-                                   function,
-                                   minArgs, 
-                                   maxArgs,
-                                   showUsage})
+  if (prepend == true) {
+    _gCommandList = append(_gCommandList, 
+                           pshellCmd{command, 
+                                     usage,
+                                     description, 
+                                     function,
+                                     minArgs, 
+                                     maxArgs,
+                                     showUsage})
+  } else {
+    _gCommandList = append(_gCommandList, 
+                           pshellCmd{command, 
+                                     usage,
+                                     description, 
+                                     function,
+                                     minArgs, 
+                                     maxArgs,
+                                     showUsage})
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -59,6 +59,11 @@ var gRetCodes = map[int]string {
   SOCKET_NOT_CONNECTED:"SOCKET_NOT_CONNECTED",
 }
 
+const (
+  _COMMAND_COMPLETE = 8
+  _CONTROL_COMMAND = 12
+)
+
 /////////////////////////////////
 //
 // Public functions
@@ -140,22 +145,6 @@ func DisconnectAllServers() {
 //        none
 //
 func SetDefaultTimeout(sid int, defaultTimeout int) {
-}
-
-//
-//  This function will extract all the commands of a remote pshell server and 
-//  present them in a human readable form, this is useful when writing a multi 
-//  server control aggregator, see the demo program pshellAggregatorDemo.py in 
-//  the demo directory for examples
-//
-//    Args:
-//        sid (int) : The ServerId as returned from the connectServer call
-//
-//    Returns:
-//        str : The remote server's command list in human readable form
-//
-func ExtractCommands(sid int) string {
-  return ""
 }
 
 //
@@ -410,6 +399,9 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
         }
       }
     }
+    if (retCode == _COMMAND_COMPLETE) {
+      retCode = COMMAND_SUCCESS
+    }
   } else {
     retCode = SOCKET_SEND_FAILURE
   }
@@ -450,10 +442,6 @@ const (
   _DATA_NEEDED_OFFSET = 2
   _SEQ_NUM_OFFSET = 4
   _PAYLOAD_OFFSET = 8
-)
-
-const (
-  _CONTROL_COMMAND = 12
 )
 
 ////////////////////////////////////////////////////////////////////////////////
