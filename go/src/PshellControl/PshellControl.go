@@ -4,7 +4,7 @@ import "encoding/binary"
 import "net"
 import "time"
 import "strings"
-//import "fmt"
+import "fmt"
 
 // these enum values are returned by the non-extraction
 // based sendCommand1 and sendCommand2 functions
@@ -47,16 +47,16 @@ type pshellMulticast struct {
 }
 var gMulticastList = []pshellMulticast{}
 
-var gRetCodes = map[int]string {
-  INVALID_SID:"INVALID_SID",
-  COMMAND_SUCCESS:"COMMAND_SUCCESS",
-  COMMAND_NOT_FOUND:"COMMAND_NOT_FOUND",
-  COMMAND_INVALID_ARG_COUNT:"COMMAND_INVALID_ARG_COUNT",
-  SOCKET_SEND_FAILURE:"SOCKET_SEND_FAILURE",
-  SOCKET_SELECT_FAILURE:"SOCKET_SELECT_FAILURE",
-  SOCKET_RECEIVE_FAILURE:"SOCKET_RECEIVE_FAILURE",
-  SOCKET_TIMEOUT:"SOCKET_TIMEOUT",
-  SOCKET_NOT_CONNECTED:"SOCKET_NOT_CONNECTED",
+var gPshellControlResponse = map[int]string {
+  INVALID_SID:"PSHELL_INVALID_SID",
+  COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
+  COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
+  COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT",
+  SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE",
+  SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE",
+  SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE",
+  SOCKET_TIMEOUT:"PSHELL_SOCKET_TIMEOUT",
+  SOCKET_NOT_CONNECTED:"PSHELL_SOCKET_NOT_CONNECTED",
 }
 
 const (
@@ -201,8 +201,8 @@ func SendMulticast(command string) {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand1(sid_ int, command_ string) int {
-  return (sendCommand1(sid_, command_))
+func SendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
+  return (sendCommand1(sid_, format_, command_...))
 }
 
 //
@@ -226,8 +226,8 @@ func SendCommand1(sid_ int, command_ string) int {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
-  return (sendCommand2(sid_, timeoutOverride_, command_))
+func SendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) int {
+  return (sendCommand2(sid_, timeoutOverride_, format_, command_...))
 }
 
 //
@@ -253,8 +253,8 @@ func SendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand3(sid_ int, command_ string) (int, string) {
-  return (sendCommand3(sid_, command_))
+func SendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, string) {
+  return (sendCommand3(sid_, format_, command_...))
 }
 
 //
@@ -281,8 +281,8 @@ func SendCommand3(sid_ int, command_ string) (int, string) {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string) {
-  return (sendCommand4(sid_, timeoutOverride_, command_))
+func SendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) (int, string) {
+  return (sendCommand4(sid_, timeoutOverride_, format_, command_...))
 }
 
 //
@@ -294,8 +294,8 @@ func SendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string)
 //  Returns:
 //      str: The string representation of the enum value
 //
-func GetRetCodeString(retCode_ int) string {
-  return gRetCodes[retCode_]
+func GetResponseString(retCode_ int) string {
+  return (getResponseString(retCode_))
 }
 
 /////////////////////////////////
@@ -326,10 +326,10 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand1(sid_ int, command_ string) int {
+func sendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(&control, command_, control.defaultTimeout, _NO_DATA_NEEDED)
+    return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _NO_DATA_NEEDED)
   } else {
     return INVALID_SID
   }
@@ -337,10 +337,10 @@ func sendCommand1(sid_ int, command_ string) int {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
+func sendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) int {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(&control, command_, timeoutOverride_, _NO_DATA_NEEDED)
+    return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _NO_DATA_NEEDED)
   } else {
     return INVALID_SID
   }
@@ -348,10 +348,10 @@ func sendCommand2(sid_ int, timeoutOverride_ int, command_ string) int {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand3(sid_ int, command_ string) (int, string) {
+func sendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, string) {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(&control, command_, control.defaultTimeout, _DATA_NEEDED),
+    return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
     return INVALID_SID, ""
@@ -360,10 +360,10 @@ func sendCommand3(sid_ int, command_ string) (int, string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand4(sid_ int, timeoutOverride_ int, command_ string) (int, string) {
+func sendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) (int, string) {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
-    return sendCommand(&control, command_, timeoutOverride_, _DATA_NEEDED),
+    return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
     return INVALID_SID, ""
@@ -407,6 +407,16 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
   }
   
   return retCode
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getResponseString(retCode_ int) string {
+  if (retCode_ < len(gPshellControlResponse)) {
+    return (gPshellControlResponse[retCode_])
+  } else {
+    return ("PSHELL_UNKNOWN_RESPONSE")
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

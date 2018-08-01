@@ -79,7 +79,7 @@ void pshell_registerControlLogFunction(PshellLogFunction logFunction_);
  * the following enum values are returned by the non-extraction
  * based pshell_sendCommand1 and pshell_sendCommand2 functions
  */
-enum PshellControlResults
+enum PshellControlResponse
 {
   /*
    * the following "COMMAND" enums are returned by the remote pshell server
@@ -97,11 +97,11 @@ enum PshellControlResults
 };
 
 /*
- * pshell_getResultsString:
+ * pshell_getResponseString:
  * 
  * map the above enums to their corresponding strings
  */
-const char *pshell_getResultsString(int results_);
+const char *pshell_getResponseString(int results_);
 
 /*
  * pshell_connectServer:
@@ -214,7 +214,7 @@ void pshell_sendMulticast(const char *command_, ...);
  * there are 4 version of this command, since we are using standard 'C' linkage,
  * we cannot overload the function names, hence the separate names
  * 
- * the return of the following 4 functions is one of the PshellControlResults
+ * the return of the following 4 functions is one of the PshellControlResponse enums
  */
 int pshell_sendCommand1(int sid_, const char *command_, ...);
 int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...);

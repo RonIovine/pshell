@@ -102,8 +102,10 @@ func main() {
           fmt.Printf("%d bytes extracted, results:\n", len(results))
           fmt.Printf("%s", results)
         }
+        fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
       } else {
-        PshellControl.SendCommand1(sid, command)
+        retCode := PshellControl.SendCommand1(sid, command)
+        fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
       }
     }
   }

@@ -218,7 +218,7 @@ static int _defaultIdleTimeout = 10;
  * control type command, these must match their corresponding values in
  * PshellControl.h
  */
-enum PshellControlResults
+enum PshellControlResponse
 {
   PSHELL_COMMAND_SUCCESS,        
   PSHELL_COMMAND_NOT_FOUND,      

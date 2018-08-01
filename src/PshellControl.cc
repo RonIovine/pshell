@@ -509,7 +509,7 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
 
 /******************************************************************************/
 /******************************************************************************/
-const char *pshell_getResultsString(int results_)
+const char *pshell_getResponseString(int results_)
 {
   switch (results_)
   {
@@ -530,7 +530,7 @@ const char *pshell_getResultsString(int results_)
     case PSHELL_SOCKET_NOT_CONNECTED:
       return ("PSHELL_SOCKET_NOT_CONNECTED");
     default:
-      return ("PSHELL_UNKNOWN_RESULT");    
+      return ("PSHELL_UNKNOWN_RESPONSE");    
   }
 }
 
@@ -730,17 +730,17 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
   {
     PSHELL_ERROR("Remote pshell command: '%s', %s\n%s%s",
                  command_,
-                 pshell_getResultsString(retCode),
+                 pshell_getResponseString(retCode),
                  _errorPad,
                  control_->pshellMsg.payload);
   }
   else if ((retCode != PSHELL_COMMAND_SUCCESS) && (retCode != PSHELL_COMMAND_COMPLETE))
   {
-    PSHELL_ERROR("Remote pshell command: '%s', %s", command_, pshell_getResultsString(retCode));
+    PSHELL_ERROR("Remote pshell command: '%s', %s", command_, pshell_getResponseString(retCode));
   }
   else
   {
-    PSHELL_INFO("Remote pshell command: '%s', %s", command_, pshell_getResultsString(retCode));
+    PSHELL_INFO("Remote pshell command: '%s', %s", command_, pshell_getResponseString(retCode));
     retCode = PSHELL_COMMAND_SUCCESS;
   }
   

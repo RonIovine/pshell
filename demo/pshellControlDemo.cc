@@ -102,12 +102,12 @@ void registerSignalHandlers(void)
 int main (int argc, char *argv[])
 {
   char inputLine[180];
-  char results[300];
-  int bytesRead;
+  char results[4096];
   int timeout = PSHELL_ONE_MSEC*100;
   int port = 0;
   int logLevel = PSHELL_CONTROL_LOG_LEVEL_ALL;
   bool extract = false;
+  int retCode;
   int sid;
 
   if ((argc < 3) || (argc > 6))
@@ -163,19 +163,18 @@ int main (int argc, char *argv[])
       {
         if (extract)
         {
-          if ((pshell_sendCommand3(sid, results, sizeof(results), inputLine) == PSHELL_COMMAND_SUCCESS) && ((bytesRead = strlen(results)) > 0))
+          retCode = pshell_sendCommand3(sid, results, sizeof(results), inputLine);
+          if (retCode == PSHELL_COMMAND_SUCCESS)
           {
-            printf("%d bytes extracted, results:\n", bytesRead);
+            printf("%d bytes extracted, results:\n", (int)strlen(results));
             printf("%s", results);
           }
-          else
-          {
-            printf("No results extracted\n");
-          }
+          printf("retCode: %s\n",pshell_getResponseString(retCode));
         }
         else
         {
-          pshell_sendCommand1(sid, inputLine);
+          retCode = pshell_sendCommand1(sid, inputLine);
+          printf("retCode: %s\n",pshell_getResponseString(retCode));
         }
       }
     }

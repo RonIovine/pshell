@@ -126,7 +126,9 @@ if (__name__ == '__main__'):
         (results, retCode) = PshellControl.sendCommand3(sid, command)
         PshellReadline.write("%d bytes extracted, results:\n" % len(results))
         PshellReadline.write("%s" % results)
+        PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
       else:
-        PshellControl.sendCommand1(sid, command)
+        retCode = PshellControl.sendCommand1(sid, command)
+        PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
 
   PshellControl.disconnectServer(sid)

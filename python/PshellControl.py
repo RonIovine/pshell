@@ -392,6 +392,21 @@ def sendCommand4(sid, timeoutOverride, command):
   return (_sendCommand4(sid, timeoutOverride, command))
 
 #################################################################################
+#################################################################################
+def getResponseString(retCode):
+  """
+  Return the human readable form of one of the command response return codes
+
+    Args:
+        retCode (int)  :  One of the return codes from the above sendCommand
+                          functions
+
+    Returns:
+        str: The human readable results of the command response
+  """
+  return (_getResponseString(retCode))
+
+#################################################################################
 #
 # "private" functions and data
 #
@@ -660,7 +675,7 @@ def _sendCommand4(sid_, timeoutOverride_, command_):
 #################################################################################
 def _sendCommand(control_, commandType_, command_, timeout_):
   global _gMsgTypes
-  global _gPshellControlResults
+  global _gPshellControlResponse
   global _gSupressInvalidArgCountMessage
   global NO_WAIT
   retCode = COMMAND_SUCCESS
@@ -723,12 +738,12 @@ def _sendCommand(control_, commandType_, command_, timeout_):
 
 #################################################################################
 #################################################################################
-def _getControlResults(retCode):
-  global _gPshellControlResults
-  if (retCode < len(_gPshellControlResults)):
-    return (_gPshellControlResults[retCode])
+def _getResponseString(retCode):
+  global _gPshellControlResponse
+  if (retCode < len(_gPshellControlResponse)):
+    return (_gPshellControlResponse[retCode])
   else:
-    return ("Unknown retCode: %d" % retCode)
+    return ("PSHELL_UNKNOWN_RESPONSE: %d" % retCode)
 
 #################################################################################
 #################################################################################
@@ -830,14 +845,14 @@ _gPshellMsgHeaderFormat = "4BI"
 _gPshellMsgPayloadLength = 4096
 
 # mapping of above definitions to strings so we can display text in error messages
-_gPshellControlResults = {COMMAND_SUCCESS:"COMMAND_SUCCESS", 
-                          COMMAND_NOT_FOUND:"COMMAND_NOT_FOUND", 
-                          COMMAND_INVALID_ARG_COUNT:"COMMAND_INVALID_ARG_COUNT", 
-                          SOCKET_SEND_FAILURE:"SOCKET_SEND_FAILURE", 
-                          SOCKET_SELECT_FAILURE:"SOCKET_SELECT_FAILURE", 
-                          SOCKET_RECEIVE_FAILURE:"SOCKET_RECEIVE_FAILURE", 
-                          SOCKET_TIMEOUT:"SOCKET_TIMEOUT",
-                          SOCKET_NOT_CONNECTED:"SOCKET_NOT_CONNECTED"}
+_gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS", 
+                           COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND", 
+                           COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT", 
+                           SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE", 
+                           SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE", 
+                           SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE", 
+                           SOCKET_TIMEOUT:"PSHELL_SOCKET_TIMEOUT",
+                           SOCKET_NOT_CONNECTED:"PSHELL_SOCKET_NOT_CONNECTED"}
  
 # the suppress flag is used as a backdoor for the pshell.py client to allow
 # a remote server to pass the command usage back to the local server that
