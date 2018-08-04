@@ -87,27 +87,32 @@ func main() {
   registerSignalHandlers()
   
   sid := PshellControl.ConnectServer("pshellControlDemo", os.Args[1], os.Args[2], timeout) 
-  
-  command := ""
-  scanner := bufio.NewScanner(os.Stdin)
-  fmt.Printf("Enter command or 'q' to quit\n");
-  for (command == "") || !strings.HasPrefix("quit", command) {
-    fmt.Print("pshellControlCmd> ")
-    scanner.Scan()
-    command = scanner.Text()
-    if ((len(command) > 0) && !strings.HasPrefix("quit", command)) {
-      if (extract == true) {
-        retCode, results := PshellControl.SendCommand3(sid, command)
-        if (retCode == PshellControl.COMMAND_SUCCESS) {  
-          fmt.Printf("%d bytes extracted, results:\n", len(results))
-          fmt.Printf("%s", results)
+
+  if (sid != PshellControl.INVALID_SID) {
+    command := ""
+    scanner := bufio.NewScanner(os.Stdin)
+    fmt.Printf("Enter command or 'q' to quit\n");
+    for (command == "") || !strings.HasPrefix("quit", command) {
+      fmt.Print("pshellControlCmd> ")
+      scanner.Scan()
+      command = scanner.Text()
+      if ((len(command) > 0) && !strings.HasPrefix("quit", command)) {
+        if (extract == true) {
+          retCode, results := PshellControl.SendCommand3(sid, command)
+          if (retCode == PshellControl.COMMAND_SUCCESS) {  
+            fmt.Printf("%d bytes extracted, results:\n", len(results))
+            fmt.Printf("%s", results)
+          }
+          fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
+        } else {
+          retCode := PshellControl.SendCommand1(sid, command)
+          fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
         }
-        fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
-      } else {
-        retCode := PshellControl.SendCommand1(sid, command)
-        fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
       }
     }
+
+    PshellControl.DisconnectServer(sid)
+
   }
   
 }

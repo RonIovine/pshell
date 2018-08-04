@@ -202,8 +202,8 @@ func RunCommand(command string) {
 //    Returns:
 //        none
 //
-func Printf(format_ string, message_ ...interface{}) {
-  printf(format_, message_...)
+func Printf(format string, message ...interface{}) {
+  printf(format, message...)
 }
 
 //

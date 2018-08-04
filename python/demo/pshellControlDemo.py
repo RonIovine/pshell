@@ -115,20 +115,21 @@ if (__name__ == '__main__'):
 
   sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
 
-  command = ""
-  print("Enter command or 'q' to quit");
-  while (not PshellReadline.isSubString(command, "quit")):
-    (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
-    if (not PshellReadline.isSubString(command, "quit")):
-      if ((command.split()[0] == "?") or (command.split()[0] == "help")):
-        PshellReadline.write(PshellControl.extractCommands(sid))
-      elif (extract):
-        (results, retCode) = PshellControl.sendCommand3(sid, command)
-        PshellReadline.write("%d bytes extracted, results:\n" % len(results))
-        PshellReadline.write("%s" % results)
-        PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
-      else:
-        retCode = PshellControl.sendCommand1(sid, command)
-        PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
+  if (sid != PshellControl.INVALID_SID):
+    command = ""
+    print("Enter command or 'q' to quit");
+    while (not PshellReadline.isSubString(command, "quit")):
+      (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
+      if (not PshellReadline.isSubString(command, "quit")):
+        if ((command.split()[0] == "?") or (command.split()[0] == "help")):
+          PshellReadline.write(PshellControl.extractCommands(sid))
+        elif (extract):
+          (results, retCode) = PshellControl.sendCommand3(sid, command)
+          PshellReadline.write("%d bytes extracted, results:\n" % len(results))
+          PshellReadline.write("%s" % results)
+          PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
+        else:
+          retCode = PshellControl.sendCommand1(sid, command)
+          PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
 
-  PshellControl.disconnectServer(sid)
+    PshellControl.disconnectServer(sid)

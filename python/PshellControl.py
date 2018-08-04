@@ -55,6 +55,7 @@ sendCommand1()         -- send command to server using default timeout, no resul
 sendCommand2()         -- send command to server using timeout override, no results extracted
 sendCommand3()         -- send command to server using default timeout, results extracted
 sendCommand4()         -- send command to server using timeout override, results extracted
+getResponseString()    -- return the human readable form of one of the command response return codes
 
 Integer constants:
 
@@ -74,6 +75,12 @@ SOCKET_SELECT_FAILURE
 SOCKET_RECEIVE_FAILURE
 SOCKET_TIMEOUT
 SOCKET_NOT_CONNECTED
+
+Integer constants:
+
+Used if we cannot connect to a local UNIX socket
+
+INVALID_SID
 
 String constants:
 
@@ -134,6 +141,9 @@ SOCKET_NOT_CONNECTED = 7
 # specifies if the addMulticast should add the given sid to all commands
 MULTICAST_ALL = "__multicast_all__"
 
+# used if we cannot connect to a local UNIX socket
+INVALID_SID = -1
+
 #################################################################################
 #
 # "public" API functions
@@ -175,7 +185,7 @@ def connectServer(controlName, remoteServer, port, defaultTimeout):
         defaultTimeout (int) : The default timeout (in msec) for the remote server response
 
     Returns:
-        int: The ServerId (sid) handle of the connected server
+        int: The ServerId (sid) handle of the connected server or INVALID_SID on failure
   """
   return (_connectServer(controlName, remoteServer, port, defaultTimeout))
 
@@ -423,6 +433,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   global _gUnixSocketPath
   global _gPshellMsgPayloadLength
   isBroadcastAddress = False
+  sid = INVALID_SID
   (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_.lower() == "unix"):
     if (os.path.exists(_gUnixSocketPath+remoteServer_)):
@@ -450,6 +461,8 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                                                        ("pad",0),
                                                        ("seqNum",0),
                                                        ("payload","")])})
+      # return the newly appended list entry as the SID
+      sid = len(_gPshellControl)-1
     else:
       print("PSHELL_ERROR: Could not find unix server: '%s'" % (_gUnixSocketPath+remoteServer_))
   else:
@@ -477,8 +490,9 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                                                      ("pad",0),
                                                      ("seqNum",0),
                                                      ("payload","")])})
-  # return the newly appended list entry as the SID
-  return (len(_gPshellControl)-1)
+    # return the newly appended list entry as the SID
+    sid = len(_gPshellControl)-1
+  return (sid)
 
 #################################################################################
 #################################################################################

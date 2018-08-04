@@ -1,9 +1,12 @@
 package PshellControl
 
 import "encoding/binary"
+import "math/rand"
 import "net"
 import "time"
 import "strings"
+import "strconv"
+import "os"
 import "fmt"
 
 // these enum values are returned by the non-extraction
@@ -23,6 +26,13 @@ const (
   SOCKET_NOT_CONNECTED = 7
 )
 
+// use this as the "port" identifier for the connectServer call when
+// using a UNIX domain server
+const UNIX = "unix"
+
+const _UNIX_SOCKET_PATH = "/tmp/"
+
+// This is returned on a failure of the ConnectServer function
 const INVALID_SID = -1
 
 const _NO_RESP_NEEDED = 0
@@ -34,6 +44,7 @@ type pshellControl struct {
   socket net.Conn
   defaultTimeout int
   serverType string
+  sourceAddress string
   sendMsg []byte
   recvMsg []byte
   recvSize int
@@ -98,10 +109,10 @@ const (
 //        defaultTimeout (int) : The default timeout (in msec) for the remote server response
 //
 //    Returns:
-//        int: The ServerId (sid) handle of the connected server
+//        int: The ServerId (sid) handle of the connected server or INVALID_SID on failure
 //
-func ConnectServer(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) int {
-  return (connectServer(controlName_, remoteServer_, port_, defaultTimeout_))
+func ConnectServer(controlName string, remoteServer string, port string, defaultTimeout int) int {
+  return (connectServer(controlName, remoteServer, port, defaultTimeout))
 }
 
 //
@@ -115,6 +126,7 @@ func ConnectServer(controlName_ string, remoteServer_ string, port_ string, defa
 //        none
 //
 func DisconnectServer(sid int) {
+  disconnectServer(sid)
 }
 
 //
@@ -131,6 +143,7 @@ func DisconnectServer(sid int) {
 //        none
 //
 func DisconnectAllServers() {
+  disconnectAllServers()
 }
 
 //
@@ -201,8 +214,8 @@ func SendMulticast(command string) {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
-  return (sendCommand1(sid_, format_, command_...))
+func SendCommand1(sid int, format string, command ...interface{}) int {
+  return (sendCommand1(sid, format, command...))
 }
 
 //
@@ -226,8 +239,8 @@ func SendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) int {
-  return (sendCommand2(sid_, timeoutOverride_, format_, command_...))
+func SendCommand2(sid int, timeoutOverride int, format string, command ...interface{}) int {
+  return (sendCommand2(sid, timeoutOverride, format, command...))
 }
 
 //
@@ -253,8 +266,8 @@ func SendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...in
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, string) {
-  return (sendCommand3(sid_, format_, command_...))
+func SendCommand3(sid int, format string, command ...interface{}) (int, string) {
+  return (sendCommand3(sid, format, command...))
 }
 
 //
@@ -281,8 +294,8 @@ func SendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, strin
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) (int, string) {
-  return (sendCommand4(sid_, timeoutOverride_, format_, command_...))
+func SendCommand4(sid int, timeoutOverride int, format string, command ...interface{}) (int, string) {
+  return (sendCommand4(sid, timeoutOverride, format, command...))
 }
 
 //
@@ -294,8 +307,8 @@ func SendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...in
 //  Returns:
 //      str: The string representation of the enum value
 //
-func GetResponseString(retCode_ int) string {
-  return (getResponseString(retCode_))
+func GetResponseString(retCode int) string {
+  return (getResponseString(retCode))
 }
 
 /////////////////////////////////
@@ -308,19 +321,73 @@ func GetResponseString(retCode_ int) string {
 ////////////////////////////////////////////////////////////////////////////////
 func connectServer(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) int {
   // setup our destination socket
-  udpSocket, retCode := net.Dial("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
-  if (retCode == nil) {
-    gControlList = append(gControlList, 
-                          pshellControl{udpSocket,
-                                        defaultTimeout_, 
-                                        "udp", 
-                                        []byte{},           // sendMsg
-                                        make([]byte, 2048), // recvMsg
-                                        0,                  // recvSize
-                                        strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
-    return len(gControlList)-1
+  var retCode error
+  var sid = INVALID_SID
+  var socket net.Conn
+  var sourceAddress string
+  if (port_ == UNIX) {
+    if _, err := os.Stat(_UNIX_SOCKET_PATH+remoteServer_); !os.IsNotExist(err) {
+      // UNIX domain socket
+      rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+      for {
+        sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
+        remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
+        localAddr := net.UnixAddr{sourceAddress, "unixgram"}
+        socket, retCode = net.DialUnix("unixgram", &localAddr, &remoteAddr)
+        if (retCode == nil) {
+          break
+        }
+      }
+      gControlList = append(gControlList, 
+                            pshellControl{socket,
+                                          defaultTimeout_, 
+                                          "unix",
+                                          sourceAddress,      // unix file handle, used for cleanup
+                                          []byte{},           // sendMsg
+                                          make([]byte, 2048), // recvMsg
+                                          0,                  // recvSize
+                                          strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
+      sid = len(gControlList)-1
+    } else {
+      fmt.Printf("PSHELL_ERROR: Could not find unix server: '%s'\n", _UNIX_SOCKET_PATH+remoteServer_)
+    }
   } else {
-    return INVALID_SID
+    // IP (UDP) domain socket
+    remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
+    socket, retCode = net.DialUDP("udp", nil, remoteAddr)
+    if (retCode == nil) {
+      gControlList = append(gControlList, 
+                            pshellControl{socket,
+                                          defaultTimeout_, 
+                                          "udp",
+                                          "",                 // sourceAddress not used for UDP socket
+                                          []byte{},           // sendMsg
+                                          make([]byte, 2048), // recvMsg
+                                          0,                  // recvSize
+                                          strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
+                                      
+      sid = len(gControlList)-1
+    }
+  }
+  return (sid)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func disconnectServer(sid int) {
+  if ((sid >= 0) && (sid < len(gControlList))) {
+    control := gControlList[sid]
+    if (control.serverType == UNIX) {
+      os.Remove(control.sourceAddress)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func disconnectAllServers() {
+  for sid, _ := range(gControlList) {
+    disconnectServer(sid)
   }
 }
 
