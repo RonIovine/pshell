@@ -800,10 +800,10 @@ def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
   for line in file:
     # skip comments
     if (line[0] != "#"):
-      option = line.split("=");
+      option = line.split("=")
       if (len(option) == 2):
         control = option[0].split(".")
-        if ((len(control) == 2) and  (controlName_ == control[0])):
+        if ((len(control) == 2) and (controlName_ == control[0])):
           if (control[1].lower() == "udp"):
             remoteServer_ = option[1].strip()
           elif (control[1].lower() == "unix"):

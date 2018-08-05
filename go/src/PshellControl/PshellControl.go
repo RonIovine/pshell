@@ -6,6 +6,7 @@ import "net"
 import "time"
 import "strings"
 import "strconv"
+import "io/ioutil"
 import "os"
 import "fmt"
 
@@ -39,6 +40,9 @@ const _NO_RESP_NEEDED = 0
 const _NO_DATA_NEEDED = 0
 const _RESP_NEEDED = 1
 const _DATA_NEEDED = 1
+
+const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
+const _PSHELL_CONFIG_FILE = "pshell-control.conf"
 
 type pshellControl struct {
   socket net.Conn
@@ -325,16 +329,16 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
   var sid = INVALID_SID
   var socket net.Conn
   var sourceAddress string
+  remoteServer_, port_, defaultTimeout_ = loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_ == UNIX) {
     if _, err := os.Stat(_UNIX_SOCKET_PATH+remoteServer_); !os.IsNotExist(err) {
       // UNIX domain socket
+      remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
       rand := rand.New(rand.NewSource(time.Now().UnixNano()))
       for {
         sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
-        remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
         localAddr := net.UnixAddr{sourceAddress, "unixgram"}
-        socket, retCode = net.DialUnix("unixgram", &localAddr, &remoteAddr)
-        if (retCode == nil) {
+        if socket, retCode = net.DialUnix("unixgram", &localAddr, &remoteAddr); retCode == nil {
           break
         }
       }
@@ -389,6 +393,65 @@ func disconnectAllServers() {
   for sid, _ := range(gControlList) {
     disconnectServer(sid)
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func loadConfigFile(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) (string, string, int) {
+  var configFile1 = ""
+  var file []byte
+  configPath := os.Getenv("PSHELL_CONFIG_DIR")
+  if (configPath != "") {
+    configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
+  }
+  configFile2 := _PSHELL_CONFIG_DIR+"/"+_PSHELL_CONFIG_FILE
+  cwd, _ := os.Getwd()
+  configFile3 := cwd+"/"+_PSHELL_CONFIG_FILE
+  if _, err := os.Stat(configFile1); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile1)
+  } else if _, err := os.Stat(configFile2); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile2)
+  } else if _, err := os.Stat(configFile3); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile3)
+  } else {
+    return remoteServer_, port_, defaultTimeout_
+  }
+  // found a config file, process it
+  isUnix := false
+  lines := strings.Split(string(file), "\n")
+  for _, line := range lines {
+    // skip comments
+    if ((len(line) > 0) && (line[0] != '#')) {
+      option := strings.Split(line, "=")
+      if (len(option) == 2) {
+        control := strings.Split(option[0], ".")
+        if ((len(control) == 2) && (controlName_ == control[0])) {
+          if (strings.ToLower(control[1]) == "udp") {
+            remoteServer_ = option[1]
+          } else if (strings.ToLower(control[1]) == "unix") {
+            remoteServer_ = option[1]
+            port_ = "unix"
+            isUnix = true
+          } else if (strings.ToLower(control[1]) == "port") {
+            port_ = option[1]
+          } else if (strings.ToLower(control[1]) == "timeout") {
+            if (strings.ToLower(option[1]) == "none") {
+              defaultTimeout_ = 0
+            } else {
+              defaultTimeout_, _ = strconv.Atoi(option[1])
+            }
+          }
+        }
+      }
+    }
+  }
+  // make this check in case they changed the server
+  // from udp to unix and forgot to comment out the
+  // port
+  if (isUnix) {
+    port_ = "unix"
+  }
+  return remoteServer_, port_, defaultTimeout_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
