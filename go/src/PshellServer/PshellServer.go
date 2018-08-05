@@ -4,6 +4,8 @@ import "encoding/binary"
 import "net"
 import "fmt"
 import "strings"
+import "strconv"
+import "io/ioutil"
 import "os"
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +79,11 @@ type pshellCmd struct {
   showUsage bool
 }
 
+const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
+const _PSHELL_STARTUP_DIR = "/etc/pshell/startup"
+const _PSHELL_BATCH_DIR = "/etc/pshell/batch"
+const _PSHELL_CONFIG_FILE = "pshell-server.conf"
+
 var _gPrompt = "PSHELL> "
 var _gTitle = "PSHELL: "
 var _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
@@ -88,6 +95,7 @@ var _gServerName = "None"
 var _gServerMode = BLOCKING
 var _gHostnameOrIpAddr = "None"
 var _gPort = "0"
+var _gTcpTimeout = 10  // minutes
 var _gRunning = false
 var _gCommandDispatched = false
 var _gCommandInteractive = true
@@ -382,11 +390,11 @@ func startServer(serverName string,
                  hostnameOrIpAddr string, 
                  port string) {
   if (_gRunning == false) {
-    _gServerName = serverName
     _gServerType = serverType
     _gServerMode = serverMode
-    _gHostnameOrIpAddr = hostnameOrIpAddr
-    _gPort = port
+    _gTitle, _gBanner, _gPrompt, _gServerType, _gHostnameOrIpAddr, _gPort, _gTcpTimeout =
+      loadConfigFile(_gServerName, _gTitle, _gBanner, _gPrompt, serverType, hostnameOrIpAddr, port, _gTcpTimeout)
+    loadStartupFile()  
     _gRunning = true
     if (_gServerMode == BLOCKING) {
       runServer()
@@ -436,6 +444,82 @@ func showUsage() {
   } else {
     Printf("Usage: %s\n", _gFoundCommand.command)
   }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func loadConfigFile(serverName string,
+                    title string,
+                    banner string,
+                    prompt string,
+                    serverType string,
+                    hostnameOrIpAddr string,
+                    port string,
+                    tcpTimeout int) (string,
+                                     string,
+                                     string,
+                                     string,
+                                     string,
+                                     string,
+                                     int) {
+  var configFile1 = ""
+  var file []byte
+  configPath := os.Getenv("PSHELL_CONFIG_DIR")
+  if (configPath != "") {
+    configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
+  }
+  configFile2 := _PSHELL_CONFIG_DIR+"/"+_PSHELL_CONFIG_FILE
+  cwd, _ := os.Getwd()
+  configFile3 := cwd+"/"+_PSHELL_CONFIG_FILE
+  if _, err := os.Stat(configFile1); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile1)
+  } else if _, err := os.Stat(configFile2); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile2)
+  } else if _, err := os.Stat(configFile3); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile3)
+  } else {
+    return title, banner, prompt, serverType, hostnameOrIpAddr, port, tcpTimeout
+  }
+  // found a config file, process it
+  lines := strings.Split(string(file), "\n")
+  for _, line := range lines {
+    // skip comments
+    if ((len(line) > 0) && (line[0] != '#')) {
+      value := strings.Split(line, "=")
+      if (len(value) == 2) {
+        option := strings.Split(value[0], ".")
+        if ((len(option) == 2) && (serverName == option[0])) {
+          if (strings.ToLower(option[1]) == "title") {
+            title = value[1]
+          } else if (strings.ToLower(option[1]) == "banner") {
+            banner = value[1]
+          } else if (strings.ToLower(option[1]) == "prompt") {
+            prompt = value[1]
+          } else if (strings.ToLower(option[1]) == "host") {
+            hostnameOrIpAddr = value[1]
+          } else if (strings.ToLower(option[1]) == "port") {
+            port = value[1]
+          } else if (strings.ToLower(option[1]) == "type") {
+            if ((strings.ToLower(value[1]) == UDP) ||
+                (strings.ToLower(value[1]) == TCP) ||
+                (strings.ToLower(value[1]) == UNIX) ||
+                (strings.ToLower(value[1]) == LOCAL)) {
+              serverType = value[1]
+            }
+          } else if (strings.ToLower(option[1]) == "timeout") {
+            tcpTimeout, _ = strconv.Atoi(value[1])
+          }
+        }
+      }
+    }
+  }
+  return title, banner, prompt, serverType, hostnameOrIpAddr, port, tcpTimeout
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func loadStartupFile() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////

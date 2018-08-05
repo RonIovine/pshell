@@ -162,6 +162,7 @@ func DisconnectAllServers() {
 //        none
 //
 func SetDefaultTimeout(sid int, defaultTimeout int) {
+  setDefaultTimeout(sid, defaultTimeout)
 }
 
 //
@@ -397,61 +398,21 @@ func disconnectAllServers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func loadConfigFile(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) (string, string, int) {
-  var configFile1 = ""
-  var file []byte
-  configPath := os.Getenv("PSHELL_CONFIG_DIR")
-  if (configPath != "") {
-    configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
+func setDefaultTimeout(sid_ int, defaultTimeout_ int) {
+  if ((sid_ >= 0) && (sid_ < len(gControlList))) {
+    control := gControlList[sid_]
+    control.defaultTimeout = defaultTimeout_
   }
-  configFile2 := _PSHELL_CONFIG_DIR+"/"+_PSHELL_CONFIG_FILE
-  cwd, _ := os.Getwd()
-  configFile3 := cwd+"/"+_PSHELL_CONFIG_FILE
-  if _, err := os.Stat(configFile1); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(configFile1)
-  } else if _, err := os.Stat(configFile2); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(configFile2)
-  } else if _, err := os.Stat(configFile3); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(configFile3)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getResponseString(retCode_ int) string {
+  if (retCode_ < len(gPshellControlResponse)) {
+    return (gPshellControlResponse[retCode_])
   } else {
-    return remoteServer_, port_, defaultTimeout_
+    return ("PSHELL_UNKNOWN_RESPONSE")
   }
-  // found a config file, process it
-  isUnix := false
-  lines := strings.Split(string(file), "\n")
-  for _, line := range lines {
-    // skip comments
-    if ((len(line) > 0) && (line[0] != '#')) {
-      option := strings.Split(line, "=")
-      if (len(option) == 2) {
-        control := strings.Split(option[0], ".")
-        if ((len(control) == 2) && (controlName_ == control[0])) {
-          if (strings.ToLower(control[1]) == "udp") {
-            remoteServer_ = option[1]
-          } else if (strings.ToLower(control[1]) == "unix") {
-            remoteServer_ = option[1]
-            port_ = "unix"
-            isUnix = true
-          } else if (strings.ToLower(control[1]) == "port") {
-            port_ = option[1]
-          } else if (strings.ToLower(control[1]) == "timeout") {
-            if (strings.ToLower(option[1]) == "none") {
-              defaultTimeout_ = 0
-            } else {
-              defaultTimeout_, _ = strconv.Atoi(option[1])
-            }
-          }
-        }
-      }
-    }
-  }
-  // make this check in case they changed the server
-  // from udp to unix and forgot to comment out the
-  // port
-  if (isUnix) {
-    port_ = "unix"
-  }
-  return remoteServer_, port_, defaultTimeout_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -541,12 +502,61 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getResponseString(retCode_ int) string {
-  if (retCode_ < len(gPshellControlResponse)) {
-    return (gPshellControlResponse[retCode_])
-  } else {
-    return ("PSHELL_UNKNOWN_RESPONSE")
+func loadConfigFile(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) (string, string, int) {
+  var configFile1 = ""
+  var file []byte
+  configPath := os.Getenv("PSHELL_CONFIG_DIR")
+  if (configPath != "") {
+    configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
   }
+  configFile2 := _PSHELL_CONFIG_DIR+"/"+_PSHELL_CONFIG_FILE
+  cwd, _ := os.Getwd()
+  configFile3 := cwd+"/"+_PSHELL_CONFIG_FILE
+  if _, err := os.Stat(configFile1); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile1)
+  } else if _, err := os.Stat(configFile2); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile2)
+  } else if _, err := os.Stat(configFile3); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(configFile3)
+  } else {
+    return remoteServer_, port_, defaultTimeout_
+  }
+  // found a config file, process it
+  isUnix := false
+  lines := strings.Split(string(file), "\n")
+  for _, line := range lines {
+    // skip comments
+    if ((len(line) > 0) && (line[0] != '#')) {
+      option := strings.Split(line, "=")
+      if (len(option) == 2) {
+        control := strings.Split(option[0], ".")
+        if ((len(control) == 2) && (controlName_ == control[0])) {
+          if (strings.ToLower(control[1]) == "udp") {
+            remoteServer_ = option[1]
+          } else if (strings.ToLower(control[1]) == "unix") {
+            remoteServer_ = option[1]
+            port_ = "unix"
+            isUnix = true
+          } else if (strings.ToLower(control[1]) == "port") {
+            port_ = option[1]
+          } else if (strings.ToLower(control[1]) == "timeout") {
+            if (strings.ToLower(option[1]) == "none") {
+              defaultTimeout_ = 0
+            } else {
+              defaultTimeout_, _ = strconv.Atoi(option[1])
+            }
+          }
+        }
+      }
+    }
+  }
+  // make this check in case they changed the server
+  // from udp to unix and forgot to comment out the
+  // port
+  if (isUnix) {
+    port_ = "unix"
+  }
+  return remoteServer_, port_, defaultTimeout_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
