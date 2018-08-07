@@ -296,7 +296,7 @@ func ShowUsage() {
 //        bool : True if substring matches, False otherwise
 //
 func IsSubString(string1 string, string2 string, minMatchLength int) bool {
-  return true
+  return isSubString(string1, string2, minMatchLength)
 }
 
 /////////////////////////////////
@@ -390,7 +390,7 @@ func startServer(serverName string,
                  hostnameOrIpAddr string, 
                  port string) {
   if (_gRunning == false) {
-    _gServerType = serverType
+    _gServerName = serverName
     _gServerMode = serverMode
     _gTitle, _gBanner, _gPrompt, _gServerType, _gHostnameOrIpAddr, _gPort, _gTcpTimeout =
       loadConfigFile(_gServerName, _gTitle, _gBanner, _gPrompt, serverType, hostnameOrIpAddr, port, _gTcpTimeout)
@@ -446,6 +446,15 @@ func showUsage() {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isSubString(string1 string, string2 string, minMatchLength int) bool {
+  if (minMatchLength > len(string1)) {
+    return false
+  } else {
+    return strings.HasPrefix(string2, string1)
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -720,9 +729,9 @@ func processCommand(command string) {
       }
     }
     if (numMatches == 0) {
-      fmt.Printf("PSHELL_ERROR: Command: '%s' not found", command)
+      Printf("PSHELL_ERROR: Command: '%s' not found\n", command)
     } else if (numMatches > 1) {
-      fmt.Printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'", command)
+      Printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command)
     } else {
       if (IsHelp()) {
         if (_gFoundCommand.showUsage == true) {

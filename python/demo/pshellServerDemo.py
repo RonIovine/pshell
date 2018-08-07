@@ -88,6 +88,47 @@ def enhancedUsage(argv):
 
 #################################################################################
 #################################################################################
+def wildcardMatch(argv):
+  if (PshellServer.isHelp()):
+    PshellServer.printf()
+    PshellServer.showUsage()
+    PshellServer.printf()
+    PshellServer.printf("  where valid <args> are:")
+    PshellServer.printf("    on")
+    PshellServer.printf("    of*f")
+    PshellServer.printf("    a*ll")
+    PshellServer.printf("    sy*mbols")
+    PshellServer.printf("    se*ttings")
+    PshellServer.printf("    d*efault")
+    PshellServer.printf()
+  elif (PshellServer.isSubString(argv[0], "on", 2)):
+    PshellServer.printf("argv 'on' match")
+  elif (PshellServer.isSubString(argv[0], "off", 2)):
+    PshellServer.printf("argv 'off' match")
+  elif (PshellServer.isSubString(argv[0], "all", 1)):
+    PshellServer.printf("argv 'all' match")
+  elif (PshellServer.isSubString(argv[0], "symbols", 2)):
+    PshellServer.printf("argv 'symbols' match")
+  elif (PshellServer.isSubString(argv[0], "settings", 2)):
+    PshellServer.printf("argv 'settings' match")
+  elif (PshellServer.isSubString(argv[0], "default", 1)):
+    PshellServer.printf("argv 'default' match")
+  else:
+    PshellServer.printf()
+    PshellServer.showUsage()
+    PshellServer.printf()
+    PshellServer.printf("  where valid <args> are:")
+    PshellServer.printf()
+    PshellServer.printf("    on")
+    PshellServer.printf("    of*f")
+    PshellServer.printf("    a*ll")
+    PshellServer.printf("    sy*mbols")
+    PshellServer.printf("    se*ttings")
+    PshellServer.printf("    d*efault")
+    PshellServer.printf()
+
+#################################################################################
+#################################################################################
 def keepAlive(argv):
   if (argv[0] == "dots"):
     PshellServer.printf("marching dots keep alive:")
@@ -208,6 +249,13 @@ if (__name__ == '__main__'):
                           minArgs     = 1,
                           showUsage   = False)
                           
+  PshellServer.addCommand(function    = wildcardMatch,                           
+                          command     = "wildcardMatch",
+                          description = "command that does a wildcard matching",  
+                          usage       = "<arg>",                                 
+                          minArgs     = 1,
+                          showUsage   = False)                                     
+
   PshellServer.addCommand(function    = getOptions, 
                           command     = "getOptions", 
                           description = "example of parsing command line options", 

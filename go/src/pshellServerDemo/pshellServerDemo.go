@@ -41,6 +41,49 @@ func enhancedUsage(argv []string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func wildcardMatch(argv []string) {
+  if (PshellServer.IsHelp()) {
+    PshellServer.Printf("\n")
+    PshellServer.ShowUsage()
+    PshellServer.Printf("\n")
+    PshellServer.Printf("  where valid <args> are:\n")
+    PshellServer.Printf("    on\n")
+    PshellServer.Printf("    of*f\n")
+    PshellServer.Printf("    a*ll\n")
+    PshellServer.Printf("    sy*mbols\n")
+    PshellServer.Printf("    se*ttings\n")
+    PshellServer.Printf("    d*efault\n")
+    PshellServer.Printf("\n")
+  } else if (PshellServer.IsSubString(argv[0], "on", 2)) {
+    PshellServer.Printf("argv 'on' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "off", 2)) {
+    PshellServer.Printf("argv 'off' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "all", 1)) {
+    PshellServer.Printf("argv 'all' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "symbols", 2)) {
+    PshellServer.Printf("argv 'symbols' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "settings", 2)) {
+    PshellServer.Printf("argv 'settings' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "default", 1)) {
+    PshellServer.Printf("argv 'default' match\n")
+  } else {
+    PshellServer.Printf("\n")
+    PshellServer.ShowUsage()
+    PshellServer.Printf("\n")
+    PshellServer.Printf("  where valid <args> are:\n")
+    PshellServer.Printf("\n")
+    PshellServer.Printf("    on\n")
+    PshellServer.Printf("    of*f\n")
+    PshellServer.Printf("    a*ll\n")
+    PshellServer.Printf("    sy*mbols\n")
+    PshellServer.Printf("    se*ttings\n")
+    PshellServer.Printf("    d*efault\n")
+    PshellServer.Printf("\n")
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func keepAlive(argv []string) {
 /*
   if (argv[0] == "dots"):
@@ -180,6 +223,14 @@ func main() {
                           1,                               // maxArgs
                           false)                           // showUsage on '?'
   
+  PshellServer.AddCommand(wildcardMatch,                            // function
+                          "wildcardMatch",                          // command
+                          "command that does a wildcard matching",  // description
+                          "<arg>",                                  // usage
+                          1,                                        // minArgs
+                          1,                                        // maxArgs
+                          false)                                    // showUsage on "?"
+
   PshellServer.AddCommand(getOptions,                                  // function
                           "getOptions",                                // command
                           "example of parsing command line options",   // description
