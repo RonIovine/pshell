@@ -3,6 +3,7 @@ package main
 import "os"
 import "fmt"
 import "syscall"
+import "time"
 import "os/signal"
 import "PshellServer"
 
@@ -85,33 +86,36 @@ func wildcardMatch(argv []string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func keepAlive(argv []string) {
-/*
-  if (argv[0] == "dots"):
-    PshellServer.printf("marching dots keep alive:")
-    for i in range(1,10):
-      PshellServer.march(".")
-      time.sleep(1)
-  elif (argv[0] == "bang"):
-    PshellServer.printf("marching 'bang' keep alive:");
-    for  i in range(1,10):
-      PshellServer.march("!")
-      time.sleep(1)
-  elif (argv[0] == "pound"):
-    PshellServer.printf("marching pound keep alive:");
-    for  i in range(1,10):
-      PshellServer.march("#")
-      time.sleep(1)
-  elif (argv[0] == "wheel"):
-    PshellServer.printf("spinning wheel keep alive:")
-    for  i in range(1,10):
+  if (argv[0] == "dots") {
+    PshellServer.Printf("marching dots keep alive:\n")
+    for i := 0; i < 10; i++ {
+      PshellServer.March(".")
+      time.Sleep(time.Second)
+    }
+  } else if (argv[0] == "bang") {
+    PshellServer.Printf("marching 'bang' keep alive:\n")
+    for i := 0; i < 10; i++ {
+      PshellServer.March("!")
+      time.Sleep(time.Second)
+    }
+  } else if (argv[0] == "pound") {
+    PshellServer.Printf("marching pound keep alive:\n")
+    for i := 0; i < 10; i++ {
+      PshellServer.March("#")
+      time.Sleep(time.Second)
+    }
+  } else if (argv[0] == "wheel") {
+    PshellServer.Printf("spinning wheel keep alive:\n")
+    for i := 0; i < 10; i++ {
       // string is optional, use NULL to omit
-      PshellServer.wheel("optional string: ")
-      time.sleep(1)
-  else:
-    PshellServer.showUsage()
+      PshellServer.Wheel("optional string: ")
+      time.Sleep(time.Second)
+    }
+  } else {
+    PshellServer.ShowUsage()
     return
-  PshellServer.printf()
-*/
+  }
+  PshellServer.Printf("\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -239,6 +243,18 @@ func main() {
                           20,                                          // maxArgs
                           false)                                       // showUsage on '?'
   
+  // TCP or LOCAL servers don't need a keep-alive, so only add 
+  // this command for connectionless datagram type servers
+  if ((serverType == PshellServer.UDP) || (serverType == PshellServer.UNIX)) {
+    PshellServer.AddCommand(keepAlive,                             // function
+                            "keepAlive",                           // command
+                            "command to show client keep-alive",   // description
+                            "dots | bang | pound | wheel",         // usage
+                            1,                                     // minArgs
+                            1,                                     // maxArgs
+                            false)                                 // showUsage on '?'
+  }
+
   // run a registered command from within it's parent process, this can be done before
   // or after the server is started, as long as the command being called is regstered
   PshellServer.RunCommand("hello 1 2 3")

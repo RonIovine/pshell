@@ -1146,15 +1146,15 @@ def _wheel(string_):
   global _gWheelPos
   _gWheelPos += 1
   if (string_ != ""):
-    _printf("\r%s%c" % (string_, _gWheel[(_gWheelPos)%4]), newline=False)
+    _printf("\r%s%c" % (string_, _gWheel[(_gWheelPos)%4]), newline_=False)
   else:
-    _printf("\r%c" % _gWheel[(_gWheelPos)%4], newline=False)
+    _printf("\r%c" % _gWheel[(_gWheelPos)%4], newline_=False)
   _flush()
 
 #################################################################################
 #################################################################################
 def _march(string_):
-  _printf(string_, newline=False)
+  _printf(string_, newline_=False)
   _flush()
 
 #################################################################################

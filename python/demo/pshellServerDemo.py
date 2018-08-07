@@ -136,18 +136,18 @@ def keepAlive(argv):
       PshellServer.march(".")
       time.sleep(1)
   elif (argv[0] == "bang"):
-    PshellServer.printf("marching 'bang' keep alive:");
-    for  i in range(1,10):
+    PshellServer.printf("marching 'bang' keep alive:")
+    for i in range(1,10):
       PshellServer.march("!")
       time.sleep(1)
   elif (argv[0] == "pound"):
-    PshellServer.printf("marching pound keep alive:");
-    for  i in range(1,10):
+    PshellServer.printf("marching pound keep alive:")
+    for i in range(1,10):
       PshellServer.march("#")
       time.sleep(1)
   elif (argv[0] == "wheel"):
     PshellServer.printf("spinning wheel keep alive:")
-    for  i in range(1,10):
+    for i in range(1,10):
       # string is optional, use NULL to omit
       PshellServer.wheel("optional string: ")
       time.sleep(1)

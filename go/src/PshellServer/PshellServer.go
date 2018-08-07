@@ -112,6 +112,8 @@ var _gUnixSourceAddress string
 var _gTcpSocket *net.TCPConn
 var _gRecvAddr net.Addr
 var _gMaxLength = 0
+var _gWheelPos = 0
+var _gWheel = "|/-\\"
 
 /////////////////////////////////
 //
@@ -189,8 +191,8 @@ func CleanupResources() {
 //    Returns:
 //        none
 //
-func RunCommand(command string) {
-  runCommand(command)
+func RunCommand(format string, command ...interface{}) {
+  runCommand(format, command...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -224,6 +226,7 @@ func Printf(format string, message ...interface{}) {
 //        none
 //
 func Flush() {
+  flush()
 }
 
 //
@@ -236,6 +239,7 @@ func Flush() {
 //        none
 //
 func Wheel(message string) {
+  wheel(message)
 }
 
 //
@@ -248,6 +252,7 @@ func Wheel(message string) {
 //        none
 //
 func March(message string) {
+  march(message)
 }
 
 //
@@ -414,7 +419,32 @@ func cleanupResources() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func runCommand(command string) {
+func runCommand(format_ string, command_ ...interface{}) {
+  if (_gCommandDispatched == false) {
+    command := fmt.Sprintf(format_, command_...)
+    _gCommandDispatched = true
+    _gCommandInteractive = false
+    numMatches := 0
+    _gCommandDispatched = true
+    _gArgs = strings.Split(strings.TrimSpace(command), " ")
+    command = _gArgs[0]
+    if (len(_gArgs) > 1) {
+      _gArgs = _gArgs[1:]
+    } else {
+      _gArgs = []string{}
+    }
+    for _, entry := range _gCommandList {
+      if (command == entry.command) {
+        _gFoundCommand = entry
+        numMatches += 1
+      }
+    }
+    if ((numMatches == 1) && isValidArgCount() && !IsHelp()) {
+      _gFoundCommand.function(_gArgs)
+    }
+    _gCommandDispatched = false
+    _gCommandInteractive = true
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -438,11 +468,39 @@ func isHelp() bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func flush() {
+  if ((_gCommandInteractive == true) &&
+      ((_gServerType == UDP) || (_gServerType == UNIX))) {
+    reply(getMsgType(_gPshellRcvMsg))
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func wheel(message string) {
+  _gWheelPos += 1
+  if (message != "") {
+    printf("\r%s%c", message, _gWheel[(_gWheelPos)%4])
+  } else {
+    printf("\r%c", _gWheel[(_gWheelPos)%4])
+  }
+  flush()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func march(message string) {
+  printf(message)
+  flush()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func showUsage() {
   if (len(_gFoundCommand.usage) > 0) {
-    Printf("Usage: %s %s\n", _gFoundCommand.command, _gFoundCommand.usage)
+    printf("Usage: %s %s\n", _gFoundCommand.command, _gFoundCommand.usage)
   } else {
-    Printf("Usage: %s\n", _gFoundCommand.command)
+    printf("Usage: %s\n", _gFoundCommand.command)
   }
 }
 
@@ -722,7 +780,7 @@ func processCommand(command string) {
       return
     } else {
       for _, entry := range _gCommandList {
-        if (command == entry.command) {
+        if (isSubString(command, entry.command, len(command))) {
           _gFoundCommand = entry
           numMatches += 1
         }
@@ -747,13 +805,13 @@ func processCommand(command string) {
     }
   }
   _gCommandDispatched = false
-  reply()
+  reply(_COMMAND_COMPLETE)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func reply() {
-  pshellSendMsg := createMessage(_COMMAND_COMPLETE, 
+func reply(response byte) {
+  pshellSendMsg := createMessage(response, 
                                  getRespNeeded(_gPshellRcvMsg), 
                                  getDataNeeded(_gPshellRcvMsg), 
                                  getSeqNum(_gPshellRcvMsg), 
