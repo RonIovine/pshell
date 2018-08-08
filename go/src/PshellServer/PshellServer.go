@@ -367,14 +367,14 @@ func addCommand(function pshellFunction,
   }
     
   if (prepend == true) {
-    _gCommandList = append(_gCommandList, 
-                           pshellCmd{command, 
-                                     usage,
-                                     description, 
-                                     function,
-                                     minArgs, 
-                                     maxArgs,
-                                     showUsage})
+    _gCommandList = append([]pshellCmd{}, _gCommandList...)
+    _gCommandList[0].command = command
+    _gCommandList[0].usage = usage
+    _gCommandList[0].description = description
+    _gCommandList[0].function = function
+    _gCommandList[0].minArgs = minArgs
+    _gCommandList[0].maxArgs = maxArgs
+    _gCommandList[0].showUsage = showUsage
   } else {
     _gCommandList = append(_gCommandList, 
                            pshellCmd{command, 
@@ -587,6 +587,70 @@ func loadConfigFile(serverName string,
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func loadStartupFile() {
+  var startupFile1 = ""
+  var file []byte
+  startupPath := os.Getenv("PSHELL_STARTUP_DIR")
+  if (startupPath != "") {
+    startupFile1 = startupPath+"/"+_gServerName+".startup"
+  }
+  startupFile2 := _PSHELL_STARTUP_DIR+"/"+_gServerName+".startup"
+  cwd, _ := os.Getwd()
+  startupFile3 := cwd+"/"+_gServerName+".startup"
+  if _, err := os.Stat(startupFile1); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(startupFile1)
+  } else if _, err := os.Stat(startupFile2); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(startupFile2)
+  } else if _, err := os.Stat(startupFile3); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(startupFile3)
+  } else {
+    // file not found, return
+    return
+  }
+  // found a startup file, process it
+  lines := strings.Split(string(file), "\n")
+  for _, line := range lines {
+    // skip comments
+    if ((len(line) > 0) && (line[0] != '#')) {
+      runCommand(line)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func batch(argv []string) {
+  var batchFile = argv[0]
+  var batchFile1 = ""
+  var file []byte
+  batchPath := os.Getenv("PSHELL_BATCH_DIR")
+  if (batchPath != "") {
+    batchFile1 = batchPath+"/"+_gServerName+".batch"
+  }
+  batchFile2 := _PSHELL_BATCH_DIR+"/"+_gServerName+".batch"
+  cwd, _ := os.Getwd()
+  batchFile3 := cwd+"/"+_gServerName+".batch"
+  batchFile4 := batchFile
+  if _, err := os.Stat(batchFile1); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(batchFile1)
+  } else if _, err := os.Stat(batchFile2); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(batchFile2)
+  } else if _, err := os.Stat(batchFile3); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(batchFile3)
+  } else if _, err := os.Stat(batchFile4); !os.IsNotExist(err) {
+    file, _ = ioutil.ReadFile(batchFile4)
+  } else {
+    // file not found, return
+    printf("ERROR: Could not find batch file: '%s'\n", batchFile)
+    return
+  }
+  // found a batch file, process it
+  lines := strings.Split(string(file), "\n")
+  for _, line := range lines {
+    // skip comments
+    if ((len(line) > 0) && (line[0] != '#')) {
+      runCommand(line)
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -608,7 +672,7 @@ func runServer() {
 func runUDPServer() {
   fmt.Printf("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %s\n", _gServerName, _gHostnameOrIpAddr, _gPort)
   // startup our UDP server
-  //addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
+  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
   if (createSocket()) {
     for {
       receiveDGRAM()
@@ -621,7 +685,7 @@ func runUDPServer() {
 func runUNIXServer() {
   fmt.Printf("PSHELL_INFO: UNIX Server: %s Started\n", _gServerName)
   // startup our UDP server
-  //addCommand(_batch, "batch", "run commands from a batch file", "<filename>", 1, 1, True, True)
+  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
   if (createSocket()) {
     for {
       receiveDGRAM()

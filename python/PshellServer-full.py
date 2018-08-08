@@ -771,7 +771,7 @@ def _processCommand(command_):
       return
     else:
       for command in _gCommandList:
-        if (command_ in command["name"]):
+        if (isSubString(command_, command["name"], len(command_))):
           _gFoundCommand = command
           numMatches += 1
     if (numMatches == 0):
