@@ -7,6 +7,7 @@ import "strings"
 import "strconv"
 import "io/ioutil"
 import "os"
+import "math"
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -85,7 +86,9 @@ const _PSHELL_BATCH_DIR = "/etc/pshell/batch"
 const _PSHELL_CONFIG_FILE = "pshell-server.conf"
 
 var _gPrompt = "PSHELL> "
-var _gTitle = "PSHELL: "
+var _gTitle = "PSHELL"
+var _gTcpTitle = "PSHELL"
+var _gTcpPrompt = ""
 var _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 var _gServerVersion = "1"
 var _gPshellMsgPayloadLength = 2048
@@ -96,6 +99,7 @@ var _gServerMode = BLOCKING
 var _gHostnameOrIpAddr = "None"
 var _gPort = "0"
 var _gTcpTimeout = 10  // minutes
+var _gTcpConnectSockName = ""
 var _gRunning = false
 var _gCommandDispatched = false
 var _gCommandInteractive = true
@@ -302,6 +306,25 @@ func ShowUsage() {
 //
 func IsSubString(string1 string, string2 string, minMatchLength int) bool {
   return isSubString(string1, string2, minMatchLength)
+}
+
+//
+//  This function will parse an argument string of the formats -<key><value> where
+//  key is one letter only, i.e. '-t', or <key>=<value> where key can be any length
+//  word, i.e. 'timeout', and return a 3-tuple indicating if the arg was parsed
+//  correctly, along with the associated key and corresponding value.  An example 
+//  of the two valid formats are -t10, timeout=10.
+//
+//  Args:
+//        arg (str) : The argument string to parse
+//
+//    Returns:
+//        bool : True if string parses correctly, i.e. -<key><value> or <key>=<value>
+//        str  : The key value found
+//        str  : The value associated with the key
+//
+func GetOption(arg string) (bool, string, string) {
+  return (getOption(arg))
 }
 
 /////////////////////////////////
@@ -516,6 +539,23 @@ func isSubString(string1 string, string2 string, minMatchLength int) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func getOption(arg string) (bool, string, string) {
+  if (len(arg) < 3) {
+    return false, "", ""
+  } else if (arg[0] == '-') {
+    return true, arg[:2], arg[2:]
+  } else {
+    value := strings.Split(arg, "=")
+    if (len(value) != 2) {
+      return false, "", ""
+    } else {
+      return true, value[0], value[1]
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func loadConfigFile(serverName string,
                     title string,
                     banner string,
@@ -582,6 +622,48 @@ func loadConfigFile(serverName string,
     }
   }
   return title, banner, prompt, serverType, hostnameOrIpAddr, port, tcpTimeout
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func showWelcome() {
+  var server = ""
+  // show our welcome screen
+  banner := "#  " + _gBanner + "\n"
+  // put up our window title banner
+  Printf("\033]0;%s\007", _gTitle)
+  if (_gServerType == LOCAL) {
+    Printf("\033]0;%s", _gTitle)
+    server = fmt.Sprintf("#  Single session LOCAL server: %s[%s]\n", _gServerName, _gServerType)
+  } else {
+    Printf("\033]0;%s", _gTcpTitle)
+    server = fmt.Sprintf("#  Single session TCP server: %s[%s]\n", _gServerName, _gTcpConnectSockName)
+  }
+  maxBorderWidth := math.Max(58, float64(len(banner)-1))
+  maxBorderWidth = math.Max(maxBorderWidth, float64(len(server)))+2
+  Printf("\n")
+  for i := 0; i < int(maxBorderWidth); i++ {Printf("#")}
+  Printf("\n")
+  Printf("#\n")
+  Printf(banner)
+  Printf("#\n")
+  Printf(server)
+  Printf("#\n")
+  if (_gServerType == LOCAL) {
+    Printf("#  Idle session timeout: NONE\n")
+  } else {
+    Printf("#  Idle session timeout: %d minutes\n", _gTcpTimeout)
+  }
+  Printf("#\n")
+  Printf("#  Type '?' or 'help' at prompt for command summary\n")
+  Printf("#  Type '?' or '-h' after command for command usage\n")
+  Printf("#\n")
+  Printf("#  Full <TAB> completion, up-arrow recall, command\n")
+  Printf("#  line editing and command abbreviation supported\n")
+  Printf("#\n")
+  for i := 0; i < int(maxBorderWidth); i++ {Printf("#")}
+  Printf("\n")
+  Printf("\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -696,12 +778,15 @@ func runUNIXServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runLocalServer() {
+  _gTitle = _gTitle + ": " + _gServerName + "[" + _gServerType + "], Mode: INTERACTIVE"
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runTCPServer() {
   fmt.Printf("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %s\n", _gServerName, _gHostnameOrIpAddr, _gPort)
+  _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
+  _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -132,9 +132,10 @@ func getOptions(argv []string) {
     PshellServer.Printf("  for the second form, <key> can be any length, e.g. timeout=10\n")
     PshellServer.Printf("\n")
   } else {
-    //for index, arg in enumerate(argv):
-    //  (parsed, key, value) = PshellServer.getOption(arg)
-    //  PshellServer.printf("arg[%d]: '%s', parsed: %s, key: '%s', value: '%s'" % (index, arg, parsed, key, value))
+    for index, arg := range(argv) {
+      parsed, key, value := PshellServer.GetOption(arg)
+      PshellServer.Printf("arg[%d]: '%s', parsed: %v, key: '%s', value: '%s'\n", index, arg, parsed, key, value)
+    }
   }
 }
 
