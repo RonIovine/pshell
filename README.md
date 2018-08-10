@@ -43,7 +43,7 @@ The prototype for the Python callback shell functions are as follows:
 
 The prototype for the 'go' callback functions are as follows:
 
-`func myFunc([]string)`
+`func myFunc(argv []string)`
 
 Command line shell functions can also display information back to the interactive
 clients via a mechanism similar to the familiar 'printf' as follows:
