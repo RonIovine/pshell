@@ -1,0 +1,2 @@
+This directory contains all the 'go' packages for the PshellServer and
+PshellControl modules for the various targets, currently only x86.

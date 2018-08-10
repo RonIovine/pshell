@@ -1,12 +1,12 @@
 # pshell
 **A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++/Python/Go Applications**
 
-This package contains all the necessary code, documentation, and examples for
-building C/C++/Python applications that incorporate a Process-Specific Embedded
+This package contains all the necessary code, documentation and examples for
+building C/C++/Python/Go applications that incorporate a Process Specific Embedded 
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
-framework and API to embed functions within a C/C++/Python application that can 
-be invoked either via a separate interactive client program ('telnet', 'pshell',
-or 'pshellAggregator')  or via direct interaction from within the application itself.
+framework and API to embed functions within a C/C++/Python/Go application that can 
+be invoked either via a separate client program or directly from the within
+application itself.
 
 There is also a control API provided by where any external program can invoke another
 program's registered pshell functions (only supported for UDP or UNIX pshell servers).
@@ -27,39 +27,46 @@ like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
 broadcast address, e.g. x.y.z.255).
 
-The Python and 'C' versions are consistent with each other at the API level (i.e. similar 
-functional API, usage, process interaction etc) and fully interoperable with each other at 
-the protocol level and can be mixed and matched in any combination, i.e. the 'C' libraries 
-and UDP/UNIX client can control and interface transparently to the Python applications and
-Python UDP/UNIX client and vice-versa.  A telnet client can interface to both 'C' and Python 
-based pshell servers.
+The Python, 'C', and 'go' versions are consistent with each other at the API level (i.e.
+similar functional API, usage, process interaction etc) and fully interoperable with each
+other at the protocol level and can be mixed and matched in any combination.  A telnet
+client can interface to both 'C' and Python based pshell servers.  Currently, the 'go'
+implementation only supports UDP/UNIX servers.
 
 The prototype for the 'C' callback functions are similar to the 'main' in 'C' as follows:
 
-`void myFunc(int argc, char *argv[]);`
+`void myFunc(int argc, char *argv[])`
 
 The prototype for the Python callback shell functions are as follows:
 
-`def myFunc(argv):`
+`def myFunc(argv)`
+
+The prototype for the 'go' callback functions are as follows:
+
+`func myFunc([]string)`
 
 Command line shell functions can also display information back to the interactive
 clients via a mechanism similar to the familiar 'printf' as follows:
 
-`void pshell_printf(const char *format, ...);`
+`void pshell_printf(const char *format, ...)`
 
 The Python versions have a similar mechanism:
 
-`def printf(string):`
+`def printf(string)`
+
+The 'go' versions have a similar mechanism:
+
+`func Printf(format string, message ...interface{})`
 
 These functions can be invoked via several methods depending on how the internal PSHELL 
 server is configured.  The following shows the various PSHELL server types along with their 
 associated invokation method:
 
-* TCP Server   : Uses standard telnet interactive client to invoke functions
+* TCP Server   : Uses standard telnet interactive client to invoke functions (C/Python only)
 * UDP Server   : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
 * UNIX Server  : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application 
-                 itself via local command line interactive prompting
+                 itself via local command line interactive prompting (C/Python only)
 
 The functions are dispatched via its registered command name (keyword), along with 0 or more
 command line arguments, similar to command line shell processing.

@@ -5,7 +5,7 @@ PSHELL - A Lightweight, Process-Specific, Embedded Command Line Shell
 INTRODUCTION:
 
 This package contains all the necessary code, documentation and examples for
-building C/C++/Python applications that incorporate a Process Specific Embedded 
+building C/C++/Python/Go applications that incorporate a Process Specific Embedded 
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
 framework and API to embed functions within a C/C++/Python/Go application that can 
 be invoked either via a separate client program or directly from the within
@@ -30,39 +30,46 @@ like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet 
 broadcast address, e.g. x.y.z.255).
 
-The Python and 'C' versions are consistent with each other at the API level (i.e. similar 
-functional API, usage, process interaction etc) and fully interoperable with each other at 
-the protocol level and can be mixed and matched in any combination, i.e. the 'C' libraries 
-and UDP/UNIX client can control and interface transparently to the Python applications and
-Python UDP/UNIX client and vice-versa.  A telnet client can interface to both 'C' and Python 
-based pshell servers.
+The Python, 'C', and 'go' versions are consistent with each other at the API level (i.e.
+similar functional API, usage, process interaction etc) and fully interoperable with each
+other at the protocol level and can be mixed and matched in any combination.  A telnet
+client can interface to both 'C' and Python based pshell servers.  Currently, the 'go'
+implementation only supports UDP/UNIX servers.
 
 The prototype for the 'C' callback functions are similar to the 'main' in 'C' as follows:
 
-void myFunc(int argc, char *argv[]);
+void myFunc(int argc, char *argv[])
 
 The prototype for the Python callback functions are as follows:
 
-def myFunc(argv):
+def myFunc(argv)
+
+The prototype for the 'go' callback functions are as follows:
+
+func myFunc([]string)
 
 Command line pshell functions can also display information back to the interactive clients 
 via a mechanism similar to the familiar 'printf' as follows:
 
-void pshell_printf(const char *format, ...);
+void pshell_printf(const char *format, ...)
 
 The Python versions have a similar mechanism:
 
-def printf(string):
+def printf(string)
+
+The 'go' versions have a similar mechanism:
+
+func Printf(format string, message ...interface{})
 
 These functions can be invoked in several ways depending on how the internal PSHELL server is 
 configured.  The following shows the various PSHELL server types along with their associated 
 invokation method:
 
-TCP Server   : Uses standard 'telnet' interactive client to invoke functions
+TCP Server   : Uses standard 'telnet' interactive client to invoke functions (C/Python only)
 UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
 UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
 LOCAL Server : No client program needed, functions invoked directly from within application 
-               itself via local command line interactive prompting
+               itself via local command line interactive prompting (C/Python only)
 
 The functions are dispatched via its registered command name (keyword), along with 0 or more 
 command line arguments, similar to command line shell processing.
@@ -116,8 +123,10 @@ the 'expect' package to be installed.
   - libpshell-server-stub.so -- Stub version of libpshell-server library (shared)
   - libpshell-control.so     -- External pshell program control libpshell-control library (shared)
   - libpshell-control.a      -- External pshell program control libpshell-control library (static)
-  - PshellServer.py          -- Python version of PshellServer functionality (UDP, UNIX and LOCAL only)
-  - PshellControl.py         -- External pshell program control Python module
+  - PshellServer.a           -- Go version of the PshellServer functionality (UDP/UNIX only)
+  - PshellControl.a          -- Go version of control API
+  - PshellServer.py          -- Python version of PshellServer functionality
+  - PshellControl.py         -- Python version of control API
   - PshellReadline.py        -- Provides a readline like funtionality Python module
   - pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program
   - pshellAggregator         -- Dynamic server aggregator client for UDP/UNIX servers
@@ -184,10 +193,11 @@ export PSHELL_INSTALL=<myLocalInstallDir>
 export PSHELL_BATCH_DIR=$PSHELL_INSTALL/batch
 export PSHELL_STARTUP_DIR=$PSHELL_INSTALL/startup
 export PSHELL_CONFIG_DIR=$PSHELL_INSTALL/config
-export PATH=$PSHELL_INSTALL/bin:$PSHELL_INSTALL/utils:$PSHELL_INSTALL/python:$PSHELL_INSTALL/python/demo:$PATH
 export MANPATH=$PSHELL_INSTALL/man:$MANPATH
 export LD_LIBRARY_PATH=$PSHELL_INSTALL/lib:$LD_LIBRARY_PATH
 export PYTHONPATH=$PSHELL_INSTALL/python:$PSHELL_INSTALL/python/demo:$PYTHONPATH
+export GOPATH=$PSHELL_INSTALL/go
+export PATH=$PSHELL_INSTALL/bin:$PSHELL_INSTALL/utils:$PSHELL_INSTALL/python:$PSHELL_INSTALL/python/demo:$GOPATH/bin:$PATH
 
 Note that if a system wide install is done, none of the 'demo' programs are installed
 in any system wide 'bin' directories.  They can only be executed directly from the 'bin'
@@ -217,16 +227,19 @@ PshellReadline.html
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
-$PSHELL_INSTALL/demo/pshellServerDemo.cc             --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc            --  Sample pshell control external client
-$PSHELL_INSTALL/demo/pshellAggregatorDemo.cc         --  Sample pshell control to aggregate multiple servers
-$PSHELL_INSTALL/demo/traceFilterDemo.cc              --  Server demo for dynamic trace filtering
-$PSHELL_INSTALL/demo/traceLogDemo.cc                 --  Demo using the stand-alone TraceLog module
-$PSHELL_INSTALL/demo/pshellNoServerDemo.cc           --  Demo using the multi-call binary option
-$PSHELL_INSTALL/python/demo/pshellServerDemo.py      --  Server demo for user defined commands (Python)
-$PSHELL_INSTALL/python/demo/pshellControlDemo.py     --  Sample pshell control external client (Python)
-$PSHELL_INSTALL/python/demo/pshellAggregatorDemo.py  --  Sample pshell control to aggregate multiple servers (Python)
-$PSHELL_INSTALL/python/demo/pshellReadlineDemo.py    --  Sample program to show usage of PshellReadline (Python)
+$PSHELL_INSTALL/demo/pshellServerDemo.cc                     --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.cc                    --  Sample pshell control external client
+$PSHELL_INSTALL/demo/pshellAggregatorDemo.cc                 --  Sample pshell control to aggregate multiple servers
+$PSHELL_INSTALL/demo/traceFilterDemo.cc                      --  Server demo for dynamic trace filtering
+$PSHELL_INSTALL/demo/traceLogDemo.cc                         --  Demo using the stand-alone TraceLog module
+$PSHELL_INSTALL/demo/pshellNoServerDemo.cc                   --  Demo using the multi-call binary option
+$PSHELL_INSTALL/python/demo/pshellServerDemo.py              --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/python/demo/pshellControlDemo.py             --  Sample pshell control external client (Python)
+$PSHELL_INSTALL/python/demo/pshellAggregatorDemo.py          --  Sample pshell control to aggregate multiple servers (Python)
+$PSHELL_INSTALL/python/demo/pshellReadlineDemo.py            --  Sample program to show usage of PshellReadline (Python)
+$PSHELL_INSTALL/python/demo/pshellServerDemo.py              --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/go/src/pshellControlDemo/pshellServerDemo.go --  Sample pshell control external client (go)
+$PSHELL_INSTALL/go/src/pshellServerDemo/pshellServerDemo.go  --  Server demo for user defined commands (Python)
 
 EXECUTION:
 

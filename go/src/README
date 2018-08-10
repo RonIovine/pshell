@@ -1,0 +1,3 @@
+This directory contains the 'go' implementations for the PshellControl
+and PshellServer modules and the pshellServerDemo and pshellControlDemo
+programs.

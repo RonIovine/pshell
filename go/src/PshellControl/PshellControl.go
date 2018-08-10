@@ -10,6 +10,26 @@ import "io/ioutil"
 import "os"
 import "fmt"
 
+/////////////////////////////////////////////////////////////////////////////////
+//
+// This API provides the ability for a client program to invoke pshell commands
+// that are registered in a remote program that is running a pshell UDP or UNIX
+// server.  The format of the command string that is sent to the pshell should
+// be in the same usage format that the given command is expecting.  This
+// provides a very lightweight way to provide a control mechanism into a program
+// that is running a pshell, this is analagous to a remote procedure call (rpc).
+//
+// A complete example of the usage of the API can be found in the included 
+// demo program pshellControlDemo.go
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global "public" data, these are used for various parts of the public API
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 // these enum values are returned by the non-extraction
 // based sendCommand1 and sendCommand2 functions
 //
@@ -31,11 +51,16 @@ const (
 // using a UNIX domain server
 const UNIX = "unix"
 
-const _UNIX_SOCKET_PATH = "/tmp/"
-
 // This is returned on a failure of the ConnectServer function
 const INVALID_SID = -1
 
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global "private" data
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+const _UNIX_SOCKET_PATH = "/tmp/"
 const _NO_RESP_NEEDED = 0
 const _NO_DATA_NEEDED = 0
 const _RESP_NEEDED = 1

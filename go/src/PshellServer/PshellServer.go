@@ -11,6 +11,24 @@ import "math"
 
 /////////////////////////////////////////////////////////////////////////////////
 //
+// This API provides the Process Specific Embedded Command Line Shell (PSHELL)
+// user API functionality.  It provides the ability for a client program to
+// register functions that can be invoked via a command line user interface.
+// This is the 'go' implementation, there are also corresponding C/C++ and
+// Python implementations.
+//
+// The functions are similar to the prototype of the 'main' in 'go', i.e.
+// 'func myFunc([]string), there are several ways to invoke these embedded
+// functions based on how the pshell server is configured, which is described
+// in documentation further down in this file.
+//
+// A complete example of the usage of the API can be found in the included 
+// demo program file pshellServerDemo.go
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////
+//
 // global "public" data, these are used for various parts of the public API
 //
 /////////////////////////////////////////////////////////////////////////////////
@@ -40,19 +58,15 @@ const (
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-// the following enum values are returned by the non-extraction
-// based sendCommand1 and sendCommand2 functions
-//
-// the following "COMMAND" enums are returned by the remote pshell server
-// and must match their corresponding values in PshellServer.cc
-// msgType return codes for control client
+// the following enum values are returned by the pshell server
+// response to a command request from a control client
 const (
   _COMMAND_SUCCESS = 0
   _COMMAND_NOT_FOUND = 1
   _COMMAND_INVALID_ARG_COUNT = 2
 )
 
-// msgType codes between client and server
+// msgType codes between interactive client and server
 const (
   _QUERY_VERSION = 1
   _QUERY_PAYLOAD_SIZE = 2
