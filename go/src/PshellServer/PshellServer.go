@@ -706,11 +706,11 @@ func batch(argv []string) {
   var file []byte
   batchPath := os.Getenv("PSHELL_BATCH_DIR")
   if (batchPath != "") {
-    batchFile1 = batchPath+"/"+_gServerName+".batch"
+    batchFile1 = batchPath+"/"+batchFile+".batch"
   }
-  batchFile2 := _PSHELL_BATCH_DIR+"/"+_gServerName+".batch"
+  batchFile2 := _PSHELL_BATCH_DIR+"/"+batchFile+".batch"
   cwd, _ := os.Getwd()
-  batchFile3 := cwd+"/"+_gServerName+".batch"
+  batchFile3 := cwd+"/"+batchFile+".batch"
   batchFile4 := batchFile
   if _, err := os.Stat(batchFile1); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(batchFile1)
