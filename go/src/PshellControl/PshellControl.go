@@ -51,6 +51,9 @@ const (
 // using a UNIX domain server
 const UNIX = "unix"
 
+// specifies if the addMulticast should add the given sid to all commands
+const MULTICAST_ALL = "__multicast_all__"
+
 // This is returned on a failure of the ConnectServer function
 const INVALID_SID = -1
 
@@ -65,6 +68,7 @@ const _NO_RESP_NEEDED = 0
 const _NO_DATA_NEEDED = 0
 const _RESP_NEEDED = 1
 const _DATA_NEEDED = 1
+const _NO_WAIT = 0
 
 const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
 const _PSHELL_CONFIG_FILE = "pshell-control.conf"
@@ -82,8 +86,8 @@ type pshellControl struct {
 var gControlList = []pshellControl{}
 
 type pshellMulticast struct {
-  sidList []int
   keyword string
+  sidList []int
 }
 var gMulticastList = []pshellMulticast{}
 
@@ -205,6 +209,7 @@ func SetDefaultTimeout(sid int, defaultTimeout int) {
 //        none
 //
 func AddMulticast(sid int, keyword string) {
+  addMulticast(sid, keyword)
 }
 
 //
@@ -221,7 +226,8 @@ func AddMulticast(sid int, keyword string) {
 //    Returns:
 //        none
 //
-func SendMulticast(command string) {
+func SendMulticast(format string, command ...interface{}) {
+  sendMulticast(format, command...)
 }
 
 //
@@ -423,6 +429,55 @@ func disconnectAllServers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func addMulticast(sid_ int, keyword_ string) {
+  var sidList []int
+  if (sid_ <  len(gControlList)) {
+    multicastFound := false
+    for _, multicast := range(gMulticastList) {
+      if (multicast.keyword == keyword_) {
+        multicastFound = true
+        sidList = multicast.sidList
+        break
+      }
+    }
+    if (multicastFound == false) {
+      // multicast entry not found for this keyword, add a new one
+      gMulticastList = append(gMulticastList, pshellMulticast{keyword_, []int{}})
+      sidList = gMulticastList[len(gMulticastList)-1].sidList
+    }
+    sidFound := false
+    for _, sid := range(sidList) {
+      if (sid == sid_) {
+        sidFound = true
+        break
+      }
+    }
+    if (sidFound == false) {
+      // sid not found for this multicast group, add it for this group
+      sidList = append(sidList, sid_)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func sendMulticast(format_ string, command_ ...interface{}) {
+  command := fmt.Sprintf(format_, command_...)
+  keyword := strings.Split(strings.TrimSpace(command), " ")[0]
+  for _, multicast := range(gMulticastList) {
+    if ((multicast.keyword == MULTICAST_ALL) || (keyword == multicast.keyword)) {
+      for _, sid := range(multicast.sidList) {
+        if ((sid >= 0) && (sid < len(gControlList))) {
+          control := gControlList[sid]
+          sendCommand(&control, command, _NO_WAIT, _NO_DATA_NEEDED)
+        }
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func setDefaultTimeout(sid_ int, defaultTimeout_ int) {
   if ((sid_ >= 0) && (sid_ < len(gControlList))) {
     control := gControlList[sid_]
@@ -499,7 +554,7 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
   }
   _, err := control_.socket.Write(control_.sendMsg)
   if (err == nil) {
-    if (timeout_ > 0) {
+    if (timeout_ > _NO_WAIT) {
       for {
         control_.socket.SetReadDeadline(time.Now().Add(time.Second*time.Duration(timeout_)))
         var err error
@@ -521,7 +576,7 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
   } else {
     retCode = SOCKET_SEND_FAILURE
   }
-  
+   
   return retCode
 }
 
