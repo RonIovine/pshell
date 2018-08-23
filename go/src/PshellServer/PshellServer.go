@@ -8,6 +8,7 @@ import "strconv"
 import "io/ioutil"
 import "os"
 import "math"
+import "bufio"
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -404,14 +405,14 @@ func addCommand(function pshellFunction,
   }
     
   if (prepend == true) {
-    _gCommandList = append([]pshellCmd{}, _gCommandList...)
-    _gCommandList[0].command = command
-    _gCommandList[0].usage = usage
-    _gCommandList[0].description = description
-    _gCommandList[0].function = function
-    _gCommandList[0].minArgs = minArgs
-    _gCommandList[0].maxArgs = maxArgs
-    _gCommandList[0].showUsage = showUsage
+    _gCommandList = append([]pshellCmd{{command,
+                                        usage,
+                                        description,
+                                        function,
+                                        minArgs,
+                                        maxArgs,
+                                        showUsage}},
+                           _gCommandList...)
   } else {
     _gCommandList = append(_gCommandList, 
                            pshellCmd{command, 
@@ -488,7 +489,14 @@ func runCommand(format_ string, command_ ...interface{}) {
 ////////////////////////////////////////////////////////////////////////////////
 func printf(format_ string, message_ ...interface{}) {
   if (_gCommandInteractive == true) {
-    _gPshellSendPayload += fmt.Sprintf(format_, message_...)
+    if (_gServerType == LOCAL) {
+      fmt.Printf(format_, message_...)
+    } else if (_gServerType == TCP) {
+      // TCP/Telnet server TBD
+    } else {
+      // UDP/Unix (datagramn) server
+      _gPshellSendPayload += fmt.Sprintf(format_, message_...)
+    }
   }
 }
 
@@ -645,12 +653,11 @@ func showWelcome() {
   // show our welcome screen
   banner := "#  " + _gBanner + "\n"
   // put up our window title banner
-  Printf("\033]0;%s\007", _gTitle)
   if (_gServerType == LOCAL) {
-    Printf("\033]0;%s", _gTitle)
+    Printf("\033]0;%s\007", _gTitle)
     server = fmt.Sprintf("#  Single session LOCAL server: %s[%s]\n", _gServerName, _gServerType)
   } else {
-    Printf("\033]0;%s", _gTcpTitle)
+    Printf("\033]0;%s\007", _gTcpTitle)
     server = fmt.Sprintf("#  Single session TCP server: %s[%s]\n", _gServerName, _gTcpConnectSockName)
   }
   maxBorderWidth := math.Max(58, float64(len(banner)-1))
@@ -672,8 +679,9 @@ func showWelcome() {
   Printf("#  Type '?' or 'help' at prompt for command summary\n")
   Printf("#  Type '?' or '-h' after command for command usage\n")
   Printf("#\n")
-  Printf("#  Full <TAB> completion, up-arrow recall, command\n")
-  Printf("#  line editing and command abbreviation supported\n")
+  Printf("#  Command abbreviation supported\n")
+  //Printf("#  Full <TAB> completion, up-arrow recall, command\n")
+  //Printf("#  line editing and command abbreviation supported\n")
   Printf("#\n")
   for i := 0; i < int(maxBorderWidth); i++ {Printf("#")}
   Printf("\n")
@@ -751,6 +759,26 @@ func batch(argv []string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func help(argv []string) {
+  printf("\n")
+  printf("****************************************\n")
+  printf("*             COMMAND LIST             *\n")
+  printf("****************************************\n")
+  printf("\n")
+  processQueryCommands1()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func exit(argv []string) {
+  if (_gServerType == LOCAL) {
+    //local server, exit the process
+    os.Exit(0)
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func runServer() {
   if (_gServerType == UDP) {
     runUDPServer()
@@ -792,7 +820,22 @@ func runUNIXServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runLocalServer() {
+  _gPrompt = _gServerName + "[" + _gServerType + "]:" + _gPrompt
   _gTitle = _gTitle + ": " + _gServerName + "[" + _gServerType + "], Mode: INTERACTIVE"
+  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 2, true, true)
+  addCommand(help, "help", "show all available commands", "", 0, 0, true, true)
+  addCommand(exit, "quit", "exit interactive mode", "", 0, 0, true, true)
+  //addTabCompletions()
+  showWelcome()
+  reader := bufio.NewReader(os.Stdin)
+  for {
+    fmt.Print(_gPrompt)
+    command, _ := reader.ReadString('\n')
+    command = strings.TrimSuffix(command, "\n")
+    if (len(command) > 0) {
+      processCommand(command)
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -938,7 +981,7 @@ func processCommand(command string) {
     }
     numMatches := 0
     if ((command == "?") || (command == "help")) {
-      //help(_gArgs)
+      help(_gArgs)
       _gCommandDispatched = false
       return
     } else {

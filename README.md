@@ -66,7 +66,7 @@ associated invokation method:
 * UDP Server   : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
 * UNIX Server  : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application 
-                 itself via local command line interactive prompting (C/Python only)
+                 itself via local command line interactive prompting
 
 The functions are dispatched via its registered command name (keyword), along with 0 or more
 command line arguments, similar to command line shell processing.

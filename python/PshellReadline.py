@@ -105,6 +105,7 @@ ONE_MINUTE = ONE_SECOND*60
 
 # standard bash/readline tabbing method, i.e. initiate via double tabbing
 BASH_TAB = "bash"
+
 # fast tabbing, i.e. initiated via single tabbing, this is the default
 FAST_TAB = "fast"
 
@@ -523,7 +524,7 @@ def _getInput(prompt_):
             # nothing typed, just TAB, show all registered TAB completions
             _showTabCompletions(_gTabCompletions, prompt_)
           else:
-            # partial word typed, double TAB, show all possible completions
+            # partial word typed, show all possible completions
             matchList = _findTabCompletions(command)
             if (len(matchList) == 1):
               # only one possible completion, show it

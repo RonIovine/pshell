@@ -69,7 +69,7 @@ TCP Server   : Uses standard 'telnet' interactive client to invoke functions (C/
 UDP Server   : Uses included 'pshell' interactive client or control API to invoke functions
 UNIX Server  : Uses included 'pshell' interactive client or control API to invoke functions
 LOCAL Server : No client program needed, functions invoked directly from within application 
-               itself via local command line interactive prompting (C/Python only)
+               itself via local command line interactive prompting
 
 The functions are dispatched via its registered command name (keyword), along with 0 or more 
 command line arguments, similar to command line shell processing.
@@ -137,14 +137,14 @@ the 'expect' package to be installed.
   - archivePshell            -- Shell script to create a pshell-vX.Y.tar.gz archive
   - setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
   - showPshelllLib           -- Shell script to show the current libpshell-server.so softlink setting
-  - pshellServerDemo         -- Demo application using the pshell server library features
+  - pshellServerDemo         -- Demo application using the pshell server library features (C and Go)
   - pshellServerDemo.py      -- Demo application using the pshell server Python module features
-  - pshellNoServerDemo       -- Demo application using non-server option of the pshell library
-  - pshellControlDemo        -- Demo application using the pshell control library features
+  - pshellNoServerDemo       -- Demo application using non-server option of the pshell library (C only)
+  - pshellControlDemo        -- Demo application using the pshell control library features (C and Go)
   - pshellControlDemo.py     -- Demo application using the pshell control Python module features
   - pshellReadlineDemo.py    -- Demo application using the PshellReadline Python module to solicit user input
-  - traceFilterDemo          -- Demo application using the optional trace filter features
-  - traceLogDemo             -- Demo application using the stand-alone TraceLog module
+  - traceFilterDemo          -- Demo application using the optional trace filter features (C only)
+  - traceLogDemo             -- Demo application using the stand-alone TraceLog module (C only)
 
 INSTALLATION:
 
@@ -217,29 +217,35 @@ TraceFilter(3)   - Describes the API and usage of the TraceFilter utility
 TraceLog(3)      - Describes the API and usage of the TraceLog utility
 
 The following HTML 'pydoc' generated documentation is available in the
-$PSHELL_INSTALL/python/doc directory:
+$PSHELL_INSTALL/python/doc directory, the user can also use the command
+line 'pydoc' to see the embedded documentation on all the python modules.
 
 pshell.html
 PshellServer.html
 PshellControl.html
 PshellReadline.html
 
+The following 'go' modules also support embedded 'godoc' documentation:
+
+PshellControl.go
+PshellServer.go
+
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
-$PSHELL_INSTALL/demo/pshellServerDemo.cc                     --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc                    --  Sample pshell control external client
-$PSHELL_INSTALL/demo/pshellAggregatorDemo.cc                 --  Sample pshell control to aggregate multiple servers
-$PSHELL_INSTALL/demo/traceFilterDemo.cc                      --  Server demo for dynamic trace filtering
-$PSHELL_INSTALL/demo/traceLogDemo.cc                         --  Demo using the stand-alone TraceLog module
-$PSHELL_INSTALL/demo/pshellNoServerDemo.cc                   --  Demo using the multi-call binary option
-$PSHELL_INSTALL/python/demo/pshellServerDemo.py              --  Server demo for user defined commands (Python)
-$PSHELL_INSTALL/python/demo/pshellControlDemo.py             --  Sample pshell control external client (Python)
-$PSHELL_INSTALL/python/demo/pshellAggregatorDemo.py          --  Sample pshell control to aggregate multiple servers (Python)
-$PSHELL_INSTALL/python/demo/pshellReadlineDemo.py            --  Sample program to show usage of PshellReadline (Python)
-$PSHELL_INSTALL/python/demo/pshellServerDemo.py              --  Server demo for user defined commands (Python)
-$PSHELL_INSTALL/go/src/pshellControlDemo/pshellServerDemo.go --  Sample pshell control external client (go)
-$PSHELL_INSTALL/go/src/pshellServerDemo/pshellServerDemo.go  --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/demo/pshellServerDemo.cc                      --  Server demo for user defined commands
+$PSHELL_INSTALL/demo/pshellControlDemo.cc                     --  Sample pshell control external client
+$PSHELL_INSTALL/demo/pshellAggregatorDemo.cc                  --  Sample pshell control to aggregate multiple servers
+$PSHELL_INSTALL/demo/traceFilterDemo.cc                       --  Server demo for dynamic trace filtering
+$PSHELL_INSTALL/demo/traceLogDemo.cc                          --  Demo using the stand-alone TraceLog module
+$PSHELL_INSTALL/demo/pshellNoServerDemo.cc                    --  Demo using the multi-call binary option
+$PSHELL_INSTALL/python/demo/pshellServerDemo.py               --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/python/demo/pshellControlDemo.py              --  Sample pshell control external client (Python)
+$PSHELL_INSTALL/python/demo/pshellAggregatorDemo.py           --  Sample pshell control to aggregate multiple servers (Python)
+$PSHELL_INSTALL/python/demo/pshellReadlineDemo.py             --  Sample program to show usage of PshellReadline (Python)
+$PSHELL_INSTALL/python/demo/pshellServerDemo.py               --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/go/src/pshellControlDemo/pshellControlDemo.go --  Sample pshell control external client (go)
+$PSHELL_INSTALL/go/src/pshellServerDemo/pshellServerDemo.go   --  Server demo for user defined commands (Python)
 
 EXECUTION:
 
