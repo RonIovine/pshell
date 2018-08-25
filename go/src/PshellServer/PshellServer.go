@@ -160,6 +160,10 @@ var _gMaxLength = 0
 var _gWheelPos = 0
 var _gWheel = "|/-\\"
 
+var _gTabCompletions []string
+var _gMaxTabCompletionKeywordLength = 0
+var _gMaxCompletionsPerLine = 0
+
 /////////////////////////////////
 //
 // Public functions
@@ -517,14 +521,12 @@ func printf(format_ string, message_ ...interface{}) {
   if (_gCommandInteractive == true) {
     if (_gServerType == LOCAL) {
       fmt.Printf(format_, message_...)
-    } else if (_gServerType == TCP) {
-      // TCP/Telnet server TBD
-      _gPshellSendPayload += fmt.Sprintf(format_, message_...)
-      _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload, "\n", "\r\n", -1)))
-      _gPshellSendPayload = ""
     } else {
-      // UDP/Unix (datagramn) server
+      // UDP/TCP/Unix (datagramn) server
       _gPshellSendPayload += fmt.Sprintf(format_, message_...)
+      if (_gServerType == TCP) {
+        flush()
+      }
     }
   }
 }
@@ -543,9 +545,13 @@ func isHelp() bool {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func flush() {
-  if ((_gCommandInteractive == true) &&
-      ((_gServerType == UDP) || (_gServerType == UNIX))) {
-    reply(getMsgType(_gPshellRcvMsg))
+  if (_gCommandInteractive == true) {
+    if ((_gServerType == UDP) || (_gServerType == UNIX)) {
+      reply(getMsgType(_gPshellRcvMsg))
+    } else if (_gServerType == TCP) {
+      _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload, "\n", "\r\n", -1)))
+      _gPshellSendPayload = ""
+    }
   }
 }
 
@@ -856,7 +862,7 @@ func runLocalServer() {
   addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 2, true, true)
   addCommand(help, "help", "show all available commands", "", 0, 0, true, true)
   addCommand(exit, "quit", "exit interactive mode", "", 0, 0, true, true)
-  //addTabCompletions()
+  addTabCompletions()
   showWelcome()
   reader := bufio.NewReader(os.Stdin)
   for {
@@ -866,6 +872,85 @@ func runLocalServer() {
     if (len(command) > 0) {
       processCommand(command)
     }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func addTabCompletions() {
+  if (((_gServerType == LOCAL) || (_gServerType == TCP)) && (_gRunning  == true)) {
+    for _, entry := range(_gCommandList) {
+      addTabCompletion(entry.command)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func addTabCompletion(keyword_ string) {
+  for _, keyword := range(_gTabCompletions) {
+    if (keyword == keyword_) {
+      //duplicate keyword found, return
+      return
+    }
+  }
+  if (len(keyword_) > _gMaxTabCompletionKeywordLength) {
+    _gMaxTabCompletionKeywordLength = len(keyword_)+5
+    _gMaxCompletionsPerLine = 80/_gMaxTabCompletionKeywordLength
+  }
+  _gTabCompletions = append(_gTabCompletions, keyword_)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func findTabCompletions(keyword_ string) []string {
+  var matchList []string
+  for _, keyword := range(_gTabCompletions) {
+    if (isSubString(keyword_, keyword, len(keyword_))) {
+      matchList = append(matchList, keyword)
+    }
+  }
+  return (matchList)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func findLongestMatch(matchList_ []string, command_ string) string {
+  command := command_
+  charPos := len(command_)
+  for {
+    if (charPos < len(matchList_[0])) {
+      char := matchList_[0][charPos]
+      for _, keyword := range(matchList_) {
+         if ((charPos >= len(keyword)) || (char != keyword[charPos])) {
+           return (command)
+         }
+       }
+      command = command + string(char)
+      charPos += 1
+    } else {
+      return (command)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func showTabCompletions(completionList_ []string, prompt_ string) {
+  if (len(completionList_) > 0) {
+    printf("\n")
+    totPrinted := 0
+    numPrinted := 0
+    for _, keyword := range(completionList_) {
+      printf("%-*s", _gMaxTabCompletionKeywordLength, keyword)
+      numPrinted += 1
+      totPrinted += 1
+      if ((numPrinted == _gMaxCompletionsPerLine) && (totPrinted < len(completionList_))) {
+        printf("\n")
+        numPrinted = 0
+      }
+    }
+    printf("\n%s", prompt_)
   }
 }
 
@@ -887,12 +972,12 @@ func runTCPServer() {
   addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
   addCommand(help, "help", "show all available commands", "", 0, 0, true, true)
   addCommand(exit, "quit", "exit interactive mode", "", 0, 0, true, true)
-  //addTabCompletions()
+  addTabCompletions()
   // startup our TCP server and accept new connections
   for createSocket() && acceptConnection() {
-    // shutdown original socket to not allow any new connections until we are done with this one
     _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
     _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
+    // shutdown original socket to not allow any new connections until we are done with this one
     _gTcpSocket.Close()
     receiveTCP()
     _gConnectFd.Close()
