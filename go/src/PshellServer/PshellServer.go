@@ -53,6 +53,18 @@ const (
   NON_BLOCKING = 1
 )
 
+// These three identifiers that can be used for the hostnameOrIpAddr argument 
+// of the startServer call.  PshellServer.ANYHOST will bind the server socket
+// to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
+// 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to 
+// the local loopback address (i.e. 127.0.0.1), note that subnet broadcast 
+// it also supported, e.g. x.y.z.255
+const (
+  ANYHOST = "anyhost"
+  ANYBCAST = "anybcast"
+  LOCALHOST = "localhost"
+)
+
 /////////////////////////////////////////////////////////////////////////////////
 //
 // global "private" data
@@ -83,6 +95,17 @@ const (
   _CONTROL_COMMAND = 12
 )
 
+// ascii keystroke codes
+const (
+  _BS = 8
+  _TAB = 9
+  _LF = 10
+  _CR = 13
+  _ESC = 27
+  _SPACE = 32
+  _DEL = 127
+)
+
 type pshellFunction func([]string)
 
 type pshellCmd struct {
@@ -104,6 +127,7 @@ var _gPrompt = "PSHELL> "
 var _gTitle = "PSHELL"
 var _gTcpTitle = "PSHELL"
 var _gTcpPrompt = ""
+var _gQuitTcp = false
 var _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 var _gServerVersion = "1"
 var _gPshellMsgPayloadLength = 2048
@@ -128,7 +152,9 @@ var _gUdpSocket *net.UDPConn
 var _gUnixSocket *net.UnixConn
 var _gUnixSocketPath = "/tmp/"
 var _gUnixSourceAddress string
-var _gTcpSocket *net.TCPConn
+var _gTcpSocket *net.TCPListener
+var _gConnectFd *net.TCPConn
+var _gTcpNegotiate = []byte{0xFF, 0xFB, 0x03, 0xFF, 0xFB, 0x01, 0xFF, 0xFD, 0x03, 0xFF, 0xFD, 0x01}
 var _gRecvAddr net.Addr
 var _gMaxLength = 0
 var _gWheelPos = 0
@@ -493,6 +519,9 @@ func printf(format_ string, message_ ...interface{}) {
       fmt.Printf(format_, message_...)
     } else if (_gServerType == TCP) {
       // TCP/Telnet server TBD
+      _gPshellSendPayload += fmt.Sprintf(format_, message_...)
+      _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload, "\n", "\r\n", -1)))
+      _gPshellSendPayload = ""
     } else {
       // UDP/Unix (datagramn) server
       _gPshellSendPayload += fmt.Sprintf(format_, message_...)
@@ -774,6 +803,8 @@ func exit(argv []string) {
   if (_gServerType == LOCAL) {
     //local server, exit the process
     os.Exit(0)
+  } else if (_gServerType == TCP) {
+    _gQuitTcp = true
   }
 }
 
@@ -840,10 +871,32 @@ func runLocalServer() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func acceptConnection() bool {
+  _gConnectFd, _ = _gTcpSocket.AcceptTCP()
+  //(_gConnectFd, clientAddr) = _gSocketFd.accept()
+  //_gTcpConnectSockName = clientAddr[0]
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func runTCPServer() {
   fmt.Printf("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %s\n", _gServerName, _gHostnameOrIpAddr, _gPort)
   _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
   _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
+  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
+  addCommand(help, "help", "show all available commands", "", 0, 0, true, true)
+  addCommand(exit, "quit", "exit interactive mode", "", 0, 0, true, true)
+  //addTabCompletions()
+  // startup our TCP server and accept new connections
+  for createSocket() && acceptConnection() {
+    // shutdown original socket to not allow any new connections until we are done with this one
+    _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
+    _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
+    _gTcpSocket.Close()
+    receiveTCP()
+    _gConnectFd.Close()
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -870,7 +923,29 @@ func createSocket() bool {
     }
     return (true)
   } else if (_gServerType == TCP) {
+    serverAddr := _gHostnameOrIpAddr + ":" + _gPort
+    tcpAddr, err := net.ResolveTCPAddr("tcp", serverAddr)
+    if err == nil {
+      _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
+      return (true)
+    } else {
+      return (false)
+    }
+    /*
+    // IP domain socket (TCP)
+    _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    // Bind the socket to the port
+    if (_gHostnameOrIpAddr == ANYHOST):
+      _gSocketFd.bind(("", _gPort))
+    elif (_gHostnameOrIpAddr == LOCALHOST):
+      _gSocketFd.bind(("127.0.0.1", _gPort))
+    else:
+      _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
+    // Listen for incoming connections
+    _gSocketFd.listen(1)
     return (true)
+    */
   } else {
     return (false)
   }
@@ -888,6 +963,55 @@ func receiveDGRAM() {
   }
   if (err == nil) {
     processCommand(getPayload(_gPshellRcvMsg, recvSize))
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func showPrompt(command_ string) {
+  if (command_ == "") {
+    printf("\r%s", _gTcpPrompt);
+  } else {
+    printf("\r%s%s", _gTcpPrompt, command_);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getInput(command string, keystroke []byte, length int) (string, bool, bool) {
+  quit := false
+  fullCommand := false
+  if (keystroke[0] == _CR) {
+    printf("\n")
+    fullCommand = (len(command) > 0)
+  } else if ((length == 1) && (keystroke[0] >= _SPACE) && (keystroke[0] < _DEL)) {
+    command = command + string(keystroke[0])
+  }
+  return command, fullCommand, quit
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func receiveTCP() {
+  var fullCommand bool
+  var command string
+  var length int
+  _gConnectFd.Write(_gTcpNegotiate)
+  _gConnectFd.Read(_gPshellRcvMsg)
+  showWelcome()
+  //_gPshellMsg["msgType"] = _gMsgTypes["userCommand"]
+  _gQuitTcp = false
+  command = ""
+  fullCommand = false
+  for (_gQuitTcp == false) {
+    showPrompt(command)
+    length, _ = _gConnectFd.Read(_gPshellRcvMsg)
+    command, fullCommand, _gQuitTcp = getInput(command, _gPshellRcvMsg, length)
+    if ((_gQuitTcp == false) && (fullCommand == true)) {
+      processCommand(command)
+      command = ""
+      fullCommand = false
+    }
   }
 }
 

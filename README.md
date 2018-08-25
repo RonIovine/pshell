@@ -62,7 +62,7 @@ These functions can be invoked via several methods depending on how the internal
 server is configured.  The following shows the various PSHELL server types along with their 
 associated invokation method:
 
-* TCP Server   : Uses standard telnet interactive client to invoke functions (C/Python only)
+* TCP Server   : Uses standard telnet interactive client to invoke functions
 * UDP Server   : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
 * UNIX Server  : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application 
