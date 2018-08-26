@@ -163,6 +163,8 @@ var _gWheel = "|/-\\"
 var _gTabCompletions []string
 var _gMaxTabCompletionKeywordLength = 0
 var _gMaxCompletionsPerLine = 0
+var _gCommandHistory []string
+var _gCommandHistoryPos = 0
 
 /////////////////////////////////
 //
@@ -175,7 +177,7 @@ var _gMaxCompletionsPerLine = 0
 //  arguments, the default parameters can be provided.  If the command takes
 //  an exact number of parameters, set minArgs and maxArgs to be the same.  If
 //  the user wants the callback function to handle all help initiated usage,
-//  set the showUsage parameter to False.
+//  set the showUsage parameter to false.
 //
 //    Args:
 //        function (ptr)    : User callback function
@@ -306,13 +308,13 @@ func March(message string) {
 
 //
 //  Check if the user has asked for help on this command.  Command must be 
-//  registered with the showUsage = False option.
+//  registered with the showUsage = false option.
 //
 //    Args:
 //        none
 //
 //    Returns:
-//        bool : True if user is requesting command help, False otherwise
+//        bool : True if user is requesting command help, false otherwise
 //
 func IsHelp() bool {
   return (isHelp())
@@ -347,7 +349,7 @@ func ShowUsage() {
 //        minMatchLength (int) : The minimum required characters match
 //
 //    Returns:
-//        bool : True if substring matches, False otherwise
+//        bool : True if substring matches, false otherwise
 //
 func IsSubString(string1 string, string2 string, minMatchLength int) bool {
   return isSubString(string1, string2, minMatchLength)
@@ -698,7 +700,7 @@ func showWelcome() {
   maxBorderWidth := math.Max(58, float64(len(banner)-1))
   maxBorderWidth = math.Max(maxBorderWidth, float64(len(server)))+2
   Printf("\n")
-  for i := 0; i < int(maxBorderWidth); i++ {Printf("#")}
+  Printf(strings.Repeat("#", int(maxBorderWidth)))
   Printf("\n")
   Printf("#\n")
   Printf(banner)
@@ -714,11 +716,14 @@ func showWelcome() {
   Printf("#  Type '?' or 'help' at prompt for command summary\n")
   Printf("#  Type '?' or '-h' after command for command usage\n")
   Printf("#\n")
-  Printf("#  Command abbreviation supported\n")
-  //Printf("#  Full <TAB> completion, up-arrow recall, command\n")
-  //Printf("#  line editing and command abbreviation supported\n")
+  if (_gServerType == TCP) {
+    Printf("#  Full <TAB> completion, up-arrow recall, command\n")
+    Printf("#  line editing and command abbreviation supported\n")
+  } else {
+    Printf("#  Command abbreviation supported\n")
+  }
   Printf("#\n")
-  for i := 0; i < int(maxBorderWidth); i++ {Printf("#")}
+  Printf(strings.Repeat("#", int(maxBorderWidth)))
   Printf("\n")
   Printf("\n")
 }
@@ -877,85 +882,6 @@ func runLocalServer() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func addTabCompletions() {
-  if (((_gServerType == LOCAL) || (_gServerType == TCP)) && (_gRunning  == true)) {
-    for _, entry := range(_gCommandList) {
-      addTabCompletion(entry.command)
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func addTabCompletion(keyword_ string) {
-  for _, keyword := range(_gTabCompletions) {
-    if (keyword == keyword_) {
-      //duplicate keyword found, return
-      return
-    }
-  }
-  if (len(keyword_) > _gMaxTabCompletionKeywordLength) {
-    _gMaxTabCompletionKeywordLength = len(keyword_)+5
-    _gMaxCompletionsPerLine = 80/_gMaxTabCompletionKeywordLength
-  }
-  _gTabCompletions = append(_gTabCompletions, keyword_)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func findTabCompletions(keyword_ string) []string {
-  var matchList []string
-  for _, keyword := range(_gTabCompletions) {
-    if (isSubString(keyword_, keyword, len(keyword_))) {
-      matchList = append(matchList, keyword)
-    }
-  }
-  return (matchList)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func findLongestMatch(matchList_ []string, command_ string) string {
-  command := command_
-  charPos := len(command_)
-  for {
-    if (charPos < len(matchList_[0])) {
-      char := matchList_[0][charPos]
-      for _, keyword := range(matchList_) {
-         if ((charPos >= len(keyword)) || (char != keyword[charPos])) {
-           return (command)
-         }
-       }
-      command = command + string(char)
-      charPos += 1
-    } else {
-      return (command)
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func showTabCompletions(completionList_ []string, prompt_ string) {
-  if (len(completionList_) > 0) {
-    printf("\n")
-    totPrinted := 0
-    numPrinted := 0
-    for _, keyword := range(completionList_) {
-      printf("%-*s", _gMaxTabCompletionKeywordLength, keyword)
-      numPrinted += 1
-      totPrinted += 1
-      if ((numPrinted == _gMaxCompletionsPerLine) && (totPrinted < len(completionList_))) {
-        printf("\n")
-        numPrinted = 0
-      }
-    }
-    printf("\n%s", prompt_)
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 func acceptConnection() bool {
   _gConnectFd, _ = _gTcpSocket.AcceptTCP()
   //(_gConnectFd, clientAddr) = _gSocketFd.accept()
@@ -1063,16 +989,290 @@ func showPrompt(command_ string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getInput(command string, keystroke []byte, length int) (string, bool, bool) {
+func addTabCompletions() {
+  if (((_gServerType == LOCAL) || (_gServerType == TCP)) && (_gRunning  == true)) {
+    for _, entry := range(_gCommandList) {
+      addTabCompletion(entry.command)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func addTabCompletion(keyword_ string) {
+  for _, keyword := range(_gTabCompletions) {
+    if (keyword == keyword_) {
+      //duplicate keyword found, return
+      return
+    }
+  }
+  if (len(keyword_) > _gMaxTabCompletionKeywordLength) {
+    _gMaxTabCompletionKeywordLength = len(keyword_)+5
+    _gMaxCompletionsPerLine = 80/_gMaxTabCompletionKeywordLength
+  }
+  _gTabCompletions = append(_gTabCompletions, keyword_)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func findTabCompletions(keyword_ string) []string {
+  var matchList []string
+  for _, keyword := range(_gTabCompletions) {
+    if (isSubString(keyword_, keyword, len(keyword_))) {
+      matchList = append(matchList, keyword)
+    }
+  }
+  return (matchList)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func findLongestMatch(matchList_ []string, command_ string) string {
+  command := command_
+  charPos := len(command_)
+  for {
+    if (charPos < len(matchList_[0])) {
+      char := matchList_[0][charPos]
+      for _, keyword := range(matchList_) {
+         if ((charPos >= len(keyword)) || (char != keyword[charPos])) {
+           return (command)
+         }
+       }
+      command = command + string(char)
+      charPos += 1
+    } else {
+      return (command)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func showTabCompletions(completionList_ []string, prompt_ string) {
+  if (len(completionList_) > 0) {
+    printf("\n")
+    totPrinted := 0
+    numPrinted := 0
+    for _, keyword := range(completionList_) {
+      printf("%-*s", _gMaxTabCompletionKeywordLength, keyword)
+      numPrinted += 1
+      totPrinted += 1
+      if ((numPrinted == _gMaxCompletionsPerLine) && (totPrinted < len(completionList_))) {
+        printf("\n")
+        numPrinted = 0
+      }
+    }
+    printf("\n%s", prompt_)
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func clearLine(cursorPos_ int, command_ string) {
+  printf("%s%s%s", strings.Repeat("\b", cursorPos_), strings.Repeat(" ", cursorPos_), strings.Repeat("\b", len(command_)))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func beginningOfLine(cursorPos_ int, command_ string) int {
+  if (cursorPos_ > 0) {
+    cursorPos_ = 0
+    printf(strings.Repeat("\b", len(command_)))
+  }
+  return (cursorPos_)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func endOfLine(cursorPos_ int, command_ string) int {
+  if (cursorPos_ < len(command_)) {
+    printf(command_[cursorPos_:])
+    cursorPos_ = len(command_)
+  }
+  return cursorPos_
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func killLine(cursorPos_ int, command_ string) (int, string) {
+  clearLine(cursorPos_, command_)
+  command_ = ""
+  cursorPos_ = 0
+  return cursorPos_, command_
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func showCommand(command_ string) (int, string) {
+  printf(command_)
+  return len(command_), command_
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getInput(command string, keystroke []byte, length int, cursorPos int, prompt_ string) (string, bool, bool, int) {
   quit := false
   fullCommand := false
   if (keystroke[0] == _CR) {
+    // user typed CR, indicate the command is entered and return
     printf("\n")
-    fullCommand = (len(command) > 0)
+    if (len(command) > 0) {
+      fullCommand = true
+      if (len(_gCommandHistory) == 0 || (_gCommandHistory[len(_gCommandHistory)-1] != command)) {
+        _gCommandHistory = append(_gCommandHistory, command)
+        _gCommandHistoryPos = len(_gCommandHistory)
+      }
+    }
   } else if ((length == 1) && (keystroke[0] >= _SPACE) && (keystroke[0] < _DEL)) {
-    command = command + string(keystroke[0])
+    // printable single character, add it to our command,
+    command = command[:cursorPos] + string(keystroke[0]) + command[cursorPos:]
+    printf("%s%s", command[cursorPos:], strings.Repeat("\b", len(command[cursorPos:])-1))
+    cursorPos += 1
+  } else {
+    inEsc := false
+    var esc byte = 0
+    tabCount := 0
+    // non-printable character or escape sequence, process it
+    for index := 0; index < length; index++ {
+      //fmt.Printf("index[%d], val: %d\n", index, keystroke[index])
+      char := keystroke[index]
+      if (char != _TAB) {
+        // something other than TAB typed, clear out our tabCount
+        tabCount = 0
+      }
+      if (inEsc == true) {
+        if (esc == '[') {
+          if (char == 'A') {
+            // up-arrow key
+            if (_gCommandHistoryPos > 0) {
+              _gCommandHistoryPos -= 1
+              clearLine(cursorPos, command)
+              cursorPos, command = showCommand(_gCommandHistory[_gCommandHistoryPos])
+            }
+            inEsc = false
+            esc = 0
+          } else if (char == 'B') {
+            // down-arrow key
+            if (_gCommandHistoryPos < len(_gCommandHistory)-1) {
+              _gCommandHistoryPos += 1
+              clearLine(cursorPos, command)
+              cursorPos, command = showCommand(_gCommandHistory[_gCommandHistoryPos])
+            } else {
+              // kill whole line
+              _gCommandHistoryPos = len(_gCommandHistory)
+              cursorPos, command = killLine(cursorPos, command)
+            }
+            inEsc = false
+            esc = 0
+          } else if (char == 'C') {
+            // right-arrow key
+            if (cursorPos < len(command)) {
+              printf("%s%s", command[cursorPos:], strings.Repeat("\b", len(command[cursorPos:])-1))
+              cursorPos += 1
+            }
+            inEsc = false
+            esc = 0
+          } else if (char == 'D') {
+            // left-arrow key
+            if (cursorPos > 0) {
+              cursorPos -= 1
+              printf("\b")
+            }
+            inEsc = false
+            esc = 0
+          } else if (char == '1') {
+            printf("home2")
+            cursorPos = beginningOfLine(cursorPos, command)
+          //} else if (char == '3') {
+          //  print("delete")
+          } else if (char == '~') {
+            // delete key, delete under cursor
+            if (cursorPos < len(command)) {
+              printf("%s%s%s", command[cursorPos+1:], " ", strings.Repeat("\b", len(command[cursorPos:])))
+              command = command[:cursorPos] + command[cursorPos+1:]
+            }
+            inEsc = false
+            esc = 0
+          } else if (char == '4') {
+            print("end2")
+            cursorPos = endOfLine(cursorPos, command)
+          }
+        } else if (esc == 'O') {
+          if (char == 'H') {
+            // home key, go to beginning of line
+            cursorPos = beginningOfLine(cursorPos, command)
+          } else if (char == 'F') {
+            // end key, go to end of line
+            cursorPos = endOfLine(cursorPos, command)
+          }
+          inEsc = false
+          esc = 0
+        } else if ((char == '[') || (char == 'O')) {
+          esc = char
+        } else {
+          inEsc = false
+        }
+      } else if (char == 11) {
+        // kill to eol
+        printf("%s%s", strings.Repeat(" ", len(command[cursorPos:]) ), strings.Repeat("\b", len(command[cursorPos:])))
+        command = command[:cursorPos]
+      } else if (char == 21) {
+        // kill whole line
+        cursorPos, command = killLine(cursorPos, command)
+      } else if (char == _ESC) {
+        // esc character
+        inEsc = true
+      } else if ((char == _TAB) && ((len(command) == 0) || (len(strings.Split(strings.TrimSpace(command), " ")) == 1))) {
+        // tab character, print out any completions, we only do tabbing on the first keyword
+        tabCount += 1
+        if (tabCount == 1) {
+          // this tabbing method is a little different than the standard
+          // readline or bash shell tabbing, we always trigger on a single
+          // tab and always show all the possible completions for any
+          // multiple matches
+          if (len(command) == 0) {
+            // nothing typed, just TAB, show all registered TAB completions
+            showTabCompletions(_gTabCompletions, prompt_)
+          } else {
+            // partial word typed, show all possible completions
+            matchList := findTabCompletions(command)
+            if (len(matchList) == 1) {
+              // only one possible completion, show it
+              clearLine(cursorPos, command)
+              cursorPos, command = showCommand(matchList[0] + " ")
+            } else if (len(matchList) > 1) {
+              // multiple possible matches, fill out longest match and
+              // then show all other possibilities
+              clearLine(cursorPos, command)
+              cursorPos, command = showCommand(findLongestMatch(matchList, command))
+              showTabCompletions(matchList, prompt_+command)
+            }
+          }
+        }
+      } else if (char == _DEL) {
+        // backspace delete
+        if ((len(command) > 0) && (cursorPos > 0)) {
+          printf("%s%s%s%s", "\b", command[cursorPos:], " ", strings.Repeat("\b", len(command[cursorPos:])+1))
+          command = command[:cursorPos-1] + command[cursorPos:]
+          cursorPos -= 1
+        }
+      } else if (char == 1) {
+        // home, go to beginning of line
+        cursorPos = beginningOfLine(cursorPos, command)
+      } else if (char == 3) {
+        // ctrl-c, raise signal SIGINT to our own process
+        //os.kill(os.getpid(), signal.SIGINT)
+      } else if (char == 5) {
+        // end, go to end of line
+        cursorPos = endOfLine(cursorPos, command)
+      } else if (char != 9) {
+        // don't print out tab if multi keyword command
+        //_write("\nchar value: %d" % char)
+        //_write("\n"+prompt_)
+      }
+    }    
   }
-  return command, fullCommand, quit
+  return command, fullCommand, quit, cursorPos
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1081,6 +1281,7 @@ func receiveTCP() {
   var fullCommand bool
   var command string
   var length int
+  var cursorPos int
   _gConnectFd.Write(_gTcpNegotiate)
   _gConnectFd.Read(_gPshellRcvMsg)
   showWelcome()
@@ -1088,14 +1289,19 @@ func receiveTCP() {
   _gQuitTcp = false
   command = ""
   fullCommand = false
+  cursorPos = 0
+  _gCommandHistory = []string{}
   for (_gQuitTcp == false) {
-    showPrompt(command)
+    if (command == "") {
+      showPrompt(command)
+    }
     length, _ = _gConnectFd.Read(_gPshellRcvMsg)
-    command, fullCommand, _gQuitTcp = getInput(command, _gPshellRcvMsg, length)
+    command, fullCommand, _gQuitTcp, cursorPos = getInput(command, _gPshellRcvMsg, length, cursorPos, _gPrompt)
     if ((_gQuitTcp == false) && (fullCommand == true)) {
       processCommand(command)
       command = ""
       fullCommand = false
+      cursorPos = 0
     }
   }
 }

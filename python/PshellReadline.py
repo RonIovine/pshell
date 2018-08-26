@@ -268,10 +268,12 @@ def _setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_):
   global _gOutFd
   global _gTcpNegotiate
   global _gSerialType
+  global _gCommandHistory
   _gInFd = inFd_
   _gOutFd = outFd_
   _gSerialType = serialType_
   _setIdleTimeout(idleTimeout_)
+  _gCommandHistory = []
   # if a socket serial device, setup for telnet client control
   if (_gSerialType == SOCKET):
     _write(_gTcpNegotiate)
@@ -410,7 +412,6 @@ def _getInput(prompt_):
   command = ""
   cursorPos = 0
   tabCount = 0
-  tabCompletions = []
   _write(prompt_)
   while (True):
     (char, idleSession) = _getChar()
@@ -495,8 +496,9 @@ def _getInput(prompt_):
       _write("\n")
       if (len(command) > 0):
         # add command to our command history
-        _gCommandHistory.append(command)
-        _gCommandHistoryPos = len(_gCommandHistory)
+        if (len(_gCommandHistory) == 0 or (_gCommandHistory[-1] != command)):
+          _gCommandHistory.append(command)
+          _gCommandHistoryPos = len(_gCommandHistory)
         # return command, no idleSession timeout
         return (command.strip(), False)
       else:
