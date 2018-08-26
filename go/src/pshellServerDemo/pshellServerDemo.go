@@ -308,7 +308,7 @@ func main() {
   // All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden 
   // via the 'pshell-server.conf' file on a per-server basis.
 
-  PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, "127.0.0.1", "7001")
+  PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, "7001")
 
   // should never get here, but cleanup any pshell system resources as good practice
   PshellServer.CleanupResources()

@@ -467,8 +467,20 @@ func startServer(serverName string,
   if (_gRunning == false) {
     _gServerName = serverName
     _gServerMode = serverMode
-    _gTitle, _gBanner, _gPrompt, _gServerType, _gHostnameOrIpAddr, _gPort, _gTcpTimeout =
-      loadConfigFile(_gServerName, _gTitle, _gBanner, _gPrompt, serverType, hostnameOrIpAddr, port, _gTcpTimeout)
+    _gTitle,
+    _gBanner,
+    _gPrompt,
+    _gServerType,
+    _gHostnameOrIpAddr,
+    _gPort,
+    _gTcpTimeout = loadConfigFile(_gServerName,
+                                  _gTitle,
+                                  _gBanner,
+                                  _gPrompt,
+                                  serverType,
+                                  hostnameOrIpAddr,
+                                  port,
+                                  _gTcpTimeout)
     loadStartupFile()  
     _gRunning = true
     if (_gServerMode == BLOCKING) {
@@ -551,7 +563,10 @@ func flush() {
     if ((_gServerType == UDP) || (_gServerType == UNIX)) {
       reply(getMsgType(_gPshellRcvMsg))
     } else if (_gServerType == TCP) {
-      _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload, "\n", "\r\n", -1)))
+      _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload,
+                                               "\n",
+                                               "\r\n",
+                                               -1)))
       _gPshellSendPayload = ""
     }
   }
@@ -692,10 +707,14 @@ func showWelcome() {
   // put up our window title banner
   if (_gServerType == LOCAL) {
     Printf("\033]0;%s\007", _gTitle)
-    server = fmt.Sprintf("#  Single session LOCAL server: %s[%s]\n", _gServerName, _gServerType)
+    server = fmt.Sprintf("#  Single session LOCAL server: %s[%s]\n",
+                         _gServerName,
+                         _gServerType)
   } else {
     Printf("\033]0;%s\007", _gTcpTitle)
-    server = fmt.Sprintf("#  Single session TCP server: %s[%s]\n", _gServerName, _gTcpConnectSockName)
+    server = fmt.Sprintf("#  Single session TCP server: %s[%s]\n",
+                         _gServerName,
+                         _gTcpConnectSockName)
   }
   maxBorderWidth := math.Max(58, float64(len(banner)-1))
   maxBorderWidth = math.Max(maxBorderWidth, float64(len(server)))+2
@@ -836,9 +855,19 @@ func runServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runUDPServer() {
-  fmt.Printf("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %s\n", _gServerName, _gHostnameOrIpAddr, _gPort)
+  fmt.Printf("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %s\n",
+             _gServerName,
+             _gHostnameOrIpAddr,
+             _gPort)
   // startup our UDP server
-  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
+  addCommand(batch,
+             "batch",
+             "run commands from a batch file",
+             "<filename>",
+             1,
+             1,
+             true,
+             true)
   if (createSocket()) {
     for {
       receiveDGRAM()
@@ -851,7 +880,14 @@ func runUDPServer() {
 func runUNIXServer() {
   fmt.Printf("PSHELL_INFO: UNIX Server: %s Started\n", _gServerName)
   // startup our UDP server
-  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
+  addCommand(batch,
+             "batch",
+             "run commands from a batch file",
+             "<filename>",
+             1,
+             1,
+             true,
+             true)
   if (createSocket()) {
     for {
       receiveDGRAM()
@@ -884,15 +920,17 @@ func runLocalServer() {
 ////////////////////////////////////////////////////////////////////////////////
 func acceptConnection() bool {
   _gConnectFd, _ = _gTcpSocket.AcceptTCP()
-  //(_gConnectFd, clientAddr) = _gSocketFd.accept()
-  //_gTcpConnectSockName = clientAddr[0]
+  _gTcpConnectSockName = strings.Split(_gConnectFd.LocalAddr().String(), ":")[0]
   return (true)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runTCPServer() {
-  fmt.Printf("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %s\n", _gServerName, _gHostnameOrIpAddr, _gPort)
+  fmt.Printf("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %s\n",
+             _gServerName,
+             _gHostnameOrIpAddr,
+             _gPort)
   _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
   _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
   addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
@@ -913,8 +951,16 @@ func runTCPServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func createSocket() bool {
+  var hostnameOrIpAddr = ""
+  if (_gHostnameOrIpAddr == ANYHOST) {
+    hostnameOrIpAddr = ""
+  } else if (_gHostnameOrIpAddr == LOCALHOST) {
+    hostnameOrIpAddr = "127.0.0.1"
+  } else {
+    hostnameOrIpAddr = _gHostnameOrIpAddr
+  }
   if (_gServerType == UDP) {
-    serverAddr := _gHostnameOrIpAddr + ":" + _gPort
+    serverAddr := hostnameOrIpAddr + ":" + _gPort
     udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
     if err == nil {
       _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
@@ -934,7 +980,8 @@ func createSocket() bool {
     }
     return (true)
   } else if (_gServerType == TCP) {
-    serverAddr := _gHostnameOrIpAddr + ":" + _gPort
+    // Listen for incoming connections
+    serverAddr := hostnameOrIpAddr + ":" + _gPort
     tcpAddr, err := net.ResolveTCPAddr("tcp", serverAddr)
     if err == nil {
       _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
@@ -942,21 +989,6 @@ func createSocket() bool {
     } else {
       return (false)
     }
-    /*
-    // IP domain socket (TCP)
-    _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    // Bind the socket to the port
-    if (_gHostnameOrIpAddr == ANYHOST):
-      _gSocketFd.bind(("", _gPort))
-    elif (_gHostnameOrIpAddr == LOCALHOST):
-      _gSocketFd.bind(("127.0.0.1", _gPort))
-    else:
-      _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
-    // Listen for incoming connections
-    _gSocketFd.listen(1)
-    return (true)
-    */
   } else {
     return (false)
   }
@@ -990,7 +1022,8 @@ func showPrompt(command_ string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func addTabCompletions() {
-  if (((_gServerType == LOCAL) || (_gServerType == TCP)) && (_gRunning  == true)) {
+  if (((_gServerType == LOCAL) || (_gServerType == TCP)) &&
+       (_gRunning  == true)) {
     for _, entry := range(_gCommandList) {
       addTabCompletion(entry.command)
     }
@@ -1057,7 +1090,8 @@ func showTabCompletions(completionList_ []string, prompt_ string) {
       printf("%-*s", _gMaxTabCompletionKeywordLength, keyword)
       numPrinted += 1
       totPrinted += 1
-      if ((numPrinted == _gMaxCompletionsPerLine) && (totPrinted < len(completionList_))) {
+      if ((numPrinted == _gMaxCompletionsPerLine) &&
+          (totPrinted < len(completionList_))) {
         printf("\n")
         numPrinted = 0
       }
@@ -1069,7 +1103,10 @@ func showTabCompletions(completionList_ []string, prompt_ string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func clearLine(cursorPos_ int, command_ string) {
-  printf("%s%s%s", strings.Repeat("\b", cursorPos_), strings.Repeat(" ", cursorPos_), strings.Repeat("\b", len(command_)))
+  printf("%s%s%s",
+         strings.Repeat("\b", cursorPos_),
+         strings.Repeat(" ", cursorPos_),
+         strings.Repeat("\b", len(command_)))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1110,28 +1147,43 @@ func showCommand(command_ string) (int, string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getInput(command string, keystroke []byte, length int, cursorPos int, prompt_ string) (string, bool, bool, int) {
+func getInput(command string,
+              keystroke []byte,
+              length int,
+              cursorPos int,
+              tabCount int,
+              prompt_ string) (string,
+                               bool,
+                               bool,
+                               int,
+                               int) {
   quit := false
   fullCommand := false
   if (keystroke[0] == _CR) {
     // user typed CR, indicate the command is entered and return
     printf("\n")
+    tabCount = 0
     if (len(command) > 0) {
       fullCommand = true
-      if (len(_gCommandHistory) == 0 || (_gCommandHistory[len(_gCommandHistory)-1] != command)) {
+      if (len(_gCommandHistory) == 0 ||
+          _gCommandHistory[len(_gCommandHistory)-1] != command) {
         _gCommandHistory = append(_gCommandHistory, command)
         _gCommandHistoryPos = len(_gCommandHistory)
       }
     }
-  } else if ((length == 1) && (keystroke[0] >= _SPACE) && (keystroke[0] < _DEL)) {
+  } else if ((length == 1) &&
+             (keystroke[0] >= _SPACE) &&
+             (keystroke[0] < _DEL)) {
     // printable single character, add it to our command,
     command = command[:cursorPos] + string(keystroke[0]) + command[cursorPos:]
-    printf("%s%s", command[cursorPos:], strings.Repeat("\b", len(command[cursorPos:])-1))
+    printf("%s%s",
+           command[cursorPos:],
+           strings.Repeat("\b", len(command[cursorPos:])-1))
     cursorPos += 1
+    tabCount = 0
   } else {
     inEsc := false
     var esc byte = 0
-    tabCount := 0
     // non-printable character or escape sequence, process it
     for index := 0; index < length; index++ {
       //fmt.Printf("index[%d], val: %d\n", index, keystroke[index])
@@ -1167,7 +1219,9 @@ func getInput(command string, keystroke []byte, length int, cursorPos int, promp
           } else if (char == 'C') {
             // right-arrow key
             if (cursorPos < len(command)) {
-              printf("%s%s", command[cursorPos:], strings.Repeat("\b", len(command[cursorPos:])-1))
+              printf("%s%s",
+                     command[cursorPos:],
+                     strings.Repeat("\b", len(command[cursorPos:])-1))
               cursorPos += 1
             }
             inEsc = false
@@ -1188,7 +1242,10 @@ func getInput(command string, keystroke []byte, length int, cursorPos int, promp
           } else if (char == '~') {
             // delete key, delete under cursor
             if (cursorPos < len(command)) {
-              printf("%s%s%s", command[cursorPos+1:], " ", strings.Repeat("\b", len(command[cursorPos:])))
+              printf("%s%s%s",
+                     command[cursorPos+1:],
+                     " ",
+                     strings.Repeat("\b", len(command[cursorPos:])))
               command = command[:cursorPos] + command[cursorPos+1:]
             }
             inEsc = false
@@ -1214,7 +1271,9 @@ func getInput(command string, keystroke []byte, length int, cursorPos int, promp
         }
       } else if (char == 11) {
         // kill to eol
-        printf("%s%s", strings.Repeat(" ", len(command[cursorPos:]) ), strings.Repeat("\b", len(command[cursorPos:])))
+        printf("%s%s",
+               strings.Repeat(" ", len(command[cursorPos:]) ),
+               strings.Repeat("\b", len(command[cursorPos:])))
         command = command[:cursorPos]
       } else if (char == 21) {
         // kill whole line
@@ -1222,7 +1281,9 @@ func getInput(command string, keystroke []byte, length int, cursorPos int, promp
       } else if (char == _ESC) {
         // esc character
         inEsc = true
-      } else if ((char == _TAB) && ((len(command) == 0) || (len(strings.Split(strings.TrimSpace(command), " ")) == 1))) {
+      } else if ((char == _TAB) &&
+                ((len(command) == 0) ||
+                 (len(strings.Split(strings.TrimSpace(command), " ")) == 1))) {
         // tab character, print out any completions, we only do tabbing on the first keyword
         tabCount += 1
         if (tabCount == 1) {
@@ -1252,7 +1313,11 @@ func getInput(command string, keystroke []byte, length int, cursorPos int, promp
       } else if (char == _DEL) {
         // backspace delete
         if ((len(command) > 0) && (cursorPos > 0)) {
-          printf("%s%s%s%s", "\b", command[cursorPos:], " ", strings.Repeat("\b", len(command[cursorPos:])+1))
+          printf("%s%s%s%s",
+                 "\b",
+                 command[cursorPos:],
+                 " ",
+                 strings.Repeat("\b", len(command[cursorPos:])+1))
           command = command[:cursorPos-1] + command[cursorPos:]
           cursorPos -= 1
         }
@@ -1272,7 +1337,7 @@ func getInput(command string, keystroke []byte, length int, cursorPos int, promp
       }
     }    
   }
-  return command, fullCommand, quit, cursorPos
+  return command, fullCommand, quit, cursorPos, tabCount
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1282,6 +1347,7 @@ func receiveTCP() {
   var command string
   var length int
   var cursorPos int
+  var tabCount int
   _gConnectFd.Write(_gTcpNegotiate)
   _gConnectFd.Read(_gPshellRcvMsg)
   showWelcome()
@@ -1290,13 +1356,23 @@ func receiveTCP() {
   command = ""
   fullCommand = false
   cursorPos = 0
+  tabCount = 0
   _gCommandHistory = []string{}
   for (_gQuitTcp == false) {
     if (command == "") {
       showPrompt(command)
     }
     length, _ = _gConnectFd.Read(_gPshellRcvMsg)
-    command, fullCommand, _gQuitTcp, cursorPos = getInput(command, _gPshellRcvMsg, length, cursorPos, _gPrompt)
+    command,
+    fullCommand,
+    _gQuitTcp,
+    cursorPos,
+    tabCount = getInput(command,
+                        _gPshellRcvMsg,
+                        length,
+                        cursorPos,
+                        tabCount,
+                        _gPrompt)
     if ((_gQuitTcp == false) && (fullCommand == true)) {
       processCommand(command)
       command = ""
