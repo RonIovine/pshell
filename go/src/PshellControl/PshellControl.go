@@ -556,7 +556,7 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
   if (err == nil) {
     if (timeout_ > _NO_WAIT) {
       for {
-        control_.socket.SetReadDeadline(time.Now().Add(time.Second*time.Duration(timeout_)))
+        control_.socket.SetReadDeadline(time.Now().Add(time.Millisecond*time.Duration(timeout_)))
         var err error
         control_.recvSize, err = control_.socket.Read(control_.recvMsg)
         if (err == nil) {

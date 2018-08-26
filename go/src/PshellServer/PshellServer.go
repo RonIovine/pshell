@@ -9,6 +9,7 @@ import "io/ioutil"
 import "os"
 import "math"
 import "bufio"
+import "time"
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -1011,16 +1012,6 @@ func receiveDGRAM() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func showPrompt(command_ string) {
-  if (command_ == "") {
-    printf("\r%s", _gTcpPrompt);
-  } else {
-    printf("\r%s%s", _gTcpPrompt, command_);
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 func addTabCompletions() {
   if (((_gServerType == LOCAL) || (_gServerType == TCP)) &&
        (_gRunning  == true)) {
@@ -1186,7 +1177,7 @@ func getInput(command string,
     var esc byte = 0
     // non-printable character or escape sequence, process it
     for index := 0; index < length; index++ {
-      //fmt.Printf("index[%d], val: %d\n", index, keystroke[index])
+      fmt.Printf("index[%d], val: %d\n", index, keystroke[index])
       char := keystroke[index]
       if (char != _TAB) {
         // something other than TAB typed, clear out our tabCount
@@ -1348,10 +1339,10 @@ func receiveTCP() {
   var length int
   var cursorPos int
   var tabCount int
+  var err error
   _gConnectFd.Write(_gTcpNegotiate)
   _gConnectFd.Read(_gPshellRcvMsg)
   showWelcome()
-  //_gPshellMsg["msgType"] = _gMsgTypes["userCommand"]
   _gQuitTcp = false
   command = ""
   fullCommand = false
@@ -1360,24 +1351,30 @@ func receiveTCP() {
   _gCommandHistory = []string{}
   for (_gQuitTcp == false) {
     if (command == "") {
-      showPrompt(command)
+      printf("\r%s", _gTcpPrompt)
     }
-    length, _ = _gConnectFd.Read(_gPshellRcvMsg)
-    command,
-    fullCommand,
-    _gQuitTcp,
-    cursorPos,
-    tabCount = getInput(command,
-                        _gPshellRcvMsg,
-                        length,
-                        cursorPos,
-                        tabCount,
-                        _gPrompt)
-    if ((_gQuitTcp == false) && (fullCommand == true)) {
-      processCommand(command)
-      command = ""
-      fullCommand = false
-      cursorPos = 0
+    _gConnectFd.SetReadDeadline(time.Now().Add(time.Minute*time.Duration(_gTcpTimeout)))
+    length, err = _gConnectFd.Read(_gPshellRcvMsg)
+    if (err == nil) {
+      command,
+      fullCommand,
+      _gQuitTcp,
+      cursorPos,
+      tabCount = getInput(command,
+                          _gPshellRcvMsg,
+                          length,
+                          cursorPos,
+                          tabCount,
+                          _gTcpPrompt)
+      if ((_gQuitTcp == false) && (fullCommand == true)) {
+        processCommand(command)
+        command = ""
+        fullCommand = false
+        cursorPos = 0
+      }
+    } else {
+      printf("\nIdle session timeout\n")
+      _gQuitTcp = true
     }
   }
 }
