@@ -707,45 +707,45 @@ func showWelcome() {
   banner := "#  " + _gBanner + "\n"
   // put up our window title banner
   if (_gServerType == LOCAL) {
-    Printf("\033]0;%s\007", _gTitle)
+    printf("\033]0;%s\007", _gTitle)
     server = fmt.Sprintf("#  Single session LOCAL server: %s[%s]\n",
                          _gServerName,
                          _gServerType)
   } else {
-    Printf("\033]0;%s\007", _gTcpTitle)
+    printf("\033]0;%s\007", _gTcpTitle)
     server = fmt.Sprintf("#  Single session TCP server: %s[%s]\n",
                          _gServerName,
                          _gTcpConnectSockName)
   }
   maxBorderWidth := math.Max(58, float64(len(banner)-1))
   maxBorderWidth = math.Max(maxBorderWidth, float64(len(server)))+2
-  Printf("\n")
-  Printf(strings.Repeat("#", int(maxBorderWidth)))
-  Printf("\n")
-  Printf("#\n")
-  Printf(banner)
-  Printf("#\n")
-  Printf(server)
-  Printf("#\n")
+  printf("\n")
+  printf(strings.Repeat("#", int(maxBorderWidth)))
+  printf("\n")
+  printf("#\n")
+  printf(banner)
+  printf("#\n")
+  printf(server)
+  printf("#\n")
   if (_gServerType == LOCAL) {
-    Printf("#  Idle session timeout: NONE\n")
+    printf("#  Idle session timeout: NONE\n")
   } else {
-    Printf("#  Idle session timeout: %d minutes\n", _gTcpTimeout)
+    printf("#  Idle session timeout: %d minutes\n", _gTcpTimeout)
   }
-  Printf("#\n")
-  Printf("#  Type '?' or 'help' at prompt for command summary\n")
-  Printf("#  Type '?' or '-h' after command for command usage\n")
-  Printf("#\n")
+  printf("#\n")
+  printf("#  Type '?' or 'help' at prompt for command summary\n")
+  printf("#  Type '?' or '-h' after command for command usage\n")
+  printf("#\n")
   if (_gServerType == TCP) {
-    Printf("#  Full <TAB> completion, up-arrow recall, command\n")
-    Printf("#  line editing and command abbreviation supported\n")
+    printf("#  Full <TAB> completion, up-arrow recall, command\n")
+    printf("#  line editing and command abbreviation supported\n")
   } else {
-    Printf("#  Command abbreviation supported\n")
+    printf("#  Command abbreviation supported\n")
   }
-  Printf("#\n")
-  Printf(strings.Repeat("#", int(maxBorderWidth)))
-  Printf("\n")
-  Printf("\n")
+  printf("#\n")
+  printf(strings.Repeat("#", int(maxBorderWidth)))
+  printf("\n")
+  printf("\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1229,7 +1229,7 @@ func getInput(command string,
             printf("home2")
             cursorPos = beginningOfLine(cursorPos, command)
           //} else if (char == '3') {
-          //  print("delete")
+          //  printf("delete\n")
           } else if (char == '~') {
             // delete key, delete under cursor
             if (cursorPos < len(command)) {
@@ -1242,7 +1242,7 @@ func getInput(command string,
             inEsc = false
             esc = 0
           } else if (char == '4') {
-            print("end2")
+            printf("end2\n")
             cursorPos = endOfLine(cursorPos, command)
           }
         } else if (esc == 'O') {
@@ -1389,53 +1389,53 @@ func isValidArgCount() bool {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryVersion() {
-  Printf("%s", _gServerVersion)
+  printf("%s", _gServerVersion)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryPayloadSize() {
-  Printf("%d", _gPshellMsgPayloadLength)
+  printf("%d", _gPshellMsgPayloadLength)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryName() {
-  Printf(_gServerName)
+  printf(_gServerName)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryTitle() {
-  Printf(_gTitle)
+  printf(_gTitle)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryBanner() {
-  Printf(_gBanner)
+  printf(_gBanner)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryPrompt() {
-  Printf(_gPrompt)
+  printf(_gPrompt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryCommands1() {
   for _, command := range _gCommandList {
-    Printf("%-*s  -  %s\n", _gMaxLength, command.command, command.description)
+    printf("%-*s  -  %s\n", _gMaxLength, command.command, command.description)
   }
-  Printf("\n")
+  printf("\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func processQueryCommands2() {
   for _, command := range _gCommandList {
-    Printf("%s%s", command.command, "/")
+    printf("%s%s", command.command, "/")
   }
 }
 
@@ -1481,9 +1481,9 @@ func processCommand(command string) {
       }
     }
     if (numMatches == 0) {
-      Printf("PSHELL_ERROR: Command: '%s' not found\n", command)
+      printf("PSHELL_ERROR: Command: '%s' not found\n", command)
     } else if (numMatches > 1) {
-      Printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command)
+      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command)
     } else {
       if (IsHelp()) {
         if (_gFoundCommand.showUsage == true) {
