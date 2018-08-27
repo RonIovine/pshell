@@ -573,7 +573,7 @@ def _getInput(prompt_):
     elif (ord(char) == 1):
       # home, go to beginning of line
       cursorPos = _beginningOfLine(cursorPos, command)
-    elif (ord(char) == 3):
+    elif ((ord(char) == 3) and (_gSerialType == TTY)):
       # ctrl-c, raise signal SIGINT to our own process
       os.kill(os.getpid(), signal.SIGINT)
     elif (ord(char) == 5):
