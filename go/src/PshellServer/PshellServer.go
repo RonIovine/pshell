@@ -1177,7 +1177,7 @@ func getInput(command string,
     var esc byte = 0
     // non-printable character or escape sequence, process it
     for index := 0; index < length; index++ {
-      fmt.Printf("index[%d], val: %d\n", index, keystroke[index])
+      //fmt.Printf("index[%d], val: %d\n", index, keystroke[index])
       char := keystroke[index]
       if (char != _TAB) {
         // something other than TAB typed, clear out our tabCount
@@ -1315,13 +1315,13 @@ func getInput(command string,
       } else if (char == 1) {
         // home, go to beginning of line
         cursorPos = beginningOfLine(cursorPos, command)
-      } else if (char == 3) {
+      } else if ((char == 3) && (_gServerType == LOCAL)) {
         // ctrl-c, raise signal SIGINT to our own process
         //os.kill(os.getpid(), signal.SIGINT)
       } else if (char == 5) {
         // end, go to end of line
         cursorPos = endOfLine(cursorPos, command)
-      } else if (char != 9) {
+      } else if (char != _TAB) {
         // don't print out tab if multi keyword command
         //_write("\nchar value: %d" % char)
         //_write("\n"+prompt_)
