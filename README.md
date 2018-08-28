@@ -81,8 +81,8 @@ is no interactive user prompting, and control is returned to the calling host's 
 shell when the command is complete.  This mode also provides the ability to setup softlink 
 shortcuts to each internal command and to invoke those commands from the host's command line 
 shell directly via the shortcut name  rather than the parent program name, in a manner similar 
-to [Busybox](https://busybox.net/about.html) functionality.  Note this is not available with the
-Python modules.
+to [Busybox](https://busybox.net/about.html) functionality.  Note this is only available in the
+'C' implementation.
 
 This package also provides an optional integrated interactive dynamic trace filtering mechanism that 
 can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`, 

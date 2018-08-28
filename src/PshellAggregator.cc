@@ -28,13 +28,27 @@
 
 /*******************************************************************************
  *
- * This is an example demo program that shows the use of multiple pshell control
- * interfaces to aggregate all of the remote commands from all of the connected
- * servers into a single local pshell server.  This can be useful in presenting
- * a consolidated user shell who's functionality spans several discrete pshell
- * servers.  Since this uses the PshellControl API, the external servers must
- * all be either UDP or Unix servers.  The consolidation point in this example 
- * is a local pshell server.
+ * This is a pshell client program that aggregates several remote pshell servers
+ * into single local pshell server that serves as an interactive client to the
+ * remote servers.  This can be useful in presenting a consolidated user shell
+ * who's functionality spans several discrete pshell servers.  Since this uses
+ * the PshellControl API, the external servers must all be either UDP or Unix
+ * servers.  The consolidation point a local pshell server.
+ *
+ * This is a generic dynamic aggregator, i.e. it is server agnostic.  Servers can
+ * be added to the aggregation via the 'add server' command either at startup via
+ * the pshellAggregator.startup file or interactively via the interactive command
+ * line.
+ *
+ * This program can also create multicast groups commands via the 'add multicast'
+ * command (also at startup or interactively).  The multicast commands can then be
+ * distributed to multiple aggregated servers.
+ *
+ * This program replaces the old, static, hard-wired, pshellAggregatorDemo.cc
+ * program which hard-coded the remote servers to aggregate.
+ *
+ * The aggregation and multicast functionality can be useful to manually drive a
+ * set of processes that use the pshell control mechanism as a control plane IPC.
  *
  *******************************************************************************/
 

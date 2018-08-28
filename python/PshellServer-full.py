@@ -109,9 +109,9 @@ import socket
 import struct
 import random
 import thread
-import PshellReadline
 from collections import OrderedDict
 from collections import namedtuple
+import PshellReadline
 
 #################################################################################
 #
