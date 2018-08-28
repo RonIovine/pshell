@@ -259,7 +259,6 @@ func RunCommand(format string, command ...interface{}) {
 //
 //    Args:
 //        string (str)   : Message to display to the client user
-//        newline (bool) : Automatically add a newline to message
 //
 //    Returns:
 //        none

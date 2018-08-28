@@ -32,32 +32,35 @@ broadcast address, e.g. x.y.z.255).
 
 The Python, 'C', and 'go' versions are consistent with each other at the API level (i.e.
 similar functional API, usage, process interaction etc) and fully interoperable with each
-other at the protocol level and can be mixed and matched in any combination.  A telnet
-client can interface to both 'C' and Python based pshell servers.  Currently, the 'go'
-implementation only supports UDP/UNIX servers.
+other at the protocol level and can be mixed and matched in any combination.  
 
-The prototype for the 'C' callback functions are similar to the 'main' in 'C' as follows:
+The prototype for the callback functions follow the paradigms of the way command line
+agruments are passed into the respective 'main' for each language as shown below:
+
+'C' callback:
 
 void myFunc(int argc, char *argv[])
 
-The prototype for the Python callback functions are as follows:
+Python callback:
 
 def myFunc(argv)
 
-The prototype for the 'go' callback functions are as follows:
+'go' callback:
 
 func myFunc(argv []string)
 
 Command line pshell functions can also display information back to the interactive clients 
 via a mechanism similar to the familiar 'printf' as follows:
 
+'C' printf:
+
 void pshell_printf(const char *format, ...)
 
-The Python versions have a similar mechanism:
+Python printf:
 
 def printf(string)
 
-The 'go' versions have a similar mechanism:
+'go' printf:
 
 func Printf(format string, message ...interface{})
 
