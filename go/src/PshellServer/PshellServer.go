@@ -383,91 +383,91 @@ func GetOption(arg string) (bool, string, string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func addCommand(function pshellFunction, 
-                command string, 
-                description string, 
-                usage string, 
-                minArgs int, 
-                maxArgs int, 
-                showUsage bool,
-                prepend bool) {  
+func addCommand(function_ pshellFunction, 
+                command_ string, 
+                description_ string, 
+                usage_ string, 
+                minArgs_ int, 
+                maxArgs_ int, 
+                showUsage_ bool,
+                prepend_ bool) {  
                   
   // see if we have a NULL command name 
-  if ((command == "") || (len(command) == 0)) {
+  if ((command_ == "") || (len(command_) == 0)) {
     fmt.Printf("PSHELL_ERROR: NULL command name, command not added\n")
     return
   }
 
   // see if we have a NULL description 
-  if ((description == "") || (len(description) == 0)) {
-    fmt.Printf("PSHELL_ERROR: NULL description, command: '%s' not added\n", command)
+  if ((description_ == "") || (len(description_) == 0)) {
+    fmt.Printf("PSHELL_ERROR: NULL description, command: '%s' not added\n", command_)
     return
   }
 
   // see if we have a NULL function
-  if (function == nil) {
-    fmt.Printf("PSHELL_ERROR: NULL function, command: '%s' not added\n", command)
+  if (function_ == nil) {
+    fmt.Printf("PSHELL_ERROR: NULL function, command: '%s' not added\n", command_)
     return
   }
 
   // if they provided no usage for a function with arguments
-  if (((maxArgs > 0) || (minArgs > 0)) && ((usage == "") || (len(usage) == 0))) {
-    fmt.Printf("PSHELL_ERROR: NULL usage for command that takes arguments, command: '%s' not added\n", command)
+  if (((maxArgs_ > 0) || (minArgs_ > 0)) && ((usage_ == "") || (len(usage_) == 0))) {
+    fmt.Printf("PSHELL_ERROR: NULL usage for command that takes arguments, command: '%s' not added\n", command_)
     return
   }
 
   // see if their minArgs is greater than their maxArgs
-  if (minArgs > maxArgs) {
-    fmt.Printf("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added\n", minArgs, maxArgs, command)
+  if (minArgs_ > maxArgs_) {
+    fmt.Printf("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added\n", minArgs_, maxArgs_, command_)
     return
   }
     
   // see if it is a duplicate command
   for _, entry := range _gCommandList {
-    if (entry.command == command) {
+    if (entry.command == command_) {
       // command name already exists, don't add it again
-      fmt.Printf("PSHELL_ERROR: Command: %s already exists, not adding command\n", command)
+      fmt.Printf("PSHELL_ERROR: Command: %s already exists, not adding command\n", command_)
       return
     }
   }
       
   // everything ok, good to add command
   
-  if (len(command) > _gMaxLength) {
-    _gMaxLength = len(command)
+  if (len(command_) > _gMaxLength) {
+    _gMaxLength = len(command_)
   }
     
-  if (prepend == true) {
-    _gCommandList = append([]pshellCmd{{command,
-                                        usage,
-                                        description,
-                                        function,
-                                        minArgs,
-                                        maxArgs,
-                                        showUsage}},
+  if (prepend_ == true) {
+    _gCommandList = append([]pshellCmd{{command_,
+                                        usage_,
+                                        description_,
+                                        function_,
+                                        minArgs_,
+                                        maxArgs_,
+                                        showUsage_}},
                            _gCommandList...)
   } else {
     _gCommandList = append(_gCommandList, 
-                           pshellCmd{command, 
-                                     usage,
-                                     description, 
-                                     function,
-                                     minArgs, 
-                                     maxArgs,
-                                     showUsage})
+                           pshellCmd{command_, 
+                                     usage_,
+                                     description_, 
+                                     function_,
+                                     minArgs_, 
+                                     maxArgs_,
+                                     showUsage_})
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func startServer(serverName string,
-                 serverType string,
-                 serverMode int,
-                 hostnameOrIpAddr string, 
-                 port string) {
+func startServer(serverName_ string,
+                 serverType_ string,
+                 serverMode_ int,
+                 hostnameOrIpAddr_ string, 
+                 port_ string) {
   if (_gRunning == false) {
-    _gServerName = serverName
-    _gServerMode = serverMode
+    _gServerName = serverName_
+    _gServerMode = serverMode_
     _gTitle,
     _gBanner,
     _gPrompt,
@@ -478,9 +478,9 @@ func startServer(serverName string,
                                   _gTitle,
                                   _gBanner,
                                   _gPrompt,
-                                  serverType,
-                                  hostnameOrIpAddr,
-                                  port,
+                                  serverType_,
+                                  hostnameOrIpAddr_,
+                                  port_,
                                   _gTcpTimeout)
     loadStartupFile()  
     _gRunning = true
@@ -575,10 +575,10 @@ func flush() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func wheel(message string) {
+func wheel(message_ string) {
   _gWheelPos += 1
-  if (message != "") {
-    printf("\r%s%c", message, _gWheel[(_gWheelPos)%4])
+  if (message_ != "") {
+    printf("\r%s%c", message_, _gWheel[(_gWheelPos)%4])
   } else {
     printf("\r%c", _gWheel[(_gWheelPos)%4])
   }
@@ -587,8 +587,8 @@ func wheel(message string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func march(message string) {
-  printf(message)
+func march(message_ string) {
+  printf(message_)
   flush()
 }
 
@@ -604,23 +604,23 @@ func showUsage() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isSubString(string1 string, string2 string, minMatchLength int) bool {
-  if (minMatchLength > len(string1)) {
+func isSubString(string1_ string, string2_ string, minMatchLength_ int) bool {
+  if (minMatchLength_ > len(string1_)) {
     return false
   } else {
-    return strings.HasPrefix(string2, string1)
+    return strings.HasPrefix(string2_, string1_)
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getOption(arg string) (bool, string, string) {
-  if (len(arg) < 3) {
+func getOption(arg_ string) (bool, string, string) {
+  if (len(arg_) < 3) {
     return false, "", ""
-  } else if (arg[0] == '-') {
-    return true, arg[:2], arg[2:]
+  } else if (arg_[0] == '-') {
+    return true, arg_[:2], arg_[2:]
   } else {
-    value := strings.Split(arg, "=")
+    value := strings.Split(arg_, "=")
     if (len(value) != 2) {
       return false, "", ""
     } else {
@@ -631,20 +631,20 @@ func getOption(arg string) (bool, string, string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func loadConfigFile(serverName string,
-                    title string,
-                    banner string,
-                    prompt string,
-                    serverType string,
-                    hostnameOrIpAddr string,
-                    port string,
-                    tcpTimeout int) (string,
-                                     string,
-                                     string,
-                                     string,
-                                     string,
-                                     string,
-                                     int) {
+func loadConfigFile(serverName_ string,
+                    title_ string,
+                    banner_ string,
+                    prompt_ string,
+                    serverType_ string,
+                    hostnameOrIpAddr_ string,
+                    port_ string,
+                    tcpTimeout_ int) (string,
+                                      string,
+                                      string,
+                                      string,
+                                      string,
+                                      string,
+                                      int) {
   var configFile1 = ""
   var file []byte
   configPath := os.Getenv("PSHELL_CONFIG_DIR")
@@ -661,7 +661,7 @@ func loadConfigFile(serverName string,
   } else if _, err := os.Stat(configFile3); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(configFile3)
   } else {
-    return title, banner, prompt, serverType, hostnameOrIpAddr, port, tcpTimeout
+    return title_, banner_, prompt_, serverType_, hostnameOrIpAddr_, port_, tcpTimeout_
   }
   // found a config file, process it
   lines := strings.Split(string(file), "\n")
@@ -671,32 +671,32 @@ func loadConfigFile(serverName string,
       value := strings.Split(line, "=")
       if (len(value) == 2) {
         option := strings.Split(value[0], ".")
-        if ((len(option) == 2) && (serverName == option[0])) {
+        if ((len(option) == 2) && (serverName_ == option[0])) {
           if (strings.ToLower(option[1]) == "title") {
-            title = value[1]
+            title_ = value[1]
           } else if (strings.ToLower(option[1]) == "banner") {
-            banner = value[1]
+            banner_ = value[1]
           } else if (strings.ToLower(option[1]) == "prompt") {
-            prompt = value[1]
+            prompt_ = value[1]
           } else if (strings.ToLower(option[1]) == "host") {
-            hostnameOrIpAddr = value[1]
+            hostnameOrIpAddr_ = value[1]
           } else if (strings.ToLower(option[1]) == "port") {
-            port = value[1]
+            port_ = value[1]
           } else if (strings.ToLower(option[1]) == "type") {
             if ((strings.ToLower(value[1]) == UDP) ||
                 (strings.ToLower(value[1]) == TCP) ||
                 (strings.ToLower(value[1]) == UNIX) ||
                 (strings.ToLower(value[1]) == LOCAL)) {
-              serverType = value[1]
+              serverType_ = value[1]
             }
           } else if (strings.ToLower(option[1]) == "timeout") {
-            tcpTimeout, _ = strconv.Atoi(value[1])
+            tcpTimeout_, _ = strconv.Atoi(value[1])
           }
         }
       }
     }
   }
-  return title, banner, prompt, serverType, hostnameOrIpAddr, port, tcpTimeout
+  return title_, banner_, prompt_, serverType_, hostnameOrIpAddr_, port_, tcpTimeout_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -782,8 +782,8 @@ func loadStartupFile() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func batch(argv []string) {
-  var batchFile = argv[0]
+func batch(argv_ []string) {
+  var batchFile = argv_[0]
   var batchFile1 = ""
   var file []byte
   batchPath := os.Getenv("PSHELL_BATCH_DIR")
@@ -819,7 +819,7 @@ func batch(argv []string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func help(argv []string) {
+func help(argv_ []string) {
   printf("\n")
   printf("****************************************\n")
   printf("*             COMMAND LIST             *\n")
@@ -830,7 +830,7 @@ func help(argv []string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func exit(argv []string) {
+func exit(argv_ []string) {
   if (_gServerType == LOCAL) {
     //local server, exit the process
     os.Exit(0)
@@ -1138,11 +1138,11 @@ func showCommand(command_ string) (int, string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getInput(command string,
-              keystroke []byte,
-              length int,
-              cursorPos int,
-              tabCount int,
+func getInput(command_ string,
+              keystroke_ []byte,
+              length_ int,
+              cursorPos_ int,
+              tabCount_ int,
               prompt_ string) (string,
                                bool,
                                bool,
@@ -1150,38 +1150,38 @@ func getInput(command string,
                                int) {
   quit := false
   fullCommand := false
-  if (keystroke[0] == _CR) {
+  if (keystroke_[0] == _CR) {
     // user typed CR, indicate the command is entered and return
     printf("\n")
-    tabCount = 0
-    if (len(command) > 0) {
+    tabCount_ = 0
+    if (len(command_) > 0) {
       fullCommand = true
       if (len(_gCommandHistory) == 0 ||
-          _gCommandHistory[len(_gCommandHistory)-1] != command) {
-        _gCommandHistory = append(_gCommandHistory, command)
+          _gCommandHistory[len(_gCommandHistory)-1] != command_) {
+        _gCommandHistory = append(_gCommandHistory, command_)
         _gCommandHistoryPos = len(_gCommandHistory)
       }
     }
-  } else if ((length == 1) &&
-             (keystroke[0] >= _SPACE) &&
-             (keystroke[0] < _DEL)) {
+  } else if ((length_ == 1) &&
+             (keystroke_[0] >= _SPACE) &&
+             (keystroke_[0] < _DEL)) {
     // printable single character, add it to our command,
-    command = command[:cursorPos] + string(keystroke[0]) + command[cursorPos:]
+    command_ = command_[:cursorPos_] + string(keystroke_[0]) + command_[cursorPos_:]
     printf("%s%s",
-           command[cursorPos:],
-           strings.Repeat("\b", len(command[cursorPos:])-1))
-    cursorPos += 1
-    tabCount = 0
+           command_[cursorPos_:],
+           strings.Repeat("\b", len(command_[cursorPos_:])-1))
+    cursorPos_ += 1
+    tabCount_ = 0
   } else {
     inEsc := false
     var esc byte = 0
     // non-printable character or escape sequence, process it
-    for index := 0; index < length; index++ {
-      //fmt.Printf("index[%d], val: %d\n", index, keystroke[index])
-      char := keystroke[index]
+    for index := 0; index < length_; index++ {
+      //fmt.Printf("index[%d], val: %d\n", index, keystroke_[index])
+      char := keystroke_[index]
       if (char != _TAB) {
         // something other than TAB typed, clear out our tabCount
-        tabCount = 0
+        tabCount_ = 0
       }
       if (inEsc == true) {
         if (esc == '[') {
@@ -1189,8 +1189,8 @@ func getInput(command string,
             // up-arrow key
             if (_gCommandHistoryPos > 0) {
               _gCommandHistoryPos -= 1
-              clearLine(cursorPos, command)
-              cursorPos, command = showCommand(_gCommandHistory[_gCommandHistoryPos])
+              clearLine(cursorPos_, command_)
+              cursorPos_, command_ = showCommand(_gCommandHistory[_gCommandHistoryPos])
             }
             inEsc = false
             esc = 0
@@ -1198,60 +1198,60 @@ func getInput(command string,
             // down-arrow key
             if (_gCommandHistoryPos < len(_gCommandHistory)-1) {
               _gCommandHistoryPos += 1
-              clearLine(cursorPos, command)
-              cursorPos, command = showCommand(_gCommandHistory[_gCommandHistoryPos])
+              clearLine(cursorPos_, command_)
+              cursorPos_, command_ = showCommand(_gCommandHistory[_gCommandHistoryPos])
             } else {
               // kill whole line
               _gCommandHistoryPos = len(_gCommandHistory)
-              cursorPos, command = killLine(cursorPos, command)
+              cursorPos_, command_ = killLine(cursorPos_, command_)
             }
             inEsc = false
             esc = 0
           } else if (char == 'C') {
             // right-arrow key
-            if (cursorPos < len(command)) {
+            if (cursorPos_ < len(command_)) {
               printf("%s%s",
-                     command[cursorPos:],
-                     strings.Repeat("\b", len(command[cursorPos:])-1))
-              cursorPos += 1
+                     command_[cursorPos_:],
+                     strings.Repeat("\b", len(command_[cursorPos_:])-1))
+              cursorPos_ += 1
             }
             inEsc = false
             esc = 0
           } else if (char == 'D') {
             // left-arrow key
-            if (cursorPos > 0) {
-              cursorPos -= 1
+            if (cursorPos_ > 0) {
+              cursorPos_ -= 1
               printf("\b")
             }
             inEsc = false
             esc = 0
           } else if (char == '1') {
             printf("home2")
-            cursorPos = beginningOfLine(cursorPos, command)
+            cursorPos_ = beginningOfLine(cursorPos_, command_)
           //} else if (char == '3') {
           //  printf("delete\n")
           } else if (char == '~') {
             // delete key, delete under cursor
-            if (cursorPos < len(command)) {
+            if (cursorPos_ < len(command_)) {
               printf("%s%s%s",
-                     command[cursorPos+1:],
+                     command_[cursorPos_+1:],
                      " ",
-                     strings.Repeat("\b", len(command[cursorPos:])))
-              command = command[:cursorPos] + command[cursorPos+1:]
+                     strings.Repeat("\b", len(command_[cursorPos_:])))
+              command_ = command_[:cursorPos_] + command_[cursorPos_+1:]
             }
             inEsc = false
             esc = 0
           } else if (char == '4') {
             printf("end2\n")
-            cursorPos = endOfLine(cursorPos, command)
+            cursorPos_ = endOfLine(cursorPos_, command_)
           }
         } else if (esc == 'O') {
           if (char == 'H') {
             // home key, go to beginning of line
-            cursorPos = beginningOfLine(cursorPos, command)
+            cursorPos_ = beginningOfLine(cursorPos_, command_)
           } else if (char == 'F') {
             // end key, go to end of line
-            cursorPos = endOfLine(cursorPos, command)
+            cursorPos_ = endOfLine(cursorPos_, command_)
           }
           inEsc = false
           esc = 0
@@ -1263,64 +1263,64 @@ func getInput(command string,
       } else if (char == 11) {
         // kill to eol
         printf("%s%s",
-               strings.Repeat(" ", len(command[cursorPos:]) ),
-               strings.Repeat("\b", len(command[cursorPos:])))
-        command = command[:cursorPos]
+               strings.Repeat(" ", len(command_[cursorPos_:]) ),
+               strings.Repeat("\b", len(command_[cursorPos_:])))
+        command_ = command_[:cursorPos_]
       } else if (char == 21) {
         // kill whole line
-        cursorPos, command = killLine(cursorPos, command)
+        cursorPos_, command_ = killLine(cursorPos_, command_)
       } else if (char == _ESC) {
         // esc character
         inEsc = true
       } else if ((char == _TAB) &&
-                ((len(command) == 0) ||
-                 (len(strings.Split(strings.TrimSpace(command), " ")) == 1))) {
+                ((len(command_) == 0) ||
+                 (len(strings.Split(strings.TrimSpace(command_), " ")) == 1))) {
         // tab character, print out any completions, we only do tabbing on the first keyword
-        tabCount += 1
-        if (tabCount == 1) {
+        tabCount_ += 1
+        if (tabCount_ == 1) {
           // this tabbing method is a little different than the standard
           // readline or bash shell tabbing, we always trigger on a single
           // tab and always show all the possible completions for any
           // multiple matches
-          if (len(command) == 0) {
+          if (len(command_) == 0) {
             // nothing typed, just TAB, show all registered TAB completions
             showTabCompletions(_gTabCompletions, prompt_)
           } else {
             // partial word typed, show all possible completions
-            matchList := findTabCompletions(command)
+            matchList := findTabCompletions(command_)
             if (len(matchList) == 1) {
               // only one possible completion, show it
-              clearLine(cursorPos, command)
-              cursorPos, command = showCommand(matchList[0] + " ")
+              clearLine(cursorPos_, command_)
+              cursorPos_, command_ = showCommand(matchList[0] + " ")
             } else if (len(matchList) > 1) {
               // multiple possible matches, fill out longest match and
               // then show all other possibilities
-              clearLine(cursorPos, command)
-              cursorPos, command = showCommand(findLongestMatch(matchList, command))
-              showTabCompletions(matchList, prompt_+command)
+              clearLine(cursorPos_, command_)
+              cursorPos_, command_ = showCommand(findLongestMatch(matchList, command_))
+              showTabCompletions(matchList, prompt_+command_)
             }
           }
         }
       } else if (char == _DEL) {
         // backspace delete
-        if ((len(command) > 0) && (cursorPos > 0)) {
+        if ((len(command_) > 0) && (cursorPos_ > 0)) {
           printf("%s%s%s%s",
                  "\b",
-                 command[cursorPos:],
+                 command_[cursorPos_:],
                  " ",
-                 strings.Repeat("\b", len(command[cursorPos:])+1))
-          command = command[:cursorPos-1] + command[cursorPos:]
-          cursorPos -= 1
+                 strings.Repeat("\b", len(command_[cursorPos_:])+1))
+          command_ = command_[:cursorPos_-1] + command_[cursorPos_:]
+          cursorPos_ -= 1
         }
       } else if (char == 1) {
         // home, go to beginning of line
-        cursorPos = beginningOfLine(cursorPos, command)
+        cursorPos_ = beginningOfLine(cursorPos_, command_)
       } else if ((char == 3) && (_gServerType == LOCAL)) {
         // ctrl-c, raise signal SIGINT to our own process
         //os.kill(os.getpid(), signal.SIGINT)
       } else if (char == 5) {
         // end, go to end of line
-        cursorPos = endOfLine(cursorPos, command)
+        cursorPos_ = endOfLine(cursorPos_, command_)
       } else if (char != _TAB) {
         // don't print out tab if multi keyword command
         //_write("\nchar value: %d" % char)
@@ -1328,7 +1328,7 @@ func getInput(command string,
       }
     }    
   }
-  return command, fullCommand, quit, cursorPos, tabCount
+  return command_, fullCommand, quit, cursorPos_, tabCount_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1441,7 +1441,7 @@ func processQueryCommands2() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func processCommand(command string) {
+func processCommand(command_ string) {
   if (getMsgType(_gPshellRcvMsg) == _QUERY_VERSION) {
     processQueryVersion()
   } else if (getMsgType(_gPshellRcvMsg) == _QUERY_PAYLOAD_SIZE) {
@@ -1460,30 +1460,30 @@ func processCommand(command string) {
     processQueryCommands2()
   } else {
     _gCommandDispatched = true
-    _gArgs = strings.Split(strings.TrimSpace(command), " ")
-    command := _gArgs[0]
+    _gArgs = strings.Split(strings.TrimSpace(command_), " ")
+    command_ := _gArgs[0]
     if (len(_gArgs) > 1) {
       _gArgs = _gArgs[1:]
     } else {
       _gArgs = []string{}
     }
     numMatches := 0
-    if ((command == "?") || (command == "help")) {
+    if ((command_ == "?") || (command_ == "help")) {
       help(_gArgs)
       _gCommandDispatched = false
       return
     } else {
       for _, entry := range _gCommandList {
-        if (isSubString(command, entry.command, len(command))) {
+        if (isSubString(command_, entry.command, len(command_))) {
           _gFoundCommand = entry
           numMatches += 1
         }
       }
     }
     if (numMatches == 0) {
-      printf("PSHELL_ERROR: Command: '%s' not found\n", command)
+      printf("PSHELL_ERROR: Command: '%s' not found\n", command_)
     } else if (numMatches > 1) {
-      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command)
+      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command_)
     } else {
       if (IsHelp()) {
         if (_gFoundCommand.showUsage == true) {
@@ -1504,8 +1504,8 @@ func processCommand(command string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func reply(response byte) {
-  pshellSendMsg := createMessage(response, 
+func reply(response_ byte) {
+  pshellSendMsg := createMessage(response_, 
                                  getRespNeeded(_gPshellRcvMsg), 
                                  getDataNeeded(_gPshellRcvMsg), 
                                  getSeqNum(_gPshellRcvMsg), 
@@ -1555,64 +1555,68 @@ const (
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getPayload(message []byte, recvSize int) string {
-  return (string(message[_PAYLOAD_OFFSET:recvSize]))
+func getPayload(message_ []byte, recvSize_ int) string {
+  return (string(message_[_PAYLOAD_OFFSET:recvSize_]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getMsgType(message []byte) byte {
-  return (message[_MSG_TYPE_OFFSET])
+func getMsgType(message_ []byte) byte {
+  return (message_[_MSG_TYPE_OFFSET])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func setMsgType(message []byte, msgType byte) {
-  message[_MSG_TYPE_OFFSET] = msgType
+func setMsgType(message_ []byte, msgType_ byte) {
+  message_[_MSG_TYPE_OFFSET] = msgType_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getRespNeeded(message []byte) byte {
-  return (message[_RESP_NEEDED_OFFSET])
+func getRespNeeded(message_ []byte) byte {
+  return (message_[_RESP_NEEDED_OFFSET])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func setRespNeeded(message []byte, respNeeded byte) {
-  message[_RESP_NEEDED_OFFSET] = respNeeded
+func setRespNeeded(message_ []byte, respNeeded_ byte) {
+  message_[_RESP_NEEDED_OFFSET] = respNeeded_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getDataNeeded(message []byte) byte {
-  return (message[_DATA_NEEDED_OFFSET])
+func getDataNeeded(message_ []byte) byte {
+  return (message_[_DATA_NEEDED_OFFSET])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func setDataNeeded(message []byte, dataNeeded byte) {
-  message[_DATA_NEEDED_OFFSET] = dataNeeded
+func setDataNeeded(message_ []byte, dataNeeded_ byte) {
+  message_[_DATA_NEEDED_OFFSET] = dataNeeded_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getSeqNum(message []byte) uint32 {
-  return (binary.BigEndian.Uint32(message[_SEQ_NUM_OFFSET:]))
+func getSeqNum(message_ []byte) uint32 {
+  return (binary.BigEndian.Uint32(message_[_SEQ_NUM_OFFSET:]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func setSeqNum(message []byte, seqNum uint32) {
-  binary.BigEndian.PutUint32(message[_SEQ_NUM_OFFSET:], seqNum)
+func setSeqNum(message_ []byte, seqNum_ uint32) {
+  binary.BigEndian.PutUint32(message_[_SEQ_NUM_OFFSET:], seqNum_)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func createMessage(msgType byte, respNeeded byte, dataNeeded byte, seqNum uint32, command string) []byte {
-  message := []byte{msgType, respNeeded, dataNeeded, 0, 0, 0, 0, 0}
-  setSeqNum(message, seqNum)
-  message = append(message, []byte(command)...)
+func createMessage(msgType_ byte,
+                   respNeeded_ byte,
+                   dataNeeded_ byte,
+                   seqNum_ uint32,
+                   command_ string) []byte {
+  message := []byte{msgType_, respNeeded_, dataNeeded_, 0, 0, 0, 0, 0}
+  setSeqNum(message, seqNum_)
+  message = append(message, []byte(command_)...)
   return (message)
 }
 

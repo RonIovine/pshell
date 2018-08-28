@@ -83,15 +83,15 @@ type pshellControl struct {
   recvSize int
   remoteServer string
 }
-var gControlList = []pshellControl{}
+var _gControlList = []pshellControl{}
 
 type pshellMulticast struct {
   keyword string
   sidList []int
 }
-var gMulticastList = []pshellMulticast{}
+var _gMulticastList = []pshellMulticast{}
 
-var gPshellControlResponse = map[int]string {
+var _gPshellControlResponse = map[int]string {
   INVALID_SID:"PSHELL_INVALID_SID",
   COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
   COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
@@ -374,16 +374,16 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
           break
         }
       }
-      gControlList = append(gControlList, 
-                            pshellControl{socket,
-                                          defaultTimeout_, 
-                                          "unix",
-                                          sourceAddress,      // unix file handle, used for cleanup
-                                          []byte{},           // sendMsg
-                                          make([]byte, 2048), // recvMsg
-                                          0,                  // recvSize
-                                          strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
-      sid = len(gControlList)-1
+      _gControlList = append(_gControlList, 
+                             pshellControl{socket,
+                                           defaultTimeout_, 
+                                           "unix",
+                                           sourceAddress,      // unix file handle, used for cleanup
+                                           []byte{},           // sendMsg
+                                           make([]byte, 2048), // recvMsg
+                                           0,                  // recvSize
+                                           strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
+      sid = len(_gControlList)-1
     } else {
       fmt.Printf("PSHELL_ERROR: Could not find unix server: '%s'\n", _UNIX_SOCKET_PATH+remoteServer_)
     }
@@ -392,17 +392,17 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
     remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
     socket, retCode = net.DialUDP("udp", nil, remoteAddr)
     if (retCode == nil) {
-      gControlList = append(gControlList, 
-                            pshellControl{socket,
-                                          defaultTimeout_, 
-                                          "udp",
-                                          "",                 // sourceAddress not used for UDP socket
-                                          []byte{},           // sendMsg
-                                          make([]byte, 2048), // recvMsg
-                                          0,                  // recvSize
-                                          strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
+      _gControlList = append(_gControlList, 
+                             pshellControl{socket,
+                                           defaultTimeout_, 
+                                           "udp",
+                                           "",                 // sourceAddress not used for UDP socket
+                                           []byte{},           // sendMsg
+                                           make([]byte, 2048), // recvMsg
+                                           0,                  // recvSize
+                                           strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
                                       
-      sid = len(gControlList)-1
+      sid = len(_gControlList)-1
     }
   }
   return (sid)
@@ -410,9 +410,9 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func disconnectServer(sid int) {
-  if ((sid >= 0) && (sid < len(gControlList))) {
-    control := gControlList[sid]
+func disconnectServer(sid_ int) {
+  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
+    control := _gControlList[sid_]
     if (control.serverType == UNIX) {
       os.Remove(control.sourceAddress)
     }
@@ -422,7 +422,7 @@ func disconnectServer(sid int) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func disconnectAllServers() {
-  for sid, _ := range(gControlList) {
+  for sid, _ := range(_gControlList) {
     disconnectServer(sid)
   }
 }
@@ -431,9 +431,9 @@ func disconnectAllServers() {
 ////////////////////////////////////////////////////////////////////////////////
 func addMulticast(sid_ int, keyword_ string) {
   var sidList []int
-  if (sid_ <  len(gControlList)) {
+  if (sid_ <  len(_gControlList)) {
     multicastFound := false
-    for _, multicast := range(gMulticastList) {
+    for _, multicast := range(_gMulticastList) {
       if (multicast.keyword == keyword_) {
         multicastFound = true
         sidList = multicast.sidList
@@ -442,8 +442,8 @@ func addMulticast(sid_ int, keyword_ string) {
     }
     if (multicastFound == false) {
       // multicast entry not found for this keyword, add a new one
-      gMulticastList = append(gMulticastList, pshellMulticast{keyword_, []int{}})
-      sidList = gMulticastList[len(gMulticastList)-1].sidList
+      _gMulticastList = append(_gMulticastList, pshellMulticast{keyword_, []int{}})
+      sidList = _gMulticastList[len(_gMulticastList)-1].sidList
     }
     sidFound := false
     for _, sid := range(sidList) {
@@ -464,11 +464,11 @@ func addMulticast(sid_ int, keyword_ string) {
 func sendMulticast(format_ string, command_ ...interface{}) {
   command := fmt.Sprintf(format_, command_...)
   keyword := strings.Split(strings.TrimSpace(command), " ")[0]
-  for _, multicast := range(gMulticastList) {
+  for _, multicast := range(_gMulticastList) {
     if ((multicast.keyword == MULTICAST_ALL) || (keyword == multicast.keyword)) {
       for _, sid := range(multicast.sidList) {
-        if ((sid >= 0) && (sid < len(gControlList))) {
-          control := gControlList[sid]
+        if ((sid >= 0) && (sid < len(_gControlList))) {
+          control := _gControlList[sid]
           sendCommand(&control, command, _NO_WAIT, _NO_DATA_NEEDED)
         }
       }
@@ -479,8 +479,8 @@ func sendMulticast(format_ string, command_ ...interface{}) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func setDefaultTimeout(sid_ int, defaultTimeout_ int) {
-  if ((sid_ >= 0) && (sid_ < len(gControlList))) {
-    control := gControlList[sid_]
+  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
+    control := _gControlList[sid_]
     control.defaultTimeout = defaultTimeout_
   }
 }
@@ -488,8 +488,8 @@ func setDefaultTimeout(sid_ int, defaultTimeout_ int) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getResponseString(retCode_ int) string {
-  if (retCode_ < len(gPshellControlResponse)) {
-    return (gPshellControlResponse[retCode_])
+  if (retCode_ < len(_gPshellControlResponse)) {
+    return (_gPshellControlResponse[retCode_])
   } else {
     return ("PSHELL_UNKNOWN_RESPONSE")
   }
@@ -498,8 +498,8 @@ func getResponseString(retCode_ int) string {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func sendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
-  if ((sid_ >= 0) && (sid_ < len(gControlList))) {
-    control := gControlList[sid_]
+  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
+    control := _gControlList[sid_]
     return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _NO_DATA_NEEDED)
   } else {
     return INVALID_SID
@@ -509,8 +509,8 @@ func sendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func sendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) int {
-  if ((sid_ >= 0) && (sid_ < len(gControlList))) {
-    control := gControlList[sid_]
+  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
+    control := _gControlList[sid_]
     return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _NO_DATA_NEEDED)
   } else {
     return INVALID_SID
@@ -520,8 +520,8 @@ func sendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...in
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func sendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, string) {
-  if ((sid_ >= 0) && (sid_ < len(gControlList))) {
-    control := gControlList[sid_]
+  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
+    control := _gControlList[sid_]
     return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
@@ -532,8 +532,8 @@ func sendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, strin
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func sendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) (int, string) {
-  if ((sid_ >= 0) && (sid_ < len(gControlList))) {
-    control := gControlList[sid_]
+  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
+    control := _gControlList[sid_]
     return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
@@ -676,34 +676,34 @@ const (
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getPayload(message []byte, recvSize int) string {
-  return (string(message[_PAYLOAD_OFFSET:recvSize]))
+func getPayload(message_ []byte, recvSize_ int) string {
+  return (string(message_[_PAYLOAD_OFFSET:recvSize_]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getMsgType(message []byte) byte {
-  return (message[_MSG_TYPE_OFFSET])
+func getMsgType(message_ []byte) byte {
+  return (message_[_MSG_TYPE_OFFSET])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getSeqNum(message []byte) uint32 {
-  return (binary.BigEndian.Uint32(message[_SEQ_NUM_OFFSET:]))
+func getSeqNum(message_ []byte) uint32 {
+  return (binary.BigEndian.Uint32(message_[_SEQ_NUM_OFFSET:]))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func setSeqNum(message []byte, seqNum uint32) {
-  binary.BigEndian.PutUint32(message[_SEQ_NUM_OFFSET:], seqNum)
+func setSeqNum(message_ []byte, seqNum_ uint32) {
+  binary.BigEndian.PutUint32(message_[_SEQ_NUM_OFFSET:], seqNum_)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func createMessage(msgType byte, respNeeded byte, dataNeeded byte, seqNum uint32, command string) []byte {
-  message := []byte{msgType, respNeeded, dataNeeded, 0, 0, 0, 0, 0}
-  setSeqNum(message, seqNum)
-  message = append(message, []byte(command)...)
+func createMessage(msgType_ byte, respNeeded_ byte, dataNeeded_ byte, seqNum_ uint32, command_ string) []byte {
+  message := []byte{msgType_, respNeeded_, dataNeeded_, 0, 0, 0, 0, 0}
+  setSeqNum(message, seqNum_)
+  message = append(message, []byte(command_)...)
   return (message)
 }
 

@@ -1307,7 +1307,7 @@ void showUsage(void)
 {
   printf("\n");
   printf("Usage: pshell -s | [-t<timeout>] {{<hostNameOrIpAddr> <port>} | <unixServerName>}\n");
-  printf("              [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]\n");
+  printf("              [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");

@@ -12,12 +12,12 @@ import "os/signal"
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func signalHandler(signalChan chan os.Signal) {
-	for {
-		<-signalChan // This line will block until a signal is received
+  for {
+    <-signalChan // This line will block until a signal is received
     PshellControl.DisconnectAllServers()
     fmt.Printf("\n")
     os.Exit(0)
-	}
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ func registerSignalHandlers() {
   // register a signal handler so we can cleanup our
   // system resources upon abnormal termination
   signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan,
+  signal.Notify(signalChan,
                 syscall.SIGHUP,       // 1  Hangup (POSIX)
                 syscall.SIGINT,       // 2  Interrupt (ANSI)
                 syscall.SIGQUIT,      // 3  Quit (POSIX)
@@ -41,7 +41,7 @@ func registerSignalHandlers() {
                 syscall.SIGXCPU,      // 24 CPU limit exceeded (4.2 BSD)
                 syscall.SIGXFSZ,      // 25 File size limit exceeded (4.2 BSD)
                 syscall.SIGSYS)       // 31 Bad system call
-	go signalHandler(signalChan)
+  go signalHandler(signalChan)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,9 +110,7 @@ func main() {
         }
       }
     }
-
     PshellControl.DisconnectServer(sid)
-
   }
   
 }

@@ -280,7 +280,7 @@ def _registerSignalHandlers():
 def _showUsage():
   print("")
   print("Usage: %s {{<hostNameOrIpAddr> <port>} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
-  print("                 [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]")
+  print("                 [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]]}]")
   print("")
   print("  where:")
   print("")
