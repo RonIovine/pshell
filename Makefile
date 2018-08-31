@@ -363,6 +363,9 @@ demo:
 	@echo "Building pshellControlDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 	
+	@echo "Building pshellAggregatorDemo program..."
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellAggregatorDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregatorDemo
+	
 ifeq ($(TF_INTEGRATED_TRACE_LOG),y)
 	@echo "Building traceFilterDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.$(SRC_EXT) $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
