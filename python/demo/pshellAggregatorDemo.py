@@ -65,7 +65,7 @@ def controlServer(sid, argv):
   else:
     (results, retCode) = PshellControl.sendCommand3(sid, command)
     if (retCode == PshellControl.COMMAND_SUCCESS):
-      PshellServer.printf(results)
+      PshellServer.printf(results, newline=False)
     
 # the following two functions are the control specific functions that interface
 # directly to a given remote server via the control API for a give SID, this is
@@ -97,7 +97,7 @@ def meta(argv):
   global traceFilterDemoSid
   (results, retCode) = PshellControl.sendCommand3(pshellServerDemoSid, "hello %s %s" % (argv[0], argv[1]))
   if (retCode == PshellControl.COMMAND_SUCCESS):
-    PshellServer.printf(results)
+    PshellServer.printf(results, newline=False)
   
   PshellControl.sendCommand1(traceFilterDemoSid, "set callback %s" % argv[2])
 
