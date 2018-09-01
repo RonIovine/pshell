@@ -436,35 +436,32 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   sid = INVALID_SID
   (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_.lower() == "unix"):
-    if (os.path.exists(_gUnixSocketPath+remoteServer_)):
-      # UNIX domain socket
-      socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-      # bind our source socket so we can get replies
-      sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
-      bound = False
-      while (not bound):
-        try:
-          socketFd.bind(sourceAddress)
-          bound = True
-        except Exception as e: 
-          sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
-      _gPshellControl.append({"socket":socketFd,
-                              "timeout":defaultTimeout_,
-                              "serverType":"unix",
-                              "isBroadcastAddress":isBroadcastAddress,
-                              "sourceAddress":sourceAddress,
-                              "destAddress":_gUnixSocketPath+remoteServer_,
-                              "remoteServer":controlName_+"[unix]",
-                              "pshellMsg":OrderedDict([("msgType",0),
-                                                       ("respNeeded",True),
-                                                       ("dataNeeded",True),
-                                                       ("pad",0),
-                                                       ("seqNum",0),
-                                                       ("payload","")])})
-      # return the newly appended list entry as the SID
-      sid = len(_gPshellControl)-1
-    else:
-      print("PSHELL_ERROR: Could not find unix server: '%s'" % (_gUnixSocketPath+remoteServer_))
+    # UNIX domain socket
+    socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    # bind our source socket so we can get replies
+    sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
+    bound = False
+    while (not bound):
+      try:
+        socketFd.bind(sourceAddress)
+        bound = True
+      except Exception as e: 
+        sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
+    _gPshellControl.append({"socket":socketFd,
+                            "timeout":defaultTimeout_,
+                            "serverType":"unix",
+                            "isBroadcastAddress":isBroadcastAddress,
+                            "sourceAddress":sourceAddress,
+                            "destAddress":_gUnixSocketPath+remoteServer_,
+                            "remoteServer":controlName_+"[unix]",
+                            "pshellMsg":OrderedDict([("msgType",0),
+                                                     ("respNeeded",True),
+                                                     ("dataNeeded",True),
+                                                     ("pad",0),
+                                                     ("seqNum",0),
+                                                     ("payload","")])})
+    # return the newly appended list entry as the SID
+    sid = len(_gPshellControl)-1
   else:
     # IP domain socket
     socketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -743,9 +740,9 @@ def _sendCommand(control_, commandType_, command_, timeout_):
   if ((_gSupressInvalidArgCountMessage == True) and (retCode == COMMAND_INVALID_ARG_COUNT)):
     retCode = COMMAND_SUCCESS
   elif ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
-    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode)))
+    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getResponseString(retCode)))
   elif ((retCode != COMMAND_SUCCESS) and (retCode != _gMsgTypes["commandComplete"])):
-    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getControlResults(retCode)))
+    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getResponseString(retCode)))
   else:
     retCode = COMMAND_SUCCESS
   return (retCode)

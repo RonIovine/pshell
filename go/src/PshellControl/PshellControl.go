@@ -391,30 +391,26 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
   var sourceAddress string
   remoteServer_, port_, defaultTimeout_ = loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_ == UNIX) {
-    if _, err := os.Stat(_UNIX_SOCKET_PATH+remoteServer_); !os.IsNotExist(err) {
-      // UNIX domain socket
-      remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
-      rand := rand.New(rand.NewSource(time.Now().UnixNano()))
-      for {
-        sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
-        localAddr := net.UnixAddr{sourceAddress, "unixgram"}
-        if socket, retCode = net.DialUnix("unixgram", &localAddr, &remoteAddr); retCode == nil {
-          break
-        }
+    // UNIX domain socket
+    remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
+    rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+    for {
+      sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
+      localAddr := net.UnixAddr{sourceAddress, "unixgram"}
+      if socket, retCode = net.DialUnix("unixgram", &localAddr, &remoteAddr); retCode == nil {
+        break
       }
-      _gControlList = append(_gControlList, 
-                             pshellControl{socket,
-                                           defaultTimeout_, 
-                                           "unix",
-                                           sourceAddress,      // unix file handle, used for cleanup
-                                           []byte{},           // sendMsg
-                                           make([]byte, 2048), // recvMsg
-                                           0,                  // recvSize
-                                           strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
-      sid = len(_gControlList)-1
-    } else {
-      fmt.Printf("PSHELL_ERROR: Could not find unix server: '%s'\n", _UNIX_SOCKET_PATH+remoteServer_)
     }
+    _gControlList = append(_gControlList, 
+                           pshellControl{socket,
+                                         defaultTimeout_, 
+                                         "unix",
+                                         sourceAddress,      // unix file handle, used for cleanup
+                                         []byte{},           // sendMsg
+                                         make([]byte, 2048), // recvMsg
+                                         0,                  // recvSize
+                                         strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
+    sid = len(_gControlList)-1
   } else {
     // IP (UDP) domain socket
     remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))

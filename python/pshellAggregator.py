@@ -222,10 +222,10 @@ def _show(argv):
                                                         "=".ljust(_gMaxLocalName, "="),
                                                         "=".ljust(_gMaxRemoteName, "=")))
     for multicast in _gMulticast:
-      PshellServer.printf("%s    " % multicast["keyword"].ljust(_gMaxMulticastKeyword))
+      PshellServer.printf("%s    " % multicast["keyword"].ljust(_gMaxMulticastKeyword), newline=False)
       for index, server in enumerate(multicast["servers"]):
         if (index > 0):
-          PshellServer.printf("%s    " % " ".ljust(_gMaxMulticastKeyword, " "))
+          PshellServer.printf("%s    " % " ".ljust(_gMaxMulticastKeyword, " "), newline=False)
         PshellServer.printf("%s    %s    %s" % (server["localName"].ljust(_gMaxLocalName), 
                                                       server["remoteServer"].ljust(_gMaxRemoteName), 
                                                       server["port"]))
