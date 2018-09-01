@@ -37,6 +37,7 @@ if [ -n "$PSHELL_INSTALL" ]
 then
   LIB_DIR=${PSHELL_INSTALL}/lib
   PYTHON_DIR=${PSHELL_INSTALL}/python
+  GO_DIR=${PSHELL_INSTALL}/go/pkg/linux_amd64
 else
   PYTHON_DIR=$(pwd)/python
 fi
@@ -61,6 +62,13 @@ then
     rm -f $PYTHON_DIR/PshellServer.py
     ln -s $PYTHON_DIR/PshellServer-stub.py $PYTHON_DIR/PshellServer.py 
   fi
+  if [ ! -e "$GO_DIR/PshellServer-stub.a" ]
+  then
+    echo "ERROR: Could not find module: '$GO_DIR/PshellServer-stub.a'"
+  else
+    rm -f $GO_DIR/PshellServer.a
+    ln -s $GO_DIR/PshellServer-stub.a $GO_DIR/PshellServer.a
+  fi
 elif [ "$1" == "-full" ] 
 then
   if [ ! -e "$LIB_DIR/libpshell-server-full.so" ]
@@ -81,6 +89,13 @@ then
   else
     rm -f $PYTHON_DIR/PshellServer.py
     ln -s $PYTHON_DIR/PshellServer-full.py $PYTHON_DIR/PshellServer.py 
+  fi
+  if [ ! -e "$GO_DIR/PshellServer-full.a" ]
+  then
+    echo "ERROR: Could not find module: '$GO_DIR/PshellServer-full.a'"
+  else
+    rm -f $GO_DIR/PshellServer.a
+    ln -s $GO_DIR/PshellServer-full.a $GO_DIR/PshellServer.a
   fi
 else
   echo "Usage: setPshellLib -stub | -full"

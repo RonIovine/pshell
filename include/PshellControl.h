@@ -137,7 +137,7 @@ const char *pshell_getResponseString(int results_);
 
 int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,
-                         unsigned port_,// = PSHELL_UNIX_CONTROL,
+                         unsigned port_,   // = PSHELL_UNIX_CONTROL,
                          unsigned defaultTimeout_);// = PSHELL_NO_WAIT);
 
 /*
