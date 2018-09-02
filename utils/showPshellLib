@@ -63,6 +63,13 @@ then
   else
     echo "ERROR: PshellServer.a softlink not found, run setPshellLib -full or -stub"
   fi
+  if [ -e "${PSHELL_INSTALL}/go/src/PshellServer/PshellServer.go" ]
+  then
+    cd $PSHELL_INSTALL/go/src/PshellServer
+    ls -l $PSHELL_INSTALL/go/src/PshellServer/PshellServer.go
+  else
+    echo "ERROR: PshellServer.goa softlink not found, run setPshellLib -full or -stub"
+  fi
 else
   echo "ERROR: Environment variable PSHELL_INSTALL not defined"
 fi

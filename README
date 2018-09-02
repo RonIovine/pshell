@@ -167,7 +167,7 @@ that will do the different installs.  This package has binaries built for an x86
 target that have been tested on CentOs (RedHat derivitave) and Mint (Ubuntu derivitave)
 Linux distributions.  It has also been successfully built and run on a ARM based
 Raspberry Pi system running Raspbian Linux as well as a Windows/Cygwin based system
-and a MAC/OSX based system.  If using this package for a a different target, see the 
+and a MAC/OSX based system.  If using this package for a different target, see the
 following section on building from source.
 
 To see the usage of the script 'cd' to the top level pshell directory and type:

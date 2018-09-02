@@ -494,21 +494,11 @@ func startServer(serverName_ string,
                  port_ string) {
   if (_gRunning == false) {
     _gServerName = serverName_
+    _gServerType = serverType_
     _gServerMode = serverMode_
-    _gTitle,
-    _gBanner,
-    _gPrompt,
-    _gServerType,
-    _gHostnameOrIpAddr,
-    _gPort,
-    _gTcpTimeout = loadConfigFile(_gServerName,
-                                  _gTitle,
-                                  _gBanner,
-                                  _gPrompt,
-                                  serverType_,
-                                  hostnameOrIpAddr_,
-                                  port_,
-                                  _gTcpTimeout)
+    _gHostnameOrIpAddr = hostnameOrIpAddr_
+    _gPort = port_
+    loadConfigFile()
     loadStartupFile()  
     _gRunning = true
     if (_gServerMode == BLOCKING) {
@@ -591,10 +581,7 @@ func flush() {
     if ((_gServerType == UDP) || (_gServerType == UNIX)) {
       reply(getMsgType(_gPshellRcvMsg))
     } else if (_gServerType == TCP) {
-      _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload,
-                                               "\n",
-                                               "\r\n",
-                                               -1)))
+      _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload, "\n", "\r\n", -1)))
       _gPshellSendPayload = ""
     }
   }
@@ -658,20 +645,7 @@ func getOption(arg_ string) (bool, string, string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func loadConfigFile(serverName_ string,
-                    title_ string,
-                    banner_ string,
-                    prompt_ string,
-                    serverType_ string,
-                    hostnameOrIpAddr_ string,
-                    port_ string,
-                    tcpTimeout_ int) (string,
-                                      string,
-                                      string,
-                                      string,
-                                      string,
-                                      string,
-                                      int) {
+func loadConfigFile() {
   var configFile1 = ""
   var file []byte
   configPath := os.Getenv("PSHELL_CONFIG_DIR")
@@ -688,7 +662,7 @@ func loadConfigFile(serverName_ string,
   } else if _, err := os.Stat(configFile3); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(configFile3)
   } else {
-    return title_, banner_, prompt_, serverType_, hostnameOrIpAddr_, port_, tcpTimeout_
+    return
   }
   // found a config file, process it
   lines := strings.Split(string(file), "\n")
@@ -698,32 +672,32 @@ func loadConfigFile(serverName_ string,
       value := strings.Split(line, "=")
       if (len(value) == 2) {
         option := strings.Split(value[0], ".")
-        if ((len(option) == 2) && (serverName_ == option[0])) {
+        if ((len(option) == 2) && (_gServerName == option[0])) {
           if (strings.ToLower(option[1]) == "title") {
-            title_ = value[1]
+            _gTitle = value[1]
           } else if (strings.ToLower(option[1]) == "banner") {
-            banner_ = value[1]
+            _gBanner = value[1]
           } else if (strings.ToLower(option[1]) == "prompt") {
-            prompt_ = value[1]
+            _gPrompt = value[1]
           } else if (strings.ToLower(option[1]) == "host") {
-            hostnameOrIpAddr_ = value[1]
+            _gHostnameOrIpAddr = value[1]
           } else if (strings.ToLower(option[1]) == "port") {
-            port_ = value[1]
+            _gPort = value[1]
           } else if (strings.ToLower(option[1]) == "type") {
             if ((strings.ToLower(value[1]) == UDP) ||
                 (strings.ToLower(value[1]) == TCP) ||
                 (strings.ToLower(value[1]) == UNIX) ||
                 (strings.ToLower(value[1]) == LOCAL)) {
-              serverType_ = value[1]
+              _gServerType = value[1]
             }
           } else if (strings.ToLower(option[1]) == "timeout") {
-            tcpTimeout_, _ = strconv.Atoi(value[1])
+            _gTcpTimeout, _ = strconv.Atoi(value[1])
           }
         }
       }
     }
   }
-  return title_, banner_, prompt_, serverType_, hostnameOrIpAddr_, port_, tcpTimeout_
+  return
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -887,35 +861,20 @@ func runUDPServer() {
              _gServerName,
              _gHostnameOrIpAddr,
              _gPort)
-  // startup our UDP server
-  addCommand(batch,
-             "batch",
-             "run commands from a batch file",
-             "<filename>",
-             1,
-             1,
-             true,
-             true)
-  if (createSocket()) {
-    for {
-      receiveDGRAM()
-    }
-  }
+  runDGRAMServer()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runUNIXServer() {
   fmt.Printf("PSHELL_INFO: UNIX Server: %s Started\n", _gServerName)
-  // startup our UDP server
-  addCommand(batch,
-             "batch",
-             "run commands from a batch file",
-             "<filename>",
-             1,
-             1,
-             true,
-             true)
+  runDGRAMServer()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func runDGRAMServer() {
+  addNativeCommands()
   if (createSocket()) {
     for {
       receiveDGRAM()
@@ -925,13 +884,43 @@ func runUNIXServer() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func addNativeCommands() {
+  addCommand(batch,
+             "batch",
+             "run commands from a batch file",
+             "<filename>",
+             1,
+             2,
+             true,
+             true)
+  if ((_gServerType == TCP) || (_gServerType == LOCAL)) {
+    addCommand(help,
+               "help",
+               "show all available commands",
+               "",
+               0,
+               0,
+               true,
+               true)
+    addCommand(exit,
+               "quit",
+               "exit interactive mode",
+               "",
+               0,
+               0,
+               true,
+               true)
+  }
+  addTabCompletions()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func runLocalServer() {
   _gPrompt = _gServerName + "[" + _gServerType + "]:" + _gPrompt
-  _gTitle = _gTitle + ": " + _gServerName + "[" + _gServerType + "], Mode: INTERACTIVE"
-  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 2, true, true)
-  addCommand(help, "help", "show all available commands", "", 0, 0, true, true)
-  addCommand(exit, "quit", "exit interactive mode", "", 0, 0, true, true)
-  addTabCompletions()
+  _gTitle = _gTitle + ": " + _gServerName + "[" +
+            _gServerType + "], Mode: INTERACTIVE"
+  addNativeCommands()
   showWelcome()
   reader := bufio.NewReader(os.Stdin)
   for {
@@ -949,7 +938,7 @@ func runLocalServer() {
 func acceptConnection() bool {
   _gConnectFd, _ = _gTcpSocket.AcceptTCP()
   _gTcpConnectSockName = strings.Split(_gConnectFd.LocalAddr().String(), ":")[0]
-  return (true)
+   return (true)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -960,16 +949,16 @@ func runTCPServer() {
              _gHostnameOrIpAddr,
              _gPort)
   _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
-  _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
-  addCommand(batch, "batch", "run commands from a batch file", "<filename>", 1, 1, true, true)
-  addCommand(help, "help", "show all available commands", "", 0, 0, true, true)
-  addCommand(exit, "quit", "exit interactive mode", "", 0, 0, true, true)
-  addTabCompletions()
+  _gTcpTitle = _gTitle + ": " + _gServerName + "[" +
+               _gTcpConnectSockName + "], Mode: INTERACTIVE"
+  addNativeCommands()
   // startup our TCP server and accept new connections
   for createSocket() && acceptConnection() {
     _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
-    _gTcpTitle = _gTitle + ": " + _gServerName + "[" + _gTcpConnectSockName + "], Mode: INTERACTIVE"
-    // shutdown original socket to not allow any new connections until we are done with this one
+    _gTcpTitle = _gTitle + ": " + _gServerName + "[" +
+                 _gTcpConnectSockName + "], Mode: INTERACTIVE"
+    // shutdown original socket to not allow any new connections
+    // until we are done with this one
     _gTcpSocket.Close()
     receiveTCP()
     _gConnectFd.Close()
@@ -1193,7 +1182,9 @@ func getInput(command_ string,
              (keystroke_[0] >= _SPACE) &&
              (keystroke_[0] < _DEL)) {
     // printable single character, add it to our command,
-    command_ = command_[:cursorPos_] + string(keystroke_[0]) + command_[cursorPos_:]
+    command_ = command_[:cursorPos_] +
+               string(keystroke_[0]) +
+               command_[cursorPos_:]
     printf("%s%s",
            command_[cursorPos_:],
            strings.Repeat("\b", len(command_[cursorPos_:])-1))
@@ -1302,7 +1293,8 @@ func getInput(command_ string,
       } else if ((char == _TAB) &&
                 ((len(command_) == 0) ||
                  (len(strings.Split(strings.TrimSpace(command_), " ")) == 1))) {
-        // tab character, print out any completions, we only do tabbing on the first keyword
+        // tab character, print out any completions, we only do
+        // tabbing on the first keyword
         tabCount_ += 1
         if (tabCount_ == 1) {
           // this tabbing method is a little different than the standard

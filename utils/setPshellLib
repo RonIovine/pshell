@@ -37,7 +37,11 @@ if [ -n "$PSHELL_INSTALL" ]
 then
   LIB_DIR=${PSHELL_INSTALL}/lib
   PYTHON_DIR=${PSHELL_INSTALL}/python
-  GO_DIR=${PSHELL_INSTALL}/go/pkg/linux_amd64
+  GO_DIR=${PSHELL_INSTALL}/go
+  GO_SRC=$GO_DIR/src/PshellServer
+  GO_SRC_FULL=$GO_DIR/src/PshellServer-full
+  GO_SRC_STUB=$GO_DIR/src/PshellServer-stub
+  GO_PKG=$GO_DIR/pkg/linux_amd64
 else
   PYTHON_DIR=$(pwd)/python
 fi
@@ -62,12 +66,19 @@ then
     rm -f $PYTHON_DIR/PshellServer.py
     ln -s $PYTHON_DIR/PshellServer-stub.py $PYTHON_DIR/PshellServer.py 
   fi
-  if [ ! -e "$GO_DIR/PshellServer-stub.a" ]
+  if [ ! -e "$GO_PKG/PshellServer-stub.a" ]
   then
-    echo "ERROR: Could not find module: '$GO_DIR/PshellServer-stub.a'"
+    echo "ERROR: Could not find module: '$GO_PKG/PshellServer-stub.a'"
   else
-    rm -f $GO_DIR/PshellServer.a
-    ln -s $GO_DIR/PshellServer-stub.a $GO_DIR/PshellServer.a
+    rm -f $GO_PKG/PshellServer.a
+    ln -s $GO_PKG/PshellServer-stub.a $GO_PKG/PshellServer.a
+  fi
+  if [ ! -e "$GO_SRC_STUB/PshellServer-stub.go" ]
+  then
+    echo "ERROR: Could not find module: '$GO_SRC_STUB/PshellServer-stub.go'"
+  else
+    rm -f $GO_SRC/PshellServer.go
+    ln -s $GO_SRC_STUB/PshellServer-stub.go $GO_SRC/PshellServer.go
   fi
 elif [ "$1" == "-full" ] 
 then
@@ -90,12 +101,19 @@ then
     rm -f $PYTHON_DIR/PshellServer.py
     ln -s $PYTHON_DIR/PshellServer-full.py $PYTHON_DIR/PshellServer.py 
   fi
-  if [ ! -e "$GO_DIR/PshellServer-full.a" ]
+  if [ ! -e "$GO_PKG/PshellServer-full.a" ]
   then
-    echo "ERROR: Could not find module: '$GO_DIR/PshellServer-full.a'"
+    echo "ERROR: Could not find module: '$GO_PKG/PshellServer-full.a'"
   else
-    rm -f $GO_DIR/PshellServer.a
-    ln -s $GO_DIR/PshellServer-full.a $GO_DIR/PshellServer.a
+    rm -f $GO_PKG/PshellServer.a
+    ln -s $GO_PKG/PshellServer-full.a $GO_PKG/PshellServer.a
+  fi
+  if [ ! -e "$GO_SRC_FULL/PshellServer-full.go" ]
+  then
+    echo "ERROR: Could not find module: '$GO_SRC_FULL/PshellServer-full.go'"
+  else
+    rm -f $GO_SRC/PshellServer.go
+    ln -s $GO_SRC_FULL/PshellServer-full.go $GO_SRC/PshellServer.go
   fi
 else
   echo "Usage: setPshellLib -stub | -full"
