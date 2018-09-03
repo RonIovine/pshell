@@ -916,9 +916,9 @@ def _batch(command_):
   batchFile1 = ""
   batchPath = os.getenv('PSHELL_BATCH_DIR')
   if (batchPath != None):
-    batchFile1 = batchPath+"/"+batchFile+".batch"
-  batchFile2 = _PSHELL_BATCH_DIR+"/"+batchFile+".batch"
-  batchFile3 = os.getcwd()+"/"+batchFile+".batch"
+    batchFile1 = batchPath+"/"+batchFile
+  batchFile2 = _PSHELL_BATCH_DIR+"/"+batchFile
+  batchFile3 = os.getcwd()+"/"+batchFile
   batchFile4 = batchFile
   if (os.path.isfile(batchFile1)):
     file = open(batchFile1, 'r')

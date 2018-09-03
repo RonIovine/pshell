@@ -220,8 +220,21 @@ var _gCommandHistoryPos = 0
 //    Returns:
 //        none
 //
-func AddCommand(function pshellFunction, command string, description string, usage string, minArgs int, maxArgs int, showUsage bool) {
-  addCommand(function, command, description, usage, minArgs, maxArgs, showUsage, false)
+func AddCommand(function pshellFunction,
+                command string,
+                description string,
+                usage string,
+                minArgs int,
+                maxArgs int,
+                showUsage bool) {
+  addCommand(function,
+             command,
+             description,
+             usage,
+             minArgs,
+             maxArgs,
+             showUsage,
+             false)
 }
 
 //
@@ -242,8 +255,16 @@ func AddCommand(function pshellFunction, command string, description string, usa
 //    Returns:
 //        none
 //
-func StartServer(serverName string, serverType string, serverMode int, hostnameOrIpAddr string, port string) {
-  startServer(serverName, serverType, serverMode, hostnameOrIpAddr, port)
+func StartServer(serverName string,
+                 serverType string,
+                 serverMode int,
+                 hostnameOrIpAddr string,
+                 port string) {
+  startServer(serverName,
+              serverType,
+              serverMode,
+              hostnameOrIpAddr,
+              port)
 }
 
 //
@@ -525,7 +546,6 @@ func runCommand(format_ string, command_ ...interface{}) {
     _gCommandDispatched = true
     _gCommandInteractive = false
     numMatches := 0
-    _gCommandDispatched = true
     _gArgs = strings.Split(strings.TrimSpace(command), " ")
     command = _gArgs[0]
     if (len(_gArgs) > 1) {
@@ -554,7 +574,7 @@ func printf(format_ string, message_ ...interface{}) {
     if (_gServerType == LOCAL) {
       fmt.Printf(format_, message_...)
     } else {
-      // UDP/TCP/Unix (datagramn) server
+      // UDP/TCP/Unix server
       _gPshellSendPayload += fmt.Sprintf(format_, message_...)
       if (_gServerType == TCP) {
         flush()
@@ -789,11 +809,11 @@ func batch(argv_ []string) {
   var file []byte
   batchPath := os.Getenv("PSHELL_BATCH_DIR")
   if (batchPath != "") {
-    batchFile1 = batchPath+"/"+batchFile+".batch"
+    batchFile1 = batchPath+"/"+batchFile
   }
-  batchFile2 := _PSHELL_BATCH_DIR+"/"+batchFile+".batch"
+  batchFile2 := _PSHELL_BATCH_DIR+"/"+batchFile
   cwd, _ := os.Getwd()
-  batchFile3 := cwd+"/"+batchFile+".batch"
+  batchFile3 := cwd+"/"+batchFile
   batchFile4 := batchFile
   if _, err := os.Stat(batchFile1); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(batchFile1)
@@ -813,7 +833,7 @@ func batch(argv_ []string) {
   for _, line := range lines {
     // skip comments
     if ((len(line) > 0) && (line[0] != '#')) {
-      runCommand(line)
+      processCommand(line)
     }
   }
 }

@@ -82,13 +82,22 @@ type pshellFunction func([]string)
 //
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
-func AddCommand(function pshellFunction, command string, description string, usage string, minArgs int, maxArgs int, showUsage bool) {
+func AddCommand(function pshellFunction,
+                command string, description
+                string, usage string,
+                minArgs int,
+                maxArgs int,
+                showUsage bool) {
 }
 
 //
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
-func StartServer(serverName string, serverType string, serverMode int, hostnameOrIpAddr string, port string) {
+func StartServer(serverName string,
+                 serverType string,
+                 serverMode int,
+                 hostnameOrIpAddr string,
+                 port string) {
   fmt.Printf("PSHELL_INFO: STUB Server: %s Started\n", serverName)
   if (serverMode == BLOCKING) {
     for {
