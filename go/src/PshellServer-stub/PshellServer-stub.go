@@ -83,8 +83,9 @@ type pshellFunction func([]string)
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
 func AddCommand(function pshellFunction,
-                command string, description
-                string, usage string,
+                command string,
+                description string,
+                usage string,
                 minArgs int,
                 maxArgs int,
                 showUsage bool) {
