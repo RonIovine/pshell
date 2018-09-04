@@ -72,6 +72,8 @@ then
   else
     rm -f $GO_PKG/PshellServer.a
     ln -s $GO_PKG/PshellServer-stub.a $GO_PKG/PshellServer.a
+    # need to do this to force a re-link when building the demo app
+    touch $GO_PKG/PshellServer.a
   fi
   if [ ! -e "$GO_SRC_STUB/PshellServer-stub.go" ]
   then
@@ -107,6 +109,8 @@ then
   else
     rm -f $GO_PKG/PshellServer.a
     ln -s $GO_PKG/PshellServer-full.a $GO_PKG/PshellServer.a
+    # need to do this to force a re-link when building the demo app
+    touch $GO_PKG/PshellServer.a
   fi
   if [ ! -e "$GO_SRC_FULL/PshellServer-full.go" ]
   then
