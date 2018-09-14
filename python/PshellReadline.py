@@ -547,23 +547,18 @@ def _getInput(prompt_):
           else:
             # partial word typed, double TAB, show all possible completions
             _showTabCompletions(_findTabCompletions(command), prompt_+command)
-            tabCount = 0
         elif ((tabCount == 1) and (len(command) > 0)):
           # partial word typed, single TAB, fill out as much
           #  as we can and show any possible other matches
           matchList = _findTabCompletions(command)
           if (len(matchList) == 1):
             # we only have one completion, show it
-            tabCount = 0
             _clearLine(cursorPos, command)
             (cursorPos, command) = _showCommand(matchList[0] + " ")
           elif (len(matchList) > 1):
             # multiple completions, find the longest match and show up to that
             _clearLine(cursorPos, command)
             (cursorPos, command) = _showCommand(_findLongestMatch(matchList, command))
-        elif (len(command) > 0):
-          # TAB count > 2 with command typed, reset TAB count
-          tabCount = 0
     elif (ord(char) == 127):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
