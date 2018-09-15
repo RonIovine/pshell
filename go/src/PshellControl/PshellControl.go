@@ -26,19 +26,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-package PshellControl
-
-import "encoding/binary"
-import "math/rand"
-import "net"
-import "time"
-import "strings"
-import "strconv"
-import "io/ioutil"
-import "os"
-import "fmt"
-
-/////////////////////////////////////////////////////////////////////////////////
 //
 // This API provides the ability for a client program to invoke pshell commands
 // that are registered in a remote program that is running a pshell UDP or UNIX
@@ -50,7 +37,17 @@ import "fmt"
 // A complete example of the usage of the API can be found in the included 
 // demo program pshellControlDemo.go
 //
-/////////////////////////////////////////////////////////////////////////////////
+package PshellControl
+
+import "encoding/binary"
+import "math/rand"
+import "net"
+import "time"
+import "strings"
+import "strconv"
+import "io/ioutil"
+import "os"
+import "fmt"
 
 /////////////////////////////////////////////////////////////////////////////////
 //

@@ -26,20 +26,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-package PshellServer
-
-import "encoding/binary"
-import "net"
-import "fmt"
-import "strings"
-import "strconv"
-import "io/ioutil"
-import "os"
-import "math"
-import "bufio"
-import "time"
-
-/////////////////////////////////////////////////////////////////////////////////
 //
 // This API provides the Process Specific Embedded Command Line Shell (PSHELL)
 // user API functionality.  It provides the ability for a client program to
@@ -55,7 +41,19 @@ import "time"
 // A complete example of the usage of the API can be found in the included 
 // demo program file pshellServerDemo.go
 //
-/////////////////////////////////////////////////////////////////////////////////
+package PshellServer
+
+import "encoding/binary"
+import "net"
+import "fmt"
+import "strings"
+import "strconv"
+import "io/ioutil"
+import "os"
+import "math"
+import "bufio"
+import "time"
+
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -202,11 +200,13 @@ var _gCommandHistoryPos = 0
 /////////////////////////////////
 
 //
-//  Register callback commands to our PSHELL server.  If the command takes no
-//  arguments, the default parameters can be provided.  If the command takes
-//  an exact number of parameters, set minArgs and maxArgs to be the same.  If
-//  the user wants the callback function to handle all help initiated usage,
-//  set the showUsage parameter to false.
+//  Register callback commands to our PSHELL server.  If the command takes
+//  no arguments, the usage should be set to "" and minArgs and maxArgs
+//  should be set to 0.  If the command takes an exact number of parameters,
+//  set minArgs and maxArgs to be the same.  If the user wants the callback
+//  function to handle all help initiated usage, set the showUsage parameter
+//  to false, otherwise if set to true, the framework will display the registered
+//  usage upon a '?' or '-h' typed after the command.
 //
 //    Args:
 //        function (ptr)    : User callback function
@@ -238,12 +238,11 @@ func AddCommand(function pshellFunction,
 }
 
 //
-//  Start our PSHELL server, if serverType is UNIX or LOCAL, the default
-//  parameters can be used, and will be ignored if provided.  All of these
-//  parameters except serverMode can be overridden on a per serverName
-//  basis via the pshell-server.conf config file.  All commands in the
-//  <serverName>.startup file will be executed in this function at server
-//  startup time.
+//  Start our PSHELL server, if serverType is UNIX or LOCAL, the hostnameOrIpAddr
+//  and port will be ignored (they can be set to "").  All of these parameters except
+//  serverMode can be overridden on a per serverName basis via the pshell-server.conf
+//  config file.  All commands in the <serverName>.startup file will be executed in
+//  this function at server startup time.
 //
 //    Args:
 //        serverName (str)       : Logical name of the Pshell server
