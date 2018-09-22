@@ -66,6 +66,7 @@ then
     echo
     exit 1
   else
+  
     # local install, setup some softlinks and create .pshellrc env file
     echo "Setting softlink libpshell-server to libpshell-server-full"
     cd $localDir/lib
@@ -78,6 +79,21 @@ then
     cd $localDir/python	
     rm -f PshellServer.py	
     ln -s PshellServer-full.py PshellServer.py 
+
+    if [ ! -e "$localDir/go/src/PshellServer" ]
+    then
+      mkdir $localDir/go/src/PshellServer
+    fi
+    
+    echo "Setting softlink PshellServer.go PshellServer-full.go"	
+    cd $localDir/go/src/PshellServer	
+    rm -f $localDir/go/src/PshellServer/PshellServer.go
+    ln -s $localDir/go/src/PshellServer-full/PshellServer-full.go $localDir/go/src/PshellServer/PshellServer.go
+
+    echo "Setting softlink PshellServer.a PshellServer-full.a"	
+    cd $localDir/go/pkg/linux_amd64	
+    rm -f PshellServer.a
+    ln -s PshellServer-full.a PshellServer.a
 
     echo "Setting up Busybox-like demo softlinks"
     cd $localDir/bin
