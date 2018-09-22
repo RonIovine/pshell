@@ -989,9 +989,14 @@ func runTCPServer() {
 func createSocket() bool {
   var hostnameOrIpAddr = ""
   if (_gHostnameOrIpAddr == ANYHOST) {
+    // all interfaces of this host
     hostnameOrIpAddr = ""
   } else if (_gHostnameOrIpAddr == LOCALHOST) {
+    // local loopback address
     hostnameOrIpAddr = "127.0.0.1"
+  } else if (_gHostnameOrIpAddr == ANYBCAST) {
+    // global broadcast address
+    hostnameOrIpAddr = "255.255.255.255"
   } else {
     hostnameOrIpAddr = _gHostnameOrIpAddr
   }

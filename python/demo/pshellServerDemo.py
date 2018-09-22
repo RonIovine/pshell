@@ -277,7 +277,7 @@ if (__name__ == '__main__'):
   # or after the server is started, as long as the command being called is regstered
   PshellServer.runCommand("hello 1 2 3")
 
-  # Now start our PSHELL server with the pshell_startServer function call.
+  # Now start our PSHELL server with the PshellServer.startServer function call.
   #
   # The 1st argument is our serverName (i.e. "pshellServerDemo").
   #

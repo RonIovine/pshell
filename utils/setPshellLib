@@ -42,11 +42,17 @@ then
   GO_SRC_FULL=$GO_DIR/src/PshellServer-full
   GO_SRC_STUB=$GO_DIR/src/PshellServer-stub
   GO_PKG=$GO_DIR/pkg/linux_amd64
+  if [ ! -e "${GO_SRC}" ]
+  then
+    mkdir $GO_SRC
+  fi
 else
   PYTHON_DIR=$(pwd)/python
 fi
 if [ "$1" == "-stub" ] 
 then
+
+  # C/C++ libraries, shared and static
   if [ ! -e "$LIB_DIR/libpshell-server-stub.so" ]
   then
     echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-stub.so'"
@@ -59,6 +65,8 @@ then
     rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-stub.a $LIB_DIR/libpshell-server.a
   fi
+  
+  # Python modules
   if [ ! -e "$PYTHON_DIR/PshellServer-stub.py" ]
   then
     echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-stub.py'"
@@ -66,6 +74,8 @@ then
     rm -f $PYTHON_DIR/PshellServer.py
     ln -s $PYTHON_DIR/PshellServer-stub.py $PYTHON_DIR/PshellServer.py 
   fi
+  
+  # Go library module, static only
   if [ ! -e "$GO_PKG/PshellServer-stub.a" ]
   then
     echo "ERROR: Could not find module: '$GO_PKG/PshellServer-stub.a'"
@@ -75,6 +85,8 @@ then
     # need to do this to force a re-link when building the demo app
     touch $GO_PKG/PshellServer.a
   fi
+  
+  # Go source module
   if [ ! -e "$GO_SRC_STUB/PshellServer-stub.go" ]
   then
     echo "ERROR: Could not find module: '$GO_SRC_STUB/PshellServer-stub.go'"
@@ -82,8 +94,11 @@ then
     rm -f $GO_SRC/PshellServer.go
     ln -s $GO_SRC_STUB/PshellServer-stub.go $GO_SRC/PshellServer.go
   fi
+  
 elif [ "$1" == "-full" ] 
 then
+
+  # C/C++ libraries, shared and static
   if [ ! -e "$LIB_DIR/libpshell-server-full.so" ]
   then
     echo "ERROR: Could not find library: '$LIB_DIR/libpshell-server-full.so'"
@@ -96,6 +111,8 @@ then
     rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-full.a $LIB_DIR/libpshell-server.a
   fi
+  
+  # Python modules
   if [ ! -e "$PYTHON_DIR/PshellServer-full.py" ]
   then
     echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-full.py'"
@@ -103,6 +120,8 @@ then
     rm -f $PYTHON_DIR/PshellServer.py
     ln -s $PYTHON_DIR/PshellServer-full.py $PYTHON_DIR/PshellServer.py 
   fi
+  
+  # Go library module, static only
   if [ ! -e "$GO_PKG/PshellServer-full.a" ]
   then
     echo "ERROR: Could not find module: '$GO_PKG/PshellServer-full.a'"
@@ -112,6 +131,8 @@ then
     # need to do this to force a re-link when building the demo app
     touch $GO_PKG/PshellServer.a
   fi
+  
+  # Go source module
   if [ ! -e "$GO_SRC_FULL/PshellServer-full.go" ]
   then
     echo "ERROR: Could not find module: '$GO_SRC_FULL/PshellServer-full.go'"
@@ -119,6 +140,7 @@ then
     rm -f $GO_SRC/PshellServer.go
     ln -s $GO_SRC_FULL/PshellServer-full.go $GO_SRC/PshellServer.go
   fi
+  
 else
   echo "Usage: setPshellLib -stub | -full"
 fi

@@ -68,7 +68,7 @@ then
     cd $PSHELL_INSTALL/go/src/PshellServer
     ls -l $PSHELL_INSTALL/go/src/PshellServer/PshellServer.go
   else
-    echo "ERROR: PshellServer.goa softlink not found, run setPshellLib -full or -stub"
+    echo "ERROR: PshellServer.go softlink not found, run setPshellLib -full or -stub"
   fi
 else
   echo "ERROR: Environment variable PSHELL_INSTALL not defined"
