@@ -76,7 +76,7 @@ then
     ln -s libpshell-server-full.a libpshell-server.a
     
     echo "Setting softlink PshellServer.py PshellServer-full.py"	
-    cd $localDir/python	
+    cd $localDir/python/src
     rm -f PshellServer.py	
     ln -s PshellServer-full.py PshellServer.py 
 
@@ -126,9 +126,9 @@ then
     echo export PSHELL_CONFIG_DIR=\$PSHELL_INSTALL/config >> .pshellrc
     echo export MANPATH=\$PSHELL_INSTALL/c/man:\$MANPATH >> .pshellrc
     echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/c/lib:\$LD_LIBRARY_PATH >> .pshellrc
-    echo export PYTHONPATH=\$PSHELL_INSTALL/python:\$PSHELL_INSTALL/python/demo:\$PYTHONPATH >> .pshellrc
+    echo export PYTHONPATH=\$PSHELL_INSTALL/python/src:\$PSHELL_INSTALL/python/demo:\$PYTHONPATH >> .pshellrc
     echo export GOPATH=\$PSHELL_INSTALL/go >> .pshellrc
-    echo export PATH=\$PSHELL_INSTALL/c/bin:\$PSHELL_INSTALL/utils:\$PSHELL_INSTALL/python:\$PSHELL_INSTALL/python/demo:\$GOPATH/bin:\$PATH >> .pshellrc
+    echo export PATH=\$PSHELL_INSTALL/c/bin:\$PSHELL_INSTALL/utils:\$PSHELL_INSTALL/python/src:\$PSHELL_INSTALL/python/demo:\$GOPATH/bin:\$PATH >> .pshellrc
     echo "Local install environment setup in '.pshellrc'"
     echo "To source enviromnent in current shell run 'source .pshellrc' at the command line"
     if [ $# -eq 2 ]

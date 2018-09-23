@@ -49,10 +49,10 @@ then
   else
     echo "ERROR: libpshell-server.a softlink not found, run setPshellLib -full or -stub"
   fi
-  if [ -e "${PSHELL_INSTALL}/python/PshellServer.py" ]
+  if [ -e "${PSHELL_INSTALL}/python/src/PshellServer.py" ]
   then
-    cd $PSHELL_INSTALL/python
-    ls -l $PSHELL_INSTALL/python/PshellServer.py
+    cd $PSHELL_INSTALL/python/src
+    ls -l $PSHELL_INSTALL/python/src/PshellServer.py
   else
     echo "ERROR: PshellServer.py softlink not found, run setPshellLib -full or -stub"
   fi

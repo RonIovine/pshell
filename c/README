@@ -1,0 +1,3 @@
+This directory contains the 'c' implementations for the PshellServer,
+PshellControl, TraceFilter, TraceLog, and associated demo programs
+and binaries.

@@ -1,0 +1,6 @@
+This directory contains Python versions of the PshellControl, PshellServer,
+PshellClient (pshell.py), pshellAggregator, and PshellReadline functionality.  
+There are three demo Python programs in the 'python/demo' directory showing 
+their usage.  None of these files are copied/setup on a system wide install.  
+On a local install, environment variables are setup to allow access to these 
+files and modules.
