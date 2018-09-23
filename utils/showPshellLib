@@ -35,17 +35,17 @@ then
 fi
 if [ -n "$PSHELL_INSTALL" ]
 then
-  if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.so" ]
+  if [ -e "${PSHELL_INSTALL}/c/lib/libpshell-server.so" ]
   then
-    cd $PSHELL_INSTALL/lib
-    ls -l $PSHELL_INSTALL/lib/libpshell-server.so
+    cd $PSHELL_INSTALL/c/lib
+    ls -l $PSHELL_INSTALL/c/lib/libpshell-server.so
   else
     echo "ERROR: libpshell-server.so softlink not found, run setPshellLib -full or -stub"
   fi
-  if [ -e "${PSHELL_INSTALL}/lib/libpshell-server.a" ]
+  if [ -e "${PSHELL_INSTALL}/c/lib/libpshell-server.a" ]
   then
-    cd $PSHELL_INSTALL/lib
-    ls -l $PSHELL_INSTALL/lib/libpshell-server.a
+    cd $PSHELL_INSTALL/c/lib
+    ls -l $PSHELL_INSTALL/c/lib/libpshell-server.a
   else
     echo "ERROR: libpshell-server.a softlink not found, run setPshellLib -full or -stub"
   fi

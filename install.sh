@@ -69,7 +69,7 @@ then
   
     # local install, setup some softlinks and create .pshellrc env file
     echo "Setting softlink libpshell-server to libpshell-server-full"
-    cd $localDir/lib
+    cd $localDir/c/lib
     rm -f libpshell-server.so
     ln -s libpshell-server-full.so libpshell-server.so
     rm -f libpshell-server.a
@@ -96,7 +96,7 @@ then
     ln -s PshellServer-full.a PshellServer.a
 
     echo "Setting up Busybox-like demo softlinks"
-    cd $localDir/bin
+    cd $localDir/c/bin
     rm -f advancedParsing*
     ln -s pshellNoServerDemo$fileExt advancedParsing$fileExt
     rm -f enhancedUsage*
@@ -112,7 +112,7 @@ then
     rm -f world*
     ln -s pshellNoServerDemo$fileExt world$fileExt
     
-    cd ..
+    cd $localDir
     rm -f .pshellrc
     echo "#" >> .pshellrc
     echo "# Local PSHELL install env file" >> .pshellrc
@@ -124,11 +124,11 @@ then
     echo export PSHELL_BATCH_DIR=\$PSHELL_INSTALL/batch >> .pshellrc
     echo export PSHELL_STARTUP_DIR=\$PSHELL_INSTALL/startup >> .pshellrc
     echo export PSHELL_CONFIG_DIR=\$PSHELL_INSTALL/config >> .pshellrc
-    echo export MANPATH=\$PSHELL_INSTALL/man:\$MANPATH >> .pshellrc
-    echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/lib:\$LD_LIBRARY_PATH >> .pshellrc
+    echo export MANPATH=\$PSHELL_INSTALL/c/man:\$MANPATH >> .pshellrc
+    echo export LD_LIBRARY_PATH=\$PSHELL_INSTALL/c/lib:\$LD_LIBRARY_PATH >> .pshellrc
     echo export PYTHONPATH=\$PSHELL_INSTALL/python:\$PSHELL_INSTALL/python/demo:\$PYTHONPATH >> .pshellrc
     echo export GOPATH=\$PSHELL_INSTALL/go >> .pshellrc
-    echo export PATH=\$PSHELL_INSTALL/bin:\$PSHELL_INSTALL/utils:\$PSHELL_INSTALL/python:\$PSHELL_INSTALL/python/demo:\$GOPATH/bin:\$PATH >> .pshellrc
+    echo export PATH=\$PSHELL_INSTALL/c/bin:\$PSHELL_INSTALL/utils:\$PSHELL_INSTALL/python:\$PSHELL_INSTALL/python/demo:\$GOPATH/bin:\$PATH >> .pshellrc
     echo "Local install environment setup in '.pshellrc'"
     echo "To source enviromnent in current shell run 'source .pshellrc' at the command line"
     if [ $# -eq 2 ]
@@ -166,6 +166,12 @@ else
   startupDir="/etc/pshell/startup"
   man1Dir="/usr/share/man/man1"
   man3Dir="/usr/share/man/man3"
+
+  localBinDir="c/bin"
+  localIncludeDir="c/include"
+  localLibDir="c/lib"
+  localMan1Dir="c/man/man1"
+  localMan3Dir="c/man/man3"
   
   if [ -d "/usr/lib64" ]
   then
@@ -184,17 +190,17 @@ else
   fi
   
   echo "Copying libpshell-server-full.so to $libDir/pshell"
-  cp -f lib/libpshell-server-full.so $libDir/pshell/.
+  cp -f $localLibDir/libpshell-server-full.so $libDir/pshell/.
   echo "Copying libpshell-server-full.a to $libDir/pshell"
-  cp -f lib/libpshell-server-full.a $libDir/pshell/.
+  cp -f $localLibDir/libpshell-server-full.a $libDir/pshell/.
   echo "Copying libpshell-server-stub.so to $libDir/pshell"
-  cp -f lib/libpshell-server-stub.so $libDir/pshell/.
+  cp -f $localLibDir/libpshell-server-stub.so $libDir/pshell/.
   echo "Copying libpshell-server-stub.a to $libDir/pshell"
-  cp -f lib/libpshell-server-stub.a $libDir/pshell/.
+  cp -f $localLibDir/libpshell-server-stub.a $libDir/pshell/.
   echo "Copying libpshell-control.so to $libDir/pshell"
-  cp -f lib/libpshell-control.so $libDir/pshell/.
+  cp -f $localLibDir/libpshell-control.so $libDir/pshell/.
   echo "Copying libpshell-control.a to $libDir/pshell"
-  cp -f lib/libpshell-control.a $libDir/pshell/.
+  cp -f $localLibDir/libpshell-control.a $libDir/pshell/.
   
   echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"  
   rm -f $libDir/libpshell-server.so
@@ -209,21 +215,21 @@ else
   
   echo "Installing bins..."
   echo "Copying pshell$fileExt to $binDir"
-  cp -f bin/pshell $binDir/.
+  cp -f $localBinDir/pshell $binDir/.
   chmod +x $binDir/pshell$fileExt
   echo "Copying pshellAggregator$fileExt to $binDir"
-  cp -f bin/pshellAggregator $binDir/.
+  cp -f $localBinDir/pshellAggregator $binDir/.
   chmod +x $binDir/pshellAggregator$fileExt
   
   echo "Installing includes..."
   echo "Copying PshellServer.h to $includeDir"
-  cp -f include/PshellServer.h $includeDir/.
+  cp -f $localIncludeDir/PshellServer.h $includeDir/.
   echo "Copying PshellControl.h to $includeDir"
-  cp -f include/PshellControl.h $includeDir/.
+  cp -f $localIncludeDir/PshellControl.h $includeDir/.
   echo "Copying TraceFilter.h to $includeDir"
-  cp -f include/TraceFilter.h $includeDir/.
+  cp -f $localIncludeDir/TraceFilter.h $includeDir/.
   echo "Copying TraceLog.h to $includeDir"
-  cp -f include/TraceLog.h $includeDir/.
+  cp -f $localIncludeDir/TraceLog.h $includeDir/.
   
   if [ ! -d $pshellDir ]
   then
@@ -273,18 +279,18 @@ else
   
   echo "Installing manpages..."
   echo "Copying pshell.1 to $man1Dir"
-  cp -f man/man1/pshell.1 $man1Dir/.
+  cp -f $localMan1Dir/pshell.1 $man1Dir/.
   gzip -f $man1Dir/pshell.1
   echo "Copying PshellControl.3 to $man3Dir"
-  cp -f man/man3/PshellControl.3 $man3Dir/.
+  cp -f $localMan3Dir/PshellControl.3 $man3Dir/.
   gzip -f $man3Dir/PshellControl.3
   echo "Copying PshellServer.3 to $man3Dir"
-  cp -f man/man3/PshellServer.3 $man3Dir/.
+  cp -f $localMan3Dir/PshellServer.3 $man3Dir/.
   gzip -f $man3Dir/PshellServer.3
   echo "Copying TraceFilter.3 to $man3Dir"
-  cp -f man/man3/TraceFilter.3 $man3Dir/.
+  cp -f $localMan3Dir/TraceFilter.3 $man3Dir/.
   gzip -f $man3Dir/TraceFilter.3
   echo "Copying TraceLog.3 to $man3Dir"
-  cp -f man/man3/TraceLog.3 $man3Dir/.
+  cp -f $localMan3Dir/TraceLog.3 $man3Dir/.
   gzip -f $man3Dir/TraceLog.3
 fi

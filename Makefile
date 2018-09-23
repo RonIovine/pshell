@@ -30,7 +30,7 @@ CC=gcc
 
 SRC_EXT=cc
 
-INCLUDE = -I$(abspath include)
+INCLUDE = -I$(abspath c/include)
 
 WARNINGS = -Wall
 
@@ -57,11 +57,11 @@ endif
 
 SHARED_LIB = $(CC) -shared -o
 
-SRC_DIR = src
-LIB_DIR = lib
-BIN_DIR = bin
+SRC_DIR = c/src
+LIB_DIR = c/lib
+BIN_DIR = c/bin
 UTILS_DIR = utils
-DEMO_DIR = demo
+DEMO_DIR = c/demo
 
 PSHELL_FLAGS =
 TF_FLAGS = 

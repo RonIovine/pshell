@@ -47,7 +47,7 @@ else
   installDir=$localDir
 fi
 
-LIB_DIR=$installDir/lib
+LIB_DIR=$installDir/c/lib
 PYTHON_DIR=$installDir/python
 GO_DIR=$installDir/go
 GO_SRC=$GO_DIR/src/PshellServer
