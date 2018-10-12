@@ -967,9 +967,6 @@ func runTCPServer() {
              _gServerName,
              _gHostnameOrIpAddr,
              _gPort)
-  _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
-  _gTcpTitle = _gTitle + ": " + _gServerName + "[" +
-               _gTcpConnectSockName + "], Mode: INTERACTIVE"
   addNativeCommands()
   // startup our TCP server and accept new connections
   for createSocket() && acceptConnection() {
