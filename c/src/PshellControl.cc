@@ -183,6 +183,10 @@ int pshell_connectServer(const char *controlName_,
       _control[sid] = NULL;
       sid = PSHELL_INVALID_SID;
     }
+    else if (_control[sid]->serverType == UNIX)
+    {
+      sprintf(_control[sid]->remoteServer,  "%s[unix]", controlName_);
+    }
     else
     {
       sprintf(_control[sid]->remoteServer,  "%s[%s]", controlName_, remoteServer);

@@ -118,7 +118,7 @@ Server *getServer(char *localName)
 {
   for (unsigned server = 0; server < numServers; server++)
   {
-    if (strcmp(servers[server].localName, localName) == 0)
+    if (strncmp(localName, servers[server].localName, strlen(localName)) == 0)
     {
       return (&servers[server]);
     }
