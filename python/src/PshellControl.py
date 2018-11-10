@@ -852,8 +852,8 @@ _PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum p
 # over-the-wire via a socket
 _gPshellMsgHeaderFormat = "4BI"
 
-# default PshellMsg payload length, used to receive responses
-_gPshellMsgPayloadLength = 4096
+# default PshellMsg payload length, used to receive responses, 16k buffer size
+_gPshellMsgPayloadLength = 1024*16
 
 # mapping of above definitions to strings so we can display text in error messages
 _gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS", 
