@@ -751,15 +751,19 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
       (retCode > PSHELL_COMMAND_SUCCESS) && 
       (retCode < PSHELL_SOCKET_SEND_FAILURE))
   {
-    PSHELL_ERROR("Remote pshell command: '%s', %s\n%s%s",
+    PSHELL_ERROR("Remote pshell command: '%s', server: %s, %s\n%s%s",
                  command_,
+                 control_->remoteServer,
                  pshell_getResponseString(retCode),
                  _errorPad,
                  control_->pshellMsg.payload);
   }
   else if ((retCode != PSHELL_COMMAND_SUCCESS) && (retCode != PSHELL_COMMAND_COMPLETE))
   {
-    PSHELL_ERROR("Remote pshell command: '%s', %s", command_, pshell_getResponseString(retCode));
+    PSHELL_ERROR("Remote pshell command: '%s', server: %s, %s",
+                 command_,
+                 control_->remoteServer,
+                 pshell_getResponseString(retCode));
   }
   else
   {

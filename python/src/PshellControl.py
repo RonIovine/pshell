@@ -745,9 +745,9 @@ def _sendCommand(control_, commandType_, command_, timeout_):
   if ((_gSupressInvalidArgCountMessage == True) and (retCode == COMMAND_INVALID_ARG_COUNT)):
     retCode = COMMAND_SUCCESS
   elif ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
-    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getResponseString(retCode)))
+    print("PSHELL_ERROR: Remote pshell command: '%s', server: %s, %s" % (command_, control_["remoteServer"], _getResponseString(retCode)))
   elif ((retCode != COMMAND_SUCCESS) and (retCode != _gMsgTypes["commandComplete"])):
-    print("PSHELL_ERROR: Remote pshell command: '%s', %s" % (command_, _getResponseString(retCode)))
+    print("PSHELL_ERROR: Remote pshell command: '%s', server: %s, %s" % (command_, control_["remoteServer"], _getResponseString(retCode)))
   else:
     retCode = COMMAND_SUCCESS
   return (retCode)

@@ -46,7 +46,7 @@
  * needs to be big enough for any reasonable sized command and
  * its arguments
  */
-#define PSHELL_PAYLOAD_SIZE 2048
+#define PSHELL_PAYLOAD_SIZE 1024*4   /* 4k payload size */
 
 /* message structures used to communicate between the client and server */
 
