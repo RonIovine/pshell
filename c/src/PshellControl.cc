@@ -334,20 +334,30 @@ void pshell_sendMulticast(const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int bytesFormatted = 0;
+  bool keywordFound = false;
   char command[MAX_STRING_SIZE];
+  char command1[MAX_STRING_SIZE];
   PshellControl *control;
   char *keyword;
+  char *pos;
   va_list args;
   va_start(args, command_);
   bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
   va_end(args);
   if (bytesFormatted < (int)sizeof(command))
   {
+    strcpy(command1, command);
+    if ((pos = strstr(command1, " ")) != NULL)
+    {
+      *pos = 0;
+    }
     for (int group = 0; group < _multicastList.numGroups; group++)
     {
       if ((strcmp(_multicastList.groups[group].keyword, PSHELL_MULTICAST_ALL) == 0) || 
-          (((keyword = strstr(command, _multicastList.groups[group].keyword)) != NULL) && (keyword == command)))
+          (((keyword = strstr(_multicastList.groups[group].keyword, command1)) != NULL) &&
+            (keyword == _multicastList.groups[group].keyword)))
       {
+        keywordFound = true;
         /* we found a match, send command to all of our sids */
         for (int sid = 0; sid < _multicastList.groups[group].numSids; sid++)
         {
@@ -364,6 +374,10 @@ void pshell_sendMulticast(const char *command_, ...)
           }
         }
       }
+    }
+    if (keywordFound == false)
+    {
+      PSHELL_ERROR("Multicast command: '%s', not found", command1);
     }
   }
   else

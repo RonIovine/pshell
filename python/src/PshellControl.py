@@ -610,13 +610,18 @@ def _addMulticast(sid_, keyword_):
 def _sendMulticast(command_):
   global _gPshellMulticast
   global NO_WAIT
+  keywordFound = False
   for multicast in _gPshellMulticast:
-    if ((multicast["keyword"] == MULTICAST_ALL) or (command_.split()[0] == multicast["keyword"])):
+    command = command_.split()[0]
+    if ((multicast["keyword"] == MULTICAST_ALL) or (command == multicast["keyword"][:len(command)])):
+      keywordFound = True
       for sid in multicast["sidList"]:
         control = _getControl(sid)
         if (control != None):
           control["dataNeeded"] = False
           _sendCommand(control, _gMsgTypes["controlCommand"], command_, NO_WAIT)
+  if not keywordFound:
+    print("PSHELL_ERROR: Multicast command: '%s', not found" % command)
 
 #################################################################################
 #################################################################################
@@ -852,8 +857,9 @@ _PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum p
 # over-the-wire via a socket
 _gPshellMsgHeaderFormat = "4BI"
 
-# default PshellMsg payload length, used to receive responses, 16k buffer size
-_gPshellMsgPayloadLength = 1024*16
+# default PshellMsg payload length, used to receive responses,
+# set to the max UDP datagram size, 64k
+_gPshellMsgPayloadLength = 1024*64
 
 # mapping of above definitions to strings so we can display text in error messages
 _gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS", 
