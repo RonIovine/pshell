@@ -336,7 +336,6 @@ void pshell_sendMulticast(const char *command_, ...)
   int bytesFormatted = 0;
   bool keywordFound = false;
   char command[MAX_STRING_SIZE];
-  char command1[MAX_STRING_SIZE];
   PshellControl *control;
   char *keyword;
   char *pos;
@@ -346,18 +345,24 @@ void pshell_sendMulticast(const char *command_, ...)
   va_end(args);
   if (bytesFormatted < (int)sizeof(command))
   {
-    strcpy(command1, command);
-    if ((pos = strstr(command1, " ")) != NULL)
+    /* just look at first keyword so we can do a match abbreviation */
+    if ((pos = strstr(command, " ")) != NULL)
     {
-      *pos = 0;
+      /* NULL terminate to the first whitespace */
+      *pos = '\0';
     }
     for (int group = 0; group < _multicastList.numGroups; group++)
     {
       if ((strcmp(_multicastList.groups[group].keyword, PSHELL_MULTICAST_ALL) == 0) || 
-          (((keyword = strstr(_multicastList.groups[group].keyword, command1)) != NULL) &&
+          (((keyword = strstr(_multicastList.groups[group].keyword, command)) != NULL) &&
             (keyword == _multicastList.groups[group].keyword)))
       {
         keywordFound = true;
+        /* restore full command with along with any arguments */
+        if (pos != NULL)
+        {
+          *pos = ' ';
+        }
         /* we found a match, send command to all of our sids */
         for (int sid = 0; sid < _multicastList.groups[group].numSids; sid++)
         {
@@ -377,7 +382,7 @@ void pshell_sendMulticast(const char *command_, ...)
     }
     if (keywordFound == false)
     {
-      PSHELL_ERROR("Multicast command: '%s', not found", command1);
+      PSHELL_ERROR("Multicast command: '%s', not found", command);
     }
   }
   else
