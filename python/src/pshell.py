@@ -62,6 +62,7 @@ import PshellServer
 import PshellReadline
 
 _gSid = None
+_gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
 #################################################################################
 #################################################################################
@@ -129,8 +130,12 @@ def _processCommand(command_):
 #################################################################################
 def _comandDispatcher(args_):
   global _gSid
+  global _gHelp
   global _gInteractive
-  (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
+  if args_[0] in _gHelp:
+    results = PshellControl.extractCommands(_gSid)
+  else:
+    (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
   if (_gInteractive == True):
     PshellServer.printf(results, newline=False)
   else:

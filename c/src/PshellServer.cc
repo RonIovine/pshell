@@ -112,9 +112,7 @@ static int _defaultIdleTimeout = 10;
  * as given in the interacive "batch" command, if it does not find it in the directory
  * specified by the env variable PSHELL_BATCH_DIR, or the CWD, change this to any other
  * desired default location, the batch file can contain any commands that can be entered
- * to the server via the interacive command line, the batch file is executed during the
- * startup of the server, so it can serve as a program initialization file, it can also
- * be re-executed via the "batch" command
+ * to the server via the interacive command line
  */
 #ifdef PSHELL_BATCH_DIR
 #undef PSHELL_BATCH_DIR
