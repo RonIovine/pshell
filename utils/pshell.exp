@@ -56,23 +56,23 @@ proc showUsage {} {
   variable defaultClientConfigFile
   variable defaultServerConfigFile
   puts ""
-  puts "Usage: pshell.exp -h | ? | -s | {<hostName> | <ipAddress>} {<serverName> | <portNum>}"
-  puts "                 \[-h | ? | {<command> \[<rate> \[clear\]\]} | {-f <fileName> \[<rate> \[clear\]}\]"
+  puts "Usage: pshell.exp -s | {<hostName> | ipAddr>} {<portNum> | <serverName>}"
+  puts "                       \[{<command> \[rate=<seconds>\] \[repeat=<count>\] \[clear\]} |"
+  puts "                        {-f <fileName> \[rate=<seconds>\] \[repeat=<count>\] \[clear\]}\]"
   puts ""
   puts "  where:"
   puts ""
-  puts "    -h,?       - show pshell.exp usage or command set of specified PSHELL server"
   puts "    -s         - show named servers in \$PSHELL_CONFIG_DIR/$defaultClientConfigFile file"
   puts "    -f         - run commands from a batch file"
-  puts "    -t         - change the default server response timeout"
-  puts "    hostName   - hostname of desired PSHELL server"
-  puts "    ipAddress  - IP address of desired PSHELL server"
-  puts "    serverName - name of desired PSHELL server"
-  puts "    portNum    - port number of desired PSHELL server"
+  puts "    hostName   - hostname of TCP server"
+  puts "    ipAddr     - IP address of TCP server"
+  puts "    portNum    - port number of TCP server"
+  puts "    serverName - name of TCP server from pshell-client.conf file"
   puts "    command    - optional command to execute"
   puts "    fileName   - optional batch file to execute"
   puts "    rate       - optional rate to repeat command or batch file (in seconds)"
-  puts "    clear      - clear screen between commands or batch file passes"
+  puts "    repeat     - optional repeat count for command or batch file (default=forever)"
+  puts "    clear      - optional clear screen between commands or batch file passes"
   puts ""
   puts "    NOTE: If no <command> is given, pshell will be started"
   puts "          up in interactive mode, commands issued in command"
@@ -241,48 +241,36 @@ if { !([string is integer $serverName]) } {
 }
 
 set rate 0
+set repeat 0
 set command ""
 set batchFile ""
+set fileNeeded "false"
 set clearScreen ""
 
 # parse our command line
-if {[llength $argv] == 3} {
-  if {[lindex $argv 2] == "-h" || [lindex $argv 2] == "?"} {
+for {set i 2} {$i < [llength $argv]} {incr i} {
+  set arg [lindex $argv $i]
+  set rateOrRepeat [split $arg "="]
+  if {$arg == "-h" || $arg == "--h" || $arg == "-help" || $arg == "--help" || $arg == "?"} {
     set command "help"
-  } else {
-    set command [lindex $argv 2]
-  }
-} elseif {[llength $argv] == 4} {
-  if {[lindex $argv 2] == "-f"} {
-    set batchFile [lindex $argv 3]
-  } else {
-    set command [lindex $argv 2]
-    set rate [lindex $argv 3]
-  }
-} elseif {[llength $argv] == 5} {
-  if {[lindex $argv 2] == "-f"} {
-    set batchFile [lindex $argv 3]
-    set rate [lindex $argv 4]
-  } else {
-    set command [lindex $argv 2]
-    set rate [lindex $argv 3]
-    if {[lindex $argv 4] == "clear"} {
-      set clearScreen "\033\[H\033\[J"
+    break
+  } elseif {$arg == "-f"} {
+    fileNeeded = "true"
+  } elseif {$fileNeeded == "true"} {
+    set batchFile $arg
+    set fileNeeded "false"
+  } elseif {[llength $rateOrRepeat] == 2} {
+    if {[lindex $rateOrRepeat 0] == "rate"} {
+      set rate [lindex $rateOrRepeat 1]
+    } elseif {[lindex $rateOrRepeat 0] == "repeat"} {
+      set repeat [lindex $rateOrRepeat 1]
     } else {
       showUsage
     }
-  }
-} elseif {[llength $argv] == 6} {
-  if {[lindex $argv 2] == "-f"} {
-    set batchFile [lindex $argv 3]
-    set rate [lindex $argv 4]
-    if {[lindex $argv 5] == "clear"} {
-      set clearScreen "\033\[H\033\[J"
-    } else {
-      showUsage
-    }
+  } elseif {$arg == "clear"} {
+    set clearScreen "\033\[H\033\[J"
   } else {
-    showUsage
+    set command $arg
   }
 }
 
@@ -310,19 +298,34 @@ set ipAddress [lindex [split $ipAddress "\["] 1]
 
 # process our request    
 if {$command != ""} {
-  if {$rate > 0} {
+  if {$rate > 0 || $repeat > 0} {
     set keyword $command
     set keyword [split $keyword " "]
     set keyword [lindex $keyword 0]
     # setup our terminal title bar
-    setTitle "$title: $serverName\[$ipAddress\], Mode: COMMAND LINE\[$keyword\], Rate: $rate SEC"
+    if {$repeat == 0} {
+      setTitle "$title: $serverName\[$ipAddress\], Mode: COMMAND LINE\[$command\], Rate: $rate SEC"
+    }
+    set iteration 0
     while {1} {
+      incr iteration
+      # modify iteration count for each pass
+      if {$repeat > 0} {
+        setTitle "$title: $serverName\[$ipAddress\], Mode: COMMAND LINE\[$command\], Rate: $rate SEC, Iteration: $iteration of $repeat"
+      }
       clearScreen
       send "$command\r"
       expect $prompt
+      if {$iteration == $repeat} {
+        break
+      }
       sleep $rate
     }
+    send "quit\r"
+    puts ""
+    exit
   } else {
+    clearScreen
     send "$command\r"
     expect $prompt
     send "quit\r"
@@ -351,11 +354,19 @@ if {$command != ""} {
     }
   }
   if {[file exists $batchFile]} {
-    if {$rate > 0} {
+    if {$rate > 0 || $repeat > 0} {
       # setup our terminal title bar
-      setTitle "$title: $serverName\[$ipAddress\], Mode: BATCH\[$filename\], Rate: $rate SEC"
+      if {$repeat == 0} {
+        setTitle "$title: $serverName\[$ipAddress\], Mode: BATCH\[$filename\], Rate: $rate SEC"
+      }
       set file [open $batchFile r]
+      set iteration 0
       while {1} {
+        incr iteration
+        # modify iteration count for each pass
+        if {$repeat > 0} {
+          setTitle "$title: $serverName\[$ipAddress\], Mode: BATCH\[$filename\], Rate: $rate SEC, Iteration: $iteration of $repeat"
+        }
         # rewind file
         seek $file 0
         clearScreen
@@ -365,9 +376,16 @@ if {$command != ""} {
             expect $prompt      
           }
         }
+        if {$iteration == $repeat} {
+          break
+        }
         sleep $rate        
       }
+      send "quit\r"
+      puts ""
+      exit
     } else {
+      clearScreen
       set file [open $batchFile r]
       while {[gets $file command] != -1} {
         if {[string index $command 0] != "#" && [string length $command] > 0} {

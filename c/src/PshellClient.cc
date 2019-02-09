@@ -221,11 +221,11 @@ bool init(const char *destination_, const char *server_);
 bool send(void);
 bool receive(void);
 void tokenize(char *string_, const char *delimeter_, char *tokens_[], unsigned maxTokens_, unsigned *numTokens_);
-bool processCommand(char msgType_, char *command_, unsigned rate_, bool clear_, bool silent_);
+bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_);
 void getInput(void);
 bool initInteractiveMode(void);
 void processInteractiveMode(void);
-void processBatchFile(char *filename_, unsigned rate_, bool clear_);
+void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
 void getNamedServers(void);
 void showNamedServers(void);
 void showCommands(void);
@@ -354,7 +354,7 @@ const char *findServerPort(const char *name_)
 /******************************************************************************/
 bool getVersion(void)
 {
-  if (processCommand(PSHELL_QUERY_VERSION, NULL, 0, false, true))
+  if (processCommand(PSHELL_QUERY_VERSION, NULL, 0, 0, false, true))
   {
     _version = (unsigned)atoi(_pshellRcvMsg->payload);
     if ((_version < PSHELL_VERSION_1) || (_version > PSHELL_VERSION))
@@ -382,7 +382,7 @@ bool getVersion(void)
 bool getServerName(void)
 {
   /* query for our process name so we can setup our prompt and title bar */
-  if (processCommand(PSHELL_QUERY_NAME, NULL, 0, false, true))
+  if (processCommand(PSHELL_QUERY_NAME, NULL, 0, 0, false, true))
   {
     strcpy(_serverName, _pshellRcvMsg->payload);
     return (true);
@@ -398,7 +398,7 @@ bool getServerName(void)
 /******************************************************************************/
 bool getTitle(void)
 {
-  if (processCommand(PSHELL_QUERY_TITLE, NULL, 0, false, true))
+  if (processCommand(PSHELL_QUERY_TITLE, NULL, 0, 0, false, true))
   {
     strcpy(_title, _pshellRcvMsg->payload);
     return (true);
@@ -415,7 +415,7 @@ bool getTitle(void)
 bool getBanner(void)
 {
   /* query for our welcome banner message */
-  if (processCommand(PSHELL_QUERY_BANNER, NULL, 0, false, true))
+  if (processCommand(PSHELL_QUERY_BANNER, NULL, 0, 0, false, true))
   {
     strcpy(_banner, _pshellRcvMsg->payload);
     return (true);
@@ -432,7 +432,7 @@ bool getBanner(void)
 bool getPrompt(void)
 {
   /* query for our prompt */
-  if (processCommand(PSHELL_QUERY_PROMPT, NULL, 0, false, true))
+  if (processCommand(PSHELL_QUERY_PROMPT, NULL, 0, 0, false, true))
   {
     strcpy(_prompt, _pshellRcvMsg->payload);
     return (true);
@@ -448,7 +448,7 @@ bool getPrompt(void)
 /******************************************************************************/
 bool getPayloadSize(void)
 {
-  if (processCommand(PSHELL_QUERY_PAYLOAD_SIZE, NULL, 0, false, true))
+  if (processCommand(PSHELL_QUERY_PAYLOAD_SIZE, NULL, 0, 0, false, true))
   {
     _pshellPayloadSize = atoi(_pshellRcvMsg->payload);
     _pshellRcvMsg = (PshellMsg*)malloc(_pshellPayloadSize+PSHELL_HEADER_SIZE);
@@ -720,8 +720,9 @@ bool receive(void)
 
 /******************************************************************************/
 /******************************************************************************/
-bool processCommand(char msgType_, char *command_, unsigned rate_, bool clear_, bool silent_)
+bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_)
 {
+  unsigned iteration = 0;
   _pshellSendMsg.header.msgType = msgType_;
   _pshellSendMsg.header.respNeeded = true;
   _pshellSendMsg.payload[0] = 0;
@@ -732,6 +733,20 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, bool clear_, 
 
   do
   {
+    if (repeat_ > 0)
+    {
+      iteration++;
+      fprintf(stdout,
+              "\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC, Iteration: %d of %d\007",
+              _title,
+              _serverName,
+              _ipAddress,
+              command_,
+              rate_,
+              iteration,
+              repeat_);
+      fflush(stdout);
+    }
     if (clear_)
     {
       clearScreen();
@@ -762,8 +777,12 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, bool clear_, 
     {
       return (false);
     }
+    if ((repeat_ > 0) && (iteration == repeat_))
+    {
+      break;
+    }
     sleep(rate_);
-  } while (rate_);
+  } while (rate_ || repeat_);
 
   return (true);
 
@@ -970,7 +989,7 @@ bool initInteractiveMode(void)
    */
   if  (!_isBroadcastServer)
   {
-    if (!processCommand(PSHELL_QUERY_COMMANDS2, NULL, 0, false, true))
+    if (!processCommand(PSHELL_QUERY_COMMANDS2, NULL, 0, 0, false, true))
     {
       return (false);
     }
@@ -1003,12 +1022,13 @@ bool initInteractiveMode(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void processBatchFile(char *filename_, unsigned rate_, bool clear_)
+void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_)
 {
   FILE *fp;
   char inputLine[180];
   char batchFile[180];
   char *batchPath;
+  unsigned iteration = 0;
 
   if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
   {
@@ -1040,6 +1060,20 @@ void processBatchFile(char *filename_, unsigned rate_, bool clear_)
   {
     do
     {
+      if (repeat_ > 0)
+      {
+        iteration++;
+        fprintf(stdout,
+                "\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007",
+                _title,
+                _serverName,
+                _ipAddress,
+                filename_,
+                rate_,
+                iteration,
+                repeat_);
+        fflush(stdout);
+      }
       if (clear_)
       {
         clearScreen();
@@ -1054,13 +1088,17 @@ void processBatchFile(char *filename_, unsigned rate_, bool clear_)
           }
           if (strlen(inputLine) > 0)
           {
-            processCommand(PSHELL_USER_COMMAND, inputLine, 0, false, false);
+            processCommand(PSHELL_USER_COMMAND, inputLine, 0, 0, false, false);
           }
         }
       }
+      if ((repeat_ > 0) && (iteration == repeat_))
+      {
+        break;
+      }
       sleep(rate_);
       rewind(fp);
-    } while (rate_);
+    } while (rate_ || repeat_);
     fclose(fp);
   }
   else
@@ -1135,7 +1173,7 @@ void processInteractiveMode(void)
       }
       else
       {
-        processCommand(PSHELL_USER_COMMAND, _interactiveCommand, 0, false, false);
+        processCommand(PSHELL_USER_COMMAND, _interactiveCommand, 0, 0, false, false);
       }
     }
   }
@@ -1288,7 +1326,7 @@ void showCommands(void)
   }
   if (!_isBroadcastServer)
   {
-    processCommand(PSHELL_QUERY_COMMANDS1, NULL, 0, false, false);
+    processCommand(PSHELL_QUERY_COMMANDS1, NULL, 0, 0, false, false);
   }
   else
   {
@@ -1306,22 +1344,26 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -s | [-t<timeout>] {{<hostNameOrIpAddr> <port>} | <unixServerName>}\n");
-  printf("              [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]]}]\n");
+  printf("Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>\n");
+  printf("                   [{<command> [rate=<seconds>] [repeat=<count>] [clear]} |\n");
+  printf("                    {-f <fileName> [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
-  printf("    -s               - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file\n");
-  printf("    -f               - run commands from a batch file\n");
-  printf("    -t               - change the default server response timeout\n");
-  printf("    hostNameOrIpAddr - hostname or IP address of UDP server\n");
-  printf("    port             - port number of UDP server\n");
-  printf("    unixServerName   - name of UNIX server\n");
-  printf("    timeout          - response wait timeout in sec (default=5)\n");
-  printf("    command          - optional command to execute\n");
-  printf("    fileName         - optional batch file to execute\n");
-  printf("    rate             - optional rate to repeat command or batch file (in seconds)\n");
-  printf("    clear            - clear screen between commands or batch file passes\n");
+  printf("    -s             - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file\n");
+  printf("    -f             - run commands from a batch file\n");
+  printf("    -t             - change the default server response timeout\n");
+  printf("    hostName       - hostname of UDP server\n");
+  printf("    ipAddr         - IP address of UDP server\n");
+  printf("    portNum        - port number of UDP server\n");
+  printf("    serverName     - name of UDP server from pshell-client.conf file\n");
+  printf("    unixServerName - name of UNIX server\n");
+  printf("    timeout        - response wait timeout in sec (default=5)\n");
+  printf("    command        - optional command to execute\n");
+  printf("    fileName       - optional batch file to execute\n");
+  printf("    rate           - optional rate to repeat command or batch file (in seconds)\n");
+  printf("    repeat         - optional repeat count for command or batch file (default=forever)\n");
+  printf("    clear          - optional clear screen between commands or batch file passes\n");
   printf("\n");
   printf("    NOTE: If no <command> is given, pshell will be started\n");
   printf("          up in interactive mode, commands issued in command\n");
@@ -1483,9 +1525,13 @@ int main(int argc, char *argv[])
 {
 
   unsigned rate = 0;
+  unsigned repeat = 0;
+  bool needFile = false;
   bool clear = false;
-  char commandName[PSHELL_PAYLOAD_SIZE];
-  char *str;
+  char *command = NULL;
+  char *filename = NULL;
+  char *rateOrRepeat[MAX_TOKENS];
+  unsigned numTokens;
 
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
@@ -1502,64 +1548,75 @@ int main(int argc, char *argv[])
   {
     _mode = INTERACTIVE;
   }
-  else if (argc == 1)
+  else if (argc <=5)
   {
+    /* either command line or batch mode */
     if ((strcmp(argv[0], "-h") == 0) ||
         (strcmp(argv[0], "help") == 0) ||
         (strcmp(argv[0], "-help") == 0) ||
         (strcmp(argv[0], "--help") == 0) ||
         (strcmp(argv[0], "?") == 0))
     {
+      /* they asked for the command list only, display it and exit */
       if (init(_host, _server))
       {
         showCommands();
       }
       exitProgram(0);
     }
-    _mode = COMMAND_LINE;
-  }
-  else if (argc == 2)
-  {
-    if (strcmp(argv[0], "-f") == 0)
-    {
-      _mode = BATCH;
-    }
     else
     {
-      _mode = COMMAND_LINE;
-      rate = atoi(argv[1]);
+      /* parse the command/batch mode options */
+      for (int i = 0; i < argc; i++)
+      {
+        if (strstr(argv[i], "=") != NULL)
+        {
+          /* parse our options */
+          tokenize(argv[i], "=", rateOrRepeat, MAX_TOKENS, &numTokens);
+          if ((numTokens == 2) && (strcmp(rateOrRepeat[0], "rate") == 0))
+          {
+            rate = atoi(rateOrRepeat[1]);
+          }
+          else if ((numTokens == 2) && (strcmp(rateOrRepeat[0], "repeat") == 0))
+          {
+            repeat = atoi(rateOrRepeat[1]);
+          }
+          else
+          {
+            showUsage();
+          }
+        }
+        else if (strcmp(argv[i], "clear") == 0)
+        {
+          clear = true;
+        }
+        else if (strcmp(argv[i], "-f") == 0)
+        {
+          _mode = BATCH;
+          needFile = true;
+        }
+        else if (needFile == true)
+        {
+          filename = argv[i];
+          needFile = false;
+        }
+        else
+        {
+          command = argv[i];
+          _mode = COMMAND_LINE;
+        }
+      }
     }
   }
-  else  if (argc == 3)
+  else
   {
-    if (strcmp(argv[0], "-f") == 0)
-    {
-      _mode = BATCH;
-      rate = atoi(argv[2]);
-    }
-    else if (strcmp(argv[2], "clear") == 0)
-    {
-      _mode = COMMAND_LINE;
-      rate = atoi(argv[1]);
-      clear = true;
-    }
-    else
-    {
-      showUsage();
-    }
+    showUsage();
   }
-  else  /* argc == 4 */
+
+  /* see if they speficied a -f and forgot to supply a filename */
+  if (needFile)
   {
-    if ((strcmp(argv[0], "-f") == 0) && (strcmp(argv[3], "clear") == 0))
-    {
-      _mode = BATCH;
-      rate = atoi(argv[2]);
-      clear = true;
-    }
-    else
-    {
-      showUsage();
-    }
+    showUsage();
   }
   
   /* command line processed, now execute results */
@@ -1577,21 +1634,18 @@ int main(int argc, char *argv[])
       * repeating the command, since it will be too quick to see
       * anyway
       */
-      if (rate)
+      if ((rate > 0) && (repeat == 0))
       {
-        /* just get the command name and not any parameters for the title */
-        strcpy(commandName, argv[0]);
-        str = strtok(commandName, " ");
         fprintf(stdout,
                 "\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007",
                 _title,
                 _serverName,
                 _ipAddress,
-                str,
+                command,
                 rate);
         fflush(stdout);
       }
-      processCommand(PSHELL_USER_COMMAND, argv[0], rate, clear, false);
+      processCommand(PSHELL_USER_COMMAND, command, rate, repeat, clear, false);
     }
     else  /* _mode == BATCH */
     {
@@ -1600,18 +1654,18 @@ int main(int argc, char *argv[])
       * repeating the command, since it will be too quick to see
       * anyway
       */
-      if (rate)
+      if ((rate > 0) && (repeat == 0))
       {
         fprintf(stdout,
                 "\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007",
                 _title,
                 _serverName,
                 _ipAddress,
-                argv[1],
+                filename,
                 rate);
         fflush(stdout);
       }
-      processBatchFile(argv[1], rate, clear);
+      processBatchFile(filename, rate, repeat, clear);
     }
   }
   exitProgram(0);

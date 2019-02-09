@@ -162,15 +162,30 @@ def _processCommandLine():
   global _gCommand
   global _gServerName
   global _gTitle
+  global _gRepeat
+  global _gIteration
   command = _gCommand.split()
-  sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gCommand, _gRate))
+  if (_gRepeat == 0):
+    sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gCommand, _gRate))
   while (True):
+    if (_gRepeat > 0):
+      _gIteration += 1
+      sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007" %
+                      (_gTitle,
+                       _gServerName,
+                       _getIpAddress(),
+                       _gFilename,
+                       _gRate,
+                       _gIteration,
+                       _gRepeat))
     if (_gClear != False):
       sys.stdout.write(_gClear)
     _comandDispatcher(command)
-    if (_gRate > 0):
+    if _gRepeat > 0 and _gIteration == _gRepeat:
+      break
+    elif (_gRate > 0):
       time.sleep(_gRate)
-    else:
+    elif (_gRepeat == 0):
       break
   
 #################################################################################
@@ -181,22 +196,37 @@ def _processBatchFile():
   global _gFilename
   global _gServerName
   global _gTitle
+  global _gRepeat
+  global _gIteration
   if (os.path.isfile(_gFilename)):
     file = open(_gFilename, 'r')
-    sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
+    if (_gRepeat == 0):
+      sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
     while (True):
       if (_gClear != False):
         sys.stdout.write(_gClear)
       file.seek(0, 0)
+      if (_gRepeat > 0):
+        _gIteration += 1
+        sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007" %
+                        (_gTitle,
+                         _gServerName,
+                         _getIpAddress(),
+                         _gFilename,
+                         _gRate,
+                         _gIteration,
+                         _gRepeat))
       for line in file:
         # skip comments
         line = line.strip()
         if ((len(line) > 0) and (line[0] != "#")):
           command = line.split()
           _comandDispatcher(command)
-      if (_gRate > 0):
-        time.sleep(_gRate) 
-      else:
+      if _gRepeat > 0 and _gIteration == _gRepeat:
+        break
+      elif (_gRate > 0):
+        time.sleep(_gRate)
+      elif (_gRepeat == 0):
         break
   else:
     print("ERROR: Could not open file: '%s'" % _gFilename)
@@ -284,21 +314,24 @@ def _registerSignalHandlers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s {{<hostNameOrIpAddr> <port>} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
-  print("                 [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]]}]")
+  print("Usage: %s {{<hostName> | <ipAddr>} <portNum>} | <unixServerName> [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("                 [{<command> [rate=<seconds>] [repeat=<count>] [clear]} |")
+  print("                  {-f <fileName> [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
-  print("    -f               - run commands from a batch file")
-  print("    -t               - change the default server response timeout")
-  print("    hostNameOrIpAddr - hostname or IP address of UDP server")
-  print("    port             - port number of UDP server")
-  print("    unixServerName   - name of UNIX server")
-  print("    timeout          - response wait timeout in sec (default=5)")
-  print("    command          - optional command to execute")
-  print("    fileName         - optional batch file to execute")
-  print("    rate             - optional rate to repeat command or batch file (in seconds)")
-  print("    clear            - clear screen between commands or batch file passes")
+  print("    -f             - run commands from a batch file")
+  print("    -t             - change the default server response timeout")
+  print("    hostName       - hostname of UDP server")
+  print("    ipAddr         - IP address of UDP server")
+  print("    portNum        - port number of UDP server")
+  print("    unixServerName - name of UNIX server")
+  print("    timeout        - response wait timeout in sec (default=5)")
+  print("    command        - optional command to execute")
+  print("    fileName       - optional batch file to execute")
+  print("    rate           - optional rate to repeat command or batch file (in seconds)")
+  print("    repeat         - optional repeat count for command or batch file (default=forever)")
+  print("    clear          - optional clear screen between commands or batch file passes")
   print("")
   print("    NOTE: If no <command> is given, pshell will be started")
   print("          up in interactive mode, commands issued in command")
@@ -334,6 +367,8 @@ if (__name__ == '__main__'):
   _gPort = PshellServer.UNIX
   
   _gRate = 0
+  _gRepeat = 0
+  _gIteration = 0
   _gClear = False
   _gFilename = None
   _gCommand = None
@@ -342,13 +377,24 @@ if (__name__ == '__main__'):
   needFile = False
   
   for index, arg in enumerate(sys.argv[2:]):
-    if ("-t" in arg):
-      _gTimeout = int(arg[2:])
+    if "-t" in arg:
+      if len(arg) > 2 and arg[2:].isdigit():
+        _gTimeout = int(arg[2:])
+      else:
+        _showUsage()
     elif (arg.isdigit()):
       if (index == 0):
         _gPort = arg
       else:
-        _gRate = int(arg)
+        _showUsage()
+    elif "=" in arg:
+      rateOrRepeat = arg.split("=")
+      if len(rateOrRepeat) == 2 and rateOrRepeat[0] == "rate" and rateOrRepeat[1].isdigit():
+        _gRate = int(rateOrRepeat[1])
+      elif len(rateOrRepeat) == 2 and rateOrRepeat[0] == "repeat" and rateOrRepeat[1].isdigit():
+        _gRepeat = int(rateOrRepeat[1])
+      else:
+        _showUsage()
     elif (arg == "clear"):
       _gClear = "\033[H\033[J"
     elif (arg == "-f"):
@@ -361,6 +407,10 @@ if (__name__ == '__main__'):
         _showUsage()
     else:
       _gCommand = arg
+
+  # needed filename but it was not fulfilled
+  if needFile:
+    _showUsage()
   
   # make sure we cleanup any system resorces on an abnormal termination
   _registerSignalHandlers()
