@@ -819,6 +819,7 @@ def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
               defaultTimeout_ = 0
             else:
               defaultTimeout_ = int(option[1].strip())
+  file.close()
   # make this check in case they changed the server
   # from udp to unix and forgot to comment out the
   # port

@@ -47,10 +47,11 @@ set title "PSHELL"
 set prompt "PSHELL>"
 
 set defaultInstallDir "/etc/pshell"
-set defaultConfigDir $defaultInstallDir/"config"
-set defaultBatchDir $defaultInstallDir/"batch"
+set defaultConfigDir $defaultInstallDir/config
+set defaultBatchDir $defaultInstallDir/batch
 set defaultClientConfigFile "pshell-client.conf"
 set defaultServerConfigFile "pshell-server.conf"
+set serverList []
 
 proc showUsage {} {
   variable defaultClientConfigFile
@@ -111,72 +112,87 @@ proc clearScreen {} {
   flush stdout
 }
 
-# validate our command line argument count
-if {[llength $argv] < 1 || [llength $argv] > 6} {
-  showUsage
-}
-
-set timeout 30
-#log_user 0
-if {[llength $argv] == 1} {
-  if {[lindex $argv 0] == "-s"} {
-    # see if our env variable exists
-    if { [info exists env(PSHELL_CONFIG_DIR) ] } {
-      set clientConfFile $env(PSHELL_CONFIG_DIR)/$defaultClientConfigFile
-    } else {
-      set clientConfFile $defaultConfigDir/$defaultClientConfigFile
-    }
-    # check if our source file exists
-    if ![file exists $clientConfFile] {
-      puts "PSHELL_ERROR: Client config file '$clientConfFile' not found"
-      exit
-    }
-    # scan the file to get our mas server name length so we can have a prettily aligned output
-    set maxServerNameLength 11
+proc loadServers {} {
+  variable defaultClientConfigFile
+  variable defaultConfigDir
+  variable maxServerNameLength
+  variable serverList
+  set maxServerNameLength 11
+  # see if our env variable exists
+  #puts $env(PSHELL_CONFIG_DIR)
+  if { [info exists env(PSHELL_CONFIG_DIR)] } {
+    set clientConfFile $env(PSHELL_CONFIG_DIR)/$defaultClientConfigFile
+  } else {
+    set clientConfFile $defaultConfigDir/$defaultClientConfigFile
+  }
+  # check if our source file exists
+  if [file exists $clientConfFile] {
+    # scan the file to get our max server name length so we can have a prettily aligned output
     set file [open $clientConfFile r]
     while {[gets $file line] != -1} {
       if {[string index $line 0] != "#" && [string length $line] > 0} {
+        lappend serverList $line
         set list [split $line ":"]
         if {[llength $list] >= 2 && [string length [lindex $list 0]] > $maxServerNameLength} {
           set maxServerNameLength [string length [lindex $list 0]]
         }
       }
     }
-    # now display our servers, print out our banner
-    puts ""
-    puts "**************************************"
-    puts "*      Available PSHELL Servers      *"
-    puts "**************************************"
-    puts ""
-    puts -nonewline "Server Name"
-    for {set count 11} {$count < $maxServerNameLength} {incr count 1} {
-      puts -nonewline " "
-    }
-    puts "  Port Number"
-    for {set count 0} {$count < $maxServerNameLength} {incr count 1} {
-      #puts -nonewline "-"
-      puts -nonewline "="
-    }
-    #puts "  -----------"
-    puts "  ==========="
-    # got the max server name length, now reset the file pointer and read it again
-    seek $file 0
-    while {[gets $file line] != -1} {
-      if {[string index $line 0] != "#" && [string length $line] > 0} {
-        set list [split $line ":"]
-        if {[llength $list] >= 2} {
-          set serverName [lindex $list 0]
-          set portNum [lindex $list 1]
-          puts -nonewline $serverName
-          for {set count [string length $serverName]} {$count < $maxServerNameLength} {incr count 1} {
-            puts -nonewline " "
-          }
-          puts "  $portNum"
-        }
+  }
+}
+
+proc showServers {} {
+  variable serverList
+  variable maxServerNameLength
+  puts ""
+  puts "**************************************"
+  puts "*      Available PSHELL Servers      *"
+  puts "**************************************"
+  puts ""
+  puts -nonewline "Server Name"
+  for {set count 11} {$count < $maxServerNameLength} {incr count 1} {
+    puts -nonewline " "
+  }
+  puts "  Port Number"
+  for {set count 0} {$count < $maxServerNameLength} {incr count 1} {
+    #puts -nonewline "-"
+    puts -nonewline "="
+  }
+  #puts "  -----------"
+  puts "  ==========="
+  foreach server $serverList {
+    set list [split $server ":"]
+    if {[llength $list] >= 2} {
+      set serverName [lindex $list 0]
+      set portNum [lindex $list 1]
+      puts -nonewline $serverName
+      for {set count [string length $serverName]} {$count < $maxServerNameLength} {incr count 1} {
+        puts -nonewline " "
       }
+      puts "  $portNum"
     }
-    puts ""
-    exit
+  }
+  puts ""
+  exit
+}
+
+set timeout 30
+#log_user 0
+
+#################################
+# start of 'main'
+#################################
+
+# validate our command line argument count
+if {[llength $argv] < 1 || [llength $argv] > 6} {
+  showUsage
+}
+
+loadServers
+
+if {[llength $argv] == 1} {
+  if {[lindex $argv 0] == "-s"} {
+    showServers
   } else {
     showUsage
   }
@@ -190,32 +206,18 @@ set portNum $serverName
 # see if we have a named server
 if { !([string is integer $serverName]) } {
   set portNum -1
-  # open the client config file to get the port number
-  if { [info exists env(PSHELL_CONFIG_DIR)] && [file exists $env(PSHELL_CONFIG_DIR)/$defaultClientConfigFile] } {
-    set clientConfFile $env(PSHELL_CONFIG_DIR)/$defaultClientConfigFile
-  } else {
-    set clientConfFile $defaultConfigDir/$defaultClientConfigFile
-  }
-  if { [file exists $clientConfFile] } {
-    set file [open $clientConfFile r]
-    while {[gets $file line] != -1} {
-      if {[string index $line 0] != "#" && [string length $line] > 0} {
-        set list [split $line ":"]
-        if {[llength $list] >= 2 && [string first $serverName [lindex $list 0]] != -1} {
-          set portNum [lindex $list 1]
-          break
-        }
-      }
+  foreach server $serverList {
+    set list [split $server ":"]
+    if {[llength $list] >= 2 && [string first $serverName [lindex $list 0]] != -1} {
+      set portNum [lindex $list 1]
+      break
     }
-  } else {
-    puts "PSHELL_ERROR: Could not open client config file: '$clientConfFile'"
-    exit
   }
-  
   # see if we found a port for the specified named server in our client config file
   if { $portNum == -1 } {
-    puts "PSHELL_ERROR: Could not find server: '$serverName' in file: '$clientConfFile'"
-    exit
+    puts ""
+    puts "PSHELL_ERROR: Could not find server: '$serverName' in file: '$defaultClientConfigFile'"
+    showServers
   }
 
   # open the servers config file to get any prompt and/or title override

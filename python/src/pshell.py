@@ -198,38 +198,55 @@ def _processBatchFile():
   global _gTitle
   global _gRepeat
   global _gIteration
-  if (os.path.isfile(_gFilename)):
-    file = open(_gFilename, 'r')
-    if (_gRepeat == 0):
-      sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
-    while (True):
-      if (_gClear != False):
-        sys.stdout.write(_gClear)
-      file.seek(0, 0)
-      if (_gRepeat > 0):
-        _gIteration += 1
-        sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007" %
-                        (_gTitle,
-                         _gServerName,
-                         _getIpAddress(),
-                         _gFilename,
-                         _gRate,
-                         _gIteration,
-                         _gRepeat))
-      for line in file:
-        # skip comments
-        line = line.strip()
-        if ((len(line) > 0) and (line[0] != "#")):
-          command = line.split()
-          _comandDispatcher(command)
-      if _gRepeat > 0 and _gIteration == _gRepeat:
-        break
-      elif (_gRate > 0):
-        time.sleep(_gRate)
-      elif (_gRepeat == 0):
-        break
+  global _gDefaultBatchDir
+  batchFile1 = ""
+  batchPath = os.getenv('PSHELL_BATCH_DIR')
+  if (batchPath != None):
+    batchFile1 = batchPath+"/"+_gFilename
+  batchFile2 = _gDefaultBatchDir+"/"+_gFilename
+  batchFile3 = os.getcwd()+"/"+_gFilename
+  batchFile4 = _gFilename
+  if (os.path.isfile(batchFile1)):
+    file = open(batchFile1, 'r')
+  elif (os.path.isfile(batchFile2)):
+    file = open(batchFile2, 'r')
+  elif (os.path.isfile(batchFile3)):
+    file = open(batchFile3, 'r')
+  elif (os.path.isfile(batchFile4)):
+    file = open(batchFile4, 'r')
   else:
     print("PSHELL_ERROR: Could not open file: '%s'" % _gFilename)
+    return
+  # we found a batch file, process it
+  if (_gRepeat == 0):
+    sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
+  while (True):
+    if (_gClear != False):
+      sys.stdout.write(_gClear)
+    file.seek(0, 0)
+    if (_gRepeat > 0):
+      _gIteration += 1
+      sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007" %
+                      (_gTitle,
+                       _gServerName,
+                       _getIpAddress(),
+                       _gFilename,
+                       _gRate,
+                       _gIteration,
+                       _gRepeat))
+    for line in file:
+      # skip comments
+      line = line.strip()
+      if ((len(line) > 0) and (line[0] != "#")):
+        command = line.split()
+        _comandDispatcher(command)
+    if _gRepeat > 0 and _gIteration == _gRepeat:
+      break
+    elif (_gRate > 0):
+      time.sleep(_gRate)
+    elif (_gRepeat == 0):
+      break
+  file.close()
   
 #################################################################################
 #################################################################################
@@ -299,31 +316,36 @@ def _loadServers():
   global _gClientConfigFile
   _gServerList = []
   _gMaxServerNameLength = 11
+  configFile1 = ""
   configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
-    clientConfigFile = configPath+"/"+_gClientConfigFile
-    if (os.path.isfile(clientConfigFile)):
-      _gClientConfigFile = clientConfigFile
-    else:
-      clientConfigFile = _gDefaultConfigDir+"/"+_gClientConfigFile
-      if (os.path.isfile(clientConfigFile)):
-        _gClientConfigFile = clientConfigFile
-      else:
-        return
-  if (os.path.isfile(_gClientConfigFile)):
-    file = open(_gClientConfigFile, 'r')
-    for line in file:
-      # skip comments
-      line = line.strip()
-      if ((len(line) > 0) and (line[0] != "#")):
-        server = line.split(":")
-        if len(server) == 2:
-          _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
-          _gServerList.append({"server":server[0], "port":server[1], "timeout":5})
-        elif len(server) == 3:
-          _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
-          _gServerList.append({"server":server[0], "port":server[1], "timeout":int(server[2])})
-          
+    configFile1 = configPath+"/"+_gClientConfigFile
+  configFile2 = _gDefaultConfigDir+"/"+_gClientConfigFile
+  configFile3 = os.getcwd()+"/"+_gClientConfigFile
+  configFile4 = _gClientConfigFile
+  if (os.path.isfile(configFile1)):
+    file = open(configFile1, 'r')
+  elif (os.path.isfile(configFile2)):
+    file = open(configFile2, 'r')
+  elif (os.path.isfile(configFile3)):
+    file = open(configFile3, 'r')
+  elif (os.path.isfile(configFile4)):
+    file = open(configFile4, 'r')
+  else:
+    return
+  # opened config file, process it
+  for line in file:
+    # skip comments
+    line = line.strip()
+    if ((len(line) > 0) and (line[0] != "#")):
+      server = line.split(":")
+      if len(server) == 2:
+        _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
+        _gServerList.append({"server":server[0], "port":server[1], "timeout":5})
+      elif len(server) == 3:
+        _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
+        _gServerList.append({"server":server[0], "port":server[1], "timeout":int(server[2])})
+  file.close()
 
 #####################################################
 #####################################################
@@ -471,7 +493,7 @@ if (__name__ == '__main__'):
         _gPort = arg
       elif not _getServer(arg):
         print("")
-        print("PSHELL_ERROR: Could not find server: '%s' in %s file" % (arg, _gClientConfigFile))
+        print("PSHELL_ERROR: Could not find server: '%s' in file: '%s'" % (arg, _gClientConfigFile))
         _showServers()
     elif "=" in arg:
       rateOrRepeat = arg.split("=")

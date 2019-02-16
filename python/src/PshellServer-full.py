@@ -940,6 +940,7 @@ def _batch(command_):
     line = line.strip()
     if ((len(line) > 0) and (line[0] != "#")):
       _processCommand(line)
+  file.close()
 
 #################################################################################
 #################################################################################
@@ -1152,6 +1153,7 @@ def _loadConfigFile():
               _gServerType = value[1].lower()
           elif ((option[1].lower() == "timeout") and (value[1].isdigit())):
             _gTcpTimeout = int(value[1])
+  file.close()
   return
 
 #################################################################################
@@ -1178,6 +1180,7 @@ def _loadStartupFile():
     line = line.strip()
     if ((len(line) > 0) and (line[0] != "#")):
       _runCommand(line)
+  file.close()
 
 #################################################################################
 #################################################################################

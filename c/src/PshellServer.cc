@@ -3195,7 +3195,7 @@ static void addNativeCommands(void)
     pshell_addCommand(batch,
                       "batch",
                       "run commands from a batch file",
-                      "<filename> [repeat=<count> [rate=<seconds]] [clear]",
+                      "<filename> [repeat=<count> [rate=<seconds>]] [clear]",
                       1,
                       4,
                       false);
