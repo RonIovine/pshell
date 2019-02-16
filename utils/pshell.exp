@@ -62,7 +62,7 @@ proc showUsage {} {
   puts ""
   puts "  where:"
   puts ""
-  puts "    -s         - show named servers in \$PSHELL_CONFIG_DIR/$defaultClientConfigFile file"
+  puts "    -s         - show named servers in $defaultClientConfigFile file"
   puts "    -f         - run commands from a batch file"
   puts "    hostName   - hostname of TCP server"
   puts "    ipAddr     - IP address of TCP server"
@@ -214,7 +214,7 @@ if { !([string is integer $serverName]) } {
   
   # see if we found a port for the specified named server in our client config file
   if { $portNum == -1 } {
-    puts "PSHELL_ERROR: Could not find port number for named server: '$serverName' in client config file: '$clientConfFile'"
+    puts "PSHELL_ERROR: Could not find server: '$serverName' in file: '$clientConfFile'"
     exit
   }
 

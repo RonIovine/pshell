@@ -1350,7 +1350,7 @@ void showUsage(void)
   printf("\n");
   printf("  where:\n");
   printf("\n");
-  printf("    -s             - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file\n");
+  printf("    -s             - show named servers in pshell-client.conf file\n");
   printf("    -f             - run commands from a batch file\n");
   printf("    -t             - change the default server response timeout\n");
   printf("    hostName       - hostname of UDP server\n");

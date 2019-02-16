@@ -75,7 +75,7 @@ def _showWelcome():
   sys.stdout.flush()    
   banner = "#  PSHELL: Process Specific Embedded Command Line Shell"
   server = "#  Multi-session BROADCAST server: %s[%s]" % (_gServerName, _gRemoteServer)
-  maxBorderWidth = max(58, len(banner),len(server))+2
+  maxBorderWidth = max(58, len(banner), len(server))+2
   print("")
   print("#"*maxBorderWidth)
   print("#")
@@ -229,7 +229,7 @@ def _processBatchFile():
       elif (_gRepeat == 0):
         break
   else:
-    print("ERROR: Could not open file: '%s'" % _gFilename)
+    print("PSHELL_ERROR: Could not open file: '%s'" % _gFilename)
   
 #################################################################################
 #################################################################################
@@ -277,6 +277,113 @@ def _configureLocalServer():
 
   PshellServer._gTcpTimeout = _gTimeout
 
+#####################################################
+#####################################################
+def _getServer(arg):
+  global _gServerList
+  global _gPort
+  global _gTimeout
+  for server in _gServerList:
+    if server["server"] == arg:
+      _gPort = server["port"]
+      _gTimeout = server["timeout"]
+      return True
+  return False
+
+#####################################################
+#####################################################
+def _loadServers():
+  global _gDefaultConfigDir
+  global _gMaxServerNameLength
+  global _gServerList
+  global _gClientConfigFile
+  _gServerList = []
+  _gMaxServerNameLength = 11
+  configPath = os.getenv('PSHELL_CONFIG_DIR')
+  if (configPath != None):
+    clientConfigFile = configPath+"/"+_gClientConfigFile
+    if (os.path.isfile(clientConfigFile)):
+      _gClientConfigFile = clientConfigFile
+    else:
+      clientConfigFile = _gDefaultConfigDir+"/"+_gClientConfigFile
+      if (os.path.isfile(clientConfigFile)):
+        _gClientConfigFile = clientConfigFile
+      else:
+        return
+  if (os.path.isfile(_gClientConfigFile)):
+    file = open(_gClientConfigFile, 'r')
+    for line in file:
+      # skip comments
+      line = line.strip()
+      if ((len(line) > 0) and (line[0] != "#")):
+        server = line.split(":")
+        if len(server) == 2:
+          _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
+          _gServerList.append({"server":server[0], "port":server[1], "timeout":5})
+        elif len(server) == 3:
+          _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
+          _gServerList.append({"server":server[0], "port":server[1], "timeout":int(server[2])})
+          
+
+#####################################################
+#####################################################
+def _showServers():
+  global _gServerList
+  global _gMaxServerNameLength
+  print("")
+  print("**************************************")
+  print("*      Available PSHELL Servers      *")
+  print("**************************************")
+  print("")
+  print("%s  Port Number  Response Timeout" % "Server Name".ljust(_gMaxServerNameLength))
+  print("%s  ===========  ================" % ("="*_gMaxServerNameLength))
+  for server in _gServerList:
+    print("%s  %s  %d seconds" % (server["server"].ljust(_gMaxServerNameLength), server["port"].ljust(11), server["timeout"]))
+  print("")
+  exit(0)
+
+#####################################################
+#####################################################
+def _showUsage():
+  print("")
+  print("Usage: %s -s | {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName> [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("                      [{<command> [rate=<seconds>] [repeat=<count>] [clear]} |")
+  print("                       {-f <fileName> [rate=<seconds>] [repeat=<count>] [clear]}]")
+  print("")
+  print("  where:")
+  print("")
+  print("    -s             - show named servers in pshell-client.conf file")
+  print("    -f             - run commands from a batch file")
+  print("    -t             - change the default server response timeout")
+  print("    hostName       - hostname of UDP server")
+  print("    ipAddr         - IP address of UDP server")
+  print("    portNum        - port number of UDP server")
+  print("    serverName     - name of UDP server from pshell-client.conf file")
+  print("    unixServerName - name of UNIX server")
+  print("    timeout        - response wait timeout in sec (default=5)")
+  print("    command        - optional command to execute")
+  print("    fileName       - optional batch file to execute")
+  print("    rate           - optional rate to repeat command or batch file (in seconds)")
+  print("    repeat         - optional repeat count for command or batch file (default=forever)")
+  print("    clear          - optional clear screen between commands or batch file passes")
+  print("")
+  print("    NOTE: If no <command> is given, pshell will be started")
+  print("          up in interactive mode, commands issued in command")
+  print("          line mode that require arguments must be enclosed")
+  print("          in double quotes, commands issued in interactive")
+  print("          mode that require arguments do not require double")
+  print("          quotes.")
+  print("")
+  print("          To get help on a command in command line mode, type")
+  print("          \"<command> ?\" or \"<command> -h\".  To get help in")
+  print("          interactive mode type 'help' or '?' at the prompt to")
+  print("          see all available commands, to get help on a single")
+  print("          command, type '<command> {? | -h}'.  Use TAB completion")
+  print("          to fill out partial commands and up-arrow to recall")
+  print("          for command history.")
+  print("")
+  exit(0)
+
 #################################################################################
 #################################################################################
 def _cleanupAndExit():
@@ -310,46 +417,6 @@ def _registerSignalHandlers():
   signal.signal(signal.SIGXFSZ, _signalHandler)     # 25 File size limit exceeded (4.2 BSD)
   signal.signal(signal.SIGSYS, _signalHandler)      # 31 Bad system call
 
-#####################################################
-#####################################################
-def _showUsage():
-  print("")
-  print("Usage: %s {{<hostName> | <ipAddr>} <portNum>} | <unixServerName> [-t<timeout>]" % os.path.basename(sys.argv[0]))
-  print("                 [{<command> [rate=<seconds>] [repeat=<count>] [clear]} |")
-  print("                  {-f <fileName> [rate=<seconds>] [repeat=<count>] [clear]}]")
-  print("")
-  print("  where:")
-  print("")
-  print("    -f             - run commands from a batch file")
-  print("    -t             - change the default server response timeout")
-  print("    hostName       - hostname of UDP server")
-  print("    ipAddr         - IP address of UDP server")
-  print("    portNum        - port number of UDP server")
-  print("    unixServerName - name of UNIX server")
-  print("    timeout        - response wait timeout in sec (default=5)")
-  print("    command        - optional command to execute")
-  print("    fileName       - optional batch file to execute")
-  print("    rate           - optional rate to repeat command or batch file (in seconds)")
-  print("    repeat         - optional repeat count for command or batch file (default=forever)")
-  print("    clear          - optional clear screen between commands or batch file passes")
-  print("")
-  print("    NOTE: If no <command> is given, pshell will be started")
-  print("          up in interactive mode, commands issued in command")
-  print("          line mode that require arguments must be enclosed")
-  print("          in double quotes, commands issued in interactive")
-  print("          mode that require arguments do not require double")
-  print("          quotes.")
-  print("")
-  print("          To get help on a command in command line mode, type")
-  print("          \"<command> ?\" or \"<command> -h\".  To get help in")
-  print("          interactive mode type 'help' or '?' at the prompt to")
-  print("          see all available commands, to get help on a single")
-  print("          command, type '<command> {? | -h}'.  Use TAB completion")
-  print("          to fill out partial commands and up-arrow to recall")
-  print("          for command history.")
-  print("")
-  exit(0)
-
 ##############################
 #
 # start of main program
@@ -362,6 +429,9 @@ if (__name__ == '__main__'):
       ((len(sys.argv) > 1) and (sys.argv[1] == "-h"))):
     _showUsage()
 
+  # make sure we cleanup any system resorces on an abnormal termination
+  _registerSignalHandlers()
+  
   _gTimeout = 5
 
   _gPort = PshellServer.UNIX
@@ -374,19 +444,35 @@ if (__name__ == '__main__'):
   _gCommand = None
   _gInteractive = False
   
+  _gDefaultInstallDir = "/etc/pshell"
+  _gDefaultConfigDir = _gDefaultInstallDir+"/config"
+  _gDefaultBatchDir = _gDefaultInstallDir+"/batch"
+  _gClientConfigFile = "pshell-client.conf"
+  _gMaxServerNameLength = 11
+  _gServerList = []
+
+  _loadServers()
+
+  if sys.argv[1] == "-s":
+    _showServers()
+  else:
+    _gRemoteServer = sys.argv[1]
+
   needFile = False
-  
+
   for index, arg in enumerate(sys.argv[2:]):
     if "-t" in arg:
       if len(arg) > 2 and arg[2:].isdigit():
         _gTimeout = int(arg[2:])
       else:
         _showUsage()
-    elif (arg.isdigit()):
-      if (index == 0):
+    elif index == 0:
+      if (arg.isdigit()):
         _gPort = arg
-      else:
-        _showUsage()
+      elif not _getServer(arg):
+        print("")
+        print("PSHELL_ERROR: Could not find server: '%s' in %s file" % (arg, _gClientConfigFile))
+        _showServers()
     elif "=" in arg:
       rateOrRepeat = arg.split("=")
       if len(rateOrRepeat) == 2 and rateOrRepeat[0] == "rate" and rateOrRepeat[1].isdigit():
@@ -412,11 +498,6 @@ if (__name__ == '__main__'):
   if needFile:
     _showUsage()
   
-  # make sure we cleanup any system resorces on an abnormal termination
-  _registerSignalHandlers()
-  
-  _gRemoteServer = sys.argv[1]
-
   # see if we are requesting a server sitting on a subnet broadcast address,
   # if so, we configure for one-way, fire-and-forget messaging since there may
   # be many hosts/servers on our subnet which might all be listening on the
