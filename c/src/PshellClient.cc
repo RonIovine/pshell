@@ -1350,7 +1350,7 @@ void showUsage(void)
   printf("  where:\n");
   printf("\n");
   printf("    -s             - show named servers in pshell-client.conf file\n");
-  printf("    -c             - run command from command line (use double quotes, \"\")\n");
+  printf("    -c             - run command from command line\n");
   printf("    -f             - run commands from a batch file\n");
   printf("    -t             - change the default server response timeout\n");
   printf("    hostName       - hostname of UDP server\n");
@@ -1359,7 +1359,7 @@ void showUsage(void)
   printf("    serverName     - name of UDP server from pshell-client.conf file\n");
   printf("    unixServerName - name of UNIX server\n");
   printf("    timeout        - response wait timeout in sec (default=5)\n");
-  printf("    command        - optional command to execute\n");
+  printf("    command        - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")\n");
   printf("    fileName       - optional batch file to execute\n");
   printf("    rate           - optional rate to repeat command or batch file (in seconds)\n");
   printf("    repeat         - optional repeat count for command or batch file (default=forever)\n");
