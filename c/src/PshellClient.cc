@@ -1345,12 +1345,12 @@ void showUsage(void)
 {
   printf("\n");
   printf("Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>\n");
-  printf("                   [{<command> [rate=<seconds>] [repeat=<count>] [clear]} |\n");
-  printf("                    {-f <fileName> [rate=<seconds>] [repeat=<count>] [clear]}]\n");
+  printf("                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
   printf("    -s             - show named servers in pshell-client.conf file\n");
+  printf("    -c             - run command from command line (use double quotes, \"\")\n");
   printf("    -f             - run commands from a batch file\n");
   printf("    -t             - change the default server response timeout\n");
   printf("    hostName       - hostname of UDP server\n");
@@ -1527,6 +1527,7 @@ int main(int argc, char *argv[])
   unsigned rate = 0;
   unsigned repeat = 0;
   bool needFile = false;
+  bool needCommand = false;
   bool clear = false;
   char *command = NULL;
   char *filename = NULL;
@@ -1551,11 +1552,11 @@ int main(int argc, char *argv[])
   else if (argc <=5)
   {
     /* either command line or batch mode */
-    if ((strcmp(argv[0], "-h") == 0) ||
-        (strcmp(argv[0], "help") == 0) ||
-        (strcmp(argv[0], "-help") == 0) ||
-        (strcmp(argv[0], "--help") == 0) ||
-        (strcmp(argv[0], "?") == 0))
+    if ((argc == 2) && ((strcmp(argv[1], "-h") == 0) ||
+                        (strcmp(argv[1], "help") == 0) ||
+                        (strcmp(argv[1], "-help") == 0) ||
+                        (strcmp(argv[1], "--help") == 0) ||
+                        (strcmp(argv[1], "?") == 0)))
     {
       /* they asked for the command list only, display it and exit */
       if (init(_host, _server))
@@ -1590,6 +1591,16 @@ int main(int argc, char *argv[])
         {
           clear = true;
         }
+        else if (strcmp(argv[i], "-c") == 0)
+        {
+          _mode = COMMAND_LINE;
+          needCommand = true;
+        }
+        else if (needCommand == true)
+        {
+          command = argv[i];
+          needCommand = false;
+        }
         else if (strcmp(argv[i], "-f") == 0)
         {
           _mode = BATCH;
@@ -1602,8 +1613,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-          command = argv[i];
-          _mode = COMMAND_LINE;
+          showUsage();
         }
       }
     }
@@ -1614,7 +1624,7 @@ int main(int argc, char *argv[])
   }
 
   /* see if they speficied a -f and forgot to supply a filename */
-  if (needFile)
+  if (needFile || needCommand)
   {
     showUsage();
   }

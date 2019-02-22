@@ -368,13 +368,13 @@ def _showServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s -s | {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName> [-t<timeout>]" % os.path.basename(sys.argv[0]))
-  print("                      [{<command> [rate=<seconds>] [repeat=<count>] [clear]} |")
-  print("                       {-f <fileName> [rate=<seconds>] [repeat=<count>] [clear]}]")
+  print("Usage: %s -s | {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("                      [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
   print("    -s             - show named servers in pshell-client.conf file")
+  print("    -c             - run command from command line (use double quotes, \"\")")
   print("    -f             - run commands from a batch file")
   print("    -t             - change the default server response timeout")
   print("    hostName       - hostname of UDP server")
@@ -481,6 +481,7 @@ if (__name__ == '__main__'):
     _gRemoteServer = sys.argv[1]
 
   needFile = False
+  needCommand = False
 
   for index, arg in enumerate(sys.argv[2:]):
     if "-t" in arg:
@@ -488,6 +489,10 @@ if (__name__ == '__main__'):
         _gTimeout = int(arg[2:])
       else:
         _showUsage()
+    elif (arg == "-f"):
+      needFile = True
+    elif (arg == "-c"):
+      needCommand = True
     elif index == 0:
       if (arg.isdigit()):
         _gPort = arg
@@ -505,19 +510,23 @@ if (__name__ == '__main__'):
         _showUsage()
     elif (arg == "clear"):
       _gClear = "\033[H\033[J"
-    elif (arg == "-f"):
-      needFile = True
     elif (needFile == True):
       if (not arg.isdigit()):
         _gFilename = arg
         needFile = False
       else:
         _showUsage()
+    elif (needCommand == True):
+      if (not arg.isdigit()):
+        _gCommand = arg
+        needCommand = False
+      else:
+        _showUsage()
     else:
-      _gCommand = arg
+      _showUsage()
 
   # needed filename but it was not fulfilled
-  if needFile:
+  if needFile or needCommand:
     _showUsage()
   
   # see if we are requesting a server sitting on a subnet broadcast address,

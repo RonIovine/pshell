@@ -58,12 +58,12 @@ proc showUsage {} {
   variable defaultServerConfigFile
   puts ""
   puts "Usage: pshell.exp -s | {<hostName> | ipAddr>} {<portNum> | <serverName>}"
-  puts "                       \[{<command> \[rate=<seconds>\] \[repeat=<count>\] \[clear\]} |"
-  puts "                        {-f <fileName> \[rate=<seconds>\] \[repeat=<count>\] \[clear\]}\]"
+  puts "                       \[{{-c <command> | -f <filename>} \[rate=<seconds>\] \[repeat=<count>\] \[clear\]}]"
   puts ""
   puts "  where:"
   puts ""
   puts "    -s         - show named servers in $defaultClientConfigFile file"
+  puts "    -c         - run command from command line (use double quotes, \"\")"
   puts "    -f         - run commands from a batch file"
   puts "    hostName   - hostname of TCP server"
   puts "    ipAddr     - IP address of TCP server"
@@ -247,6 +247,7 @@ set repeat 0
 set command ""
 set batchFile ""
 set fileNeeded "false"
+set commandNeeded "false"
 set clearScreen ""
 
 # parse our command line
@@ -258,9 +259,14 @@ for {set i 2} {$i < [llength $argv]} {incr i} {
     break
   } elseif {$arg == "-f"} {
     fileNeeded = "true"
+  } elseif {$arg == "-c"} {
+    set commandNeeded "true"
   } elseif {$fileNeeded == "true"} {
     set batchFile $arg
     set fileNeeded "false"
+  } elseif {$commandNeeded == "true"} {
+    set command $arg
+    set commandNeeded "false"
   } elseif {[llength $rateOrRepeat] == 2} {
     if {[lindex $rateOrRepeat 0] == "rate"} {
       set rate [lindex $rateOrRepeat 1]
@@ -272,8 +278,12 @@ for {set i 2} {$i < [llength $argv]} {incr i} {
   } elseif {$arg == "clear"} {
     set clearScreen "\033\[H\033\[J"
   } else {
-    set command $arg
+    showUsage
   }
+}
+
+if {$fileNeeded == "true" || $commandNeeded == "true"} {
+  showUsage
 }
 
 # connect to our server
