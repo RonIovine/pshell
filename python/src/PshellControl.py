@@ -240,7 +240,7 @@ def setDefaultTimeout(sid, defaultTimeout):
 
 #################################################################################
 #################################################################################
-def extractCommands(sid):
+def extractCommands(sid, includeName = True):
   """ 
   This function will extract all the commands of a remote pshell server and 
   present them in a human readable form, this is useful when writing a multi 
@@ -248,12 +248,13 @@ def extractCommands(sid):
   the demo directory for examples
 
     Args:
-        sid (int) : The ServerId as returned from the connectServer call
+        sid (int)          : The ServerId as returned from the connectServer call
+        includeName (bool) : Include server name in banner
 
     Returns:
         str : The remote server's command list in human readable form
   """
-  return (_extractCommands(sid))
+  return (_extractCommands(sid, includeName))
 
 #################################################################################
 #################################################################################
@@ -514,7 +515,7 @@ def _setDefaultTimeout(sid_, defaultTimeout_):
 
 #################################################################################
 #################################################################################
-def _extractCommands(sid_):
+def _extractCommands(sid_, includeName_):
   global _gMsgTypes
   results = ""
   control = _getControl(sid_)
@@ -522,12 +523,17 @@ def _extractCommands(sid_):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryCommands"], "query commands", ONE_SEC*5) == COMMAND_SUCCESS):
       results += "\n"
-      results += (len(control["remoteServer"])+22)*"*"
-      results += "\n"
-      results += "*   COMMAND LIST: %s   *" % control["remoteServer"]
-      results += "\n"
-      results += (len(control["remoteServer"])+22)*"*"
-      results += "\n"
+      if includeName_:
+        results += (len(control["remoteServer"])+22)*"*"
+        results += "\n"
+        results += "*   COMMAND LIST: %s   *" % control["remoteServer"]
+        results += "\n"
+        results += (len(control["remoteServer"])+22)*"*"
+        results += "\n"
+      else:
+        results += "****************************************\n"
+        results += "*             COMMAND LIST             *\n"
+        results += "****************************************\n"
       results += "\n"
       results += control["pshellMsg"]["payload"]
   return (results)

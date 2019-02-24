@@ -133,7 +133,7 @@ def _comandDispatcher(args_):
   global _gHelp
   global _gInteractive
   if args_[0] in _gHelp:
-    results = PshellControl.extractCommands(_gSid)
+    results = PshellControl.extractCommands(_gSid, includeName=False)
   else:
     (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
   if (_gInteractive == True):

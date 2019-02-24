@@ -133,12 +133,14 @@ const char *pshell_getResponseString(int results_);
 #define PSHELL_NO_WAIT      0
 #define PSHELL_ONE_MSEC     1
 #define PSHELL_ONE_SEC      PSHELL_ONE_MSEC*1000
+#define PSHELL_ONE_MINUTE   PSHELL_ONE_SEC*60
+#define PSHELL_ONE_HOUR     PSHELL_ONE_MINUTE*60
 #define PSHELL_LOCALHOST    "localhost"
 
 int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,
-                         unsigned port_,   // = PSHELL_UNIX_CONTROL,
-                         unsigned defaultTimeout_);// = PSHELL_NO_WAIT);
+                         unsigned port_ = PSHELL_UNIX_CONTROL,
+                         unsigned defaultTimeout_ = PSHELL_NO_WAIT);
 
 /*
  * pshell_disconnectServer:
@@ -187,7 +189,7 @@ void pshell_extractCommands(int sid_, char *results_, int size_);
  */
 #define PSHELL_MULTICAST_ALL "__all__"
 
-void pshell_addMulticast(int sid_, const char *keyword_);//= PSHELL_MULTICAST_ALL);
+void pshell_addMulticast(int sid_, const char *keyword_ = PSHELL_MULTICAST_ALL);
 
 /*
  * pshell_sendMulticast:
