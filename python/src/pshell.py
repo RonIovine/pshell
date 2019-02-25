@@ -170,11 +170,11 @@ def _processCommandLine():
   while (True):
     if (_gRepeat > 0):
       _gIteration += 1
-      sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007" %
+      sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC, Iteration: %d of %d\007" %
                       (_gTitle,
                        _gServerName,
                        _getIpAddress(),
-                       _gFilename,
+                       _gCommand,
                        _gRate,
                        _gIteration,
                        _gRepeat))
