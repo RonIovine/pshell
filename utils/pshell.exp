@@ -315,7 +315,7 @@ if {$command != ""} {
     set keyword [split $keyword " "]
     set keyword [lindex $keyword 0]
     # setup our terminal title bar
-    if {$repeat == 0} {
+    if {$rate > 0 && $repeat == 0} {
       setTitle "$title: $serverName\[$ipAddress\], Mode: COMMAND LINE\[$command\], Rate: $rate SEC"
     }
     set iteration 0
@@ -368,7 +368,7 @@ if {$command != ""} {
   if {[file exists $batchFile]} {
     if {$rate > 0 || $repeat > 0} {
       # setup our terminal title bar
-      if {$repeat == 0} {
+      if {$rate > 0 && $repeat == 0} {
         setTitle "$title: $serverName\[$ipAddress\], Mode: BATCH\[$filename\], Rate: $rate SEC"
       }
       set file [open $batchFile r]

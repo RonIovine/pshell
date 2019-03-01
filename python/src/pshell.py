@@ -165,7 +165,7 @@ def _processCommandLine():
   global _gRepeat
   global _gIteration
   command = _gCommand.split()
-  if (_gRepeat == 0):
+  if _gRate > 0 and _gRepeat == 0:
     sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gCommand, _gRate))
   while (True):
     if (_gRepeat > 0):
@@ -218,7 +218,7 @@ def _processBatchFile():
     print("PSHELL_ERROR: Could not open file: '%s'" % _gFilename)
     return
   # we found a batch file, process it
-  if (_gRepeat == 0):
+  if _gRate > 0 and _gRepeat == 0:
     sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
   while (True):
     if (_gClear != False):
