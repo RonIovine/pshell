@@ -1031,7 +1031,7 @@ def _printf(message_, newline_):
     if (newline_ == True):
       message_ = str(message_)+"\n"
     if ((_gServerType == LOCAL) or (_gServerType == TCP)):
-      PshellReadline.write(str(message_))
+      PshellReadline.writeOutput(str(message_))
     else:   # UDP/UNIX server
       _gPshellMsg["payload"] += str(message_)
 

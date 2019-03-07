@@ -134,4 +134,4 @@ if (__name__ == '__main__'):
   while (not idleSession and not PshellReadline.isSubString(command, "quit")):
     (command, idleSession) = PshellReadline.getInput("prompt> ")
     if (not idleSession and not PshellReadline.isSubString(command, "quit")):
-      PshellReadline.write("command: '%s'\n" % command)
+      PshellReadline.writeOutput("command: '%s'\n" % command)

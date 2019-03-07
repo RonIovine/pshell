@@ -44,8 +44,8 @@ setIdleTimeout()     -- set the idle session timeout
 addTabCompletion()   -- add a keyword to the TAB completion list
 setTabStyle()        -- sets the tab behavour style ("fast" or bash)
 getInput()           -- get a line of user input from our input file descriptor
+writeOutput()        -- write a string to our output file descriptor
 isSubString()        -- checks for string1 substring of string2 at position 0
-write()              -- write a string to our output file descriptor
 
 Integer constants:
 
@@ -162,7 +162,7 @@ def setIdleTimeout(idleTimeout):
 
 #################################################################################
 #################################################################################
-def write(string):
+def writeOutput(string):
   """
   Write a string to our output file descriptor
 
@@ -172,7 +172,7 @@ def write(string):
     Returns:
         none
   """
-  _write(string)
+  _writeOutput(string)
 
 #################################################################################
 #################################################################################
@@ -276,7 +276,7 @@ def _setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_):
   _gCommandHistory = []
   # if a socket serial device, setup for telnet client control
   if (_gSerialType == SOCKET):
-    _write(_gTcpNegotiate)
+    _writeOutput(_gTcpNegotiate)
     _gInFd.recv(len(_gTcpNegotiate))
 
 #################################################################################
@@ -318,9 +318,16 @@ def _isSubString(string1_, string2_, minMatchLength_):
 #################################################################################
 def _findTabCompletions(keyword_):
   global _gTabCompletions
+  global _gMaxMatchKeywordLength
+  global _gMaxMatchCompletionsPerLine
   matchList = []
+  _gMaxMatchKeywordLength = 0
+  _gMaxMatchCompletionsPerLine = 0
   for keyword in _gTabCompletions:
     if (isSubString(keyword_, keyword)):
+      if (len(keyword_) > _gMaxMatchKeywordLength):
+        _gMaxMatchKeywordLength = len(keyword_)+5
+        _gMaxMatchCompletionsPerLine = 80/_gMaxMatchKeywordLength
       matchList.append(keyword)
   return (matchList)
 
@@ -342,21 +349,19 @@ def _findLongestMatch(matchList_, command_):
 
 #################################################################################
 #################################################################################
-def _showTabCompletions(completionList_, prompt_):
-  global _gMaxTabCompletionKeywordLength
-  global _gMaxCompletionsPerLine
+def _showTabCompletions(completionList_, maxPerLine_, maxLength_, prompt_):
   if (len(completionList_) > 0):
-    _write("\n")
+    _writeOutput("\n")
     totPrinted = 0
     numPrinted = 0
     for keyword in completionList_:
-      _write("%-*s" % (_gMaxTabCompletionKeywordLength, keyword))
+      _writeOutput("%-*s" % (maxLength_, keyword))
       numPrinted += 1
       totPrinted += 1
-      if ((numPrinted == _gMaxCompletionsPerLine) and (totPrinted < len(completionList_))):
-        _write("\n")
+      if ((numPrinted == maxPerLine_) and (totPrinted < len(completionList_))):
+        _writeOutput("\n")
         numPrinted = 0
-    _write("\n"+prompt_)
+    _writeOutput("\n"+prompt_)
 
 #################################################################################
 #################################################################################
@@ -367,21 +372,21 @@ def _setTabStyle(tabStyle_):
 #################################################################################
 #################################################################################
 def _clearLine(cursorPos_, command_):
-  _write("\b"*cursorPos_ + " "*len(command_) + "\b"*(len(command_)))
+  _writeOutput("\b"*cursorPos_ + " "*len(command_) + "\b"*(len(command_)))
 
 #################################################################################
 #################################################################################
 def _beginningOfLine(cursorPos_, command_):
   if (cursorPos_ > 0):
     cursorPos_ = 0
-    _write("\b"*len(command_))
+    _writeOutput("\b"*len(command_))
   return (cursorPos_)
 
 #################################################################################
 #################################################################################
 def _endOfLine(cursorPos_, command_):
   if (cursorPos_ < len(command_)):
-    _write(command_[cursorPos_:])
+    _writeOutput(command_[cursorPos_:])
     cursorPos_ = len(command_)
   return (cursorPos_)
 
@@ -396,7 +401,7 @@ def _killLine(cursorPos_, command_):
 #################################################################################
 #################################################################################
 def _showCommand(command_):
-  _write(command_)
+  _writeOutput(command_)
   return (len(command_), command_)
 
 #################################################################################
@@ -404,6 +409,10 @@ def _showCommand(command_):
 def _getInput(prompt_):
   global _gCommandHistory
   global _gCommandHistoryPos
+  global _gMaxMatchKeywordLength
+  global _gMaxMatchCompletionsPerLine
+  global _gMaxTabCompletionKeywordLength
+  global _gMaxCompletionsPerLine
   global _gTabCompletions
   global _gTabStyle
   global _gOutFd
@@ -412,7 +421,7 @@ def _getInput(prompt_):
   command = ""
   cursorPos = 0
   tabCount = 0
-  _write(prompt_)
+  _writeOutput(prompt_)
   while (True):
     (char, idleSession) = _getChar()
     # check for idleSession timeout
@@ -447,7 +456,7 @@ def _getInput(prompt_):
         elif (char == 'C'):
           # right-arrow key
           if (cursorPos < len(command)):
-            _write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+            _writeOutput(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
             cursorPos += 1
           inEsc = False
           esc = ""
@@ -455,7 +464,7 @@ def _getInput(prompt_):
           # left-arrow key
           if (cursorPos > 0):
             cursorPos -= 1
-            _write("\b")
+            _writeOutput("\b")
           inEsc = False
           esc = ""
         elif (char == '1'):
@@ -466,7 +475,7 @@ def _getInput(prompt_):
         elif (char == '~'):
           # delete key, delete under cursor
           if (cursorPos < len(command)):
-            _write(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
+            _writeOutput(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
             command = command[:cursorPos] + command[cursorPos+1:]
           inEsc = False
           esc = ""
@@ -489,23 +498,44 @@ def _getInput(prompt_):
     elif ((ord(char) >= 32) and (ord(char) < 127)):
       # printable single character, add it to our command,
       command = command[:cursorPos] + char + command[cursorPos:]
-      _write(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
+      _writeOutput(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       cursorPos += 1
     elif (ord(char) == 13):
       # carriage return
-      _write("\n")
+      _writeOutput("\n")
       if (len(command) > 0):
-        # add command to our command history
-        if (len(_gCommandHistory) == 0 or (_gCommandHistory[-1] != command)):
-          _gCommandHistory.append(command)
-          _gCommandHistoryPos = len(_gCommandHistory)
-        # return command, no idleSession timeout
-        return (command.strip(), False)
+        if (command == "history"):
+          # add command to our command history
+          _addHistory(command)
+	        # we process the history internally
+          _showHistory()
+          command = ""
+          cursorPos = 0
+          tabCount = 0
+          _writeOutput(prompt_)
+        elif len(command) > 1 and command[0] == '!':
+          # they want to recall a specific command in the history, check if it is within range
+          index = int(command[1:])-1
+          if index < len(_gCommandHistory):
+	          command = _gCommandHistory[index]
+	          _addHistory(command)
+	          return (command.strip(), False)
+          else:
+            command = ""
+            cursorPos = 0
+            tabCount = 0
+            _writeOutput("history index: %d, out of bounds, range 1-%d\n" % (index+1, len(_gCommandHistory)))
+            _writeOutput(prompt_)
+        else:
+          # add input_ to our command history
+          _addHistory(command)
+          # normal input, return no timeout
+          return (command.strip(), False)
       else:
-        _write(prompt_)
+        _writeOutput(prompt_)
     elif (ord(char) == 11):
       # kill to eol
-      _write(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
+      _writeOutput(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
       command = command[:cursorPos]
     elif (ord(char) == 21):
       # kill whole line
@@ -524,7 +554,7 @@ def _getInput(prompt_):
           # multiple matches
           if (len(command) == 0):
             # nothing typed, just TAB, show all registered TAB completions
-            _showTabCompletions(_gTabCompletions, prompt_)
+            _showTabCompletions(_gTabCompletions, _gMaxCompletionsPerLine, _gMaxTabCompletionKeywordLength, prompt_)
           else:
             # partial word typed, show all possible completions
             matchList = _findTabCompletions(command)
@@ -537,16 +567,16 @@ def _getInput(prompt_):
               # then show all other possibilities
               _clearLine(cursorPos, command)
               (cursorPos, command) = _showCommand(_findLongestMatch(matchList, command))
-              _showTabCompletions(matchList, prompt_+command)
+              _showTabCompletions(matchList, _gMaxMatchCompletionsPerLine, _gMaxMatchKeywordLength, prompt_+command)
       else:  # BASH_TAB
         # this code below implements the more standard readline/bash double tabbing method 
         if (tabCount == 2):
           if (len(command) == 0):
             # nothing typed, just a double TAB, show all registered TAB completions
-            _showTabCompletions(_gTabCompletions, prompt_)
+            _showTabCompletions(_gTabCompletions, _gMaxCompletionsPerLine, _gMaxTabCompletionKeywordLength, prompt_)
           else:
             # partial word typed, double TAB, show all possible completions
-            _showTabCompletions(_findTabCompletions(command), prompt_+command)
+            _showTabCompletions(_findTabCompletions(command), _gMaxMatchCompletionsPerLine, _gMaxMatchKeywordLength, prompt_+command)
         elif ((tabCount == 1) and (len(command) > 0)):
           # partial word typed, single TAB, fill out as much
           #  as we can and show any possible other matches
@@ -562,7 +592,7 @@ def _getInput(prompt_):
     elif (ord(char) == 127):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
-        _write("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
+        _writeOutput("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
         command = command[:cursorPos-1] + command[cursorPos:]
         cursorPos -= 1
     elif (ord(char) == 1):
@@ -576,13 +606,30 @@ def _getInput(prompt_):
       cursorPos = _endOfLine(cursorPos, command)
     elif (ord(char) != 9):
       # don't print out tab if multi keyword command
-      #_write("\nchar value: %d" % ord(char))
-      #_write("\n"+prompt_)
+      #_writeOutput("\nchar value: %d" % ord(char))
+      #_writeOutput("\n"+prompt_)
       None
 
 #################################################################################
 #################################################################################
-def _write(string_):
+def _addHistory(command_):
+  global _gCommandHistory
+  global _gCommandHistoryPos
+  # add command to our command history
+  if (len(_gCommandHistory) == 0 or (_gCommandHistory[-1] != command_)):
+    _gCommandHistory.append(command_.strip())
+    _gCommandHistoryPos = len(_gCommandHistory)
+
+#################################################################################
+#################################################################################
+def _showHistory():
+  global _gCommandHistory
+  for index, keyword in enumerate(_gCommandHistory):
+    _writeOutput("%-3d %s\n" % (index+1, keyword))
+  
+#################################################################################
+#################################################################################
+def _writeOutput(string_):
   global _gOutFd
   global _gSerialType
   string_ = string_.replace("\n", "\r\n")
@@ -611,7 +658,7 @@ def _getChar():
         if (len(inputready) > 0):
           char = _gInFd.read(1)
         else:
-          _write("\r\nIdle session timeout\r\n");
+          _writeOutput("\r\nIdle session timeout\r\n")
           return (char, True)
       else:
         char = _gInFd.read(1)
@@ -624,7 +671,7 @@ def _getChar():
       if (len(inputready) > 0):
         char = _gInFd.recv(1)
       else:
-        _write("\nIdle session timeout\n");
+        _writeOutput("\nIdle session timeout\n")
         return (char, True)
     else:
       char = _gInFd.recv(1)
@@ -645,6 +692,8 @@ _gOutFd = sys.stdout
 _gTabCompletions = []
 _gMaxTabCompletionKeywordLength = 0
 _gMaxCompletionsPerLine = 0
+_gMaxMatchKeywordLength = 0
+_gMaxMatchCompletionsPerLine = 0
 _gCommandHistory = []
 _gCommandHistoryPos = 0
 _gTabStyle = FAST_TAB

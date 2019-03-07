@@ -122,14 +122,14 @@ if (__name__ == '__main__'):
       (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
       if (not PshellReadline.isSubString(command, "quit")):
         if ((command.split()[0] == "?") or (command.split()[0] == "help")):
-          PshellReadline.write(PshellControl.extractCommands(sid))
+          PshellReadline.writeOutput(PshellControl.extractCommands(sid))
         elif (extract):
           (results, retCode) = PshellControl.sendCommand3(sid, command)
-          PshellReadline.write("%d bytes extracted, results:\n" % len(results))
-          PshellReadline.write("%s" % results)
-          PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
+          PshellReadline.writeOutput("%d bytes extracted, results:\n" % len(results))
+          PshellReadline.writeOutput("%s" % results)
+          PshellReadline.writeOutput("retCode: %s\n" % PshellControl.getResponseString(retCode))
         else:
           retCode = PshellControl.sendCommand1(sid, command)
-          PshellReadline.write("retCode: %s\n" % PshellControl.getResponseString(retCode))
+          PshellReadline.writeOutput("retCode: %s\n" % PshellControl.getResponseString(retCode))
 
     PshellControl.disconnectServer(sid)

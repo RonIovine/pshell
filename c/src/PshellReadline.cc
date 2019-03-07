@@ -244,6 +244,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
 	}
 	else if ((strlen(input_) > 1) && (input_[0] == '!'))
 	{
+	  // they want to recall a specific command in the history, check if it is within range
 	  index = atoi(&input_[1])-1;
 	  if (index < _numHistory)
 	  {
