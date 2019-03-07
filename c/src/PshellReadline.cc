@@ -49,11 +49,13 @@ static char *_tabCompletions[MAX_TAB_COMPLETIONS];
 static int _numTabCompletions = 0;
 static int _maxTabCompletionKeywordLength = 0;
 static int _maxCompletionsPerLine = 0;
+static int _maxMatchKeywordLength = 0;
+static int _maxMatchCompletionsPerLine = 0;
 static TabStyle _tabStyle = FAST_TAB;
 static SerialType _serialType = TTY;
 static int _inFd = STDIN_FILENO;
 static int _outFd = STDOUT_FILENO;
-static int _idleTimeout = 0;
+static int _idleTimeout = IDLE_TIMEOUT_NONE;
 
 /****************************************
  * private "member" function prototypes
@@ -66,7 +68,7 @@ static char *stripWhitespace(char *string_);
 static int numKeywords(char *command_);
 static void findTabCompletions(const char *keyword_);
 static char *findLongestMatch(char *command_);
-static void showTabCompletions(char *completionList_[], int numCompletions_, const char* format_, ...);
+static void showTabCompletions(char *completionList_[], int numCompletions_, int maxCompletionsPerLine_, int maxCompletionLength_, const char* format_, ...);
 static void clearLine(int cursorPos_, char *command_);
 static void beginningOfLine(int &cursorPos_, const char *command_);
 static void endOfLine(int &cursorPos_, const char *command_);
@@ -81,6 +83,7 @@ static void leftArrow(int &cursorPos_);
 static void rightArrow(int &cursorPos_, char *command_);
 static int showCommand(char *outCommand_, const char* format_, ...);
 static void addHistory(char *command_);
+static void showHistory(void);
 static void clearHistory(void);
 static bool getChar(char &ch);
 
@@ -92,7 +95,8 @@ void pshell_writeOutput(const char* format_, ...);
 bool pshell_getInput(const char *prompt_, char *input_);
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_);
 void pshell_addTabCompletion(const char *keyword_);
-void pshell_setIdleSessionTimeout(int timeout_);
+void pshell_setTabStyle(TabStyle tabStyle_);
+void pshell_setIdleTimeout(int timeout_);
 
 /**************************************
  * public API "member" function bodies
@@ -121,6 +125,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
   int cursorPos = 0;
   int tabCount = 0;
   bool idleSession = false;
+  int index = 0;
   char ch;
   input_[0] = 0;
   pshell_writeOutput(prompt_);
@@ -226,13 +231,47 @@ bool pshell_getInput(const char *prompt_, char *input_)
       newline();
       if (strlen(input_) > 0)
       {
-        // add input_ to our command history
-	addHistory(input_);
-        // return no timeout
-        return (false);
+	if (strcmp(input_, "history") == 0)
+	{
+          // add input_ to our command history
+          addHistory(input_);
+	  // we process the history internally
+	  showHistory();
+	  input_[0] = 0;
+	  cursorPos = 0;
+	  tabCount = 0;
+          pshell_writeOutput(prompt_);
+	}
+	else if ((strlen(input_) > 1) && (input_[0] == '!'))
+	{
+	  index = atoi(&input_[1])-1;
+	  if (index < _numHistory)
+	  {
+	    input_[0] = 0;
+	    strcpy(input_, _history[index]);
+	    addHistory(input_);
+	    return (false);
+	  }
+	  else
+	  {
+            input_[0] = 0;
+            cursorPos = 0;
+	    tabCount = 0;
+	    pshell_writeOutput("history index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
+            pshell_writeOutput(prompt_);
+	  }
+	}
+	else
+	{
+          // add input_ to our command history
+          addHistory(input_);
+          // normal input, return no timeout
+          return (false);
+	}
       }
       else
       {
+	// just pressed CR with no input, just give prompt again
         pshell_writeOutput(prompt_);
       }
     }
@@ -266,7 +305,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
           if (strlen(input_) == 0)
 	  {
             // nothing typed, just TAB, show all registered TAB completions
-            showTabCompletions(_tabCompletions, _numTabCompletions, prompt_);
+            showTabCompletions(_tabCompletions, _numTabCompletions, _maxCompletionsPerLine, _maxTabCompletionKeywordLength, prompt_);
 	  }
           else
 	  {
@@ -284,7 +323,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
               // then show all other possibilities
               clearLine(cursorPos, input_);
               cursorPos = showCommand(input_, findLongestMatch(input_));
-              showTabCompletions(_tabMatches, _numTabMatches, "%s%s", prompt_, input_);
+              showTabCompletions(_tabMatches, _numTabMatches, _maxMatchKeywordLength, _maxMatchCompletionsPerLine, "%s%s", prompt_, input_);
 	    }
 	  }
 	}
@@ -297,13 +336,13 @@ bool pshell_getInput(const char *prompt_, char *input_)
           if (strlen(input_) == 0)
 	  {
             // nothing typed, just a double TAB, show all registered TAB completions
-            showTabCompletions(_tabCompletions, _numTabCompletions, prompt_);
+            showTabCompletions(_tabCompletions, _numTabCompletions, _maxCompletionsPerLine, _maxTabCompletionKeywordLength, prompt_);
 	  }
           else
 	  {
             // partial word typed, double TAB, show all possible completions
 	    findTabCompletions(input_);
-            showTabCompletions(_tabMatches, _numTabMatches, "%s%s", prompt_, input_);
+            showTabCompletions(_tabMatches, _numTabMatches, _maxMatchKeywordLength, _maxMatchCompletionsPerLine, "%s%s", prompt_, input_);
 	  }
 	}
         else if ((tabCount == 1) && (strlen(input_) > 0))
@@ -398,9 +437,16 @@ void pshell_addTabCompletion(const char *keyword_)
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setIdleSessionTimeout(int timeout_)
+void pshell_setIdleTimeout(int timeout_)
 {
   _idleTimeout = timeout_;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void pshell_setTabStyle(TabStyle tabStyle_)
+{
+  _tabStyle = tabStyle_;
 }
 
 /************************************
@@ -486,11 +532,18 @@ static int numKeywords(char *command_)
 static void findTabCompletions(const char *keyword_)
 {
   _numTabMatches = 0;
+  _maxMatchKeywordLength = 0;
+  _maxMatchCompletionsPerLine = 0;
   for (int i = 0; i < _numTabCompletions; i++)
   {
     if (pshell_isSubString(keyword_, _tabCompletions[i]))
     {
       _tabMatches[_numTabMatches++] = _tabCompletions[i];
+      if (strlen(keyword_) > _maxMatchKeywordLength)
+      {
+        _maxMatchKeywordLength = strlen(keyword_)+5;
+        _maxMatchCompletionsPerLine = 80/_maxMatchKeywordLength;
+      }
     }
   }
 }
@@ -524,7 +577,11 @@ static char *findLongestMatch(char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void showTabCompletions(char *completionList_[], int numCompletions_, const char* format_, ...)
+static void showTabCompletions(char *completionList_[],
+                               int numCompletions_,
+			       int maxCompletionsPerLine_,
+			       int maxCompletionLength_,
+			       const char* format_, ...)
 {
   char prompt[MAX_COMMAND_SIZE] = {0};
   va_list args;
@@ -535,11 +592,11 @@ static void showTabCompletions(char *completionList_[], int numCompletions_, con
     int numPrinted = 0;
     for (int i = 0; i < numCompletions_; i++)
     {
-      pshell_writeOutput("%s", (_maxTabCompletionKeywordLength, completionList_[i]));
-      space(_maxTabCompletionKeywordLength-strlen(completionList_[i]));
+      pshell_writeOutput("%s", (maxCompletionLength_, completionList_[i]));
+      space(maxCompletionLength_-strlen(completionList_[i]));
       numPrinted += 1;
       totPrinted += 1;
-      if ((numPrinted == _maxCompletionsPerLine) and (totPrinted < numCompletions_))
+      if ((numPrinted == maxCompletionsPerLine_) and (totPrinted < numCompletions_))
       {
         newline();
         numPrinted = 0;
@@ -765,6 +822,16 @@ static void clearHistory(void)
 
 /******************************************************************************/
 /******************************************************************************/
+static void showHistory(void)
+{
+  for (int i = 0; i < _numHistory; i++)
+  {
+    pshell_writeOutput("%-3d %s\n", i+1, _history[i]); 
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static bool getChar(char &ch)
 {
   //char buf = 0;
@@ -811,7 +878,7 @@ static bool getChar(char &ch)
 /******************************************************************************/
 int main(int argc, char *argv[])
 {
-  char input[MAX_COMMAND_SIZE];
+  char input[MAX_COMMAND_SIZE] = {0};
   bool idleTimeout = false;
   char ch;
 
@@ -830,7 +897,8 @@ int main(int argc, char *argv[])
   pshell_addTabCompletion("myCommand456");
   pshell_addTabCompletion("myCommand789");
 
-  pshell_setIdleSessionTimeout(ONE_SECOND*5);
+  //pshell_setIdleTimeout(ONE_SECOND*5);
+  //pshell_setTabStyle(BASH_TAB);
   
   while (!pshell_isSubString(input, "quit") && !idleTimeout)
   {
