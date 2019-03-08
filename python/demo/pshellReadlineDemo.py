@@ -67,6 +67,7 @@ if (__name__ == '__main__'):
     showUsage()
 
   serialType = PshellReadline.TTY
+  idleTimeout = PshellReadline.IDLE_TIMEOUT_NONE
 
   for arg in sys.argv[1:]:
     if (arg == "-bash"):
@@ -80,7 +81,7 @@ if (__name__ == '__main__'):
     elif (arg == "-h"):
       showUsage()
     elif (arg.isdigit()):
-      PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*int(arg))
+      idleTimeout = PshellReadline.ONE_MINUTE*int(arg)
     else:
       showUsage()
 
@@ -128,6 +129,8 @@ if (__name__ == '__main__'):
   
     # shutdown our original listening socket
     sockFd.shutdown(socket.SHUT_RDWR);
+
+  PshellReadline.setIdleTimeout(idleTimeout)
 
   command = ""
   idleSession = False

@@ -933,15 +933,75 @@ static bool getChar(char &ch)
 
 /******************************************************************************/
 /******************************************************************************/
+void showUsage(void)
+{
+  printf("\n");
+  printf("Usage: pshellReadlineDemo.py {-tty | -socket} [-bash | -fast] [<idleTimeout>]\n");
+  printf("\n");
+  printf("  where:\n");
+  printf("    -tty          - serial terminal using stdin and stdout (default)\n");
+  printf("    -socket       - TCP socket terminal using telnet client\n");
+  printf("    -bash         - Use bash/readline style tabbing\n");
+  printf("    -fast         - Use \"fast\" style tabbing (default)\n");
+  printf("    <idleTimeout> - the idle session timeout in minutes (default=none)\n");
+  printf("\n");
+  exit(0);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 int main(int argc, char *argv[])
 {
   char input[MAX_COMMAND_SIZE] = {0};
-  bool idleTimeout = false;
+  bool idleSession = false;
   char ch;
   int on = 1;
-  struct sockaddr_in localIpAddress;
-  int tcpSocketFd;
-  int tcpConnectFd;
+  struct sockaddr_in ipAddress;
+  int socketFd;
+  int connectFd;
+  SerialType serialType = PSHELL_TTY;
+  int idleTimeout = IDLE_TIMEOUT_NONE;
+  int port = 9005;
+
+  if (argc > 4)
+  {
+    showUsage();
+  }
+
+  for (int i = 1; i < argc; i++)
+  {
+    if (strcmp(argv[i], "-bash") == 0)
+    {
+      pshell_setTabStyle(PSHELL_BASH_TAB);
+    }
+    else if (strcmp(argv[i], "-fast") == 0)
+    {
+      pshell_setTabStyle(PSHELL_FAST_TAB);
+    }
+    else if (strcmp(argv[i], "-tty") == 0)
+    {
+      serialType = PSHELL_TTY;
+    }
+    else if (strcmp(argv[i], "-socket") == 0)
+    {
+      serialType = PSHELL_SOCKET;
+    }
+    else if (strcmp(argv[i], "-h") == 0)
+    {
+      showUsage();
+    }
+    else
+    {
+      for (int j = 0; j < strlen(argv[i]); j++)
+      {
+	if (!isdigit(argv[i][j]))
+	{
+	  showUsage();
+	}
+      }
+      idleTimeout = ONE_MINUTE*atoi(argv[i]);;
+    }
+  }
 
   pshell_addTabCompletion("quit");
   pshell_addTabCompletion("help");
@@ -958,35 +1018,36 @@ int main(int argc, char *argv[])
   pshell_addTabCompletion("myCommand456");
   pshell_addTabCompletion("myCommand789");
 
-//#if 0
-  int port = 9005;
-  tcpSocketFd = socket(AF_INET, SOCK_STREAM, 0);
-  setsockopt(tcpSocketFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-  localIpAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-  localIpAddress.sin_family = AF_INET;
-  localIpAddress.sin_port = htons(port);
-  bind(tcpSocketFd, (struct sockaddr *) &localIpAddress, sizeof(localIpAddress));
-  listen(tcpSocketFd, 1);
-
-  printf("waiting for a connection on port %d, use 'telnet localhost %d' to connect\n", port, port);
-  tcpConnectFd = accept(tcpSocketFd, NULL, 0);
-  printf("connection accepted\n");
-
-  pshell_setFileDescriptors(tcpConnectFd, tcpConnectFd, PSHELL_SOCKET);
-
-  shutdown(tcpSocketFd, SHUT_RDWR);
-//#endif
-	     
-  //pshell_setIdleTimeout(ONE_SECOND*5);
-  //pshell_setTabStyle(PSHELL_BASH_TAB);
-
-  while (!pshell_isSubString(input, "quit") && !idleTimeout)
+  if (serialType == PSHELL_SOCKET)
   {
-    idleTimeout = pshell_getInput("prompt> ", input);
-    if (!idleTimeout)
+    socketFd = socket(AF_INET, SOCK_STREAM, 0);
+    setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+    ipAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+    ipAddress.sin_family = AF_INET;
+    ipAddress.sin_port = htons(port);
+    bind(socketFd, (struct sockaddr *) &ipAddress, sizeof(ipAddress));
+    listen(socketFd, 1);
+
+    printf("waiting for a connection on port %d, use 'telnet localhost %d' to connect\n", port, port);
+    connectFd = accept(socketFd, NULL, 0);
+    printf("connection accepted\n");
+
+    pshell_setFileDescriptors(connectFd, connectFd, PSHELL_SOCKET);
+
+    shutdown(socketFd, SHUT_RDWR);
+  }
+	     
+  pshell_setIdleTimeout(idleTimeout);
+
+  while (!pshell_isSubString(input, "quit") && !idleSession)
+  {
+    idleSession = pshell_getInput("prompt> ", input);
+    if (!idleSession)
     {
       pshell_writeOutput("input: '%s'\n", input);
    }
   }
+  
   return (0);
+  
 }
