@@ -757,8 +757,8 @@ func showWelcome() {
   printf("#  Type '?' or '-h' after command for command usage\n")
   printf("#\n")
   if (_gServerType == TCP) {
-    printf("#  Full <TAB> completion, up-arrow recall, command\n")
-    printf("#  line editing and command abbreviation supported\n")
+    printf("#  Full <TAB> completion, command history, command\n")
+    printf("#  line editing, and command abbreviation supported\n")
   } else {
     printf("#  Command abbreviation supported\n")
   }

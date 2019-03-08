@@ -130,7 +130,7 @@
 
 #
 # Build with the READLINE development libraries so the pshell client and
-# pshell local server can support up-arrow recall, TAB completion,
+# pshell local server can support command history, TAB completion,
 # command line editing etc.
 #
 # NOTE: The included x86_64 binaries were built with this flag enabled.

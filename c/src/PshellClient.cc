@@ -280,8 +280,8 @@ void showWelcome(void)
   printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);
 #ifdef PSHELL_READLINE
-  printf("%s  Full <TAB> completion, up-arrow recall, command\n", PSHELL_WELCOME_BORDER);
-  printf("%s  line editing and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
+  printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
+  printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
 #else
   printf("%s  Command abbreviation supported\n", PSHELL_WELCOME_BORDER);
 #endif

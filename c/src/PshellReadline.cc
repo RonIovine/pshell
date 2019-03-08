@@ -6,17 +6,19 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <sys/select.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 enum TabStyle
 {
-  FAST_TAB,
-  BASH_TAB 
+  PSHELL_FAST_TAB,
+  PSHELL_BASH_TAB 
 };
 
 enum SerialType
 {
-  TTY,
-  SOCKET
+  PSHELL_TTY,
+  PSHELL_SOCKET
 };
 
 #define IDLE_TIMEOUT_NONE 0
@@ -37,8 +39,8 @@ enum SerialType
 
 #define MAX_COMMAND_SIZE 256
 
-#define PSHELL_MAX_HISTORY 256
-static char *_history[PSHELL_MAX_HISTORY];
+#define MAX_HISTORY 256
+static char *_history[MAX_HISTORY];
 static int _historyPos = 0;
 static int _numHistory = 0;
 
@@ -51,11 +53,12 @@ static int _maxTabCompletionKeywordLength = 0;
 static int _maxCompletionsPerLine = 0;
 static int _maxMatchKeywordLength = 0;
 static int _maxMatchCompletionsPerLine = 0;
-static TabStyle _tabStyle = FAST_TAB;
-static SerialType _serialType = TTY;
+static TabStyle _tabStyle = PSHELL_FAST_TAB;
+static SerialType _serialType = PSHELL_TTY;
 static int _inFd = STDIN_FILENO;
 static int _outFd = STDOUT_FILENO;
 static int _idleTimeout = IDLE_TIMEOUT_NONE;
+static const char *_tcpNegotiate = "\xFF\xFB\x03\xFF\xFB\x01\xFF\xFD\x03\xFF\xFD\x01";
 
 /****************************************
  * private "member" function prototypes
@@ -91,6 +94,7 @@ static bool getChar(char &ch);
  * public "member" function prototypes
  ****************************************/
  
+void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, int idleTimeout_ = IDLE_TIMEOUT_NONE);
 void pshell_writeOutput(const char* format_, ...);
 bool pshell_getInput(const char *prompt_, char *input_);
 bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_);
@@ -102,18 +106,48 @@ void pshell_setIdleTimeout(int timeout_);
  * public API "member" function bodies
  **************************************/
 
+void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, int idleTimeout_)
+{
+  _inFd = inFd_;
+  _outFd = outFd_;
+  _serialType = serialType_;
+  pshell_setIdleTimeout(idleTimeout_);
+  // if a socket serial device, setup for telnet client control
+  if (_serialType == PSHELL_SOCKET)
+  {
+    pshell_writeOutput(_tcpNegotiate);
+  }
+}
+
 /******************************************************************************/
 /******************************************************************************/
 void pshell_writeOutput(const char* format_, ...)
 {
   char string[MAX_COMMAND_SIZE] = {0};
+  char socketString[MAX_COMMAND_SIZE] = {0};
   va_list args;
 
   va_start(args, format_);
   vsnprintf(string, sizeof(string), format_, args);
   va_end(args);
-  
-  write(_outFd, string, strlen(string));
+  if (_serialType == PSHELL_SOCKET)
+  {
+    // need to convert \n to \r\n
+    int j = 0;
+    for (int i = 0; i < strlen(string); i++)
+    {
+      if (string[i] == '\n')
+      {
+	socketString[j++] = '\r';
+      }
+      socketString[j++] = string[i];
+    }
+    write(_outFd, socketString, strlen(socketString));
+  }
+  else
+  {
+    write(_outFd, string, strlen(string));
+  }
 }
 
 /******************************************************************************/
@@ -295,7 +329,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
     {
       // tab character, print out any completions, we only do tabbing on the first keyword
       tabCount += 1;
-      if (_tabStyle == FAST_TAB)
+      if (_tabStyle == PSHELL_FAST_TAB)
       {
         if (tabCount == 1)
 	{
@@ -480,7 +514,7 @@ static void newline(int count_)
 {
   for (int i = 0; i < count_; i++)
   {
-    write(_outFd, "\n", 1);
+    write(_outFd, "\r\n", 2);
   }
 }
 
@@ -773,7 +807,7 @@ static void addHistory(char *command_)
 {
   int i;
 
-  for (i = 0; i < PSHELL_MAX_HISTORY; i++)
+  for (i = 0; i < MAX_HISTORY; i++)
   {
     /* look for the first empty slot */
     if (_history[i] == NULL)
@@ -795,14 +829,14 @@ static void addHistory(char *command_)
   free_z(_history[0]);
 
   /* move all the other entrys up the list */
-  for (i = 0; i < PSHELL_MAX_HISTORY-1; i++)
+  for (i = 0; i < MAX_HISTORY-1; i++)
   {
     _history[i] = _history[i+1];
   }
 
   /* add the new entry */
   _historyPos = _numHistory;
-  _history[PSHELL_MAX_HISTORY-1] = strdup(command_);
+  _history[MAX_HISTORY-1] = strdup(command_);
 
 }
 
@@ -812,7 +846,7 @@ static void clearHistory(void)
 {
   int i;
   _numHistory = 0;
-  for (i = 0; i < PSHELL_MAX_HISTORY; i++)
+  for (i = 0; i < MAX_HISTORY; i++)
   {
     if (_history[i] != NULL)
     {
@@ -841,37 +875,59 @@ static bool getChar(char &ch)
   bool idleSession = false;
   struct timeval idleTimeout;
   struct termios old = {0};
-  tcgetattr(0, &old);
-  old.c_lflag &= ~ICANON;
-  old.c_lflag &= ~ECHO;
-  old.c_cc[VMIN] = 1;
-  old.c_cc[VTIME] = 0;
-  tcsetattr(0, TCSANOW, &old);
   ch = 0;
-  if (_idleTimeout > 0)
+  idleTimeout.tv_sec = _idleTimeout;
+  idleTimeout.tv_usec = 0;
+  FD_ZERO(&readFd);
+  FD_SET(_inFd, &readFd);
+  if (_serialType == PSHELL_TTY)
   {
-    idleTimeout.tv_sec = _idleTimeout;
-    idleTimeout.tv_usec = 0;
-    FD_ZERO(&readFd);
-    FD_SET(_inFd, &readFd);
-
-    if ((retCode = select(_inFd+1, &readFd, NULL, NULL, &idleTimeout)) == 0)
+    tcgetattr(0, &old);
+    old.c_lflag &= ~ICANON;
+    old.c_lflag &= ~ECHO;
+    old.c_cc[VMIN] = 1;
+    old.c_cc[VTIME] = 0;
+    tcsetattr(0, TCSANOW, &old);
+    if (_idleTimeout > 0)
     {
-      pshell_writeOutput("\nIdle session timeout\n");
-      idleSession = true;
+      if ((retCode = select(_inFd+1, &readFd, NULL, NULL, &idleTimeout)) == 0)
+      {
+        pshell_writeOutput("\nIdle session timeout\n");
+        idleSession = true;
+      }
+      else if (retCode > 0)
+      {
+        read(_inFd, &ch, 1);
+      }
     }
-    else if (retCode > 0)
+    else
+    {
+      read(_inFd, &ch, 1);
+    }
+    old.c_lflag |= ICANON;
+    old.c_lflag |= ECHO;
+    tcsetattr(0, TCSADRAIN, &old);
+  }
+  else
+  {
+    // TCP socket with telnet client
+    if (_idleTimeout > 0)
+    {
+      if ((retCode = select(_inFd+1, &readFd, NULL, NULL, &idleTimeout)) == 0)
+      {
+        pshell_writeOutput("\nIdle session timeout\n");
+        idleSession = true;
+      }
+      else if (retCode > 0)
+      {
+        read(_inFd, &ch, 1);
+      }
+    }
+    else
     {
       read(_inFd, &ch, 1);
     }
   }
-  else
-  {
-    read(_inFd, &ch, 1);
-  }
-  old.c_lflag |= ICANON;
-  old.c_lflag |= ECHO;
-  tcsetattr(0, TCSADRAIN, &old);
   return (idleSession);
 }
 
@@ -882,6 +938,10 @@ int main(int argc, char *argv[])
   char input[MAX_COMMAND_SIZE] = {0};
   bool idleTimeout = false;
   char ch;
+  int on = 1;
+  struct sockaddr_in localIpAddress;
+  int tcpSocketFd;
+  int tcpConnectFd;
 
   pshell_addTabCompletion("quit");
   pshell_addTabCompletion("help");
@@ -898,16 +958,35 @@ int main(int argc, char *argv[])
   pshell_addTabCompletion("myCommand456");
   pshell_addTabCompletion("myCommand789");
 
+//#if 0
+  int port = 9005;
+  tcpSocketFd = socket(AF_INET, SOCK_STREAM, 0);
+  setsockopt(tcpSocketFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+  localIpAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+  localIpAddress.sin_family = AF_INET;
+  localIpAddress.sin_port = htons(port);
+  bind(tcpSocketFd, (struct sockaddr *) &localIpAddress, sizeof(localIpAddress));
+  listen(tcpSocketFd, 1);
+
+  printf("waiting for a connection on port %d, use 'telnet localhost %d' to connect\n", port, port);
+  tcpConnectFd = accept(tcpSocketFd, NULL, 0);
+  printf("connection accepted\n");
+
+  pshell_setFileDescriptors(tcpConnectFd, tcpConnectFd, PSHELL_SOCKET);
+
+  shutdown(tcpSocketFd, SHUT_RDWR);
+//#endif
+	     
   //pshell_setIdleTimeout(ONE_SECOND*5);
-  //pshell_setTabStyle(BASH_TAB);
-  
+  //pshell_setTabStyle(PSHELL_BASH_TAB);
+
   while (!pshell_isSubString(input, "quit") && !idleTimeout)
   {
     idleTimeout = pshell_getInput("prompt> ", input);
     if (!idleTimeout)
     {
-      printf("input: '%s'\n", input);
-    }
+      pshell_writeOutput("input: '%s'\n", input);
+   }
   }
   return (0);
 }

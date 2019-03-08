@@ -2103,15 +2103,15 @@ static void showWelcome(void)
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   if (_serverType == PSHELL_TCP_SERVER)
   {
-    pshell_printf("%s  Full <TAB> completion, up-arrow recall, command\n", PSHELL_WELCOME_BORDER);
-    pshell_printf("%s  line editing and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
+    pshell_printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
+    pshell_printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
     pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   }
   else  /* local server built with readline library */
   {
 #ifdef PSHELL_READLINE
-    pshell_printf("%s  Full <TAB> completion, up-arrow recall, command\n", PSHELL_WELCOME_BORDER);
-    pshell_printf("%s  line editing and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
+    pshell_printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
+    pshell_printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
     pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
 #else
     pshell_printf("%s  Command abbreviation supported\n", PSHELL_WELCOME_BORDER);
