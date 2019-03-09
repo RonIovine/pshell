@@ -30,7 +30,7 @@
 
 #################################################################################
 #
-# This demo programshows the usage of the PshellReadline module.  This module
+# This demo program shows the usage of the PshellReadline module.  This module
 # provides functionality similar to the readline library.  This will work with
 # any character based input stream, i.e.  terminal, serial, TCP etc.
 #

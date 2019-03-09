@@ -72,6 +72,7 @@ TRACE_LOG_DEMO_FLAGS =
 
 PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
 PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread 
+PSHELL_READLINE_DEMO_LIBS = -L$(LIB_DIR) -lpshell-readline 
 TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
 
 VERBOSE = @
@@ -343,6 +344,16 @@ lib:
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-control.so PshellControl.o
 	$(VERBOSE)rm *.o
 
+	@echo "Building libpshell-readline.a..."
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
+	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-readline.a PshellReadline.o
+	$(VERBOSE)rm *.o
+	
+	@echo "Building libpshell-readline.so..."
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
+	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-readline.so PshellReadline.o
+	$(VERBOSE)rm *.o
+
 	@echo "Setting libpshell-server to libpshell-server-full..."
 	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full
 
@@ -362,6 +373,9 @@ demo:
 
 	@echo "Building pshellControlDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
+	
+	@echo "Building pshellReadlineDemo program..."
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellReadlineDemo.$(SRC_EXT) $(PSHELL_READLINE_DEMO_LIBS) -o $(BIN_DIR)/pshellReadlineDemo
 	
 	@echo "Building pshellAggregatorDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellAggregatorDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregatorDemo

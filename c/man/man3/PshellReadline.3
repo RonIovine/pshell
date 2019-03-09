@@ -1,0 +1,41 @@
+.TH PshellReadline 3 "Sep 2012" "PSHELL" "Readline Like Functionality" 
+.SH NAME
+PshellReadline - API and library for readline-like functionality
+.SH DESCRIPTION
+This API provides the ability for get command line user input with readline-like
+functionality.  In particular, it supports TAB completion of registered keywords,
+command history, command lin editing, and command abbreviation.  This library works
+with any character stream based serial device, including an TTY setminal and TCP
+socket (telnet client).
+.SH SYNOPSIS
+
+#include <PshellReadline.h>
+
+/* set the input/output file descriptors
+void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, int idleTimeout_ = IDLE_TIMEOUT_NONE);
+
+void pshell_writeOutput(const char* format_, ...);
+
+bool pshell_getInput(const char *prompt_, char *input_);
+
+bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_ = 0);
+
+void pshell_addTabCompletion(const char *keyword_);
+
+void pshell_setTabStyle(TabStyle tabStyle_);
+
+void pshell_setIdleTimeout(int timeout_);
+
+Link with the library libpshell-readline
+
+Note, there is also a python implementation of this functionality in the module 'PshellReadline.py'.  
+Its API and examples can be found in the python subdirectory of this install package.
+.SH EXAMPLES
+See the file pshellReadlineDemo.cc in the pshell distribution package for a complete 
+list of examples of invoking functions in a remote pshell via a local client program.
+.SH MT-LEVEL
+Safe
+.SH SEE ALSO
+pshell(1), PshellServer(3)
+.SH AUTHOR
+Ron Iovine  --  github.com/RonIovine/pshell

@@ -100,12 +100,9 @@ This example logging system can also be compiled out via the build-time config f
 logging system is used.  All of the trace logging/filtering features are only available via the C based
 library.
 
-In addition to the infrastructure components, ten demo programs are also provided, three
-(C, Python, and Go) to show the usage of the pshell server API, three (C, Python and Go)
-to show the usage of pshell control API, one to show the usage of the stand-alone PshellReadline
-API (Python only), one to show the usage of the trace filter/trace log API (C only), one
-to show the usage of a stand-alone (no filtering) trace log application (C only), and one
-to show the usage of the multi-call binary API (C only).
+In addition to the infrastructure components, several demo programs are also provided to show the usage
+of the various APIs for each component.  See the respective 'demo' directories under each language for
+specific examples.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 

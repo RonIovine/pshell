@@ -213,6 +213,9 @@ else
   rm -f $libDir/libpshell-control.so
   ln -s $libDir/pshell/libpshell-control.so $libDir/libpshell-control.so
   
+  rm -f $libDir/libpshell-control.a
+  ln -s $libDir/pshell/libpshell-control.a $libDir/libpshell-control.a
+
   echo "Installing bins..."
   echo "Copying pshell$fileExt to $binDir"
   cp -f $localBinDir/pshell $binDir/.
@@ -226,6 +229,8 @@ else
   cp -f $localIncludeDir/PshellServer.h $includeDir/.
   echo "Copying PshellControl.h to $includeDir"
   cp -f $localIncludeDir/PshellControl.h $includeDir/.
+  echo "Copying PshellReadline.h to $includeDir"
+  cp -f $localIncludeDir/PshellReadline.h $includeDir/.
   echo "Copying TraceFilter.h to $includeDir"
   cp -f $localIncludeDir/TraceFilter.h $includeDir/.
   echo "Copying TraceLog.h to $includeDir"

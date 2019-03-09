@@ -98,7 +98,7 @@ import signal
 TTY = "tty"
 SOCKET = "socket"
 
-# use for the timeout value when setting the idleSessionTimeout, default=none
+# use for the timeout value when setting the idleSessionTimeout, default=IDLE_TIMEOUT_NONE
 IDLE_TIMEOUT_NONE = 0
 ONE_SECOND = 1
 ONE_MINUTE = ONE_SECOND*60

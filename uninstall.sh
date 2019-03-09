@@ -89,6 +89,7 @@ else
   
   echo "Removing softlink $libDir/libpshell-control"
   rm -f $libDir/libpshell-control.so
+  rm -f $libDir/libpshell-control.a
   
   echo "Removing pshell$fileExt from $binDir"
   rm -f $binDir/pshell$fileExt
@@ -104,6 +105,9 @@ else
   echo "Removing PshellControl.h from $includeDir"
   rm -f $includeDir/PshellControl.h
   
+  echo "Removing PshellReadline.h from $includeDir"
+  rm -f $includeDir/PshellReadline.h
+
   echo "Removing TraceFilter.h from $includeDir"
   rm -f $includeDir/TraceFilter.h
   

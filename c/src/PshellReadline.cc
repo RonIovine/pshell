@@ -1,3 +1,31 @@
+/*******************************************************************************
+ *
+ * Copyright (c) 2009, Ron Iovine, All rights reserved. 
+ *
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Ron Iovine nor the names of its contributors 
+ *       may be used to endorse or promote products derived from this software 
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ * IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ *******************************************************************************/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
@@ -6,24 +34,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <sys/select.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 
-enum TabStyle
-{
-  PSHELL_FAST_TAB,
-  PSHELL_BASH_TAB 
-};
-
-enum SerialType
-{
-  PSHELL_TTY,
-  PSHELL_SOCKET
-};
-
-#define IDLE_TIMEOUT_NONE 0
-#define ONE_SECOND 1
-#define ONE_MINUTE ONE_SECOND*60
+#include <PshellReadline.h>
 
 #ifndef MAX
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
@@ -37,22 +49,20 @@ enum SerialType
 /* free and zero (to avoid double-free) */
 #define free_z(p) do { if (p) { free(p); (p) = 0; } } while (0)
 
-#define MAX_COMMAND_SIZE 256
-
 #define MAX_HISTORY 256
 static char *_history[MAX_HISTORY];
-static int _historyPos = 0;
-static int _numHistory = 0;
+static unsigned _historyPos = 0;
+static unsigned _numHistory = 0;
 
 #define MAX_TAB_COMPLETIONS 256
 static char *_tabMatches[MAX_TAB_COMPLETIONS];
-static int _numTabMatches = 0;
+static unsigned _numTabMatches = 0;
 static char *_tabCompletions[MAX_TAB_COMPLETIONS];
-static int _numTabCompletions = 0;
-static int _maxTabCompletionKeywordLength = 0;
-static int _maxCompletionsPerLine = 0;
-static int _maxMatchKeywordLength = 0;
-static int _maxMatchCompletionsPerLine = 0;
+static unsigned _numTabCompletions = 0;
+static unsigned _maxTabCompletionKeywordLength = 0;
+static unsigned _maxCompletionsPerLine = 0;
+static unsigned _maxMatchKeywordLength = 0;
+static unsigned _maxMatchCompletionsPerLine = 0;
 static TabStyle _tabStyle = PSHELL_FAST_TAB;
 static SerialType _serialType = PSHELL_TTY;
 static int _inFd = STDIN_FILENO;
@@ -64,48 +74,40 @@ static const char *_tcpNegotiate = "\xFF\xFB\x03\xFF\xFB\x01\xFF\xFD\x03\xFF\xFD
  * private "member" function prototypes
  ****************************************/
 
-static void backspace(int count_ = 1);
-static void space(int count_ = 1);
-static void newline(int count_ = 1);
+static void backspace(unsigned count_ = 1);
+static void space(unsigned count_ = 1);
+static void newline(unsigned count_ = 1);
 static char *stripWhitespace(char *string_);
-static int numKeywords(char *command_);
+static unsigned numKeywords(char *command_);
 static void findTabCompletions(const char *keyword_);
 static char *findLongestMatch(char *command_);
-static void showTabCompletions(char *completionList_[], int numCompletions_, int maxCompletionsPerLine_, int maxCompletionLength_, const char* format_, ...);
-static void clearLine(int cursorPos_, char *command_);
-static void beginningOfLine(int &cursorPos_, const char *command_);
-static void endOfLine(int &cursorPos_, const char *command_);
-static void killLine(int &cursorPos_, char *command_);
-static void killEndOfLine(int cursorPos_, char *command_);
-static void deleteUnderCursor(int cursorPos_, char *command_);
-static void backspaceDelete(int &cursorPos_, char *command_);
-static void addChar(int &cursorPos_, char *command_, char ch_);
-static void upArrow(int &cursorPos_, char *command_);
-static void downArrow(int &cursorPos_, char *command_);
-static void leftArrow(int &cursorPos_);
-static void rightArrow(int &cursorPos_, char *command_);
-static int showCommand(char *outCommand_, const char* format_, ...);
+static void showTabCompletions(char *completionList_[], unsigned numCompletions_, unsigned maxCompletionsPerLine_, unsigned maxCompletionLength_, const char* format_, ...);
+static void clearLine(unsigned cursorPos_, char *command_);
+static void beginningOfLine(unsigned &cursorPos_, const char *command_);
+static void endOfLine(unsigned &cursorPos_, const char *command_);
+static void killLine(unsigned &cursorPos_, char *command_);
+static void killEndOfLine(unsigned cursorPos_, char *command_);
+static void deleteUnderCursor(unsigned cursorPos_, char *command_);
+static void backspaceDelete(unsigned &cursorPos_, char *command_);
+static void addChar(unsigned &cursorPos_, char *command_, char ch_);
+static void upArrow(unsigned &cursorPos_, char *command_);
+static void downArrow(unsigned &cursorPos_, char *command_);
+static void leftArrow(unsigned &cursorPos_);
+static void rightArrow(unsigned &cursorPos_, char *command_);
+static unsigned showCommand(char *outCommand_, const char* format_, ...);
 static void addHistory(char *command_);
 static void showHistory(void);
-static void clearHistory(void);
 static bool getChar(char &ch);
-
-/****************************************
- * public "member" function prototypes
- ****************************************/
- 
-void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, int idleTimeout_ = IDLE_TIMEOUT_NONE);
-void pshell_writeOutput(const char* format_, ...);
-bool pshell_getInput(const char *prompt_, char *input_);
-bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_);
-void pshell_addTabCompletion(const char *keyword_);
-void pshell_setTabStyle(TabStyle tabStyle_);
-void pshell_setIdleTimeout(int timeout_);
+#if 0
+static void clearHistory(void);
+#endif
 
 /**************************************
  * public API "member" function bodies
  **************************************/
 
+/******************************************************************************/
+/******************************************************************************/
 void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, int idleTimeout_)
 {
   _inFd = inFd_;
@@ -123,8 +125,8 @@ void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, in
 /******************************************************************************/
 void pshell_writeOutput(const char* format_, ...)
 {
-  char string[MAX_COMMAND_SIZE] = {0};
-  char socketString[MAX_COMMAND_SIZE] = {0};
+  char string[PSHELL_MAX_COMMAND_SIZE] = {0};
+  char socketString[PSHELL_MAX_COMMAND_SIZE] = {0};
   va_list args;
 
   va_start(args, format_);
@@ -133,8 +135,8 @@ void pshell_writeOutput(const char* format_, ...)
   if (_serialType == PSHELL_SOCKET)
   {
     // need to convert \n to \r\n
-    int j = 0;
-    for (int i = 0; i < strlen(string); i++)
+    unsigned j = 0;
+    for (unsigned i = 0; i < strlen(string); i++)
     {
       if (string[i] == '\n')
       {
@@ -156,10 +158,10 @@ bool pshell_getInput(const char *prompt_, char *input_)
 {
   bool inEsc = false;
   char esc = '\0';
-  int cursorPos = 0;
-  int tabCount = 0;
+  unsigned cursorPos = 0;
+  unsigned tabCount = 0;
   bool idleSession = false;
-  int index = 0;
+  unsigned index = 0;
   char ch;
   input_[0] = 0;
   pshell_writeOutput(prompt_);
@@ -426,7 +428,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
 
 /******************************************************************************/
 /******************************************************************************/
-bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_ = 1)
+bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_)
 {
   unsigned length;
   if ((string1_ == NULL) && (string2_ == NULL))
@@ -438,6 +440,10 @@ bool pshell_isSubString(const char *string1_, const char *string2_, unsigned min
     if ((length = strlen(string1_)) > strlen(string2_))
     {
       return (false);
+    }
+    else if (minChars_ == 0)
+    {
+      return (strncmp(string1_, string2_, strlen(string1_)) == 0);
     }
     else
     {
@@ -454,7 +460,7 @@ bool pshell_isSubString(const char *string1_, const char *string2_, unsigned min
 /******************************************************************************/
 void pshell_addTabCompletion(const char *keyword_)
 {
-  for (int i = 0; i < _numTabCompletions; i++)
+  for (unsigned i = 0; i < _numTabCompletions; i++)
   {
     if (strcmp(_tabCompletions[i], keyword_) == 0)
     {
@@ -490,9 +496,9 @@ void pshell_setTabStyle(TabStyle tabStyle_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void backspace(int count_)
+static void backspace(unsigned count_)
 {
-  for (int i = 0; i < count_; i++)
+  for (unsigned i = 0; i < count_; i++)
   {
     write(_outFd, "\b", 1);
   }
@@ -500,9 +506,9 @@ static void backspace(int count_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void space(int count_)
+static void space(unsigned count_)
 {
-  for (int i = 0; i < count_; i++)
+  for (unsigned i = 0; i < count_; i++)
   {
     write(_outFd, " ", 1);
   }
@@ -510,11 +516,18 @@ static void space(int count_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void newline(int count_)
+static void newline(unsigned count_)
 {
-  for (int i = 0; i < count_; i++)
+  for (unsigned i = 0; i < count_; i++)
   {
-    write(_outFd, "\r\n", 2);
+    if (_serialType == PSHELL_TTY)
+    {
+      write(_outFd, "\n", 1);
+    }
+    else
+    {
+      write(_outFd, "\r\n", 2);
+    }
   }
 }
 
@@ -522,11 +535,10 @@ static void newline(int count_)
 /******************************************************************************/
 static char *stripWhitespace(char *string_)
 {
-  int i;
   char *str = string_;
 
   /* strip leading whitespace */
-  for (i = 0; i < (int)strlen(string_); i++)
+  for (unsigned i = 0; i < strlen(string_); i++)
   {
     if (!isspace(string_[i]))
     {
@@ -539,7 +551,7 @@ static char *stripWhitespace(char *string_)
     strcpy(string_, str);
   }
   /* strip trailing whitespace */
-  for (i = strlen(string_)-1; ((i >= 0) && isspace(string_[i])); i--)
+  for (unsigned i = strlen(string_)-1; ((i >= 0) && isspace(string_[i])); i--)
   {
     string_[i] = '\0';
   }
@@ -548,11 +560,11 @@ static char *stripWhitespace(char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
-static int numKeywords(char *command_)
+static unsigned numKeywords(char *command_)
 {
-  int numKeywords = 1;
+  unsigned numKeywords = 1;
   stripWhitespace(command_);
-  for (int i = 0; i < strlen(command_); i++)
+  for (unsigned i = 0; i < strlen(command_); i++)
   {
     if (command_[i] == ' ')
     {
@@ -569,7 +581,7 @@ static void findTabCompletions(const char *keyword_)
   _numTabMatches = 0;
   _maxMatchKeywordLength = 0;
   _maxMatchCompletionsPerLine = 0;
-  for (int i = 0; i < _numTabCompletions; i++)
+  for (unsigned i = 0; i < _numTabCompletions; i++)
   {
     if (pshell_isSubString(keyword_, _tabCompletions[i]))
     {
@@ -588,13 +600,13 @@ static void findTabCompletions(const char *keyword_)
 static char *findLongestMatch(char *command_)
 {
   char ch;
-  int charPos = strlen(command_);
+  unsigned charPos = strlen(command_);
   while (true)
   {
     if (charPos < strlen(_tabMatches[0]))
     {
       ch = _tabMatches[0][charPos];
-      for (int i = 0; i < _numTabMatches; i++)
+      for (unsigned i = 0; i < _numTabMatches; i++)
       {
         if ((charPos >= strlen(_tabMatches[i])) || (ch != _tabMatches[i][charPos]))
 	{
@@ -613,21 +625,21 @@ static char *findLongestMatch(char *command_)
 /******************************************************************************/
 /******************************************************************************/
 static void showTabCompletions(char *completionList_[],
-                               int numCompletions_,
-			       int maxCompletionsPerLine_,
-			       int maxCompletionLength_,
+                               unsigned numCompletions_,
+			       unsigned maxCompletionsPerLine_,
+			       unsigned maxCompletionLength_,
 			       const char* format_, ...)
 {
-  char prompt[MAX_COMMAND_SIZE] = {0};
+  char prompt[PSHELL_MAX_COMMAND_SIZE] = {0};
   va_list args;
   if (_numTabCompletions > 0)
   {
     newline();
-    int totPrinted = 0;
-    int numPrinted = 0;
-    for (int i = 0; i < numCompletions_; i++)
+    unsigned totPrinted = 0;
+    unsigned numPrinted = 0;
+    for (unsigned i = 0; i < numCompletions_; i++)
     {
-      pshell_writeOutput("%s", (maxCompletionLength_, completionList_[i]));
+      pshell_writeOutput("%s", completionList_[i]);
       space(maxCompletionLength_-strlen(completionList_[i]));
       numPrinted += 1;
       totPrinted += 1;
@@ -646,7 +658,7 @@ static void showTabCompletions(char *completionList_[],
 
 /******************************************************************************/
 /******************************************************************************/
-static void clearLine(int cursorPos_, char *command_)
+static void clearLine(unsigned cursorPos_, char *command_)
 {
   backspace(cursorPos_);
   space(strlen(command_));
@@ -655,7 +667,7 @@ static void clearLine(int cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void beginningOfLine(int &cursorPos_, const char *command_)
+static void beginningOfLine(unsigned &cursorPos_, const char *command_)
 {
   if (cursorPos_ > 0)
   {
@@ -666,7 +678,7 @@ static void beginningOfLine(int &cursorPos_, const char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void endOfLine(int &cursorPos_, const char *command_)
+static void endOfLine(unsigned &cursorPos_, const char *command_)
 {
   if (cursorPos_ < strlen(command_))
   {
@@ -677,7 +689,7 @@ static void endOfLine(int &cursorPos_, const char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void killLine(int &cursorPos_, char *command_)
+static void killLine(unsigned &cursorPos_, char *command_)
 {
   clearLine(cursorPos_, command_);
   cursorPos_ = 0;
@@ -686,7 +698,7 @@ static void killLine(int &cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void killEndOfLine(int cursorPos_, char *command_)
+static void killEndOfLine(unsigned cursorPos_, char *command_)
 {
   space(strlen(&command_[cursorPos_]));
   backspace(strlen(&command_[cursorPos_]));
@@ -695,7 +707,7 @@ static void killEndOfLine(int cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void deleteUnderCursor(int cursorPos_, char *command_)
+static void deleteUnderCursor(unsigned cursorPos_, char *command_)
 {
   if (cursorPos_ < strlen(command_))
   {
@@ -708,7 +720,7 @@ static void deleteUnderCursor(int cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void backspaceDelete(int &cursorPos_, char *command_)
+static void backspaceDelete(unsigned &cursorPos_, char *command_)
 {
   if ((strlen(command_) > 0) && (cursorPos_ > 0))
   {
@@ -722,9 +734,9 @@ static void backspaceDelete(int &cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void addChar(int &cursorPos_, char *command_, char ch_)
+static void addChar(unsigned &cursorPos_, char *command_, char ch_)
 {
-  char newCommand[MAX_COMMAND_SIZE] = {0};
+  char newCommand[PSHELL_MAX_COMMAND_SIZE] = {0};
   snprintf(newCommand, cursorPos_+1, "%s", command_);
   sprintf(&newCommand[cursorPos_], "%c%s", ch_, &command_[cursorPos_]);
   strcpy(command_, newCommand);
@@ -735,7 +747,7 @@ static void addChar(int &cursorPos_, char *command_, char ch_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void upArrow(int &cursorPos_, char *command_)
+static void upArrow(unsigned &cursorPos_, char *command_)
 {
   if (_historyPos > 0)
   {
@@ -747,7 +759,7 @@ static void upArrow(int &cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void downArrow(int &cursorPos_, char *command_)
+static void downArrow(unsigned &cursorPos_, char *command_)
 {
   if (_historyPos < _numHistory-1)
   {
@@ -765,7 +777,7 @@ static void downArrow(int &cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void leftArrow(int &cursorPos_)
+static void leftArrow(unsigned &cursorPos_)
 {
   if (cursorPos_ > 0)
   {
@@ -776,7 +788,7 @@ static void leftArrow(int &cursorPos_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void rightArrow(int &cursorPos_, char *command_)
+static void rightArrow(unsigned &cursorPos_, char *command_)
 {
   if (cursorPos_ < strlen(command_))
   {
@@ -788,9 +800,9 @@ static void rightArrow(int &cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static int showCommand(char *outCommand_, const char* format_, ...)
+static unsigned showCommand(char *outCommand_, const char* format_, ...)
 {
-  char inCommand[MAX_COMMAND_SIZE] = {0};
+  char inCommand[PSHELL_MAX_COMMAND_SIZE] = {0};
   va_list args;
 
   va_start(args, format_);
@@ -805,7 +817,7 @@ static int showCommand(char *outCommand_, const char* format_, ...)
 /******************************************************************************/
 static void addHistory(char *command_)
 {
-  int i;
+  unsigned i;
 
   for (i = 0; i < MAX_HISTORY; i++)
   {
@@ -842,11 +854,11 @@ static void addHistory(char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
+#if 0
 static void clearHistory(void)
 {
-  int i;
   _numHistory = 0;
-  for (i = 0; i < MAX_HISTORY; i++)
+  for (unsigned i = 0; i < MAX_HISTORY; i++)
   {
     if (_history[i] != NULL)
     {
@@ -854,12 +866,13 @@ static void clearHistory(void)
     }
   }
 }
+#endif
 
 /******************************************************************************/
 /******************************************************************************/
 static void showHistory(void)
 {
-  for (int i = 0; i < _numHistory; i++)
+  for (unsigned i = 0; i < _numHistory; i++)
   {
     pshell_writeOutput("%-3d %s\n", i+1, _history[i]); 
   }
@@ -870,7 +883,7 @@ static void showHistory(void)
 static bool getChar(char &ch)
 {
   //char buf = 0;
-  int retCode;
+  unsigned retCode;
   fd_set readFd;
   bool idleSession = false;
   struct timeval idleTimeout;
@@ -929,125 +942,4 @@ static bool getChar(char &ch)
     }
   }
   return (idleSession);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-void showUsage(void)
-{
-  printf("\n");
-  printf("Usage: pshellReadlineDemo.py {-tty | -socket} [-bash | -fast] [<idleTimeout>]\n");
-  printf("\n");
-  printf("  where:\n");
-  printf("    -tty          - serial terminal using stdin and stdout (default)\n");
-  printf("    -socket       - TCP socket terminal using telnet client\n");
-  printf("    -bash         - Use bash/readline style tabbing\n");
-  printf("    -fast         - Use \"fast\" style tabbing (default)\n");
-  printf("    <idleTimeout> - the idle session timeout in minutes (default=none)\n");
-  printf("\n");
-  exit(0);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-int main(int argc, char *argv[])
-{
-  char input[MAX_COMMAND_SIZE] = {0};
-  bool idleSession = false;
-  char ch;
-  int on = 1;
-  struct sockaddr_in ipAddress;
-  int socketFd;
-  int connectFd;
-  SerialType serialType = PSHELL_TTY;
-  int idleTimeout = IDLE_TIMEOUT_NONE;
-  int port = 9005;
-
-  if (argc > 4)
-  {
-    showUsage();
-  }
-
-  for (int i = 1; i < argc; i++)
-  {
-    if (strcmp(argv[i], "-bash") == 0)
-    {
-      pshell_setTabStyle(PSHELL_BASH_TAB);
-    }
-    else if (strcmp(argv[i], "-fast") == 0)
-    {
-      pshell_setTabStyle(PSHELL_FAST_TAB);
-    }
-    else if (strcmp(argv[i], "-tty") == 0)
-    {
-      serialType = PSHELL_TTY;
-    }
-    else if (strcmp(argv[i], "-socket") == 0)
-    {
-      serialType = PSHELL_SOCKET;
-    }
-    else if (strcmp(argv[i], "-h") == 0)
-    {
-      showUsage();
-    }
-    else
-    {
-      for (int j = 0; j < strlen(argv[i]); j++)
-      {
-	if (!isdigit(argv[i][j]))
-	{
-	  showUsage();
-	}
-      }
-      idleTimeout = ONE_MINUTE*atoi(argv[i]);;
-    }
-  }
-
-  pshell_addTabCompletion("quit");
-  pshell_addTabCompletion("help");
-  pshell_addTabCompletion("hello");
-  pshell_addTabCompletion("world");
-  pshell_addTabCompletion("enhancedUsage");
-  pshell_addTabCompletion("keepAlive");
-  pshell_addTabCompletion("pshellAggregatorDemo");
-  pshell_addTabCompletion("pshellControlDemo");
-  pshell_addTabCompletion("pshellReadlineDemo");
-  pshell_addTabCompletion("pshellServerDemo");
-  pshell_addTabCompletion("myComm");
-  pshell_addTabCompletion("myCommand123");
-  pshell_addTabCompletion("myCommand456");
-  pshell_addTabCompletion("myCommand789");
-
-  if (serialType == PSHELL_SOCKET)
-  {
-    socketFd = socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
-    ipAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-    ipAddress.sin_family = AF_INET;
-    ipAddress.sin_port = htons(port);
-    bind(socketFd, (struct sockaddr *) &ipAddress, sizeof(ipAddress));
-    listen(socketFd, 1);
-
-    printf("waiting for a connection on port %d, use 'telnet localhost %d' to connect\n", port, port);
-    connectFd = accept(socketFd, NULL, 0);
-    printf("connection accepted\n");
-
-    pshell_setFileDescriptors(connectFd, connectFd, PSHELL_SOCKET);
-
-    shutdown(socketFd, SHUT_RDWR);
-  }
-	     
-  pshell_setIdleTimeout(idleTimeout);
-
-  while (!pshell_isSubString(input, "quit") && !idleSession)
-  {
-    idleSession = pshell_getInput("prompt> ", input);
-    if (!idleSession)
-    {
-      pshell_writeOutput("input: '%s'\n", input);
-   }
-  }
-  
-  return (0);
-  
 }

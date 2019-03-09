@@ -103,13 +103,9 @@ This example logging system can also be compiled out via the build-time config f
 logging system is used.  All of the trace logging/filtering features are only available via the C
 based library.
 
-In addition to the infrastructure components, twelve demo programs are also provided, three
-(C, Python, and Go) to show the usage of the pshell server API, three (C, Python and Go)
-to show the usage of pshell control API, two to show the usage of the custom aggregator
-(C and Python), one to show the usage of the stand-alone PshellReadline API (Python only),
-one to show the usage of the trace filter/trace log API (C only), one to show the usage of
-a stand-alone (no filtering) trace log application (C only), and one to show the usage of
-the multi-call binary API (C only).
+In addition to the infrastructure components, several demo programs are also provided to show the usage
+of the various APIs for each component.  See the respective 'demo' directories under each language for
+specific examples.
 
 Finally, a stub module/library is provided that will honor the complete API of the normal pshell
 library but with all the underlying functionality stubbed out.  This will allow all the pshell 
@@ -133,6 +129,8 @@ the 'expect' package to be installed.
   - libpshell-server-stub.so -- Stub version of libpshell-server library (shared)
   - libpshell-control.so     -- External pshell program control libpshell-control library (shared)
   - libpshell-control.a      -- External pshell program control libpshell-control library (static)
+  - libpshell-readline.so    -- Provides a readline like funtionality library (shared)
+  - libpshell-readline.a     -- Provides a readline like funtionality library (static)
   - PshellServer.a           -- Go version of the PshellServer functionality (UDP/UNIX only)
   - PshellControl.a          -- Go version of control API
   - PshellServer.py          -- Python version of PshellServer functionality
@@ -153,6 +151,7 @@ the 'expect' package to be installed.
   - pshellControlDemo        -- Demo application using the pshell control library features (C and Go)
   - pshellControlDemo.py     -- Demo application using the pshell control Python module features
   - pshellAggregatorlDemo    -- Demo application using the pshell control library to aggregate multiple servers
+  - pshellReadlineDemo       -- Demo application using the PshellReadline C library to solicit user input
   - pshellReadlineDemo.py    -- Demo application using the PshellReadline Python module to solicit user input
   - pshellAggregatorlDemo.py -- Demo application using the pshell control Python module to aggregate multiple servers
   - traceFilterDemo          -- Demo application using the optional trace filter features (C only)
@@ -222,11 +221,12 @@ DOCUMENTATION:
 The following manpages are available from the above configured MANPATH or
 from the standard manpage locations on a system installation:
 
-pshell(1)        - Describes the framework as well as the client program
-PshellServer(3)  - Describes the API and usage of the PshellServer utility
-PshellControl(3) - Describes the API and usage of the PshellControl utility
-TraceFilter(3)   - Describes the API and usage of the TraceFilter utility
-TraceLog(3)      - Describes the API and usage of the TraceLog utility
+pshell(1)         - Describes the framework as well as the client program
+PshellServer(3)   - Describes the API and usage of the PshellServer utility
+PshellControl(3)  - Describes the API and usage of the PshellControl utility
+PshellReadline(3) - Describes the API and usage of the PshellReadline utility
+TraceFilter(3)    - Describes the API and usage of the TraceFilter utility
+TraceLog(3)       - Describes the API and usage of the TraceLog utility
 
 The following HTML 'pydoc' generated documentation is available in the
 $PSHELL_INSTALL/python/doc directory, the user can also use the command
@@ -247,6 +247,7 @@ main features of the PSHELL library can be found in the files:
 
 $PSHELL_INSTALL/demo/pshellServerDemo.cc                      --  Server demo for user defined commands
 $PSHELL_INSTALL/demo/pshellControlDemo.cc                     --  Sample pshell control external client
+$PSHELL_INSTALL/demo/pshellReadlineDemo.cc                    --  Sample program to show usage of PshellReadline
 $PSHELL_INSTALL/demo/pshellAggregatorDemo.cc                  --  Sample pshell control to aggregate multiple servers
 $PSHELL_INSTALL/demo/traceFilterDemo.cc                       --  Server demo for dynamic trace filtering
 $PSHELL_INSTALL/demo/traceLogDemo.cc                          --  Demo using the stand-alone TraceLog module
@@ -261,16 +262,16 @@ $PSHELL_INSTALL/go/src/pshellServerDemo/pshellServerDemo.go   --  Server demo fo
 
 EXECUTION:
 
-There are 10 demo programs, two that demonstrate a program that incorporates a
-pshell server (pshellServerDemo and pshellServerDemo.py), one that demonstrates 
+There are several demo programs, two that demonstrate a program that incorporates
+a pshell server (pshellServerDemo and pshellServerDemo.py), one that demonstrates 
 a program that incorporates the trace filter functionality (traceFilterDemo), two 
 that demonstrate the control of a program that is running a pshell server from 
 another program (pshellControlDemo and pshellControlDemo.py), two that demonstrate 
 the aggregation of multiple pshell servers into a single server via the control
-API (pshellAggregatorDemo, pshellAggregatorDemo.py), one that demonstrates the 
-usage of readline-like command line user input (pshellReadlineDemo.py), one that 
-demonstrates the stand-alone usage of the TraceLog API (traceLogDemo), and one 
-that demonstrates the use of the multi-call binary API (pshellNoServerDemo).
+API (pshellAggregatorDemo, pshellAggregatorDemo.py), two that demonstrates the usage
+of readline-like command line user input (pshellReadlineDemo and pshellReadlineDemo.py),
+one that demonstrates the stand-alone usage of the TraceLog API (traceLogDemo), and
+one that demonstrates the use of the multi-call binary API (pshellNoServerDemo).
 
 All demo programs have a usage that can be displayed by typing <programName> -h.
 The two demo programs pshellServerDemo and traceFilterDemo can be controlled via
