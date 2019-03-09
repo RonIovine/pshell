@@ -291,15 +291,10 @@ struct Tokens
   int numTokens;
 };
 
-static char *_history[PSHELL_MAX_HISTORY];
-static bool _showPrompt;
 static FILE *_clientFd = stdout;
 static int _connectFd;
-static struct timeval _idleTimeout;
 static bool _quit = false;
 static char _interactivePrompt[80];
-static unsigned _maxTabCommandLength = 0;
-static unsigned _maxTabColumns = 0;
 
 /* common data (for UDP, TCP, UNIX, and LOCAL servers */
 
@@ -391,13 +386,6 @@ static void reply(PshellMsg *pshellMsg_);
 
 static void runTCPServer(void);
 static void receiveTCP(void);
-static void writeSocket(const char *string_, unsigned length_);
-static int findCompletions(char *command_, char *completions_[]);
-static void clearLine(char *command_, int length_, int cursor_);
-static void addHistory(char *command_);
-static void clearHistory(void);
-static void showPrompt(char *command_);
-static void tokenize(char *string_, struct Tokens *tokens_, const char *delimiter_);
 
 /* common functions (TCP and LOCAL servers) */
 
@@ -692,7 +680,7 @@ void pshell_addCommand(PshellFunction function_,
    */
   if (_isRunning)
   {
-    pshell_addTabCompletion(command_);
+    pshell_rl_addTabCompletion(command_);
   }
 
   /* figure out our max command length so the help display can be aligned */
@@ -798,9 +786,6 @@ void pshell_march(const char *string_)
 /******************************************************************************/
 void pshell_flush(void)
 {
-  char *printPos;
-  char *newline;
-
   /* 
    * if we called a command non-interactively, just bail because there is no
    * client side program (either pshell or telnet) to receive the output
@@ -819,24 +804,7 @@ void pshell_flush(void)
     }
     else  /* TCP or local server */
     {
-
-      printPos = _pshellMsg->payload;
-
-      do
-      {
-        /* for every newline we need to insert a CR/LF in its place */
-        if ((newline = strchr(printPos, '\n')) != NULL)
-        {
-          *newline++ = 0;
-          fprintf(_clientFd, "%s\r\n", printPos);
-        }
-        else
-        {
-          fprintf(_clientFd, "%s", printPos);
-        }
-        printPos = newline;
-      } while (printPos);
-
+      pshell_rl_writeOutput(_pshellMsg->payload);
       /* clear out buffer for next time */
       _pshellMsg->payload[0] = '\0';
 
@@ -1869,6 +1837,10 @@ static void runTCPServer(void)
     getsockname(_connectFd, (sockaddr *)&addr, &addrlen);
     strcpy(_ipAddress, inet_ntoa(addr.sin_addr));
     sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
+    pshell_rl_setFileDescriptors(_connectFd,
+                                 _connectFd,
+                                 PSHELL_SOCKET,
+                                 ONE_MINUTE*_defaultIdleTimeout);
     shutdown(_socketFd, SHUT_RDWR);
     receiveTCP();
     shutdown(_connectFd, SHUT_RDWR);
@@ -1903,7 +1875,7 @@ static void runLocalServer(void)
   while (!_quit)
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-    pshell_getInput(_interactivePrompt, inputLine);
+    pshell_rl_getInput(_interactivePrompt, inputLine);
     /* if we are currently processing a non-interactive command (via the pshell_runCommand
      * function call), wait a little bit for it to complete before processing an interactive command */
     while (!_isCommandInteractive) sleep(1);    
@@ -1934,20 +1906,6 @@ static int getIpAddress(const char *interface_, char *ipAddress_)
     freeifaddrs(ifaddr);
   }
   return (0);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static void writeSocket(const char *string_, unsigned length_)
-{
-  if (length_ > 0)
-  {
-    write(_connectFd, string_, length_);
-  }
-  else
-  {
-    write(_connectFd, string_, strlen(string_));
-  }
 }
 
 /******************************************************************************/
@@ -2164,719 +2122,27 @@ static void batch(int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
-static void addHistory(char *command_)
-{
-  int i;
-
-  for (i = 0; i < PSHELL_MAX_HISTORY; i++)
-  {
-    /* look for the first empty slot */
-    if (_history[i] == NULL)
-    {
-      /* if this is the first entry or the new entry is not
-       * the same as the previous one, go ahead and add it
-       */
-      if ((i == 0) || (strcasecmp(_history[i-1], command_) != 0))
-      {
-        _history[i] = strdup(command_);
-      }
-      return;
-    }
-  }
-
-  /* No space found, drop one off the beginning of the list */
-  free_z(_history[0]);
-
-  /* move all the other entrys up the list */
-  for (i = 0; i < PSHELL_MAX_HISTORY-1; i++)
-  {
-    _history[i] = _history[i+1];
-  }
-
-  /* add the new entry */
-  _history[PSHELL_MAX_HISTORY-1] = strdup(command_);
-
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static void clearHistory(void)
-{
-  int i;
-  for (i = 0; i < PSHELL_MAX_HISTORY; i++)
-  {
-    if (_history[i] != NULL)
-    {
-      free_z(_history[i]);
-    }
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static void tokenize(char *string_, struct Tokens *tokens_, const char *delimiter_)
-{
-  char *str;
-  tokens_->numTokens = 0;
-  if ((str = strtok(string_, delimiter_)) != NULL)
-  {
-    tokens_->tokens[tokens_->numTokens++] = str;
-    while ((str = strtok(NULL, delimiter_)) != NULL)
-    {
-      if (tokens_->numTokens < PSHELL_MAX_TOKENS)
-      {
-        tokens_->tokens[tokens_->numTokens++] = str;
-      }
-      else
-      {
-        break;
-      }
-    }
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static int findCompletions(char *command_, char *completions_[])
-{
-  struct Tokens tokens;
-  unsigned i;
-  int numFound = 0;
-
-  _maxTabCommandLength = 0;
-  tokenize(command_, &tokens, " ");
-
-  if (tokens.numTokens > 0)
-  {
-    for (i = 0; i < _numCommands; i++)
-    {
-      if (strncasecmp(_commandTable[i].command, tokens.tokens[0], strlen(tokens.tokens[0])) == 0)
-      {
-        completions_[numFound++] = (char *)_commandTable[i].command;
-        if (strlen(_commandTable[i].command) > _maxTabCommandLength)
-        {
-          _maxTabCommandLength = strlen(_commandTable[i].command);
-        }
-      }
-    }
-  }
-  else
-  {
-    for (i = 0; i < _numCommands; i++)
-    {
-      completions_[numFound++] = (char *)_commandTable[i].command;
-      if (strlen(_commandTable[i].command) > _maxTabCommandLength)
-      {
-        _maxTabCommandLength = strlen(_commandTable[i].command);
-      }
-    }
-  }
-
-  _maxTabColumns = PSHELL_MAX_SCREEN_WIDTH/(_maxTabCommandLength+2);
-
-  return (numFound);
-
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static void clearLine(char *command_, int length_, int cursor_)
-{
-  int i;
-  if (cursor_ < length_) for (i = 0; i < (length_-cursor_); i++) writeSocket(" ", 0);
-  for (i = 0; i < length_; i++) command_[i] = '\b';
-  for (; i < length_ * 2; i++) command_[i] = ' ';
-  for (; i < length_ * 3; i++) command_[i] = '\b';
-  writeSocket(command_, i);
-  memset(command_, 0, i);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static void showPrompt(char *command_)
-{
-  if (command_ == NULL)
-  {
-    pshell_printf("\r%s", _interactivePrompt);
-  }
-  else
-  {
-    pshell_printf("\r%s%s", _interactivePrompt, command_);
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
 static void receiveTCP(void)
 {
-  unsigned char character;
-  unsigned char character1;
-  int i;
-  int numRead;
-  int position;
-  bool historyFound;
-  int length;
-  int isTelnetOption = 0;
-  int esc = 0;
-  int cursor = 0;
-  int lastChar;
-  int nextChar;
-  int back;
-  int retCode;
-  signed int inHistory;
-  fd_set readFd;
-  bool insertMode = true;
-  char *completions[PSHELL_MAX_LINE_WORDS];
-  int numCompletions;
-  char command[PSHELL_MAX_LINE_LENGTH];
-  const char *negotiate = "\xFF\xFB\x03\xFF\xFB\x01\xFF\xFD\x03\xFF\xFD\x01";
+  char command[256] = {0};
 
-  clearHistory();
-  writeSocket(negotiate, 0);
-
-  if (!(_clientFd = fdopen(_connectFd, "w+")))
-  {
-    return;
-  }
-
-  setbuf(_clientFd, NULL);
-  
   /* print out our welcome banner */
   showWelcome();
 
   _quit = false;
   while (!_quit)
   {
-
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-    memset(command, 0, PSHELL_MAX_LINE_LENGTH);
-    inHistory = 0;
-    lastChar = 0;
-    length = 0;
-    cursor = 0;
-
-    _showPrompt = true;
-
-    while (1)
+    pshell_rl_getInput(_interactivePrompt, command);
+    if (!_quit)
     {
-
-      if (_showPrompt)
-      {
-        showPrompt(command);
-        if (cursor < length)
-        {
-          numRead = length-cursor;
-          while (numRead--)
-          {
-            writeSocket("\b", 0);
-          }
-        }
-        _showPrompt = false;
-      }
-
-      FD_ZERO(&readFd);
-      FD_SET(_connectFd, &readFd);
-
-      /* Set the default idle timeout to 10 minutes */
-      _idleTimeout.tv_sec = _defaultIdleTimeout*60;
-      _idleTimeout.tv_usec = 0;
-
-      if ((retCode = select(_connectFd+1, &readFd, NULL, NULL, &_idleTimeout)) < 0)
-      {
-        /* select error */
-        if (errno == EINTR)
-        {
-          continue;
-        }
-        PSHELL_ERROR("Socket select error");
-        length = -1;
-        break;
-      }
-      else if (retCode == 0)
-      {
-        pshell_printf("\nIdle session timeout\n");
-        return;
-      }
-
-      if ((numRead = read(_connectFd, &character, 1)) < 0)
-      {
-        if (errno == EINTR)
-        {
-          continue;
-        }
-        PSHELL_ERROR("Socket read error");
-        length = -1;
-        break;
-      }
-
-      if (numRead == 0)
-      {
-        length = -1;
-        break;
-      }
-
-      if (character == 255 && !isTelnetOption)
-      {
-        isTelnetOption++;
-        continue;
-      }
-
-      if (isTelnetOption)
-      {
-        if (character >= 251 && character <= 254)
-        {
-          isTelnetOption = character;
-          continue;
-        }
-        if (character != 255)
-        {
-          isTelnetOption = 0;
-          continue;
-        }
-        isTelnetOption = 0;
-      }
-
-      /* handle various control keys */
-      if (esc)
-      {
-        if (esc == '[')
-        {
-          /* remap to readline control codes */
-          switch (character)
-          {
-            case 'A': /* Up */
-              character = CTRL('P');
-              break;
-            case 'B': /* Down */
-              character = CTRL('N');
-              break;
-            case 'C': /* Right */
-              character = CTRL('F');
-              break;
-            case 'D': /* Left */
-              character = CTRL('B');
-              break;
-            case '1': /* Home */
-              character1 = CTRL('A');
-              continue;
-            case '3': /* Delete */
-              character1 = CTRL('D');
-              continue;
-            case '4': /* End */
-              character1 = CTRL('E');
-              continue;
-            case '5': /* page up */
-            case '6': /* page down */
-              character1 = 0;
-              continue;
-            case '~': /* End of 4 char escape sequence */
-              character = character1;
-              break;
-            default:
-              character = 0;
-              break;
-          }
-          esc = 0;
-        }
-        else if (esc == 'O')
-        {
-          /* remap to readline control codes */
-          switch (character)
-          {
-            case 'H': /* Home */
-              character = CTRL('A');
-              break;
-            case 'F': /* End */
-              character = CTRL('E');
-              break;
-            default:
-              character = 0;
-              break;
-          }
-          esc = 0;
-        }
-        else
-        {
-          switch (character)
-          {
-            case '[':
-            case 'O':
-              esc = character;
-              break;
-            default:
-              esc = 0;
-              break;
-          }
-          continue;
-        }
-      }
-
-      if ((character == 0) || (character == '\n'))
-      {
-        continue;
-      }
-
-      if (character == '\r')
-      {
-        writeSocket("\r\n", 0);
-        break;
-      }
-
-      if (character == 27)
-      {
-        esc = 1;
-        continue;
-      }
-
-      if (character == CTRL('C'))
-      {
-        writeSocket("\a", 0);
-        continue;
-      }
-
-      /* delete character under cursor */
-      if (character == CTRL('D'))
-      {
-        if (cursor < length)
-        {
-          for (i = cursor; i <= length; i++)
-          {
-            command[i] = command[i+1];
-          }
-          writeSocket(command+cursor, strlen(command+cursor));
-          writeSocket(" ", 0);
-          for (i = 0; i <= (int)strlen(command+cursor); i++)
-          {
-            writeSocket("\b", 0);
-          }
-          length--;          
-        }
-        continue;
-      }
-      
-      /* back word, backspace/delete */
-      if (character == CTRL('W') || character == CTRL('H') || character == 0x7f)
-      {
-        back = 0;
-
-        if (character == CTRL('W')) /* word */
-        {
-          nextChar = cursor;
-          if ((length == 0) || (cursor == 0))
-          {
-            continue;
-          }
-
-          while (nextChar && (command[nextChar-1] == ' '))
-          {
-            nextChar--;
-            back++;
-          }
-
-          while (nextChar && (command[nextChar-1] != ' '))
-          {
-            nextChar--;
-            back++;
-          }
-        }
-        else   /* char */
-        {
-          if ((length == 0) || (cursor == 0))
-          {
-            writeSocket("\a", 0);
-            continue;
-          }
-          back = 1;
-        }
-
-        if (back)
-        {
-          while (back--)
-          {
-            if (length == cursor)
-            {
-              command[--cursor] = 0;
-              writeSocket("\b \b", 0);
-            }
-            else
-            {
-              cursor--;
-              for (i = cursor; i <= length; i++)
-              {
-                command[i] = command[i+1];
-              }
-              writeSocket("\b", 0);
-              writeSocket(command+cursor, strlen(command+cursor));
-              writeSocket(" ", 0);
-              for (i = 0; i <= (int)strlen(command+cursor); i++)
-              {
-                writeSocket("\b", 0);
-              }
-            }
-            length--;
-          }
-          continue;
-        }
-      }
-
-      /* redraw */
-      if (character == CTRL('L'))
-      {
-        showPrompt(command);
-        for (i = 0; i < length-cursor; i++)
-        {
-          writeSocket("\b", 0);
-        }
-        continue;
-      }
-
-      /* clear line */
-      if (character == CTRL('U'))
-      {
-        clearLine(command, length, cursor);
-        length = cursor = 0;
-        continue;
-      }
-
-      /* kill to EOL */
-      if (character == CTRL('K'))
-      {
-        if (cursor == length)
-        {
-          continue;
-        }
-
-        for (position = cursor; position < length; position++)
-        {
-          writeSocket(" ", 0);
-        }
-
-        for (position = cursor; position < length; position++)
-        {
-          writeSocket("\b", 0);
-        }
-
-        memset(command + cursor, 0, length-cursor);
-        length = cursor;
-        continue;
-      }
-
-      /* TAB completion */
-      if (character == CTRL('I'))
-      {
-        if (cursor != length)
-        {
-          continue;
-        }
-
-        if ((numCompletions = findCompletions(command, completions)) == 0)
-        {
-          writeSocket("\a", 0);
-        }
-        else if (numCompletions == 1)
-        {
-          /* Single completion */
-          for (; length > 0; length--, cursor--)
-          {
-            if ((command[length-1] == ' ') || (command[length-1] == '|'))
-            {
-              break;
-            }
-            writeSocket("\b", 0);
-          }
-          strcpy((command+length), completions[0]);
-          length += strlen(completions[0]);
-          command[length++] = ' ';
-          cursor = length;
-          writeSocket(completions[0], 0);
-          writeSocket(" ", 0);
-        }
-        else if (lastChar == CTRL('I'))
-        {
-          /* double tab */
-          pshell_printf("\n");
-          for (i = 0; i < numCompletions; i++)
-          {
-            pshell_printf("%-*s  ", _maxTabCommandLength, completions[i]);
-            if ((((i+1)%_maxTabColumns) == 0) || (i == numCompletions-1))
-            {
-              pshell_printf("\n");
-            }
-          }
-          _showPrompt = true;
-        }
-        else
-        {
-          /* More than one completion */
-          lastChar = character;
-          writeSocket("\a", 0);
-        }
-        continue;
-      }
-
-      /* history */
-      if (character == CTRL('P') || character == CTRL('N'))
-      {
-        historyFound = false;
-        if (character == CTRL('P')) /* Up */
-        {
-          inHistory--;
-          if (inHistory < 0)
-          {
-            for (inHistory = PSHELL_MAX_HISTORY-1; inHistory >= 0; inHistory--)
-            {
-              if (_history[inHistory])
-              {
-                historyFound = true;
-                break;
-              }
-            }
-          }
-          else
-          {
-            historyFound = (_history[inHistory] != NULL);
-          }
-        }
-        else /* Down */
-        {
-          inHistory++;
-          if ((inHistory >= PSHELL_MAX_HISTORY) || !_history[inHistory])
-          {
-            for (i = 0; i < PSHELL_MAX_HISTORY; i++)
-            {
-              if (_history[i])
-              {
-                inHistory = i;
-                historyFound = true;
-                break;
-              }
-            }
-          }
-          else
-          {
-            historyFound = (_history[inHistory] != NULL);
-          }
-        }
-        if (historyFound && _history[inHistory])
-        {
-          /* Show history item */
-          clearLine(command, length, cursor);
-          memset(command, 0, PSHELL_MAX_LINE_LENGTH);
-          strncpy(command, _history[inHistory], PSHELL_MAX_LINE_LENGTH-1);
-          length = cursor = strlen(command);
-          writeSocket(command, 0);
-        }
-        continue;
-      }
-
-      /* left/right cursor motion */
-      if (character == CTRL('B') || character == CTRL('F'))
-      {
-        if (character == CTRL('B')) /* Left */
-        {
-          if (cursor)
-          {
-            writeSocket("\b", 0);
-            cursor--;
-          }
-        }
-        else /* Right */
-        {
-          if (cursor < length)
-          {
-            writeSocket(&command[cursor++], 1);
-          }
-        }
-        continue;
-      }
-
-      /* start of line */
-      if (character == CTRL('A'))
-      {
-        if (cursor)
-        {
-          showPrompt(NULL);
-          cursor = 0;
-        }
-        continue;
-      }
-
-      /* end of line */
-      if (character == CTRL('E'))
-      {
-        if (cursor < length)
-        {
-          writeSocket(&command[cursor], length-cursor);
-          cursor = length;
-        }
-        continue;
-      }
-
-      /* normal character typed */
-      if (cursor == length)
-      {
-        /* append to end of line */
-        command[cursor] = character;
-        if (length < PSHELL_MAX_LINE_LENGTH-1)
-        {
-          length++;
-          cursor++;
-        }
-        else
-        {
-          writeSocket("\a", 0);
-          continue;
-        }
-      }
-      else
-      {
-        /* Middle of text */
-        if (insertMode)
-        {
-          /* Move everything one character to the right */
-          if (length >= PSHELL_MAX_LINE_LENGTH-2)
-          {
-            length--;
-          }
-          for (i = length; i >= cursor; i--)
-          {
-            command[i+1] = command[i];
-          }
-          /* Write what we've just added */
-          command[cursor] = character;
-          writeSocket(&command[cursor], length-cursor+1);
-          for (i = 0; i < (length-cursor+1); i++)
-          {
-            writeSocket("\b", 0);
-          }
-          length++;
-        }
-        else
-        {
-          command[cursor] = character;
-        }
-        cursor++;
-      }
-      writeSocket((char *)&character, 1);
-      lastChar = character;
-    }
-
-    if (length > 0)
-    {
-      addHistory(command);
       /* if we are currently processing a non-interactive command (via the pshell_runCommand
        * function call), wait a little bit for it to complete before processing an interactive command */
       while (!_isCommandInteractive) sleep(1);
       /* good to go, process an interactive command */
       processCommand(command);
     }
-    else if (length < 0)
-    {
-      break;
-    }
-
   }
-
 }
 
 /******************************************************************************/
@@ -3203,7 +2469,7 @@ static void addNativeCommands(void)
   /* add to our TAB completion list */
   for (unsigned i = 0; i < _numCommands; i++)
   {
-    pshell_addTabCompletion(_commandTable[i].command);
+    pshell_rl_addTabCompletion(_commandTable[i].command);
   }
 
 }

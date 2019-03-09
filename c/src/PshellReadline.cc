@@ -49,7 +49,7 @@
 /* free and zero (to avoid double-free) */
 #define free_z(p) do { if (p) { free(p); (p) = 0; } } while (0)
 
-#define MAX_HISTORY 256
+#define MAX_HISTORY 512
 static char *_history[MAX_HISTORY];
 static unsigned _historyPos = 0;
 static unsigned _numHistory = 0;
@@ -81,7 +81,11 @@ static char *stripWhitespace(char *string_);
 static unsigned numKeywords(char *command_);
 static void findTabCompletions(const char *keyword_);
 static char *findLongestMatch(char *command_);
-static void showTabCompletions(char *completionList_[], unsigned numCompletions_, unsigned maxCompletionsPerLine_, unsigned maxCompletionLength_, const char* format_, ...);
+static void showTabCompletions(char *completionList_[],
+                               unsigned numCompletions_,
+			       unsigned maxCompletionsPerLine_,
+			       unsigned maxCompletionLength_,
+			       const char* format_, ...);
 static void clearLine(unsigned cursorPos_, char *command_);
 static void beginningOfLine(unsigned &cursorPos_, const char *command_);
 static void endOfLine(unsigned &cursorPos_, const char *command_);
@@ -109,22 +113,22 @@ static void clearHistory(void);
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setFileDescriptors(int inFd_, int outFd_, PshellSerialType serialType_, int idleTimeout_)
+void pshell_rl_setFileDescriptors(int inFd_, int outFd_, PshellSerialType serialType_, int idleTimeout_)
 {
   _inFd = inFd_;
   _outFd = outFd_;
   _serialType = serialType_;
-  pshell_setIdleTimeout(idleTimeout_);
+  pshell_rl_setIdleTimeout(idleTimeout_);
   // if a socket serial device, setup for telnet client control
   if (_serialType == PSHELL_SOCKET)
   {
-    pshell_writeOutput(_tcpNegotiate);
+    pshell_rl_writeOutput(_tcpNegotiate);
   }
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_writeOutput(const char* format_, ...)
+void pshell_rl_writeOutput(const char* format_, ...)
 {
   char string[PSHELL_MAX_COMMAND_SIZE] = {0};
   char socketString[PSHELL_MAX_COMMAND_SIZE] = {0};
@@ -155,7 +159,7 @@ void pshell_writeOutput(const char* format_, ...)
 
 /******************************************************************************/
 /******************************************************************************/
-bool pshell_getInput(const char *prompt_, char *input_)
+bool pshell_rl_getInput(const char *prompt_, char *input_)
 {
   bool inEsc = false;
   char esc = '\0';
@@ -165,7 +169,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
   unsigned index = 0;
   char ch;
   input_[0] = 0;
-  pshell_writeOutput(prompt_);
+  pshell_rl_writeOutput(prompt_);
   while (true)
   {
     idleSession = getChar(ch);
@@ -277,7 +281,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
 	  input_[0] = 0;
 	  cursorPos = 0;
 	  tabCount = 0;
-          pshell_writeOutput(prompt_);
+          pshell_rl_writeOutput(prompt_);
 	}
 	else if ((strlen(input_) > 1) && (input_[0] == '!'))
 	{
@@ -296,7 +300,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
 	        input_[0] = 0;
 	        cursorPos = 0;
 	        tabCount = 0;
-                pshell_writeOutput(prompt_);
+                pshell_rl_writeOutput(prompt_);
 	      }
 	      else
 	      {
@@ -308,14 +312,14 @@ bool pshell_getInput(const char *prompt_, char *input_)
               input_[0] = 0;
               cursorPos = 0;
 	      tabCount = 0;
-	      pshell_writeOutput("history index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
-              pshell_writeOutput(prompt_);
+	      pshell_rl_writeOutput("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
+              pshell_rl_writeOutput(prompt_);
 	    }
 	  }
 	  else
 	  {
-	    pshell_writeOutput("invalid index: '%s'\n", &input_[1]);
-            pshell_writeOutput(prompt_);
+	    pshell_rl_writeOutput("PSHELL_ERROR: Invalid history index: '%s'\n", &input_[1]);
+            pshell_rl_writeOutput(prompt_);
             input_[0] = 0;
             cursorPos = 0;
 	    tabCount = 0;
@@ -332,7 +336,7 @@ bool pshell_getInput(const char *prompt_, char *input_)
       else
       {
 	// just pressed CR with no input, just give prompt again
-        pshell_writeOutput(prompt_);
+        pshell_rl_writeOutput(prompt_);
       }
     }
     else if (ch == 11)
@@ -443,15 +447,15 @@ bool pshell_getInput(const char *prompt_, char *input_)
     else if (ch != 9)
     {
       // don't print out tab if multi keyword command
-      //pshell_writeOutput("\nchar value: %d" % ch)
-      //pshell_writeOutput("\n"+prompt_)
+      //pshell_rl_writeOutput("\nchar value: %d" % ch)
+      //pshell_rl_writeOutput("\n"+prompt_)
     }
   }
 }
 
 /******************************************************************************/
 /******************************************************************************/
-bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_)
+bool pshell_rl_isSubString(const char *string1_, const char *string2_, unsigned minChars_)
 {
   unsigned length;
   if ((string1_ == NULL) && (string2_ == NULL))
@@ -481,7 +485,7 @@ bool pshell_isSubString(const char *string1_, const char *string2_, unsigned min
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_addTabCompletion(const char *keyword_)
+void pshell_rl_addTabCompletion(const char *keyword_)
 {
   for (unsigned i = 0; i < _numTabCompletions; i++)
   {
@@ -501,14 +505,14 @@ void pshell_addTabCompletion(const char *keyword_)
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setIdleTimeout(int timeout_)
+void pshell_rl_setIdleTimeout(int timeout_)
 {
   _idleTimeout = timeout_;
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setTabStyle(PshellTabStyle tabStyle_)
+void pshell_rl_setTabStyle(PshellTabStyle tabStyle_)
 {
   _tabStyle = tabStyle_;
 }
@@ -606,7 +610,7 @@ static void findTabCompletions(const char *keyword_)
   _maxMatchCompletionsPerLine = 0;
   for (unsigned i = 0; i < _numTabCompletions; i++)
   {
-    if (pshell_isSubString(keyword_, _tabCompletions[i]))
+    if (pshell_rl_isSubString(keyword_, _tabCompletions[i]))
     {
       _tabMatches[_numTabMatches++] = _tabCompletions[i];
       if (strlen(keyword_) > _maxMatchKeywordLength)
@@ -662,7 +666,7 @@ static void showTabCompletions(char *completionList_[],
     unsigned numPrinted = 0;
     for (unsigned i = 0; i < numCompletions_; i++)
     {
-      pshell_writeOutput("%s", completionList_[i]);
+      pshell_rl_writeOutput("%s", completionList_[i]);
       space(maxCompletionLength_-strlen(completionList_[i]));
       numPrinted += 1;
       totPrinted += 1;
@@ -675,7 +679,7 @@ static void showTabCompletions(char *completionList_[],
     va_start(args, format_);
     vsnprintf(prompt, sizeof(prompt), format_, args);
     va_end(args);
-    pshell_writeOutput("\n%s", prompt);
+    pshell_rl_writeOutput("\n%s", prompt);
   }
 }
 
@@ -705,7 +709,7 @@ static void endOfLine(unsigned &cursorPos_, const char *command_)
 {
   if (cursorPos_ < strlen(command_))
   {
-    pshell_writeOutput(&command_[cursorPos_]);
+    pshell_rl_writeOutput(&command_[cursorPos_]);
     cursorPos_ = strlen(command_);
   }
 }
@@ -734,7 +738,7 @@ static void deleteUnderCursor(unsigned cursorPos_, char *command_)
 {
   if (cursorPos_ < strlen(command_))
   {
-    pshell_writeOutput("%s ", &command_[cursorPos_+1]);
+    pshell_rl_writeOutput("%s ", &command_[cursorPos_+1]);
     backspace(strlen(&command_[cursorPos_]));
     command_[cursorPos_] = 0;
     sprintf(command_, "%s%s", command_, &command_[cursorPos_+1]);
@@ -748,7 +752,7 @@ static void backspaceDelete(unsigned &cursorPos_, char *command_)
   if ((strlen(command_) > 0) && (cursorPos_ > 0))
   {
     backspace();
-    pshell_writeOutput("%s ", &command_[cursorPos_]);
+    pshell_rl_writeOutput("%s ", &command_[cursorPos_]);
     backspace(strlen(&command_[cursorPos_])+1);
     sprintf(&command_[cursorPos_-1], "%s", &command_[cursorPos_]);
     cursorPos_ -= 1;
@@ -763,7 +767,7 @@ static void addChar(unsigned &cursorPos_, char *command_, char ch_)
   snprintf(newCommand, cursorPos_+1, "%s", command_);
   sprintf(&newCommand[cursorPos_], "%c%s", ch_, &command_[cursorPos_]);
   strcpy(command_, newCommand);
-  pshell_writeOutput(&command_[cursorPos_]);
+  pshell_rl_writeOutput(&command_[cursorPos_]);
   backspace(strlen(&command_[cursorPos_])-1);
   cursorPos_ += 1;
 }
@@ -815,7 +819,7 @@ static void rightArrow(unsigned &cursorPos_, char *command_)
 {
   if (cursorPos_ < strlen(command_))
   {
-    pshell_writeOutput(&command_[cursorPos_]);
+    pshell_rl_writeOutput(&command_[cursorPos_]);
     backspace(strlen(&command_[cursorPos_])-1);
     cursorPos_ += 1;
   }
@@ -831,7 +835,7 @@ static unsigned showCommand(char *outCommand_, const char* format_, ...)
   va_start(args, format_);
   vsnprintf(inCommand, sizeof(inCommand), format_, args);
   va_end(args);
-  pshell_writeOutput(inCommand);
+  pshell_rl_writeOutput(inCommand);
   strcpy(outCommand_, inCommand);
   return (strlen(outCommand_));
 }
@@ -897,7 +901,7 @@ static void showHistory(void)
 {
   for (unsigned i = 0; i < _numHistory; i++)
   {
-    pshell_writeOutput("%-3d %s\n", i+1, _history[i]); 
+    pshell_rl_writeOutput("%-3d %s\n", i+1, _history[i]); 
   }
 }
 
@@ -928,7 +932,7 @@ static bool getChar(char &ch)
     {
       if ((retCode = select(_inFd+1, &readFd, NULL, NULL, &idleTimeout)) == 0)
       {
-        pshell_writeOutput("\nIdle session timeout\n");
+        pshell_rl_writeOutput("\nIdle session timeout\n");
         idleSession = true;
       }
       else if (retCode > 0)
@@ -951,7 +955,7 @@ static bool getChar(char &ch)
     {
       if ((retCode = select(_inFd+1, &readFd, NULL, NULL, &idleTimeout)) == 0)
       {
-        pshell_writeOutput("\nIdle session timeout\n");
+        pshell_rl_writeOutput("\nIdle session timeout\n");
         idleSession = true;
       }
       else if (retCode > 0)

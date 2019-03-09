@@ -1435,10 +1435,10 @@ func receiveTCP() {
                 processCommand(_gCommandHistory[index])
               }
             } else {
-              printf("history index: %d, out of bounds, range 1-%d\n", index+1, len(_gCommandHistory))
+              printf("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n", index+1, len(_gCommandHistory))
             }
           } else {
-            printf("invalid index: '%s'\n", command[1:])
+            printf("PSHELL_ERROR: Invalid history index: '%s'\n", command[1:])
           }
         } else {
           processCommand(command)

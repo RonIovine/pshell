@@ -13,36 +13,36 @@ socket (telnet client).
 
 /* set the input/output file descriptors */
 
-void pshell_setFileDescriptors(int inFd_,
-                               int outFd_,
-                               PshellSerialType serialType_,
-                               int idleTimeout_ = IDLE_TIMEOUT_NONE);
+void pshell_rl_setFileDescriptors(int inFd_,
+                                  int outFd_,
+                                  PshellSerialType serialType_,
+                                  int idleTimeout_ = IDLE_TIMEOUT_NONE);
 
 /* write a string to the output file descriptor */
 
-void pshell_writeOutput(const char* format_, ...);
+void pshell_rl_writeOutput(const char* format_, ...);
 
 /* get a line of user input */
 
-bool pshell_getInput(const char *prompt_, char *input_);
+bool pshell_rl_getInput(const char *prompt_, char *input_);
 
 /* check if string1 is a substring of string2 from position */
 
-bool pshell_isSubString(const char *string1_,
-                        const char *string2_,
-                        unsigned minChars_ = 0);
+bool pshell_rl_isSubString(const char *string1_,
+                           const char *string2_,
+                           unsigned minChars_ = 0);
 
 /* add a keyword to our tab completion list */
 
-void pshell_addTabCompletion(const char *keyword_);
+void pshell_rl_addTabCompletion(const char *keyword_);
 
 /* set our TAB style, FAST or BASH, default=BASH */
 
-void pshell_setTabStyle(PshellTabStyle tabStyle_);
+void pshell_rl_setTabStyle(PshellTabStyle tabStyle_);
 
 /* set out idle session timeout in seconds, default=NONE */
 
-void pshell_setIdleTimeout(int timeout_);
+void pshell_rl_setIdleTimeout(int timeout_);
 
 Link with the library libpshell-readline
 
@@ -54,6 +54,6 @@ list of examples of invoking functions in a remote pshell via a local client pro
 .SH MT-LEVEL
 Safe
 .SH SEE ALSO
-pshell(1), PshellServer(3)
+pshell(1), PshellServer(3), PshellControl(3)
 .SH AUTHOR
 Ron Iovine  --  github.com/RonIovine/pshell

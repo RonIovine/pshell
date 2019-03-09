@@ -70,11 +70,10 @@ CLIENT_FLAGS =
 TRACE_FILTER_DEMO_FLAGS =
 TRACE_LOG_DEMO_FLAGS =
 
-CLIENT_LIBS += -L$(LIB_DIR) -lpshell-readline
-PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpshell-readline -lpthread 
+PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
 PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread 
 PSHELL_READLINE_DEMO_LIBS = -L$(LIB_DIR) -lpshell-readline 
-TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpshell-readline -lpthread 
+TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
 
 VERBOSE = @
 LOCAL =
@@ -111,9 +110,11 @@ endif
 -include .config
 
 #
-# PshellServer objects
+# PshellServer objects, we hardwire the PshellReadline into the PshellServer library
+# and the PshellClient programs, we also create a separate stand-alone library for
+# libpshell-readline for use by any other application needing user command line input
 #
-PSHELL_OBJS = PshellServer.o
+PSHELL_OBJS = PshellServer.o PshellReadline.o
 
 #########################
 #
@@ -305,6 +306,7 @@ help:
 lib:
 	@echo "Building libpshell-server-full.a..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-full.a $(PSHELL_OBJS)
@@ -312,6 +314,7 @@ lib:
 	
 	@echo "Building libpshell-server-full.so..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-full.so $(PSHELL_OBJS)
@@ -338,12 +341,12 @@ lib:
 	$(VERBOSE)rm *.o
 
 	@echo "Building libpshell-readline.a..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-readline.a PshellReadline.o
 	$(VERBOSE)rm *.o
 	
 	@echo "Building libpshell-readline.so..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-readline.so PshellReadline.o
 	$(VERBOSE)rm *.o
 
@@ -352,10 +355,10 @@ lib:
 
 pshell:
 	@echo "Building pshellAggregator stand-alone UDP/UNIX aggregator client..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellAggregator.$(SRC_EXT) $(CLIENT_LIBS) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregator
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellAggregator.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregator
 
 	@echo "Building pshell stand-alone UDP/UNIX client..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
 demo:
 	@echo "Building pshellServerDemo program..."

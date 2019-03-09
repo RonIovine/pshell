@@ -45,13 +45,13 @@ extern "C" {
  *
  * Functions:
  *
- * pshell_setFileDescriptors() -- set the input/output file descriptors
- * pshell_setIdleTimeout()     -- set the idle session timeout
- * pshell_addTabCompletion()   -- add a keyword to the TAB completion list
- * pshell_setTabStyle()        -- sets the tab behavour style ("fast" or bash)
- * pshell_getInput()           -- get a line of user input from our input file descriptor
- * pshell_writeOutput()        -- write a string to our output file descriptor
- * pshell_isSubString()        -- checks for string1 substring of string2 at position 0
+ * pshell_rl_setFileDescriptors() -- set the input/output file descriptors
+ * pshell_rl_setIdleTimeout()     -- set the idle session timeout
+ * pshell_rl_addTabCompletion()   -- add a keyword to the TAB completion list
+ * pshell_rl_setTabStyle()        -- sets the tab behavour style ("fast" or bash)
+ * pshell_rl_getInput()           -- get a line of user input from our input file descriptor
+ * pshell_rl_writeOutput()        -- write a string to our output file descriptor
+ * pshell_rl_isSubString()        -- checks for string1 substring of string2 at position 0
  *
  * Use for the timeout value when setting the idleSessionTimeout, default=none
  *
@@ -111,7 +111,7 @@ enum PshellSerialType
 #define ONE_MINUTE ONE_SECOND*60
 
 /*
- * pshell_setFileDescriptors:
+ * pshell_rl_setFileDescriptors:
  *
  * Set the input and output file descriptors, if this function is not called,
  * the default is stdin and stdout.  The file descriptors given to this function
@@ -123,20 +123,20 @@ enum PshellSerialType
  * socket identifier, use the file descriptor that is returned from the TCP
  * socket server 'accept' call for both the inFd and outFd.
  */
-void pshell_setFileDescriptors(int inFd_,
-                               int outFd_,
-                               PshellSerialType serialType_,
-                               int idleTimeout_ = IDLE_TIMEOUT_NONE);
+void pshell_rl_setFileDescriptors(int inFd_,
+                                  int outFd_,
+                                  PshellSerialType serialType_,
+                                  int idleTimeout_ = IDLE_TIMEOUT_NONE);
 
 /*
- * pshell_writeOutput:
+ * pshell_rl_writeOutput:
  *
  * Write a string to our output file descriptor
  */
-void pshell_writeOutput(const char* format_, ...);
+void pshell_rl_writeOutput(const char* format_, ...);
 
 /*
- * pshell_getInput:
+ * pshell_rl_getInput:
  *
  * Issue the user prompt and return the entered command line value.  This
  * function will return the tuple (command, idleSession).  If the idle session
@@ -146,10 +146,10 @@ void pshell_writeOutput(const char* format_, ...);
  * to true and return if no user activity is detected for the idleSessionTimeout
  * period
  */
-bool pshell_getInput(const char *prompt_, char *input_);
+bool pshell_rl_getInput(const char *prompt_, char *input_);
 
 /*
- * pshell_isSubString:
+ * pshell_rl_isSubString:
  *
  * This function will return True if string1 is a substring of string2 at
  * position 0.  If the minMatchLength is 0, then it will compare up to the
@@ -160,20 +160,20 @@ bool pshell_getInput(const char *prompt_, char *input_);
  * will match, 'quix' or 'uit' will not match.  This function is useful for
  * wildcard matching.
  */
-bool pshell_isSubString(const char *string1_,
-                        const char *string2_,
-                        unsigned minChars_ = 0);
+bool pshell_rl_isSubString(const char *string1_,
+                           const char *string2_,
+                           unsigned minChars_ = 0);
 
 /*
- * pshell_addTabCompletion:
+ * pshell_rl_addTabCompletion:
  * 
  * Add a keyword to the TAB completion list.  TAB completion will only be applied
  * to the first keyword of a given user typed command
  */
-void pshell_addTabCompletion(const char *keyword_);
+void pshell_rl_addTabCompletion(const char *keyword_);
 
 /*
- * pshell_setTabStyle:
+ * pshell_rl_setTabStyle:
  * 
  * Set the tabbing method to either be bash/readline style tabbing, i.e. double
  * tabbing to initiate and display completions, or "fast" tabbing, where all
@@ -181,16 +181,16 @@ void pshell_addTabCompletion(const char *keyword_);
  * "fast" tabbing, use the identifiers PSHELL_BASH_TAB and PSHELL_FAST_TAB for
  * the tabStyle
  */
-void pshell_setTabStyle(PshellTabStyle tabStyle_);
+void pshell_rl_setTabStyle(PshellTabStyle tabStyle_);
 
 /*
- * pshell_setIdleTimeout:
+ * pshell_rl_setIdleTimeout:
  * 
  * Set the idle session timeout as described above.  Use the identifiers
  * ONE_SEC and ONE_MINUTE as follows, e.g. ONE_MINUTE*5 for a 5 minute
  * idleSession timeout.
  */
-void pshell_setIdleTimeout(int timeout_);
+void pshell_rl_setIdleTimeout(int timeout_);
 
 #ifdef __cplusplus
 }

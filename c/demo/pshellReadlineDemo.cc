@@ -84,11 +84,11 @@ int main(int argc, char *argv[])
   {
     if (strcmp(argv[i], "-bash") == 0)
     {
-      pshell_setTabStyle(PSHELL_BASH_TAB);
+      pshell_rl_setTabStyle(PSHELL_BASH_TAB);
     }
     else if (strcmp(argv[i], "-fast") == 0)
     {
-      pshell_setTabStyle(PSHELL_FAST_TAB);
+      pshell_rl_setTabStyle(PSHELL_FAST_TAB);
     }
     else if (strcmp(argv[i], "-tty") == 0)
     {
@@ -115,20 +115,20 @@ int main(int argc, char *argv[])
     }
   }
 
-  pshell_addTabCompletion("quit");
-  pshell_addTabCompletion("help");
-  pshell_addTabCompletion("hello");
-  pshell_addTabCompletion("world");
-  pshell_addTabCompletion("enhancedUsage");
-  pshell_addTabCompletion("keepAlive");
-  pshell_addTabCompletion("pshellAggregatorDemo");
-  pshell_addTabCompletion("pshellControlDemo");
-  pshell_addTabCompletion("pshellReadlineDemo");
-  pshell_addTabCompletion("pshellServerDemo");
-  pshell_addTabCompletion("myComm");
-  pshell_addTabCompletion("myCommand123");
-  pshell_addTabCompletion("myCommand456");
-  pshell_addTabCompletion("myCommand789");
+  pshell_rl_addTabCompletion("quit");
+  pshell_rl_addTabCompletion("help");
+  pshell_rl_addTabCompletion("hello");
+  pshell_rl_addTabCompletion("world");
+  pshell_rl_addTabCompletion("enhancedUsage");
+  pshell_rl_addTabCompletion("keepAlive");
+  pshell_rl_addTabCompletion("pshellAggregatorDemo");
+  pshell_rl_addTabCompletion("pshellControlDemo");
+  pshell_rl_addTabCompletion("pshellReadlineDemo");
+  pshell_rl_addTabCompletion("pshellServerDemo");
+  pshell_rl_addTabCompletion("myComm");
+  pshell_rl_addTabCompletion("myCommand123");
+  pshell_rl_addTabCompletion("myCommand456");
+  pshell_rl_addTabCompletion("myCommand789");
 
   if (serialType == PSHELL_SOCKET)
   {
@@ -144,19 +144,19 @@ int main(int argc, char *argv[])
     connectFd = accept(socketFd, NULL, 0);
     printf("connection accepted\n");
 
-    pshell_setFileDescriptors(connectFd, connectFd, PSHELL_SOCKET);
+    pshell_rl_setFileDescriptors(connectFd, connectFd, PSHELL_SOCKET);
 
     shutdown(socketFd, SHUT_RDWR);
   }
 	     
-  pshell_setIdleTimeout(idleTimeout);
+  pshell_rl_setIdleTimeout(idleTimeout);
 
-  while (!pshell_isSubString(input, "quit", 1) && !idleSession)
+  while (!pshell_rl_isSubString(input, "quit", 1) && !idleSession)
   {
-    idleSession = pshell_getInput("prompt> ", input);
+    idleSession = pshell_rl_getInput("prompt> ", input);
     if (!idleSession)
     {
-      pshell_writeOutput("input: '%s'\n", input);
+      pshell_rl_writeOutput("input: '%s'\n", input);
    }
   }
   

@@ -861,7 +861,7 @@ void buildCommandList(void)
   _maxCommandLength = 0;
   for (i = 0; i < _numPshellCommands; i++)
   {
-    pshell_addTabCompletion(_pshellCommandList[i]);
+    pshell_rl_addTabCompletion(_pshellCommandList[i]);
     if (strlen(_pshellCommandList[i]) > _maxCommandLength)
     {
       _maxCommandLength = strlen(_pshellCommandList[i]);
@@ -1028,7 +1028,7 @@ void processInteractiveMode(void)
   {
     for (;;)
     {
-      pshell_getInput(_interactivePrompt, _interactiveCommand);
+      pshell_rl_getInput(_interactivePrompt, _interactiveCommand);
       strcpy(command, _interactiveCommand);
       tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
       if ((strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) ==
