@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
   struct sockaddr_in ipAddress;
   int socketFd;
   int connectFd;
-  SerialType serialType = PSHELL_TTY;
+  PshellSerialType serialType = PSHELL_TTY;
   int idleTimeout = IDLE_TIMEOUT_NONE;
   int port = 9005;
 

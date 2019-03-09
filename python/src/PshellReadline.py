@@ -618,7 +618,7 @@ def _addHistory(command_):
   # add command to our command history
   if (len(_gCommandHistory) == 0 or (_gCommandHistory[-1] != command_)):
     _gCommandHistory.append(command_.strip())
-    _gCommandHistoryPos = len(_gCommandHistory)
+  _gCommandHistoryPos = len(_gCommandHistory)
 
 #################################################################################
 #################################################################################

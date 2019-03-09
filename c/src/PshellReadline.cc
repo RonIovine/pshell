@@ -63,8 +63,8 @@ static unsigned _maxTabCompletionKeywordLength = 0;
 static unsigned _maxCompletionsPerLine = 0;
 static unsigned _maxMatchKeywordLength = 0;
 static unsigned _maxMatchCompletionsPerLine = 0;
-static TabStyle _tabStyle = PSHELL_FAST_TAB;
-static SerialType _serialType = PSHELL_TTY;
+static PshellTabStyle _tabStyle = PSHELL_FAST_TAB;
+static PshellSerialType _serialType = PSHELL_TTY;
 static int _inFd = STDIN_FILENO;
 static int _outFd = STDOUT_FILENO;
 static int _idleTimeout = IDLE_TIMEOUT_NONE;
@@ -108,7 +108,7 @@ static void clearHistory(void);
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, int idleTimeout_)
+void pshell_setFileDescriptors(int inFd_, int outFd_, PshellSerialType serialType_, int idleTimeout_)
 {
   _inFd = inFd_;
   _outFd = outFd_;
@@ -485,7 +485,7 @@ void pshell_setIdleTimeout(int timeout_)
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setTabStyle(TabStyle tabStyle_)
+void pshell_setTabStyle(PshellTabStyle tabStyle_)
 {
   _tabStyle = tabStyle_;
 }
@@ -830,7 +830,7 @@ static void addHistory(char *command_)
       if ((i == 0) || (strcasecmp(_history[i-1], command_) != 0))
       {
         _history[i] = strdup(command_);
-	_numHistory ++;
+	_numHistory++;
       }
       _historyPos = _numHistory;
       return;

@@ -85,7 +85,7 @@ extern "C" {
  * Used to specify the TAB style, FAST TAB will only use a single TAB,
  * while BASH TAB will require double TABing
  */
-enum TabStyle
+enum PshellTabStyle
 {
   PSHELL_FAST_TAB,
   PSHELL_BASH_TAB 
@@ -96,7 +96,7 @@ enum TabStyle
  * stdin and stdout, SOCKET uses a serial TCP socket placed in 'telnet'
  * mode for control via a telnet client, default=TTY with stdin/stdout
  */
-enum SerialType
+enum PshellSerialType
 {
   PSHELL_TTY,
   PSHELL_SOCKET
@@ -125,7 +125,7 @@ enum SerialType
  */
 void pshell_setFileDescriptors(int inFd_,
                                int outFd_,
-                               SerialType serialType_,
+                               PshellSerialType serialType_,
                                int idleTimeout_ = IDLE_TIMEOUT_NONE);
 
 /*
@@ -181,7 +181,7 @@ void pshell_addTabCompletion(const char *keyword_);
  * "fast" tabbing, use the identifiers PSHELL_BASH_TAB and PSHELL_FAST_TAB for
  * the tabStyle
  */
-void pshell_setTabStyle(TabStyle tabStyle_);
+void pshell_setTabStyle(PshellTabStyle tabStyle_);
 
 /*
  * pshell_setIdleTimeout:

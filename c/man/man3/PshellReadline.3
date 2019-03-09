@@ -11,18 +11,36 @@ socket (telnet client).
 
 #include <PshellReadline.h>
 
-/* set the input/output file descriptors
-void pshell_setFileDescriptors(int inFd_, int outFd_, SerialType serialType_, int idleTimeout_ = IDLE_TIMEOUT_NONE);
+/* set the input/output file descriptors */
+
+void pshell_setFileDescriptors(int inFd_,
+                               int outFd_,
+                               PshellSerialType serialType_,
+                               int idleTimeout_ = IDLE_TIMEOUT_NONE);
+
+/* write a string to the output file descriptor */
 
 void pshell_writeOutput(const char* format_, ...);
 
+/* get a line of user input */
+
 bool pshell_getInput(const char *prompt_, char *input_);
 
-bool pshell_isSubString(const char *string1_, const char *string2_, unsigned minChars_ = 0);
+/* check if string1 is a substring of string2 from position */
+
+bool pshell_isSubString(const char *string1_,
+                        const char *string2_,
+                        unsigned minChars_ = 0);
+
+/* add a keyword to our tab completion list */
 
 void pshell_addTabCompletion(const char *keyword_);
 
-void pshell_setTabStyle(TabStyle tabStyle_);
+/* set our TAB style, FAST or BASH, default=BASH */
+
+void pshell_setTabStyle(PshellTabStyle tabStyle_);
+
+/* set out idle session timeout in seconds, default=NONE */
 
 void pshell_setIdleTimeout(int timeout_);
 
