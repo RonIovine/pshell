@@ -687,6 +687,14 @@ void pshell_addCommand(PshellFunction function_,
   _commandTable[_numCommands].showUsage = showUsage_;
   _numCommands++;
 
+  /* see if they are adding commands after the server is started, if so, add it here,
+   * otherwise, they will all be added to the TAB completion in theaddNaticeCommands function
+   */
+  if (_isRunning)
+  {
+    pshell_addTabCompletion(command_);
+  }
+
   /* figure out our max command length so the help display can be aligned */
   if (pshell_getLength(command_) > _maxCommandLength)
   {
