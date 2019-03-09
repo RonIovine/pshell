@@ -39,12 +39,8 @@
 #include <ctype.h>
 #include <signal.h>
 
-#ifdef PSHELL_READLINE
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
-
 #include <PshellCommon.h>
+#include <PshellReadline.h>
 
 /* constants */
 
@@ -136,13 +132,13 @@ bool _isUnixConnected = false;
 ServerType _serverType = UDP;
 
 char _unixLocalSocketName[256];
-char _interactiveCommand[PSHELL_PAYLOAD_SIZE];
-char _interactivePrompt[PSHELL_PAYLOAD_SIZE];
-char _serverName[PSHELL_PAYLOAD_SIZE];
-char _ipAddress[PSHELL_PAYLOAD_SIZE];
-char _title[PSHELL_PAYLOAD_SIZE];
-char _banner[PSHELL_PAYLOAD_SIZE];
-char _prompt[PSHELL_PAYLOAD_SIZE];
+char _interactiveCommand[PSHELL_MAX_COMMAND_SIZE];
+char _interactivePrompt[PSHELL_MAX_COMMAND_SIZE];
+char _serverName[PSHELL_MAX_COMMAND_SIZE];
+char _ipAddress[PSHELL_MAX_COMMAND_SIZE];
+char _title[PSHELL_MAX_COMMAND_SIZE];
+char _banner[PSHELL_MAX_COMMAND_SIZE];
+char _prompt[PSHELL_MAX_COMMAND_SIZE];
 const char *_host;
 const char *_server;
 unsigned _version;
@@ -200,13 +196,6 @@ const char **_pshellCommandList;
 unsigned _numPshellCommands = 0;
 unsigned _maxPshellCommands = PSHELL_COMMAND_CHUNK;
 
-#ifdef PSHELL_READLINE
-bool _commandFound;
-int _matchLength;
-unsigned _commandPos;
-bool _completionEnabled;
-#endif
-
 /* function prototypes */
 
 bool isNumeric(const char *string_);
@@ -222,7 +211,6 @@ bool send(void);
 bool receive(void);
 void tokenize(char *string_, const char *delimeter_, char *tokens_[], unsigned maxTokens_, unsigned *numTokens_);
 bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_);
-void getInput(void);
 bool initInteractiveMode(void);
 void processInteractiveMode(void);
 void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
@@ -238,11 +226,6 @@ void showWelcome(void);
 void exitProgram(int exitCode_);
 void registerSignalHandlers(void);
 void parseCommandLine(int *argc, char *argv[], char *host, char *port);
-
-#ifdef PSHELL_READLINE
-char **commandCompletion (const char *command_, int start_, int end_);
-char *commandGenerator (const char *command_, int state_);
-#endif
 
 /******************************************************************************/
 /******************************************************************************/
@@ -279,12 +262,8 @@ void showWelcome(void)
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);
-#ifdef PSHELL_READLINE
   printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
   printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
-#else
-  printf("%s  Command abbreviation supported\n", PSHELL_WELCOME_BORDER);
-#endif
   if (_isBroadcastServer)
   {
   printf("%s\n", PSHELL_WELCOME_BORDER);
@@ -728,7 +707,7 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
   _pshellSendMsg.payload[0] = 0;
   if (command_ != NULL)
   {
-    strncpy(_pshellSendMsg.payload, command_, PSHELL_PAYLOAD_SIZE);
+    strncpy(_pshellSendMsg.payload, command_, PSHELL_MAX_COMMAND_SIZE);
   }
 
   do
@@ -816,38 +795,6 @@ void stripWhitespace(char *string_)
 
 /******************************************************************************/
 /******************************************************************************/
-void getInput(void)
-{
-#ifdef PSHELL_READLINE
-  char *commandLine;
-  _interactiveCommand[0] = 0;
-  while (strlen(_interactiveCommand) == 0)
-  {
-    commandLine = NULL;
-    _commandFound = false;
-    commandLine = readline(_interactivePrompt);
-    if (commandLine && *commandLine)
-    {
-      add_history(commandLine);
-      strcpy(_interactiveCommand, commandLine);
-      stripWhitespace(_interactiveCommand);
-    }
-    free(commandLine);
-  }
-#else
-  _interactiveCommand[0] = 0;
-  while (strlen(_interactiveCommand) == 0)
-  {
-    fprintf(stdout, "%s", _interactivePrompt);
-    fflush(stdout);
-    fgets(_interactiveCommand, PSHELL_PAYLOAD_SIZE, stdin);
-    stripWhitespace(_interactiveCommand);
-  }
-#endif
-}
-
-/******************************************************************************/
-/******************************************************************************/
 bool isDuplicate(char *command_)
 {
   unsigned i;
@@ -914,6 +861,7 @@ void buildCommandList(void)
   _maxCommandLength = 0;
   for (i = 0; i < _numPshellCommands; i++)
   {
+    pshell_addTabCompletion(_pshellCommandList[i]);
     if (strlen(_pshellCommandList[i]) > _maxCommandLength)
     {
       _maxCommandLength = strlen(_pshellCommandList[i]);
@@ -921,61 +869,6 @@ void buildCommandList(void)
   }
 
 }
-
-#ifdef PSHELL_READLINE
-
-/******************************************************************************/
-/******************************************************************************/
-char **commandCompletion(const char *command_, int start_, int end_)
-{
-  _commandFound = (start_ > 0);
-  return (rl_completion_matches(command_, commandGenerator));
-}
-
-/******************************************************************************/
-/******************************************************************************/
-char *commandGenerator(const char *command_, int state_)
-{
-  const char *command;
-  char *returnCommand;
-
-  /*
-  * if this is a new command to complete, set the starting search
-  * command, this funciton is called repeatedly, the state must be
-  * preserved between calls, that is why _matchLength and _currentPos
-  * are static global variables, we need to pick up where we left off
-  */
-  if (state_ == 0)
-  {
-    _matchLength = strlen(command_);
-    _commandPos = 0;
-  }
-
-  while ((_commandPos < _numPshellCommands) && (!_commandFound))
-  {
-
-    /* get our command string */
-    command = _pshellCommandList[_commandPos++];
-
-    if (::strncmp(command, command_, _matchLength) == 0)
-    {
-      returnCommand = (char*)malloc(strlen(command));
-      strcpy(returnCommand, command);
-      return (returnCommand);
-    }
-
-  }
-
-  /*
-  * if no names matched, then return NULL,
-  * supress normal filename completion when
-  * we are done finding matches
-  */
-  rl_attempted_completion_over = 1;
-  return (NULL);
-
-}
-#endif /* PSHELL_READLINE */
 
 /******************************************************************************/
 /******************************************************************************/
@@ -995,11 +888,6 @@ bool initInteractiveMode(void)
     }
     buildCommandList();
   }
-
-#ifdef PSHELL_READLINE
-  /* register our TAB completion function */
-  rl_attempted_completion_function = commandCompletion;
-#endif
 
   /* setup our prompt */
   sprintf(_interactivePrompt,
@@ -1140,7 +1028,7 @@ void processInteractiveMode(void)
   {
     for (;;)
     {
-      getInput();
+      pshell_getInput(_interactivePrompt, _interactiveCommand);
       strcpy(command, _interactiveCommand);
       tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
       if ((strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) ==
@@ -1377,13 +1265,9 @@ void showUsage(void)
   printf("          interactive mode type 'help' or '?' at the prompt to\n");
   printf("          see all available commands, to get help on a single\n");
   printf("          command, type '<command> {? | -h}'.");
-#ifdef PSHELL_READLINE
   printf("  Use TAB completion\n");
   printf("          to fill out partial commands and up-arrow to recall\n");
   printf("          for command history.\n");
-#else
-  printf("\n");
-#endif
   printf("\n");
   exitProgram(0);
 }

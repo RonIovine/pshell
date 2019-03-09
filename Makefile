@@ -70,10 +70,11 @@ CLIENT_FLAGS =
 TRACE_FILTER_DEMO_FLAGS =
 TRACE_LOG_DEMO_FLAGS =
 
-PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
+CLIENT_LIBS += -L$(LIB_DIR) -lpshell-readline
+PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpshell-readline -lpthread 
 PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread 
 PSHELL_READLINE_DEMO_LIBS = -L$(LIB_DIR) -lpshell-readline 
-TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
+TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpshell-readline -lpthread 
 
 VERBOSE = @
 LOCAL =
@@ -150,14 +151,6 @@ endif
 
 ifdef PSHELL_BATCH_DIR
   PSHELL_FLAGS += -DPSHELL_BATCH_DIR=$(PSHELL_BATCH_DIR)
-endif
-
-ifdef PSHELL_READLINE
-  PSHELL_FLAGS += -DPSHELL_READLINE
-  CLIENT_FLAGS += -DPSHELL_READLINE
-  CLIENT_LIBS += -lreadline
-  PSHELL_SERVER_DEMO_LIBS += -lreadline
-  TRACE_FILTER_DEMO_LIBS += -lreadline
 endif
 
 ifdef PSHELL_VSNPRINTF

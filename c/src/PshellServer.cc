@@ -44,12 +44,8 @@
 #include <cstdio>
 #include <sys/stat.h>
 
-#ifdef PSHELL_READLINE
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
-
 #include <PshellCommon.h>
+#include <PshellReadline.h>
 #include <PshellServer.h>
 
 /* constants */
@@ -261,14 +257,6 @@ struct PshellTokens_c
  * or trailing underscores for local stack variables
  */
 
-/* LOCAL server data */
-
-#ifdef PSHELL_READLINE
-static bool _commandFound;
-static int _matchLength;
-static unsigned _commandPos;
-#endif
-
 /* UDP/UNIX server data */
 
 static struct sockaddr_in _fromIpAddress;
@@ -378,14 +366,8 @@ static PshellCmd _setupCmd;
 /* LOCAL server functions */
 
 static void runLocalServer(void);
-static void stripWhitespace(char *string_);
 static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
 static void clearScreen(void);
-
-#ifdef PSHELL_READLINE
-char **commandCompletion (const char *command_, int start_, int end_);
-char *commandGenerator (const char *command_, int state_);
-#endif
 
 /* UDP and UNIX server functions */
 
@@ -1846,91 +1828,6 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
 
 /******************************************************************************/
 /******************************************************************************/
-#ifdef PSHELL_READLINE
-
-/******************************************************************************/
-/******************************************************************************/
-char **commandCompletion(const char *command_, int start_, int end_)
-{
-  _commandFound = (start_ > 0);
-  return (rl_completion_matches(command_, commandGenerator));
-}
-
-/******************************************************************************/
-/******************************************************************************/
-char *commandGenerator(const char *command_, int state_)
-{
-  const char *command;
-  char *returnCommand;
-
-  /*
-   * if this is a new command to complete, set the starting search
-   * command, this funciton is called repeatedly, the state must be
-   * preserved between calls, that is why _matchLength and _currentPos
-   * are static global variables, we need to pick up where we left off
-   */
-  if (state_ == 0)
-  {
-    _matchLength = strlen(command_);
-    _commandPos = 0;
-  }
-
-  while ((_commandPos < _numCommands) && (!_commandFound))
-  {
-
-    /* get our command string */
-    command = _commandTable[_commandPos++].command;
-
-    if (::strncmp(command, command_, _matchLength) == 0)
-    {
-      returnCommand = (char*)malloc(strlen(command));
-      strcpy(returnCommand, command);
-      return (returnCommand);
-    }
-
-  }
-
-  /*
-   * if no names matched, then return NULL,
-   * supress normal filename completion when
-   * we are done finding matches
-   */
-  rl_attempted_completion_over = 1;
-  return (NULL);
-
-}
-
-#endif /* PSHELL_READLINE */
-
-/******************************************************************************/
-/******************************************************************************/
-static void stripWhitespace(char *string_)
-{
-  int i;
-  char *str = string_;
-
-  /* strip leading whitespace */
-  for (i = 0; i < (int)strlen(string_); i++)
-  {
-    if (!isspace(string_[i]))
-    {
-      str = &string_[i];
-      break;
-    }
-  }
-  if (string_ != str)
-  {
-    strcpy(string_, str);
-  }
-  /* strip trailing whitespace */
-  for (i = strlen(string_)-1; ((i >= 0) && isspace(string_[i])); i--)
-  {
-    string_[i] = '\0';
-  }
-}
-
-/******************************************************************************/
-/******************************************************************************/
 static void runUDPServer(void)
 {
   PSHELL_INFO("UDP Server: %s Started On Host: %s, Port: %d",
@@ -1991,41 +1888,14 @@ static void runUNIXServer(void)
 /******************************************************************************/
 static void runLocalServer(void)
 {
-  char inputLine[180];
+  char inputLine[180] = {0};
   strcpy(_ipAddress, "local");
   sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
   showWelcome();
-
-#ifdef PSHELL_READLINE
-  char *commandLine;
-  /* register our TAB completion function */
-  rl_attempted_completion_function = commandCompletion;
-#endif
-
   while (!_quit)
   {
-    inputLine[0] = 0;
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-    while (strlen(inputLine) == 0)
-    {
-#ifdef PSHELL_READLINE
-      commandLine = NULL;
-      _commandFound = false;
-      commandLine = readline(_interactivePrompt);
-      if (commandLine && *commandLine)
-      {
-        add_history(commandLine);
-        strcpy(inputLine, commandLine);
-        stripWhitespace(inputLine);
-      }
-      free(commandLine);
-#else
-      fprintf(stdout, "%s", _interactivePrompt);
-      fflush(stdout);
-      fgets(inputLine, sizeof(inputLine), stdin);
-      stripWhitespace(inputLine);
-#endif
-    }
+    pshell_getInput(_interactivePrompt, inputLine);
     /* if we are currently processing a non-interactive command (via the pshell_runCommand
      * function call), wait a little bit for it to complete before processing an interactive command */
     while (!_isCommandInteractive) sleep(1);    
@@ -2109,14 +1979,9 @@ static void showWelcome(void)
   }
   else  /* local server built with readline library */
   {
-#ifdef PSHELL_READLINE
     pshell_printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
     pshell_printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
     pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
-#else
-    pshell_printf("%s  Command abbreviation supported\n", PSHELL_WELCOME_BORDER);
-    pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
-#endif
   }
   PSHELL_PRINT_WELCOME_BORDER(pshell_printf, maxLength);
   pshell_printf("\n");
@@ -3327,6 +3192,12 @@ static void addNativeCommands(void)
   _setupCmd.maxArgs = 0;
   _setupCmd.showUsage = false;
 
+  /* add to our TAB completion list */
+  for (unsigned i = 0; i < _numCommands; i++)
+  {
+    pshell_addTabCompletion(_commandTable[i].command);
+  }
+
 }
 
 /******************************************************************************/
@@ -3637,14 +3508,11 @@ static void processQueryPrompt(void)
 /******************************************************************************/
 
 /*
- * called when pshell client runs in interactive mode and
- * was built with the -DPSHELL_READLINE compile time flag, in
- * that case the client needs the command list for its
- * TAB completion function, it is much easier to parse
- * a list of just the command names with a simple delimeter
- * rather than try to parse the output that is returned
- * from the processQueryCommands1 function in order to
- * pick out just the command names
+ * called when pshell client runs in interactive mode, the client needs
+ * the command list for its TAB completion function, it is much easier to
+ * parse a list of just the command names with a simple delimeter rather
+ * than try to parse the output that is returned from the processQueryCommands1
+ * function in order to pick out just the command names
  */
 static void processQueryCommands2(void)
 {

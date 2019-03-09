@@ -129,17 +129,6 @@
 #PSHELL_BATCH_DIR="/etc/pshell/batch"
 
 #
-# Build with the READLINE development libraries so the pshell client and
-# pshell local server can support command history, TAB completion,
-# command line editing etc.
-#
-# NOTE: The included x86_64 binaries were built with this flag enabled.
-#       If you enable this flag, you must be sure to have the readline
-#       development libraries (libreadline-dev) installed on your system.
-#
-#PSHELL_READLINE=y
-
-#
 # Some older versions of the standard 'C' library do not support the
 # function "vsnprintf".  This function is used in the "pshell_printf"
 # function to format and populate the PSHELL transfer buffer and to
