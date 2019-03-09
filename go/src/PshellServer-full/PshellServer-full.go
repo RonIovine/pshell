@@ -1193,11 +1193,7 @@ func getInput(command_ string,
     tabCount_ = 0
     if (len(command_) > 0) {
       fullCommand = true
-      if (len(_gCommandHistory) == 0 ||
-          _gCommandHistory[len(_gCommandHistory)-1] != command_) {
-        _gCommandHistory = append(_gCommandHistory, command_)
-        _gCommandHistoryPos = len(_gCommandHistory)
-      }
+      addHistory(command_)
     }
   } else if ((length_ == 1) &&
              (keystroke_[0] >= _SPACE) &&
@@ -1373,6 +1369,25 @@ func getInput(command_ string,
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func showHistory() {
+  for index, command := range _gCommandHistory {
+    printf("%-3d %s\n", index+1, command)
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func addHistory(command_ string) {
+  if ((len(_gCommandHistory) == 0 ||
+     _gCommandHistory[len(_gCommandHistory)-1] != command_) &&
+     command_[0] != '!') {
+    _gCommandHistory = append(_gCommandHistory, command_)
+  }
+  _gCommandHistoryPos = len(_gCommandHistory)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func receiveTCP() {
   var fullCommand bool
   var command string
@@ -1407,7 +1422,27 @@ func receiveTCP() {
                           tabCount,
                           _gTcpPrompt)
       if ((_gQuitTcp == false) && (fullCommand == true)) {
-        processCommand(command)
+        if (command == "history") {
+          showHistory()
+        } else if ((len(command) >= 2) && (command[0] == '!')) {
+          if index, err := strconv.Atoi(command[1:]); err == nil {
+            index -= 1
+            if (index < len(_gCommandHistory)) {
+              addHistory(_gCommandHistory[index])
+              if (_gCommandHistory[index] == "history") {
+                showHistory()
+              } else {            
+                processCommand(_gCommandHistory[index])
+              }
+            } else {
+              printf("history index: %d, out of bounds, range 1-%d\n", index+1, len(_gCommandHistory))
+            }
+          } else {
+            printf("invalid index: '%s'\n", command[1:])
+          }
+        } else {
+          processCommand(command)
+        }
         command = ""
         fullCommand = false
         cursorPos = 0

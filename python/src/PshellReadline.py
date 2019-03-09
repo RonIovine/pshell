@@ -515,16 +515,31 @@ def _getInput(prompt_):
           _writeOutput(prompt_)
         elif len(command) > 1 and command[0] == '!':
           # they want to recall a specific command in the history, check if it is within range
-          index = int(command[1:])-1
-          if index < len(_gCommandHistory):
-	          command = _gCommandHistory[index]
-	          _addHistory(command)
-	          return (command.strip(), False)
-          else:
+          try:
+            index = int(command[1:])-1
+            if index < len(_gCommandHistory):
+              command = _gCommandHistory[index]
+              _addHistory(command)
+              if command == "history":
+	              # we process the history internally
+                _showHistory()
+                command = ""
+                cursorPos = 0
+                tabCount = 0
+                _writeOutput(prompt_)
+              else:
+	              return (command.strip(), False)
+            else:
+              command = ""
+              cursorPos = 0
+              tabCount = 0
+              _writeOutput("history index: %d, out of bounds, range 1-%d\n" % (index+1, len(_gCommandHistory)))
+              _writeOutput(prompt_)
+          except:
+            _writeOutput("invalid index: '%s'\n" % command[1:])
             command = ""
             cursorPos = 0
             tabCount = 0
-            _writeOutput("history index: %d, out of bounds, range 1-%d\n" % (index+1, len(_gCommandHistory)))
             _writeOutput(prompt_)
         else:
           # add input_ to our command history

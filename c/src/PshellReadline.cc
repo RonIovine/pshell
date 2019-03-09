@@ -98,6 +98,7 @@ static unsigned showCommand(char *outCommand_, const char* format_, ...);
 static void addHistory(char *command_);
 static void showHistory(void);
 static bool getChar(char &ch);
+static bool isNumeric(const char *string_);
 #if 0
 static void clearHistory(void);
 #endif
@@ -281,21 +282,43 @@ bool pshell_getInput(const char *prompt_, char *input_)
 	else if ((strlen(input_) > 1) && (input_[0] == '!'))
 	{
 	  // they want to recall a specific command in the history, check if it is within range
-	  index = atoi(&input_[1])-1;
-	  if (index < _numHistory)
+	  if (isNumeric(&input_[1]))
 	  {
-	    input_[0] = 0;
-	    strcpy(input_, _history[index]);
-	    addHistory(input_);
-	    return (false);
+	    index = atoi(&input_[1])-1;
+	    if (index < _numHistory)
+	    {
+	      input_[0] = 0;
+	      strcpy(input_, _history[index]);
+	      addHistory(input_);
+	      if (strcmp(_history[index], "history") == 0)
+	      {
+	        showHistory();
+	        input_[0] = 0;
+	        cursorPos = 0;
+	        tabCount = 0;
+                pshell_writeOutput(prompt_);
+	      }
+	      else
+	      {
+	        return (false);
+	      }
+	    }
+	    else
+	    {
+              input_[0] = 0;
+              cursorPos = 0;
+	      tabCount = 0;
+	      pshell_writeOutput("history index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
+              pshell_writeOutput(prompt_);
+	    }
 	  }
 	  else
 	  {
+	    pshell_writeOutput("invalid index: '%s'\n", &input_[1]);
+            pshell_writeOutput(prompt_);
             input_[0] = 0;
             cursorPos = 0;
 	    tabCount = 0;
-	    pshell_writeOutput("history index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
-            pshell_writeOutput(prompt_);
 	  }
 	}
 	else
@@ -942,4 +965,18 @@ static bool getChar(char &ch)
     }
   }
   return (idleSession);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static bool isNumeric(const char *string_)
+{
+  for (unsigned i = 0; i < strlen(string_); i++)
+  {
+    if (!isdigit(string_[i]))
+    {
+      return (false);
+    }
+  }
+  return (true);
 }
