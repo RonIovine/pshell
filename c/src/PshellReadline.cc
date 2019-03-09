@@ -637,6 +637,7 @@ static char *findLongestMatch(char *command_)
       {
         if ((charPos >= strlen(_tabMatches[i])) || (ch != _tabMatches[i][charPos]))
 	{
+	  command_[charPos] = 0;
           return (command_);
 	}
       }
