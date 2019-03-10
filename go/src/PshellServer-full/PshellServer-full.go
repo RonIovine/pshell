@@ -187,9 +187,15 @@ var _gMaxLength = 0
 var _gWheelPos = 0
 var _gWheel = "|/-\\"
 
+
+const _TAB_SPACING = 5
+const _TAB_COLUMNS = 80
+
 var _gTabCompletions []string
 var _gMaxTabCompletionKeywordLength = 0
 var _gMaxCompletionsPerLine = 0
+var _gMaxMatchPerLine = 0
+var _gMaxMatchKeywordLength = 0
 var _gCommandHistory []string
 var _gCommandHistoryPos = 0
 
@@ -1068,8 +1074,8 @@ func addTabCompletion(keyword_ string) {
     }
   }
   if (len(keyword_) > _gMaxTabCompletionKeywordLength) {
-    _gMaxTabCompletionKeywordLength = len(keyword_)+5
-    _gMaxCompletionsPerLine = 80/_gMaxTabCompletionKeywordLength
+    _gMaxTabCompletionKeywordLength = len(keyword_)+_TAB_SPACING
+    _gMaxCompletionsPerLine = _TAB_COLUMNS/_gMaxTabCompletionKeywordLength
   }
   _gTabCompletions = append(_gTabCompletions, keyword_)
 }
@@ -1078,8 +1084,14 @@ func addTabCompletion(keyword_ string) {
 ////////////////////////////////////////////////////////////////////////////////
 func findTabCompletions(keyword_ string) []string {
   var matchList []string
+  _gMaxMatchKeywordLength = 0
+  _gMaxMatchPerLine = 0
   for _, keyword := range(_gTabCompletions) {
     if (isSubString(keyword_, keyword, len(keyword_))) {
+      if (len(keyword) > _gMaxMatchKeywordLength) {
+        _gMaxMatchKeywordLength = len(keyword)+_TAB_SPACING
+        _gMaxMatchPerLine = _TAB_COLUMNS/_gMaxMatchKeywordLength
+      }
       matchList = append(matchList, keyword)
     }
   }
@@ -1109,17 +1121,16 @@ func findLongestMatch(matchList_ []string, command_ string) string {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func showTabCompletions(completionList_ []string, prompt_ string) {
+func showTabCompletions(completionList_ []string, maxPerLine_ int, maxLength_ int, prompt_ string) {
   if (len(completionList_) > 0) {
     printf("\n")
     totPrinted := 0
     numPrinted := 0
     for _, keyword := range(completionList_) {
-      printf("%-*s", _gMaxTabCompletionKeywordLength, keyword)
+      printf("%-*s", maxLength_, keyword)
       numPrinted += 1
       totPrinted += 1
-      if ((numPrinted == _gMaxCompletionsPerLine) &&
-          (totPrinted < len(completionList_))) {
+      if ((numPrinted == maxPerLine_) && (totPrinted < len(completionList_))) {
         printf("\n")
         numPrinted = 0
       }
@@ -1320,7 +1331,7 @@ func getInput(command_ string,
           // multiple matches, this is referred to as 'fast' tabbing
           if (len(command_) == 0) {
             // nothing typed, just TAB, show all registered TAB completions
-            showTabCompletions(_gTabCompletions, prompt_)
+            showTabCompletions(_gTabCompletions, _gMaxCompletionsPerLine, _gMaxTabCompletionKeywordLength, prompt_)
           } else {
             // partial word typed, show all possible completions
             matchList := findTabCompletions(command_)
@@ -1333,7 +1344,7 @@ func getInput(command_ string,
               // then show all other possibilities
               clearLine(cursorPos_, command_)
               cursorPos_, command_ = showCommand(findLongestMatch(matchList, command_))
-              showTabCompletions(matchList, prompt_+command_)
+              showTabCompletions(matchList, _gMaxMatchPerLine, _gMaxMatchKeywordLength, prompt_+command_)
             }
           }
         }

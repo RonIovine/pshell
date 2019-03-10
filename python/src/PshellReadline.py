@@ -291,13 +291,15 @@ def _addTabCompletion(keyword_):
   global _gTabCompletions
   global _gMaxTabCompletionKeywordLength
   global _gMaxCompletionsPerLine
+  global _gTabSpacing
+  global _gTabColumns
   for keyword in _gTabCompletions:
     if (keyword == keyword_):
       # duplicate keyword found, return
       return
   if (len(keyword_) > _gMaxTabCompletionKeywordLength):
-    _gMaxTabCompletionKeywordLength = len(keyword_)+5
-    _gMaxCompletionsPerLine = 80/_gMaxTabCompletionKeywordLength
+    _gMaxTabCompletionKeywordLength = len(keyword_)+_gTabSpacing
+    _gMaxCompletionsPerLine = _gTabColumns/_gMaxTabCompletionKeywordLength
   _gTabCompletions.append(keyword_.strip())
 
 #################################################################################
@@ -320,14 +322,16 @@ def _findTabCompletions(keyword_):
   global _gTabCompletions
   global _gMaxMatchKeywordLength
   global _gMaxMatchCompletionsPerLine
+  global _gTabSpacing
+  global _gTabColumns
   matchList = []
   _gMaxMatchKeywordLength = 0
   _gMaxMatchCompletionsPerLine = 0
   for keyword in _gTabCompletions:
     if (isSubString(keyword_, keyword)):
-      if (len(keyword_) > _gMaxMatchKeywordLength):
-        _gMaxMatchKeywordLength = len(keyword_)+5
-        _gMaxMatchCompletionsPerLine = 80/_gMaxMatchKeywordLength
+      if (len(keyword) > _gMaxMatchKeywordLength):
+        _gMaxMatchKeywordLength = len(keyword)+_gTabSpacing
+        _gMaxMatchCompletionsPerLine = _gTabColumns/_gMaxMatchKeywordLength
       matchList.append(keyword)
   return (matchList)
 
@@ -712,3 +716,5 @@ _gMaxMatchCompletionsPerLine = 0
 _gCommandHistory = []
 _gCommandHistoryPos = 0
 _gTabStyle = FAST_TAB
+_gTabSpacing = 5
+_gTabColumns = 80

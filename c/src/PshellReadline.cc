@@ -54,6 +54,8 @@ static char *_history[MAX_HISTORY];
 static unsigned _historyPos = 0;
 static unsigned _numHistory = 0;
 
+#define TAB_SPACING 5
+#define TAB_COLUMNS 80
 #define MAX_TAB_COMPLETIONS 256
 static char *_tabMatches[MAX_TAB_COMPLETIONS];
 static unsigned _numTabMatches = 0;
@@ -387,7 +389,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
               // then show all other possibilities
               clearLine(cursorPos, input_);
               cursorPos = showCommand(input_, findLongestMatch(input_));
-              showTabCompletions(_tabMatches, _numTabMatches, _maxMatchKeywordLength, _maxMatchCompletionsPerLine, "%s%s", prompt_, input_);
+              showTabCompletions(_tabMatches, _numTabMatches, _maxMatchCompletionsPerLine, _maxMatchKeywordLength, "%s%s", prompt_, input_);
 	    }
 	  }
 	}
@@ -406,7 +408,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
 	  {
             // partial word typed, double TAB, show all possible completions
 	    findTabCompletions(input_);
-            showTabCompletions(_tabMatches, _numTabMatches, _maxMatchKeywordLength, _maxMatchCompletionsPerLine, "%s%s", prompt_, input_);
+            showTabCompletions(_tabMatches, _numTabMatches, _maxMatchCompletionsPerLine, _maxMatchKeywordLength, "%s%s", prompt_, input_);
 	  }
 	}
         else if ((tabCount == 1) && (strlen(input_) > 0))
@@ -497,8 +499,8 @@ void pshell_rl_addTabCompletion(const char *keyword_)
   }
   if (strlen(keyword_) > _maxTabCompletionKeywordLength)
   {
-    _maxTabCompletionKeywordLength = strlen(keyword_)+5;
-    _maxCompletionsPerLine = 80/_maxTabCompletionKeywordLength;
+    _maxTabCompletionKeywordLength = strlen(keyword_)+TAB_SPACING;
+    _maxCompletionsPerLine = TAB_COLUMNS/_maxTabCompletionKeywordLength;
   }
   _tabCompletions[_numTabCompletions++] = strdup(stripWhitespace((char *)keyword_));
 }
@@ -613,10 +615,10 @@ static void findTabCompletions(const char *keyword_)
     if (pshell_rl_isSubString(keyword_, _tabCompletions[i]))
     {
       _tabMatches[_numTabMatches++] = _tabCompletions[i];
-      if (strlen(keyword_) > _maxMatchKeywordLength)
+      if (strlen(_tabCompletions[i]) > _maxMatchKeywordLength)
       {
-        _maxMatchKeywordLength = strlen(keyword_)+5;
-        _maxMatchCompletionsPerLine = 80/_maxMatchKeywordLength;
+        _maxMatchKeywordLength = strlen(_tabCompletions[i])+TAB_SPACING;
+        _maxMatchCompletionsPerLine = TAB_COLUMNS/_maxMatchKeywordLength;
       }
     }
   }
