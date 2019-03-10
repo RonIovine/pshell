@@ -132,13 +132,13 @@ bool _isUnixConnected = false;
 ServerType _serverType = UDP;
 
 char _unixLocalSocketName[256];
-char _interactiveCommand[PSHELL_MAX_COMMAND_SIZE];
-char _interactivePrompt[PSHELL_MAX_COMMAND_SIZE];
-char _serverName[PSHELL_MAX_COMMAND_SIZE];
-char _ipAddress[PSHELL_MAX_COMMAND_SIZE];
-char _title[PSHELL_MAX_COMMAND_SIZE];
-char _banner[PSHELL_MAX_COMMAND_SIZE];
-char _prompt[PSHELL_MAX_COMMAND_SIZE];
+char _interactiveCommand[PSHELL_RL_MAX_COMMAND_SIZE];
+char _interactivePrompt[PSHELL_RL_MAX_COMMAND_SIZE];
+char _serverName[PSHELL_RL_MAX_COMMAND_SIZE];
+char _ipAddress[PSHELL_RL_MAX_COMMAND_SIZE];
+char _title[PSHELL_RL_MAX_COMMAND_SIZE];
+char _banner[PSHELL_RL_MAX_COMMAND_SIZE];
+char _prompt[PSHELL_RL_MAX_COMMAND_SIZE];
 const char *_host;
 const char *_server;
 unsigned _version;
@@ -707,7 +707,7 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
   _pshellSendMsg.payload[0] = 0;
   if (command_ != NULL)
   {
-    strncpy(_pshellSendMsg.payload, command_, PSHELL_MAX_COMMAND_SIZE);
+    strncpy(_pshellSendMsg.payload, command_, PSHELL_RL_MAX_COMMAND_SIZE);
   }
 
   do

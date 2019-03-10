@@ -55,26 +55,26 @@ extern "C" {
  *
  * Use for the timeout value when setting the idleSessionTimeout, default=none
  *
- * IDLE_TIMEOUT_NONE
- * ONE_SECOND
- * ONE_MINUTE
+ * PSHELL_RL_IDLE_TIMEOUT_NONE
+ * PSHELL_RL_ONE_SECOND
+ * PSHELL_RL_ONE_MINUTE
  *
  * Valid serial types, TTY is for serial terminal control and defaults to
  * stdin and stdout, SOCKET uses a serial TCP socket placed in 'telnet'
  * mode for control via a telnet client, default=tty with stdin/stdout
  *
- * PSHELL_TTY
- * PSHELL_SOCKET
+ * PSHELL_RL_TTY
+ * PSHELL_RL_SOCKET
  *
  * Valid TAB style identifiers
  *
  * Standard bash/readline tabbing method, i.e. initiate via double tabbing
  *
- * PSHELL_BASH_TAB
+ * PSHELL_RL_BASH_TAB
  *
  * Fast tabbing, i.e. initiated via single tabbing, this is the default
  *
- * PSHELL_FAST_TAB
+ * PSHELL_RL_FAST_TAB
  *
  * A complete example of the usage of the API can be found in the included demo
  * program pshellReadlineDemo.cc
@@ -87,8 +87,8 @@ extern "C" {
  */
 enum PshellTabStyle
 {
-  PSHELL_FAST_TAB,
-  PSHELL_BASH_TAB 
+  PSHELL_RL_FAST_TAB,
+  PSHELL_RL_BASH_TAB 
 };
 
 /*
@@ -98,17 +98,17 @@ enum PshellTabStyle
  */
 enum PshellSerialType
 {
-  PSHELL_TTY,
-  PSHELL_SOCKET
+  PSHELL_RL_TTY,
+  PSHELL_RL_SOCKET
 };
 
 /* use this to sice the user supplied input string */
-#define PSHELL_MAX_COMMAND_SIZE 256
+#define PSHELL_RL_MAX_COMMAND_SIZE 256
 
 /* use these to set the idle session timeout values, default=NONE */
-#define IDLE_TIMEOUT_NONE 0
-#define ONE_SECOND 1
-#define ONE_MINUTE ONE_SECOND*60
+#define PSHELL_RL_IDLE_TIMEOUT_NONE 0
+#define PSHELL_RL_ONE_SECOND 1
+#define PSHELL_RL_ONE_MINUTE PSHELL_RL_ONE_SECOND*60
 
 /*
  * pshell_rl_setFileDescriptors:
@@ -117,16 +117,16 @@ enum PshellSerialType
  * the default is stdin and stdout.  The file descriptors given to this function
  * must be opened and running in raw serial character mode.  The idleTimeout
  * specifies the time to wait for any user activity in the getInput function.
- * Use the identifiers PshellReadline.ONE_SECOND and PshellReadline.ONE_MINUTE
- * to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5, for serialType
- * use the identifiers PshellReadline.TTY and PshellReadline.SOCKET.  For the
- * socket identifier, use the file descriptor that is returned from the TCP
- * socket server 'accept' call for both the inFd and outFd.
+ * Use the identifiers PSHELL_RL_ONE_SECOND and PSHELL_RL_ONE_MINUTE to set this
+ * timeout value, e.g. PSHELL_RL_ONE_MINUTE*5, for serialType use the identifiers
+ * PSHELL_RL_TTY and PSHELL_RL_SOCKET.  For the socket identifier, use the file
+ * descriptor that is returned from the TCP socket server 'accept' call for both
+ * the inFd and outFd.
  */
 void pshell_rl_setFileDescriptors(int inFd_,
                                   int outFd_,
                                   PshellSerialType serialType_,
-                                  int idleTimeout_ = IDLE_TIMEOUT_NONE);
+                                  int idleTimeout_ = PSHELL_RL_IDLE_TIMEOUT_NONE);
 
 /*
  * pshell_rl_writeOutput:
@@ -140,10 +140,10 @@ void pshell_rl_writeOutput(const char* format_, ...);
  *
  * Issue the user prompt and return the entered command line value.  This
  * function will return the tuple (command, idleSession).  If the idle session
- * timeout is set to IDLE_TIMEOUT_NONE (default), the idleSession will always
- * be false and this function will not return until the user has typed a command
- * and pressed return.  Otherwise this function will set the idleSession value
- * to true and return if no user activity is detected for the idleSessionTimeout
+ * timeout is set to PSHELL_RL_IDLE_TIMEOUT_NONE (default), the idleSession will
+ * always be false and this function will not return until the user has typed a
+ * command and pressed return.  Otherwise this function will set the idleSession
+ * value to true and return if no user activity is detected for the idleSessionTimeout
  * period
  */
 bool pshell_rl_getInput(const char *prompt_, char *input_);
@@ -152,13 +152,13 @@ bool pshell_rl_getInput(const char *prompt_, char *input_);
  * pshell_rl_isSubString:
  *
  * This function will return True if string1 is a substring of string2 at
- * position 0.  If the minMatchLength is 0, then it will compare up to the
- * length of string1.  If the minMatchLength > 0, it will require a minimum
- * of that many characters to match.  A string that is longer than the min
- * match length must still match for the remaining characters, e.g. with a
- * minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
- * will match, 'quix' or 'uit' will not match.  This function is useful for
- * wildcard matching.
+ * position 0.  If the minChars is 0, then it will compare up to the
+ * length of string1.  If the minChars > 0, it will require a minimum of
+ * that many characters to match.  A string that is longer than the min
+ * match length must still match for the remaining characters, e.g. with
+ * a minChars of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
+ * will match, 'quix' or 'uit' will not match.  This function is useful
+ * for wildcard matching.
  */
 bool pshell_rl_isSubString(const char *string1_,
                            const char *string2_,
@@ -178,8 +178,8 @@ void pshell_rl_addTabCompletion(const char *keyword_);
  * Set the tabbing method to either be bash/readline style tabbing, i.e. double
  * tabbing to initiate and display completions, or "fast" tabbing, where all
  * completions and displays are initiated via a single tab only, the default is
- * "fast" tabbing, use the identifiers PSHELL_BASH_TAB and PSHELL_FAST_TAB for
- * the tabStyle
+ * "fast" tabbing, use the identifiers PSHELL_RL_BASH_TAB and PSHELL_RL_FAST_TAB
+ * for the tabStyle
  */
 void pshell_rl_setTabStyle(PshellTabStyle tabStyle_);
 

@@ -63,11 +63,11 @@ static unsigned _maxTabCompletionKeywordLength = 0;
 static unsigned _maxCompletionsPerLine = 0;
 static unsigned _maxMatchKeywordLength = 0;
 static unsigned _maxMatchCompletionsPerLine = 0;
-static PshellTabStyle _tabStyle = PSHELL_FAST_TAB;
-static PshellSerialType _serialType = PSHELL_TTY;
+static PshellTabStyle _tabStyle = PSHELL_RL_FAST_TAB;
+static PshellSerialType _serialType = PSHELL_RL_TTY;
 static int _inFd = STDIN_FILENO;
 static int _outFd = STDOUT_FILENO;
-static int _idleTimeout = IDLE_TIMEOUT_NONE;
+static int _idleTimeout = PSHELL_RL_IDLE_TIMEOUT_NONE;
 static const char *_tcpNegotiate = "\xFF\xFB\x03\xFF\xFB\x01\xFF\xFD\x03\xFF\xFD\x01";
 
 /****************************************
@@ -120,7 +120,7 @@ void pshell_rl_setFileDescriptors(int inFd_, int outFd_, PshellSerialType serial
   _serialType = serialType_;
   pshell_rl_setIdleTimeout(idleTimeout_);
   // if a socket serial device, setup for telnet client control
-  if (_serialType == PSHELL_SOCKET)
+  if (_serialType == PSHELL_RL_SOCKET)
   {
     pshell_rl_writeOutput(_tcpNegotiate);
   }
@@ -130,14 +130,14 @@ void pshell_rl_setFileDescriptors(int inFd_, int outFd_, PshellSerialType serial
 /******************************************************************************/
 void pshell_rl_writeOutput(const char* format_, ...)
 {
-  char string[PSHELL_MAX_COMMAND_SIZE] = {0};
-  char socketString[PSHELL_MAX_COMMAND_SIZE] = {0};
+  char string[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
+  char socketString[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   va_list args;
 
   va_start(args, format_);
   vsnprintf(string, sizeof(string), format_, args);
   va_end(args);
-  if (_serialType == PSHELL_SOCKET)
+  if (_serialType == PSHELL_RL_SOCKET)
   {
     // need to convert \n to \r\n
     unsigned j = 0;
@@ -358,7 +358,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
     {
       // tab character, print out any completions, we only do tabbing on the first keyword
       tabCount += 1;
-      if (_tabStyle == PSHELL_FAST_TAB)
+      if (_tabStyle == PSHELL_RL_FAST_TAB)
       {
         if (tabCount == 1)
 	{
@@ -547,7 +547,7 @@ static void newline(unsigned count_)
 {
   for (unsigned i = 0; i < count_; i++)
   {
-    if (_serialType == PSHELL_TTY)
+    if (_serialType == PSHELL_RL_TTY)
     {
       write(_outFd, "\n", 1);
     }
@@ -658,7 +658,7 @@ static void showTabCompletions(char *completionList_[],
 			       unsigned maxCompletionLength_,
 			       const char* format_, ...)
 {
-  char prompt[PSHELL_MAX_COMMAND_SIZE] = {0};
+  char prompt[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   va_list args;
   if (_numTabCompletions > 0)
   {
@@ -764,7 +764,7 @@ static void backspaceDelete(unsigned &cursorPos_, char *command_)
 /******************************************************************************/
 static void addChar(unsigned &cursorPos_, char *command_, char ch_)
 {
-  char newCommand[PSHELL_MAX_COMMAND_SIZE] = {0};
+  char newCommand[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   snprintf(newCommand, cursorPos_+1, "%s", command_);
   sprintf(&newCommand[cursorPos_], "%c%s", ch_, &command_[cursorPos_]);
   strcpy(command_, newCommand);
@@ -830,7 +830,7 @@ static void rightArrow(unsigned &cursorPos_, char *command_)
 /******************************************************************************/
 static unsigned showCommand(char *outCommand_, const char* format_, ...)
 {
-  char inCommand[PSHELL_MAX_COMMAND_SIZE] = {0};
+  char inCommand[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   va_list args;
 
   va_start(args, format_);
@@ -921,7 +921,7 @@ static bool getChar(char &ch)
   idleTimeout.tv_usec = 0;
   FD_ZERO(&readFd);
   FD_SET(_inFd, &readFd);
-  if (_serialType == PSHELL_TTY)
+  if (_serialType == PSHELL_RL_TTY)
   {
     tcgetattr(0, &old);
     old.c_lflag &= ~ICANON;

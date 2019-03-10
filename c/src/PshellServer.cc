@@ -265,25 +265,6 @@ static const char *_wheel = "|/-\\";
 static unsigned _wheelPos = 0;
 static bool _isControlCommand = false;
 
-/* TCP server data */
-
-#define PSHELL_MAX_HISTORY 256
-#define PSHELL_MAX_LINE_WORDS 128
-#define PSHELL_MAX_LINE_LENGTH 180
-#define PSHELL_MAX_SCREEN_WIDTH 80
-
-#define CR  "\r"
-#define LF  "\n"
-#define BS  "\b"
-#define BEL "\a"
-
-#ifndef CTRL
-#define CTRL(c) (c - '@')
-#endif
-
-/* free and zero (to avoid double-free) */
-#define free_z(p) do { if (p) { free(p); (p) = 0; } } while (0)
-
 #define PSHELL_MAX_TOKENS 64
 struct Tokens
 {
@@ -291,10 +272,9 @@ struct Tokens
   int numTokens;
 };
 
-static FILE *_clientFd = stdout;
 static int _connectFd;
 static bool _quit = false;
-static char _interactivePrompt[80];
+static char _interactivePrompt[PSHELL_RL_MAX_COMMAND_SIZE];
 
 /* common data (for UDP, TCP, UNIX, and LOCAL servers */
 
@@ -1839,8 +1819,8 @@ static void runTCPServer(void)
     sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
     pshell_rl_setFileDescriptors(_connectFd,
                                  _connectFd,
-                                 PSHELL_SOCKET,
-                                 ONE_MINUTE*_defaultIdleTimeout);
+                                 PSHELL_RL_SOCKET,
+                                 PSHELL_RL_ONE_MINUTE*_defaultIdleTimeout);
     shutdown(_socketFd, SHUT_RDWR);
     receiveTCP();
     shutdown(_connectFd, SHUT_RDWR);
@@ -2124,7 +2104,7 @@ static void batch(int argc, char *argv[])
 /******************************************************************************/
 static void receiveTCP(void)
 {
-  char command[256] = {0};
+  char command[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
 
   /* print out our welcome banner */
   showWelcome();

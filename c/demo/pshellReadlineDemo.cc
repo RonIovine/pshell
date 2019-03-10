@@ -65,14 +65,14 @@ void showUsage(void)
 /******************************************************************************/
 int main(int argc, char *argv[])
 {
-  char input[PSHELL_MAX_COMMAND_SIZE] = {0};
+  char input[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   bool idleSession = false;
   int on = 1;
   struct sockaddr_in ipAddress;
   int socketFd;
   int connectFd;
-  PshellSerialType serialType = PSHELL_TTY;
-  int idleTimeout = IDLE_TIMEOUT_NONE;
+  PshellSerialType serialType = PSHELL_RL_TTY;
+  int idleTimeout = PSHELL_RL_IDLE_TIMEOUT_NONE;
   int port = 9005;
 
   if (argc > 4)
@@ -84,19 +84,19 @@ int main(int argc, char *argv[])
   {
     if (strcmp(argv[i], "-bash") == 0)
     {
-      pshell_rl_setTabStyle(PSHELL_BASH_TAB);
+      pshell_rl_setTabStyle(PSHELL_RL_BASH_TAB);
     }
     else if (strcmp(argv[i], "-fast") == 0)
     {
-      pshell_rl_setTabStyle(PSHELL_FAST_TAB);
+      pshell_rl_setTabStyle(PSHELL_RL_FAST_TAB);
     }
     else if (strcmp(argv[i], "-tty") == 0)
     {
-      serialType = PSHELL_TTY;
+      serialType = PSHELL_RL_TTY;
     }
     else if (strcmp(argv[i], "-socket") == 0)
     {
-      serialType = PSHELL_SOCKET;
+      serialType = PSHELL_RL_SOCKET;
     }
     else if (strcmp(argv[i], "-h") == 0)
     {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 	  showUsage();
 	}
       }
-      idleTimeout = ONE_MINUTE*atoi(argv[i]);;
+      idleTimeout = PSHELL_RL_ONE_MINUTE*atoi(argv[i]);;
     }
   }
 
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
   pshell_rl_addTabCompletion("myCommand456");
   pshell_rl_addTabCompletion("myCommand789");
 
-  if (serialType == PSHELL_SOCKET)
+  if (serialType == PSHELL_RL_SOCKET)
   {
     socketFd = socket(AF_INET, SOCK_STREAM, 0);
     setsockopt(socketFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     connectFd = accept(socketFd, NULL, 0);
     printf("connection accepted\n");
 
-    pshell_rl_setFileDescriptors(connectFd, connectFd, PSHELL_SOCKET);
+    pshell_rl_setFileDescriptors(connectFd, connectFd, PSHELL_RL_SOCKET);
 
     shutdown(socketFd, SHUT_RDWR);
   }
