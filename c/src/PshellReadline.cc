@@ -580,7 +580,7 @@ static char *stripWhitespace(char *string_)
     strcpy(string_, str);
   }
   /* strip trailing whitespace */
-  for (unsigned i = strlen(string_)-1; ((i >= 0) && isspace(string_[i])); i--)
+  for (int i = (int)strlen(string_)-1; ((i >= 0) && isspace(string_[i])); i--)
   {
     string_[i] = '\0';
   }
