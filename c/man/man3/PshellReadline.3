@@ -1,17 +1,17 @@
 .TH PshellReadline 3 "Sep 2012" "PSHELL" "Readline Like Functionality" 
 .SH NAME
-PshellReadline - API and library for readline-like functionality
+PshellReadline - API and library to provide readline like user input functionality
 .SH DESCRIPTION
-This API provides the ability for get command line user input with readline-like
-functionality.  In particular, it supports TAB completion of registered keywords,
-command history, command lin editing, and command abbreviation.  This library works
-with any character stream based serial device, including an TTY setminal and TCP
-socket (telnet client).
+This API implements a readline like functionality for user input.  This can
+work with any character stream based input/output terminal device, i.e. 
+keyboard input over a serial tty, or over a TCP/telnet connection.  This module 
+will provide up-arrow command history recall, command line editing, and TAB 
+completion of registered keywords.
 .SH SYNOPSIS
 
 #include <PshellReadline.h>
 
-/* set the input/output file descriptors */
+/* set the input/output file descriptors, if not called default=stdin/stdout */
 
 void pshell_rl_setFileDescriptors(int inFd_,
                                   int outFd_,
@@ -51,7 +51,7 @@ the module 'PshellReadline.py'.  Its API and examples can be found in the python
 subdirectory of this install package.
 .SH EXAMPLES
 See the file pshellReadlineDemo.cc in the pshell distribution package for a complete 
-list of examples of invoking functions in a remote pshell via a local client program.
+example of using the various parts of the API for this module/library.
 .SH MT-LEVEL
 Safe
 .SH SEE ALSO
