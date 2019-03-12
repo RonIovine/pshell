@@ -102,7 +102,7 @@ enum PshellSerialType
   PSHELL_RL_SOCKET
 };
 
-/* use this to sice the user supplied input string */
+/* use this to size the user supplied input string */
 #define PSHELL_RL_MAX_COMMAND_SIZE 256
 
 /* use these to set the idle session timeout values, default=NONE */
@@ -139,7 +139,7 @@ void pshell_rl_writeOutput(const char* format_, ...);
  * pshell_rl_getInput:
  *
  * Issue the user prompt and return the entered command line value.  This
- * function will return the tuple (command, idleSession).  If the idle session
+ * function will also return the idleSession indicator.  If the idle session
  * timeout is set to PSHELL_RL_IDLE_TIMEOUT_NONE (default), the idleSession will
  * always be false and this function will not return until the user has typed a
  * command and pressed return.  Otherwise this function will set the idleSession
@@ -187,8 +187,8 @@ void pshell_rl_setTabStyle(PshellTabStyle tabStyle_);
  * pshell_rl_setIdleTimeout:
  * 
  * Set the idle session timeout as described above.  Use the identifiers
- * ONE_SEC and ONE_MINUTE as follows, e.g. ONE_MINUTE*5 for a 5 minute
- * idleSession timeout.
+ * PSHELL_RL_ONE_SEC and PSHELL_RL_ONE_MINUTE as follows, e.g. PSHELL_RL_ONE_MINUTE*5
+ * for a 5 minute idleSession timeout.
  */
 void pshell_rl_setIdleTimeout(int timeout_);
 
