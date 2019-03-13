@@ -584,9 +584,9 @@ def _getInput(prompt_):
             elif (len(matchList) > 1):
               # multiple possible matches, fill out longest match and
               # then show all other possibilities
+              _showTabCompletions(matchList, _gMaxMatchCompletionsPerLine, _gMaxMatchKeywordLength, prompt_+command)
               _clearLine(cursorPos, command)
               (cursorPos, command) = _showCommand(_findLongestMatch(matchList, command))
-              _showTabCompletions(matchList, _gMaxMatchCompletionsPerLine, _gMaxMatchKeywordLength, prompt_+command)
       else:  # BASH_TAB
         # this code below implements the more standard readline/bash double tabbing method 
         if (tabCount == 2):

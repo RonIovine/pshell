@@ -387,9 +387,9 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
 	    {
               // multiple possible matches, fill out longest match and
               // then show all other possibilities
+              showTabCompletions(_tabMatches, _numTabMatches, _maxMatchCompletionsPerLine, _maxMatchKeywordLength, "%s%s", prompt_, input_);
               clearLine(cursorPos, input_);
               cursorPos = showCommand(input_, findLongestMatch(input_));
-              showTabCompletions(_tabMatches, _numTabMatches, _maxMatchCompletionsPerLine, _maxMatchKeywordLength, "%s%s", prompt_, input_);
 	    }
 	  }
 	}

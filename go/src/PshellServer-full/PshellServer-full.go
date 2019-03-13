@@ -1342,9 +1342,9 @@ func getInput(command_ string,
             } else if (len(matchList) > 1) {
               // multiple possible matches, fill out longest match and
               // then show all other possibilities
+              showTabCompletions(matchList, _gMaxMatchPerLine, _gMaxMatchKeywordLength, prompt_+command_)
               clearLine(cursorPos_, command_)
               cursorPos_, command_ = showCommand(findLongestMatch(matchList, command_))
-              showTabCompletions(matchList, _gMaxMatchPerLine, _gMaxMatchKeywordLength, prompt_+command_)
             }
           }
         }
