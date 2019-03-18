@@ -1849,18 +1849,21 @@ static void runUNIXServer(void)
 static void runLocalServer(void)
 {
   char inputLine[180] = {0};
+  bool idleSession = false;
   strcpy(_ipAddress, "local");
   sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
   showWelcome();
-  while (!_quit)
+  while (!_quit && !idleSession)
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-    pshell_rl_getInput(_interactivePrompt, inputLine);
-    /* if we are currently processing a non-interactive command (via the pshell_runCommand
-     * function call), wait a little bit for it to complete before processing an interactive command */
-    while (!_isCommandInteractive) sleep(1);    
-    /* good to go, process an interactive command */
-    processCommand(inputLine);
+    if ((idleSession = pshell_rl_getInput(_interactivePrompt, inputLine)) == false)
+    {
+      /* if we are currently processing a non-interactive command (via the pshell_runCommand
+       * function call), wait a little bit for it to complete before processing an interactive command */
+      while (!_isCommandInteractive) sleep(1);    
+      /* good to go, process an interactive command */
+      processCommand(inputLine);
+    }
   }
 }
 
@@ -2105,16 +2108,16 @@ static void batch(int argc, char *argv[])
 static void receiveTCP(void)
 {
   char command[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
+  bool idleSession = false;
 
   /* print out our welcome banner */
   showWelcome();
 
   _quit = false;
-  while (!_quit)
+  while (!_quit && !idleSession)
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-    pshell_rl_getInput(_interactivePrompt, command);
-    if (!_quit)
+    if ((idleSession = pshell_rl_getInput(_interactivePrompt, command)) == false)
     {
       /* if we are currently processing a non-interactive command (via the pshell_runCommand
        * function call), wait a little bit for it to complete before processing an interactive command */

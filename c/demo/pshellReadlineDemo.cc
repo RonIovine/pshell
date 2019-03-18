@@ -151,13 +151,10 @@ int main(int argc, char *argv[])
 	     
   pshell_rl_setIdleTimeout(idleTimeout);
 
-  while (!pshell_rl_isSubString(input, "quit", 1) && !idleSession)
+  while (((idleSession = pshell_rl_getInput("prompt> ", input)) == false) &&
+          !pshell_rl_isSubString(input, "quit", 1))
   {
-    idleSession = pshell_rl_getInput("prompt> ", input);
-    if (!idleSession)
-    {
-      pshell_rl_writeOutput("input: '%s'\n", input);
-   }
+    pshell_rl_writeOutput("input: '%s'\n", input);
   }
   
   return (0);
