@@ -89,8 +89,8 @@ static int _defaultIdleTimeout = 10;
 /*
  * the default config dir is where the server will look for the pshell-server.conf
  * file if it does not find it in the directory specified by the env variable
- * PSHELL_CONFIG_DIR, or the CWD, change this to any other desired location, 
- * the config file can contain settings that override the defined default 
+ * PSHELL_CONFIG_DIR, or the CWD, change this to any other desired location,
+ * the config file can contain settings that override the defined default
  * configurations for the title, banner, prompt, address, port, type and mode
  * values, this is also the directory the TraceFilter 'init' function looks in
  * for its startup config file in the event that the environment variable of
@@ -120,7 +120,7 @@ static int _defaultIdleTimeout = 10;
 /*
  * the default startup dir is where the server will look for the <serverName>.startup
  * file if it does not find it in the directory specified by the env variable
- * PSHELL_STARTUP_DIR, or the CWD, change this to any other desired default location, 
+ * PSHELL_STARTUP_DIR, or the CWD, change this to any other desired default location,
  * the startup file can contain any commands that can be entered to the server via
  * the interacive command line, the startup file is executed during the startup
  * of the server, so it can serve as a program initialization file
@@ -150,7 +150,7 @@ static int _defaultIdleTimeout = 10;
  * support returning the overflow size).
  *
  * PSHELL_VSNPRINTF is NOT set:
- * 
+ *
  * The buffer will be flushed to the client upon overflow.  Note that care must
  * be taken when setting the PSHELL_PAYLOAD_GUARDBAND value when operating in this
  * mode.
@@ -214,8 +214,8 @@ static int _defaultIdleTimeout = 10;
  */
 enum PshellControlResponse
 {
-  PSHELL_COMMAND_SUCCESS,        
-  PSHELL_COMMAND_NOT_FOUND,      
+  PSHELL_COMMAND_SUCCESS,
+  PSHELL_COMMAND_NOT_FOUND,
   PSHELL_COMMAND_INVALID_ARG_COUNT
 };
 
@@ -392,7 +392,7 @@ static void cleanupTokens(void);
 static void *serverThread(void*);
 static void runServer(void);
 
-/* command that is run in no-server mode to setup busybox like 
+/* command that is run in no-server mode to setup busybox like
  * softlinks to all of the commands
  */
 static void setup(int argc, char *argv[]);
@@ -581,7 +581,7 @@ void pshell_addCommand(PshellFunction function_,
     _commandTableSize += PSHELL_COMMAND_CHUNK;
     _commandTable = (PshellCmd*)ptr;
   }
-  
+
   if (pshell_copyAddCommandStrings)
   {
 
@@ -629,7 +629,7 @@ void pshell_addCommand(PshellFunction function_,
       free((void *)_commandTable[_numCommands].usage);
       pthread_mutex_unlock(&_mutex);
       return;
-    }  
+    }
   }
   else
   {
@@ -680,10 +680,10 @@ void pshell_runCommand(const char *command_, ...)
   char *commandName;
   char fullCommand[256];
   char command[256];
-  /* 
+  /*
    * only dispatch command if we are not already in the middle of
    * dispatching an interactive command
-   */   
+   */
   if (!_isCommandDispatched)
   {
     /* set this to false so we can short circuit any calls to pshell_printf since
@@ -766,7 +766,7 @@ void pshell_march(const char *string_)
 /******************************************************************************/
 void pshell_flush(void)
 {
-  /* 
+  /*
    * if we called a command non-interactively, just bail because there is no
    * client side program (either pshell or telnet) to receive the output
    */
@@ -797,7 +797,7 @@ void pshell_flush(void)
 void pshell_printf(const char *format_, ...)
 {
 
-  /* 
+  /*
    * if we called a command non-interactively, just bail because there is no
    * pshell client side program to receive the output
    */
@@ -952,7 +952,7 @@ void pshell_printf(const char *format_, ...)
 #endif  /* ifndef PSHELL_VSNPRINTF */
 
   /* if we are running a TCP server, flush the output to the socket */
-  if ((_serverType == PSHELL_TCP_SERVER) || 
+  if ((_serverType == PSHELL_TCP_SERVER) ||
       (_serverType == PSHELL_LOCAL_SERVER) ||
       (_serverType == PSHELL_NO_SERVER))
   {
@@ -996,7 +996,7 @@ void pshell_startServer(const char *serverName_,
 
       /* initialize payload of transfer buffer */
       _pshellMsg->payload[0] = '\0';
-      
+
       /* make sure we are only invoked once */
       _isRunning = true;
       strcpy(_serverName, serverName_);
@@ -1004,7 +1004,7 @@ void pshell_startServer(const char *serverName_,
       {
         strcpy(_hostnameOrIpAddr, hostnameOrIpAddr_);
       }
-      
+
       _ipAddress[0] = '\0';
       strcpy(_title, _defaultTitle);
       strcpy(_banner, _defaultBanner);
@@ -1066,7 +1066,7 @@ void pshell_noServer(int argc, char *argv[])
   _isRunning = true;
   strcpy(_serverName, argv[0]);
   strcpy(_ipAddress, "local");
-  strcpy(_title, "PSHELL");  
+  strcpy(_title, "PSHELL");
   _pshellMsg = (PshellMsg*)malloc(_pshellPayloadSize+PSHELL_HEADER_SIZE);
   addNativeCommands();
   /* initialize payload of transfer buffer */
@@ -1379,7 +1379,7 @@ bool pshell_isHex(const char *string_, bool needHexPrefix_)
   {
     /* if they are requesting the 0x prefix, make sure it is there */
     if ((pshell_getLength(string_) > 2) &&
-        (string_[0] == '0') && 
+        (string_[0] == '0') &&
         (tolower(string_[1]) == 'x'))
     {
       start = 2;
@@ -1546,7 +1546,7 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
   else if (strlen(option_) == 0)
   {
     /* return the found option and corresponding value */
-    
+
     /* see if they are looking for a -<option><value> type option */
     if (string_[0] == '-')
     {
@@ -1574,7 +1574,7 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
   {
 
     /* non-NULL option, look for the requested option */
-      
+
     /* see if they are looking for a -<option><value> type option */
     if (option_[0] == '-')
     {
@@ -1617,8 +1617,8 @@ void *pshell_getAddress(const char *string_)
 /******************************************************************************/
 bool pshell_getBool(const char *string_)
 {
-  return (pshell_isEqual(string_, "true") || 
-          pshell_isEqual(string_, "yes") || 
+  return (pshell_isEqual(string_, "true") ||
+          pshell_isEqual(string_, "yes") ||
           pshell_isEqual(string_, "on"));
 }
 
@@ -1705,7 +1705,7 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
       /* look for batch file in local directory */
       sprintf(batchFile, "%s", filename_);
       if ((fp = fopen(batchFile, "r")) == NULL)
-      {      
+      {
         /* look for batch file in default directory */
         sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
         fp = fopen(batchFile, "r");
@@ -1772,7 +1772,7 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
     PSHELL_ERROR("Could not open batch file: %s", filename_);
     if (batchPath != NULL)
     {
-      PSHELL_ERROR("Could not find file in local directory: %s, env directory: %s, or default directory: %s", 
+      PSHELL_ERROR("Could not find file in local directory: %s, env directory: %s, or default directory: %s",
                    cwd, batchPath, PSHELL_BATCH_DIR);
     }
     else
@@ -1849,21 +1849,18 @@ static void runUNIXServer(void)
 static void runLocalServer(void)
 {
   char inputLine[180] = {0};
-  bool idleSession = false;
+  bool idleSession;
   strcpy(_ipAddress, "local");
   sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
   showWelcome();
-  while (!_quit && !idleSession)
+  while (!_quit && ((idleSession = pshell_rl_getInput(_interactivePrompt, inputLine)) == false))
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-    if ((idleSession = pshell_rl_getInput(_interactivePrompt, inputLine)) == false)
-    {
-      /* if we are currently processing a non-interactive command (via the pshell_runCommand
-       * function call), wait a little bit for it to complete before processing an interactive command */
-      while (!_isCommandInteractive) sleep(1);    
-      /* good to go, process an interactive command */
-      processCommand(inputLine);
-    }
+    /* if we are currently processing a non-interactive command (via the pshell_runCommand
+     * function call), wait a little bit for it to complete before processing an interactive command */
+    while (!_isCommandInteractive) sleep(1);
+    /* good to go, process an interactive command */
+    processCommand(inputLine);
   }
 }
 
@@ -1967,7 +1964,7 @@ static void setup(int argc, char *argv[])
   }
   else
   {
-    struct stat buffer;   
+    struct stat buffer;
     if (stat(_serverName, &buffer) == 0)
     {
       pshell_printf("Busybox softlink setup:\n");
@@ -2108,23 +2105,20 @@ static void batch(int argc, char *argv[])
 static void receiveTCP(void)
 {
   char command[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
-  bool idleSession = false;
+  bool idleSession;
 
   /* print out our welcome banner */
   showWelcome();
 
   _quit = false;
-  while (!_quit && !idleSession)
+  while (!_quit && ((idleSession = pshell_rl_getInput(_interactivePrompt, command)) == false))
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-    if ((idleSession = pshell_rl_getInput(_interactivePrompt, command)) == false)
-    {
-      /* if we are currently processing a non-interactive command (via the pshell_runCommand
-       * function call), wait a little bit for it to complete before processing an interactive command */
-      while (!_isCommandInteractive) sleep(1);
-      /* good to go, process an interactive command */
-      processCommand(command);
-    }
+    /* if we are currently processing a non-interactive command (via the pshell_runCommand
+     * function call), wait a little bit for it to complete before processing an interactive command */
+    while (!_isCommandInteractive) sleep(1);
+    /* good to go, process an interactive command */
+    processCommand(command);
   }
 }
 
@@ -2217,8 +2211,8 @@ static void loadStartupFile(void)
       /* look for file in current working directory */
       sprintf(startupFile, "%s.startup", _serverName);
       if (loadCommandFile(startupFile, false) == false)
-      {  
-        /* look for file in default directory */    
+      {
+        /* look for file in default directory */
         sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
         loadCommandFile(startupFile, false);
       }
@@ -2229,13 +2223,13 @@ static void loadStartupFile(void)
     /* look for file in current working directory */
     sprintf(startupFile, "%s.startup", _serverName);
     if (loadCommandFile(startupFile, false) == false)
-    {  
-      /* look for file in default directory */    
+    {
+      /* look for file in default directory */
       sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
       loadCommandFile(startupFile, false);
     }
   }
-  
+
 }
 
 /******************************************************************************/
@@ -2255,7 +2249,7 @@ static void loadBatchFile(const char *batchFile_)
       /* look for file in current working directory */
       if (loadCommandFile(batchFile_, true) == false)
       {
-        /* look for file in default directory */    
+        /* look for file in default directory */
         sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
         loadCommandFile(batchFile, true);
       }
@@ -2266,12 +2260,12 @@ static void loadBatchFile(const char *batchFile_)
     /* look for file in current working directory */
     if (loadCommandFile(batchFile_, true) == false)
     {
-      /* look for file in default directory */    
+      /* look for file in default directory */
       sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
       loadCommandFile(batchFile, true);
     }
   }
-  
+
 }
 
 /******************************************************************************/
@@ -2280,8 +2274,8 @@ static void addNativeCommands(void)
 {
   int numNativeCommands = 1;
   int i;
-  
-  if ((_serverType != PSHELL_UDP_SERVER) && 
+
+  if ((_serverType != PSHELL_UDP_SERVER) &&
       (_serverType != PSHELL_UNIX_SERVER))
   {
     /*
@@ -2440,7 +2434,7 @@ static void addNativeCommands(void)
     _commandTable[0].maxArgs = _batchCmd.maxArgs;
     _commandTable[0].showUsage = _batchCmd.showUsage;
   }
-  
+
   _setupCmd.function = setup;
   _setupCmd.command = "--setup";
   _setupCmd.usage = NULL;
@@ -2868,8 +2862,8 @@ static unsigned findCommand(char *command_)
   unsigned entry;
   unsigned numMatches = 0;
   _foundCommand = NULL;
-  if (pshell_isEqual(command_, "?") || 
-      pshell_isEqual(command_, "-h") || 
+  if (pshell_isEqual(command_, "?") ||
+      pshell_isEqual(command_, "-h") ||
       pshell_isEqual(command_, "-help") ||
       pshell_isEqual(command_, "--help"))
   {
@@ -3116,10 +3110,10 @@ static void receiveUDP(void)
       /* if we are currently processing a non-interactive command (via the pshell_runCommand
        * function call), wait a little bit for it to complete before processing an interactive command */
       while (!_isCommandInteractive) sleep(1);
-      
+
       /* make sure our command is NULL terminated */
       _pshellMsg->payload[receivedSize-PSHELL_HEADER_SIZE] = 0;
-      
+
       /* good to go, process an interactive command */
       processCommand(_pshellMsg->payload);
 
@@ -3164,10 +3158,10 @@ static void receiveUNIX(void)
       /* if we are currently processing a non-interactive command (via the pshell_runCommand
        * function call), wait a little bit for it to complete before processing an interactive command */
       while (!_isCommandInteractive) sleep(1);
-      
+
       /* make sure our command is NULL terminated */
       _pshellMsg->payload[receivedSize-PSHELL_HEADER_SIZE] = 0;
-      
+
       /* good to go, process an interactive command */
       processCommand(_pshellMsg->payload);
 

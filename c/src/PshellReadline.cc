@@ -1,27 +1,27 @@
 /*******************************************************************************
  *
- * Copyright (c) 2009, Ron Iovine, All rights reserved. 
+ * Copyright (c) 2009, Ron Iovine, All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without 
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of Ron Iovine nor the names of its contributors 
- *       may be used to endorse or promote products derived from this software 
+ *     * Neither the name of Ron Iovine nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
  *       without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
- * IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
- * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *******************************************************************************/
@@ -85,9 +85,9 @@ static void findTabCompletions(const char *keyword_);
 static char *findLongestMatch(char *command_);
 static void showTabCompletions(char *completionList_[],
                                unsigned numCompletions_,
-			       unsigned maxCompletionsPerLine_,
-			       unsigned maxCompletionLength_,
-			       const char* format_, ...);
+                               unsigned maxCompletionsPerLine_,
+                               unsigned maxCompletionLength_,
+                               const char* format_, ...);
 static void clearLine(unsigned cursorPos_, char *command_);
 static void beginningOfLine(unsigned &cursorPos_, const char *command_);
 static void endOfLine(unsigned &cursorPos_, const char *command_);
@@ -147,7 +147,7 @@ void pshell_rl_writeOutput(const char* format_, ...)
     {
       if (string[i] == '\n')
       {
-	socketString[j++] = '\r';
+        socketString[j++] = '\r';
       }
       socketString[j++] = string[i];
     }
@@ -190,67 +190,67 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
       if (esc == '[')
       {
         if (ch == 'A')
-	{
+        {
           // up-arrow key
-	  upArrow(cursorPos, input_);
+          upArrow(cursorPos, input_);
           inEsc = false;
           esc = '\0';
-	}
+        }
         else if (ch == 'B')
-	{
+        {
           // down-arrow key
-	  downArrow(cursorPos, input_);
+          downArrow(cursorPos, input_);
           inEsc = false;
           esc = '\0';
-	}
+        }
         else if (ch == 'C')
-	{
+        {
           // right-arrow key
-	  rightArrow(cursorPos, input_);
+          rightArrow(cursorPos, input_);
           inEsc = false;
           esc = '\0';
-	}
+        }
         else if (ch == 'D')
-	{
+        {
           // left-arrow key
-	  leftArrow(cursorPos);
+          leftArrow(cursorPos);
           inEsc = false;
           esc = '\0';
-	}
+        }
         else if (ch == '1')
-	{
+        {
           printf("home2");
           beginningOfLine(cursorPos, input_);
-	}
+        }
         else if (ch == '3')
-	{
+        {
           //printf("delete");
         }
         else if (ch == '~')
-	{
+        {
           // delete key, delete under cursor
-	  deleteUnderCursor(cursorPos, input_);
+          deleteUnderCursor(cursorPos, input_);
           inEsc = false;
           esc = '\0';
-	}
+        }
         else if (ch == '4')
-	{
+        {
           printf("end2");
           endOfLine(cursorPos, input_);
-	}
+        }
       }
       else if (esc == 'O')
       {
         if (ch == 'H')
-	{
+        {
           // home key, go to beginning of line
           beginningOfLine(cursorPos, input_);
-	}
+        }
         else if (ch == 'F')
-	{
+        {
           // end key, go to end of line
           endOfLine(cursorPos, input_);
-	}
+        }
         inEsc = false;
         esc = '\0';
       }
@@ -274,70 +274,72 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
       newline();
       if (strlen(input_) > 0)
       {
-	if (strcmp(input_, "history") == 0)
-	{
+        if (strcmp(input_, "history") == 0)
+        {
           // add input_ to our command history
           addHistory(input_);
-	  // we process the history internally
-	  showHistory();
-	  input_[0] = 0;
-	  cursorPos = 0;
-	  tabCount = 0;
+          // we process the history internally
+          showHistory();
+          input_[0] = 0;
+          cursorPos = 0;
+          tabCount = 0;
           pshell_rl_writeOutput(prompt_);
-	}
-	else if ((strlen(input_) > 1) && (input_[0] == '!'))
-	{
-	  // they want to recall a specific command in the history, check if it is within range
-	  if (isNumeric(&input_[1]))
-	  {
-	    index = atoi(&input_[1])-1;
-	    if (index < _numHistory)
-	    {
-	      input_[0] = 0;
-	      strcpy(input_, _history[index]);
-	      addHistory(input_);
-	      if (strcmp(_history[index], "history") == 0)
-	      {
-	        showHistory();
-	        input_[0] = 0;
-	        cursorPos = 0;
-	        tabCount = 0;
+        }
+        else if ((strlen(input_) > 1) && (input_[0] == '!'))
+        {
+          // they want to recall a specific command in the history, check if it is within range
+          if (isNumeric(&input_[1]))
+          {
+            index = atoi(&input_[1])-1;
+            if (index < _numHistory)
+            {
+              input_[0] = 0;
+              strcpy(input_, _history[index]);
+              addHistory(input_);
+              if (strcmp(_history[index], "history") == 0)
+              {
+                showHistory();
+                input_[0] = 0;
+                cursorPos = 0;
+                tabCount = 0;
                 pshell_rl_writeOutput(prompt_);
-	      }
-	      else
-	      {
-	        return (false);
-	      }
-	    }
-	    else
-	    {
+              }
+              else
+              {
+                stripWhitespace(input_);
+                return (false);
+              }
+            }
+            else
+            {
               input_[0] = 0;
               cursorPos = 0;
-	      tabCount = 0;
-	      pshell_rl_writeOutput("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
+              tabCount = 0;
+              pshell_rl_writeOutput("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
               pshell_rl_writeOutput(prompt_);
-	    }
-	  }
-	  else
-	  {
-	    pshell_rl_writeOutput("PSHELL_ERROR: Invalid history index: '%s'\n", &input_[1]);
+            }
+          }
+          else
+          {
+            pshell_rl_writeOutput("PSHELL_ERROR: Invalid history index: '%s'\n", &input_[1]);
             pshell_rl_writeOutput(prompt_);
             input_[0] = 0;
             cursorPos = 0;
-	    tabCount = 0;
-	  }
-	}
-	else
-	{
+            tabCount = 0;
+          }
+        }
+        else
+        {
+          stripWhitespace(input_);
           // add input_ to our command history
           addHistory(input_);
           // normal input, return no timeout
           return (false);
-	}
+        }
       }
       else
       {
-	// just pressed CR with no input, just give prompt again
+        // just pressed CR with no input, just give prompt again
         pshell_rl_writeOutput(prompt_);
       }
     }
@@ -363,72 +365,72 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
       if (_tabStyle == PSHELL_RL_FAST_TAB)
       {
         if (tabCount == 1)
-	{
+        {
           // this tabbing method is a little different than the standard
           // readline or bash shell tabbing, we always trigger on a single
           // tab and always show all the possible completions for any
           // multiple matches
           if (strlen(input_) == 0)
-	  {
+          {
             // nothing typed, just TAB, show all registered TAB completions
             showTabCompletions(_tabCompletions, _numTabCompletions, _maxCompletionsPerLine, _maxTabCompletionKeywordLength, prompt_);
-	  }
+          }
           else
-	  {
+          {
             // partial word typed, show all possible completions
             findTabCompletions(input_);
             if (_numTabMatches == 1)
-	    {
+            {
               // only one possible completion, show it
               clearLine(cursorPos, input_);
               cursorPos = showCommand(input_, "%s ", _tabMatches[0]);
-	    }
+            }
             else if (_numTabMatches > 1)
-	    {
+            {
               // multiple possible matches, fill out longest match and
               // then show all other possibilities
               showTabCompletions(_tabMatches, _numTabMatches, _maxMatchCompletionsPerLine, _maxMatchKeywordLength, "%s%s", prompt_, input_);
               clearLine(cursorPos, input_);
               cursorPos = showCommand(input_, findLongestMatch(input_));
-	    }
-	  }
-	}
+            }
+          }
+        }
       }
       else  // BASH_TAB
       {
-        // this code below implements the more standard readline/bash double tabbing method 
+        // this code below implements the more standard readline/bash double tabbing method
         if (tabCount == 2)
-	{
+        {
           if (strlen(input_) == 0)
-	  {
+          {
             // nothing typed, just a double TAB, show all registered TAB completions
             showTabCompletions(_tabCompletions, _numTabCompletions, _maxCompletionsPerLine, _maxTabCompletionKeywordLength, prompt_);
-	  }
+          }
           else
-	  {
+          {
             // partial word typed, double TAB, show all possible completions
-	    findTabCompletions(input_);
+            findTabCompletions(input_);
             showTabCompletions(_tabMatches, _numTabMatches, _maxMatchCompletionsPerLine, _maxMatchKeywordLength, "%s%s", prompt_, input_);
-	  }
-	}
+          }
+        }
         else if ((tabCount == 1) && (strlen(input_) > 0))
-	{
+        {
           // partial word typed, single TAB, fill out as much
           //  as we can and show any possible other matches
           findTabCompletions(input_);
           if (_numTabMatches == 1)
-	  {
+          {
             // we only have one completion, show it
             clearLine(cursorPos, input_);
             cursorPos = showCommand(input_, "%s ", _tabMatches[0]);
-	  }
+          }
           else if (_numTabMatches > 1)
-	  {
+          {
             // multiple completions, find the longest match and show up to that
             clearLine(cursorPos, input_);
             cursorPos = showCommand(input_, findLongestMatch(input_));
-	  }
-	}
+          }
+        }
       }
     }
     else if (ch == 127)
@@ -638,10 +640,10 @@ static char *findLongestMatch(char *command_)
       for (unsigned i = 0; i < _numTabMatches; i++)
       {
         if ((charPos >= strlen(_tabMatches[i])) || (ch != _tabMatches[i][charPos]))
-	{
-	  command_[charPos] = 0;
+        {
+          command_[charPos] = 0;
           return (command_);
-	}
+        }
       }
       command_[charPos++] = ch;
     }
@@ -656,9 +658,9 @@ static char *findLongestMatch(char *command_)
 /******************************************************************************/
 static void showTabCompletions(char *completionList_[],
                                unsigned numCompletions_,
-			       unsigned maxCompletionsPerLine_,
-			       unsigned maxCompletionLength_,
-			       const char* format_, ...)
+                               unsigned maxCompletionsPerLine_,
+                               unsigned maxCompletionLength_,
+                               const char* format_, ...)
 {
   char prompt[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   va_list args;
@@ -860,7 +862,7 @@ static void addHistory(char *command_)
       if ((i == 0) || (strcasecmp(_history[i-1], command_) != 0))
       {
         _history[i] = strdup(command_);
-	_numHistory++;
+        _numHistory++;
       }
       _historyPos = _numHistory;
       return;
@@ -904,7 +906,7 @@ static void showHistory(void)
 {
   for (unsigned i = 0; i < _numHistory; i++)
   {
-    pshell_rl_writeOutput("%-3d %s\n", i+1, _history[i]); 
+    pshell_rl_writeOutput("%-3d %s\n", i+1, _history[i]);
   }
 }
 
