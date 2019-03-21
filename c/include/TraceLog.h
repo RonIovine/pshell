@@ -67,7 +67,7 @@ extern "C" {
 #define TL_DEFAULT_LEVEL TL_FAILURE
 
 /* define the string based names of the trace levels */
-#define TL_ERROR_STRING "Error" 
+#define TL_ERROR_STRING "Error"
 #define TL_WARNING_STRING "Warning"
 #define TL_FAILURE_STRING "Failure"
 #define TL_INFO_STRING "Info"
@@ -77,12 +77,12 @@ extern "C" {
 #define TL_DUMP_STRING "Dump"
 #define TL_FORCE_STRING "Force"
 
-/* 
+/*
  * the following are some example TRACE macros to illustrate integrating the
  * function 'tf_isFilterPassed' into an existing trace logging system to provide
  * dynamic trace control via an integrated pshell server, the existing trace
  * logging utility must utilize the __FILE__, __FUNCTION__, __LINE__ (and
- * optionally a 'level') trace logging paradigm 
+ * optionally a 'level') trace logging paradigm
  */
 
 /* trace output macros, these are called directly by client code */
@@ -150,7 +150,7 @@ void trace_registerLevels(void);
  */
 void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_ = false, bool isMaskable_ = true);
 
-/* 
+/*
  * if we are using a stand-alone traceLog system and not integrating it into the
  * traceFilter mechanism we need to provide an internal trace log level and a way
  * to set it
@@ -159,7 +159,7 @@ void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDef
 
 /*
  * trace_setLogLevel:
- * 
+ *
  * this function is used to set the internal trace log level when this module
  * is built with the DYNAMIC_TRACE_FILTER flag NOT set (i.e. stand-alone mode)
  */
@@ -167,7 +167,7 @@ void trace_setLogLevel(unsigned _logLevel);
 
 /*
  * trace_getLogLevel:
- * 
+ *
  * this function is used to return the internal trace log level when this module
  * is built with the DYNAMIC_TRACE_FILTER flag NOT set (i.e. stand-alone mode)
  */
@@ -232,11 +232,11 @@ void trace_enablePrefix(bool enable_);
 bool trace_isPrefixEnabled(void);
 
 /****************************************************************************
- * 
+ *
  * NOTE: There are no public APIs beyhond this point, all public functional
  *       APIs and macros appear above this section, do not call anything
  *       below this section directly!!
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -257,8 +257,8 @@ extern void trace_outputDump(void *address_, unsigned length_, const char *type_
 
 #ifdef DYNAMIC_TRACE_FILTER
 
-/* 
- * dynamic trace filtering enabled, use the tf_isFilterPassed function in the dynamic 
+/*
+ * dynamic trace filtering enabled, use the tf_isFilterPassed function in the dynamic
  * trace filter module to determine if a given trace should be printed out
  */
 #define __TRACE(level, name, format, args...) if (tf_isFilterPassed(__FILE__, __LINE__, __FUNCTION__, level)) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
@@ -266,9 +266,9 @@ extern void trace_outputDump(void *address_, unsigned length_, const char *type_
 
 #else  /* stand-alone trace logs (i.e. no dynamic filtering) */
 
-/* 
+/*
  * dynamic trace filtering not enabled, use use a simple compare of the desired hierarchical
- * trace level against the configures trace level to determine if a given trace should be 
+ * trace level against the configures trace level to determine if a given trace should be
  * printed out
  */
 extern unsigned _traceLogLevel;

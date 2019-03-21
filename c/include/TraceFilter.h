@@ -133,7 +133,7 @@ bool tf_isFilterPassed(const char *file_,
 /*
  * the following two functions should not be called directly, but
  * rather should only be call via their respective following macros
- */                       
+ */
 void tf_watch(const char *file_,
               int line_,
               const char *function_,
@@ -142,7 +142,7 @@ void tf_watch(const char *file_,
               int width_,
               const char *format_,
               tf_TraceControl control_);
-              
+
 void tf_callback(const char *file_,
                  int line_,
                  const char *function_,
@@ -153,7 +153,7 @@ void tf_callback(const char *file_,
 /*
  * macro to registger a memory location to watch at every trace statement,
  * use this instead of a direct call to tf_watch
- */ 
+ */
 #define TF_WATCH(symbol, address, width, format, control) \
           tf_watch(__FILE__, __LINE__, __FUNCTION__, symbol, address, width, format, control)
 

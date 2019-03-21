@@ -1,27 +1,27 @@
 /*******************************************************************************
  *
- * Copyright (c) 2009, Ron Iovine, All rights reserved. 
+ * Copyright (c) 2009, Ron Iovine, All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without 
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of Ron Iovine nor the names of its contributors 
- *       may be used to endorse or promote products derived from this software 
+ *     * Neither the name of Ron Iovine nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
  *       without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
- * IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
- * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *******************************************************************************/
@@ -44,7 +44,7 @@ extern "C" {
  * provides a very lightweight way to provide a control mechanism into a program
  * that is running a pshell, this is analagous to a remote procedure call (rpc).
  *
- * A complete example of the usage of the API can be found in the included 
+ * A complete example of the usage of the API can be found in the included
  * demo programs pshellControlDemo.cc and pshellAggregatorDemo.cc
  *
  *******************************************************************************/
@@ -85,8 +85,8 @@ enum PshellControlResponse
    * the following "COMMAND" enums are returned by the remote pshell server
    * and must match their corresponding values in PshellServer.cc
    */
-  PSHELL_COMMAND_SUCCESS,        
-  PSHELL_COMMAND_NOT_FOUND,      
+  PSHELL_COMMAND_SUCCESS,
+  PSHELL_COMMAND_NOT_FOUND,
   PSHELL_COMMAND_INVALID_ARG_COUNT,
   /* the following "SOCKET" enums are generated internally by the pshell_sendCommandN functions */
   PSHELL_SOCKET_SEND_FAILURE,
@@ -98,7 +98,7 @@ enum PshellControlResponse
 
 /*
  * pshell_getResponseString:
- * 
+ *
  * map the above enums to their corresponding strings
  */
 const char *pshell_getResponseString(int results_);
@@ -115,12 +115,12 @@ const char *pshell_getResponseString(int results_);
  * from the remote command in the pshell_sendCommandN functions, a timeout
  * value of 0 will not wait for a response, in which case the function
  * will return either PSHELL_SOCKET_NOT_CONNECTED, PSHELL_SOCKET_SEND_FAILURE,
- * or PSHELL_COMMAND_SUCCESS, the timeout value entered in this funcition 
- * will be used as the default timeout for all calls to pshell_sendCommandN 
- * that do not provide an override timeout value, for a UDP server, the 
- * remoteServer must be either a valid hostname or IP address and a valid 
- * destination port must be provided, for a UNIX server, only a valid server 
- * name must be provided along with the identifier PSHELL_UNIX_CONTROL (i.e. 0) 
+ * or PSHELL_COMMAND_SUCCESS, the timeout value entered in this funcition
+ * will be used as the default timeout for all calls to pshell_sendCommandN
+ * that do not provide an override timeout value, for a UDP server, the
+ * remoteServer must be either a valid hostname or IP address and a valid
+ * destination port must be provided, for a UNIX server, only a valid server
+ * name must be provided along with the identifier PSHELL_UNIX_CONTROL (i.e. 0)
  * for the 'port' parameter
  *
  * this function returns a Server ID (sid) handle which must be saved and
@@ -182,9 +182,9 @@ void pshell_extractCommands(int sid_, char *results_, int size_);
 
 /*
  * pshell_addMulticast:
- * 
- * this command will add a given multicast receiver (i.e. sid) to a multicast 
- * group, multicast groups are based either on the command's keyword, or if 
+ *
+ * this command will add a given multicast receiver (i.e. sid) to a multicast
+ * group, multicast groups are based either on the command's keyword, or if
  * no keyword is supplied, the given sid will receive all multicast commands
  */
 #define PSHELL_MULTICAST_ALL "__all__"
@@ -193,12 +193,12 @@ void pshell_addMulticast(int sid_, const char *keyword_ = PSHELL_MULTICAST_ALL);
 
 /*
  * pshell_sendMulticast:
- * 
+ *
  * this command will send a given command to all the registered multicast
- * receivers (i.e. sids) for this multicast group, multicast groups are 
- * based on the command's keyword, this function will issue the command as 
- * a best effort fire-and-forget command to each receiver in the multicast 
- * group, no results will be requested or expected, and no response will be 
+ * receivers (i.e. sids) for this multicast group, multicast groups are
+ * based on the command's keyword, this function will issue the command as
+ * a best effort fire-and-forget command to each receiver in the multicast
+ * group, no results will be requested or expected, and no response will be
  * requested or expected
  */
 void pshell_sendMulticast(const char *command_, ...);
@@ -215,7 +215,7 @@ void pshell_sendMulticast(const char *command_, ...);
  *
  * there are 4 version of this command, since we are using standard 'C' linkage,
  * we cannot overload the function names, hence the separate names
- * 
+ *
  * the return of the following 4 functions is one of the PshellControlResponse enums
  */
 int pshell_sendCommand1(int sid_, const char *command_, ...);
@@ -225,8 +225,8 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
  * the following two commands will issue the remote command and extract any
  * results that are returned in the payload of the message, this will only
  * work with a non-0 timeout and a return result of PSHELL_COMMAND_SUCCESS,
- * the data in the payload is NULL terminated ascii formatted character data, 
- * it is the responsibility of the calling application to parse & understand 
+ * the data in the payload is NULL terminated ascii formatted character data,
+ * it is the responsibility of the calling application to parse & understand
  * the results
  */
 int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command_, ...);

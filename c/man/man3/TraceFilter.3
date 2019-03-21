@@ -18,7 +18,7 @@ typedef bool (*tf_TraceCallback) (void);
 enum tf_TraceControl {TF_ONCE, TF_CONTINUOUS, TF_ABORT};
 
 void tf_addLevel(const char *name_, unsigned value_, bool isDefault_, bool isMaskable_);
-                 
+
 void tf_init(void);
 
 void tf_registerThread(const char *threadName_);
@@ -27,7 +27,7 @@ bool tf_isFilterPassed(const char *file_, int line_, const char *function_, unsi
 
 /* macro to registger a memory location to watch at every trace statement */
 .br
-#define TF_WATCH(symbol, address, width, format, control) 
+#define TF_WATCH(symbol, address, width, format, control)
 
 /* macro to registger a function to be called at every trace statement */
 .br

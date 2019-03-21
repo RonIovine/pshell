@@ -112,7 +112,7 @@ struct RegisteredThread
 /***********************************
  * "private" function prototypes
  ***********************************/
- 
+
 static void showConfig(void);
 static void showUsage(void);
 static void configureFilter(int argc, char *argv[]);
@@ -310,7 +310,7 @@ static unsigned _defaultHierarchicalLevel = 0;
 /************************************
  * "public" function bodies
  ************************************/
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void tf_init(void)
@@ -423,7 +423,7 @@ void tf_addLevel(const char *levelName_,
     _levelFilters[levelValue_].name = levelName_;
     _levelFilters[levelValue_].level = 1<<(levelValue_+1);
     _levelFilters[levelValue_].isDefault = isDefault_;
-    _levelFilters[levelValue_].isMaskable = isMaskable_;    
+    _levelFilters[levelValue_].isMaskable = isMaskable_;
   }
 }
 
@@ -445,19 +445,19 @@ bool tf_isFilterPassed(const char *file_,
   unsigned level = _levelFilters[level_].level;
   if (isWatchHit() && ((_watchNumHits == 0) || (_watchControl != TF_ONCE)))
   {
-    
+
     /* print out the most recent trace for which the value was unchanged */
     sprintf(traceOutputString, _watchFormatString, "prev", _watchPrevValue);
     printLog(TF_WATCH_STRING, _watchPrevFile, _watchPrevFunction, _watchPrevLine, traceOutputString);
-    
+
     /* print out the current trace where the value change was detected */
     sprintf(traceOutputString, _watchFormatString, "curr", _watchCurrValue);
     printLog(TF_WATCH_STRING, file_, function_, line_, traceOutputString);
-    
+
     _watchPrevValue = _watchCurrValue;
     _watchNumHits++;
     filterPassed = false;
-    
+
     /* see if they requested an abort on the condition being met */
     if (_watchControl == TF_ABORT)
     {
@@ -617,7 +617,7 @@ bool tf_isFilterPassed(const char *file_,
     _watchPrevFunction = function_;
     _watchPrevLine = line_;
   }
-  
+
   /* if we have a callback enabled, remember our previous, file/function/line info */
   if (_callbackFunction != NULL)
   {
@@ -625,9 +625,9 @@ bool tf_isFilterPassed(const char *file_,
     _callbackPrevFunction = function_;
     _callbackPrevLine = line_;
   }
-  
+
   return (filterPassed);
-  
+
 }
 
 /******************************************************************************/

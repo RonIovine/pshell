@@ -1,47 +1,47 @@
 #!/usr/bin/python
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
 """
 A Python program to provide remote client access to UDP/UNIX PshellServers
 
-This stand-alone client process will provide remote user interaction to 
-any process that is running a UDP or UNIX PshellServer (TCP PshellServers 
-are controlled via a standard 'telnet' client).  It can control processes 
-that are running either the 'C' version of the PshellServer, which is 
-provided via the PshellServer.h API and the libpshell-server link libaray, 
+This stand-alone client process will provide remote user interaction to
+any process that is running a UDP or UNIX PshellServer (TCP PshellServers
+are controlled via a standard 'telnet' client).  It can control processes
+that are running either the 'C' version of the PshellServer, which is
+provided via the PshellServer.h API and the libpshell-server link libaray,
 or the Python version that is provided via the PshellServer.py module.
 
 Modules:
 
 The following Python modules are provided for programs to embed their own
-PshellServer functionality and to programatically control PshellServers 
+PshellServer functionality and to programatically control PshellServers
 running in other processes.
 
 PshellServer.py   -- provide PshellServer capability in a given process
@@ -72,7 +72,7 @@ def _showWelcome():
   # show our welcome screen
   # put up our window title banner
   sys.stdout.write("\033]0;PSHELL: %s[%s], Mode: INTERACTIVE\007" % (_gServerName, _gRemoteServer))
-  sys.stdout.flush()    
+  sys.stdout.flush()
   banner = "#  PSHELL: Process Specific Embedded Command Line Shell"
   server = "#  Multi-session BROADCAST server: %s[%s]" % (_gServerName, _gRemoteServer)
   maxBorderWidth = max(58, len(banner), len(server))+2
@@ -153,7 +153,7 @@ def _getIpAddress():
     return ("127.0.0.1")
   else:
     return (_gRemoteServer)
-    
+
 #################################################################################
 #################################################################################
 def _processCommandLine():
@@ -187,7 +187,7 @@ def _processCommandLine():
       time.sleep(_gRate)
     elif (_gRepeat == 0):
       break
-  
+
 #################################################################################
 #################################################################################
 def _processBatchFile():
@@ -247,7 +247,7 @@ def _processBatchFile():
     elif (_gRepeat == 0):
       break
   file.close()
-  
+
 #################################################################################
 #################################################################################
 def _configureLocalServer():
@@ -259,7 +259,7 @@ def _configureLocalServer():
   # need to set the first arg position to 0 so we can pass
   # through the exact command to our remote server for dispatching
   PshellServer._gFirstArgPos = 0
-  # we tell the local server we are the special UDP/UNIX command 
+  # we tell the local server we are the special UDP/UNIX command
   # line client so it can process commands correctly and display
   # the correct banner  information
   PshellServer._gPshellClient = True
@@ -272,15 +272,15 @@ def _configureLocalServer():
   prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
-    
+
   title = PshellControl._extractTitle(_gSid)
   if (len(title) > 0):
     PshellServer._gTitleOverride = title
-    
+
   serverName = PshellControl._extractName(_gSid)
   if (len(serverName) > 0):
     PshellServer._gServerNameOverride = serverName
-    
+
   banner = PshellControl._extractBanner(_gSid)
   if (len(banner) > 0):
     PshellServer._gBannerOverride = banner
@@ -445,19 +445,19 @@ def _registerSignalHandlers():
 #
 ##############################
 if (__name__ == '__main__'):
-  
-  if ((len(sys.argv) < 2) or 
-      ((len(sys.argv)) > 8) or 
+
+  if ((len(sys.argv) < 2) or
+      ((len(sys.argv)) > 8) or
       ((len(sys.argv) > 1) and (sys.argv[1] == "-h"))):
     _showUsage()
 
   # make sure we cleanup any system resorces on an abnormal termination
   _registerSignalHandlers()
-  
+
   _gTimeout = 5
 
   _gPort = PshellServer.UNIX
-  
+
   _gRate = 0
   _gRepeat = 0
   _gIteration = 0
@@ -465,7 +465,7 @@ if (__name__ == '__main__'):
   _gFilename = None
   _gCommand = None
   _gInteractive = False
-  
+
   _gDefaultInstallDir = "/etc/pshell"
   _gDefaultConfigDir = _gDefaultInstallDir+"/config"
   _gDefaultBatchDir = _gDefaultInstallDir+"/batch"
@@ -528,7 +528,7 @@ if (__name__ == '__main__'):
   # needed filename but it was not fulfilled
   if needFile or needCommand:
     _showUsage()
-  
+
   # see if we are requesting a server sitting on a subnet broadcast address,
   # if so, we configure for one-way, fire-and-forget messaging since there may
   # be many hosts/servers on our subnet which might all be listening on the
@@ -547,12 +547,12 @@ if (__name__ == '__main__'):
     # command line mode, using batch file containing commands
     _processBatchFile()
   else:
-    
+
     # interactive mode, setup local server and interact with user
     _gInteractive = True
-  
+
     if (_gIsBroadcastAddr == False):
-    
+
       # if not a broadcast server address, extract all the commands from
       # our unicast remote server and add them to our local server
       commandList = PshellControl.extractCommands(_gSid)
@@ -574,7 +574,7 @@ if (__name__ == '__main__'):
         PshellServer.startServer("pshellServer", PshellServer.LOCAL, PshellServer.BLOCKING)
       else:
         print("PSHELL_ERROR: Could not connect to server: '%s:%s'" % (_gRemoteServer, _gPort))
-  
+
     else:
 
       _gServerName = "broadcastAddr"
@@ -592,5 +592,5 @@ if (__name__ == '__main__'):
           _processCommand(command)
 
   _cleanupAndExit()
-  
+
 

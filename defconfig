@@ -30,7 +30,7 @@
 #
 # Example pshell build-time configuration, the Makefile uses the '.config'
 # file for it's build-time configuration settings.  The user should copy the
-# provided 'defconfig' file to '.config' and make any desired modifications 
+# provided 'defconfig' file to '.config' and make any desired modifications
 # to that file, then run the 'make'.  If the file '.config' is not found, the
 # 'defconfig' file will be copied to '.config' by the makefile processing before
 # the build process starts.  The user should NOT modify the provided 'defconfig'
@@ -48,7 +48,7 @@
 #################################################################################
 #
 # The following set of compile options are used by the PshellServer library part
-# of this package. 
+# of this package.
 #
 #################################################################################
 
@@ -61,20 +61,20 @@
 
 #
 # change the default single-line welcome banner for all servers, this can
-# also be changed at runtime on a per-server basis via the pshell-server.conf 
+# also be changed at runtime on a per-server basis via the pshell-server.conf
 # file
 #
 #PSHELL_DEFAULT_BANNER="PSHELL: Process Specific Embedded Command Line Shell"
 
 #
 # change the default prompt for all servers, the full prompt format is
-# 'shellName[ipAddress]:prompt', this can also be changed at runtime 
+# 'shellName[ipAddress]:prompt', this can also be changed at runtime
 # on a per-server basis via the pshell-server.conf file
 #
 #PSHELL_DEFAULT_PROMPT="PSHELL>"
 
 #
-# change the default TCP server idle session timeout (in minutes), this can also 
+# change the default TCP server idle session timeout (in minutes), this can also
 # be changed at runtime on a per-server basis via the pshell-server.conf file
 #
 #PSHELL_DEFAULT_TIMEOUT=10
@@ -96,7 +96,7 @@
 # These config files can be used to set various server, client, and control
 # settings.  Refer to the example files in the 'config' directory of this
 # package for usage of these files.
-#    
+#
 #PSHELL_CONFIG_DIR="/etc/pshell/config"
 
 #
@@ -123,7 +123,7 @@
 #
 # The batch processing will first look for the batch file in the directory
 # specified by the $PSHELL_BATCH_DIR environment variable, and if not found
-# will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if 
+# will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if
 # still not found, will take the passed in batch file name verbatim.
 #
 #PSHELL_BATCH_DIR="/etc/pshell/batch"
@@ -236,7 +236,7 @@ PSHELL_INCLUDE_TRACE_FILTER=y
 
 #
 # This flag specifies whether to build in the example TraceLog service into the
-# PshellServer libraries along with the traceFilterDemo program to demonstrate 
+# PshellServer libraries along with the traceFilterDemo program to demonstrate
 # interactive trace control via the TraceFilter mechanism.  This can only be
 # enabled if the above PSHELL_INCLUDE_TRACE_FILTER flag is also enabled.
 #

@@ -125,7 +125,7 @@ Server *getServer(char *localName)
   }
   return (NULL);
 }
-  
+
 /******************************************************************************/
 /******************************************************************************/
 char *buildCommand(char *command, unsigned size, int argc, char *argv[])
@@ -156,9 +156,9 @@ void controlServer(int argc, char *argv[])
     {
       /* this contains the re-constituted command */
       char command[MAX_COMMAND_SIZE];
-      if ((pshell_sendCommand3(server->sid, 
-                               results, 
-                               sizeof(results), 
+      if ((pshell_sendCommand3(server->sid,
+                               results,
+                               sizeof(results),
                                buildCommand(command, sizeof(command), argc, argv)) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
       {
         pshell_printf("%s", results);
@@ -174,7 +174,7 @@ bool isDuplicate(char *localName, char *remoteServer, int port)
   for (unsigned server = 0; server < numServers; server++)
   {
     if ((strcmp(servers[server].localName, localName) == 0) ||
-        ((strcmp(servers[server].remoteServer, remoteServer) == 0) && 
+        ((strcmp(servers[server].remoteServer, remoteServer) == 0) &&
          (servers[server].port == port)))
     {
       return (true);
@@ -223,19 +223,19 @@ void add(int argc, char *argv[])
         strcpy(servers[numServers].localName, argv[1]);
         strcpy(servers[numServers].remoteServer, argv[2]);
         servers[numServers].port = port;
-        servers[numServers].sid = pshell_connectServer(argv[1], 
-                                                       argv[2], 
-                                                       port, 
+        servers[numServers].sid = pshell_connectServer(argv[1],
+                                                       argv[2],
+                                                       port,
                                                        PSHELL_ONE_SEC*5);
         numServers++;
         char description[MAX_STRING_SIZE];
         sprintf(description, "control the remote %s process", argv[1]);
-        pshell_addCommand(controlServer, 
-                          argv[1], 
-                          description, 
-                          "[<command> | ? | -h]", 
-                          0, 
-                          30, 
+        pshell_addCommand(controlServer,
+                          argv[1],
+                          description,
+                          "[<command> | ? | -h]",
+                          0,
+                          30,
                           false);
       }
       else
@@ -370,7 +370,7 @@ void show(int argc, char *argv[])
         }
         pshell_printf("%-*s    %-*s",  maxLocalName,
                                        multicastGroups[multicast].servers[server]->localName,
-                                       maxRemoteName, 
+                                       maxRemoteName,
                                        multicastGroups[multicast].servers[server]->remoteServer);
         if (multicastGroups[multicast].servers[server]->port == 0)
         {
@@ -449,7 +449,7 @@ void registerSignalHandlers(void)
 /******************************************************************************/
 int main (int argc, char *argv[])
 {
-  
+
   /* verify usage */
   if (argc != 1)
   {
@@ -467,42 +467,42 @@ int main (int argc, char *argv[])
 
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
-  
+
   /* set some special backdoor settings in PshellServer.cc us to run as both server and client */
   pshell_copyAddCommandStrings = true;
   pshell_allowDuplicateFunction = true;
-  
+
   /* register our callback commands */
-  pshell_addCommand(add, 
-                    "add", 
-                    "add a new remote server or multicast group entry", 
+  pshell_addCommand(add,
+                    "add",
+                    "add a new remote server or multicast group entry",
                     "{server <localName> <remoteServer> [<port>]} | {multicast <keyword> <localName1> [<localName2>...<localNameN>]}",
-                    3, 
-                    30, 
+                    3,
+                    30,
                     false);
-                          
-  pshell_addCommand(show, 
-                    "show", 
-                    "show aggregated servers or multicast group info", 
-                    "servers | multicast", 
-                    1, 
-                    1, 
+
+  pshell_addCommand(show,
+                    "show",
+                    "show aggregated servers or multicast group info",
+                    "servers | multicast",
+                    1,
+                    1,
                     true);
-                          
-  pshell_addCommand(multicast, 
-                    "multicast", 
+
+  pshell_addCommand(multicast,
+                    "multicast",
                     "send multicast command to registered server group",
                     "<command>",
                     0,
                     30,
                     false);
-  
+
   /* start our local pshell server */
   pshell_startServer("pshellAggregator", PSHELL_LOCAL_SERVER, PSHELL_BLOCKING);
-  
+
   /* disconnect all our remote control servers */
   pshell_disconnectAllServers();
-  
+
   /* cleanup our local server's resources */
   pshell_cleanupResources();
 

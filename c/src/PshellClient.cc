@@ -92,7 +92,7 @@
 /*
  * the maximum number of command line arguments that can be tokenized
  */
- 
+
 #define MAX_TOKENS 20
 
 /* enums */
@@ -474,7 +474,7 @@ bool init(const char *destination_, const char *server_)
 
     /* UDP socket destination */
     _serverType = UDP;
-    
+
     /*
      * we don't care what our source address is because the pshellServer
      * will just do a reply to us based on the source address it receives
@@ -491,7 +491,7 @@ bool init(const char *destination_, const char *server_)
       return (false);
     }
 
-    /* 
+    /*
      * see if we are trying to connect to a broadcast address,
      * if so, set our socket options to allow for broadcast
      */
@@ -570,7 +570,7 @@ bool init(const char *destination_, const char *server_)
       sprintf(_sourceUnixAddress.sun_path, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, server_, (rand()%MAX_UNIX_CLIENTS));
       retCode = bind(_socketFd, (struct sockaddr *) &_sourceUnixAddress, sizeof(_sourceUnixAddress));
     }
-    
+
     if (retCode < 0)
     {
       printf("PSHELL_ERROR: Cannot bind to UNIX socket: %s\n", _sourceUnixAddress.sun_path);
@@ -594,11 +594,11 @@ bool init(const char *destination_, const char *server_)
   }
   else
   {
-    return (getVersion() && 
-            getPayloadSize() && 
-            getServerName() && 
-            getTitle() && 
-            getBanner() && 
+    return (getVersion() &&
+            getPayloadSize() &&
+            getServerName() &&
+            getTitle() &&
+            getBanner() &&
             getPrompt());
   }
 }
@@ -943,7 +943,7 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
       }
     }
   }
-  
+
   if (fp != NULL)
   {
     do
@@ -1094,14 +1094,14 @@ void getNamedServers(void)
     _pshellServersList = (PshellServers*)malloc(_pshellServersListSize*sizeof(PshellServers));
     while (fgets(line, 180, fp) != NULL)
     {
-      if (line[0] != '#') 
+      if (line[0] != '#')
       {
         tokenize(line, ":", tokens, MAX_TOKENS, &numTokens);
         if ((numTokens >=2) && (numTokens <= 3))
         {
           /* got at least both args */
          if (_numPshellServers < _pshellServersListSize)
-          { 
+          {
             _pshellServersList[_numPshellServers].serverName = strdup(tokens[0]);
             _pshellServersList[_numPshellServers].portNum = strdup(tokens[1]);
             if (numTokens == 3)
@@ -1139,7 +1139,7 @@ void getNamedServers(void)
             {
               _maxServerNameLength = strlen(_pshellServersList[_numPshellServers].serverName);
             }
-            _numPshellServers++; 
+            _numPshellServers++;
           }
         }
       }
@@ -1512,7 +1512,7 @@ int main(int argc, char *argv[])
   {
     showUsage();
   }
-  
+
   /* command line processed, now execute results */
   if (init(_host, _server))
   {

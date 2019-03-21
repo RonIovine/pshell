@@ -1,30 +1,30 @@
 #!/usr/bin/python
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
@@ -35,19 +35,19 @@ This is a pshell client program that aggregates several remote pshell servers
 into single local pshell server that serves as an interactive client to the
 remote servers.  This can be useful in presenting a consolidated user shell
 who's functionality spans several discrete pshell servers.  Since this uses
-the PshellControl API, the external servers must all be either UDP or Unix 
+the PshellControl API, the external servers must all be either UDP or Unix
 servers.  The consolidation point a local pshell server.
 
 This is a generic dynamic aggregator, i.e. it is server agnostic.  Servers can
 be added to the aggregation via the 'add server' command either at startup via
-the pshellAggregator.startup file or interactively via the interactive command 
+the pshellAggregator.startup file or interactively via the interactive command
 line.
 
 This program can also create multicast groups commands via the 'add multicast'
 command (also at startup or interactively).  The multicast commands can then be
 distributed to multiple aggregated servers.
 
-The aggregation and multicast functionality can be useful to manually drive a set 
+The aggregation and multicast functionality can be useful to manually drive a set
 of processes that use the pshell control mechanism as a control plane IPC.
 """
 
@@ -87,19 +87,19 @@ def _getServer(localName):
     if (PshellServer.isSubString(localName, server["localName"])):
       return (server)
   return (None)
-  
+
 #################################################################################
 #################################################################################
 def _controlServer(argv):
   server = _getServer(argv[0])
   if (server != None):
     # see if they asked for help
-    if ((len(argv) == 1) or 
-        (argv[1] == "help") or 
-        (argv[1] == "-h") or 
-        (argv[1] == "-help") or 
-        (argv[1] == "--h") or 
-        (argv[1] == "--help") or 
+    if ((len(argv) == 1) or
+        (argv[1] == "help") or
+        (argv[1] == "-h") or
+        (argv[1] == "-help") or
+        (argv[1] == "--h") or
+        (argv[1] == "--help") or
         (argv[1] == "?")):
       # user asked for help, display all the registered commands of the remote server
       PshellServer.printf(PshellControl.extractCommands(server["sid"]), newline=False)
@@ -109,7 +109,7 @@ def _controlServer(argv):
       # good return, display results back to user
       if (retCode == PshellControl.COMMAND_SUCCESS):
         PshellServer.printf(results, newline=False)
-    
+
 #################################################################################
 #################################################################################
 def _isDuplicate(localName_, remoteServer_, port_):
@@ -154,16 +154,16 @@ def _add(argv):
       _gPshellServers.append({"localName":argv[2],
                               "remoteServer":argv[3],
                               "port":port,
-                              "sid":PshellControl.connectServer(argv[2], 
-                                                                argv[3], 
-                                                                port, 
+                              "sid":PshellControl.connectServer(argv[2],
+                                                                argv[3],
+                                                                port,
                                                                 PshellControl.ONE_SEC*5)})
-      PshellServer.addCommand(_controlServer, 
-                              argv[2], 
-                              "control the remote " + argv[2] + " process", 
-                              "[<command> | ? | -h]", 
-                              0, 
-                              30, 
+      PshellServer.addCommand(_controlServer,
+                              argv[2],
+                              "control the remote " + argv[2] + " process",
+                              "[<command> | ? | -h]",
+                              0,
+                              30,
                               False)
       PshellServer._addTabCompletions()
     else:
@@ -226,8 +226,8 @@ def _show(argv):
       for index, server in enumerate(multicast["servers"]):
         if (index > 0):
           PshellServer.printf("%s    " % " ".ljust(_gMaxMulticastKeyword, " "), newline=False)
-        PshellServer.printf("%s    %s    %s" % (server["localName"].ljust(_gMaxLocalName), 
-                                                      server["remoteServer"].ljust(_gMaxRemoteName), 
+        PshellServer.printf("%s    %s    %s" % (server["localName"].ljust(_gMaxLocalName),
+                                                      server["remoteServer"].ljust(_gMaxRemoteName),
                                                       server["port"]))
     PshellServer.printf()
   else:
@@ -246,7 +246,7 @@ def _multicast(argv):
   else:
     # reconstitute the original command
     PshellControl.sendMulticast(' '.join(argv[1:]))
-  
+
 #################################################################################
 #################################################################################
 def _cleanupAndExit():
@@ -307,7 +307,7 @@ if (__name__ == '__main__'):
   # through the exact command to our remote server for dispatching
   PshellServer._setFirstArgPos(0)
 
-  # we tell the local server we are the special UDP/UNIX command 
+  # we tell the local server we are the special UDP/UNIX command
   # line client so it can process commands correctly and display
   # the correct banner  information
   PshellServer._gPshellClient = True
@@ -317,24 +317,24 @@ if (__name__ == '__main__'):
   PshellControl._gSupressInvalidArgCountMessage = True
 
   # register our callback commands
-  PshellServer.addCommand(_add, 
-                          "add", 
-                          "add a new remote server or multicast group entry", 
+  PshellServer.addCommand(_add,
+                          "add",
+                          "add a new remote server or multicast group entry",
                           "{server <localName> <remoteServer> [<port>]} | {multicast <keyword> <localName1> [<localName2>...<localNameN>]}",
-                          4, 
-                          30, 
+                          4,
+                          30,
                           False)
-                          
-  PshellServer.addCommand(_show, 
-                          "show", 
-                          "show aggregated servers or multicast group info", 
-                          "servers | multicast", 
-                          2, 
-                          2, 
+
+  PshellServer.addCommand(_show,
+                          "show",
+                          "show aggregated servers or multicast group info",
+                          "servers | multicast",
+                          2,
+                          2,
                           True)
-                          
-  PshellServer.addCommand(_multicast, 
-                          "multicast", 
+
+  PshellServer.addCommand(_multicast,
+                          "multicast",
                           "send multicast command to registered server group",
                           "<command>",
                           2,
@@ -343,9 +343,9 @@ if (__name__ == '__main__'):
 
   # start our local pshell server
   PshellServer.startServer("pshellAggregator", PshellServer.LOCAL, PshellServer.BLOCKING)
-  
+
   # disconnect all our remote control servers
   PshellControl.disconnectAllServers()
-  
+
   # cleanup our local server's resources
   PshellServer.cleanupResources()

@@ -33,7 +33,7 @@
  * servers into a single local pshell server.  This can be useful in presenting
  * a consolidated user shell who's functionality spans several discrete pshell
  * servers.  Since this uses the PshellControl API, the external servers must
- * all be either UDP or Unix servers.  The consolidation point in this example 
+ * all be either UDP or Unix servers.  The consolidation point in this example
  * is a local pshell server.  Note that this is a hard coded aggregator, meaning
  * that the remote servers that are aggregated are hard-coded, as opposed to
  * the generic, dynamic PshellAggregator.cc client program, which can aggregate
@@ -90,7 +90,7 @@ void registerSignalHandlers(void)
  * this function will re-create the original command into one
  * string from the argc, argv items
  */
- 
+
  /******************************************************************************/
 /******************************************************************************/
 char *buildCommand(char *command, unsigned size, int argc, char *argv[])
@@ -107,7 +107,7 @@ char *buildCommand(char *command, unsigned size, int argc, char *argv[])
 
 /*
  * this function is the common generic function to control any server
- * based on only the SID and entered command, it should be called from 
+ * based on only the SID and entered command, it should be called from
  * every control specific callback for this aggregator
  */
 
@@ -127,9 +127,9 @@ void controlServer(int sid, int argc, char *argv[])
   {
     /* this contains the re-constituted command */
     char command[300];
-    if ((pshell_sendCommand3(sid, 
-                             results, 
-                             sizeof(results), 
+    if ((pshell_sendCommand3(sid,
+                             results,
+                             sizeof(results),
                              buildCommand(command, sizeof(command), argc, argv)) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
     {
       pshell_printf("%s", results);
@@ -137,8 +137,8 @@ void controlServer(int sid, int argc, char *argv[])
   }
 }
 
-/* 
- * the SIDs of all the remote pshell servers we are aggregating, add more SID 
+/*
+ * the SIDs of all the remote pshell servers we are aggregating, add more SID
  * identifiers for each external server being controlled/aggregated
  */
 int pshellServerDemoSid;
@@ -172,14 +172,14 @@ void traceFilterDemo(int argc, char *argv[])
  * example meta command that will call multiple discrete pshell commands from
  * multiple pshell servers
  */
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void meta(int argc, char *argv[])
 {
-    if ((pshell_sendCommand3(pshellServerDemoSid, 
-                             results, 
-                             sizeof(results), 
+    if ((pshell_sendCommand3(pshellServerDemoSid,
+                             results,
+                             sizeof(results),
                              "hello %s %s", argv[0], argv[1]) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
   {
     pshell_printf("%s", results);
@@ -192,7 +192,7 @@ void meta(int argc, char *argv[])
  * multicast receivers for that multicast group, multicast groups are based on
  * the command's keyword
  */
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void multicast(int argc, char *argv[])
@@ -208,7 +208,7 @@ int main (int argc, char *argv[])
 {
   unsigned pshellServerDemoPort = 6001;
   unsigned traceFilterDemoPort = 6002;
-  
+
   if ((argc != 2) && (argc != 4))
   {
     printf("Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]\n");
@@ -224,13 +224,13 @@ int main (int argc, char *argv[])
     pshellServerDemoPort = atoi(argv[2]);
     traceFilterDemoPort = atoi(argv[3]);
   }
-  
+
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
-  
-  /* 
+
+  /*
    * connect to our remote servers, the hostname/ipAddress, port,
-   * and timeout values can be overridden via the pshell-control.conf 
+   * and timeout values can be overridden via the pshell-control.conf
    * file
    */
   if ((pshellServerDemoSid = pshell_connectServer("pshellServerDemo",
@@ -250,20 +250,20 @@ int main (int argc, char *argv[])
     printf("ERROR: Could not connect to remote pshell server traceFilterControl\n");
     exit(0);
   }
-  
-  /* 
+
+  /*
    * add some multicast groups for our control sids, a multicast group is based
    * on the command's keyword
    */
   pshell_addMulticast(pshellServerDemoSid, "trace");
-  pshell_addMulticast(traceFilterDemoSid, "trace");  
-  
+  pshell_addMulticast(traceFilterDemoSid, "trace");
+
   pshell_addMulticast(pshellServerDemoSid, "test");
   pshell_addMulticast(traceFilterDemoSid, "test");
 
   /* register our local pshell commands */
-  
-  /* these will aggregrate the commands from the two separate servers we are connected to */  
+
+  /* these will aggregrate the commands from the two separate servers we are connected to */
   pshell_addCommand(pshellServerDemo,                               /* function */
                     "pshellServerDemo",                             /* command */
                     "control the remote pshellServerDemo process",  /* description */
@@ -279,8 +279,8 @@ int main (int argc, char *argv[])
                     0,                                             /* minArgs */
                     30,                                            /* maxArgs */
                     false);                                        /* showUsage on "?" */
-                    
-  /* 
+
+  /*
    * add any "meta" commands here, meta commands can aggregate multiple discrete
    * pshell commands, either within one server or across multiple servers, into
    * one command
@@ -291,9 +291,9 @@ int main (int argc, char *argv[])
                     "<arg1> <arg2> <arg3>",                             /* usage */
                     3,                                                  /* minArgs */
                     3,                                                  /* maxArgs */
-                    true);                                              /* showUsage on "?" */   
+                    true);                                              /* showUsage on "?" */
 
-  /* 
+  /*
    * add an example command that uses the one-to-many multicast feature of
    * the control API
    */
@@ -303,14 +303,14 @@ int main (int argc, char *argv[])
                     NULL,                                            /* usage */
                     0,                                               /* minArgs */
                     0,                                               /* maxArgs */
-                    true);                                           /* showUsage on "?" */   
+                    true);                                           /* showUsage on "?" */
 
   /* start our local pshell server */
   pshell_startServer("pshellAggregatorDemo", PSHELL_LOCAL_SERVER, PSHELL_BLOCKING);
-  
+
   /* disconnect all our remote control servers */
   pshell_disconnectAllServers();
-  
+
   /* cleanup our local server's resources */
   pshell_cleanupResources();
 

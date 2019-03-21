@@ -35,9 +35,9 @@
 
 /*
  * This module honors the complete public API of the PshellServer, TraceFilter,
- * and TraceLog modules but with all the underlying functionality stubbed 
- * out, link with this module (or the corresponding "stub" library) to 
- * easily remove all PSHELL functionality from a program without making 
+ * and TraceLog modules but with all the underlying functionality stubbed
+ * out, link with this module (or the corresponding "stub" library) to
+ * easily remove all PSHELL functionality from a program without making
  * any changes to actual source code
  */
 
@@ -48,12 +48,12 @@ static PshellTokens _dummyTokens;
 /* PshellServer public API functions */
 void pshell_setServerLogLevel(unsigned level_){};
 void pshell_registerServerLogFunction(PshellLogFunction logFunction_){};
-void pshell_startServer(const char *serverName_,  
+void pshell_startServer(const char *serverName_,
                         PshellServerType serverType_,
                         PshellServerMode serverMode_,
-                        const char *hostnameOrIpAddr_, 
+                        const char *hostnameOrIpAddr_,
                         unsigned port_)
-{  
+{
   printf("PSHELL_INFO: STUB Server: %s Started\n", serverName_);
   if (serverMode_ == PSHELL_BLOCKING) for (;;) sleep(30000);
 }

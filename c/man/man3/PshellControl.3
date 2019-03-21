@@ -1,4 +1,4 @@
-.TH PshellControl 3 "Sep 2012" "PSHELL" "External Client Control Of Remote Pshell" 
+.TH PshellControl 3 "Sep 2012" "PSHELL" "External Client Control Of Remote Pshell"
 .SH NAME
 PshellControl - External Client Program Control of Remote PSHELL Server
 .SH DESCRIPTION
@@ -15,7 +15,7 @@ int pshell_connectServer(const char *controlName_,
                          const char *remoteServer_,
                          unsigned port_ = PSHELL_UNIX_SERVER,
                          unsigned defaultTimeout_ = PSHELL_ONE_MSEC*100);
-                         
+
 /* release resources for this connection */
 
 void pshell_disconnectServer(int sid_);
@@ -47,11 +47,11 @@ Link with the library libpshell-control
 
 Note, there is also python and go version implementations of this functionality in the
 modules 'PshellControl.py' and 'PshellControl.go'
-  
+
 Their APIs and examples can be found in their corresponding language based directories
 of this install package.
 .SH EXAMPLES
-See the file pshellControlDemo.cc in the pshell distribution package for a complete 
+See the file pshellControlDemo.cc in the pshell distribution package for a complete
 list of examples of invoking functions in a remote pshell via a local client program.
 .SH MT-LEVEL
 Safe

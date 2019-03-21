@@ -1,30 +1,30 @@
 #!/usr/bin/python
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
@@ -32,17 +32,17 @@
 A Lightweight, Process-Specific, Embedded Command Line Shell
 
 This API provides the Process Specific Embedded Command Line Shell (PSHELL)
-user API functionality.  It provides the ability for a program to register 
-functions that can be invoked via a command line user interface.  There are 
-several ways to invoke these embedded functions based on how the pshell server 
+user API functionality.  It provides the ability for a program to register
+functions that can be invoked via a command line user interface.  There are
+several ways to invoke these embedded functions based on how the pshell server
 is configured, which is described in documentation further down in this file.
- 
+
 This module provides the same functionality as the PshellServer.h API and
-the libpshell-server linkable 'C' library, but implemented as a Python module.  
-It supports all the server types as the corresponding 'C' impelmentation, TCP, 
-UDP, UNIX and LOCAL server types are all supported.  Applications using this 
-module can be controlled via the pshell UDP/UNIX stand-alone 'C' client program 
-or via the PshellControl.h/libpshell-control or PshellControl.py 
+the libpshell-server linkable 'C' library, but implemented as a Python module.
+It supports all the server types as the corresponding 'C' impelmentation, TCP,
+UDP, UNIX and LOCAL server types are all supported.  Applications using this
+module can be controlled via the pshell UDP/UNIX stand-alone 'C' client program
+or via the PshellControl.h/libpshell-control or PshellControl.py
 control mechanism.
 
 Functions:
@@ -52,7 +52,7 @@ startServer()      -- start the pshell server
 cleanupResources() -- release all resources claimed by the server
 runCommand()       -- run a registered command from the parent (i.e. registering) program
 
-The following commands can only be called from within the context of 
+The following commands can only be called from within the context of
 a pshell callback function
 
 printf()      -- display a message from a pshell callback function to the client
@@ -66,15 +66,15 @@ getOption()   -- parses arg of format -<key><value> or <key>=<value>
 
 Integer constants:
 
-These are the identifiers for the serverMode.  BLOCKING wil never return 
-control to the caller of startServer, NON_BLOCKING will spawn a thread to 
+These are the identifiers for the serverMode.  BLOCKING wil never return
+control to the caller of startServer, NON_BLOCKING will spawn a thread to
 run the server and will return control to the caller of startServer
 
 BLOCKING
 NON_BLOCKING
 
-String constants: 
- 
+String constants:
+
 Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
 client programs, TCP servers require a 'telnet' client, local servers
 require no client (all user interaction done directly with server running
@@ -85,18 +85,18 @@ TCP
 UNIX
 LOCAL
 
-These three identifiers that can be used for the hostnameOrIpAddr argument 
+These three identifiers that can be used for the hostnameOrIpAddr argument
 of the startServer call.  PshellServer.ANYHOST will bind the server socket
 to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
-255.255.255.255, PshellServer.LOCALHOST will bind the server socket to 
-the local loopback address (i.e. 127.0.0.1), note that subnet broadcast 
+255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
 it also supported, e.g. x.y.z.255
 
 ANYHOST
 ANYBCAST
 LOCALHOST
 
-A complete example of the usage of the API can be found in the included 
+A complete example of the usage of the API can be found in the included
 demo program pshellServerDemo.py.
 """
 
@@ -128,17 +128,17 @@ TCP = "tcp"
 UNIX = "unix"
 LOCAL = "local"
 
-# These are the identifiers for the serverMode.  BLOCKING wil never return 
-# control to the caller of startServer, NON_BLOCKING will spawn a thread to 
+# These are the identifiers for the serverMode.  BLOCKING wil never return
+# control to the caller of startServer, NON_BLOCKING will spawn a thread to
 # run the server and will return control to the caller of startServer
 BLOCKING = 0
 NON_BLOCKING = 1
 
-# These three identifiers that can be used for the hostnameOrIpAddr argument 
+# These three identifiers that can be used for the hostnameOrIpAddr argument
 # of the startServer call.  PshellServer.ANYHOST will bind the server socket
 # to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
-# 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to 
-# the local loopback address (i.e. 127.0.0.1), note that subnet broadcast 
+# 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+# the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
 # it also supported, e.g. x.y.z.255
 ANYHOST = "anyhost"
 ANYBCAST = "anybcast"
@@ -149,7 +149,7 @@ LOCALHOST = "localhost"
 # "public" API functions
 #
 # Users of this module should only access functionality via these "public"
-# methods.  This is broken up into "public" and "private" sections for 
+# methods.  This is broken up into "public" and "private" sections for
 # readability and to not expose the implementation in the API definition
 #
 #################################################################################
@@ -234,7 +234,7 @@ def runCommand(command):
 
 #################################################################################
 #
-# The following public functions should only be called from within a 
+# The following public functions should only be called from within a
 # registered callback function
 #
 #################################################################################
@@ -314,7 +314,7 @@ def showUsage():
 #################################################################################
 def isHelp():
   """
-  Check if the user has asked for help on this command.  Command must be 
+  Check if the user has asked for help on this command.  Command must be
   registered with the showUsage = False option.
 
     Args:
@@ -329,7 +329,7 @@ def isHelp():
 #################################################################################
 def isSubString(string1, string2, minMatchLength = 0):
   """
-  This function will return True if string1 is a substring of string2 at 
+  This function will return True if string1 is a substring of string2 at
   position 0.  If the minMatchLength is 0, then it will compare up to the
   length of string1.  If the minMatchLength > 0, it will require a minimum
   of that many characters to match.  A string that is longer than the min
@@ -355,7 +355,7 @@ def getOption(arg):
   This function will parse an argument string of the formats -<key><value> where
   key is one letter only, i.e. '-t', or <key>=<value> where key can be any length
   word, i.e. 'timeout', and return a 3-tuple indicating if the arg was parsed
-  correctly, along with the associated key and corresponding value.  An example 
+  correctly, along with the associated key and corresponding value.  An example
   of the two valid formats are -t10, timeout=10.
 
     Args:
@@ -377,7 +377,7 @@ def getOption(arg):
 # API above
 #
 #################################################################################
- 
+
 #################################################################################
 #################################################################################
 def _isSubString(string1_, string2_, minMatchLength_):
@@ -411,13 +411,13 @@ def _addCommand(function_,
   global _gMaxLength
   global _gServerType
   global _gPshellClient
-  
-  # see if we have a NULL command name 
+
+  # see if we have a NULL command name
   if ((command_ == None) or (len(command_) == 0)):
     print("PSHELL_ERROR: NULL command name, command not added")
     return
 
-  # see if we have a NULL description 
+  # see if we have a NULL description
   if ((description_ == None) or (len(description_) == 0)):
     print("PSHELL_ERROR: NULL description, command: '%s' not added" % command_)
     return
@@ -438,25 +438,25 @@ def _addCommand(function_,
   if ((minArgs_ > maxArgs_) and (maxArgs_ > 0)):
     print("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added" % (minArgs_, maxArgs_, command_))
     return
-    
+
   # see if it is a duplicate command
   for command in _gCommandList:
     if (command["name"] == command_):
       # command name already exists, don't add it again
       print("PSHELL_ERROR: Command: %s already exists, not adding command" % command_)
       return
-      
+
   # everything ok, good to add command
-  
-  # see if they gave the default for maxArgs, if so, set maxArgs to minArgs 
+
+  # see if they gave the default for maxArgs, if so, set maxArgs to minArgs
   if (maxArgs_ == 0):
     maxArgs = minArgs_
   else:
     maxArgs = maxArgs_
-    
+
   if (len(command_) > _gMaxLength):
     _gMaxLength = len(command_)
-    
+
   if (prepend_ == True):
     _gCommandList.insert(0, {"function":function_,
                              "name":command_,
@@ -490,7 +490,7 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
     _gHostnameOrIpAddr = hostnameOrIpAddr_
     _gPort = port_
     _loadConfigFile()
-    _loadStartupFile()  
+    _loadStartupFile()
     _gRunning = True
     if (_gServerMode == BLOCKING):
       _runServer()
@@ -502,7 +502,7 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
 #################################################################################
 def _serverThread():
   _runServer()
-  
+
 #################################################################################
 #################################################################################
 def _createSocket():
@@ -566,7 +566,7 @@ def _runServer():
     _runTCPServer()
   elif (_gServerType == UNIX):
     _runUNIXServer()
-  else:  # local server 
+  else:  # local server
     _runLocalServer()
 
 #################################################################################
@@ -832,7 +832,7 @@ def _processCommand(command_):
     else:
       if (isHelp()):
         if (_gFoundCommand["showUsage"] == True):
-          showUsage()          
+          showUsage()
         else:
           _gFoundCommand["function"](_gArgs)
       elif (not _isValidArgCount()):
@@ -1058,7 +1058,7 @@ def _setFirstArgPos(position):
     _gFirstArgPos = 1
     _gHelpLength = 1
     _gHelpPos = 0
-    
+
 #################################################################################
 #################################################################################
 def _isHelp():
@@ -1075,7 +1075,7 @@ def _reply():
   global _gSocketFd
   global _gPshellMsg
   global _gServerType
-  global _gPshellMsgHeaderFormat  
+  global _gPshellMsgHeaderFormat
   # only issue a reply for a 'datagram' oriented remote server, TCP
   # uses a character stream and is not message based and LOCAL uses
   # no client app
@@ -1103,7 +1103,7 @@ def _cleanupResources():
 
 #################################################################################
 #################################################################################
-def _loadConfigFile():  
+def _loadConfigFile():
   global _gServerName
   global _gServerType
   global _gHostnameOrIpAddr
@@ -1146,9 +1146,9 @@ def _loadConfigFile():
           elif ((option[1].lower() == "port") and (value[1].isdigit())):
             _gPort = int(value[1])
           elif (option[1].lower() == "type"):
-            if ((value[1].lower() == UDP) or 
-                (value[1].lower() == TCP) or 
-                (value[1].lower() == UNIX) or 
+            if ((value[1].lower() == UDP) or
+                (value[1].lower() == TCP) or
+                (value[1].lower() == UNIX) or
                 (value[1].lower() == LOCAL)):
               _gServerType = value[1].lower()
           elif ((option[1].lower() == "timeout") and (value[1].isdigit())):
@@ -1255,8 +1255,8 @@ _gPort = None
 _gPrompt = "PSHELL> "
 _gTitle = "PSHELL"
 _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
-_gSocketFd = None 
-_gConnectFd = None 
+_gSocketFd = None
+_gConnectFd = None
 _gFromAddr = None
 _gUnixSocketPath = "/tmp/"
 _gArgs = None
@@ -1277,20 +1277,20 @@ _gBannerOverride = None
 #  structure,that structure is the message passed between the pshell client and
 # server, these values must match their corresponding #define definitions in
 # the C file PshellCommon.h
-_gMsgTypes = {"commandSuccess": 0, 
-              "queryVersion":1, 
-              "commandNotFound":1, 
-              "queryPayloadSize":2, 
-              "invalidArgCount":2, 
-              "queryName":3, 
-              "queryCommands1":4, 
-              "queryCommands2":5, 
-              "updatePayloadSize":6, 
-              "userCommand":7, 
-              "commandComplete":8, 
-              "queryBanner":9, 
-              "queryTitle":10, 
-              "queryPrompt":11, 
+_gMsgTypes = {"commandSuccess": 0,
+              "queryVersion":1,
+              "commandNotFound":1,
+              "queryPayloadSize":2,
+              "invalidArgCount":2,
+              "queryName":3,
+              "queryCommands1":4,
+              "queryCommands2":5,
+              "updatePayloadSize":6,
+              "userCommand":7,
+              "commandComplete":8,
+              "queryBanner":9,
+              "queryTitle":10,
+              "queryPrompt":11,
               "controlCommand":12}
 
 # fields of PshellMsg, we use this definition to unpack the received PshellMsg
@@ -1325,13 +1325,13 @@ _gHelpLength = 1
 _gWheelPos = 0
 _gWheel = "|/-\\"
 
-_gQuitTcp = False 
+_gQuitTcp = False
 _gTcpTimeout = 10  # minutes
-_gTcpConnectSockName = None 
+_gTcpConnectSockName = None
 _gTcpPrompt = None
 _gTcpTitle = None
 # flag to indicate the special pshell.py client
-_gPshellClient = False 
+_gPshellClient = False
 
 ##############################
 #

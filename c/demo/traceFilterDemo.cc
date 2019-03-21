@@ -61,7 +61,7 @@
  * this macro should be typically be placed at the very top of the source file
  * immediatly after all the 'include' statements
  */
-TF_SYMBOL_TABLE; 
+TF_SYMBOL_TABLE;
 
 /* a couple of functions to show function name filtering */
 
@@ -90,10 +90,10 @@ void bar(void)
 void *myThread(void*)
 {
 
-  /* 
+  /*
    * add a trace thread name, this should be done in the initialization
    * of each thread (i.e. before the "infinite" loop), this will allow
-   * the TraceFilter to be able to do thread based filtering 
+   * the TraceFilter to be able to do thread based filtering
    */
   tf_registerThread("myThread");
 
@@ -177,10 +177,10 @@ void sampleLogFunction(const char *outputString_)
    * what to do with that string, i.e. write to stdout, write to
    * a custom logfile, write to syslog etc
    */
-   
+
    /* write to stdout */
    printf("%s", outputString_);
-   
+
    /* write to syslog */
    syslog(LOG_INFO, "%s", outputString_);
 }
@@ -313,7 +313,7 @@ int main (int argc, char *argv[])
    * mechanism, this must register our trace levels before
    * calling 'tf_init'
    */
-   
+
   trace_registerLevels();
 
   /*
@@ -323,19 +323,19 @@ int main (int argc, char *argv[])
    * function instead of 'tf_addLevel' directly so we can keep
    * track of our max level name string length so our trace display
    * can be formatted and aligned correctly
-   * 
+   *
    * format of call is "name", level, isDefault, isMaskable
    */
 
   trace_addUserLevel(TL_USER_LEVEL1_STRING, TL_USER_LEVEL1, false, true);
   trace_addUserLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2, false, true);
-  trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3, false, true);  
+  trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3, false, true);
 
   /*
    * optionally set a log prefix, if not set, 'TRACE' will be used,
    * if set to 'NULL', no prefix will be used
    */
-   
+
   trace_setLogPrefix("demo");
 
   /*
@@ -347,19 +347,19 @@ int main (int argc, char *argv[])
    * trace logging service will just use 'printf' to output the
    * log message
    */
-   
-  /* open syslog with our program name */ 
+
+  /* open syslog with our program name */
   openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
-  
+
   /* register our log function */
   trace_registerLogFunction(sampleLogFunction);
 
-  /* 
+  /*
    * add a trace thread name, this should be done in the initialization
    * of each thread (i.e. before the "infinite" loop), this will allow
-   * the TraceFilter to be able to do thread based filtering 
+   * the TraceFilter to be able to do thread based filtering
    */
-   
+
   tf_registerThread("main");
 
   /* initialize our dynamic trace filtering feature, this should be done
@@ -367,7 +367,7 @@ int main (int argc, char *argv[])
    * any registration of pshell user commands and before starting the
    * pshell server
    */
-   
+
   tf_init();
 
   /*
@@ -392,9 +392,9 @@ int main (int argc, char *argv[])
    * change will be shown, if the control is TF_ABORT, a program termination (with core file)
    * will be forced upon the first detected change
    */
-   
+
   TF_WATCH("watchAddress", &watchAddress, sizeof(watchAddress), "0x%x", TF_CONTINUOUS);
-   
+
   /*
    * register a callback function to be called at every trace statement, the function must
    * return either 'true' or 'false', an indication will be  printed upon the first transition
@@ -403,7 +403,7 @@ int main (int argc, char *argv[])
    * to TF_ABORT, a program termination (with core file) will be forced upon the first detected
    * transition
    */
-   
+
   TF_CALLBACK("callbackFunction", callbackFunction, TF_CONTINUOUS);
 
   /* issue a trace so we can trigger the TRACE_WATCH functionality */
@@ -411,7 +411,7 @@ int main (int argc, char *argv[])
 
   /* start our pshell server */
   pshell_startServer("traceFilterDemo", serverType, PSHELL_NON_BLOCKING, PSHELL_LOCALHOST, port);
-   
+
   /* create a sample thread to show thread based filtering */
   pthread_t threadId;
   pthread_create(&threadId, NULL, myThread, NULL);
@@ -442,10 +442,10 @@ int main (int argc, char *argv[])
     TRACE_USER_LEVEL3("message 8");
     sleep(1);
   }
-   
+
   /* should never get here, but cleanup any pshell system resources as good practice */
   pshell_cleanupResources();
-   
+
   return (0);
-   
+
 }

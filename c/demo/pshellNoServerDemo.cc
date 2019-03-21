@@ -30,7 +30,7 @@
  *
  * This is an example demo program that uses all the basic features of the
  * PSHELL library in non-server mode, non-server mode is a non-interactive,
- * one shot command processing mode, i.e. it will take all the arguments 
+ * one shot command processing mode, i.e. it will take all the arguments
  * typed after the program name and process them as a single-shot command
  * and exit.  This mode will also allow for the setup of each individual
  * command to be softlinked back to the main parent program via the '--setup'
@@ -58,7 +58,7 @@
  * remote client.  The interface to this function is exactly the same as
  * the standard 'printf' function.
  */
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void hello(int argc, char *argv[])
@@ -148,16 +148,16 @@ void wildcardMatch(int argc, char *argv[])
 
 /*
  * if a command is registered with the "showUsage" flag set to "false"
- * the PshellServer will invoke the command when the user types a "?" or 
+ * the PshellServer will invoke the command when the user types a "?" or
  * "-h" rather than automatically giving the registered usage, the callback
- * command can then see if the user asked for help (i.e. typed a "?" or 
+ * command can then see if the user asked for help (i.e. typed a "?" or
  * "-h") by calling pshell_isHelp, the user can then display the standard
  * registered usage with the pshell_showUsage call and then give some
  * optional enhanced usage with the pshell_printf call
  */
 
 /******************************************************************************/
-/******************************************************************************/ 
+/******************************************************************************/
 void enhancedUsage(int argc, char *argv[])
 {
 
@@ -305,7 +305,7 @@ void advancedParsing(int argc, char *argv[])
  * 'value_' will only be extracted if the option matches the requested option_
  * name,
  */
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void getOptions(int argc, char *argv[])
@@ -415,7 +415,7 @@ int main(int argc, char *argv[])
                     1,                                              /* minArgs */
                     1,                                              /* maxArgs */
                     true);                                          /* showUsage on "?" */
-                  
+
   pshell_addCommand(getOptions,                                  /* function */
                     "getOptions",                                /* command */
                     "example of parsing command line options",   /* description */
@@ -423,7 +423,7 @@ int main(int argc, char *argv[])
                     2,                                           /* minArgs */
                     20,                                          /* maxArgs */
                     false);                                      /* showUsage on "?" */
-                  
+
   /*
    * example of running in non-server mode, i.e. non-interactive, command line mode,
    * this will run the command as typed at the command line as a single-shot command
@@ -431,6 +431,6 @@ int main(int argc, char *argv[])
    * into the 'main' from the host's command line
    */
   pshell_noServer(argc, argv);
-  
+
   return (0);
 }

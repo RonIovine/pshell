@@ -1,28 +1,28 @@
 /////////////////////////////////////////////////////////////////////////////////
-// 
-// Copyright (c) 2009, Ron Iovine, All rights reserved.  
-//  
-// Redistribution and use in source and binary forms, with or without 
+//
+// Copyright (c) 2009, Ron Iovine, All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
 //     * Redistributions in binary form must reproduce the above copyright
 //       notice, this list of conditions and the following disclaimer in the
 //       documentation and/or other materials provided with the distribution.
-//     * Neither the name of Ron Iovine nor the names of its contributors 
-//       may be used to endorse or promote products derived from this software 
+//     * Neither the name of Ron Iovine nor the names of its contributors
+//       may be used to endorse or promote products derived from this software
 //       without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-// IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-// IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-// POSSIBILITY OF SUCH DAMAGE. 
+//
+// THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+// IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+// IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@
 // functions based on how the pshell server is configured, which is described
 // in documentation further down in this file.
 //
-// A complete example of the usage of the API can be found in the included 
+// A complete example of the usage of the API can be found in the included
 // demo program file pshellServerDemo.go
 //
 package PshellServer
@@ -72,19 +72,19 @@ const (
   LOCAL = "local"
 )
 
-// These are the identifiers for the serverMode.  BLOCKING wil never return 
-// control to the caller of startServer, NON_BLOCKING will spawn a thread to 
+// These are the identifiers for the serverMode.  BLOCKING wil never return
+// control to the caller of startServer, NON_BLOCKING will spawn a thread to
 // run the server and will return control to the caller of startServer
 const (
   BLOCKING = 0
   NON_BLOCKING = 1
 )
 
-// These three identifiers that can be used for the hostnameOrIpAddr argument 
+// These three identifiers that can be used for the hostnameOrIpAddr argument
 // of the startServer call.  PshellServer.ANYHOST will bind the server socket
 // to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
-// 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to 
-// the local loopback address (i.e. 127.0.0.1), note that subnet broadcast 
+// 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+// the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
 // it also supported, e.g. x.y.z.255
 const (
   ANYHOST = "anyhost"
@@ -303,7 +303,7 @@ func RunCommand(format string, command ...interface{}) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// The following public functions should only be called from within a 
+// The following public functions should only be called from within a
 // registered callback function
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -361,7 +361,7 @@ func March(message string) {
 }
 
 //
-//  Check if the user has asked for help on this command.  Command must be 
+//  Check if the user has asked for help on this command.  Command must be
 //  registered with the showUsage = false option.
 //
 //    Args:
@@ -388,7 +388,7 @@ func ShowUsage() {
 }
 
 //
-//  This function will return True if string1 is a substring of string2 at 
+//  This function will return True if string1 is a substring of string2 at
 //  position 0.  If the minMatchLength is 0, then it will compare up to the
 //  length of string1.  If the minMatchLength > 0, it will require a minimum
 //  of that many characters to match.  A string that is longer than the min
@@ -413,7 +413,7 @@ func IsSubString(string1 string, string2 string, minMatchLength int) bool {
 //  This function will parse an argument string of the formats -<key><value> where
 //  key is one letter only, i.e. '-t', or <key>=<value> where key can be any length
 //  word, i.e. 'timeout', and return a 3-tuple indicating if the arg was parsed
-//  correctly, along with the associated key and corresponding value.  An example 
+//  correctly, along with the associated key and corresponding value.  An example
 //  of the two valid formats are -t10, timeout=10.
 //
 //  Args:
@@ -436,22 +436,22 @@ func GetOption(arg string) (bool, string, string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func addCommand(function_ pshellFunction, 
-                command_ string, 
-                description_ string, 
-                usage_ string, 
-                minArgs_ int, 
-                maxArgs_ int, 
+func addCommand(function_ pshellFunction,
+                command_ string,
+                description_ string,
+                usage_ string,
+                minArgs_ int,
+                maxArgs_ int,
                 showUsage_ bool,
-                prepend_ bool) {  
-                  
-  // see if we have a NULL command name 
+                prepend_ bool) {
+
+  // see if we have a NULL command name
   if ((command_ == "") || (len(command_) == 0)) {
     fmt.Printf("PSHELL_ERROR: NULL command name, command not added\n")
     return
   }
 
-  // see if we have a NULL description 
+  // see if we have a NULL description
   if ((description_ == "") || (len(description_) == 0)) {
     fmt.Printf("PSHELL_ERROR: NULL description, command: '%s' not added\n", command_)
     return
@@ -474,7 +474,7 @@ func addCommand(function_ pshellFunction,
     fmt.Printf("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added\n", minArgs_, maxArgs_, command_)
     return
   }
-    
+
   // see if it is a duplicate command
   for _, entry := range _gCommandList {
     if (entry.command == command_) {
@@ -483,13 +483,13 @@ func addCommand(function_ pshellFunction,
       return
     }
   }
-      
+
   // everything ok, good to add command
-  
+
   if (len(command_) > _gMaxLength) {
     _gMaxLength = len(command_)
   }
-    
+
   if (prepend_ == true) {
     _gCommandList = append([]pshellCmd{{command_,
                                         usage_,
@@ -500,12 +500,12 @@ func addCommand(function_ pshellFunction,
                                         showUsage_}},
                            _gCommandList...)
   } else {
-    _gCommandList = append(_gCommandList, 
-                           pshellCmd{command_, 
+    _gCommandList = append(_gCommandList,
+                           pshellCmd{command_,
                                      usage_,
-                                     description_, 
+                                     description_,
                                      function_,
-                                     minArgs_, 
+                                     minArgs_,
                                      maxArgs_,
                                      showUsage_})
   }
@@ -516,7 +516,7 @@ func addCommand(function_ pshellFunction,
 func startServer(serverName_ string,
                  serverType_ string,
                  serverMode_ int,
-                 hostnameOrIpAddr_ string, 
+                 hostnameOrIpAddr_ string,
                  port_ string) {
   if (_gRunning == false) {
     _gServerName = serverName_
@@ -525,7 +525,7 @@ func startServer(serverName_ string,
     _gHostnameOrIpAddr = hostnameOrIpAddr_
     _gPort = port_
     loadConfigFile()
-    loadStartupFile()  
+    loadStartupFile()
     _gRunning = true
     if (_gServerMode == BLOCKING) {
       runServer()
@@ -874,11 +874,11 @@ func runServer() {
     runTCPServer()
   } else if (_gServerType == UNIX) {
     runUNIXServer()
-  } else {  // local server 
+  } else {  // local server
     runLocalServer()
   }
 }
- 
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runUDPServer() {
@@ -1373,7 +1373,7 @@ func getInput(command_ string,
         //_write("\nchar value: %d" % char)
         //_write("\n"+prompt_)
       }
-    }    
+    }
   }
   return command_, fullCommand, quit, cursorPos_, tabCount_
 }
@@ -1442,7 +1442,7 @@ func receiveTCP() {
               addHistory(_gCommandHistory[index])
               if (_gCommandHistory[index] == "history") {
                 showHistory()
-              } else {            
+              } else {
                 processCommand(_gCommandHistory[index])
               }
             } else {
@@ -1573,7 +1573,7 @@ func processCommand(command_ string) {
     } else {
       if (IsHelp()) {
         if (_gFoundCommand.showUsage == true) {
-          ShowUsage()          
+          ShowUsage()
         } else {
           _gFoundCommand.function(_gArgs)
         }
@@ -1591,10 +1591,10 @@ func processCommand(command_ string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func reply(response_ byte) {
-  pshellSendMsg := createMessage(response_, 
-                                 getRespNeeded(_gPshellRcvMsg), 
-                                 getDataNeeded(_gPshellRcvMsg), 
-                                 getSeqNum(_gPshellRcvMsg), 
+  pshellSendMsg := createMessage(response_,
+                                 getRespNeeded(_gPshellRcvMsg),
+                                 getDataNeeded(_gPshellRcvMsg),
+                                 getSeqNum(_gPshellRcvMsg),
                                  _gPshellSendPayload)
   if (_gServerType == UDP) {
     _gUdpSocket.WriteTo(pshellSendMsg, _gRecvAddr)
@@ -1608,9 +1608,9 @@ func reply(response_ byte) {
 //
 // PshellMsg datagram message processing functions
 //
-// A PshellMsg is just a byte slice, there is a small 8 byte header along 
+// A PshellMsg is just a byte slice, there is a small 8 byte header along
 // with an ascii byte payload as follows:
-// 
+//
 //   type PshellMsg struct {
 //     msgType byte
 //     respNeeded byte
@@ -1622,7 +1622,7 @@ func reply(response_ byte) {
 //
 // I did not have any luck serializing this using 'gob' or binary/encoder to
 // send 'over-the-wire' as-is, so I am just representing this as a byte slice
-// and packing/extracting the header elements myself based on byte offsets, 
+// and packing/extracting the header elements myself based on byte offsets,
 // everything in the message except the 4 byte seqNum are single bytes, so I
 // didn't think this was to bad.  There is probably a correct way to do this
 // in 'go', but since I'm new to the language, this was the easiest way I got

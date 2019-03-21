@@ -1,34 +1,34 @@
 #!/bin/bash
 
 ################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
-if [ $# -ne 1 ] 
+if [ $# -ne 1 ]
 then
   echo "Usage: setPshellLib -stub | -full"
   exit 1
@@ -60,7 +60,7 @@ then
   mkdir $GO_SRC
 fi
 
-if [ "$1" == "-stub" ] 
+if [ "$1" == "-stub" ]
 then
 
   # C/C++ libraries, shared and static
@@ -73,44 +73,44 @@ then
   else
     echo "Setting softlink libpshell-server to libpshell-server-stub"
     rm -f $LIB_DIR/libpshell-server.so
-    ln -s $LIB_DIR/libpshell-server-stub.so $LIB_DIR/libpshell-server.so 
+    ln -s $LIB_DIR/libpshell-server-stub.so $LIB_DIR/libpshell-server.so
     rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-stub.a $LIB_DIR/libpshell-server.a
   fi
-  
+
   # Python modules
   if [ ! -e "$PYTHON_DIR/PshellServer-stub.py" ]
   then
     echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-stub.py'"
   else
-    echo "Setting softlink PshellServer.py PshellServer-stub.py"	
+    echo "Setting softlink PshellServer.py PshellServer-stub.py"
     rm -f $PYTHON_DIR/PshellServer.py
-    ln -s $PYTHON_DIR/PshellServer-stub.py $PYTHON_DIR/PshellServer.py 
+    ln -s $PYTHON_DIR/PshellServer-stub.py $PYTHON_DIR/PshellServer.py
   fi
-  
+
   # Go source module
   if [ ! -e "$GO_SRC_STUB/PshellServer-stub.go" ]
   then
     echo "ERROR: Could not find module: '$GO_SRC_STUB/PshellServer-stub.go'"
   else
-    echo "Setting softlink PshellServer.go PshellServer-stub.go"	
+    echo "Setting softlink PshellServer.go PshellServer-stub.go"
     rm -f $GO_SRC/PshellServer.go
     ln -s $GO_SRC_STUB/PshellServer-stub.go $GO_SRC/PshellServer.go
   fi
-  
+
   # Go library module, static only
   if [ ! -e "$GO_PKG/PshellServer-stub.a" ]
   then
     echo "ERROR: Could not find module: '$GO_PKG/PshellServer-stub.a'"
   else
-    echo "Setting softlink PshellServer.a PshellServer-stub.a"	
+    echo "Setting softlink PshellServer.a PshellServer-stub.a"
     rm -f $GO_PKG/PshellServer.a
     ln -s $GO_PKG/PshellServer-stub.a $GO_PKG/PshellServer.a
     # need to do this to force a re-link when building the demo app
     touch $GO_PKG/PshellServer.a
   fi
-  
-elif [ "$1" == "-full" ] 
+
+elif [ "$1" == "-full" ]
 then
 
   # C/C++ libraries, shared and static
@@ -123,43 +123,43 @@ then
   else
     echo "Setting softlink libpshell-server to libpshell-server-full"
     rm -f $LIB_DIR/libpshell-server.so
-    ln -s $LIB_DIR/libpshell-server-full.so $LIB_DIR/libpshell-server.so 
+    ln -s $LIB_DIR/libpshell-server-full.so $LIB_DIR/libpshell-server.so
     rm -f $LIB_DIR/libpshell-server.a
     ln -s $LIB_DIR/libpshell-server-full.a $LIB_DIR/libpshell-server.a
   fi
-  
+
   # Python modules
   if [ ! -e "$PYTHON_DIR/PshellServer-full.py" ]
   then
     echo "ERROR: Could not find module: '$PYTHON_DIR/PshellServer-full.py'"
   else
-    echo "Setting softlink PshellServer.py PshellServer-full.py"	
+    echo "Setting softlink PshellServer.py PshellServer-full.py"
     rm -f $PYTHON_DIR/PshellServer.py
-    ln -s $PYTHON_DIR/PshellServer-full.py $PYTHON_DIR/PshellServer.py 
+    ln -s $PYTHON_DIR/PshellServer-full.py $PYTHON_DIR/PshellServer.py
   fi
-  
+
   # Go source module
   if [ ! -e "$GO_SRC_FULL/PshellServer-full.go" ]
   then
     echo "ERROR: Could not find module: '$GO_SRC_FULL/PshellServer-full.go'"
   else
-    echo "Setting softlink PshellServer.go PshellServer-full.go"	
+    echo "Setting softlink PshellServer.go PshellServer-full.go"
     rm -f $GO_SRC/PshellServer.go
     ln -s $GO_SRC_FULL/PshellServer-full.go $GO_SRC/PshellServer.go
   fi
-  
+
   # Go library module, static only
   if [ ! -e "$GO_PKG/PshellServer-full.a" ]
   then
     echo "ERROR: Could not find module: '$GO_PKG/PshellServer-full.a'"
   else
-    echo "Setting softlink PshellServer.a PshellServer-full.a"	
+    echo "Setting softlink PshellServer.a PshellServer-full.a"
     rm -f $GO_PKG/PshellServer.a
     ln -s $GO_PKG/PshellServer-full.a $GO_PKG/PshellServer.a
     # need to do this to force a re-link when building the demo app
     touch $GO_PKG/PshellServer.a
   fi
-  
+
 else
   echo "Usage: setPshellLib -stub | -full"
 fi

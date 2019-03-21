@@ -1,28 +1,28 @@
 /////////////////////////////////////////////////////////////////////////////////
-// 
-// Copyright (c) 2009, Ron Iovine, All rights reserved.  
-//  
-// Redistribution and use in source and binary forms, with or without 
+//
+// Copyright (c) 2009, Ron Iovine, All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
 //     * Redistributions in binary form must reproduce the above copyright
 //       notice, this list of conditions and the following disclaimer in the
 //       documentation and/or other materials provided with the distribution.
-//     * Neither the name of Ron Iovine nor the names of its contributors 
-//       may be used to endorse or promote products derived from this software 
+//     * Neither the name of Ron Iovine nor the names of its contributors
+//       may be used to endorse or promote products derived from this software
 //       without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-// IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-// IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-// POSSIBILITY OF SUCH DAMAGE. 
+//
+// THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+// IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+// IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +34,7 @@
 // provides a very lightweight way to provide a control mechanism into a program
 // that is running a pshell, this is analagous to a remote procedure call (rpc).
 //
-// A complete example of the usage of the API can be found in the included 
+// A complete example of the usage of the API can be found in the included
 // demo program pshellControlDemo.go
 //
 package PshellControl
@@ -64,7 +64,7 @@ const (
   COMMAND_SUCCESS = 0
   COMMAND_NOT_FOUND = 1
   COMMAND_INVALID_ARG_COUNT = 2
-  // the following "SOCKET" enums are generated internally by the sendCommandN functions 
+  // the following "SOCKET" enums are generated internally by the sendCommandN functions
   SOCKET_SEND_FAILURE = 3
   SOCKET_SELECT_FAILURE = 4
   SOCKET_RECEIVE_FAILURE = 5
@@ -152,10 +152,10 @@ const (
 //  will return either SOCKET_NOT_CONNECTED, SOCKET_SEND_FAILURE, or
 //  COMMAND_SUCCESS, the timeout value entered in this funcition will
 //  be used as the default timeout for all calls to sendCommandN that
-//  do not provide an override timeout value, for a UDP server, the 
-//  remoteServer must be either a valid hostname or IP address and a 
-//  valid destination port must be provided, for a UNIX server, only 
-//  a valid server name must be provided along with the identifier 
+//  do not provide an override timeout value, for a UDP server, the
+//  remoteServer must be either a valid hostname or IP address and a
+//  valid destination port must be provided, for a UNIX server, only
+//  a valid server name must be provided along with the identifier
 //  PshellControl.UNIX for the 'port' parameter
 //
 //  This function returns a Server ID (sid) handle which must be saved and
@@ -175,7 +175,7 @@ func ConnectServer(controlName string, remoteServer string, port string, default
 }
 
 //
-//  Cleanup any resources associated with the server connection, including 
+//  Cleanup any resources associated with the server connection, including
 //  releasing any temp file handles, closing any local socket handles etc.
 //
 //    Args:
@@ -189,10 +189,10 @@ func DisconnectServer(sid int) {
 }
 
 //
-//  Use this function to cleanup any resources for all connected servers, this 
-//  function should be called upon program termination, either in a graceful 
-//  termination or within an exception signal handler, it is especially important 
-//  that this be called when a unix server is used since there are associated file 
+//  Use this function to cleanup any resources for all connected servers, this
+//  function should be called upon program termination, either in a graceful
+//  termination or within an exception signal handler, it is especially important
+//  that this be called when a unix server is used since there are associated file
 //  handles that need to be cleaned up
 //
 //    Args:
@@ -206,7 +206,7 @@ func DisconnectAllServers() {
 }
 
 //
-//  Set the default server response timeout that is used in the 'send' commands 
+//  Set the default server response timeout that is used in the 'send' commands
 //  that don't take a timeout override
 //
 //    Args:
@@ -221,8 +221,8 @@ func SetDefaultTimeout(sid int, defaultTimeout int) {
 }
 
 //
-//  This command will add a given multicast receiver (i.e. sid) to a multicast 
-//  group, multicast groups are either based on the command's keyword, or if 
+//  This command will add a given multicast receiver (i.e. sid) to a multicast
+//  group, multicast groups are either based on the command's keyword, or if
 //  no keyword is supplied, the given sid will receive all multicast commands
 //
 //    Args:
@@ -240,10 +240,10 @@ func AddMulticast(sid int, keyword string) {
 
 //
 //  This command will send a given command to all the registered multicast
-//  receivers (i.e. sids) for this multicast group, multicast groups are 
-//  based on the command's keyword, this function will issue the command as 
-//  a best effort fire-and-forget command to each receiver in the multicast 
-//  group, no results will be requested or expected, and no response will be 
+//  receivers (i.e. sids) for this multicast group, multicast groups are
+//  based on the command's keyword, this function will issue the command as
+//  a best effort fire-and-forget command to each receiver in the multicast
+//  group, no results will be requested or expected, and no response will be
 //  requested or expected
 //
 //    Args:
@@ -257,7 +257,7 @@ func SendMulticast(format string, command ...interface{}) {
 }
 
 //
-//  Send a command using the default timeout setup in the connectServer call, 
+//  Send a command using the default timeout setup in the connectServer call,
 //  if the default timeout is 0, the server will not reply with a response and
 //  this function will not wait for one
 //
@@ -281,8 +281,8 @@ func SendCommand1(sid int, format string, command ...interface{}) int {
 }
 
 //
-//  Send a command overriding the default timeout, if the override timeout is 0, 
-//  the server will not reply with a response and this function will not wait for 
+//  Send a command overriding the default timeout, if the override timeout is 0,
+//  the server will not reply with a response and this function will not wait for
 //  one
 //
 //    Args:
@@ -306,9 +306,9 @@ func SendCommand2(sid int, timeoutOverride int, format string, command ...interf
 }
 
 //
-//  Send a command using the default timeout setup in the connectServer call and 
-//  return any results received in the payload, if the default timeout is 0, the 
-//  server will not reply with a response and this function will not wait for one, 
+//  Send a command using the default timeout setup in the connectServer call and
+//  return any results received in the payload, if the default timeout is 0, the
+//  server will not reply with a response and this function will not wait for one,
 //  and no results will be extracted
 //
 //    Args:
@@ -333,9 +333,9 @@ func SendCommand3(sid int, format string, command ...interface{}) (int, string) 
 }
 
 //
-//  Send a command overriding the default timeout and return any results received 
-//  in the payload, if the timeout override default timeout is 0, the server will 
-//  not reply with a response and this function will not wait for one, and no 
+//  Send a command overriding the default timeout and return any results received
+//  in the payload, if the timeout override default timeout is 0, the server will
+//  not reply with a response and this function will not wait for one, and no
 //  results will be extracted
 //
 //    Args:
@@ -399,9 +399,9 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
         break
       }
     }
-    _gControlList = append(_gControlList, 
+    _gControlList = append(_gControlList,
                            pshellControl{socket,
-                                         defaultTimeout_, 
+                                         defaultTimeout_,
                                          "unix",
                                          sourceAddress,                   // unix file handle, used for cleanup
                                          []byte{},                        // sendMsg
@@ -414,16 +414,16 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
     remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
     socket, retCode = net.DialUDP("udp", nil, remoteAddr)
     if (retCode == nil) {
-      _gControlList = append(_gControlList, 
+      _gControlList = append(_gControlList,
                              pshellControl{socket,
-                                           defaultTimeout_, 
+                                           defaultTimeout_,
                                            "udp",
                                            "",                              // sourceAddress not used for UDP socket
                                            []byte{},                        // sendMsg
                                            make([]byte, _RCV_BUFFER_SIZE),  // recvMsg
                                            0,                               // recvSize
                                            strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
-                                      
+
       sid = len(_gControlList)-1
     }
   }
@@ -598,7 +598,7 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
   } else {
     retCode = SOCKET_SEND_FAILURE
   }
-   
+
   return retCode
 }
 
@@ -665,9 +665,9 @@ func loadConfigFile(controlName_ string, remoteServer_ string, port_ string, def
 //
 // PshellMsg datagram message processing functions
 //
-// A PshellMsg is just a byte slice, there is a small 8 byte header along 
+// A PshellMsg is just a byte slice, there is a small 8 byte header along
 // with an ascii byte payload as follows:
-// 
+//
 //   type PshellMsg struct {
 //     msgType byte
 //     respNeeded byte
@@ -679,7 +679,7 @@ func loadConfigFile(controlName_ string, remoteServer_ string, port_ string, def
 //
 // I did not have any luck serializing this using 'gob' or binary/encoder to
 // send 'over-the-wire' as-is, so I am just representing this as a byte slice
-// and packing/extracting the header elements myself based on byte offsets, 
+// and packing/extracting the header elements myself based on byte offsets,
 // everything in the message except the 4 byte seqNum are single bytes, so I
 // didn't think this was to bad.  There is probably a correct way to do this
 // in 'go', but since I'm new to the language, this was the easiest way I got

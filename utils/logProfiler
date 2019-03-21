@@ -1,30 +1,30 @@
 #!/usr/bin/python
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
@@ -39,12 +39,12 @@
 # This profiler understands logfile entries of the following formats:
 #
 # app | level | 14:40:32.377256 | file(function):line | user-message
-# app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
+# app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message
 # 2014-08-17 23:11:00.114 level [app:file:line] user-message
 # 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
 # 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
 #
-# Modify the functions 'parseLine' and 'findApp' to add additional log 
+# Modify the functions 'parseLine' and 'findApp' to add additional log
 # entry formats
 #
 ################################################################################
@@ -272,13 +272,13 @@ def findProfile(profiles, filename1, function1, line1, filename2, function2, lin
 #
 ######################################################################
 def parseLine(line):
-  
+
   # change this line parsing function for different log line formats,
   # we need to extract the file, function, line, and timestamp, an
   # example of the currently parsed log line formats are:
   #
   # app | level | 14:40:32.377256 | file(function):line | user-message
-  # app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
+  # app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message
   # 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
   # 2014-08-17 23:11:00.114 level [app:file:line] user-message
   # 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
@@ -298,7 +298,7 @@ def parseLine(line):
       line = location[1][:-1]
       function = tokens[functionTokenPos].strip().split(":")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
-  
+
   # parse format: 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
   expectedNumTokens = 6
   timestampTokenPos = 0
@@ -314,7 +314,7 @@ def parseLine(line):
       function = tokens[functionTokenPos].strip().split(":")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
 
-  # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
+  # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message
   expectedNumTokens = 6
   timestampTokenPos = 1
   filenameTokenPos = 2
@@ -328,7 +328,7 @@ def parseLine(line):
       line = tokens[lineTokenPos].strip()
       function = tokens[functionTokenPos].strip()
       return (filename, "("+function+")", ":"+line, timestamp)
-  
+
   # parse format: app | level | 14:40:32.377256 | file(function):line | user-message
   expectedNumTokens = 5
   timestampTokenPos = 2
@@ -344,7 +344,7 @@ def parseLine(line):
       function = tokens[functionTokenPos].strip().split("(")[-1]
       function = function.split(")")[0]
       return (filename, "("+function+")", ":"+line, timestamp)
-  
+
   # parse format: 2014-08-17 23:11:00.114 level [app:file:line] user-message
   expectedNumTokens = 4
   timestampTokenPos = 1
@@ -358,10 +358,10 @@ def parseLine(line):
       line = location[2][:-1]
       # this format does not have a function, so we just return ""
       return (filename, "", ":"+line, timestamp)
-  
+
   # dropped through, return nothing
   return (None, None, None, None)
-  
+
 ######################################################################
 #
 # return true if line matches app filter
@@ -369,13 +369,13 @@ def parseLine(line):
 ######################################################################
 def findApp(line, appFilter):
   global gNoFilter
-  
+
   # change this line parsing function for different log line formats,
   # we need to extract the file, function, line, and timestamp, an
   # example of the currently parsed log line formats are:
   #
   # app | level | 14:40:32.377256 | file(function):line | user-message
-  # app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
+  # app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message
   # 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
   # 2014-08-17 23:11:00.114 level [app:file:line] user-message
   # 2017-10-16T10:38:11.419563 level 2017-10-16T10:38:11.418026 level hostname: app: function: file@line: user-message
@@ -391,7 +391,7 @@ def findApp(line, appFilter):
       app = tokens[appTokenPos].strip().split(":")[0]
       if (app == appFilter):
         return (True)
-  
+
     # parse format: 2017-10-12T09:26:04.31081 level hostname: app: function: file@line: user-message
     expectedNumTokens = 6
     appTokenPos = 3
@@ -401,7 +401,7 @@ def findApp(line, appFilter):
       if (app == appFilter):
         return (True)
 
-    # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message 
+    # parse format: app | Sat Nov 23 04:02:35.005624 | file | line | function | level | user-message
     expectedNumTokens = 6
     appTokenPos = 0
     tokens = line.split("|")
@@ -409,7 +409,7 @@ def findApp(line, appFilter):
       app = tokens[appTokenPos].strip()
       if (app == appFilter):
         return (True)
-  
+
     # parse format: app | level | 14:40:32.377256 | file(function):line | user-message
     expectedNumTokens = 5
     appTokenPos = 0
@@ -418,7 +418,7 @@ def findApp(line, appFilter):
       app = tokens[appTokenPos].strip()
       if (app == appFilter):
         return (True)
-  
+
     # parse format: 2014-08-17 23:11:00.114 level [app:file:line] user-message
     expectedNumTokens = 4
     locationTokenPos = 3
@@ -428,10 +428,10 @@ def findApp(line, appFilter):
       app = location[0][1:]
       if (app == appFilter):
         return (True)
-  
+
     # dropped through, return nothing
     return (False)
-  
+
   else:
     return (True)
 
@@ -441,16 +441,16 @@ def findApp(line, appFilter):
 #
 ######################################################
 def updateProfile(profiles, prevLine, currLine):
-  
+
   global gTotalProfiledTime
   global gMaxAreaWidth1
   global gMaxAreaWidth2
-  
+
   (filename1, function1, line1, timestamp1) = parseLine(prevLine)
   (filename2, function2, line2, timestamp2) = parseLine(currLine)
-  
+
   if ((filename1 != None) and (filename2 != None)):
-  
+
     # both lines are good, now either update an existing area profile, or create a new one
     currTime = datetime.datetime.strptime(timestamp2, gTimestampFormat)
     prevTime = datetime.datetime.strptime(timestamp1, gTimestampFormat)
@@ -516,7 +516,7 @@ def createProfile(logfile):
     appFilter = gNoFilter
   if (os.path.isfile(logfile)):
     # create a new profile  for this logfile
-    profile = {"logfile":logfile1, 
+    profile = {"logfile":logfile1,
                "appFilter":appFilter,
                "contents":open(logfile, 'r').readlines(),
                "totTime":datetime.timedelta(0),
@@ -626,10 +626,10 @@ def showProfile(profiles, outfile, option, count, fileFilter, functionFilter):
   global gClearStatusUpdate
 
   global gDiffRequested
-  
+
   global gAreaLabel1
   global gAreaLabel2
-  
+
   global gMinAreaWidth1
   global gMinAreaWidth2
 
@@ -868,8 +868,8 @@ def diffProfiles(profiles1, profiles2):
     gCountWidthAdjust = 5
   gProfilesDiff = {"logfile":"Diff: %s->%s" % (profiles1["logfile"], profiles2["logfile"]), "profile":[]}
   for profile1 in profiles1["profile"]:
-    profile2 = findProfile(profiles2["profile"], 
-                           profile1["file1"], profile1["function1"], profile1["line1"], 
+    profile2 = findProfile(profiles2["profile"],
+                           profile1["file1"], profile1["function1"], profile1["line1"],
                            profile1["file2"], profile1["function2"], profile1["line2"])
     if (profile2 != None):
       gProfilesDiff["profile"].append({"file1":profile1["file1"],
@@ -926,11 +926,11 @@ def createDelta(profile, maxTimeDelta):
   global gKeepAliveType
   global gProfilesDelta
 
-  gProfilesDelta = {"logfile":profile["logfile"], 
+  gProfilesDelta = {"logfile":profile["logfile"],
                     "appFilter":profile["appFilter"],
-                    "maxTimeDelta":maxTimeDelta, 
-                    "maxTimeDeltaDiff":0.0, 
-                    "minTimeDeltaDiff":sys.float_info.max, 
+                    "maxTimeDelta":maxTimeDelta,
+                    "maxTimeDeltaDiff":0.0,
+                    "minTimeDeltaDiff":sys.float_info.max,
                     "delta":[]}
   sys.stdout.write("\n")
   sys.stdout.write("Creating time delta profile from logfile: %s, please wait...processing line: " % profile["logfile"])
@@ -1092,7 +1092,7 @@ def showCommands():
   print("    for a 'diff' based profile, exactly two profile IDs must be given, for a")
   print("    time 'delta' based analysis, only one profile ID should be provided.")
   print("")
-  
+
 ##########################################################
 #
 # get interactive user input and perform desired action
@@ -1194,7 +1194,7 @@ def getInput():
         # process command line selections
         # if not idList populated, default to 0
         if (len(idList) == 0):
-          idList = [0]        
+          idList = [0]
         if (deltaRequested):
           if (len(idList) == 1):
             createDelta(gProfiles[idList[0]], float(maxTimeDelta))
@@ -1224,7 +1224,7 @@ if (__name__ == '__main__'):
   else:
     # read in all our logfiles & create profiles
     sys.stdout.write("\033]0;logProfiler\007")
-    sys.stdout.flush()    
+    sys.stdout.flush()
     gProfiles = []
     for arg in sys.argv[1:]:
       logfile = arg

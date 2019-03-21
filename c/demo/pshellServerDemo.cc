@@ -64,7 +64,7 @@
  * remote client.  The interface to this function is exactly the same as
  * the standard 'printf' function.
  */
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void hello(int argc, char *argv[])
@@ -86,15 +86,15 @@ void world(int argc, char *argv[])
 
 /*
  * this command shows an example client keep alive,
- * the PSHELL UDP client has a default 5 second timeout, 
- * if a command will be known to take longer than 5 
- * seconds, it must give some kind of output back to 
- * the client, this shows the two helper functions 
+ * the PSHELL UDP client has a default 5 second timeout,
+ * if a command will be known to take longer than 5
+ * seconds, it must give some kind of output back to
+ * the client, this shows the two helper functions
  * created the assist in this, the TCP client does not
  * need a keep alive since the TCP protocol itself
  * handles that
  */
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void keepAlive(int argc, char *argv[])
@@ -219,16 +219,16 @@ void wildcardMatch(int argc, char *argv[])
 
 /*
  * if a command is registered with the "showUsage" flag set to "false"
- * the PshellServer will invoke the command when the user types a "?" or 
+ * the PshellServer will invoke the command when the user types a "?" or
  * "-h" rather than automatically giving the registered usage, the callback
- * command can then see if the user asked for help (i.e. typed a "?" or 
+ * command can then see if the user asked for help (i.e. typed a "?" or
  * "-h") by calling pshell_isHelp, the user can then display the standard
  * registered usage with the pshell_showUsage call and then give some
  * optional enhanced usage with the pshell_printf call
  */
 
 /******************************************************************************/
-/******************************************************************************/ 
+/******************************************************************************/
 void enhancedUsage(int argc, char *argv[])
 {
 
@@ -376,7 +376,7 @@ void advancedParsing(int argc, char *argv[])
  * 'value_' will only be extracted if the option matches the requested option_
  * name,
  */
- 
+
 /******************************************************************************/
 /******************************************************************************/
 void getOptions(int argc, char *argv[])
@@ -586,7 +586,7 @@ int main(int argc, char *argv[])
                     1,                                              /* minArgs */
                     1,                                              /* maxArgs */
                     true);                                          /* showUsage on "?" */
-                  
+
   pshell_addCommand(getOptions,                                  /* function */
                     "getOptions",                                /* command */
                     "example of parsing command line options",   /* description */
@@ -594,12 +594,12 @@ int main(int argc, char *argv[])
                     2,                                           /* minArgs */
                     20,                                          /* maxArgs */
                     false);                                      /* showUsage on "?" */
-                  
+
   /*
    * example of issuing an pshell command from within a program, this can be done before
    * or after the server is started, as long as the command being called is regstered
    */
-   
+
   pshell_runCommand("hello");
 
   /*
@@ -608,7 +608,7 @@ int main(int argc, char *argv[])
    * The 1st argument is our serverName (i.e. "pshellServerDemo").
    *
    * The 2nd argument specifies the type of PSHELL server, the four valid values are:
-   * 
+   *
    *   PSHELL_UDP_SERVER   - Server runs as a multi-session UDP based server.  This requires
    *                         the special stand-alone command line UDP/UNIX client program
    *                         'pshell'.  This server has no timeout for idle client sessions.
@@ -634,10 +634,10 @@ int main(int argc, char *argv[])
    *                         control to the calling context.
    *   PSHELL_BLOCKING     - No thread is created, all processing of user input is done within
    *                         this function call, it will never return control to the calling context.
-   * 
+   *
    * The 4th and 5th arguments must be provided for a UDP or TCP server, for a LOCAL or
    * UNIX server they can be omitted, and if provided they will be ignored.
-   * 
+   *
    * For the 4th argument, a valid IP address or hostname can be used.  There are also 3 special
    * "hostname" type identifiers defined as follows:
    *
@@ -648,16 +648,16 @@ int main(int argc, char *argv[])
    *
    * Finally, the 5th argument is the desired port number.
    *
-   * All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden 
+   * All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden
    * via the 'pshell-server.conf' file on a per-server basis.
    *
    */
-   
+
   pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, PSHELL_ANYHOST, port);
-  
+
   /* should never get here, but cleanup any pshell system resources as good practice */
   pshell_cleanupResources();
-   
+
   return (0);
-  
+
 }

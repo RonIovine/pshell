@@ -296,7 +296,7 @@ void pshell_addMulticast(int sid_, const char *keyword_)
       }
     }
     if (sidIndex < PSHELL_MAX_SERVERS)
-    {      
+    {
       /* see if we have a new multicast group (keyword) */
       if (groupIndex == _multicastList.numGroups)
       {
@@ -306,12 +306,12 @@ void pshell_addMulticast(int sid_, const char *keyword_)
       }
       /* see if we have a new sid for this group */
       if (sidIndex == _multicastList.groups[groupIndex].numSids)
-      {      
+      {
         /* new sid for this group, add it */
         _multicastList.groups[groupIndex].sidList[_multicastList.groups[groupIndex].numSids++] = sid_;
-        PSHELL_INFO("Adding new multicast group sid: %d, keyword: '%s', numGroups: %d, numSids: %d", 
+        PSHELL_INFO("Adding new multicast group sid: %d, keyword: '%s', numGroups: %d, numSids: %d",
                     sid_,
-                    keyword_, 
+                    keyword_,
                     _multicastList.numGroups,
                     _multicastList.groups[groupIndex].numSids);
       }
@@ -353,7 +353,7 @@ void pshell_sendMulticast(const char *command_, ...)
     }
     for (int group = 0; group < _multicastList.numGroups; group++)
     {
-      if ((strcmp(_multicastList.groups[group].keyword, PSHELL_MULTICAST_ALL) == 0) || 
+      if ((strcmp(_multicastList.groups[group].keyword, PSHELL_MULTICAST_ALL) == 0) ||
           (((keyword = strstr(_multicastList.groups[group].keyword, command)) != NULL) &&
             (keyword == _multicastList.groups[group].keyword)))
       {
@@ -368,8 +368,8 @@ void pshell_sendMulticast(const char *command_, ...)
         {
           if ((control = getControl(_multicastList.groups[group].sidList[sid])) != NULL)
           {
-            /* 
-             * since we are sending to multiple servers, we don't want any data 
+            /*
+             * since we are sending to multiple servers, we don't want any data
              * back and we don't even want any response, we just do fire-and-forget
              */
             control->pshellMsg.header.dataNeeded = false;
@@ -389,7 +389,7 @@ void pshell_sendMulticast(const char *command_, ...)
   {
     PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
   }
-  pthread_mutex_unlock(&_mutex);  
+  pthread_mutex_unlock(&_mutex);
 }
 
 /******************************************************************************/
@@ -417,7 +417,7 @@ int pshell_sendCommand1(int sid_, const char *command_, ...)
       PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
-  pthread_mutex_unlock(&_mutex);  
+  pthread_mutex_unlock(&_mutex);
   return (retCode);
 }
 
@@ -446,7 +446,7 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
       PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
-  pthread_mutex_unlock(&_mutex);  
+  pthread_mutex_unlock(&_mutex);
   return (retCode);
 }
 
@@ -526,7 +526,7 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
       PSHELL_WARNING("Command truncated: '%s', length exceeds %d bytes, %d bytes needed, command not sent", command, sizeof(command), bytesFormatted);
     }
   }
-  pthread_mutex_unlock(&_mutex);  
+  pthread_mutex_unlock(&_mutex);
   return (retCode);
 }
 
@@ -553,7 +553,7 @@ const char *pshell_getResponseString(int results_)
     case PSHELL_SOCKET_NOT_CONNECTED:
       return ("PSHELL_SOCKET_NOT_CONNECTED");
     default:
-      return ("PSHELL_UNKNOWN_RESPONSE");    
+      return ("PSHELL_UNKNOWN_RESPONSE");
   }
 }
 
@@ -573,7 +573,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
   {
 
     control_->serverType = UNIX;
-      
+
     if ((control_->socketFd = socket(AF_UNIX, SOCK_DGRAM, 0)) < 0)
     {
       PSHELL_ERROR("PSHELL_ERROR: Cannot create UNIX socket");
@@ -593,7 +593,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
                      (struct sockaddr *)&control_->sourceUnixAddress,
                      sizeof(control_->sourceUnixAddress));
     }
-    
+
     if (retCode < 0)
     {
       PSHELL_ERROR("PSHELL_ERROR: Cannot bind to UNIX socket: %s", control_->sourceUnixAddress.sun_path);
@@ -605,10 +605,10 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
 
   }
   else
-  {    
-    
+  {
+
     control_->serverType = UDP;
-  
+
     /*
     * we don't care what our source address is because the pshell server
     * will just do a reply to us based on the source address it receives
@@ -654,7 +654,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
         return (false);
       }
     }
-   
+
   }
   return (true);
 }
@@ -671,7 +671,7 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
 
   if (control_ != NULL)
   {
-    
+
     FD_ZERO (&readFd);
     FD_SET(control_->socketFd,&readFd);
 
@@ -693,7 +693,7 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
       memset(&timeout, 0, sizeof(timeout));
       timeout.tv_sec = timeoutOverride_/1000;
       timeout.tv_usec = (timeoutOverride_%1000)*1000;
-      
+
       /* loop in case we have any stale responses we need to flush from the socket */
       while (true)
       {
@@ -717,12 +717,12 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
           }
           else if (seqNum > control_->pshellMsg.header.seqNum)
           {
-            /* 
-             * make sure we have the correct response, this condition can happen if we had 
-             * a very short timeout for the previous call and missed the response, in which 
-             * case the response to the previous call will be queued in the socket ahead of 
-             * our current expected response, when we detect that condition, we read the 
-             * socket until we either find the correct response or timeout, we toss any previous 
+            /*
+             * make sure we have the correct response, this condition can happen if we had
+             * a very short timeout for the previous call and missed the response, in which
+             * case the response to the previous call will be queued in the socket ahead of
+             * our current expected response, when we detect that condition, we read the
+             * socket until we either find the correct response or timeout, we toss any previous
              * unmatched responses
              */
             PSHELL_WARNING("Received seqNum: %d, does not match sent seqNum: %d", control_->pshellMsg.header.seqNum, seqNum)
@@ -748,7 +748,7 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
   }
 
   if ((strlen(control_->pshellMsg.payload) > 0) &&
-      (retCode > PSHELL_COMMAND_SUCCESS) && 
+      (retCode > PSHELL_COMMAND_SUCCESS) &&
       (retCode < PSHELL_SOCKET_SEND_FAILURE))
   {
     PSHELL_ERROR("Remote pshell command: '%s', server: %s, %s\n%s%s",
@@ -770,9 +770,9 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
     PSHELL_INFO("Remote pshell command: '%s', %s", command_, pshell_getResponseString(retCode));
     retCode = PSHELL_COMMAND_SUCCESS;
   }
-  
+
   return (retCode);
-  
+
 }
 
 /******************************************************************************/

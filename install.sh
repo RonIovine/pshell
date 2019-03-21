@@ -1,30 +1,30 @@
 #!/bin/bash
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
@@ -66,7 +66,7 @@ then
     echo
     exit 1
   else
-  
+
     # local install, setup some softlinks and create .pshellrc env file
     echo "Setting softlink libpshell-server to libpshell-server-full"
     cd $localDir/c/lib
@@ -74,24 +74,24 @@ then
     ln -s libpshell-server-full.so libpshell-server.so
     rm -f libpshell-server.a
     ln -s libpshell-server-full.a libpshell-server.a
-    
-    echo "Setting softlink PshellServer.py PshellServer-full.py"	
+
+    echo "Setting softlink PshellServer.py PshellServer-full.py"
     cd $localDir/python/src
-    rm -f PshellServer.py	
-    ln -s PshellServer-full.py PshellServer.py 
+    rm -f PshellServer.py
+    ln -s PshellServer-full.py PshellServer.py
 
     if [ ! -e "$localDir/go/src/PshellServer" ]
     then
       mkdir $localDir/go/src/PshellServer
     fi
-    
-    echo "Setting softlink PshellServer.go PshellServer-full.go"	
-    cd $localDir/go/src/PshellServer	
+
+    echo "Setting softlink PshellServer.go PshellServer-full.go"
+    cd $localDir/go/src/PshellServer
     rm -f $localDir/go/src/PshellServer/PshellServer.go
     ln -s $localDir/go/src/PshellServer-full/PshellServer-full.go $localDir/go/src/PshellServer/PshellServer.go
 
-    echo "Setting softlink PshellServer.a PshellServer-full.a"	
-    cd $localDir/go/pkg/linux_amd64	
+    echo "Setting softlink PshellServer.a PshellServer-full.a"
+    cd $localDir/go/pkg/linux_amd64
     rm -f PshellServer.a
     ln -s PshellServer-full.a PshellServer.a
 
@@ -111,7 +111,7 @@ then
     ln -s pshellNoServerDemo$fileExt wildcardMatch$fileExt
     rm -f world*
     ln -s pshellNoServerDemo$fileExt world$fileExt
-    
+
     cd $localDir
     rm -f .pshellrc
     echo "#" >> .pshellrc
@@ -172,23 +172,23 @@ else
   localLibDir="c/lib"
   localMan1Dir="c/man/man1"
   localMan3Dir="c/man/man3"
-  
+
   if [ -d "/usr/lib64" ]
   then
     libDir="/usr/lib64"
   else
     libDir="/usr/lib"
   fi
-  
+
   echo "Installing pshell files..."
   echo "Installing libs..."
-  
+
   if [ ! -d $libDir/pshell ]
   then
     echo "Creating lib directory $libDir/pshell"
     mkdir $libDir/pshell
   fi
-  
+
   echo "Copying libpshell-server-full.so to $libDir/pshell"
   cp -f $localLibDir/libpshell-server-full.so $libDir/pshell/.
   echo "Copying libpshell-server-full.a to $libDir/pshell"
@@ -201,18 +201,18 @@ else
   cp -f $localLibDir/libpshell-control.so $libDir/pshell/.
   echo "Copying libpshell-control.a to $libDir/pshell"
   cp -f $localLibDir/libpshell-control.a $libDir/pshell/.
-  
-  echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"  
+
+  echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"
   rm -f $libDir/libpshell-server.so
   ln -s $libDir/pshell/libpshell-server-full.so $libDir/libpshell-server.so
-  
+
   rm -f $libDir/libpshell-server.a
   ln -s $libDir/pshell/libpshell-server-full.a $libDir/libpshell-server.a
 
   echo "Setting softlink $libDir/libpshell-control to $libDir/pshell/libpshell-control"
   rm -f $libDir/libpshell-control.so
   ln -s $libDir/pshell/libpshell-control.so $libDir/libpshell-control.so
-  
+
   rm -f $libDir/libpshell-control.a
   ln -s $libDir/pshell/libpshell-control.a $libDir/libpshell-control.a
 
@@ -223,7 +223,7 @@ else
   echo "Copying pshellAggregator$fileExt to $binDir"
   cp -f $localBinDir/pshellAggregator $binDir/.
   chmod +x $binDir/pshellAggregator$fileExt
-  
+
   echo "Installing includes..."
   echo "Copying PshellServer.h to $includeDir"
   cp -f $localIncludeDir/PshellServer.h $includeDir/.
@@ -235,7 +235,7 @@ else
   cp -f $localIncludeDir/TraceFilter.h $includeDir/.
   echo "Copying TraceLog.h to $includeDir"
   cp -f $localIncludeDir/TraceLog.h $includeDir/.
-  
+
   if [ ! -d $pshellDir ]
   then
     echo "Creating pshell directory $pshellDir"
@@ -249,7 +249,7 @@ else
     echo "Creating config directory $configDir"
     mkdir $configDir
   fi
-  
+
   echo "Copying pshell-server.conf to $configDir"
   cp -f config/pshell-server.conf $configDir/.
   echo "Copying pshell-client.conf to $configDir"
@@ -259,29 +259,29 @@ else
   echo "Copying README to $configDir"
   cp -f config/README $configDir/.
   chmod 666 $configDir/*
-  
+
   echo "Installing batch files..."
   if [ ! -d $batchDir ]
   then
     echo "Creating batch directory $batchDir"
     mkdir $batchDir
   fi
-  
+
   echo "Copying README to $batchDir"
   cp -f batch/README $batchDir/.
   chmod 666 $batchDir/*
-  
+
   echo "Installing startup files..."
   if [ ! -d $startupDir ]
   then
     echo "Creating startup directory $startupDir"
     mkdir $startupDir
   fi
-  
+
   echo "Copying README to $startupDir"
   cp -f startup/README $startupDir/.
   chmod 666 $startupDir/*
-  
+
   echo "Installing manpages..."
   echo "Copying pshell.1 to $man1Dir"
   cp -f $localMan1Dir/pshell.1 $man1Dir/.

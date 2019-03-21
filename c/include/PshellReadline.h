@@ -1,27 +1,27 @@
 /*******************************************************************************
  *
- * Copyright (c) 2009, Ron Iovine, All rights reserved. 
+ * Copyright (c) 2009, Ron Iovine, All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without 
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of Ron Iovine nor the names of its contributors 
- *       may be used to endorse or promote products derived from this software 
+ *     * Neither the name of Ron Iovine nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
  *       without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
- * IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
- * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *******************************************************************************/
@@ -88,7 +88,7 @@ extern "C" {
 enum PshellTabStyle
 {
   PSHELL_RL_FAST_TAB,
-  PSHELL_RL_BASH_TAB 
+  PSHELL_RL_BASH_TAB
 };
 
 /*
@@ -166,7 +166,7 @@ bool pshell_rl_isSubString(const char *string1_,
 
 /*
  * pshell_rl_addTabCompletion:
- * 
+ *
  * Add a keyword to the TAB completion list.  TAB completion will only be applied
  * to the first keyword of a given user typed command
  */
@@ -174,7 +174,7 @@ void pshell_rl_addTabCompletion(const char *keyword_);
 
 /*
  * pshell_rl_setTabStyle:
- * 
+ *
  * Set the tabbing method to either be bash/readline style tabbing, i.e. double
  * tabbing to initiate and display completions, or "fast" tabbing, where all
  * completions and displays are initiated via a single tab only, the default is
@@ -185,7 +185,7 @@ void pshell_rl_setTabStyle(PshellTabStyle tabStyle_);
 
 /*
  * pshell_rl_setIdleTimeout:
- * 
+ *
  * Set the idle session timeout as described above.  Use the identifiers
  * PSHELL_RL_ONE_SEC and PSHELL_RL_ONE_MINUTE as follows, e.g. PSHELL_RL_ONE_MINUTE*5
  * for a 5 minute idleSession timeout.

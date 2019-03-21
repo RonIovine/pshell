@@ -1,30 +1,30 @@
 #!/usr/bin/python
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
@@ -32,10 +32,10 @@
 A Python module to provide readline like user input functionality
 
 This API implements a readline like functionality for user input.  This can
-work with any character stream based input/output terminal device, i.e. 
-keyboard input over a serial tty, or over a TCP/telnet connection.  This module 
-will provide up-arrow command history recall, command line editing, and TAB 
-completion of registered keywords.  
+work with any character stream based input/output terminal device, i.e.
+keyboard input over a serial tty, or over a TCP/telnet connection.  This module
+will provide up-arrow command history recall, command line editing, and TAB
+completion of registered keywords.
 
 Functions:
 
@@ -74,7 +74,7 @@ Fast tabbing, i.e. initiated via single tabbing, this is the default
 
 FAST_TAB
 
-A complete example of the usage of the API can be found in the included demo 
+A complete example of the usage of the API can be found in the included demo
 program pshellReadlineDemo.py
 """
 
@@ -114,7 +114,7 @@ FAST_TAB = "fast"
 # "public" API functions
 #
 # Users of this module should only access functionality via these "public"
-# methods.  This is broken up into "public" and "private" sections for 
+# methods.  This is broken up into "public" and "private" sections for
 # readability and to not expose the implementation in the API definition
 #
 #################################################################################
@@ -125,12 +125,12 @@ def setFileDescriptors(inFd, outFd, serialType, idleTimeout = IDLE_TIMEOUT_NONE)
   """
   Set the input and output file descriptors, if this function is not called,
   the default is stdin and stdout.  The file descriptors given to this function
-  must be opened and running in raw serial character mode.  The idleTimeout 
+  must be opened and running in raw serial character mode.  The idleTimeout
   specifies the time to wait for any user activity in the getInput function.
   Use the identifiers PshellReadline.ONE_SECOND and PshellReadline.ONE_MINUTE
   to set this timeout value, e.g. PshellReadline.ONE_MINUTE*5, for serialType
   use the identifiers PshellReadline.TTY and PshellReadline.SOCKET.  For the
-  socket identifier, use the file descriptor that is returned from the TCP 
+  socket identifier, use the file descriptor that is returned from the TCP
   socket server 'accept' call for both the inFd and outFd.
 
     Args:
@@ -211,12 +211,12 @@ def setTabStyle(tabStyle):
 #################################################################################
 def getInput(prompt):
   """
-  Issue the user prompt and return the entered command line value.  This 
+  Issue the user prompt and return the entered command line value.  This
   function will return the tuple (command, idleSession).  If the idle session
-  timeout is set to IDLE_TIMEOUT_NONE (default), the idleSession will always 
+  timeout is set to IDLE_TIMEOUT_NONE (default), the idleSession will always
   be false and this function will not return until the user has typed a command
   and pressed return.  Otherwise this function will set the idleSession value
-  to true and return if no user activity is detected for the idleSessionTimeout 
+  to true and return if no user activity is detected for the idleSessionTimeout
   period
 
     Args:
@@ -232,13 +232,13 @@ def getInput(prompt):
 #################################################################################
 def isSubString(string1, string2, minMatchLength = 0):
   """
-  This function will return True if string1 is a substring of string2 at 
+  This function will return True if string1 is a substring of string2 at
   position 0.  If the minMatchLength is 0, then it will compare up to the
   length of string1.  If the minMatchLength > 0, it will require a minimum
   of that many characters to match.  A string that is longer than the min
   match length must still match for the remaining characters, e.g. with a
   minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
-  will match, 'quix' or 'uit' will not match.  This function is useful for 
+  will match, 'quix' or 'uit' will not match.  This function is useful for
   wildcard matching.
 
     Args:
@@ -511,7 +511,7 @@ def _getInput(prompt_):
         if (command == "history"):
           # add command to our command history
           _addHistory(command)
-	        # we process the history internally
+          # we process the history internally
           _showHistory()
           command = ""
           cursorPos = 0
@@ -525,14 +525,14 @@ def _getInput(prompt_):
               command = _gCommandHistory[index]
               _addHistory(command)
               if command == "history":
-	              # we process the history internally
+                # we process the history internally
                 _showHistory()
                 command = ""
                 cursorPos = 0
                 tabCount = 0
                 _writeOutput(prompt_)
               else:
-	              return (command.strip(), False)
+                return (command.strip(), False)
             else:
               command = ""
               cursorPos = 0
@@ -554,7 +554,7 @@ def _getInput(prompt_):
         _writeOutput(prompt_)
     elif (ord(char) == 11):
       # kill to eol
-      _writeOutput(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))      
+      _writeOutput(" "*len(command[cursorPos:]) + "\b"*(len(command[cursorPos:])))
       command = command[:cursorPos]
     elif (ord(char) == 21):
       # kill whole line
@@ -588,7 +588,7 @@ def _getInput(prompt_):
               _clearLine(cursorPos, command)
               (cursorPos, command) = _showCommand(_findLongestMatch(matchList, command))
       else:  # BASH_TAB
-        # this code below implements the more standard readline/bash double tabbing method 
+        # this code below implements the more standard readline/bash double tabbing method
         if (tabCount == 2):
           if (len(command) == 0):
             # nothing typed, just a double TAB, show all registered TAB completions
@@ -645,7 +645,7 @@ def _showHistory():
   global _gCommandHistory
   for index, keyword in enumerate(_gCommandHistory):
     _writeOutput("%-3d %s\n" % (index+1, keyword))
-  
+
 #################################################################################
 #################################################################################
 def _writeOutput(string_):

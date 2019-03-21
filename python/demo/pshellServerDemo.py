@@ -1,41 +1,41 @@
 #!/usr/bin/python
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
 #################################################################################
 #
-# This is an example demo program that uses all the basic features of the PSHELL 
-# server python module.  This program can be run as either a UDP, TCP, UNIX, or 
-# local server based on the command line options.  If it is run as a UDP or UNIX 
-# based server, you must use the provided stand-alone UDP client program 'pshell' 
+# This is an example demo program that uses all the basic features of the PSHELL
+# server python module.  This program can be run as either a UDP, TCP, UNIX, or
+# local server based on the command line options.  If it is run as a UDP or UNIX
+# based server, you must use the provided stand-alone UDP client program 'pshell'
 # or 'pshell.py' to connect to it, if it is run as a TCP server, you must use
-# 'telnet, if it is run as a local server, user command line input is solicited 
+# 'telnet, if it is run as a local server, user command line input is solicited
 # directly from this program, no external client is needed.
 #
 #################################################################################
@@ -53,12 +53,12 @@ import PshellServer
 # contents of argv are the user entered arguments, excluding the actual command
 # itself (arguments only).
 #
-# Use the special 'PshellServer.printf' function call to display data back to 
+# Use the special 'PshellServer.printf' function call to display data back to
 # the remote client.  The interface to this function is similar to the standard
 # 'print' function in Python.
 #
 #################################################################################
- 
+
 #################################################################################
 #################################################################################
 def hello(argv):
@@ -76,12 +76,12 @@ def world(argv):
 def enhancedUsage(argv):
   # see if the user asked for help
   if (PshellServer.isHelp()):
-    # show standard usage 
+    # show standard usage
     PshellServer.showUsage()
-    # give some enhanced usage 
+    # give some enhanced usage
     PshellServer.printf("Enhanced usage here...")
   else:
-    # do normal function processing 
+    # do normal function processing
     PshellServer.printf("enhancedUsage command dispatched:")
     for index, arg in enumerate(argv):
       PshellServer.printf("  argv[%d]: '%s'" % (index, arg))
@@ -231,46 +231,46 @@ if (__name__ == '__main__'):
   registerSignalHandlers()
 
   # register our callback commands, commands consist of single keyword only
-  PshellServer.addCommand(function    = hello, 
-                          command     = "hello", 
-                          description = "hello command description", 
-                          usage       = "[<arg1> ... <arg20>]", 
-                          minArgs     = 0, 
+  PshellServer.addCommand(function    = hello,
+                          command     = "hello",
+                          description = "hello command description",
+                          usage       = "[<arg1> ... <arg20>]",
+                          minArgs     = 0,
                           maxArgs     = 20)
-                          
-  PshellServer.addCommand(function    = world, 
-                          command     = "world", 
-                          description = "world command description")
-                          
-  PshellServer.addCommand(function    = enhancedUsage, 
-                          command     = "enhancedUsage", 
-                          description = "command with enhanced usage", 
-                          usage       = "<arg1>", 
-                          minArgs     = 1,
-                          showUsage   = False)
-                          
-  PshellServer.addCommand(function    = wildcardMatch,                           
-                          command     = "wildcardMatch",
-                          description = "command that does a wildcard matching",  
-                          usage       = "<arg>",                                 
-                          minArgs     = 1,
-                          showUsage   = False)                                     
 
-  PshellServer.addCommand(function    = getOptions, 
-                          command     = "getOptions", 
-                          description = "example of parsing command line options", 
-                          usage       = "<arg1> [<arg2>...<argN>]", 
-                          minArgs     = 1, 
-                          maxArgs     = 20, 
+  PshellServer.addCommand(function    = world,
+                          command     = "world",
+                          description = "world command description")
+
+  PshellServer.addCommand(function    = enhancedUsage,
+                          command     = "enhancedUsage",
+                          description = "command with enhanced usage",
+                          usage       = "<arg1>",
+                          minArgs     = 1,
                           showUsage   = False)
-                    
-  # TCP or LOCAL servers don't need a keep-alive, so only add 
+
+  PshellServer.addCommand(function    = wildcardMatch,
+                          command     = "wildcardMatch",
+                          description = "command that does a wildcard matching",
+                          usage       = "<arg>",
+                          minArgs     = 1,
+                          showUsage   = False)
+
+  PshellServer.addCommand(function    = getOptions,
+                          command     = "getOptions",
+                          description = "example of parsing command line options",
+                          usage       = "<arg1> [<arg2>...<argN>]",
+                          minArgs     = 1,
+                          maxArgs     = 20,
+                          showUsage   = False)
+
+  # TCP or LOCAL servers don't need a keep-alive, so only add
   # this command for connectionless datagram type servers
   if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
-    PshellServer.addCommand(function    = keepAlive, 
-                            command     = "keepAlive", 
-                            description = "command to show client keep-alive", 
-                            usage       = "dots | bang | pound | wheel", 
+    PshellServer.addCommand(function    = keepAlive,
+                            command     = "keepAlive",
+                            description = "command to show client keep-alive",
+                            usage       = "dots | bang | pound | wheel",
                             minArgs     = 1)
 
   # run a registered command from within it's parent process, this can be done before
@@ -282,7 +282,7 @@ if (__name__ == '__main__'):
   # The 1st argument is our serverName (i.e. "pshellServerDemo").
   #
   # The 2nd argument specifies the type of PSHELL server, the four valid values are:
-  # 
+  #
   #   PshellServer.UDP   - Server runs as a multi-session UDP based server.  This requires
   #                        the special stand-alone command line UDP/UNIX client program
   #                        'pshell'.  This server has no timeout for idle client sessions.
@@ -308,10 +308,10 @@ if (__name__ == '__main__'):
   #                               control to the calling context.
   #   PshellServer.BLOCKING     - No thread is created, all processing of user input is done within
   #                               this function call, it will never return control to the calling context.
-  # 
+  #
   # The 4th and 5th arguments must be provided for a UDP or TCP server, for a LOCAL or
   # UNIX server they can be omitted, and if provided they will be ignored.
-  # 
+  #
   # For the 4th argument, a valid IP address or hostname can be used.  There are also 3 special
   # "hostname" type identifiers defined as follows:
   #
@@ -322,7 +322,7 @@ if (__name__ == '__main__'):
   #
   # Finally, the 5th argument is the desired port number.
   #
-  # All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden 
+  # All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden
   # via the 'pshell-server.conf' file on a per-server basis.
 
   PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)

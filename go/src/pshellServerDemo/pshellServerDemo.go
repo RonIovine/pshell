@@ -1,28 +1,28 @@
 /////////////////////////////////////////////////////////////////////////////////
-// 
-// Copyright (c) 2009, Ron Iovine, All rights reserved.  
-//  
-// Redistribution and use in source and binary forms, with or without 
+//
+// Copyright (c) 2009, Ron Iovine, All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
 //     * Redistributions in binary form must reproduce the above copyright
 //       notice, this list of conditions and the following disclaimer in the
 //       documentation and/or other materials provided with the distribution.
-//     * Neither the name of Ron Iovine nor the names of its contributors 
-//       may be used to endorse or promote products derived from this software 
+//     * Neither the name of Ron Iovine nor the names of its contributors
+//       may be used to endorse or promote products derived from this software
 //       without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-// IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-// IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-// POSSIBILITY OF SUCH DAMAGE. 
+//
+// THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+// IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+// IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -30,12 +30,12 @@ package main
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// This is an example demo program that uses all the basic features of the PSHELL 
-// server Go module.  This program can be run as either a UDP, TCP, UNIX, or 
-// local server based on the command line options.  If it is run as a UDP or UNIX 
-// based server, you must use the provided stand-alone UDP client program 'pshell' 
+// This is an example demo program that uses all the basic features of the PSHELL
+// server Go module.  This program can be run as either a UDP, TCP, UNIX, or
+// local server based on the command line options.  If it is run as a UDP or UNIX
+// based server, you must use the provided stand-alone UDP client program 'pshell'
 // or 'pshell.py' to connect to it, if it is run as a TCP server, you must use
-// 'telnet, if it is run as a local server, user command line input is solicited 
+// 'telnet, if it is run as a local server, user command line input is solicited
 // directly from this program, no external client is needed.
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,17 +50,17 @@ import "PshellServer"
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// PSHELL user callback functions, the interface is similar to the "main" in 
+// PSHELL user callback functions, the interface is similar to the "main" in
 // Go, with the argv argument being the argument list and the len and contents
 // of argv are the user entered arguments, excluding the actual command itself
 // (arguments only).
 //
-// Use the special 'PshellServer.Printf' function call to display data back to 
+// Use the special 'PshellServer.Printf' function call to display data back to
 // the remote client.  The interface to this function is similar to the standard
 // 'fmt.Printf' function in Go.
 //
 ////////////////////////////////////////////////////////////////////////////////
- 
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func hello(argv []string) {
@@ -81,12 +81,12 @@ func world(argv []string) {
 func enhancedUsage(argv []string) {
   // see if the user asked for help
   if (PshellServer.IsHelp()) {
-    // show standard usage 
+    // show standard usage
     PshellServer.ShowUsage()
-    // give some enhanced usage 
+    // give some enhanced usage
     PshellServer.Printf("Enhanced usage here...\n")
   } else {
-    // do normal function processing 
+    // do normal function processing
     PshellServer.Printf("enhancedUsage command dispatched:\n")
     for index, arg := range argv {
       PshellServer.Printf("  argv[%d]: '%s'\n", index, arg)
@@ -256,32 +256,32 @@ func main() {
 
   // register signal handlers so we can do a graceful termination and cleanup any system resources
   registerSignalHandlers()
-  
+
   // register our callback commands, commands consist of single keyword only
   PshellServer.AddCommand(hello,                           // function
                           "hello",                         // command
                           "example hello command",         // description
-                          "[<arg1> ... <arg20>]",          // usage          
+                          "[<arg1> ... <arg20>]",          // usage
                           0,                               // minArgs
                           20,                              // maxArgs
                           true)                            // showUsage on '?'
-  
+
   PshellServer.AddCommand(world,                         // function
                           "world",                       // command
                           "world command description",   // description
-                          "",                            // usage      
+                          "",                            // usage
                           0,                             // minArgs
                           0,                             // maxArgs
                           true)                          // showUsage on '?'
-  
+
   PshellServer.AddCommand(enhancedUsage,                   // function
                           "enhancedUsage",                 // command
                           "command with enhanced usage",   // description
-                          "<arg1>",                        // usage      
+                          "<arg1>",                        // usage
                           1,                               // minArgs
                           1,                               // maxArgs
                           false)                           // showUsage on '?'
-  
+
   PshellServer.AddCommand(wildcardMatch,                            // function
                           "wildcardMatch",                          // command
                           "command that does a wildcard matching",  // description
@@ -293,12 +293,12 @@ func main() {
   PshellServer.AddCommand(getOptions,                                  // function
                           "getOptions",                                // command
                           "example of parsing command line options",   // description
-                          "<arg1> [<arg2>...<argN>]",                  // usage      
+                          "<arg1> [<arg2>...<argN>]",                  // usage
                           1,                                           // minArgs
                           20,                                          // maxArgs
                           false)                                       // showUsage on '?'
-  
-  // TCP or LOCAL servers don't need a keep-alive, so only add 
+
+  // TCP or LOCAL servers don't need a keep-alive, so only add
   // this command for connectionless datagram type servers
   if ((serverType == PshellServer.UDP) || (serverType == PshellServer.UNIX)) {
     PshellServer.AddCommand(keepAlive,                             // function
@@ -319,7 +319,7 @@ func main() {
   // The 1st argument is our serverName (i.e. "pshellServerDemo").
   //
   // The 2nd argument specifies the type of PSHELL server, the four valid values are:
-  // 
+  //
   //   PshellServer.UDP   - Server runs as a multi-session UDP based server.  This requires
   //                        the special stand-alone command line UDP/UNIX client program
   //                        'pshell'.  This server has no timeout for idle client sessions.
@@ -345,10 +345,10 @@ func main() {
   //                               control to the calling context.
   //   PshellServer.BLOCKING     - No thread is created, all processing of user input is done within
   //                               this function call, it will never return control to the calling context.
-  // 
+  //
   // The 4th and 5th arguments are only used for a UDP or TCP server, for a LOCAL or
   // UNIX server they are ignored.
-  // 
+  //
   // For the 4th argument, a valid IP address or hostname can be used.  There are also 3 special
   // "hostname" type identifiers defined as follows:
   //
@@ -359,7 +359,7 @@ func main() {
   //
   // Finally, the 5th argument is the desired port number.
   //
-  // All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden 
+  // All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden
   // via the 'pshell-server.conf' file on a per-server basis.
 
   PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, "7001")

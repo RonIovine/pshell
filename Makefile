@@ -64,16 +64,16 @@ UTILS_DIR = utils
 DEMO_DIR = c/demo
 
 PSHELL_FLAGS =
-TF_FLAGS = 
-TRACE_FLAGS = 
+TF_FLAGS =
+TRACE_FLAGS =
 CLIENT_FLAGS =
 TRACE_FILTER_DEMO_FLAGS =
 TRACE_LOG_DEMO_FLAGS =
 
-PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
-PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread 
-PSHELL_READLINE_DEMO_LIBS = -L$(LIB_DIR) -lpshell-readline 
-TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread 
+PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread
+PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread
+PSHELL_READLINE_DEMO_LIBS = -L$(LIB_DIR) -lpshell-readline
+TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread
 
 VERBOSE = @
 LOCAL =
@@ -311,7 +311,7 @@ lib:
 	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-full.a $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
-	
+
 	@echo "Building libpshell-server-full.so..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
@@ -319,22 +319,22 @@ lib:
 	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-full.so $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
-	
+
 	@echo "Building libpshell-server-stub.a..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-stub.a PshellStub.o
 	$(VERBOSE)rm *.o
-	
+
 	@echo "Building libpshell-server-stub.so..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-stub.so PshellStub.o
 	$(VERBOSE)rm *.o
-	
+
 	@echo "Building libpshell-control.a..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellControl.$(SRC_EXT) -o PshellControl.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-control.a PshellControl.o
 	$(VERBOSE)rm *.o
-	
+
 	@echo "Building libpshell-control.so..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellControl.$(SRC_EXT) -o PshellControl.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-control.so PshellControl.o
@@ -344,7 +344,7 @@ lib:
 	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-readline.a PshellReadline.o
 	$(VERBOSE)rm *.o
-	
+
 	@echo "Building libpshell-readline.so..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-readline.so PshellReadline.o
@@ -363,19 +363,19 @@ pshell:
 demo:
 	@echo "Building pshellServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
-	
+
 	@echo "Building pshellNoServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellNoServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellNoServerDemo
 
 	@echo "Building pshellControlDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
-	
+
 	@echo "Building pshellReadlineDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellReadlineDemo.$(SRC_EXT) $(PSHELL_READLINE_DEMO_LIBS) -o $(BIN_DIR)/pshellReadlineDemo
-	
+
 	@echo "Building pshellAggregatorDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellAggregatorDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregatorDemo
-	
+
 ifeq ($(TF_INTEGRATED_TRACE_LOG),y)
 	@echo "Building traceFilterDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.$(SRC_EXT) $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
@@ -390,7 +390,7 @@ all: clean lib pshell demo
 install: all
 	$(VERBOSE)./install.sh $(LOCAL) $(SHELL_ENV_FILE)
 
-clean:	
+clean:
 	@echo "Cleaning directory bin..."
 	$(VERBOSE)rm -f $(BIN_DIR)/*Demo
 	$(VERBOSE)rm -f $(BIN_DIR)/pshell

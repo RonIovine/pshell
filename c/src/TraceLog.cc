@@ -49,10 +49,10 @@
  * public "member" data
  *************************/
 
-/* 
+/*
  * note that this data item is only used for a stand-alone TraceLog module, i.e.
  * it is not part of the dynamic trace filtering mechanism, i.e. this module is
- * built with the DYNAMIC_TRACE_FILTER flag NOT set, the levels can  be set from 
+ * built with the DYNAMIC_TRACE_FILTER flag NOT set, the levels can  be set from
  * within the program by making calls to the trace_setLogLevel function
  */
 #ifndef DYNAMIC_TRACE_FILTER
@@ -75,7 +75,7 @@ static unsigned _maxTypeLength = 0;
 /***************************************
  * private "member" function prototypes
  ***************************************/
- 
+
 static void printLine(char *line_);
 static void formatHeader(const char *type_,
                          const char *file_,
@@ -336,7 +336,7 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   {
     file = file_;
   }
-  
+
   if (_printLocation && _printTimestamp)
   {
     sprintf(outputString_, "%s%-*s | %s.%-6ld | %s(%s):%d | ", _printPrefix, _maxTypeLength, type_, timestamp, (long)tv.tv_usec, file, function_, line_);
@@ -353,7 +353,7 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
   {
     sprintf(outputString_, "%s%-*s | ", _printPrefix, _maxTypeLength, type_);
   }
-  
+
 }
 
 /******************************************************************************/

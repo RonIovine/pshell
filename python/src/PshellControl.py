@@ -1,30 +1,30 @@
 #!/usr/bin/python
 
 #################################################################################
-# 
-# Copyright (c) 2009, Ron Iovine, All rights reserved.  
-#  
-# Redistribution and use in source and binary forms, with or without 
+#
+# Copyright (c) 2009, Ron Iovine, All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
 #       notice, this list of conditions and the following disclaimer.
 #     * Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
-#     * Neither the name of Ron Iovine nor the names of its contributors 
-#       may be used to endorse or promote products derived from this software 
+#     * Neither the name of Ron Iovine nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
 #       without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR 
-# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE. 
+#
+# THIS SOFTWARE IS PROVIDED BY Ron Iovine ''AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL Ron Iovine BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 #
 #################################################################################
 
@@ -41,7 +41,7 @@ that is running a PshellServer, this is analagous to a remote procedure call (rp
 This module provides the same functionality as the PshellControl.h API and
 the libpshell-control linkable 'C' library, but implemented as a Python
 module.
- 
+
 Functions:
 
 connectServer()        -- connect to a remote pshell server
@@ -59,7 +59,7 @@ getResponseString()    -- return the human readable form of one of the command r
 
 Integer constants:
 
-Helpful items used for the server response timeout values 
+Helpful items used for the server response timeout values
 
 NO_WAIT
 ONE_MSEC
@@ -84,7 +84,7 @@ INVALID_SID
 
 String constants:
 
-Use this as the "port" identifier for the connectServer 
+Use this as the "port" identifier for the connectServer
 call when using a UNIX domain server
 
 UNIX
@@ -93,7 +93,7 @@ Specifies if the addMulticast should add the given sid to all commands
 
 MULTICAST_ALL
 
-A complete example of the usage of the API can be found in the included 
+A complete example of the usage of the API can be found in the included
 demo programs pshellControlDemo.py and pshellAggregatorDemo.py
 """
 
@@ -114,14 +114,14 @@ from collections import namedtuple
 #
 #################################################################################
 
-# helpful items used for the timeout values 
+# helpful items used for the timeout values
 NO_WAIT = 0
 ONE_MSEC = 1
 ONE_SEC = ONE_MSEC*1000
 
 # use this as the "port" identifier for the connectServer call when
 # using a UNIX domain server
-UNIX = "unix"  
+UNIX = "unix"
 
 # the following enum values are returned by the non-extraction
 # based sendCommand1 and sendCommand2 functions
@@ -131,7 +131,7 @@ UNIX = "unix"
 COMMAND_SUCCESS = 0
 COMMAND_NOT_FOUND = 1
 COMMAND_INVALID_ARG_COUNT = 2
-# the following "SOCKET" enums are generated internally by the sendCommandN functions 
+# the following "SOCKET" enums are generated internally by the sendCommandN functions
 SOCKET_SEND_FAILURE = 3
 SOCKET_SELECT_FAILURE = 4
 SOCKET_RECEIVE_FAILURE = 5
@@ -149,7 +149,7 @@ INVALID_SID = -1
 # "public" API functions
 #
 # Users of this module should only access functionality via these "public"
-# methods.  This is broken up into "public" and "private" sections for 
+# methods.  This is broken up into "public" and "private" sections for
 # readability and to not expose the implementation in the API definition
 #
 #################################################################################
@@ -169,12 +169,12 @@ def connectServer(controlName, remoteServer, port, defaultTimeout):
   will return either SOCKET_NOT_CONNECTED, SOCKET_SEND_FAILURE, or
   COMMAND_SUCCESS, the timeout value entered in this funcition will
   be used as the default timeout for all calls to sendCommandN that
-  do not provide an override timeout value, for a UDP server, the 
-  remoteServer must be either a valid hostname or IP address and a 
-  valid destination port must be provided, for a UNIX server, only 
-  a valid server name must be provided along with the identifier 
+  do not provide an override timeout value, for a UDP server, the
+  remoteServer must be either a valid hostname or IP address and a
+  valid destination port must be provided, for a UNIX server, only
+  a valid server name must be provided along with the identifier
   PshellControl.UNIX for the 'port' parameter
- 
+
   This function returns a Server ID (sid) handle which must be saved and
   used for all subsequent calls into this module
 
@@ -193,7 +193,7 @@ def connectServer(controlName, remoteServer, port, defaultTimeout):
 #################################################################################
 def disconnectServer(sid):
   """
-  Cleanup any resources associated with the server connection, including 
+  Cleanup any resources associated with the server connection, including
   releasing any temp file handles, closing any local socket handles etc.
 
     Args:
@@ -208,10 +208,10 @@ def disconnectServer(sid):
 #################################################################################
 def disconnectAllServers():
   """
-  Use this function to cleanup any resources for all connected servers, this 
-  function should be called upon program termination, either in a graceful 
-  termination or within an exception signal handler, it is especially important 
-  that this be called when a unix server is used since there are associated file 
+  Use this function to cleanup any resources for all connected servers, this
+  function should be called upon program termination, either in a graceful
+  termination or within an exception signal handler, it is especially important
+  that this be called when a unix server is used since there are associated file
   handles that need to be cleaned up
 
     Args:
@@ -226,7 +226,7 @@ def disconnectAllServers():
 #################################################################################
 def setDefaultTimeout(sid, defaultTimeout):
   """
-  Set the default server response timeout that is used in the 'send' commands 
+  Set the default server response timeout that is used in the 'send' commands
   that don't take a timeout override
 
     Args:
@@ -241,10 +241,10 @@ def setDefaultTimeout(sid, defaultTimeout):
 #################################################################################
 #################################################################################
 def extractCommands(sid, includeName = True):
-  """ 
-  This function will extract all the commands of a remote pshell server and 
-  present them in a human readable form, this is useful when writing a multi 
-  server control aggregator, see the demo program pshellAggregatorDemo.py in 
+  """
+  This function will extract all the commands of a remote pshell server and
+  present them in a human readable form, this is useful when writing a multi
+  server control aggregator, see the demo program pshellAggregatorDemo.py in
   the demo directory for examples
 
     Args:
@@ -260,8 +260,8 @@ def extractCommands(sid, includeName = True):
 #################################################################################
 def addMulticast(sid, keyword = MULTICAST_ALL):
   """
-  This command will add a given multicast receiver (i.e. sid) to a multicast 
-  group, multicast groups are either based on the command's keyword, or if 
+  This command will add a given multicast receiver (i.e. sid) to a multicast
+  group, multicast groups are either based on the command's keyword, or if
   no keyword is supplied, the given sid will receive all multicast commands
 
     Args:
@@ -272,7 +272,7 @@ def addMulticast(sid, keyword = MULTICAST_ALL):
 
     Returns:
         none
-  """ 
+  """
   _addMulticast(sid, keyword)
 
 #################################################################################
@@ -280,10 +280,10 @@ def addMulticast(sid, keyword = MULTICAST_ALL):
 def sendMulticast(command):
   """
   This command will send a given command to all the registered multicast
-  receivers (i.e. sids) for this multicast group, multicast groups are 
-  based on the command's keyword, this function will issue the command as 
-  a best effort fire-and-forget command to each receiver in the multicast 
-  group, no results will be requested or expected, and no response will be 
+  receivers (i.e. sids) for this multicast group, multicast groups are
+  based on the command's keyword, this function will issue the command as
+  a best effort fire-and-forget command to each receiver in the multicast
+  group, no results will be requested or expected, and no response will be
   requested or expected
 
     Args:
@@ -291,14 +291,14 @@ def sendMulticast(command):
 
     Returns:
         none
-  """ 
+  """
   _sendMulticast(command)
 
 #################################################################################
 #################################################################################
 def sendCommand1(sid, command):
   """
-  Send a command using the default timeout setup in the connectServer call, 
+  Send a command using the default timeout setup in the connectServer call,
   if the default timeout is 0, the server will not reply with a response and
   this function will not wait for one
 
@@ -323,8 +323,8 @@ def sendCommand1(sid, command):
 #################################################################################
 def sendCommand2(sid, timeoutOverride, command):
   """
-  Send a command overriding the default timeout, if the override timeout is 0, 
-  the server will not reply with a response and this function will not wait for 
+  Send a command overriding the default timeout, if the override timeout is 0,
+  the server will not reply with a response and this function will not wait for
   one
 
     Args:
@@ -349,9 +349,9 @@ def sendCommand2(sid, timeoutOverride, command):
 #################################################################################
 def sendCommand3(sid, command):
   """
-  Send a command using the default timeout setup in the connectServer call and 
-  return any results received in the payload, if the default timeout is 0, the 
-  server will not reply with a response and this function will not wait for one, 
+  Send a command using the default timeout setup in the connectServer call and
+  return any results received in the payload, if the default timeout is 0, the
+  server will not reply with a response and this function will not wait for one,
   and no results will be extracted
 
     Args:
@@ -377,9 +377,9 @@ def sendCommand3(sid, command):
 #################################################################################
 def sendCommand4(sid, timeoutOverride, command):
   """
-  Send a command overriding the default timeout and return any results received 
-  in the payload, if the timeout override default timeout is 0, the server will 
-  not reply with a response and this function will not wait for one, and no 
+  Send a command overriding the default timeout and return any results received
+  in the payload, if the timeout override default timeout is 0, the server will
+  not reply with a response and this function will not wait for one, and no
   results will be extracted
 
     Args:
@@ -446,7 +446,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
       try:
         socketFd.bind(sourceAddress)
         bound = True
-      except Exception as e: 
+      except Exception as e:
         sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
     _gPshellControl.append({"socket":socketFd,
                             "timeout":defaultTimeout_,
@@ -712,8 +712,8 @@ def _sendCommand(control_, commandType_, command_, timeout_):
     seqNum = control_["pshellMsg"]["seqNum"]
     control_["pshellMsg"]["payload"] = str(command_)
     try:
-      sentSize = control_["socket"].sendto(struct.pack(_gPshellMsgHeaderFormat+str(len(control_["pshellMsg"]["payload"]))+"s", 
-                                           *control_["pshellMsg"].values()), 
+      sentSize = control_["socket"].sendto(struct.pack(_gPshellMsgHeaderFormat+str(len(control_["pshellMsg"]["payload"]))+"s",
+                                           *control_["pshellMsg"].values()),
                                            control_["destAddress"])
     except:
       sentSize = 0
@@ -729,11 +729,11 @@ def _sendCommand(control_, commandType_, command_, timeout_):
           control_["pshellMsg"], addr = control_["socket"].recvfrom(_gPshellMsgPayloadLength)
           control_["pshellMsg"] = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(control_["pshellMsg"])-struct.calcsize(_gPshellMsgHeaderFormat))+"s", control_["pshellMsg"])))
           if (seqNum > control_["pshellMsg"]["seqNum"]):
-            # make sure we have the correct response, this condition can happen if we had 
-            # a very short timeout for the previous call and missed the response, in which 
-            # case the response to the previous call will be queued in the socket ahead of 
-            # our current expected response, when we detect that condition, we read the 
-            # socket until we either find the correct response or timeout, we toss any previous 
+            # make sure we have the correct response, this condition can happen if we had
+            # a very short timeout for the previous call and missed the response, in which
+            # case the response to the previous call will be queued in the socket ahead of
+            # our current expected response, when we detect that condition, we read the
+            # socket until we either find the correct response or timeout, we toss any previous
             # unmatched responses
             print("PSHELL_WARNING: Received seqNum: %d, does not match sent seqNum: %d" % (control_["pshellMsg"]["seqNum"], seqNum))
           else:
@@ -788,7 +788,7 @@ def _getControl(sid_):
 
 #################################################################################
 #################################################################################
-def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):  
+def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
   configFile1 = ""
   configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
@@ -860,7 +860,7 @@ _gMsgTypes = {"queryName":3, "queryCommands":4, "commandComplete":8, "queryBanne
 _PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum payload')
 
 # format of PshellMsg header, 4 bytes and 1 (4 byte) integer, we use this for packing/unpacking
-# the PshellMessage to/from an OrderedDict into a packed binary structure that can be transmitted 
+# the PshellMessage to/from an OrderedDict into a packed binary structure that can be transmitted
 # over-the-wire via a socket
 _gPshellMsgHeaderFormat = "4BI"
 
@@ -869,15 +869,15 @@ _gPshellMsgHeaderFormat = "4BI"
 _gPshellMsgPayloadLength = 1024*64
 
 # mapping of above definitions to strings so we can display text in error messages
-_gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS", 
-                           COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND", 
-                           COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT", 
-                           SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE", 
-                           SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE", 
-                           SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE", 
+_gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
+                           COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
+                           COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT",
+                           SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE",
+                           SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE",
+                           SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE",
                            SOCKET_TIMEOUT:"PSHELL_SOCKET_TIMEOUT",
                            SOCKET_NOT_CONNECTED:"PSHELL_SOCKET_NOT_CONNECTED"}
- 
+
 # the suppress flag is used as a backdoor for the pshell.py client to allow
 # a remote server to pass the command usage back to the local server that
 # is run by the client

@@ -74,10 +74,10 @@ void sampleLogFunction(const char *outputString_)
    * what to do with that string, i.e. write to stdout, write to
    * a custom logfile, write to syslog etc
    */
-   
+
    /* write to stdout */
    printf("%s", outputString_);
-   
+
    /* write to syslog */
    syslog(LOG_INFO, "%s", outputString_);
 }
@@ -135,7 +135,7 @@ int main (int argc, char *argv[])
     showUsage();
     return (0);
   }
-  
+
 #ifndef TRACE_LOG_DISABLED
   /* initialize a sample memory hex dump buffer */
   for (unsigned i = 0; i < DUMP_BUFFER_SIZE; i++)
@@ -145,24 +145,24 @@ int main (int argc, char *argv[])
 #endif
 
   /*
-   * register our standard trace levels with the trace log system 
+   * register our standard trace levels with the trace log system
    * so our trace display can be formatted and aligned correctly
    */
-   
+
   trace_registerLevels();
 
   /*
    * register our program specific trace log levels with the trace log system
-   * this must be done after registering our standard levels so we can keep 
-   * track of our max level name string length so our trace display can be 
+   * this must be done after registering our standard levels so we can keep
+   * track of our max level name string length so our trace display can be
    * formatted and aligned correctly
-   * 
+   *
    * format of call is "name", level
    */
 
   trace_addUserLevel(TL_USER_LEVEL1_STRING, TL_USER_LEVEL1);
   trace_addUserLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2);
-  trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3);  
+  trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3);
 
   /* set our log level */
   trace_setLogLevel(logLevel);
@@ -171,7 +171,7 @@ int main (int argc, char *argv[])
    * optionally set a log prefix, if not set, 'TRACE' will be used,
    * if set to 'NULL', no prefix will be used
    */
-   
+
   trace_setLogPrefix("demo");
 
   /*
@@ -183,10 +183,10 @@ int main (int argc, char *argv[])
    * trace logging service will just use 'printf' to output the
    * log message
    */
-   
-  /* open syslog with our program name */ 
+
+  /* open syslog with our program name */
   openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
-  
+
   /* register our log function */
   trace_registerLogFunction(sampleLogFunction);
 
@@ -216,7 +216,7 @@ int main (int argc, char *argv[])
     TRACE_USER_LEVEL3("message 8");
     sleep(1);
   }
-   
+
   return (0);
-   
+
 }
