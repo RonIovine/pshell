@@ -105,9 +105,6 @@ static void addHistory(char *command_);
 static void showHistory(void);
 static bool getChar(char &ch);
 static bool isNumeric(const char *string_);
-#if 0
-static void clearHistory(void);
-#endif
 
 /**************************************
  * public API "member" function bodies
@@ -886,22 +883,6 @@ static void addHistory(char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-#if 0
-static void clearHistory(void)
-{
-  _numHistory = 0;
-  for (unsigned i = 0; i < MAX_HISTORY; i++)
-  {
-    if (_history[i] != NULL)
-    {
-      free_z(_history[i]);
-    }
-  }
-}
-#endif
-
-/******************************************************************************/
-/******************************************************************************/
 static void showHistory(void)
 {
   for (unsigned i = 0; i < _numHistory; i++)
@@ -914,7 +895,6 @@ static void showHistory(void)
 /******************************************************************************/
 static bool getChar(char &ch)
 {
-  //char buf = 0;
   unsigned retCode;
   fd_set readFd;
   bool idleSession = false;

@@ -1230,7 +1230,9 @@ def _flush():
   global _gCommandInteractive
   global _gServerType
   global _gPshellMsg
+  global _gMsgTypes
   if ((_gCommandInteractive == True) and
+      (_gPshellMsg["msgType"] != _gMsgTypes["controlCommand"]) and
       ((_gServerType == UDP) or (_gServerType == UNIX))):
     _reply()
     _gPshellMsg["payload"] = ""

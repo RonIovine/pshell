@@ -604,7 +604,9 @@ func isHelp() bool {
 func flush() {
   if (_gCommandInteractive == true) {
     if ((_gServerType == UDP) || (_gServerType == UNIX)) {
-      reply(getMsgType(_gPshellRcvMsg))
+      if (getMsgType(_gPshellRcvMsg) != _CONTROL_COMMAND) {
+        reply(getMsgType(_gPshellRcvMsg))
+      }
     } else if (_gServerType == TCP) {
       _gConnectFd.Write([]byte(strings.Replace(_gPshellSendPayload, "\n", "\r\n", -1)))
       _gPshellSendPayload = ""
