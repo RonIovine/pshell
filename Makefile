@@ -71,7 +71,7 @@ TRACE_FILTER_DEMO_FLAGS =
 TRACE_LOG_DEMO_FLAGS =
 
 PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread
-PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpthread
+PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpshell-readline -lpthread
 PSHELL_READLINE_DEMO_LIBS = -L$(LIB_DIR) -lpshell-readline
 TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread
 

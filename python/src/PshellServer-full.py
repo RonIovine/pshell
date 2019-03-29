@@ -1306,7 +1306,7 @@ _PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum p
 _gPshellMsgHeaderFormat = "4BI"
 
 # default PshellMsg payload length, used to receive responses
-_gPshellMsgPayloadLength = 4096
+_gPshellMsgPayloadLength = 1024*64
 
 _gPshellMsg =  OrderedDict([("msgType",0),
                             ("respNeeded",True),

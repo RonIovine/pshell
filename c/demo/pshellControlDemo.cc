@@ -42,6 +42,7 @@
 #include <ctype.h>
 #include <signal.h>
 
+#include <PshellReadline.h>
 #include <PshellControl.h>
 
 /******************************************************************************/
@@ -101,7 +102,8 @@ void registerSignalHandlers(void)
 /******************************************************************************/
 int main (int argc, char *argv[])
 {
-  char inputLine[180];
+  char input[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
+  bool idleSession = false;
   char results[4096];
   int timeout = PSHELL_ONE_MSEC*100;
   int port = 0;
@@ -147,35 +149,23 @@ int main (int argc, char *argv[])
   {
     // set our debug level
     pshell_setControlLogLevel(logLevel);
-    inputLine[0] = 0;
     printf("Enter command or 'q' to quit\n");
-    while (inputLine[0] != 'q')
+    while (((idleSession = pshell_rl_getInput("pshellControlCmd> ", input)) == false) && !pshell_rl_isSubString(input, "quit"))
     {
-      inputLine[0] = 0;
-      while (strlen(inputLine) == 0)
+      if (extract)
       {
-        fprintf(stdout, "%s", "pshellControlCmd> ");
-        fflush(stdout);
-        fgets(inputLine, sizeof(inputLine), stdin);
-        inputLine[strlen(inputLine)-1] = 0;
+        retCode = pshell_sendCommand3(sid, results, sizeof(results), input);
+        if (retCode == PSHELL_COMMAND_SUCCESS)
+        {
+          printf("%d bytes extracted, results:\n", (int)strlen(results));
+          printf("%s", results);
+        }
+        printf("retCode: %s\n",pshell_getResponseString(retCode));
       }
-      if (inputLine[0] != 'q')
+      else
       {
-        if (extract)
-        {
-          retCode = pshell_sendCommand3(sid, results, sizeof(results), inputLine);
-          if (retCode == PSHELL_COMMAND_SUCCESS)
-          {
-            printf("%d bytes extracted, results:\n", (int)strlen(results));
-            printf("%s", results);
-          }
-          printf("retCode: %s\n",pshell_getResponseString(retCode));
-        }
-        else
-        {
-          retCode = pshell_sendCommand1(sid, inputLine);
-          printf("retCode: %s\n",pshell_getResponseString(retCode));
-        }
+        retCode = pshell_sendCommand1(sid, input);
+        printf("retCode: %s\n",pshell_getResponseString(retCode));
       }
     }
     pshell_disconnectServer(sid);

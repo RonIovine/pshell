@@ -94,7 +94,7 @@ const _NO_DATA_NEEDED = 0
 const _RESP_NEEDED = 1
 const _DATA_NEEDED = 1
 const _NO_WAIT = 0
-const _RCV_BUFFER_SIZE = 1024*4  // 4k buffer size
+const _RCV_BUFFER_SIZE = 1024*64  // 64k buffer size
 
 const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
 const _PSHELL_CONFIG_FILE = "pshell-control.conf"
