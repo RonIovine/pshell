@@ -1,5 +1,7 @@
 This directory contains bin, pkg and src for the 'go' implementation of the
 PshellControl and PshellServer modules.  There are two 'go' demo programs,
-pshellServerDemo.go and pshellControlDemo.goNone of these files are copied/setup
-on a system wide install.  On a local install,environment variables are setup
-to allow access to these files and modules.
+pshellServerDemo.go and pshellControlDemo.go.  None of these files are copied/setup
+on a system wide install.  On a local install, environment variables are setup
+to allow access to these files and modules.  When switching between the full and
+stub implementations, the 'go' demo programs must be rebuilt/relinked, since 'go'
+is statically linked.

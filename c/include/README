@@ -1,6 +1,7 @@
 This directory contains all the include files used in this package.
-There are four user application API include files, PshellServer.h,
-PshellControl.h, TraceFilter.h, and TraceLog.h.  Any user application
-should only include the necessary files for the desired fucntionality.
-A user application has no need to include the file PshellCommon.h.
+There are five user application API include files, PshellServer.h,
+PshellControl.h, PshellReadline.h TraceFilter.h, and TraceLog.h.
+Any user application should only include the necessary files for
+the desired fucntionality.  A user application has no need to include
+the file PshellCommon.h.
 

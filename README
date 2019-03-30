@@ -127,11 +127,11 @@ the 'expect' package to be installed.
   - libpshell-server-full.so -- Full version of libpshell-server library (shared)
   - libpshell-server-stub.a  -- Stub version of libpshell-server library (static)
   - libpshell-server-stub.so -- Stub version of libpshell-server library (shared)
-  - libpshell-control.so     -- External pshell program control libpshell-control library (shared)
   - libpshell-control.a      -- External pshell program control libpshell-control library (static)
-  - libpshell-readline.so    -- Provides a readline like funtionality library (shared)
+  - libpshell-control.so     -- External pshell program control libpshell-control library (shared)
   - libpshell-readline.a     -- Provides a readline like funtionality library (static)
-  - PshellServer.a           -- Go version of the PshellServer functionality (UDP/UNIX only)
+  - libpshell-readline.so    -- Provides a readline like funtionality library (shared)
+  - PshellServer.a           -- Go version of the PshellServer functionality
   - PshellControl.a          -- Go version of control API
   - PshellServer.py          -- Python version of PshellServer functionality
   - PshellControl.py         -- Python version of control API
@@ -212,7 +212,7 @@ export PATH=$PSHELL_INSTALL/bin:$PSHELL_INSTALL/utils:$PSHELL_INSTALL/python:$PS
 
 Note that if a system wide install is done, none of the 'demo' programs are installed
 in any system wide 'bin' directories.  They can only be executed directly from the 'bin'
-directory of the unzipped package.  If a local install is done and its environment
+directories (c and go) of the unzipped package.  If a local install is done and its environment
 sourced, the environment variables setup will allow the execution of the 'demo' programs
 from any location.
 
@@ -245,13 +245,13 @@ PshellServer.go
 A complete code example of application programs that use all the
 main features of the PSHELL library can be found in the files:
 
-$PSHELL_INSTALL/demo/pshellServerDemo.cc                      --  Server demo for user defined commands
-$PSHELL_INSTALL/demo/pshellControlDemo.cc                     --  Sample pshell control external client
-$PSHELL_INSTALL/demo/pshellReadlineDemo.cc                    --  Sample program to show usage of PshellReadline
-$PSHELL_INSTALL/demo/pshellAggregatorDemo.cc                  --  Sample pshell control to aggregate multiple servers
-$PSHELL_INSTALL/demo/traceFilterDemo.cc                       --  Server demo for dynamic trace filtering
-$PSHELL_INSTALL/demo/traceLogDemo.cc                          --  Demo using the stand-alone TraceLog module
-$PSHELL_INSTALL/demo/pshellNoServerDemo.cc                    --  Demo using the multi-call binary option
+$PSHELL_INSTALL/c/demo/pshellServerDemo.cc                    --  Server demo for user defined commands
+$PSHELL_INSTALL/c/demo/pshellControlDemo.cc                   --  Sample pshell control external client
+$PSHELL_INSTALL/c/demo/pshellReadlineDemo.cc                  --  Sample program to show usage of PshellReadline
+$PSHELL_INSTALL/c/demo/pshellAggregatorDemo.cc                --  Sample pshell control to aggregate multiple servers
+$PSHELL_INSTALL/c/demo/traceFilterDemo.cc                     --  Server demo for dynamic trace filtering
+$PSHELL_INSTALL/c/demo/traceLogDemo.cc                        --  Demo using the stand-alone TraceLog module
+$PSHELL_INSTALL/c/demo/pshellNoServerDemo.cc                  --  Demo using the multi-call binary option
 $PSHELL_INSTALL/python/demo/pshellServerDemo.py               --  Server demo for user defined commands (Python)
 $PSHELL_INSTALL/python/demo/pshellControlDemo.py              --  Sample pshell control external client (Python)
 $PSHELL_INSTALL/python/demo/pshellAggregatorDemo.py           --  Sample pshell control to aggregate multiple servers (Python)
@@ -328,26 +328,26 @@ wrapper.
 The usage of the "pshell" and "pshell.exp" (see NOTE) command line client
 programs are as follows:
 
-Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix}
-               {<serverName> | <portNum>} [-h | ? | {<command> [<rate> [clear]]} |
-               {-f <fileName> [<rate> [clear]]}]
+Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>
+                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 
-    -h,?       - show pshell usage or command set of specified PSHELL server
-    -s         - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file
-    -f         - run commands from a batch file
-    -t         - change the default server response timeout
-    hostName   - hostname of desired PSHELL server (UDP only)
-    ipAddress  - IP address of desired PSHELL server (UDP only)
-    unix       - Specifies server is a UNIX domain server
-    serverName - name of desired PSHELL server (UDP or UNIX)
-    portNum    - port number of desired PSHELL server (UDP only)
-    timeout    - value in seconds to use for server response timeout
-    command    - optional command to execute
-    fileName   - optional batch file to execute
-    rate       - optional rate to repeat command or batch file (in seconds)
-    clear      - clear screen between commands or batch file passes
+    -s             - show named servers in pshell-client.conf file
+    -c             - run command from command line
+    -f             - run commands from a batch file
+    -t             - change the default server response timeout
+    hostName       - hostname of UDP server
+    ipAddr         - IP address of UDP server
+    portNum        - port number of UDP server
+    serverName     - name of UDP server from pshell-client.conf file
+    unixServerName - name of UNIX server
+    timeout        - response wait timeout in sec (default=5)
+    command        - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName       - optional batch file to execute
+    rate           - optional rate to repeat command or batch file (in seconds)
+    repeat         - optional repeat count for command or batch file (default=forever)
+    clear          - optional clear screen between commands or batch file passes
 
     NOTE: If no <command> is given, pshell will be started
           up in interactive mode, commands issued in command
@@ -362,7 +362,7 @@ Usage: pshell -h | ? | -s | [-t<timeout>] {<hostName> | <ipAddress> | unix}
           see all available commands, to get help on a single
           command, type '<command> {? | -h}'.  Use TAB completion
           to fill out partial commands and up-arrow to recall
-          the last entered command.
+          for command history.
 
 NOTE: The "-t<timeout>" option, the "unix" specifier are only
       supported on the UDP/UNIX client/server.
@@ -423,29 +423,29 @@ pshellServerDemo[127.0.0.1]:PSHELL> hello ?
 The following shows the same command entered in command line mode,
 note that "-h" will also accomplish the same thing:
 
-$ pshell localhost pshellServerDemo "hello ?"
+$ pshell localhost pshellServerDemo -c "hello ?"
 
 The following example shows executing a command at a periodic rate
 (every 1 second), this feature is available only in command line mode
 (note, if no arguments are given for the command, the double quotes
 are not necessary):
 
-$ pshell localhost pshellServerDemo "hello 1 2 3" 1
+$ pshell localhost pshellServerDemo -c "hello 1 2 3" rate=1
 
 The following example shows the same command as above but clearing the
 screen before each command
 
-$ pshell localhost pshellServerDemo "hello 1 2 3" 1 clear
+$ pshell localhost pshellServerDemo -c "hello 1 2 3" rate=1 clear
 
 The following example shows executing a batch file at a periodic rate
 (every 1 second), this feature is available only in command line mode.
 
-$ pshell localhost pshellServerDemo -f pshellServerDemo.batch 1
+$ pshell localhost pshellServerDemo -f pshellServerDemo.batch rate=1
 
 The following example shows the same command as above but clearing the
 screen before each invocation of the batch file
 
-$ pshell localhost pshellServerDemo -f pshellServerDemo.batch 1 clear
+$ pshell localhost pshellServerDemo -f pshellServerDemo.batch rate=1 clear
 
 The final example shows how to list all the named PSHELL servers in the
 $PSHELL_CONFIG_DIR/pshell-client.conf file, this is also only available
