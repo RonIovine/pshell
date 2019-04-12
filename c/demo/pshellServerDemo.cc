@@ -133,7 +133,7 @@ void keepAlive(int argc, char *argv[])
     {
       /* string is optional, use NULL to omit */
       pshell_wheel("optional string: ");
-      usleep(100000);
+      sleep(1);
     }
   }
   else

@@ -392,10 +392,10 @@ def _getOption(arg):
     return (True, arg[:2], arg[2:])
   else:
     value = arg.split("=")
-    if (len(value) != 2):
-      return (False, "", "")
+    if (len(value) >= 2):
+      return (True, value[0], '='.join(value[1:]))
     else:
-      return (True, value[0], value[1])
+      return (False, "", "")
 
 #################################################################################
 #################################################################################

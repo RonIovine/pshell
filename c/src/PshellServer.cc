@@ -1528,6 +1528,7 @@ double pshell_getDouble(const char *string_)
 /******************************************************************************/
 bool pshell_getOption(const char *string_, char *option_, char *value_)
 {
+  char *valueStart;
   PshellTokens *option = pshell_tokenize(string_, "=");
   /* if the 'strlen(option_) == 0', we always extract the option into
    * 'value_' and copy the extracted option name into 'option_', if
@@ -1558,10 +1559,11 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
     else
     {
       /* they are looking for a <option>=<value> type option */
-      if (option->numTokens == 2)
+      if (option->numTokens >= 2)
       {
         strcpy(option_, option->tokens[0]);
-        strcpy(value_, option->tokens[1]);
+        valueStart = strstr((char *)string_, "=");
+        strcpy(value_, &valueStart[1]);
         return (true);
       }
       else
@@ -1592,9 +1594,10 @@ bool pshell_getOption(const char *string_, char *option_, char *value_)
     else
     {
       /* assume they are looking for a <option>=<value> type option */
-      if ((option->numTokens == 2) && pshell_isEqual(option->tokens[0], option_))
+      if ((option->numTokens >= 2) && pshell_isEqual(option->tokens[0], option_))
       {
-        strcpy(value_, option->tokens[1]);
+        valueStart = strstr((char *)string_, "=");
+        strcpy(value_, &valueStart[1]);
         return (true);
       }
       else

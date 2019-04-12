@@ -662,10 +662,10 @@ func getOption(arg_ string) (bool, string, string) {
     return true, arg_[:2], arg_[2:]
   } else {
     value := strings.Split(arg_, "=")
-    if (len(value) != 2) {
-      return false, "", ""
+    if (len(value) >= 2) {
+      return true, value[0], strings.Join(value[1:], "=")
     } else {
-      return true, value[0], value[1]
+      return false, "", ""
     }
   }
 }
