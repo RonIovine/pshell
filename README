@@ -107,8 +107,8 @@ In addition to the infrastructure components, several demo programs are also pro
 of the various APIs for each component.  See the respective 'demo' directories under each language for
 specific examples.
 
-Finally, a stub module/library is provided that will honor the complete API of the normal pshell
-library but with all the underlying functionality stubbed out.  This will allow all the pshell
+Finally, a stub modules/libraries are provided that will honor the complete API of the normal pshell
+server but with all the underlying functionality stubbed out.  This will allow all the pshell
 functionality to easily be completly removed from an application without requiring any code
 changes or recompilation, only a re-link (for static linking) or restart (when using a shared
 library/module acessed via a softlink) of the target program is necessary.
@@ -131,9 +131,11 @@ the 'expect' package to be installed.
   - libpshell-control.so     -- External pshell program control libpshell-control library (shared)
   - libpshell-readline.a     -- Provides a readline like funtionality library (static)
   - libpshell-readline.so    -- Provides a readline like funtionality library (shared)
-  - PshellServer.a           -- Go version of the PshellServer functionality
+  - PshellServer-full.a      -- Full Go version of the PshellServer functionality
+  - PshellServer-stub.a      -- Stub Go version of the PshellServer functionality
   - PshellControl.a          -- Go version of control API
-  - PshellServer.py          -- Python version of PshellServer functionality
+  - PshellServer-full.py     -- Full Python version of PshellServer functionality
+  - PshellServer-stub.py     -- Stub Python version of PshellServer functionality
   - PshellControl.py         -- Python version of control API
   - PshellReadline.py        -- Provides a readline like funtionality Python module
   - pshell                   -- Stand-alone PSHELL UDP/UNIX client remote access program

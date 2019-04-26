@@ -40,7 +40,7 @@
  * any remote pshell server at runtime.  The reason a hard-coded aggregator
  * might be desired is in the case of presenting a shell environment that
  * consolidates several remote servers and which defines some 'meta' commands
- * that consist of multiple inter discrete remote pshell commands.
+ * that consist of multiple discrete remote pshell commands.
  *
  *******************************************************************************/
 
