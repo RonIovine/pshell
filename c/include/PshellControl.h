@@ -115,7 +115,7 @@ const char *pshell_getResponseString(int results_);
  * from the remote command in the pshell_sendCommandN functions, a timeout
  * value of 0 will not wait for a response, in which case the function
  * will return either PSHELL_SOCKET_NOT_CONNECTED, PSHELL_SOCKET_SEND_FAILURE,
- * or PSHELL_COMMAND_SUCCESS, the timeout value entered in this funcition
+ * or PSHELL_COMMAND_SUCCESS, the timeout value entered in this function
  * will be used as the default timeout for all calls to pshell_sendCommandN
  * that do not provide an override timeout value, for a UDP server, the
  * remoteServer must be either a valid hostname or IP address and a valid

@@ -167,7 +167,7 @@ def connectServer(controlName, remoteServer, port, defaultTimeout):
   from the remote command in the sendCommandN functions, a timeout
   value of 0 will not wait for a response, in which case the function
   will return either SOCKET_NOT_CONNECTED, SOCKET_SEND_FAILURE, or
-  COMMAND_SUCCESS, the timeout value entered in this funcition will
+  COMMAND_SUCCESS, the timeout value entered in this function will
   be used as the default timeout for all calls to sendCommandN that
   do not provide an override timeout value, for a UDP server, the
   remoteServer must be either a valid hostname or IP address and a
