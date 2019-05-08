@@ -442,12 +442,12 @@ void pshell_registerServerLogFunction(PshellLogFunction logFunction_)
 /******************************************************************************/
 /******************************************************************************/
 void pshell_addCommand(PshellFunction function_,
-                     const char *command_,
-                     const char *description_,
-                     const char *usage_,
-                     unsigned char minArgs_,
-                     unsigned char maxArgs_,
-                     bool showUsage_)
+                       const char *command_,
+                       const char *description_,
+                       const char *usage_,
+                       unsigned char minArgs_,
+                       unsigned char maxArgs_,
+                       bool showUsage_)
 {
 
   unsigned entry;
@@ -3221,7 +3221,7 @@ static void reply(PshellMsg *pshellMsg_)
 
 /******************************************************************************/
 /******************************************************************************/
-void _printf(const char *format_, ...)
+static void _printf(const char *format_, ...)
 {
   char outputString[300];
   va_list args;

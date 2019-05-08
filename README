@@ -260,7 +260,7 @@ $PSHELL_INSTALL/python/demo/pshellAggregatorDemo.py           --  Sample pshell 
 $PSHELL_INSTALL/python/demo/pshellReadlineDemo.py             --  Sample program to show usage of PshellReadline (Python)
 $PSHELL_INSTALL/python/demo/pshellServerDemo.py               --  Server demo for user defined commands (Python)
 $PSHELL_INSTALL/go/src/pshellControlDemo/pshellControlDemo.go --  Sample pshell control external client (go)
-$PSHELL_INSTALL/go/src/pshellServerDemo/pshellServerDemo.go   --  Server demo for user defined commands (Python)
+$PSHELL_INSTALL/go/src/pshellServerDemo/pshellServerDemo.go   --  Server demo for user defined commands (go)
 
 EXECUTION:
 
