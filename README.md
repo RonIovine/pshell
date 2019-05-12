@@ -38,30 +38,30 @@ passed into each function just like they would be passed into the 'main' from th
 command line shell (i.e. bash) for each language as shown below.  See the included demo
 programs for language specific examples.
 
-'C' callback:
+#### 'C' callback:
 
 `void myFunc(int argc, char *argv[])`
 
-Python callback:
+#### Python callback:
 
 `def myFunc(argv)`
 
-'go' callback:
+#### 'go' callback:
 
 `func myFunc(argv []string)`
 
 Command line pshell functions can also display information back to the interactive clients
 via a mechanism similar to the familiar 'printf' as follows:
 
-'C' printf:
+#### 'C' printf:
 
 `void pshell_printf(const char *format, ...)`
 
-Python printf:
+#### Python printf:
 
 `def printf(string)`
 
-'go' printf:
+#### 'go' printf:
 
 `func Printf(format string, message ...interface{})`
 
