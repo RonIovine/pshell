@@ -174,7 +174,7 @@ control demo programs will prompt the user for input for the remote command to i
 to process IPC situation, the IPC commands used in the control API functions will most likely be hard
 coded.  The following is the usage of the `pshellControlDemo` programs:
 
-'''
+```
 $ pshellControlDemo -h
 
 Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix}
@@ -189,9 +189,7 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
     <timeout>        - wait timeout for response in mSec (default=100)
     <logLevel>       - log level of control library (0-3, default=3, i.e. all)
     extract          - extract data contents of response (must have non-0 wait timeout)
-
-
-'''
+```
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 
