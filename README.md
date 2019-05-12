@@ -82,7 +82,9 @@ command line arguments, similar to command line shell processing.
 There is a short .ppt slide deck that gives a good overview of the framework.  See PSHELL-Framework.ppt
 
 #### Installation
-All of the included binaries should work for most modern x86_64 based Linux systems as-is.  They have been tested on Mint, Ubuntu, and CentOS.  To install, there is an `install.sh` script provided.  To see the usage of the install script, run:
+All of the included binaries should work for most modern x86_64 based Linux systems as-is.  They have 
+been tested on Mint, Ubuntu, and CentOS.  To install, there is an `install.sh` script provided.  To see 
+the usage of the install script, from the top level pshell directory run:
 
 `$ ./install.sh -h` 
 
@@ -90,11 +92,16 @@ The simplest install is a local install, from the top level pshell directory run
 
 `$ ./install.sh -local`
 
-This will create an environment file, `.pshellrc` that should be sourced in your local shell, it should also be added to your shell env file, i.e. `.bashrc`.  This will setup several softlinks and environment variables that will allow access to the various parts of the framework.
+This will create an environment file, `.pshellrc` that should be sourced in your local shell, it should 
+also be added to your shell env file, i.e. `.bashrc`.  This will setup several softlinks and environment
+variables that will allow access to the various parts of the framework.
 
 #### Building
 
-For targets other than Linux x86_64, the 'C' and 'go' code will need to be guilt from source.  This framework has been successfully built and run on Raspbian/ARM Linux, MAC OSX, and Windows Cygwin.  To build the 'C' source, a makefile is provided along with a default make config file, `defconfig`.  To see the make options, just type:
+For targets other than Linux x86_64, the 'C' and 'go' code will need to be guilt from source.  This 
+framework has been successfully built and run on Raspbian/ARM Linux, MAC OSX, and Windows Cygwin.  
+To build the 'C' source, a makefile is provided along with a default make config file, `defconfig`.  
+To see the make options, just type:
 
 `$ make`
 
@@ -104,15 +111,55 @@ To do a make and local install, run:
 
 This will compile all the 'C' code and run the above `install.sh` script for a local install.
 
-To build all the 'go' code, you first need to see if you have 'golang' installed on your system, and if not, install it with yor appropriate package manager.
+To build all the 'go' code, you first need to see if you have 'golang' installed on your system, and 
+if not, install it with yor appropriate package manager.
 
-To build all the 'go' code, first do a local install or local make install and then 'cd' to the 'go/src' directory and run:
+To build all the 'go' code, first do a local install or local make install and then 'cd' to the 
+'go/src' directory and run:
 
 `$ go install <targetDirectory>`
 
-Where target directory is every sub directory in the 'go/src' directory.  See the following example to build the 'PshellControl' 'go' module:
+Where target directory is every sub directory in the 'go/src' directory.  See the following example 
+to build the 'PshellControl' 'go' module:
 
 `$ go install PshellControl`
+
+#### Demo programs
+There are several demo programs that provide examples of using the various aspects of the framework.
+The following sections describes them in order of importance.
+
+##### pshellServerDemo ('C', Python, and 'go')
+This is the most important demo program.  It shows how to setup a pshell server to run within any process.
+It has examples of pshell callback functions, the registration of those functions within the framework, 
+and the starting of the pshell server.  This is all that is needed to add interactive pshell access to a 
+given process.  From your shell command line, invoke any of the `pshellServerDemo` programs with the `-h` 
+option to see the usage:
+
+```
+$ pshellServerDemo -h
+
+Usage: pshellServerDemo -udp [<port>] | -tcp [<port>] | -unix | -local
+
+  where:
+    -udp   - Multi-session UDP server
+    -tcp   - Single session TCP server
+    -unix  - Multi-session UNIX domain server
+    -local - Local command dispatching server
+    <port> - Desired UDP or TCP port, default: 6001
+``` 
+Then invoke the program in the foreground with the desired server type.  For a good example, run 
+the program in 4 different windows, each using a different server type.  To connect to the TCP
+server type:
+
+`$ telnet localhost 6001`
+
+To connect to the UDP server type:
+
+`$ pshell localhost 6001`
+
+To connect to the Unix servere type:
+
+`$ pshell pshellServerDemo`
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 
