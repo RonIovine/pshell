@@ -79,7 +79,7 @@ The functions are dispatched via its registered command name (keyword), along wi
 command line arguments, similar to command line shell processing.
 
 #### Getting started
-There is a short .ppt slide deck that gives a good overview of the framework.  See PSHELL-Framework.ppt
+The following sections describe an overview os getting started with the basic features of the framework.
 
 #### Installation
 All of the included binaries should work for most modern x86_64 based Linux systems as-is.  They have 
@@ -117,12 +117,45 @@ if not, install it with yor appropriate package manager.
 To build all the 'go' code, first do a local install or local make install and then 'cd' to the 
 'go/src' directory and run:
 
-`$ go install <targetDirectory>`
+```
+$ go install PshellServer-full
+$ go install PshellServer-stub
+$ go install PshellControl
+$ go install pshellServerDemo
+$ go install pshellControlDemo
+```
+Note for the 'go' install to work, be sure to source your `.pshellrc` environment file which sets 
+up the $GOPATH env variable.
 
-Where target directory is every sub directory in the 'go/src' directory.  See the following example 
-to build the 'PshellControl' 'go' module:
+#### Documentation
+There is a short .ppt presentation that gives an overview of the main features and capabilities of
+the framework, PSHELL-Framework.ppt.
 
-`$ go install PshellControl`
+There is also documentation for the 'C' API in the form of manpages.  The following manpages are provided:
+
+```
+pshell(1)         - Describes the framework as well as the client program
+PshellServer(3)   - Describes the API and usage of the PshellServer utility
+PshellControl(3)  - Describes the API and usage of the PshellControl utility
+PshellReadline(3) - Describes the API and usage of the PshellReadline utility
+TraceFilter(3)    - Describes the API and usage of the TraceFilter utility
+TraceLog(3)       - Describes the API and usage of the TraceLog utility
+```
+The following HTML 'pydoc' generated documentation is available in the
+$PSHELL_INSTALL/python/doc directory, the user can also use the command
+line 'pydoc' to see the embedded documentation on all the python modules.
+```
+pshell.html
+PshellServer.html
+PshellControl.html
+PshellReadline.html
+```
+The following 'go' modules also support embedded 'godoc' documentation:
+```
+PshellControl.go
+PshellServer.go
+```
+#### Interactive clients
 
 #### Demo programs
 There are several demo programs that provide examples of using the various aspects of the framework.
