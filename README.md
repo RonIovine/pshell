@@ -134,6 +134,10 @@ It has examples of pshell callback functions, the registration of those function
 and the starting of the pshell server.  This is all that is needed to add interactive pshell access to a 
 given process.  From your shell command line, invoke any of the `pshellServerDemo` programs with the `-h` 
 option to see the usage.  All language implementations are fully compatible with all different clients.
+Note that in these demo inpmementations, the servers are setup at the end of the `main` in BLOCKING mode.
+When retro-fitting an existing application that already has a final control loop in the `main` to keep the
+process resident, the server will most likely be setup at the beginning of the `main`, before the final
+control loop and in NON_BLOCKING mode.  See the `traceFilterDemo.cc` program for an example of this.
 
 ```
 $ pshellServerDemo -h
@@ -164,7 +168,47 @@ To connect to the Unix server type:
 Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
 'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
 any of the `pshellServerDemo` programs for all 3 languages.  The pshell client programs both take a `-h`
-to show the usage.
+to show the usage as follows:
+
+```
+$ pshell -h
+
+Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>
+                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]
+
+  where:
+
+    -s             - show named servers in pshell-client.conf file
+    -c             - run command from command line
+    -f             - run commands from a batch file
+    -t             - change the default server response timeout
+    hostName       - hostname of UDP server
+    ipAddr         - IP address of UDP server
+    portNum        - port number of UDP server
+    serverName     - name of UDP server from pshell-client.conf file
+    unixServerName - name of UNIX server
+    timeout        - response wait timeout in sec (default=5)
+    command        - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName       - optional batch file to execute
+    rate           - optional rate to repeat command or batch file (in seconds)
+    repeat         - optional repeat count for command or batch file (default=forever)
+    clear          - optional clear screen between commands or batch file passes
+
+    NOTE: If no <command> is given, pshell will be started
+          up in interactive mode, commands issued in command
+          line mode that require arguments must be enclosed 
+          in double quotes, commands issued in interactive
+          mode that require arguments do not require double
+          quotes.
+
+          To get help on a command in command line mode, type
+          "<command> ?" or "<command> -h".  To get help in
+          interactive mode type 'help' or '?' at the prompt to
+          see all available commands, to get help on a single
+          command, type '<command> {? | -h}'.  Use TAB completion
+          to fill out partial commands and up-arrow to recall
+          for command history.
+```
 
 ##### pshellControlDemo ('C', Python, and 'go')
 These demo programs show one process invoking pshell functions in another process using the control API.
