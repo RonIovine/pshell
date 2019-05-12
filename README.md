@@ -163,7 +163,8 @@ To connect to the Unix server type:
 
 Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
 'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
-any of the `pshellServerDemo` programs for all 3 languages.
+any of the `pshellServerDemo` programs for all 3 languages.  The pshell client programs both take a `-h`
+to show the usage.
 
 ##### pshellControlDemo ('C', Python, and 'go')
 These demo programs show one process invoking pshell functions in another process using the control API.
@@ -171,7 +172,26 @@ This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show t
 be used to connect to any of the previous `pshellServerDemo` programs and invoke their functions.  The
 control demo programs will prompt the user for input for the remote command to invoke, but in real process
 to process IPC situation, the IPC commands used in the control API functions will most likely be hard
-coded.
+coded.  The following is the usage of the `pshellControlDemo` programs:
+
+'''
+$ pshellControlDemo -h
+
+Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> | unix}
+                         [-t<timeout>] [-l<logLevel>] [-extract]
+
+  where:
+    <hostname>       - hostname of UDP server
+    <ipAddress>      - IP address of UDP server
+    <unixServerName> - name of UNIX server
+    unix             - specifies a UNIX server
+    <port>           - port number of UDP server
+    <timeout>        - wait timeout for response in mSec (default=100)
+    <logLevel>       - log level of control library (0-3, default=3, i.e. all)
+    extract          - extract data contents of response (must have non-0 wait timeout)
+
+
+'''
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 
