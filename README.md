@@ -128,7 +128,7 @@ to build the 'PshellControl' 'go' module:
 There are several demo programs that provide examples of using the various aspects of the framework.
 The following sections describes them in order of importance.
 
-##### pshellServerDemo ('C', Python, and 'go')
+##### 1. pshellServerDemo ('C', Python, and 'go')
 This is the most important demo program.  It shows how to setup a pshell server to run within any process.
 It has examples of pshell callback functions, the registration of those functions within the framework, 
 and the starting of the pshell server.  This is all that is needed to add interactive pshell access to a 
@@ -209,8 +209,25 @@ Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverNa
           to fill out partial commands and up-arrow to recall
           for command history.
 ```
+Note that there is also a generic `pshellAggregator` UDP/Unix client program for both 'C' and Python
+that can be used to consolidate the pshell server commands from several remote applications into one
+comprehensive interactive session.  Note that this is different than the custom aggregator described below.
 
-##### pshellControlDemo ('C', Python, and 'go')
+The following is the usage:
+
+```
+$ pshellAggregator -h
+
+Usage: pshellAggregator
+
+  Client program that will allow for the aggregation of multiple remote
+  UDP/UNIX pshell servers into one consolidated client shell.  This program
+  can also create multicast groups for sets of remote servers.  The remote
+  servers and multicast groups can be added interactively via the 'add'
+  command or at startup via the 'pshellAggregator.startup' file.
+```
+
+##### 2. pshellControlDemo ('C', Python, and 'go')
 These demo programs show one process invoking pshell functions in another process using the control API.
 This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
 be used to connect to any of the previous `pshellServerDemo` programs and invoke their functions.  The
@@ -234,6 +251,33 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
     <logLevel>       - log level of control library (0-3, default=3, i.e. all)
     extract          - extract data contents of response (must have non-0 wait timeout)
 ```
+##### 3. pshellNoServerDemo ('C' only)
+This is an implementation that allows the user to use this framework to create a multi-call binary
+similar to [Busybox](https://www.busybox.net).  This is not really used to retro-fit existing applications,
+but would be used when creating a new application by where there are multiple entry points that map
+to individual pshell commands.  This does not use any external client and all functions are accessed
+via the hosts command shell (i.e. bash) by directly invoking the application or by the optional softlinks
+which map to each individual command.
+
+##### 4. pshellAggregatiorDemo ('C' and Python)
+This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
+interactive session.  Note that this is different than the generic pshellAggregator client program in that
+this is a custom aggregator by where the servers being aggregated are tpically hardcoded.  This can be 
+useful for creating a client that might hide certain commands from individual servers and create 'meta' 
+commands that consist of several discrete commands to several different servers.
+
+##### 5. pshellReadlineDemo ('C' and Python)
+This is not really part of the pshell client/server paradigm per-se, but rather is just a handy 
+stand-alone readline like implementation that can be used by any application to solicit user intput.  
+It has native command recall history, TAB completion, and command line editing capability.
+
+##### 6. traceFilterDemo ('C' only)
+This is an application that shows the integration of a programmable trace filter mechanism with remote
+pshell control.  It used the following example trace log implementation.
+
+##### 7 traceLogDemo ('C' only)
+This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
+the trace logging front end that is used in the above traceFilterDemo program.
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 
