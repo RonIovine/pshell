@@ -362,7 +362,7 @@ of several discrete commands to several different servers.
 
 ##### 5. pshellReadlineDemo ('C' and Python)
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy 
-stand-alone readline like implementation that can be used by any application to solicit user intput.  
+stand-alone readline like implementation that can be used by any application to solicit user input.  
 It has native command recall history, TAB completion, and command line editing capability.
 
 ##### 6. traceFilterDemo ('C' only)
