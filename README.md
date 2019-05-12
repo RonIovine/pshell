@@ -132,7 +132,6 @@ There is a short .ppt presentation that gives an overview of the main features a
 the framework, PSHELL-Framework.ppt.
 
 There is also documentation for the 'C' API in the form of manpages.  The following manpages are provided:
-
 ```
 pshell(1)
 PshellServer(3)
@@ -158,10 +157,10 @@ PshellServer.go
 #### Interactive clients
 As described above, a pshell server can be accesses remotely via an interactive client.  These clients are
 generic and are server agnostic.  A custom client never needs to be created unless the user want's to
-create a custom server aggrecator client.  See the below section 'pshellAggregatorDemo' demo programs for
-more information on custom aggregators.
+create a custom server aggrecator client.  See the below section for the 'pshellAggregatorDemo' demo programs 
+for more information on creating custom aggregators.
 
-A TCP pshell server just uses a standatd 'telnet' client for interactive access.  The datagram based servers
+A TCP pshell server just uses a standard 'telnet' client for interactive access.  The datagram based servers
 (UDP/Unix) require the provided 'pshell' interactive client.
 
 Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
@@ -275,8 +274,11 @@ Usage: pshellAggregator
 ```
 
 #### Demo programs
-There are several demo programs that provide examples of using the various aspects of the framework.
-The following sections describes them in order of importance.
+There are several demo programs that provide examples of using the various aspects of the framework.  Each
+language specific directory had a 'demo' subdirectory.  Look at the language specific examples for your
+language of interest.
+
+The following sections describes all the demo programs in order of importance/relevance.
 
 ##### 1. pshellServerDemo ('C', Python, and 'go')
 This is the most important demo program.  It shows how to setup a pshell server to run within any process.
