@@ -130,13 +130,13 @@ The following sections describes them in order of importance.
 
 ##### 1. pshellServerDemo ('C', Python, and 'go')
 This is the most important demo program.  It shows how to setup a pshell server to run within any process.
-It has examples of pshell callback functions, the registration of those functions within the framework, 
-and the starting of the pshell server.  This is all that is needed to add interactive pshell access to a 
-given process.  From your shell command line, invoke any of the `pshellServerDemo` programs with the `-h` 
-option to see the usage.  All language implementations are fully compatible with all different clients.
-Note that in these demo inpmementations, the servers are setup at the end of the `main` in BLOCKING mode.
-When retro-fitting an existing application that already has a final control loop in the `main` to keep the
-process resident, the server will most likely be setup at the beginning of the `main`, before the final
+It has example implementations of pshell callback functions, the registration of those functions within 
+the framework, and the starting of the pshell server.  This is all that is needed to add interactive pshell
+access to a given process.  From your shell command line, invoke any of the `pshellServerDemo` programs with 
+the `-h` option to see the usage.  All language implementations are fully compatible with all different 
+clients.  Note that in these demo inpmementations, the servers are setup at the end of the `main` in BLOCKING
+mode.  When retro-fitting an existing application that already has a final control loop in the `main` to keep 
+the process resident, the server will most likely be setup at the beginning of the `main`, before the final
 control loop and in NON_BLOCKING mode.  See the `traceFilterDemo.cc` program for an example of this.
 
 ```
@@ -152,7 +152,7 @@ Usage: pshellServerDemo -udp [<port>] | -tcp [<port>] | -unix | -local
     <port> - Desired UDP or TCP port, default: 6001
 ``` 
 Then invoke the program in the foreground with the desired server type.  For a good example, run 
-the program in 4 different windows, each using a different server type.  To connect to the TCP
+the program in 4 different windows, each using a different server type option.  To connect to the TCP
 server type:
 
 `$ telnet localhost 6001`
@@ -164,6 +164,8 @@ To connect to the UDP server type:
 To connect to the Unix server type:
 
 `$ pshell pshellServerDemo`
+
+The local server had no remote client.  All interactive control is done directly within the application.
 
 Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
 'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
@@ -262,7 +264,7 @@ which map to each individual command.
 ##### 4. pshellAggregatiorDemo ('C' and Python)
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
 interactive session.  Note that this is different than the generic pshellAggregator client program in that
-this is a custom aggregator by where the servers being aggregated are tpically hardcoded.  This can be 
+this is a custom aggregator by where the servers being aggregated are typically hardcoded.  This can be 
 useful for creating a client that might hide certain commands from individual servers and create 'meta' 
 commands that consist of several discrete commands to several different servers.
 
@@ -273,7 +275,7 @@ It has native command recall history, TAB completion, and command line editing c
 
 ##### 6. traceFilterDemo ('C' only)
 This is an application that shows the integration of a programmable trace filter mechanism with remote
-pshell control.  It used the following example trace log implementation.
+pshell server control.  It uses the following example trace log implementation.
 
 ##### 7 traceLogDemo ('C' only)
 This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
