@@ -128,8 +128,8 @@ Note for the 'go' install to work, be sure to source your `.pshellrc` environmen
 up the $GOPATH env variable.
 
 #### Documentation
-There is a short .ppt presentation that gives an overview of the main features and capabilities of
-the framework, PSHELL-Framework.ppt.
+See the PPT presentation PSHELL-Framework.ppt for an overview of the main features and capabilities of
+the framework.
 
 There is also documentation for the 'C' API in the form of manpages.  The following manpages are provided:
 ```
