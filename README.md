@@ -79,7 +79,7 @@ The functions are dispatched via its registered command name (keyword), along wi
 command line arguments, similar to command line shell processing.
 
 #### Getting started
-The following sections describe an overview os getting started with the basic features of the framework.
+The following sections describe an overview of getting started with the basic features of the framework.
 
 #### Installation
 All of the included binaries should work for most modern x86_64 based Linux systems as-is.  They have 
