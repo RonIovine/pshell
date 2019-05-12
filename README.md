@@ -78,37 +78,41 @@ associated invokation method:
 The functions are dispatched via its registered command name (keyword), along with 0 or more
 command line arguments, similar to command line shell processing.
 
-This framework also provides the ability to run in non-server, non-interactive mode.  In this
-mode, the registered commands can be dispatched via the host's shell command line directly as
-single shot commands via the main registering multi-call binary program.  In this mode, there
-is no interactive user prompting, and control is returned to the calling host's command line
-shell when the command is complete.  This mode also provides the ability to setup softlink
-shortcuts to each internal command and to invoke those commands from the host's command line
-shell directly via the shortcut name  rather than the parent program name, in a manner similar
-to [Busybox](https://busybox.net/about.html) functionality.  Note this is only available in the
-'C' implementation.
+#### Getting started
+There is a short .ppt slide deck that gives a good overview of the framework.  See PSHELL-Framework.ppt
 
-This package also provides an optional integrated interactive dynamic trace filtering mechanism that
-can be incorporated into any software that uses an existing trace logging system that uses the `__FILE__`,
-`__LINE__`, `__FUNCTION__`, and `level` paradigm.  If this functionality is not desired, it can be
-easily compiled out via the build-time config files.
+#### Installation
+All of the included binaries should work for most modern x86_64 based Linux systems as-is.  They have been tested on Mint, Ubuntu, and CentOS.  To install, there is an `install.sh` script provided.  To see the usage of the install script, run:
 
-Along with the optional trace filtering mechanism, there is also an optional integrated trace logging
-subsystem and API to show the integration of an existing logging system into the dynamic trace filter
-API.  The output of this logging system can be controlled via the trace filter pshell CLI mechanism.
-This example logging system can also be compiled out via the build-time config files if an existing
-logging system is used.  All of the trace logging/filtering features are only available via the C based
-library.
+`$ ./install.sh -h` 
 
-In addition to the infrastructure components, several demo programs are also provided to show the usage
-of the various APIs for each component.  See the respective 'demo' directories under each language for
-specific examples.
+The simplest install is a local install, from the top level pshell directory run:
 
-Finally, a stub module/library is provided that will honor the complete API of the normal pshell
-library but with all the underlying functionality stubbed out.  This will allow all the pshell
-functionality to easily be completly removed from an application without requiring any code
-changes or recompilation, only a re-link (for static linking) or restart (when using a shared
-library/module acessed via a softlink) of the target program is necessary.
+`$ ./install.sh -local`
+
+This will create an environment file, `.pshellrc` that should be sourced in your local shell, it should also be added to your shell env file, i.e. `.bashrc`.  This will setup several softlinks and environment variables that will allow access to the various parts of the framework.
+
+#### Building
+
+For targets other than Linux x86_64, the 'C' and 'go' code will need to be guilt from source.  This framework has been successfully built and run on Raspbian/ARM Linux, MAC OSX, and Windows Cygwin.  To build the 'C' source, a makefile is provided along with a default make config file, `defconfig`.  To see the make options, just type:
+
+`$ make`
+
+To do a make and local install, run:
+
+`$ make install local=y`
+
+This will compile all the 'C' code and run the above `install.sh` script for a local install.
+
+To build all the 'go' code, you first need to see if you have 'golang' installed on your system, and if not, install it with yor appropriate package manager.
+
+To build all the 'go' code, first do a local install or local make install and then 'cd' to the 'go/src' directory and run:
+
+`$ go install <targetDirectory>`
+
+Where target directory is every sub directory in the 'go/src' directory.  See the following example to build the 'PshellControl' 'go' module:
+
+`$ go install PshellControl`
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 
