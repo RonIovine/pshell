@@ -134,12 +134,12 @@ the framework, PSHELL-Framework.ppt.
 There is also documentation for the 'C' API in the form of manpages.  The following manpages are provided:
 
 ```
-pshell(1)         - Describes the framework as well as the client program
-PshellServer(3)   - Describes the API and usage of the PshellServer utility
-PshellControl(3)  - Describes the API and usage of the PshellControl utility
-PshellReadline(3) - Describes the API and usage of the PshellReadline utility
-TraceFilter(3)    - Describes the API and usage of the TraceFilter utility
-TraceLog(3)       - Describes the API and usage of the TraceLog utility
+pshell(1)
+PshellServer(3)
+PshellControl(3)
+PshellReadline(3)
+TraceFilter(3)
+TraceLog(3)
 ```
 The following HTML 'pydoc' generated documentation is available in the
 $PSHELL_INSTALL/python/doc directory, the user can also use the command
@@ -156,6 +156,123 @@ PshellControl.go
 PshellServer.go
 ```
 #### Interactive clients
+As described above, a pshell server can be accesses remotely via an interactive client.  These clients are
+generic and are server agnostic.  A custom client never needs to be created unless the user want's to
+create a custom server aggrecator client.  See the below section 'pshellAggregatorDemo' demo programs for
+more information on custom aggregators.
+
+A TCP pshell server just uses a standatd 'telnet' client for interactive access.  The datagram based servers
+(UDP/Unix) require the provided 'pshell' interactive client.
+
+Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
+'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
+any of the `pshellServerDemo` programs for all 3 languages.  The pshell client programs both take a `-h`
+to show the usage as follows:
+
+```
+$ pshell -h
+
+Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>
+                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]
+
+  where:
+
+    -s             - show named servers in pshell-client.conf file
+    -c             - run command from command line
+    -f             - run commands from a batch file
+    -t             - change the default server response timeout
+    hostName       - hostname of UDP server
+    ipAddr         - IP address of UDP server
+    portNum        - port number of UDP server
+    serverName     - name of UDP server from pshell-client.conf file
+    unixServerName - name of UNIX server
+    timeout        - response wait timeout in sec (default=5)
+    command        - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName       - optional batch file to execute
+    rate           - optional rate to repeat command or batch file (in seconds)
+    repeat         - optional repeat count for command or batch file (default=forever)
+    clear          - optional clear screen between commands or batch file passes
+
+    NOTE: If no <command> is given, pshell will be started
+          up in interactive mode, commands issued in command
+          line mode that require arguments must be enclosed 
+          in double quotes, commands issued in interactive
+
+          mode that require arguments do not require double
+          quotes.
+
+          To get help on a command in command line mode, type
+          "<command> ?" or "<command> -h".  To get help in
+          interactive mode type 'help' or '?' at the prompt to
+          see all available commands, to get help on a single
+          command, type '<command> {? | -h}'.  Use TAB completion
+          to fill out partial commands and up-arrow to recall
+          for command history.
+```
+There is also an 'expect' wrapper script, 'pshell.exp', that will wrap 'telnet' to provide functionality 
+similar to the above 'pshell' client for things like single-shot commands, command repeat etc but for 
+TCP based pshell servers.  The 'expect' scripting package must be installed on your host.  The following 
+is the usage of the expect script.
+```
+$ pshell.exp -h
+
+Usage: pshell.exp -s | {<hostName> | ipAddr>} {<portNum> | <serverName>}
+                       [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
+
+  where:
+
+    -s         - show named servers in pshell-client.conf file
+    -c         - run command from command line
+    -f         - run commands from a batch file
+    hostName   - hostname of TCP server
+    ipAddr     - IP address of TCP server
+    portNum    - port number of TCP server
+    serverName - name of TCP server from pshell-client.conf file
+    command    - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName   - optional batch file to execute
+    rate       - optional rate to repeat command or batch file (in seconds)
+    repeat     - optional repeat count for command or batch file (default=forever)
+    clear      - optional clear screen between commands or batch file passes
+
+    NOTE: If no <command> is given, pshell will be started
+          up in interactive mode, commands issued in command
+          line mode that require arguments must be enclosed 
+          in double quotes, commands issued in interactive
+          mode that require arguments do not require double
+          quotes.
+
+          To get help on a command in command line mode, type
+          "<command> ?" or "<command> -h".  To get help in
+          interactive mode type 'help' or '?' at the prompt to
+          see all available commands, to get help on a single
+          command, type '<command> {? | -h}'.  Use TAB completion
+          to fill out partial commands and up-arrow to recall
+          the last entered command.
+
+    NOTE: If the default terminal title bar and/or prompt are changed
+          in the PshellServers.c file, the variables 'title' and 'prompt'
+          at the top of this script must be changed accordingly, however,
+          if the default terminal title bar and/or prompt are changed in
+          the pshell-server.conf file AND we are calling this script with
+          a serverName as opposed to a portNum, this script will automatically
+          detect that and assign the new values
+
+```
+Finally, yhere is a generic `pshellAggregator` UDP/Unix client program for both 'C' and Python that can 
+be used to consolidate the pshell server commands from several remote applications into one comprehensive interactive session.  Note that this is different than the custom aggregator described below.
+
+The following is the usage:
+```
+$ pshellAggregator -h
+
+Usage: pshellAggregator
+
+  Client program that will allow for the aggregation of multiple remote
+  UDP/UNIX pshell servers into one consolidated client shell.  This program
+  can also create multicast groups for sets of remote servers.  The remote
+  servers and multicast groups can be added interactively via the 'add'
+  command or at startup via the 'pshellAggregator.startup' file.
+```
 
 #### Demo programs
 There are several demo programs that provide examples of using the various aspects of the framework.
@@ -199,68 +316,6 @@ To connect to the Unix server type:
 `$ pshell pshellServerDemo`
 
 The local server had no remote client.  All interactive control is done directly within the application itself.
-
-Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
-'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
-any of the `pshellServerDemo` programs for all 3 languages.  The pshell client programs both take a `-h`
-to show the usage as follows:
-
-```
-$ pshell -h
-
-Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>
-                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]
-
-  where:
-
-    -s             - show named servers in pshell-client.conf file
-    -c             - run command from command line
-    -f             - run commands from a batch file
-    -t             - change the default server response timeout
-    hostName       - hostname of UDP server
-    ipAddr         - IP address of UDP server
-    portNum        - port number of UDP server
-    serverName     - name of UDP server from pshell-client.conf file
-    unixServerName - name of UNIX server
-    timeout        - response wait timeout in sec (default=5)
-    command        - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
-    fileName       - optional batch file to execute
-    rate           - optional rate to repeat command or batch file (in seconds)
-    repeat         - optional repeat count for command or batch file (default=forever)
-    clear          - optional clear screen between commands or batch file passes
-
-    NOTE: If no <command> is given, pshell will be started
-          up in interactive mode, commands issued in command
-          line mode that require arguments must be enclosed 
-          in double quotes, commands issued in interactive
-          mode that require arguments do not require double
-          quotes.
-
-          To get help on a command in command line mode, type
-          "<command> ?" or "<command> -h".  To get help in
-          interactive mode type 'help' or '?' at the prompt to
-          see all available commands, to get help on a single
-          command, type '<command> {? | -h}'.  Use TAB completion
-          to fill out partial commands and up-arrow to recall
-          for command history.
-```
-Note that there is also a generic `pshellAggregator` UDP/Unix client program for both 'C' and Python
-that can be used to consolidate the pshell server commands from several remote applications into one
-comprehensive interactive session.  Note that this is different than the custom aggregator described below.
-
-The following is the usage:
-
-```
-$ pshellAggregator -h
-
-Usage: pshellAggregator
-
-  Client program that will allow for the aggregation of multiple remote
-  UDP/UNIX pshell servers into one consolidated client shell.  This program
-  can also create multicast groups for sets of remote servers.  The remote
-  servers and multicast groups can be added interactively via the 'add'
-  command or at startup via the 'pshellAggregator.startup' file.
-```
 
 ##### 2. pshellControlDemo ('C', Python, and 'go')
 These demo programs show one process invoking pshell functions in another process using the control API.
