@@ -133,7 +133,7 @@ This is the most important demo program.  It shows how to setup a pshell server 
 It has examples of pshell callback functions, the registration of those functions within the framework, 
 and the starting of the pshell server.  This is all that is needed to add interactive pshell access to a 
 given process.  From your shell command line, invoke any of the `pshellServerDemo` programs with the `-h` 
-option to see the usage:
+option to see the usage.  All language implementations are fully compatible with all different clients.
 
 ```
 $ pshellServerDemo -h
@@ -157,9 +157,21 @@ To connect to the UDP server type:
 
 `$ pshell localhost 6001`
 
-To connect to the Unix servere type:
+To connect to the Unix server type:
 
 `$ pshell pshellServerDemo`
+
+Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
+'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
+any of the `pshellServerDemo` programs for all 3 languages.
+
+##### pshellControlDemo ('C', Python, and 'go')
+These demo programs show one process invoking pshell functions in another process using the control API.
+This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
+be used to connect to any of the previous `pshellServerDemo` programs and invoke their functions.  The
+control demo programs will prompt the user for input for the remote command to invoke, but in real process
+to process IPC situation, the IPC commands used in the control API functions will most likely be hard
+coded.
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 
