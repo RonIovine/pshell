@@ -63,17 +63,11 @@ import "PshellServer"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func hello(argv []string) {
-  PshellServer.Printf("hello command dispatched:\n")
+func helloWorld(argv []string) {
+  PshellServer.Printf("helloWorld command dispatched:\n")
   for index, arg := range argv {
     PshellServer.Printf("  arg[%d]: %s\n", index, arg)
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func world(argv []string) {
-  PshellServer.Printf("world command dispatched:\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -258,21 +252,13 @@ func main() {
   registerSignalHandlers()
 
   // register our callback commands, commands consist of single keyword only
-  PshellServer.AddCommand(hello,                           // function
-                          "hello",                         // command
-                          "example hello command",         // description
-                          "[<arg1> ... <arg20>]",          // usage
-                          0,                               // minArgs
-                          20,                              // maxArgs
-                          true)                            // showUsage on '?'
-
-  PshellServer.AddCommand(world,                         // function
-                          "world",                       // command
-                          "world command description",   // description
-                          "",                            // usage
-                          0,                             // minArgs
-                          0,                             // maxArgs
-                          true)                          // showUsage on '?'
+  PshellServer.AddCommand(helloWorld,                            // function
+                          "helloWorld",                          // command
+                          "command that prints out arguments",   // description
+                          "[<arg1> ... <arg20>]",                // usage
+                          0,                                     // minArgs
+                          20,                                    // maxArgs
+                          true)                                  // showUsage on '?'
 
   PshellServer.AddCommand(enhancedUsage,                   // function
                           "enhancedUsage",                 // command
@@ -312,7 +298,7 @@ func main() {
 
   // run a registered command from within it's parent process, this can be done before
   // or after the server is started, as long as the command being called is regstered
-  PshellServer.RunCommand("hello 1 2 3")
+  PshellServer.RunCommand("helloWorld 1 2 3")
 
   // Now start our PSHELL server with the PshellServer.StartServer function call.
   //
@@ -362,6 +348,12 @@ func main() {
   // All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden
   // via the 'pshell-server.conf' file on a per-server basis.
 
+  //
+  // NOTE: This server is started up in BLOCKING mode, but if a pshell server is being added
+  //       to an existing process that already has a control loop in it's main, it should be
+  //       started in NON_BLOCKING mode before the main drops into it's control loop, see the
+  //       demo program traceFilterDemo.cc for an example
+  //
   PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, "7001")
 
   // should never get here, but cleanup any pshell system resources as good practice

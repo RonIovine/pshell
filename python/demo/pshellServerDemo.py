@@ -61,15 +61,10 @@ import PshellServer
 
 #################################################################################
 #################################################################################
-def hello(argv):
-  PshellServer.printf("hello command dispatched:")
+def helloWorld(argv):
+  PshellServer.printf("helloWorld command dispatched:")
   for index, arg in enumerate(argv):
     PshellServer.printf("  argv[%d]: '%s'" % (index, arg))
-
-#################################################################################
-#################################################################################
-def world(argv):
-  PshellServer.printf("world command dispatched:")
 
 #################################################################################
 #################################################################################
@@ -231,16 +226,12 @@ if (__name__ == '__main__'):
   registerSignalHandlers()
 
   # register our callback commands, commands consist of single keyword only
-  PshellServer.addCommand(function    = hello,
-                          command     = "hello",
-                          description = "hello command description",
+  PshellServer.addCommand(function    = helloWorld,
+                          command     = "helloWorld",
+                          description = "command that prints out arguments",
                           usage       = "[<arg1> ... <arg20>]",
                           minArgs     = 0,
                           maxArgs     = 20)
-
-  PshellServer.addCommand(function    = world,
-                          command     = "world",
-                          description = "world command description")
 
   PshellServer.addCommand(function    = enhancedUsage,
                           command     = "enhancedUsage",
@@ -275,7 +266,7 @@ if (__name__ == '__main__'):
 
   # run a registered command from within it's parent process, this can be done before
   # or after the server is started, as long as the command being called is regstered
-  PshellServer.runCommand("hello 1 2 3")
+  PshellServer.runCommand("helloWorld 1 2 3")
 
   # Now start our PSHELL server with the PshellServer.startServer function call.
   #
@@ -325,6 +316,12 @@ if (__name__ == '__main__'):
   # All of these arguments (except the server name and mode, i.e. args 1 & 3) can be overridden
   # via the 'pshell-server.conf' file on a per-server basis.
 
+  #
+  # NOTE: This server is started up in BLOCKING mode, but if a pshell server is being added
+  #       to an existing process that already has a control loop in it's main, it should be
+  #       started in NON_BLOCKING mode before the main drops into it's control loop, see the
+  #       demo program traceFilterDemo.cc for an example
+  #
   PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)
 
   # should never get here, but cleanup any pshell system resources as good practice

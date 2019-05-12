@@ -65,23 +65,20 @@
  * the standard 'printf' function.
  */
 
+/*
+ * simple helloWorld command that just prints out all the passed in arguments
+ */
+
 /******************************************************************************/
 /******************************************************************************/
-void hello(int argc, char *argv[])
+void helloWorld(int argc, char *argv[])
 {
-  pshell_printf("hello command dispatched:\n");
+  pshell_printf("helloWorld command dispatched:\n");
   /* dump out our args */
   for (int i = 0; i < argc; i++)
   {
     pshell_printf("  argv[%d]: '%s'\n", i, argv[i]);
   }
-}
-
-/******************************************************************************/
-/******************************************************************************/
-void world(int argc, char *argv[])
-{
-  pshell_printf("world command dispatched:\n");
 }
 
 /*
@@ -528,21 +525,13 @@ int main(int argc, char *argv[])
    * NOTE: Command names consist of one keyword only
    */
 
-  pshell_addCommand(hello,                        /* function */
-                    "hello",                      /* command */
-                    "hello command description",  /* description */
-                    "[<arg1> ... <arg20>]",       /* usage */
-                    0,                            /* minArgs */
-                    20,                           /* maxArgs */
-                    true);                        /* showUsage on "?" */
-
-  pshell_addCommand(world,                        /* function */
-                    "world",                      /* command */
-                    "world command description",  /* description */
-                    NULL,                         /* usage */
-                    0,                            /* minArgs */
-                    0,                            /* maxArgs */
-                    true);                        /* showUsage on "?" */
+  pshell_addCommand(helloWorld,                           /* function */
+                    "helloWorld",                         /* command */
+                    "command that prints out arguments",  /* description */
+                    "[<arg1> ... <arg20>]",               /* usage */
+                    0,                                    /* minArgs */
+                    20,                                   /* maxArgs */
+                    true);                                /* showUsage on "?" */
 
   if ((serverType == PSHELL_UDP_SERVER) || (serverType == PSHELL_UNIX_SERVER))
   {
@@ -600,7 +589,7 @@ int main(int argc, char *argv[])
    * or after the server is started, as long as the command being called is regstered
    */
 
-  pshell_runCommand("hello");
+  pshell_runCommand("helloWorld 1 2 3");
 
   /*
    * Now start our PSHELL server with the pshell_startServer function call.
@@ -653,6 +642,12 @@ int main(int argc, char *argv[])
    *
    */
 
+  /*
+   * NOTE: This server is started up in BLOCKING mode, but if a pshell server is being added
+   *       to an existing process that already has a control loop in it's main, it should be
+   *       started in NON_BLOCKING mode before the main drops into it's control loop, see the
+   *       demo program traceFilterDemo.cc for an example
+   */
   pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, PSHELL_ANYHOST, port);
 
   /* should never get here, but cleanup any pshell system resources as good practice */
