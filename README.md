@@ -165,7 +165,7 @@ To connect to the Unix server type:
 
 `$ pshell pshellServerDemo`
 
-The local server had no remote client.  All interactive control is done directly within the application.
+The local server had no remote client.  All interactive control is done directly within the application itself.
 
 Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
 'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
