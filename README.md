@@ -317,7 +317,7 @@ To connect to the Unix server type:
 
 `$ pshell pshellServerDemo`
 
-The local server had no remote client.  All interactive control is done directly within the application itself.
+A local server has no remote client.  All interactive control is done directly within the application itself.
 
 ##### 2. pshellControlDemo ('C', Python, and 'go')
 These demo programs show one process invoking pshell functions in another process using the control API.
@@ -353,10 +353,11 @@ which map to each individual command.
 
 ##### 4. pshellAggregatiorDemo ('C' and Python)
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
-interactive session.  Note that this is different than the generic pshellAggregator client program in that
-this is a custom aggregator by where the servers being aggregated are typically hardcoded.  This can be 
-useful for creating a client that might hide certain commands from individual servers and create 'meta' 
-commands that consist of several discrete commands to several different servers.
+interactive session.  Note that this is different than the generic pshellAggregator client program described
+above in that this is a custom aggregator by where the servers being aggregated are typically hardcoded.  
+This can be useful for creating a client does not expose all the raw native server commands, but rather 
+might want to hide certain commands from individual servers and also create 'meta' commands that consist 
+of several discrete commands to several different servers.
 
 ##### 5. pshellReadlineDemo ('C' and Python)
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy 
