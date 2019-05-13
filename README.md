@@ -143,7 +143,8 @@ TraceLog(3)
 ```
 The following HTML 'pydoc' generated documentation is available in the
 $PSHELL_INSTALL/python/doc directory, the user can also use the command
-line 'pydoc' to see the embedded documentation on all the python modules.
+line 'pydoc' to see the embedded documentation on all the corresponding
+python modules.
 ```
 pshell.html
 PshellServer.html
@@ -197,7 +198,6 @@ Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverNa
           up in interactive mode, commands issued in command
           line mode that require arguments must be enclosed 
           in double quotes, commands issued in interactive
-
           mode that require arguments do not require double
           quotes.
 
@@ -258,7 +258,7 @@ Usage: pshell.exp -s | {<hostName> | ipAddr>} {<portNum> | <serverName>}
           detect that and assign the new values
 
 ```
-Finally, yhere is a generic `pshellAggregator` UDP/Unix client program for both 'C' and Python that can 
+Finally, there is a generic `pshellAggregator` UDP/Unix client program for both 'C' and Python that can 
 be used to consolidate the pshell server commands from several remote applications into one comprehensive interactive session.  Note that this is different than the custom aggregator described below.
 
 The following is the usage:
