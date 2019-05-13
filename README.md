@@ -395,7 +395,35 @@ similar to [Busybox](https://www.busybox.net).  This is not really used to retro
 but would be used when creating a new application by where there are multiple entry points that map
 to individual pshell commands.  This does not use any external client and all functions are accessed
 via the hosts command shell (i.e. bash) by directly invoking the application or by the optional softlinks
-which map to each individual command.
+which map to each individual command.  The following is the usage of this program:
+```
+$ pshellNoServerDemo -h
+
+****************************************
+*             COMMAND LIST             *
+****************************************
+
+help             -  show all available commands
+batch            -  run commands from a batch file
+helloWorld       -  command that prints out arguments
+wildcardMatch    -  command that does a wildcard matching
+enhancedUsage    -  command with enhanced usage
+formatChecking   -  command with arg format checking
+advancedParsing  -  command with advanced command line parsing
+getOptions       -  example of parsing command line options
+
+To run command type 'pshellNoServerDemo <command>'
+
+To get command usage type 'pshellNoServerDemo <command> {? | -h}'
+
+The special command 'pshellNoServerDemo --setup' can be run
+to automatically setup Busybox like softlink shortcuts for
+each of the commands.  This will allow direct access to each
+command from the command line shell without having to use the
+actual parent program name.  This command must be run from the
+same directory the parent program resides and may require root
+privlidges depending on the directory settings.
+```
 
 ##### 4. pshellAggregatiorDemo ('C' and Python)
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
@@ -403,20 +431,58 @@ interactive session.  Note that this is different than the generic pshellAggrega
 above in that this is a custom aggregator by where the servers being aggregated are typically hardcoded.  
 This can be useful for creating a client does not expose all the raw native server commands, but rather 
 might want to hide certain commands from individual servers and also create 'meta' commands that consist 
-of several discrete commands to several different servers.
+of several discrete commands to several different servers.  The following is the usage of the program:
+```
+$ pshellAggregatorDemo -h
+Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]
+```
 
 ##### 5. pshellReadlineDemo ('C' and Python)
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy 
 stand-alone readline like implementation that can be used by any application to solicit user input.  
-It has native command recall history, TAB completion, and command line editing capability.
+It has native command recall history, TAB completion, and command line editing capability.  The following
+is the usage of this program:
+```
+$ pshellReadlineDemo -h
+
+Usage: pshellReadlineDemo {-tty | -socket} [-bash | -fast] [<idleTimeout>]
+
+  where:
+    -tty          - serial terminal using stdin and stdout (default)
+    -socket       - TCP socket terminal using telnet client
+    -bash         - Use bash/readline style tabbing
+    -fast         - Use "fast" style tabbing (default)
+    <idleTimeout> - the idle session timeout in minutes (default=none)
+```
 
 ##### 6. traceFilterDemo ('C' only)
 This is an application that shows the integration of a programmable trace filter mechanism with remote
-pshell server control.  It uses the following example trace log implementation.
+pshell server control.  It uses the following example trace log implementation.  The following is the
+usage of this program:
+```
+$ traceFilterDemo -h
+
+Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
+
+  where:
+    -udp   - Multi-session UDP server
+    -tcp   - Single session TCP server
+    -unix  - Multi-session UNIX domain server
+    <port> - Desired UDP or TCP port, default: 6002
+```
 
 ##### 7 traceLogDemo ('C' only)
 This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
-the trace logging front end that is used in the above traceFilterDemo program.
+the trace logging front end that is used in the above traceFilterDemo program.  The following is the
+usage of this program:
+```
+$ traceLogDemo -h
+
+Usage: traceLogDemo <level>
+
+  where:
+    <level>  - The desired log level value, 0-10
+```
 
 See the full README file for a complete description of all the components, installation, building, and usage.
 
