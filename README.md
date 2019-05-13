@@ -85,9 +85,28 @@ The following sections describe an overview of getting started with the basic fe
 All of the included binaries should work for most modern x86_64 based Linux systems as-is.  They have 
 been tested on Mint, Ubuntu, and CentOS.  To install, there is an `install.sh` script provided.  To see 
 the usage of the install script, from the top level pshell directory run:
+```
+$ ./install.sh -h
 
-`$ ./install.sh -h` 
+Usage: install.sh [-local [<shellEnvFile>]]
 
+  This install script will either install this package on a system
+  wide basis or will setup a local install environment.  A system
+  install must be done as 'root' and will copy all libraries, binaries,
+  include files, conf files, and manpages to their customary system
+  locations.  A local install will not copy/move any files.  It will
+  only create a pshell env file (.pshellrc) that can be sourced in the
+  current shell or can be added to your shell env file (i.e. .bashrc)
+  that will allow use of the package features from a local directory.
+
+  The location of the local install environment will be the directory
+  where this script resides.
+
+  where:
+    local        - install locally, omit for system install
+    shellEnvFile - name of shell environment file to modify
+                   (e.g. full path to your .bashrc)
+``` 
 The simplest install is a local install, from the top level pshell directory run:
 
 `$ ./install.sh -local`
@@ -104,8 +123,34 @@ To build the 'C' source, a makefile is provided along with a default make config
 
 To see the make options, just type:
 
-`$ make`
+```
+$ make
 
+Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]
+
+  where:
+    all          - build all components of the pshell package
+    pshell       - build the pshell UDP/UNIX stand-alone client program only
+    lib          - build the pshell link libraries only (shared, static and stub)
+    demo         - build the pshell stand-alone demo programs only
+    install      - build and install all pshell components
+    clean        - clean all binaries (libs & executables)
+    verbose      - print verbose messages from build process
+    local        - specify local install (install target only)
+    shellEnvFile - shell env file (i.e. .bashrc) to modify for local install
+
+  NOTE: The install target option will either install this package on a
+        system wide basis or will setup a local install environment.  A system
+        install must be done as 'root' and will copy all libraries, binaries,
+        include files, conf files, and manpages to their customary system
+        locations.  A local install will not copy/move any files.  It will
+        only create a pshell env file (.pshellrc) that can be sourced in the
+        current shell or can be added to your shell env file (i.e. .bashrc)
+        that will allow use of the package features from a local directory.
+
+        The location of the local install environment will be the directory
+        where this script resides.
+```
 To do a make and local install, run:
 
 `$ make install local=y`
