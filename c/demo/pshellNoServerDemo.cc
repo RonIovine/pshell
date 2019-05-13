@@ -61,31 +61,15 @@
 
 /******************************************************************************/
 /******************************************************************************/
-void hello(int argc, char *argv[])
+void helloWorld(int argc, char *argv[])
 {
-  pshell_printf("hello command dispatched:\n");
+  pshell_printf("helloWorld command dispatched:\n");
   /* dump out our args */
   for (int i = 0; i < argc; i++)
   {
     pshell_printf("  argv[%d]: '%s'\n", i, argv[i]);
   }
 }
-
-/******************************************************************************/
-/******************************************************************************/
-void world(int argc, char *argv[])
-{
-  pshell_printf("world command dispatched:\n");
-}
-
-/*
- * this command shows matching the passed command arguments based on
- * substring matching rather than matching on the complete exact string,
- * the minimum number of characters that must be matched is the last
- * argument to the pshell_isSubString function, this must be the minimum
- * number of characters necessary to uniquely identify the argument from
- * the complete argument list
- */
 
 /******************************************************************************/
 /******************************************************************************/
@@ -368,21 +352,13 @@ int main(int argc, char *argv[])
    * NOTE: Command names consist of one keyword only
    */
 
-  pshell_addCommand(hello,                        /* function */
-                    "hello",                      /* command */
-                    "hello command description",  /* description */
-                    "[<arg1> ... <arg20>]",       /* usage */
-                    0,                            /* minArgs */
-                    20,                           /* maxArgs */
-                    true);                        /* showUsage on "?" */
-
-  pshell_addCommand(world,                        /* function */
-                    "world",                      /* command */
-                    "world command description",  /* description */
-                    NULL,                         /* usage */
-                    0,                            /* minArgs */
-                    0,                            /* maxArgs */
-                    true);                        /* showUsage on "?" */
+  pshell_addCommand(helloWorld,                           /* function */
+                    "helloWorld",                         /* command */
+                    "command that prints out arguments",  /* description */
+                    "[<arg1> ... <arg20>]",               /* usage */
+                    0,                                    /* minArgs */
+                    20,                                   /* maxArgs */
+                    true);                                /* showUsage on "?" */
 
   pshell_addCommand(wildcardMatch,                            /* function */
                     "wildcardMatch",                          /* command */

@@ -42,6 +42,27 @@
 
 #include <TraceLog.h>
 
+#define DUMP_BUFFER_SIZE 256
+
+/*
+ * create some user defined levels and macros
+ */
+
+/* must start user defined levels after TL_MAX_LEVELS */
+#define TL_USER_LEVEL1   TL_MAX_LEVELS+1
+#define TL_USER_LEVEL2   TL_MAX_LEVELS+2
+#define TL_USER_LEVEL3   TL_MAX_LEVELS+3
+
+/* define the string based names of the trace levels */
+#define TL_USER_LEVEL1_STRING "UserLevel1"
+#define TL_USER_LEVEL2_STRING "UserLevel2"
+#define TL_USER_LEVEL3_STRING "UserLevel3"
+
+/* define some program specific trace macros */
+#define TRACE_USER_LEVEL1(format, args...) __TRACE(TL_USER_LEVEL1, TL_USER_LEVEL1_STRING, format, ## args)
+#define TRACE_USER_LEVEL2(format, args...) __TRACE(TL_USER_LEVEL2, TL_USER_LEVEL2_STRING, format, ## args)
+#define TRACE_USER_LEVEL3(format, args...) __TRACE(TL_USER_LEVEL3, TL_USER_LEVEL3_STRING, format, ## args)
+
 /* a couple of functions to show function name filtering */
 
 /******************************************************************************/
@@ -90,30 +111,10 @@ void showUsage(void)
   printf("Usage: traceLogDemo <level>\n");
   printf("\n");
   printf("  where:\n");
-  printf("    <level>  - The desired log level value, 0-maxLevels\n");
+  printf("    <level>  - The desired log level value, 0-%d\n", TL_USER_LEVEL3);
   printf("\n");
+  exit(0);
 }
-
-#define DUMP_BUFFER_SIZE 256
-
-/*
- * create some user defined levels and macros
- */
-
-/* must start user defined levels after TL_MAX_LEVELS */
-#define TL_USER_LEVEL1   TL_MAX_LEVELS+1
-#define TL_USER_LEVEL2   TL_MAX_LEVELS+2
-#define TL_USER_LEVEL3   TL_MAX_LEVELS+3
-
-/* define the string based names of the trace levels */
-#define TL_USER_LEVEL1_STRING "UserLevel1"
-#define TL_USER_LEVEL2_STRING "UserLevel2"
-#define TL_USER_LEVEL3_STRING "UserLevel3"
-
-/* define some program specific trace macros */
-#define TRACE_USER_LEVEL1(format, args...) __TRACE(TL_USER_LEVEL1, TL_USER_LEVEL1_STRING, format, ## args)
-#define TRACE_USER_LEVEL2(format, args...) __TRACE(TL_USER_LEVEL2, TL_USER_LEVEL2_STRING, format, ## args)
-#define TRACE_USER_LEVEL3(format, args...) __TRACE(TL_USER_LEVEL3, TL_USER_LEVEL3_STRING, format, ## args)
 
 /******************************************************************************/
 /******************************************************************************/
@@ -128,12 +129,18 @@ int main (int argc, char *argv[])
   /* validate our command line arguments and get desired log level */
   if (argc == 2)
   {
-    logLevel = atoi(argv[1]);
+    if (strcmp(argv[1], "-h") == 0)
+    {
+      showUsage();
+    }
+    else
+    {
+      logLevel = atoi(argv[1]);
+    }
   }
   else
   {
     showUsage();
-    return (0);
   }
 
 #ifndef TRACE_LOG_DISABLED
