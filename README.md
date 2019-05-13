@@ -434,6 +434,7 @@ might want to hide certain commands from individual servers and also create 'met
 of several discrete commands to several different servers.  The following is the usage of the program:
 ```
 $ pshellAggregatorDemo -h
+
 Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <traceFilterDemoPort>]
 ```
 
