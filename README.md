@@ -121,7 +121,7 @@ For targets other than Linux x86_64, the 'C' and 'go' code will need to be built
 framework has been successfully built and run on Raspbian/ARM Linux, MAC OSX, and Windows Cygwin.  
 To build the 'C' source, a makefile is provided along with a default make config file, `defconfig`. 
 
-To see the make options, just type:
+To see the make options, type:
 
 ```
 $ make
