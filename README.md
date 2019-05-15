@@ -2,12 +2,12 @@
 **A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++/Python/Go Applications**
 
 [Overview](#overview)
-[Getting started](#getting started)
+[Getting started](#getting-started)
 [Installation](#installation)
 [Building](#building)
 [Documentation](#documentation)
-[Interactive clients](#interactive clients)
-[Demo programs](#demo programs)
+[Interactive clients](#interactive-clients)
+[Demo programs](#demo-programs)
   [pshellServerDemo](#pshellServerDemo)
 
 #### Overview <a name="overview"></a>
@@ -88,7 +88,7 @@ associated invokation method:
 The functions are dispatched via its registered command name (keyword), along with 0 or more
 command line arguments, similar to command line shell processing.
 
-#### Getting started <a name="getting started"></a>
+#### Getting started <a name="getting-started"></a>
 The following sections describe an overview of getting started with the basic features of the framework.
 
 #### Installation <a name="installation"></a>
@@ -210,7 +210,7 @@ The following 'go' modules also support embedded 'godoc' documentation:
 PshellControl.go
 PshellServer.go
 ```
-#### Interactive clients <a name="interactive clients"></a>
+#### Interactive clients <a name="interactive-clients"></a>
 As described above, a pshell server can be accesses remotely via an interactive client.  These clients are
 generic and are server agnostic.  A custom client never needs to be created unless the user want's to
 create a custom server aggrecator client.  See the below section for the 'pshellAggregatorDemo' demo programs 
@@ -328,7 +328,7 @@ Usage: pshellAggregator
   command or at startup via the 'pshellAggregator.startup' file.
 ```
 
-#### Demo programs <a name="demo programs"></a>
+#### Demo programs <a name="demo-programs"></a>
 There are several demo programs that provide examples of using the various aspects of the framework.  Each
 language specific directory had a 'demo' subdirectory.  Look at the language specific examples for your
 language of interest.
