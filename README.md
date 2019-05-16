@@ -172,7 +172,7 @@ Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [go=y] [lo
         where this script resides.
         
         To build all the 'go' modules, you must have 'go' installed on your
-	       build host
+	build host
 ```
 To do a make and local install, run:
 
