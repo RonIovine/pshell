@@ -335,7 +335,7 @@ language of interest for ['C'](https://github.com/RonIovine/pshell/tree/master/c
 The following sections describes all the demo programs in order of importance/relevance.
 
 <a name="pshellServerDemo"></a>
-#### 1. pshellServerDemo ('C', Python, and 'go')
+#### 1. pshellServerDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellServerDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellServerDemo.py), and ['go'](https://github.com/RonIovine/pshell/blob/master/go/src/pshellServerDemo/pshellServerDemo.go))
 This is the most important demo program.  It shows how to setup a pshell server to run within any process.
 It has example implementations of pshell callback functions, the registration of those functions within 
 the framework, and the starting of the pshell server.  This is all that is needed to add interactive pshell
