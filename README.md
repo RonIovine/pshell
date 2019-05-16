@@ -211,7 +211,7 @@ PshellServer.go
 ### Interactive clients
 As described above, a pshell server can be accesses remotely via an interactive client.  These clients are
 generic and are server agnostic.  A custom client never needs to be created unless the user want's to
-create a custom server aggrecator client.  See the below section for the 'pshellAggregatorDemo' demo programs 
+create a custom server aggrecator client.  See the below section for the ['pshellAggregatorDemo'](#pshellAggregatorDemo) demo programs 
 for more information on creating custom aggregators.
 
 A TCP pshell server just uses a standard 'telnet' client for interactive access.  The datagram based servers
