@@ -277,7 +277,7 @@ endif
 
 help:
 	@echo
-	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]"
+	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [go=y] [local=y [shellEnvFile=<file>]]"
 	@echo
 	@echo "  where:"
 	@echo "    all          - build all components of the pshell package"
@@ -285,6 +285,7 @@ help:
 	@echo "    lib          - build the pshell link libraries only (shared, static and stub)"
 	@echo "    demo         - build the pshell stand-alone demo programs only"
 	@echo "    install      - build and install all pshell components"
+	@echo "    go           - build all the 'go' modules and demo programs"
 	@echo "    clean        - clean all binaries (libs & executables)"
 	@echo "    verbose      - print verbose messages from build process"
 	@echo "    local        - specify local install (install target only)"
@@ -301,6 +302,9 @@ help:
 	@echo
 	@echo "        The location of the local install environment will be the directory"
 	@echo "        where this script resides."
+	@echo
+	@echo "        To build all the 'go' modules, you must have 'go' installed on your"
+	@echo "        build host"
 	@echo
 
 lib:
@@ -350,16 +354,18 @@ lib:
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-readline.so PshellReadline.o
 	$(VERBOSE)rm *.o
 
-	@echo "Building 'go' PshellServer-full.a..."
+ifeq ($(go), y)
+	@echo "Building PshellServer-full.a (go)..."
 	go install PshellServer-full
 
-	@echo "Building 'go' PshellServer-stub.a..."
+	@echo "Building PshellServer-stub.a (go)..."
 	go install PshellServer-stub
 
-	@echo "Building 'go' PshellControl.a..."
+	@echo "Building PshellControl.a (go)..."
 	go install PshellControl
+endif
 
-	@echo "Setting 'C' libpshell-server to libpshell-server-full and 'go' PshellServer.a to PshellServer-full.a..."
+	@echo "Setting libpshell-server to libpshell-server-full and PshellServer.a to PshellServer-full.a..."
 	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full
 
 pshell:
@@ -370,13 +376,13 @@ pshell:
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
 demo:
-	@echo "Building 'C' pshellServerDemo program..."
+	@echo "Building pshellServerDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
 
 	@echo "Building pshellNoServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellNoServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellNoServerDemo
 
-	@echo "Building 'C' pshellControlDemo program..."
+	@echo "Building pshellControlDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 
 	@echo "Building pshellReadlineDemo program..."
@@ -385,7 +391,7 @@ demo:
 	@echo "Building pshellAggregatorDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellAggregatorDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregatorDemo
 
-ifeq ($(TF_INTEGRATED_TRACE_LOG),y)
+ifeq ($(TF_INTEGRATED_TRACE_LOG), y)
 	@echo "Building traceFilterDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.$(SRC_EXT) $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
 endif
@@ -393,11 +399,13 @@ endif
 	@echo "Building traceLogDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) -o $(BIN_DIR)/traceLogDemo
 
-	@echo "Building 'go' pshellServerDemo program..."
+ifeq ($(go), y)
+	@echo "Building pshellServerDemo program (go)..."
 	go install pshellServerDemo
 
-	@echo "Building 'go' pshellControlDemo program..."
+	@echo "Building pshellControlDemo program (go)..."
 	go install pshellControlDemo
+endif
 
 all: clean lib pshell demo
 	@echo "PSHELL package successfully built..."
