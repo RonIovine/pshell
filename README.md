@@ -180,14 +180,10 @@ To build all the 'go' code, you first need to see if you have 'golang' installed
 if not, install it with yor appropriate package manager.
 
 To build all the 'go' code, first do a local install or local make install and then 'cd' to the 
-'go/src' directory and run:
+'go' directory and run:
 
 ```
-$ go install PshellServer-full
-$ go install PshellServer-stub
-$ go install PshellControl
-$ go install pshellServerDemo
-$ go install pshellControlDemo
+$ make
 ```
 Note for the 'go' install to work, be sure to source your `.pshellrc` environment file which sets 
 up the $GOPATH env variable.
