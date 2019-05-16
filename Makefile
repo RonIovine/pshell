@@ -267,6 +267,14 @@ ifeq ($(TARGET), install)
   endif
 endif
 
+ifeq ($(go), y)
+  export GOPATH=$(abspath go)
+  GO_INSTALLED = $(shell which go)
+  ifeq ($(GO_INSTALLED), )
+    $(error $(nl)ERROR: 'go' not installed, cannot use 'go=y' option)
+  endif
+endif
+
 .PHONY: demo lib
 
 ###############
@@ -376,13 +384,21 @@ pshell:
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
 demo:
+ifeq ($(go), y)
 	@echo "Building pshellServerDemo program (C)..."
+else
+	@echo "Building pshellServerDemo program..."
+endif
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
 
 	@echo "Building pshellNoServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellNoServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellNoServerDemo
 
+ifeq ($(go), y)
 	@echo "Building pshellControlDemo program (C)..."
+else
+	@echo "Building pshellControlDemo program..."
+endif
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 
 	@echo "Building pshellReadlineDemo program..."

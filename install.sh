@@ -105,12 +105,10 @@ then
     ln -s pshellNoServerDemo$fileExt formatChecking$fileExt
     rm -f getOptions*
     ln -s pshellNoServerDemo$fileExt getOptions$fileExt
-    rm -f hello*
-    ln -s pshellNoServerDemo$fileExt hello$fileExt
+    rm -f helloWorld*
+    ln -s pshellNoServerDemo$fileExt helloWorld$fileExt
     rm -f wildcardMatch*
     ln -s pshellNoServerDemo$fileExt wildcardMatch$fileExt
-    rm -f world*
-    ln -s pshellNoServerDemo$fileExt world$fileExt
 
     cd $localDir
     rm -f .pshellrc
