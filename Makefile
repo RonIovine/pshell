@@ -350,7 +350,16 @@ lib:
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-readline.so PshellReadline.o
 	$(VERBOSE)rm *.o
 
-	@echo "Setting libpshell-server to libpshell-server-full..."
+	@echo "Building 'go' PshellServer-full.a..."
+	go install PshellServer-full
+
+	@echo "Building 'go' PshellServer-stub.a..."
+	go install PshellServer-stub
+
+	@echo "Building 'go' PshellControl.a..."
+	go install PshellControl
+
+	@echo "Setting 'C' libpshell-server to libpshell-server-full and 'go' PshellServer.a to PshellServer-full.a..."
 	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full
 
 pshell:
@@ -361,13 +370,13 @@ pshell:
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
 demo:
-	@echo "Building pshellServerDemo program..."
+	@echo "Building 'C' pshellServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
 
 	@echo "Building pshellNoServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellNoServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellNoServerDemo
 
-	@echo "Building pshellControlDemo program..."
+	@echo "Building 'C' pshellControlDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 
 	@echo "Building pshellReadlineDemo program..."
@@ -383,6 +392,12 @@ endif
 
 	@echo "Building traceLogDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) -o $(BIN_DIR)/traceLogDemo
+
+	@echo "Building 'go' pshellServerDemo program..."
+	go install pshellServerDemo
+
+	@echo "Building 'go' pshellControlDemo program..."
+	go install pshellControlDemo
 
 all: clean lib pshell demo
 	@echo "PSHELL package successfully built..."
