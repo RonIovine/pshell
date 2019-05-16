@@ -333,7 +333,7 @@ language specific directory had a 'demo' subdirectory.  Look at the language spe
 language of interest for ['C'](https://github.com/RonIovine/pshell/tree/master/c/demo), [Python](https://github.com/RonIovine/pshell/tree/master/python/demo), and ['go'](https://github.com/RonIovine/pshell/tree/master/go/src).
 
 The following sections describes all the demo programs in order of importance/relevance.  Click on the
-language on interest to see specific implementations.
+language of interest for each example to see specific implementations.
 
 <a name="pshellServerDemo"></a>
 #### 1. pshellServerDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellServerDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellServerDemo.py), and ['go'](https://github.com/RonIovine/pshell/blob/master/go/src/pshellServerDemo/pshellServerDemo.go))
