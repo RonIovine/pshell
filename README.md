@@ -17,7 +17,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[traceLogDemo](#traceLogDemo)<br>
 
  <a name="overview"></a>
- #### Overview
+ ### Overview
 This package contains all the necessary code, documentation and examples for
 building C/C++/Python/Go applications that incorporate a Process Specific Embedded
 Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
@@ -96,11 +96,11 @@ The functions are dispatched via its registered command name (keyword), along wi
 command line arguments, similar to command line shell processing.
 
 <a name="getting-started"></a>
-#### Getting started
+### Getting started
 The following sections describe an overview of getting started with the basic features of the framework.
 
 <a name="installation"></a>
-#### Installation
+### Installation
 All of the included binaries should work for most modern x86_64 based Linux systems as-is.  They have 
 been tested on Mint, Ubuntu, and CentOS.  To install, there is an `install.sh` script provided.  To see 
 the usage of the install script, from the top level pshell directory run:
@@ -135,7 +135,7 @@ also be added to your shell env file, i.e. `.bashrc`.  This will setup several s
 variables that will allow access to the various parts of the framework.
 
 <a name="building"></a>
-#### Building
+### Building
 For targets other than Linux x86_64, the 'C' and 'go' code will need to be built from source.  This 
 framework has been successfully built and run on Raspbian/ARM Linux, MAC OSX, and Windows Cygwin.  
 To build the 'C' and 'go' source, a makefile is provided along with a default make config file, `defconfig`.
@@ -178,7 +178,7 @@ This will compile all the 'C' and 'go' code and run the above `install.sh` scrip
 Note, to build all the 'go' code you must have the 'go' compiler installed on your host.
 
 <a name="documentation"></a>
-#### Documentation
+### Documentation
 See the PPT presentation PSHELL-Framework.ppt for an overview of the main features and capabilities of
 the framework.
 
@@ -208,7 +208,7 @@ PshellServer.go
 ```
 
 <a name="interactive-clients"></a>
-#### Interactive clients
+### Interactive clients
 As described above, a pshell server can be accesses remotely via an interactive client.  These clients are
 generic and are server agnostic.  A custom client never needs to be created unless the user want's to
 create a custom server aggrecator client.  See the below section for the 'pshellAggregatorDemo' demo programs 
@@ -327,7 +327,7 @@ Usage: pshellAggregator
 ```
 
 <a name="demo-programs"></a>
-#### Demo programs
+### Demo programs
 There are several demo programs that provide examples of using the various aspects of the framework.  Each
 language specific directory had a 'demo' subdirectory.  Look at the language specific examples for your
 language of interest.
@@ -335,7 +335,7 @@ language of interest.
 The following sections describes all the demo programs in order of importance/relevance.
 
 <a name="pshellServerDemo"></a>
-##### 1. pshellServerDemo ('C', Python, and 'go')
+#### 1. pshellServerDemo ('C', Python, and 'go')
 This is the most important demo program.  It shows how to setup a pshell server to run within any process.
 It has example implementations of pshell callback functions, the registration of those functions within 
 the framework, and the starting of the pshell server.  This is all that is needed to add interactive pshell
@@ -375,7 +375,7 @@ To connect to the Unix server type:
 A local server has no remote client.  All interactive control is done directly within the application itself.
 
 <a name="pshellControlDemo"></a>
-##### 2. pshellControlDemo ('C', Python, and 'go')
+#### 2. pshellControlDemo ('C', Python, and 'go')
 These demo programs show one process invoking pshell functions in another process using the control API.
 This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
 be used to connect to any of the previous `pshellServerDemo` programs and invoke their functions.  The
@@ -401,7 +401,7 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
 ```
 
 <a name="pshellNoServerDemo"></a>
-##### 3. pshellNoServerDemo ('C' only)
+#### 3. pshellNoServerDemo ('C' only)
 This is an implementation that allows the user to use this framework to create a multi-call binary
 similar to [Busybox](https://www.busybox.net).  This is not really used to retro-fit existing applications,
 but would be used when creating a new application by where there are multiple entry points that map
@@ -438,7 +438,7 @@ privlidges depending on the directory settings.
 ```
 
 <a name="pshellAggregatorDemo"></a>
-##### 4. pshellAggregatiorDemo ('C' and Python) <a name="pshellAggregatorDemo"></a>
+#### 4. pshellAggregatiorDemo ('C' and Python) <a name="pshellAggregatorDemo"></a>
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
 interactive session.  Note that this is different than the generic pshellAggregator client program described
 above in that this is a custom aggregator by where the servers being aggregated are typically hardcoded.  
@@ -452,7 +452,7 @@ Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <
 ```
 
 <a name="pshellReadlineDemo"></a>
-##### 5. pshellReadlineDemo ('C' and Python)
+#### 5. pshellReadlineDemo ('C' and Python)
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy 
 stand-alone readline like implementation that can be used by any application to solicit user input.  
 It has native command recall history, TAB completion, and command line editing capability.  The following
@@ -471,7 +471,7 @@ Usage: pshellReadlineDemo {-tty | -socket} [-bash | -fast] [<idleTimeout>]
 ```
 
 <a name="traceFilterDemo"></a>
-##### 6. traceFilterDemo ('C' only)
+#### 6. traceFilterDemo ('C' only)
 This is an application that shows the integration of a programmable trace filter mechanism with remote
 pshell server control.  It uses the following example trace log implementation.  The following is the
 usage of this program:
@@ -488,7 +488,7 @@ Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
 ```
 
 <a name="traceLogDemo"></a>
-##### 7 traceLogDemo ('C' only)
+#### 7 traceLogDemo ('C' only)
 This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
 the trace logging front end that is used in the above traceFilterDemo program.  The following is the
 usage of this program:
