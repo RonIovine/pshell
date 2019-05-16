@@ -179,8 +179,8 @@ Note, to build all the 'go' code you must have the 'go' compiler installed on yo
 
 <a name="documentation"></a>
 ### Documentation
-See the PPT presentation PSHELL-Framework.ppt for an overview of the main features and capabilities of
-the framework.
+See the PPT presentation PSHELL-Framework.ppt at the top level directory for an overview of the main 
+features and capabilities of the framework.
 
 There is also documentation for the 'C' API in the form of manpages.  The following manpages are provided:
 ```
@@ -332,7 +332,8 @@ There are several demo programs that provide examples of using the various aspec
 language specific directory had a 'demo' subdirectory.  Look at the language specific examples for your
 language of interest for ['C'](https://github.com/RonIovine/pshell/tree/master/c/demo), [Python](https://github.com/RonIovine/pshell/tree/master/python/demo), and ['go'](https://github.com/RonIovine/pshell/tree/master/go/src).
 
-The following sections describes all the demo programs in order of importance/relevance.
+The following sections describes all the demo programs in order of importance/relevance.  Click on the
+language on interest to see specific implementations.
 
 <a name="pshellServerDemo"></a>
 #### 1. pshellServerDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellServerDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellServerDemo.py), and ['go'](https://github.com/RonIovine/pshell/blob/master/go/src/pshellServerDemo/pshellServerDemo.go))
@@ -375,7 +376,7 @@ To connect to the Unix server type:
 A local server has no remote client.  All interactive control is done directly within the application itself.
 
 <a name="pshellControlDemo"></a>
-#### 2. pshellControlDemo ('C', Python, and 'go')
+#### 2. pshellControlDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and ['go'](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
 These demo programs show one process invoking pshell functions in another process using the control API.
 This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
 be used to connect to any of the previous `pshellServerDemo` programs and invoke their functions.  The
@@ -401,7 +402,7 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
 ```
 
 <a name="pshellNoServerDemo"></a>
-#### 3. pshellNoServerDemo ('C' only)
+#### 3. pshellNoServerDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellNoServerDemo.cc) only)
 This is an implementation that allows the user to use this framework to create a multi-call binary
 similar to [Busybox](https://www.busybox.net).  This is not really used to retro-fit existing applications,
 but would be used when creating a new application by where there are multiple entry points that map
@@ -438,7 +439,7 @@ privlidges depending on the directory settings.
 ```
 
 <a name="pshellAggregatorDemo"></a>
-#### 4. pshellAggregatiorDemo ('C' and Python) <a name="pshellAggregatorDemo"></a>
+#### 4. pshellAggregatiorDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
 interactive session.  Note that this is different than the generic pshellAggregator client program described
 above in that this is a custom aggregator by where the servers being aggregated are typically hardcoded.  
@@ -452,7 +453,7 @@ Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <
 ```
 
 <a name="pshellReadlineDemo"></a>
-#### 5. pshellReadlineDemo ('C' and Python)
+#### 5. pshellReadlineDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy 
 stand-alone readline like implementation that can be used by any application to solicit user input.  
 It has native command recall history, TAB completion, and command line editing capability.  The following
@@ -471,7 +472,7 @@ Usage: pshellReadlineDemo {-tty | -socket} [-bash | -fast] [<idleTimeout>]
 ```
 
 <a name="traceFilterDemo"></a>
-#### 6. traceFilterDemo ('C' only)
+#### 6. traceFilterDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) only)
 This is an application that shows the integration of a programmable trace filter mechanism with remote
 pshell server control.  It uses the following example trace log implementation.  The following is the
 usage of this program:
@@ -488,7 +489,7 @@ Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
 ```
 
 <a name="traceLogDemo"></a>
-#### 7 traceLogDemo ('C' only)
+#### 7 traceLogDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) only)
 This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
 the trace logging front end that is used in the above traceFilterDemo program.  The following is the
 usage of this program:
