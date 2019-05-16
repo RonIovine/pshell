@@ -145,7 +145,7 @@ To see the make options, type:
 ```
 $ make
 
-Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]
+Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [go=y] [local=y [shellEnvFile=<file>]]
 
   where:
     all          - build all components of the pshell package
@@ -153,6 +153,7 @@ Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [
     lib          - build the pshell link libraries only (shared, static and stub)
     demo         - build the pshell stand-alone demo programs only
     install      - build and install all pshell components
+    go           - build all the 'go' modules and demo programs
     clean        - clean all binaries (libs & executables)
     verbose      - print verbose messages from build process
     local        - specify local install (install target only)
@@ -169,12 +170,18 @@ Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [
 
         The location of the local install environment will be the directory
         where this script resides.
+        
+        To build all the 'go' modules, you must have 'go' installed on your
+	       build host
 ```
 To do a make and local install, run:
 
 `$ make install local=y`
 
-This will compile all the 'C' and 'go' code and run the above `install.sh` script for a local install.
+This will compile all the 'C' code and run the above `install.sh` script for a local install.
+To build all the 'C' and 'go' code and install, run:
+
+`$ make install local=y go=y`
 
 <a name="documentation"></a>
 #### Documentation
