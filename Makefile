@@ -267,12 +267,12 @@ ifeq ($(TARGET), install)
   endif
 endif
 
-ifeq ($(go), y)
-  export GOPATH=$(abspath go)
-  GO_INSTALLED = $(shell which go)
-  ifeq ($(GO_INSTALLED), )
-    $(error $(nl)ERROR: 'go' not installed, cannot use 'go=y' option)
-  endif
+export GOPATH=$(abspath go)
+GO_INSTALLED = $(shell which go)
+ifeq ($(GO_INSTALLED), )
+  $(warning $(nl)WARNING: 'go' not installed, not building 'go' modules)
+else
+  BUILD_GO=y
 endif
 
 .PHONY: demo lib
@@ -285,7 +285,7 @@ endif
 
 help:
 	@echo
-	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [go=y] [local=y [shellEnvFile=<file>]]"
+	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]"
 	@echo
 	@echo "  where:"
 	@echo "    all          - build all components of the pshell package"
@@ -293,7 +293,6 @@ help:
 	@echo "    lib          - build the pshell link libraries only (shared, static and stub)"
 	@echo "    demo         - build the pshell stand-alone demo programs only"
 	@echo "    install      - build and install all pshell components"
-	@echo "    go           - build all the 'go' modules and demo programs"
 	@echo "    clean        - clean all binaries (libs & executables)"
 	@echo "    verbose      - print verbose messages from build process"
 	@echo "    local        - specify local install (install target only)"
@@ -310,9 +309,6 @@ help:
 	@echo
 	@echo "        The location of the local install environment will be the directory"
 	@echo "        where this script resides."
-	@echo
-	@echo "        To build all the 'go' modules, you must have 'go' installed on your"
-	@echo "        build host"
 	@echo
 
 lib:
@@ -362,7 +358,7 @@ lib:
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-readline.so PshellReadline.o
 	$(VERBOSE)rm *.o
 
-ifeq ($(go), y)
+ifeq ($(BUILD_GO), y)
 	@echo "Building PshellServer-full.a (go)..."
 	go install PshellServer-full
 
@@ -384,7 +380,7 @@ pshell:
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
 demo:
-ifeq ($(go), y)
+ifeq ($(BUILD_GO), y)
 	@echo "Building pshellServerDemo program (C)..."
 else
 	@echo "Building pshellServerDemo program..."
@@ -394,7 +390,7 @@ endif
 	@echo "Building pshellNoServerDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellNoServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellNoServerDemo
 
-ifeq ($(go), y)
+ifeq ($(BUILD_GO), y)
 	@echo "Building pshellControlDemo program (C)..."
 else
 	@echo "Building pshellControlDemo program..."
@@ -415,7 +411,7 @@ endif
 	@echo "Building traceLogDemo program..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) -o $(BIN_DIR)/traceLogDemo
 
-ifeq ($(go), y)
+ifeq ($(BUILD_GO), y)
 	@echo "Building pshellServerDemo program (go)..."
 	go install pshellServerDemo
 
