@@ -174,19 +174,7 @@ To do a make and local install, run:
 
 `$ make install local=y`
 
-This will compile all the 'C' code and run the above `install.sh` script for a local install.
-
-To build all the 'go' code, you first need to see if you have 'golang' installed on your system, and 
-if not, install it with yor appropriate package manager.
-
-To build all the 'go' code, first do a local install or local make install and then 'cd' to the 
-'go' directory and run:
-
-```
-$ make
-```
-Note for the 'go' install to work, be sure to source your `.pshellrc` environment file which sets 
-up the $GOPATH env variable.
+This will compile all the 'C' and 'go' code and run the above `install.sh` script for a local install.
 
 <a name="documentation"></a>
 #### Documentation
