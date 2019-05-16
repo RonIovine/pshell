@@ -28,6 +28,10 @@
 
 CC=g++
 
+GO=go
+
+GO_OPTIONS=install
+
 SRC_EXT=cc
 
 INCLUDE = -I$(abspath c/include)
@@ -267,12 +271,21 @@ ifeq ($(TARGET), install)
   endif
 endif
 
+#
+# see if the 'go' package is installed
+#
 export GOPATH=$(abspath go)
-GO_INSTALLED = $(shell which go)
-ifeq ($(GO_INSTALLED), )
+ifeq ($(shell which $(GO)), )
   $(warning $(nl)WARNING: 'go' not installed, not building 'go' modules)
 else
   BUILD_GO=y
+endif
+
+#
+# see if the correct c++ compiler is installed
+#
+ifeq ($(shell which $(CC)), )
+  $(error $(nl)ERROR: Compiler $(CC) not installed)
 endif
 
 .PHONY: demo lib
@@ -360,13 +373,13 @@ lib:
 
 ifeq ($(BUILD_GO), y)
 	@echo "Building PshellServer-full.a (go)..."
-	go install PshellServer-full
+	$(VERBOSE)$(GO) $(GO_OPTIONS) PshellServer-full
 
 	@echo "Building PshellServer-stub.a (go)..."
-	go install PshellServer-stub
+	$(VERBOSE)$(GO) $(GO_OPTIONS) PshellServer-stub
 
 	@echo "Building PshellControl.a (go)..."
-	go install PshellControl
+	$(VERBOSE)$(GO) $(GO_OPTIONS) PshellControl
 endif
 
 	@echo "Setting libpshell-server to libpshell-server-full and PshellServer.a to PshellServer-full.a..."
@@ -413,10 +426,10 @@ endif
 
 ifeq ($(BUILD_GO), y)
 	@echo "Building pshellServerDemo program (go)..."
-	go install pshellServerDemo
+	$(VERBOSE)$(GO) $(GO_OPTIONS) pshellServerDemo
 
 	@echo "Building pshellControlDemo program (go)..."
-	go install pshellControlDemo
+	$(VERBOSE)$(GO) $(GO_OPTIONS) pshellControlDemo
 endif
 
 all: clean lib pshell demo
