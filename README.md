@@ -358,18 +358,92 @@ Usage: pshellServerDemo -udp [<port>] | -tcp [<port>] | -unix | -local
     <port> - Desired UDP or TCP port, default: 6001
 ``` 
 Then invoke the program in the foreground with the desired server type.  For a good example, run 
-the program in 4 different windows, each using a different server type option.  To connect to the TCP
-server type:
+the program in 4 different windows, each using a different server type option as follows:
+```
+$ pshellServerDemo -tcp
+PSHELL_INFO: TCP Server: pshellServerDemo Started On Host: anyhost, Port: 6001
+```
+```
+$ pshellServerDemo -udp
+PSHELL_INFO: UDP Server: pshellServerDemo Started On Host: anyhost, Port: 6001
+```
+```
+$ pshellServerDemo -unix
+PSHELL_INFO: UNIX Server: pshellServerDemo Started
+```
+To connect to the TCP server type:
+```
+$ telnet localhost 6001
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
 
-`$ telnet localhost 6001`
+###########################################################
+#
+#  PSHELL: Process Specific Embedded Command Line Shell
+#
+#  Single session TCP server: pshellServerDemo[127.0.0.1]
+#
+#  Idle session timeout: 10 minutes
+#
+#  Type '?' or 'help' at prompt for command summary
+#  Type '?' or '-h' after command for command usage
+#
+#  Full <TAB> completion, command history, command
+#  line editing, and command abbreviation supported
+#
+###########################################################
 
+pshellServerDemo[127.0.0.1]:PSHELL> 
+```
 To connect to the UDP server type:
+```
+$ pshell localhost 6001
 
-`$ pshell localhost 6001`
+##########################################################
+#
+#  PSHELL: Process Specific Embedded Command Line Shell
+#
+#  Multi-session UDP server: pshellServerDemo[127.0.0.1]
+#
+#  Idle session timeout: NONE
+#
+#  Command response timeout: 5 seconds
+#
+#  Type '?' or 'help' at prompt for command summary
+#  Type '?' or '-h' after command for command usage
+#
+#  Full <TAB> completion, command history, command
+#  line editing, and command abbreviation supported
+#
+##########################################################
 
+pshellServerDemo[127.0.0.1]:PSHELL> 
+```
 To connect to the Unix server type:
+```
+$ pshell pshellServerDemo
 
-`$ pshell pshellServerDemo`
+#########################################################
+#
+#  PSHELL: Process Specific Embedded Command Line Shell
+#
+#  Multi-session UNIX server: pshellServerDemo[unix]
+#
+#  Idle session timeout: NONE
+#
+#  Command response timeout: 5 seconds
+#
+#  Type '?' or 'help' at prompt for command summary
+#  Type '?' or '-h' after command for command usage
+#
+#  Full <TAB> completion, command history, command
+#  line editing, and command abbreviation supported
+#
+#########################################################
+
+pshellServerDemo[unix]:PSHELL> 
+```
 
 A local server has no remote client.  All interactive control is done directly within the application itself.
 
