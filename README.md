@@ -219,7 +219,9 @@ A TCP pshell server just uses a standard 'telnet' client for interactive access.
 
 Note that there are 2 versions of the pshell UDP/Unix client programs, `pshell`, which is a compiled
 'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
-any of the ['pshellServerDemo'](#pshellServerDemo) programs for all 3 languages.  The pshell client programs both take a `-h` to show the usage as follows:
+any of the ['pshellServerDemo'](#pshellServerDemo) programs for all 3 languages as well as the
+['traceFilterDemo'](#traceFilterDemo) program.  The pshell client programs both take a `-h` to show the 
+usage as follows:
 ```
 $ pshell -h
 
@@ -323,8 +325,6 @@ Usage: pshellAggregator
   servers and multicast groups can be added interactively via the 'add'
   command or at startup via the 'pshellAggregator.startup' file.
 ```
-Note that in addition to [pshellServerDemo](#pshellServerDemo), the above client programs can also be 
-used to connect to the [traceFilterDemo](#traceFilterDemo) program described below.
 
 <a name="demo-programs"></a>
 ### Demo programs
