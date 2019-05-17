@@ -475,7 +475,8 @@ This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show t
 be used to connect to any of the previous `pshellServerDemo` programs and invoke their functions.  The
 control demo programs will prompt the user for input for the remote command to invoke, but in real process
 to process IPC situation, the IPC commands used in the control API functions will most likely be hard
-coded.  The following is the usage of the `pshellControlDemo` programs:
+coded.  The following is the usage of the [pshellControlDemo](#pshellServerDemo) or the following
+[traceFilterDemo](#traceFilterDemo) programs:
 
 ```
 $ pshellControlDemo -h
