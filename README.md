@@ -446,6 +446,27 @@ pshellServerDemo[unix]:PSHELL>
 ```
 
 A local server has no remote client.  All interactive control is done directly within the application itself.
+```
+$ pshellServerDemo -local
+
+#########################################################
+#
+#  PSHELL: Process Specific Embedded Command Line Shell
+#
+#  Single session LOCAL server: pshellServerDemo[local]
+#
+#  Idle session timeout: NONE
+#
+#  Type '?' or 'help' at prompt for command summary
+#  Type '?' or '-h' after command for command usage
+#
+#  Full <TAB> completion, command history, command
+#  line editing, and command abbreviation supported
+#
+#########################################################
+
+pshellServerDemo[local]:PSHELL> 
+```
 
 <a name="pshellControlDemo"></a>
 #### 2. pshellControlDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and ['go'](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
