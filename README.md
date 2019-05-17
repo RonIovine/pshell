@@ -10,10 +10,10 @@
 [Demo programs](#demo-programs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellServerDemo](#pshellServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellControlDemo](#pshellControlDemo)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[traceFilterDemo](#traceFilterDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellNoServerDemo](#pshellNoServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregatorDemo](#pshellAggregatorDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellReadlineDemo](#pshellReadlineDemo)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;[traceFilterDemo](#traceFilterDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[traceLogDemo](#traceLogDemo)<br>
 
  <a name="overview"></a>
@@ -495,8 +495,26 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
     extract          - extract data contents of response (must have non-0 wait timeout)
 ```
 
+<a name="traceFilterDemo"></a>
+#### 3. traceFilterDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) only)
+This is an application that shows the integration of a programmable trace filter mechanism with remote
+pshell server control.  It can be controlled by any of the [interactive clients](#interactive-clients) depending 
+on how it is started.  It uses the following example [trace log](#traceLogDemo) implementation for the log 
+filtering.  The following is the usage of this program:
+```
+$ traceFilterDemo -h
+
+Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
+
+  where:
+    -udp   - Multi-session UDP server
+    -tcp   - Single session TCP server
+    -unix  - Multi-session UNIX domain server
+    <port> - Desired UDP or TCP port, default: 6002
+```
+
 <a name="pshellNoServerDemo"></a>
-#### 3. pshellNoServerDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellNoServerDemo.cc) only)
+#### 4. pshellNoServerDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellNoServerDemo.cc) only)
 This is an implementation that allows the user to use this framework to create a multi-call binary
 similar to [Busybox](https://www.busybox.net).  This is not really used to retro-fit existing applications,
 but would be used when creating a new application by where there are multiple entry points that map
@@ -533,7 +551,7 @@ privlidges depending on the directory settings.
 ```
 
 <a name="pshellAggregatorDemo"></a>
-#### 4. pshellAggregatiorDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
+#### 5. pshellAggregatiorDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
 interactive session.  Note that this is different than the generic pshellAggregator client program described
 above in that this is a custom aggregator by where the servers being aggregated are typically hardcoded.  
@@ -547,7 +565,7 @@ Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <
 ```
 
 <a name="pshellReadlineDemo"></a>
-#### 5. pshellReadlineDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
+#### 6. pshellReadlineDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy 
 stand-alone readline like implementation that can be used by any application to solicit user input.  
 It has native command recall history, TAB completion, and command line editing capability.  The following
@@ -563,23 +581,6 @@ Usage: pshellReadlineDemo {-tty | -socket} [-bash | -fast] [<idleTimeout>]
     -bash         - Use bash/readline style tabbing
     -fast         - Use "fast" style tabbing (default)
     <idleTimeout> - the idle session timeout in minutes (default=none)
-```
-
-<a name="traceFilterDemo"></a>
-#### 6. traceFilterDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) only)
-This is an application that shows the integration of a programmable trace filter mechanism with remote
-pshell server control.  It uses the following example trace log implementation.  The following is the
-usage of this program:
-```
-$ traceFilterDemo -h
-
-Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
-
-  where:
-    -udp   - Multi-session UDP server
-    -tcp   - Single session TCP server
-    -unix  - Multi-session UNIX domain server
-    <port> - Desired UDP or TCP port, default: 6002
 ```
 
 <a name="traceLogDemo"></a>
