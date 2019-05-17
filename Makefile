@@ -26,9 +26,24 @@
 #
 #################################################################################
 
+#
+# see if the correct c++ compiler is installed
+#
 CC=g++
+ifneq ($(shell which $(CC)), /usr/bin/$(CC))
+  $(error $(nl)ERROR: Compiler $(CC) not installed)
+endif
 
+#
+# see if the 'go' package is installed
+#
 GO=go
+export GOPATH=$(abspath go)
+ifeq ($(shell which $(GO)), /usr/bin/$(GO))
+  BUILD_GO=y
+else
+  $(warning $(nl)WARNING: 'go' not installed, not building 'go' modules)
+endif
 
 GO_OPTIONS=install
 
@@ -269,23 +284,6 @@ ifeq ($(TARGET), install)
   else ifneq ($(USER), root)
     $(error $(nl)ERROR: User '$(USER)' cannot run 'make install', $(nl)       must be 'root' to do a system install of this package, $(nl)       either run as 'root' or do 'make install local=y')
   endif
-endif
-
-#
-# see if the 'go' package is installed
-#
-export GOPATH=$(abspath go)
-ifeq ($(shell which $(GO)), /usr/bin/$(GO))
-  BUILD_GO=y
-else
-  $(warning $(nl)WARNING: 'go' not installed, not building 'go' modules)
-endif
-
-#
-# see if the correct c++ compiler is installed
-#
-ifneq ($(shell which $(CC)), /usr/bin/$(CC))
-  $(error $(nl)ERROR: Compiler $(CC) not installed)
 endif
 
 .PHONY: demo lib
