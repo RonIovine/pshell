@@ -323,6 +323,8 @@ Usage: pshellAggregator
   servers and multicast groups can be added interactively via the 'add'
   command or at startup via the 'pshellAggregator.startup' file.
 ```
+Note that the above client programs can be used to connect to the [pshellServerDemo](#pshellServerDemo) and
+[traceFilterDemo](#traceFilterDemo) programs described below.
 
 <a name="demo-programs"></a>
 ### Demo programs
@@ -472,12 +474,10 @@ pshellServerDemo[local]:PSHELL>
 #### 2. pshellControlDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and ['go'](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
 These demo programs show one process invoking pshell functions in another process using the control API.
 This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
-be used to connect to any of the previous `pshellServerDemo` programs and invoke their functions.  The
-control demo programs will prompt the user for input for the remote command to invoke, but in real process
-to process IPC situation, the IPC commands used in the control API functions will most likely be hard
-coded.  The following is the usage of the [pshellControlDemo](#pshellServerDemo) or the following
-[traceFilterDemo](#traceFilterDemo) programs:
-
+be used to connect to any of the previous [pshellServerDemo](#pshellServerDemo) or [traceFilterDemo](#traceFilterDemo) programs and invoke their functions.  The control demo programs will prompt the user 
+for input for the remote command to invoke, but in real process to process IPC situation, the IPC commands 
+used in the control API functions will most likely be hard coded.  The following is the usage of the
+`pshellControlDemo` programs:
 ```
 $ pshellControlDemo -h
 
