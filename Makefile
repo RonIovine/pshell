@@ -275,16 +275,16 @@ endif
 # see if the 'go' package is installed
 #
 export GOPATH=$(abspath go)
-ifeq ($(shell which $(GO)), )
-  $(warning $(nl)WARNING: 'go' not installed, not building 'go' modules)
-else
+ifeq ($(shell which $(GO)), /usr/bin/$(GO))
   BUILD_GO=y
+else
+  $(warning $(nl)WARNING: 'go' not installed, not building 'go' modules)
 endif
 
 #
 # see if the correct c++ compiler is installed
 #
-ifeq ($(shell which $(CC)), )
+ifneq ($(shell which $(CC)), /usr/bin/$(CC))
   $(error $(nl)ERROR: Compiler $(CC) not installed)
 endif
 
