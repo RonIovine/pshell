@@ -343,7 +343,7 @@ the `-h` option to see the usage.  All language implementations are fully compat
 clients.  Note that in these demo inpmementations, the servers are setup at the end of the `main` in BLOCKING
 mode.  When retro-fitting an existing application that already has a final control loop in the `main` to keep 
 the process resident, the server will most likely be setup at the beginning of the `main`, before the final
-control loop and in NON_BLOCKING mode.  See the `traceFilterDemo.cc` program for an example of this.
+control loop and in NON_BLOCKING mode.  See the ['traceFilterDemo.cc'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) program for an example of this.
 
 ```
 $ pshellServerDemo -h
