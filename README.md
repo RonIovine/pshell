@@ -489,7 +489,7 @@ Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
 ```
 
 <a name="traceLogDemo"></a>
-#### 7 traceLogDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) only)
+#### 7. traceLogDemo (['C'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) only)
 This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
 the trace logging front end that is used in the above traceFilterDemo program.  The following is the
 usage of this program:
