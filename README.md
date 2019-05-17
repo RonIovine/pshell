@@ -323,8 +323,8 @@ Usage: pshellAggregator
   servers and multicast groups can be added interactively via the 'add'
   command or at startup via the 'pshellAggregator.startup' file.
 ```
-Note that the above client programs can be used to connect to the [pshellServerDemo](#pshellServerDemo) and
-[traceFilterDemo](#traceFilterDemo) programs described below.
+Note that in addition to [pshellServerDemo](#pshellServerDemo), the above client programs can also be 
+used to connect to the [traceFilterDemo](#traceFilterDemo) program described below.
 
 <a name="demo-programs"></a>
 ### Demo programs
