@@ -217,11 +217,9 @@ for more information on creating custom aggregators.
 A TCP pshell server just uses a standard 'telnet' client for interactive access.  The datagram based servers
 (UDP/Unix) require the provided 'pshell' interactive client.
 
-Note that there are 2 versions of the pshell UDP/Unix client progrmas, `pshell`, which is a compiled
+Note that there are 2 versions of the pshell UDP/Unix client programs, `pshell`, which is a compiled
 'C' implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
-any of the `pshellServerDemo` programs for all 3 languages.  The pshell client programs both take a `-h`
-to show the usage as follows:
-
+any of the ['pshellServerDemo'](#pshellServerDemo) programs for all 3 languages.  The pshell client programs both take a `-h` to show the usage as follows:
 ```
 $ pshell -h
 
