@@ -340,7 +340,7 @@ It has example implementations of pshell callback functions, the registration of
 the framework, and the starting of the pshell server.  This is all that is needed to add interactive pshell
 access to a given process.  From your shell command line, invoke any of the `pshellServerDemo` programs with 
 the `-h` option to see the usage.  All language implementations are fully compatible with all different 
-clients.  Note that in these demo inpmementations, the servers are setup at the end of the `main` in BLOCKING
+clients.  Note that in these demo implemtations, the servers are setup at the end of the `main` in BLOCKING
 mode.  When retro-fitting an existing application that already has a final control loop in the `main` to keep 
 the process resident, the server will most likely be setup at the beginning of the `main`, before the final
 control loop and in NON_BLOCKING mode.  See the ['traceFilterDemo.cc'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) program for an example of this.
