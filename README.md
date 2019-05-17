@@ -259,9 +259,9 @@ Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverNa
           to fill out partial commands and up-arrow to recall
           for command history.
 ```
-There is also an 'expect' wrapper script, 'pshell.exp', that will wrap 'telnet' to provide functionality 
-similar to the above 'pshell' client for things like single-shot commands, command repeat etc but for 
-TCP based pshell servers.  The 'expect' scripting package must be installed on your host.  The following 
+There is also an `expect` wrapper script, `pshell.exp`, that will wrap `telnet` to provide functionality 
+similar to the above `pshell` client for things like single-shot commands, command repeat etc but for 
+TCP based pshell servers.  The `expect` scripting package must be installed on your host.  The following 
 is the usage of the expect script.
 ```
 $ pshell.exp -h
@@ -309,7 +309,7 @@ Usage: pshell.exp -s | {<hostName> | ipAddr>} {<portNum> | <serverName>}
 
 ```
 Finally, there is a generic `pshellAggregator` UDP/Unix client program for both 'C' and Python that can 
-be used to consolidate the pshell server commands from several remote applications into one comprehensive interactive session.  Note that this is different than the custom aggregator described below.
+be used to consolidate the pshell server commands from several remote applications into one comprehensive interactive session.  Note that this is different than the [custom aggregator](#pshellAggregatorDemo) described below.
 
 The following is the usage:
 ```
