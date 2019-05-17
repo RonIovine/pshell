@@ -327,7 +327,7 @@ Usage: pshellAggregator
 <a name="demo-programs"></a>
 ### Demo programs
 There are several demo programs that provide examples of using the various aspects of the framework.  Each
-language specific directory had a 'demo' subdirectory.  Look at the language specific examples for your
+language specific directory has a 'demo' subdirectory.  Look at the language specific examples for your
 language of interest for ['C'](https://github.com/RonIovine/pshell/tree/master/c/demo), [Python](https://github.com/RonIovine/pshell/tree/master/python/demo), and ['go'](https://github.com/RonIovine/pshell/tree/master/go/src).
 
 The following sections describes all the demo programs in order of importance/relevance.  Click on the
