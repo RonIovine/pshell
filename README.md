@@ -52,8 +52,8 @@ The prototype for the callback functions follow the paradigms of the 'main' for 
 language.  A pshell callback function can be thought of as a collection of mini 'mains'
 within the given process that is invoked via its registered keyword.  The arguments are
 passed into each function just like they would be passed into the 'main' from the host's
-command line shell (i.e. bash) for each language as shown below.  See the included demo
-programs for language specific examples.
+command line shell (i.e. bash) for each language as shown below.  See the included [demo
+programs](#demo-programs) for language specific examples.
 
 #### 'C' callback:
 
