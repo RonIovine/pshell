@@ -37,7 +37,7 @@ communication and control.  If all inter-process control is implemented as a col
 of pshell commands, a user can get a programmatic IPC mechanism along with manual CLI/Shell
 access via the same code base.  There is no need to write separate code for CLI/Shell
 processing and control/message event processing.  All inter-process control can then be
-driven and tested manually via one of the interactive client programs (pshell or pshellAggregator).
+driven and tested manually via one of the [interactive client](#interactive-clients) programs (pshell or pshellAggregator).
 
 The control API supports both unicast and 'multicast' (not true subscriber based multicast
 like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.  It also
