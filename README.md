@@ -180,7 +180,7 @@ code, you must have the `go` compiler installed on your host.
 
 <a name="documentation"></a>
 ### Documentation
-See the PPT presentation PSHELL-Framework.ppt at the top level directory for an overview of the main 
+See the PPT presentation [PSHELL-Framework.ppt](https://github.com/RonIovine/pshell/blob/master/PSHELL-Framework.ppt) at the top level directory for an overview of the main 
 features and capabilities of the framework.
 
 There is also documentation for the C API in the form of manpages.  The following manpages are provided:
