@@ -86,9 +86,9 @@ These functions can be invoked via several methods depending on how the internal
 server is configured.  The following shows the various PSHELL server types along with their
 associated invokation method:
 
-* TCP Server   : Uses standard telnet interactive client to invoke functions
-* UDP Server   : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
-* UNIX Server  : Uses included pshell/pshellAggregator interactive client or control API to invoke functions
+* TCP Server   : Uses standard `telnet` interactive client to invoke functions
+* UDP Server   : Uses included `pshell/pshellAggregator` interactive client or control API to invoke functions
+* UNIX Server  : Uses included `pshell/pshellAggregator` interactive client or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application
                  itself via local command line interactive prompting
 
@@ -175,7 +175,8 @@ To do a make and local install, run:
 `$ make install local=y`
 
 This will compile all the C and Go code and run the above `install.sh` script for a local install.
-Note, to build all the Go code you must have the Go compiler installed on your host.
+Note, to build the C code, you must have the `g++` compiler installed on your host, to build the Go 
+code, you must have the `go` compiler installed on your host.
 
 <a name="documentation"></a>
 ### Documentation
@@ -214,13 +215,13 @@ generic and are server agnostic.  A custom client never needs to be created unle
 create a custom server aggrecator client.  See the below section for the [pshellAggregatorDemo](#pshellAggregatorDemo) demo programs 
 for more information on creating custom aggregators.
 
-A TCP pshell server just uses a standard 'telnet' client for interactive access.  The datagram based servers
-(UDP/Unix) require the provided 'pshell' interactive client.
+A TCP pshell server just uses a standard `telnet` client for interactive access.  The datagram based servers
+(UDP/Unix) require the provided `pshell` interactive client.
 
 Note that there are 2 versions of the pshell UDP/Unix client programs, `pshell`, which is a compiled
 C implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
 any of the [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the
-[traceFilterDemo](#traceFilterDemo) program.  The pshell client programs both take a `-h` to show the 
+[traceFilterDemo](#traceFilterDemo) program.  The `pshell` client programs both take a `-h` to show the 
 usage as follows:
 ```
 $ pshell -h
