@@ -28,7 +28,7 @@ application itself.
 There is also a control API provided by where any external program can invoke another
 program's registered pshell functions (only supported for UDP or UNIX pshell servers).
 This will provide direct programmatic control of a remote process' pshell functions
-without having to fork the calling process to call the 'pshell' command line client
+without having to fork the calling process to call the `pshell` command line client
 program via the `system` call.  This provides functionality similar to the familiar
 Remote Procedure Call (RPC) mechanism.
 
@@ -345,7 +345,7 @@ the `-h` option to see the usage.  All language implementations are fully compat
 clients.  Note that in these demo implemtations, the servers are setup at the end of the `main` in BLOCKING
 mode.  When retro-fitting an existing application that already has a final control loop in the `main` to keep 
 the process resident, the server will most likely be setup at the beginning of the `main`, before the final
-control loop and in NON_BLOCKING mode.  See the ['traceFilterDemo.cc'](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) program for an example of this.
+control loop and in NON_BLOCKING mode.  See the [traceFilterDemo.cc](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) program for an example of this.
 
 ```
 $ pshellServerDemo -h
