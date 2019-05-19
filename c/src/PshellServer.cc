@@ -364,6 +364,7 @@ static void reply(PshellMsg *pshellMsg_);
 
 /* TCP server functions */
 
+static bool acceptConnection(void);
 static void runTCPServer(void);
 static void receiveTCP(void);
 
@@ -1812,6 +1813,14 @@ static void runUDPServer(void)
 
 /******************************************************************************/
 /******************************************************************************/
+static bool acceptConnection(void)
+{
+  _connectFd = accept(_socketFd, NULL, 0);
+  return (_connectFd > 0);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static void runTCPServer(void)
 {
   struct sockaddr_in addr;
@@ -1833,8 +1842,7 @@ static void runTCPServer(void)
                     _port);
         initialStartup = false;
       }
-      _connectFd = accept(_socketFd, NULL, 0);
-      connectionAccepted = (_connectFd > 0);
+      connectionAccepted = acceptConnection();
       if (connectionAccepted)
       {
         /* shutdown original socket to not allow any new connections until we are done with this one */

@@ -556,7 +556,8 @@ def _createSocket():
         None
       _gSocketFd.bind(_gUnixSourceAddress)
     return (True)
-  except:
+  except Exception as error:
+    print("PSHELL_ERROR: {}".format(error))
     return (False)
 
 #################################################################################
@@ -614,7 +615,8 @@ def _acceptConnection():
     (_gConnectFd, clientAddr) = _gSocketFd.accept()
     _gTcpConnectSockName = clientAddr[0]
     return (True)
-  except:
+  except Exception as error:
+    print("PSHELL_ERROR: {}".format(error))
     return (False)
 
 #################################################################################
@@ -643,7 +645,6 @@ def _runTCPServer():
               (_gServerName, _gHostnameOrIpAddr, _gPort))
         _addNativeCommands()
         initialStartup = False
-      #while (_createSocket() and _acceptConnection()):
       connectionAccepted = _acceptConnection()
       if connectionAccepted:
         # shutdown original socket to not allow any new connections
@@ -1108,8 +1109,8 @@ def _reply():
   if ((_gServerType == UDP) or (_gServerType == UNIX)):
     try:
       _gSocketFd.sendto(struct.pack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg["payload"]))+"s", *_gPshellMsg.values()), _gFromAddr)
-    except:
-      None
+    except Exception as error:
+      print("PSHELL_ERROR: {}".format(error))
 
 #################################################################################
 #################################################################################

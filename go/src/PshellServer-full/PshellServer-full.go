@@ -978,6 +978,7 @@ func acceptConnection() bool {
     _gTcpConnectSockName = strings.Split(_gConnectFd.LocalAddr().String(), ":")[0]
      return (true)
   } else {
+    fmt.Printf("PSHELL_ERROR: %s\n", err)
     return (false)
   }
 }
@@ -1045,9 +1046,11 @@ func createSocket() bool {
       if err == nil {
         return (true)
       } else {
+        fmt.Printf("PSHELL_ERROR: %s\n", err)
         return (false)
       }
     } else {
+      fmt.Printf("PSHELL_ERROR: %s\n", err)
       return (false)
     }
   } else if (_gServerType == UNIX) {
@@ -1059,9 +1062,11 @@ func createSocket() bool {
       if err == nil {
         return (true)
       } else {
+        fmt.Printf("PSHELL_ERROR: %s\n", err)
         return (false)
       }
     } else {
+      fmt.Printf("PSHELL_ERROR: %s\n", err)
       return (false)
     }
     return (true)
@@ -1074,12 +1079,15 @@ func createSocket() bool {
       if err == nil {
         return (true)
       } else {
+        fmt.Printf("PSHELL_ERROR: %s\n", err)
         return (false)
       }
     } else {
+      fmt.Printf("PSHELL_ERROR: %s\n", err)
       return (false)
     }
   } else {
+    fmt.Printf("PSHELL_ERROR: Invalid server type: '%s'\n", _gServerType)
     return (false)
   }
 }
@@ -1096,6 +1104,8 @@ func receiveDGRAM() {
   }
   if (err == nil) {
     processCommand(getPayload(_gPshellRcvMsg, recvSize))
+  } else {
+    fmt.Printf("PSHELL_ERROR: %s\n", err)
   }
 }
 
