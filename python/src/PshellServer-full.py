@@ -513,48 +513,51 @@ def _createSocket():
   global _gSocketFd
   global _gUnixSocketPath
   global _gUnixSourceAddress
-  if (_gServerType == UDP):
-    # IP domain socket (UDP)
-    _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    ipAddrOctets = _gHostnameOrIpAddr.split(".")
-    if (_gHostnameOrIpAddr == ANYHOST):
-      _gSocketFd.bind(("", _gPort))
-    elif (_gHostnameOrIpAddr == LOCALHOST):
-      _gSocketFd.bind(("127.0.0.1", _gPort))
-    elif (_gHostnameOrIpAddr == ANYBCAST):
-      # global broadcast address
-      _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-      _gSocketFd.bind(("255.255.255.255", _gPort))
-    elif ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
-      # subnet broadcast address
-      _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-      _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
-    else:
-      _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
-  elif (_gServerType == TCP):
-    # IP domain socket (TCP)
-    _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # Bind the socket to the port
-    if (_gHostnameOrIpAddr == ANYHOST):
-      _gSocketFd.bind(("", _gPort))
-    elif (_gHostnameOrIpAddr == LOCALHOST):
-      _gSocketFd.bind(("127.0.0.1", _gPort))
-    else:
-      _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
-    # Listen for incoming connections
-    _gSocketFd.listen(1)
-  elif (_gServerType == UNIX):
-    # UNIX domain socket
-    _gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    _gUnixSourceAddress = _gUnixSocketPath+_gServerName
-    # cleanup any old handle that might be hanging around
-    try:
-      os.unlink(_gUnixSourceAddress)
-    except:
-      None
-    _gSocketFd.bind(_gUnixSourceAddress)
-  return (True)
+  try:
+    if (_gServerType == UDP):
+      # IP domain socket (UDP)
+      _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+      ipAddrOctets = _gHostnameOrIpAddr.split(".")
+      if (_gHostnameOrIpAddr == ANYHOST):
+        _gSocketFd.bind(("", _gPort))
+      elif (_gHostnameOrIpAddr == LOCALHOST):
+        _gSocketFd.bind(("127.0.0.1", _gPort))
+      elif (_gHostnameOrIpAddr == ANYBCAST):
+        # global broadcast address
+        _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        _gSocketFd.bind(("255.255.255.255", _gPort))
+      elif ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
+        # subnet broadcast address
+        _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
+      else:
+        _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
+    elif (_gServerType == TCP):
+      # IP domain socket (TCP)
+      _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+      # Bind the socket to the port
+      if (_gHostnameOrIpAddr == ANYHOST):
+        _gSocketFd.bind(("", _gPort))
+      elif (_gHostnameOrIpAddr == LOCALHOST):
+        _gSocketFd.bind(("127.0.0.1", _gPort))
+      else:
+        _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
+      # Listen for incoming connections
+      _gSocketFd.listen(1)
+    elif (_gServerType == UNIX):
+      # UNIX domain socket
+      _gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+      _gUnixSourceAddress = _gUnixSocketPath+_gServerName
+      # cleanup any old handle that might be hanging around
+      try:
+        os.unlink(_gUnixSourceAddress)
+      except:
+        None
+      _gSocketFd.bind(_gUnixSourceAddress)
+    return (True)
+  except:
+    return (False)
 
 #################################################################################
 #################################################################################
@@ -575,24 +578,31 @@ def _runUDPServer():
   global _gServerName
   global _gHostnameOrIpAddr
   global _gPort
-  print("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %d" %
-        (_gServerName, _gHostnameOrIpAddr, _gPort))
-  _runDGRAMServer()
+  if (_createSocket()):
+    print("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %d" %
+          (_gServerName, _gHostnameOrIpAddr, _gPort))
+    _runDGRAMServer()
+  else:
+    print("PSHELL_ERROR: Cannot create socket for UDP Server: %s On Host: %s, Port: %d" %
+          (_gServerName, _gHostnameOrIpAddr, _gPort))
+
 
 #################################################################################
 #################################################################################
 def _runUNIXServer():
   global _gServerName
-  print("PSHELL_INFO: UNIX Server: %s Started" % _gServerName)
-  _runDGRAMServer()
+  if (_createSocket()):
+    print("PSHELL_INFO: UNIX Server: %s Started" % _gServerName)
+    _runDGRAMServer()
+  else:
+    print("PSHELL_ERROR: Cannot create socket for UNIX Server: %s" % _gServerName)
 
 #################################################################################
 #################################################################################
 def _runDGRAMServer():
   _addNativeCommands()
-  if (_createSocket()):
-    while (True):
-      _receiveDGRAM()
+  while (True):
+    _receiveDGRAM()
 
 #################################################################################
 #################################################################################
@@ -600,9 +610,12 @@ def _acceptConnection():
   global _gSocketFd
   global _gConnectFd
   global _gTcpConnectSockName
-  (_gConnectFd, clientAddr) = _gSocketFd.accept()
-  _gTcpConnectSockName = clientAddr[0]
-  return (True)
+  try:
+    (_gConnectFd, clientAddr) = _gSocketFd.accept()
+    _gTcpConnectSockName = clientAddr[0]
+    return (True)
+  except:
+    return (False)
 
 #################################################################################
 #################################################################################
@@ -618,28 +631,41 @@ def _runTCPServer():
   global _gTcpTitle
   global _gTcpConnectSockName
   global _gTcpTimeout
-  print("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" %
-        (_gServerName, _gHostnameOrIpAddr, _gPort))
-  _addNativeCommands()
-  # startup our TCP server and accept new connections
-  while (_createSocket() and _acceptConnection()):
-    # shutdown original socket to not allow any new connections
-    # until we are done with this one
-    _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
-    _gTcpTitle = _gTitle + ": " + _gServerName + "[" + \
-                 _gTcpConnectSockName + "], Mode: INTERACTIVE"
-    PshellReadline.setFileDescriptors(_gConnectFd,
-                                      _gConnectFd,
-                                      PshellReadline.SOCKET,
-                                      PshellReadline.ONE_MINUTE*_gTcpTimeout)
-    try:
-      _gSocketFd.shutdown(socket.SHUT_RDWR)
-    except:
-      None
-    _receiveTCP()
-    _gConnectFd.shutdown(socket.SHUT_RDWR)
-    _gConnectFd.close()
-    _gSocketFd.close()
+  socketCreated = True
+  connectionAccepted = True
+  initialStartup = True
+  while socketCreated and connectionAccepted:
+    # startup our TCP server and accept new connections
+    socketCreated = _createSocket()
+    if socketCreated:
+      if initialStartup:
+        print("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" %
+              (_gServerName, _gHostnameOrIpAddr, _gPort))
+        _addNativeCommands()
+        initialStartup = False
+      #while (_createSocket() and _acceptConnection()):
+      connectionAccepted = _acceptConnection()
+      if connectionAccepted:
+        # shutdown original socket to not allow any new connections
+        # until we are done with this one
+        _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
+        _gTcpTitle = _gTitle + ": " + _gServerName + "[" + \
+                     _gTcpConnectSockName + "], Mode: INTERACTIVE"
+        PshellReadline.setFileDescriptors(_gConnectFd,
+                                          _gConnectFd,
+                                          PshellReadline.SOCKET,
+                                          PshellReadline.ONE_MINUTE*_gTcpTimeout)
+        try:
+          _gSocketFd.shutdown(socket.SHUT_RDWR)
+        except:
+          None
+        _receiveTCP()
+        _gConnectFd.shutdown(socket.SHUT_RDWR)
+        _gConnectFd.close()
+        _gSocketFd.close()
+  if not socketCreated or not connectionAccepted:
+    print("PSHELL_ERROR: Cannot create socket for TCP Server: %s On Host: %s, Port: %d" %
+          (_gServerName, _gHostnameOrIpAddr, _gPort))
 
 #################################################################################
 #################################################################################

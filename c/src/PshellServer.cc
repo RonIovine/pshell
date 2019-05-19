@@ -1789,17 +1789,24 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
 /******************************************************************************/
 static void runUDPServer(void)
 {
-  PSHELL_INFO("UDP Server: %s Started On Host: %s, Port: %d",
-              _serverName,
-              _hostnameOrIpAddr,
-              _port);
   /* startup our UDP server */
   if (createSocket())
   {
+    PSHELL_INFO("UDP Server: %s Started On Host: %s, Port: %d",
+                _serverName,
+                _hostnameOrIpAddr,
+                _port);
     for (;;)
     {
       receiveUDP();
     }
+  }
+  else
+  {
+    PSHELL_ERROR("Cannot create socket for UDP Server: %s On Host: %s, Port: %d",
+                 _serverName,
+                 _hostnameOrIpAddr,
+                 _port);
   }
 }
 
@@ -1807,28 +1814,51 @@ static void runUDPServer(void)
 /******************************************************************************/
 static void runTCPServer(void)
 {
-  PSHELL_INFO("TCP Server: %s Started On Host: %s, Port: %d",
-              _serverName,
-              _hostnameOrIpAddr,
-              _port);
   struct sockaddr_in addr;
   socklen_t addrlen = sizeof(addr);
+  bool socketCreated = true;
+  bool connectionAccepted = true;
+  bool initialStartup = true;
   /* startup our TCP server and accept new connections */
-  while (createSocket() && (_connectFd = accept(_socketFd, NULL, 0)) > 0)
+  while (socketCreated && connectionAccepted)
   {
-    /* shutdown original socket to not allow any new connections until we are done with this one */
-    getsockname(_connectFd, (sockaddr *)&addr, &addrlen);
-    strcpy(_ipAddress, inet_ntoa(addr.sin_addr));
-    sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
-    pshell_rl_setFileDescriptors(_connectFd,
-                                 _connectFd,
-                                 PSHELL_RL_SOCKET,
-                                 PSHELL_RL_ONE_MINUTE*_defaultIdleTimeout);
-    shutdown(_socketFd, SHUT_RDWR);
-    receiveTCP();
-    shutdown(_connectFd, SHUT_RDWR);
-    close(_connectFd);
-    close(_socketFd);
+    socketCreated = createSocket();
+    if (socketCreated)
+    {
+      if (initialStartup)
+      {
+        PSHELL_INFO("TCP Server: %s Started On Host: %s, Port: %d",
+                    _serverName,
+                    _hostnameOrIpAddr,
+                    _port);
+        initialStartup = false;
+      }
+      _connectFd = accept(_socketFd, NULL, 0);
+      connectionAccepted = (_connectFd > 0);
+      if (connectionAccepted)
+      {
+        /* shutdown original socket to not allow any new connections until we are done with this one */
+        getsockname(_connectFd, (sockaddr *)&addr, &addrlen);
+        strcpy(_ipAddress, inet_ntoa(addr.sin_addr));
+        sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
+        pshell_rl_setFileDescriptors(_connectFd,
+                                     _connectFd,
+                                     PSHELL_RL_SOCKET,
+                                     PSHELL_RL_ONE_MINUTE*_defaultIdleTimeout);
+        shutdown(_socketFd, SHUT_RDWR);
+        receiveTCP();
+        shutdown(_connectFd, SHUT_RDWR);
+        close(_connectFd);
+        close(_socketFd);
+      }
+    }
+  }
+  if (!socketCreated || !connectionAccepted)
+  {
+    PSHELL_ERROR("Cannot create socket for TCP Server: %s On Host: %s, Port: %d",
+                 _serverName,
+                 _hostnameOrIpAddr,
+                 _port);
   }
 }
 
@@ -1836,14 +1866,18 @@ static void runTCPServer(void)
 /******************************************************************************/
 static void runUNIXServer(void)
 {
-  PSHELL_INFO("UNIX Server: %s Started", _serverName);
   /* startup our UNIX server */
   if (createSocket())
   {
+    PSHELL_INFO("UNIX Server: %s Started", _serverName);
     for (;;)
     {
       receiveUNIX();
     }
+  }
+  else
+  {
+    PSHELL_ERROR("Cannot create socket for UNIX Server: %s", _serverName);
   }
 }
 

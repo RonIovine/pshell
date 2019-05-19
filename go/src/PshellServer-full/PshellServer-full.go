@@ -884,28 +884,37 @@ func runServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runUDPServer() {
-  fmt.Printf("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %s\n",
-             _gServerName,
-             _gHostnameOrIpAddr,
-             _gPort)
-  runDGRAMServer()
+  if (createSocket()) {
+    fmt.Printf("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %s\n",
+               _gServerName,
+               _gHostnameOrIpAddr,
+               _gPort)
+    runDGRAMServer()
+  } else {
+    fmt.Printf("PSHELL_ERROR: Cannot create socket for UDP Server: %s On Host: %s, Port: %s\n",
+               _gServerName,
+               _gHostnameOrIpAddr,
+               _gPort)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runUNIXServer() {
-  fmt.Printf("PSHELL_INFO: UNIX Server: %s Started\n", _gServerName)
-  runDGRAMServer()
+  if (createSocket()) {
+    fmt.Printf("PSHELL_INFO: UNIX Server: %s Started\n", _gServerName)
+    runDGRAMServer()
+  } else {
+    fmt.Printf("PSHELL_ERROR: Cannot create socket for UNIX Server: %s\n", _gServerName)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runDGRAMServer() {
   addNativeCommands()
-  if (createSocket()) {
-    for {
-      receiveDGRAM()
-    }
+  for {
+    receiveDGRAM()
   }
 }
 
@@ -963,29 +972,52 @@ func runLocalServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func acceptConnection() bool {
-  _gConnectFd, _ = _gTcpSocket.AcceptTCP()
-  _gTcpConnectSockName = strings.Split(_gConnectFd.LocalAddr().String(), ":")[0]
-   return (true)
+  var err error
+  _gConnectFd, err = _gTcpSocket.AcceptTCP()
+  if err == nil {
+    _gTcpConnectSockName = strings.Split(_gConnectFd.LocalAddr().String(), ":")[0]
+     return (true)
+  } else {
+    return (false)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func runTCPServer() {
-  fmt.Printf("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %s\n",
-             _gServerName,
-             _gHostnameOrIpAddr,
-             _gPort)
-  addNativeCommands()
+  var socketCreated = true
+  var connectionAccepted = true
+  var initialStartup = true
   // startup our TCP server and accept new connections
-  for createSocket() && acceptConnection() {
-    _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
-    _gTcpTitle = _gTitle + ": " + _gServerName + "[" +
-                 _gTcpConnectSockName + "], Mode: INTERACTIVE"
-    // shutdown original socket to not allow any new connections
-    // until we are done with this one
-    _gTcpSocket.Close()
-    receiveTCP()
-    _gConnectFd.Close()
+  for socketCreated && connectionAccepted {
+    socketCreated = createSocket()
+    if socketCreated {
+      if initialStartup {
+        fmt.Printf("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %s\n",
+                   _gServerName,
+                   _gHostnameOrIpAddr,
+                   _gPort)
+        addNativeCommands()
+        initialStartup = false
+      }
+      connectionAccepted = acceptConnection()
+      if connectionAccepted {
+        _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
+        _gTcpTitle = _gTitle + ": " + _gServerName + "[" +
+                     _gTcpConnectSockName + "], Mode: INTERACTIVE"
+        // shutdown original socket to not allow any new connections
+        // until we are done with this one
+        _gTcpSocket.Close()
+        receiveTCP()
+        _gConnectFd.Close()
+      }
+    }
+  }
+  if socketCreated == false || connectionAccepted == false {
+    fmt.Printf("PSHELL_ERROR: Cannot create socket for TCP Server: %s On Host: %s, Port: %s\n",
+               _gServerName,
+               _gHostnameOrIpAddr,
+               _gPort)
   }
 }
 
@@ -1010,7 +1042,11 @@ func createSocket() bool {
     udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
     if err == nil {
       _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
-      return (true)
+      if err == nil {
+        return (true)
+      } else {
+        return (false)
+      }
     } else {
       return (false)
     }
@@ -1020,7 +1056,11 @@ func createSocket() bool {
     unixAddr, err := net.ResolveUnixAddr("unixgram", _gUnixSourceAddress)
     if err == nil {
       _gUnixSocket, err = net.ListenUnixgram("unixgram", unixAddr)
-      return (true)
+      if err == nil {
+        return (true)
+      } else {
+        return (false)
+      }
     } else {
       return (false)
     }
@@ -1031,7 +1071,11 @@ func createSocket() bool {
     tcpAddr, err := net.ResolveTCPAddr("tcp", serverAddr)
     if err == nil {
       _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
-      return (true)
+      if err == nil {
+        return (true)
+      } else {
+        return (false)
+      }
     } else {
       return (false)
     }

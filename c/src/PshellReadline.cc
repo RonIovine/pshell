@@ -943,14 +943,14 @@ static bool getChar(char &ch)
         pshell_rl_writeOutput("\nIdle session timeout\n");
         idleSession = true;
       }
-      else if (retCode > 0)
+      else if ((retCode > 0) && (read(_inFd, &ch, 1) != 1))
       {
-        read(_inFd, &ch, 1);
+        idleSession = true;
       }
     }
-    else
+    else if (read(_inFd, &ch, 1) != 1)
     {
-      read(_inFd, &ch, 1);
+      idleSession = true;
     }
   }
   return (idleSession);

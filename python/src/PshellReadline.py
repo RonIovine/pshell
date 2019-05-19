@@ -428,6 +428,8 @@ def _getInput(prompt_):
   _writeOutput(prompt_)
   while (True):
     (char, idleSession) = _getChar()
+    if len(char) == 0:
+      return ("", True)
     # check for idleSession timeout
     if (idleSession == True):
       return (command, True)

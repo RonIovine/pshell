@@ -354,7 +354,7 @@ func main() {
   //       started in NON_BLOCKING mode before the main drops into it's control loop, see the
   //       demo program traceFilterDemo.cc for an example
   //
-  PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, "7001")
+  PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, "8001")
 
   // should never get here, but cleanup any pshell system resources as good practice
   PshellServer.CleanupResources()
