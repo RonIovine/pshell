@@ -286,6 +286,9 @@ if {$fileNeeded == "true" || $commandNeeded == "true"} {
   showUsage
 }
 
+# catch CTRL-C so we can gracefully exit from a repeated command or batch processing
+trap {send -s "quit\r";puts "";exit} SIGINT
+
 # connect to our server
 spawn -noecho telnet $hostOrIpAddr $portNum
 expect {
@@ -307,6 +310,7 @@ set serverName [lindex [split $serverNameAndIpAddress "\["] 0]
 set serverName [lindex [split $serverName "\r"] 1]
 set ipAddress [lindex [split $serverNameAndIpAddress "\]"] 0]
 set ipAddress [lindex [split $ipAddress "\["] 1]
+set send_slow {1 .001}
 
 # process our request
 if {$command != ""} {
@@ -326,21 +330,21 @@ if {$command != ""} {
         setTitle "$title: $serverName\[$ipAddress\], Mode: COMMAND LINE\[$command\], Rate: $rate SEC, Iteration: $iteration of $repeat"
       }
       clearScreen
-      send "$command\r"
+      send -s "$command\r"
       expect $prompt
       if {$iteration == $repeat} {
         break
       }
       sleep $rate
     }
-    send "quit\r"
+    send -s "quit\r"
     puts ""
     exit
   } else {
     clearScreen
-    send "$command\r"
+    send -s "$command\r"
     expect $prompt
-    send "quit\r"
+    send -s "quit\r"
     puts ""
     exit
   }
@@ -384,7 +388,7 @@ if {$command != ""} {
         clearScreen
         while {[gets $file command] != -1} {
           if {[string index $command 0] != "#" && [string length $command] > 0} {
-            send "$command\r"
+            send -s "$command\r"
             expect $prompt
           }
         }
@@ -393,7 +397,7 @@ if {$command != ""} {
         }
         sleep $rate
       }
-      send "quit\r"
+      send -s "quit\r"
       puts ""
       exit
     } else {
@@ -401,11 +405,11 @@ if {$command != ""} {
       set file [open $batchFile r]
       while {[gets $file command] != -1} {
         if {[string index $command 0] != "#" && [string length $command] > 0} {
-          send "$command\r"
+          send -s "$command\r"
           expect $prompt
         }
       }
-      send "quit\r"
+      send -s "quit\r"
       puts ""
     }
   } else {
