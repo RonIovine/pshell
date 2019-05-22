@@ -439,6 +439,7 @@ void showUsage(void)
   printf("    -local - Local command dispatching server\n");
   printf("    <port> - Desired UDP or TCP port, default: %d\n", PSHELL_DEMO_PORT);
   printf("\n");
+  exit(0);
 }
 
 /******************************************************************************/
@@ -503,7 +504,6 @@ int main(int argc, char *argv[])
     else
     {
       showUsage();
-      return (0);
     }
     if (argc == 3)
     {
@@ -513,7 +513,6 @@ int main(int argc, char *argv[])
   else
   {
     showUsage();
-    return (0);
   }
 
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */

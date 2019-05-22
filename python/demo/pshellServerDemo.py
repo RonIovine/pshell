@@ -172,7 +172,16 @@ def getOptions(argv):
 #################################################################################
 #################################################################################
 def showUsage():
-  print("Usage: pshellServerDemo.py -udp | -tcp | -unix | -local")
+  print("")
+  print("Usage: pshellServerDemo.py -udp [<port>] | -tcp [<port>] | -unix | -local")
+  print("")
+  print("  where:")
+  print("    -udp   - Multi-session UDP server")
+  print("    -tcp   - Single session TCP server")
+  print("    -unix  - Multi-session UNIX domain server")
+  print("    -local - Local command dispatching server")
+  print("    <port> - Desired UDP or TCP port, default: %d" % PSHELL_DEMO_PORT)
+  print("");
   sys.exit()
 
 #################################################################################
@@ -209,16 +218,20 @@ def registerSignalHandlers():
 ##############################
 if (__name__ == '__main__'):
 
-  if (len(sys.argv) != 2):
-    showUsage()
-  elif (sys.argv[1] == "-udp"):
-    serverType = PshellServer.UDP
-  elif (sys.argv[1] == "-unix"):
-    serverType = PshellServer.UNIX
-  elif (sys.argv[1] == "-tcp"):
-    serverType = PshellServer.TCP
-  elif (sys.argv[1] == "-local"):
-    serverType = PshellServer.LOCAL
+  PSHELL_DEMO_PORT = 9001
+  if (len(sys.argv) == 2 or len(sys.argv) == 3):
+    if (sys.argv[1] == "-udp"):
+      serverType = PshellServer.UDP
+    elif (sys.argv[1] == "-unix"):
+      serverType = PshellServer.UNIX
+    elif (sys.argv[1] == "-tcp"):
+      serverType = PshellServer.TCP
+    elif (sys.argv[1] == "-local"):
+      serverType = PshellServer.LOCAL
+    else:
+      showUsage()
+    if len(sys.argv) == 3:
+      PSHELL_DEMO_PORT = int(sys.argv[2])
   else:
     showUsage()
 
@@ -322,7 +335,7 @@ if (__name__ == '__main__'):
   #       started in NON_BLOCKING mode before the main drops into it's control loop, see the
   #       demo program traceFilterDemo.cc for an example
   #
-  PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, 9001)
+  PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, PSHELL_DEMO_PORT)
 
   # should never get here, but cleanup any pshell system resources as good practice
   PshellServer.cleanupResources()

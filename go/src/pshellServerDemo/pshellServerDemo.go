@@ -225,25 +225,41 @@ func registerSignalHandlers() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func showUsage() {
-  fmt.Printf("Usage: pshellServerDemo -udp | -tcp | -unix | -local\n")
+  fmt.Printf("\n");
+  fmt.Printf("Usage: pshellServerDemo -udp [<port>] | -tcp [<port>] | -unix | -local\n");
+  fmt.Printf("\n");
+  fmt.Printf("  where:\n");
+  fmt.Printf("    -udp   - Multi-session UDP server\n");
+  fmt.Printf("    -tcp   - Single session TCP server\n");
+  fmt.Printf("    -unix  - Multi-session UNIX domain server\n");
+  fmt.Printf("    -local - Local command dispatching server\n");
+  fmt.Printf("    <port> - Desired UDP or TCP port, default: %s\n", PSHELL_DEMO_PORT);
+  fmt.Printf("\n");
   os.Exit(0)
 }
+
+var PSHELL_DEMO_PORT = "8001"
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func main() {
 
   var serverType string
-  if (len(os.Args) != 2) {
-    showUsage()
-  } else if (os.Args[1] == "-udp") {
-    serverType = PshellServer.UDP
-  } else if (os.Args[1] == "-unix") {
-    serverType = PshellServer.UNIX
-  } else if (os.Args[1] == "-tcp") {
-    serverType = PshellServer.TCP
-  } else if (os.Args[1] == "-local") {
-    serverType = PshellServer.LOCAL
+  if (len(os.Args) == 2 || len(os.Args) == 3) {
+    if (os.Args[1] == "-udp") {
+      serverType = PshellServer.UDP
+    } else if (os.Args[1] == "-unix") {
+      serverType = PshellServer.UNIX
+    } else if (os.Args[1] == "-tcp") {
+      serverType = PshellServer.TCP
+    } else if (os.Args[1] == "-local") {
+      serverType = PshellServer.LOCAL
+    } else {
+      showUsage()
+    }
+    if len(os.Args) == 3 {
+      PSHELL_DEMO_PORT = os.Args[2]
+    }
   } else {
     showUsage()
   }
@@ -354,7 +370,7 @@ func main() {
   //       started in NON_BLOCKING mode before the main drops into it's control loop, see the
   //       demo program traceFilterDemo.cc for an example
   //
-  PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, "8001")
+  PshellServer.StartServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, PSHELL_DEMO_PORT)
 
   // should never get here, but cleanup any pshell system resources as good practice
   PshellServer.CleanupResources()
