@@ -95,6 +95,13 @@ like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet
 broadcast address, e.g. x.y.z.255).
 
+
+See the full README file for a complete description of all the components, installation, building, and usage.
+
+Note, this package was originally hosted at [code.google.com](https://code.google.com) as
+[RDB-Lite](https://code.google.com/p/rdb-lite), it was re-christened as 'pshell' when it was
+migrated to this hosting service.
+
 <a name="getting-started"></a>
 ### Getting started
 The following sections describe an overview of getting started with the basic features of the framework.
@@ -598,9 +605,3 @@ Usage: traceLogDemo <level>
   where:
     <level>  - The desired log level value, 0-10
 ```
-
-See the full README file for a complete description of all the components, installation, building, and usage.
-
-Note, this package was originally hosted at [code.google.com](https://code.google.com) as
-[RDB-Lite](https://code.google.com/p/rdb-lite), it was re-christened as 'pshell' when it was
-migrated to this hosting service.
