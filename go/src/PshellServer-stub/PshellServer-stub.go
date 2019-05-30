@@ -75,7 +75,20 @@ const (
   LOCALHOST = "localhost"
 )
 
+// constants to let the host program set the internal debug log level,
+// if the user of this API does not want to see any internal message
+// printed out, set the debug log level to LOG_LEVEL_NONE (0)
+const (
+  LOG_LEVEL_NONE = 0
+  LOG_LEVEL_ERROR = 1
+  LOG_LEVEL_WARNING = 2
+  LOG_LEVEL_INFO = 3
+  LOG_LEVEL_ALL = LOG_LEVEL_INFO
+  LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+)
+
 type pshellFunction func([]string)
+type logFunction func(string)
 
 //
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
@@ -115,6 +128,18 @@ func CleanupResources() {
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
 func RunCommand(format string, command ...interface{}) {
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func SetLogLevel(level int) {
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func SetLogFunction(function logFunction) {
 }
 
 //

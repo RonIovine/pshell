@@ -71,6 +71,16 @@ ANYHOST = "anyhost"
 ANYBCAST = "anybcast"
 LOCALHOST = "localhost"
 
+# constants to let the host program set the internal debug log level,
+# if the user of this API does not want to see any internal message
+# printed out, set the debug log level to LOG_LEVEL_NONE (0)
+LOG_LEVEL_NONE = 0
+LOG_LEVEL_ERROR = 1
+LOG_LEVEL_WARNING = 2
+LOG_LEVEL_INFO = 3
+LOG_LEVEL_ALL = LOG_LEVEL_INFO
+LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+
 #################################################################################
 #
 # "public" API functions
@@ -79,6 +89,22 @@ LOCALHOST = "localhost"
 # but with all the underlying functionality stubbed out.
 #
 #################################################################################
+
+#################################################################################
+#################################################################################
+def setLogLevel(level):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  None
+
+#################################################################################
+#################################################################################
+def setLogFunction(function):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  None
 
 #################################################################################
 #################################################################################

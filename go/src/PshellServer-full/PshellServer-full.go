@@ -92,6 +92,18 @@ const (
   LOCALHOST = "localhost"
 )
 
+// constants to let the host program set the internal debug log level,
+// if the user of this API does not want to see any internal message
+// printed out, set the debug log level to LOG_LEVEL_NONE (0)
+const (
+  LOG_LEVEL_NONE = 0
+  LOG_LEVEL_ERROR = 1
+  LOG_LEVEL_WARNING = 2
+  LOG_LEVEL_INFO = 3
+  LOG_LEVEL_ALL = LOG_LEVEL_INFO
+  LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+)
+
 /////////////////////////////////////////////////////////////////////////////////
 //
 // global "private" data
@@ -199,6 +211,10 @@ var _gMaxMatchKeywordLength = 0
 var _gCommandHistory []string
 var _gCommandHistoryPos = 0
 
+type logFunction func(string)
+var _logLevel = LOG_LEVEL_DEFAULT
+var _logFunction logFunction
+
 /////////////////////////////////
 //
 // Public functions
@@ -301,6 +317,43 @@ func RunCommand(format string, command ...interface{}) {
   runCommand(format, command...)
 }
 
+//
+//  Set the internal log level, valid levels are:
+//
+//  LOG_LEVEL_ERROR
+//  LOG_LEVEL_WARNING
+//  LOG_LEVEL_INFO
+//  LOG_LEVEL_ALL
+//  LOG_LEVEL_DEFAULT
+//
+//  Where the default is LOG_LEVEL_ALL
+//
+//    Args:
+//        level (int) : The desired log level to set
+//
+//    Returns:
+//        None
+//
+func SetLogLevel(level int) {
+  setLogLevel(level)
+}
+
+//
+//  Provide a user callback function to send the logs to, this allows an
+//  application to get all the logs issued by this module to put in it's
+//  own logfile.  If a log function is not set, all internal logs are just
+//  sent to the 'print' function.
+//
+//    Args:
+//        function (ptr) : Log callback function
+//
+//    Returns:
+//        None
+//
+func SetLogFunction(function logFunction) {
+  setLogFunction(function)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // The following public functions should only be called from within a
@@ -335,7 +388,7 @@ func Flush() {
 }
 
 //
-//  Spinning ascii wheel keep alive, user string string is optional
+//  Spinning ascii wheel keep alive, user string is optional
 //
 //    Args:
 //        message (str) : String to display before the spinning wheel
@@ -447,31 +500,31 @@ func addCommand(function_ pshellFunction,
 
   // see if we have a NULL command name
   if ((command_ == "") || (len(command_) == 0)) {
-    fmt.Printf("PSHELL_ERROR: NULL command name, command not added\n")
+    printError("NULL command name, command not added")
     return
   }
 
   // see if we have a NULL description
   if ((description_ == "") || (len(description_) == 0)) {
-    fmt.Printf("PSHELL_ERROR: NULL description, command: '%s' not added\n", command_)
+    printError("NULL description, command: '%s' not added", command_)
     return
   }
 
   // see if we have a NULL function
   if (function_ == nil) {
-    fmt.Printf("PSHELL_ERROR: NULL function, command: '%s' not added\n", command_)
+    printError("NULL function, command: '%s' not added", command_)
     return
   }
 
   // if they provided no usage for a function with arguments
   if (((maxArgs_ > 0) || (minArgs_ > 0)) && ((usage_ == "") || (len(usage_) == 0))) {
-    fmt.Printf("PSHELL_ERROR: NULL usage for command that takes arguments, command: '%s' not added\n", command_)
+    printError("NULL usage for command that takes arguments, command: '%s' not added", command_)
     return
   }
 
   // see if their minArgs is greater than their maxArgs
   if (minArgs_ > maxArgs_) {
-    fmt.Printf("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added\n", minArgs_, maxArgs_, command_)
+    printError("minArgs: %d is greater than maxArgs: %d, command: '%s' not added", minArgs_, maxArgs_, command_)
     return
   }
 
@@ -479,9 +532,14 @@ func addCommand(function_ pshellFunction,
   for _, entry := range _gCommandList {
     if (entry.command == command_) {
       // command name already exists, don't add it again
-      fmt.Printf("PSHELL_ERROR: Command: %s already exists, not adding command\n", command_)
+      printError("Command: %s already exists, not adding command", command_)
       return
     }
+  }
+  if len(strings.Split(strings.TrimSpace(command_), " ")) > 1 {
+    // we do not allow any commands with whitespace, single keyword commands only
+    printError("Whitespace found, command: '%s' not added", command_)
+    return
   }
 
   // everything ok, good to add command
@@ -570,6 +628,18 @@ func runCommand(format_ string, command_ ...interface{}) {
     _gCommandDispatched = false
     _gCommandInteractive = true
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func setLogLevel(level_ int) {
+  _logLevel = level_
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func setLogFunction(function_ logFunction) {
+  _logFunction = function_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -667,6 +737,40 @@ func getOption(arg_ string) (bool, string, string) {
     } else {
       return false, "", ""
     }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printError(format_ string, message_ ...interface{}) {
+  if _logLevel >= LOG_LEVEL_ERROR {
+    printLog("PSHELL_ERROR: "+fmt.Sprintf(format_, message_...)+"\n")
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printWarning(format_ string, message_ ...interface{}) {
+  if _logLevel >= LOG_LEVEL_WARNING {
+    printLog("PSHELL_WARNING: "+fmt.Sprintf(format_, message_...)+"\n")
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printInfo(format_ string, message_ ...interface{}) {
+  if _logLevel >= LOG_LEVEL_INFO {
+    printLog("PSHELL_INFO: "+fmt.Sprintf(format_, message_...)+"\n")
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printLog(message_ string) {
+  if _logFunction != nil {
+    _logFunction(message_)
+  } else {
+    fmt.Printf(message_)
   }
 }
 
@@ -885,13 +989,13 @@ func runServer() {
 ////////////////////////////////////////////////////////////////////////////////
 func runUDPServer() {
   if (createSocket()) {
-    fmt.Printf("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %s\n",
+    printInfo("UDP Server: %s Started On Host: %s, Port: %s",
                _gServerName,
                _gHostnameOrIpAddr,
                _gPort)
     runDGRAMServer()
   } else {
-    fmt.Printf("PSHELL_ERROR: Cannot create socket for UDP Server: %s On Host: %s, Port: %s\n",
+    printError("Cannot create socket for UDP Server: %s On Host: %s, Port: %s",
                _gServerName,
                _gHostnameOrIpAddr,
                _gPort)
@@ -902,10 +1006,10 @@ func runUDPServer() {
 ////////////////////////////////////////////////////////////////////////////////
 func runUNIXServer() {
   if (createSocket()) {
-    fmt.Printf("PSHELL_INFO: UNIX Server: %s Started\n", _gServerName)
+    printInfo("UNIX Server: %s Started", _gServerName)
     runDGRAMServer()
   } else {
-    fmt.Printf("PSHELL_ERROR: Cannot create socket for UNIX Server: %s\n", _gServerName)
+    printError("Cannot create socket for UNIX Server: %s", _gServerName)
   }
 }
 
@@ -978,7 +1082,7 @@ func acceptConnection() bool {
     _gTcpConnectSockName = strings.Split(_gConnectFd.LocalAddr().String(), ":")[0]
      return (true)
   } else {
-    fmt.Printf("PSHELL_ERROR: %s\n", err)
+    printError("%s", err)
     return (false)
   }
 }
@@ -994,7 +1098,7 @@ func runTCPServer() {
     socketCreated = createSocket()
     if socketCreated {
       if initialStartup {
-        fmt.Printf("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %s\n",
+        printInfo("TCP Server: %s Started On Host: %s, Port: %s",
                    _gServerName,
                    _gHostnameOrIpAddr,
                    _gPort)
@@ -1015,7 +1119,7 @@ func runTCPServer() {
     }
   }
   if socketCreated == false || connectionAccepted == false {
-    fmt.Printf("PSHELL_ERROR: Cannot create socket for TCP Server: %s On Host: %s, Port: %s\n",
+    printError("Cannot create socket for TCP Server: %s On Host: %s, Port: %s",
                _gServerName,
                _gHostnameOrIpAddr,
                _gPort)
@@ -1046,11 +1150,11 @@ func createSocket() bool {
       if err == nil {
         return (true)
       } else {
-        fmt.Printf("PSHELL_ERROR: %s\n", err)
+        printError("%s", err)
         return (false)
       }
     } else {
-      fmt.Printf("PSHELL_ERROR: %s\n", err)
+      printError("%s", err)
       return (false)
     }
   } else if (_gServerType == UNIX) {
@@ -1062,11 +1166,11 @@ func createSocket() bool {
       if err == nil {
         return (true)
       } else {
-        fmt.Printf("PSHELL_ERROR: %s\n", err)
+        printError("%s", err)
         return (false)
       }
     } else {
-      fmt.Printf("PSHELL_ERROR: %s\n", err)
+      printError("%s", err)
       return (false)
     }
     return (true)
@@ -1079,15 +1183,15 @@ func createSocket() bool {
       if err == nil {
         return (true)
       } else {
-        fmt.Printf("PSHELL_ERROR: %s\n", err)
+        printError("%s", err)
         return (false)
       }
     } else {
-      fmt.Printf("PSHELL_ERROR: %s\n", err)
+      printError("%s", err)
       return (false)
     }
   } else {
-    fmt.Printf("PSHELL_ERROR: Invalid server type: '%s'\n", _gServerType)
+    printError("Invalid server type: '%s'", _gServerType)
     return (false)
   }
 }
@@ -1105,7 +1209,7 @@ func receiveDGRAM() {
   if (err == nil) {
     processCommand(getPayload(_gPshellRcvMsg, recvSize))
   } else {
-    fmt.Printf("PSHELL_ERROR: %s\n", err)
+    printError("%s", err)
   }
 }
 

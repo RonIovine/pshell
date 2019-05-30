@@ -37,6 +37,8 @@ Functions:<br>
 <a href="#-sendCommand3">sendCommand3</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;default&nbsp;timeout,&nbsp;results&nbsp;extracted<br>
 <a href="#-sendCommand4">sendCommand4</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;timeout&nbsp;override,&nbsp;results&nbsp;extracted<br>
 <a href="#-getResponseString">getResponseString</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;human&nbsp;readable&nbsp;form&nbsp;of&nbsp;one&nbsp;of&nbsp;the&nbsp;command&nbsp;response&nbsp;return&nbsp;codes<br>
+<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;internal&nbsp;log&nbsp;level&nbsp;for&nbsp;this&nbsp;module<br>
+<a href="#-setLogFunction">setLogFunction</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;register&nbsp;a&nbsp;user&nbsp;function&nbsp;to&nbsp;receive&nbsp;all&nbsp;logs<br>
 &nbsp;<br>
 Integer&nbsp;constants:<br>
 &nbsp;<br>
@@ -73,6 +75,18 @@ UNIX<br>
 Specifies&nbsp;if&nbsp;the&nbsp;addMulticast&nbsp;should&nbsp;add&nbsp;the&nbsp;given&nbsp;sid&nbsp;to&nbsp;all&nbsp;commands<br>
 &nbsp;<br>
 MULTICAST_ALL<br>
+&nbsp;<br>
+Constants&nbsp;to&nbsp;let&nbsp;the&nbsp;host&nbsp;program&nbsp;set&nbsp;the&nbsp;internal&nbsp;debug&nbsp;log&nbsp;level,<br>
+if&nbsp;the&nbsp;user&nbsp;of&nbsp;this&nbsp;API&nbsp;does&nbsp;not&nbsp;want&nbsp;to&nbsp;see&nbsp;any&nbsp;internal&nbsp;message<br>
+printed&nbsp;out,&nbsp;set&nbsp;the&nbsp;debug&nbsp;log&nbsp;level&nbsp;to&nbsp;LOG_LEVEL_NONE,&nbsp;the&nbsp;default<br>
+log&nbsp;level&nbsp;is&nbsp;LOG_LEVEL_ALL<br>
+&nbsp;<br>
+LOG_LEVEL_NONE<br>
+LOG_LEVEL_ERROR<br>
+LOG_LEVEL_WARNING<br>
+LOG_LEVEL_INFO<br>
+LOG_LEVEL_ALL<br>
+LOG_LEVEL_DEFAULT<br>
 &nbsp;<br>
 A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included<br>
 demo&nbsp;programs&nbsp;pshellControlDemo.py&nbsp;and&nbsp;pshellAggregatorDemo.py</tt></p>
@@ -276,6 +290,31 @@ that&nbsp;don't&nbsp;take&nbsp;a&nbsp;timeout&nbsp;override<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-setLogFunction"><strong>setLogFunction</strong></a>(function)</dt><dd><tt>Provide&nbsp;a&nbsp;user&nbsp;callback&nbsp;function&nbsp;to&nbsp;send&nbsp;the&nbsp;logs&nbsp;to,&nbsp;this&nbsp;allows&nbsp;an<br>
+application&nbsp;to&nbsp;get&nbsp;all&nbsp;the&nbsp;logs&nbsp;issued&nbsp;by&nbsp;this&nbsp;module&nbsp;to&nbsp;put&nbsp;in&nbsp;it's<br>
+own&nbsp;logfile.&nbsp;&nbsp;If&nbsp;a&nbsp;log&nbsp;function&nbsp;is&nbsp;not&nbsp;set,&nbsp;all&nbsp;internal&nbsp;logs&nbsp;are&nbsp;just<br>
+sent&nbsp;to&nbsp;the&nbsp;'print'&nbsp;function.<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;(ptr)&nbsp;:&nbsp;Log&nbsp;callback&nbsp;function<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-setLogLevel"><strong>setLogLevel</strong></a>(level)</dt><dd><tt>Set&nbsp;the&nbsp;internal&nbsp;log&nbsp;level,&nbsp;valid&nbsp;levels&nbsp;are:<br>
+&nbsp;<br>
+LOG_LEVEL_ERROR<br>
+LOG_LEVEL_WARNING<br>
+LOG_LEVEL_INFO<br>
+LOG_LEVEL_ALL<br>
+LOG_LEVEL_DEFAULT<br>
+&nbsp;<br>
+Where&nbsp;the&nbsp;default&nbsp;is&nbsp;LOG_LEVEL_ALL<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;level&nbsp;(int)&nbsp;:&nbsp;The&nbsp;desired&nbsp;log&nbsp;level&nbsp;to&nbsp;set<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;None</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
@@ -287,6 +326,12 @@ that&nbsp;don't&nbsp;take&nbsp;a&nbsp;timeout&nbsp;override<br>
 <strong>COMMAND_NOT_FOUND</strong> = 1<br>
 <strong>COMMAND_SUCCESS</strong> = 0<br>
 <strong>INVALID_SID</strong> = -1<br>
+<strong>LOG_LEVEL_ALL</strong> = 3<br>
+<strong>LOG_LEVEL_DEFAULT</strong> = 3<br>
+<strong>LOG_LEVEL_ERROR</strong> = 1<br>
+<strong>LOG_LEVEL_INFO</strong> = 3<br>
+<strong>LOG_LEVEL_NONE</strong> = 0<br>
+<strong>LOG_LEVEL_WARNING</strong> = 2<br>
 <strong>MULTICAST_ALL</strong> = '__multicast_all__'<br>
 <strong>NO_WAIT</strong> = 0<br>
 <strong>ONE_MSEC</strong> = 1<br>

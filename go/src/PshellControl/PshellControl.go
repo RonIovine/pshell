@@ -82,6 +82,18 @@ const MULTICAST_ALL = "__multicast_all__"
 // This is returned on a failure of the ConnectServer function
 const INVALID_SID = -1
 
+// constants to let the host program set the internal debug log level,
+// if the user of this API does not want to see any internal message
+// printed out, set the debug log level to LOG_LEVEL_NONE (0)
+const (
+  LOG_LEVEL_NONE = 0
+  LOG_LEVEL_ERROR = 1
+  LOG_LEVEL_WARNING = 2
+  LOG_LEVEL_INFO = 3
+  LOG_LEVEL_ALL = LOG_LEVEL_INFO
+  LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+)
+
 /////////////////////////////////////////////////////////////////////////////////
 //
 // global "private" data
@@ -98,6 +110,10 @@ const _RCV_BUFFER_SIZE = 1024*64  // 64k buffer size
 
 const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
 const _PSHELL_CONFIG_FILE = "pshell-control.conf"
+
+type logFunction func(string)
+var _logLevel = LOG_LEVEL_DEFAULT
+var _logFunction logFunction
 
 type pshellControl struct {
   socket net.Conn
@@ -373,6 +389,43 @@ func GetResponseString(retCode int) string {
   return (getResponseString(retCode))
 }
 
+//
+//  Set the internal log level, valid levels are:
+//
+//  LOG_LEVEL_ERROR
+//  LOG_LEVEL_WARNING
+//  LOG_LEVEL_INFO
+//  LOG_LEVEL_ALL
+//  LOG_LEVEL_DEFAULT
+//
+//  Where the default is LOG_LEVEL_ALL
+//
+//    Args:
+//        level (int) : The desired log level to set
+//
+//    Returns:
+//        None
+//
+func SetLogLevel(level int) {
+  setLogLevel(level)
+}
+
+//
+//  Provide a user callback function to send the logs to, this allows an
+//  application to get all the logs issued by this module to put in it's
+//  own logfile.  If a log function is not set, all internal logs are just
+//  sent to the 'print' function.
+//
+//    Args:
+//        function (ptr) : Log callback function
+//
+//    Returns:
+//        None
+//
+func SetLogFunction(function logFunction) {
+  setLogFunction(function)
+}
+
 /////////////////////////////////
 //
 // Private functions
@@ -560,6 +613,52 @@ func sendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...in
            getPayload(control.recvMsg, control.recvSize)
   } else {
     return INVALID_SID, ""
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func setLogLevel(level_ int) {
+  _logLevel = level_
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func setLogFunction(function_ logFunction) {
+  _logFunction = function_
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printError(format_ string, message_ ...interface{}) {
+  if _logLevel >= LOG_LEVEL_ERROR {
+    printLog("PSHELL_ERROR: "+fmt.Sprintf(format_, message_...)+"\n")
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printWarning(format_ string, message_ ...interface{}) {
+  if _logLevel >= LOG_LEVEL_WARNING {
+    printLog("PSHELL_WARNING: "+fmt.Sprintf(format_, message_...)+"\n")
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printInfo(format_ string, message_ ...interface{}) {
+  if _logLevel >= LOG_LEVEL_INFO {
+    printLog("PSHELL_INFO: "+fmt.Sprintf(format_, message_...)+"\n")
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func printLog(message_ string) {
+  if _logFunction != nil {
+    _logFunction(message_)
+  } else {
+    fmt.Printf(message_)
   }
 }
 

@@ -56,6 +56,8 @@ sendCommand2()         -- send command to server using timeout override, no resu
 sendCommand3()         -- send command to server using default timeout, results extracted
 sendCommand4()         -- send command to server using timeout override, results extracted
 getResponseString()    -- return the human readable form of one of the command response return codes
+setLogLevel()          -- set the internal log level for this module
+setLogFunction()       -- register a user function to receive all logs
 
 Integer constants:
 
@@ -92,6 +94,18 @@ UNIX
 Specifies if the addMulticast should add the given sid to all commands
 
 MULTICAST_ALL
+
+Constants to let the host program set the internal debug log level,
+if the user of this API does not want to see any internal message
+printed out, set the debug log level to LOG_LEVEL_NONE, the default
+log level is LOG_LEVEL_ALL
+
+LOG_LEVEL_NONE
+LOG_LEVEL_ERROR
+LOG_LEVEL_WARNING
+LOG_LEVEL_INFO
+LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT
 
 A complete example of the usage of the API can be found in the included
 demo programs pshellControlDemo.py and pshellAggregatorDemo.py
@@ -143,6 +157,16 @@ MULTICAST_ALL = "__multicast_all__"
 
 # used if we cannot connect to a local UNIX socket
 INVALID_SID = -1
+
+# constants to let the host program set the internal debug log level,
+# if the user of this API does not want to see any internal message
+# printed out, set the debug log level to LOG_LEVEL_NONE (0)
+LOG_LEVEL_NONE = 0      # No debug logs
+LOG_LEVEL_ERROR = 1     # PSHELL_ERROR
+LOG_LEVEL_WARNING = 2   # PSHELL_ERROR, PSHELL_WARNING
+LOG_LEVEL_INFO = 3      # PSHELL_ERROR, PSHELL_WARNING, PSHELL_INFO
+LOG_LEVEL_ALL = LOG_LEVEL_INFO
+LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
 
 #################################################################################
 #
@@ -418,6 +442,45 @@ def getResponseString(retCode):
   return (_getResponseString(retCode))
 
 #################################################################################
+#################################################################################
+def setLogLevel(level):
+  """
+  Set the internal log level, valid levels are:
+
+  LOG_LEVEL_ERROR
+  LOG_LEVEL_WARNING
+  LOG_LEVEL_INFO
+  LOG_LEVEL_ALL
+  LOG_LEVEL_DEFAULT
+
+  Where the default is LOG_LEVEL_ALL
+
+    Args:
+        level (int) : The desired log level to set
+
+    Returns:
+        None
+  """
+  _setLogLevel(level)
+
+#################################################################################
+#################################################################################
+def setLogFunction(function):
+  """
+  Provide a user callback function to send the logs to, this allows an
+  application to get all the logs issued by this module to put in it's
+  own logfile.  If a log function is not set, all internal logs are just
+  sent to the 'print' function.
+
+    Args:
+        function (ptr) : Log callback function
+
+    Returns:
+        None
+  """
+  _setLogFunction(function)
+
+#################################################################################
 #
 # "private" functions and data
 #
@@ -627,7 +690,7 @@ def _sendMulticast(command_):
           control["dataNeeded"] = False
           _sendCommand(control, _gMsgTypes["controlCommand"], command_, NO_WAIT)
   if not keywordFound:
-    print("PSHELL_ERROR: Multicast command: '%s', not found" % command)
+    _printError("Multicast command: '%s', not found" % command)
 
 #################################################################################
 #################################################################################
@@ -666,7 +729,7 @@ def _sendCommand3(sid_, command_):
     # only try to extract data if not talking to a broadcast address
     if (control["isBroadcastAddress"] == False):
       if (not control["pshellMsg"]["dataNeeded"]):
-        print("PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted")
+        _printWarning("Trying to extract data with a 0 wait timeout, no data will be extracted")
       elif (retCode == COMMAND_SUCCESS):
         results = control["pshellMsg"]["payload"]
   return (results, retCode)
@@ -688,7 +751,7 @@ def _sendCommand4(sid_, timeoutOverride_, command_):
     # only try to extract data if not talking to a broadcast address
     if (control["isBroadcastAddress"] == False):
       if (not control["pshellMsg"]["dataNeeded"]):
-        print("PSHELL_WARNING: Trying to extract data with a 0 wait timeout, no data will be extracted")
+        _printWarning("Trying to extract data with a 0 wait timeout, no data will be extracted")
       elif (retCode == COMMAND_SUCCESS):
         results = control["pshellMsg"]["payload"]
   return (results, retCode)
@@ -735,7 +798,7 @@ def _sendCommand(control_, commandType_, command_, timeout_):
             # our current expected response, when we detect that condition, we read the
             # socket until we either find the correct response or timeout, we toss any previous
             # unmatched responses
-            print("PSHELL_WARNING: Received seqNum: %d, does not match sent seqNum: %d" % (control_["pshellMsg"]["seqNum"], seqNum))
+            _printWarning("Received seqNum: %d, does not match sent seqNum: %d" % (control_["pshellMsg"]["seqNum"], seqNum))
           else:
             retCode = control_["pshellMsg"]["msgType"]
             break
@@ -751,9 +814,9 @@ def _sendCommand(control_, commandType_, command_, timeout_):
   if ((_gSupressInvalidArgCountMessage == True) and (retCode == COMMAND_INVALID_ARG_COUNT)):
     retCode = COMMAND_SUCCESS
   elif ((len(control_["pshellMsg"]["payload"]) > 0) and (retCode > COMMAND_SUCCESS) and (retCode < SOCKET_SEND_FAILURE)):
-    print("PSHELL_ERROR: Remote pshell command: '%s', server: %s, %s" % (command_, control_["remoteServer"], _getResponseString(retCode)))
+    _printError("Remote pshell command: '%s', server: %s, %s" % (command_, control_["remoteServer"], _getResponseString(retCode)))
   elif ((retCode != COMMAND_SUCCESS) and (retCode != _gMsgTypes["commandComplete"])):
-    print("PSHELL_ERROR: Remote pshell command: '%s', server: %s, %s" % (command_, control_["remoteServer"], _getResponseString(retCode)))
+    _printError("Remote pshell command: '%s', server: %s, %s" % (command_, control_["remoteServer"], _getResponseString(retCode)))
   else:
     retCode = COMMAND_SUCCESS
   return (retCode)
@@ -783,7 +846,7 @@ def _getControl(sid_):
   if ((sid_ >= 0) and (sid_ < len(_gPshellControl))):
     return (_gPshellControl[sid_])
   else:
-    print("PSHELL_ERROR: No control defined for sid: %d" % sid_)
+    _printError("No control defined for sid: %d" % sid_)
     return (None)
 
 #################################################################################
@@ -834,6 +897,44 @@ def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
   return (remoteServer_, port_, defaultTimeout_)
 
 #################################################################################
+#################################################################################
+def _setLogLevel(level_):
+  global _logLevel
+  _logLevel = level_
+
+#################################################################################
+#################################################################################
+def _setLogFunction(function_):
+  global _logFunction
+  _logFunction = function_
+
+#################################################################################
+#################################################################################
+def _printError(message_):
+  if _logLevel >= LOG_LEVEL_ERROR:
+    _printLog("PSHELL_ERROR: {}".format(message_))
+
+#################################################################################
+#################################################################################
+def _printWarning(message_):
+  if _logLevel >= LOG_LEVEL_WARNING:
+    _printLog("PSHELL_WARNING: {}".format(message_))
+
+#################################################################################
+#################################################################################
+def _printInfo(message_):
+  if _logLevel >= LOG_LEVEL_INFO:
+    _printLog("PSHELL_INFO: {}".format(message_))
+
+#################################################################################
+#################################################################################
+def _printLog(message_):
+  if _logFunction is not None:
+    _logFunction(message_)
+  else:
+    print(message_)
+
+#################################################################################
 #
 # global "private" data
 #
@@ -882,3 +983,7 @@ _gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
 # a remote server to pass the command usage back to the local server that
 # is run by the client
 _gSupressInvalidArgCountMessage = False
+
+# log level and log print function
+_logLevel = LOG_LEVEL_DEFAULT
+_logFunction = None

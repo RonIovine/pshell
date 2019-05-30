@@ -51,6 +51,8 @@ addCommand()       -- register a pshell command with the server
 startServer()      -- start the pshell server
 cleanupResources() -- release all resources claimed by the server
 runCommand()       -- run a registered command from the parent (i.e. registering) program
+setLogLevel()      -- set the internal log level for this module
+setLogFunction()   -- register a user function to receive all logs
 
 The following commands can only be called from within the context of
 a pshell callback function
@@ -95,6 +97,18 @@ it also supported, e.g. x.y.z.255
 ANYHOST
 ANYBCAST
 LOCALHOST
+
+Constants to let the host program set the internal debug log level,
+if the user of this API does not want to see any internal message
+printed out, set the debug log level to LOG_LEVEL_NONE, the default
+log level is LOG_LEVEL_ALL
+
+LOG_LEVEL_NONE
+LOG_LEVEL_ERROR
+LOG_LEVEL_WARNING
+LOG_LEVEL_INFO
+LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT
 
 A complete example of the usage of the API can be found in the included
 demo program pshellServerDemo.py.
@@ -143,6 +157,16 @@ NON_BLOCKING = 1
 ANYHOST = "anyhost"
 ANYBCAST = "anybcast"
 LOCALHOST = "localhost"
+
+# constants to let the host program set the internal debug log level,
+# if the user of this API does not want to see any internal message
+# printed out, set the debug log level to LOG_LEVEL_NONE (0)
+LOG_LEVEL_NONE = 0
+LOG_LEVEL_ERROR = 1
+LOG_LEVEL_WARNING = 2
+LOG_LEVEL_INFO = 3
+LOG_LEVEL_ALL = LOG_LEVEL_INFO
+LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
 
 #################################################################################
 #
@@ -233,6 +257,45 @@ def runCommand(command):
   _runCommand(command)
 
 #################################################################################
+#################################################################################
+def setLogLevel(level):
+  """
+  Set the internal log level, valid levels are:
+
+  LOG_LEVEL_ERROR
+  LOG_LEVEL_WARNING
+  LOG_LEVEL_INFO
+  LOG_LEVEL_ALL
+  LOG_LEVEL_DEFAULT
+
+  Where the default is LOG_LEVEL_ALL
+
+    Args:
+        level (int) : The desired log level to set
+
+    Returns:
+        None
+  """
+  _setLogLevel(level)
+
+#################################################################################
+#################################################################################
+def setLogFunction(function):
+  """
+  Provide a user callback function to send the logs to, this allows an
+  application to get all the logs issued by this module to put in it's
+  own logfile.  If a log function is not set, all internal logs are just
+  sent to the 'print' function.
+
+    Args:
+        function (ptr) : Log callback function
+
+    Returns:
+        None
+  """
+  _setLogFunction(function)
+
+#################################################################################
 #
 # The following public functions should only be called from within a
 # registered callback function
@@ -272,7 +335,7 @@ def flush():
 #################################################################################
 def wheel(string = None):
   """
-  Spinning ascii wheel keep alive, user string string is optional
+  Spinning ascii wheel keep alive, user string is optional
 
     Args:
         string (str) : String to display before the spinning wheel
@@ -414,37 +477,42 @@ def _addCommand(function_,
 
   # see if we have a NULL command name
   if ((command_ == None) or (len(command_) == 0)):
-    print("PSHELL_ERROR: NULL command name, command not added")
+    _printError("NULL command name, command not added")
     return
 
   # see if we have a NULL description
   if ((description_ == None) or (len(description_) == 0)):
-    print("PSHELL_ERROR: NULL description, command: '%s' not added" % command_)
+    _printError("NULL description, command: '%s' not added" % command_)
     return
 
   # see if we have a NULL function
   if (function_ == None):
-    print("PSHELL_ERROR: NULL function, command: '%s' not added" % command_)
+    _printError("NULL function, command: '%s' not added" % command_)
     return
 
   # if they provided no usage for a function with arguments
   if (((maxArgs_ > 0) or (minArgs_ > 0)) and ((usage_ == None) or (len(usage_) == 0))):
-    print("PSHELL_ERROR: NULL usage for command that takes arguments, command: '%s' not added" % command_)
+    _printError("NULL usage for command that takes arguments, command: '%s' not added" % command_)
     return
 
   # see if their minArgs is greater than their maxArgs, we ignore if maxArgs is 0
   # because that is the default value and we will set maxArgs to minArgs if that
   # case later on in this function
   if ((minArgs_ > maxArgs_) and (maxArgs_ > 0)):
-    print("PSHELL_ERROR: minArgs: %d is greater than maxArgs: %d, command: '%s' not added" % (minArgs_, maxArgs_, command_))
+    _printError("minArgs: %d is greater than maxArgs: %d, command: '%s' not added" % (minArgs_, maxArgs_, command_))
     return
 
   # see if it is a duplicate command
   for command in _gCommandList:
     if (command["name"] == command_):
       # command name already exists, don't add it again
-      print("PSHELL_ERROR: Command: %s already exists, not adding command" % command_)
+      _printError("Command: %s already exists, not adding command" % command_)
       return
+
+  if len(command_.split()) > 1:
+    # we do not allow any commands with whitespace, single keyword commands only
+    _printError("Whitespace found, command: '%s' not added" % command_)
+    return
 
   # everything ok, good to add command
 
@@ -557,7 +625,7 @@ def _createSocket():
       _gSocketFd.bind(_gUnixSourceAddress)
     return (True)
   except Exception as error:
-    print("PSHELL_ERROR: {}".format(error))
+    _printError("{}".format(error))
     return (False)
 
 #################################################################################
@@ -580,23 +648,22 @@ def _runUDPServer():
   global _gHostnameOrIpAddr
   global _gPort
   if (_createSocket()):
-    print("PSHELL_INFO: UDP Server: %s Started On Host: %s, Port: %d" %
+    _printInfo("UDP Server: %s Started On Host: %s, Port: %d" %
           (_gServerName, _gHostnameOrIpAddr, _gPort))
     _runDGRAMServer()
   else:
-    print("PSHELL_ERROR: Cannot create socket for UDP Server: %s On Host: %s, Port: %d" %
+    _printError("Cannot create socket for UDP Server: %s On Host: %s, Port: %d" %
           (_gServerName, _gHostnameOrIpAddr, _gPort))
-
 
 #################################################################################
 #################################################################################
 def _runUNIXServer():
   global _gServerName
   if (_createSocket()):
-    print("PSHELL_INFO: UNIX Server: %s Started" % _gServerName)
+    _printInfo("UNIX Server: %s Started" % _gServerName)
     _runDGRAMServer()
   else:
-    print("PSHELL_ERROR: Cannot create socket for UNIX Server: %s" % _gServerName)
+    _printError("Cannot create socket for UNIX Server: %s" % _gServerName)
 
 #################################################################################
 #################################################################################
@@ -616,7 +683,7 @@ def _acceptConnection():
     _gTcpConnectSockName = clientAddr[0]
     return (True)
   except Exception as error:
-    print("PSHELL_ERROR: {}".format(error))
+    _printError("{}".format(error))
     return (False)
 
 #################################################################################
@@ -641,7 +708,7 @@ def _runTCPServer():
     socketCreated = _createSocket()
     if socketCreated:
       if initialStartup:
-        print("PSHELL_INFO: TCP Server: %s Started On Host: %s, Port: %d" %
+        _printInfo("TCP Server: %s Started On Host: %s, Port: %d" %
               (_gServerName, _gHostnameOrIpAddr, _gPort))
         _addNativeCommands()
         initialStartup = False
@@ -665,7 +732,7 @@ def _runTCPServer():
         _gConnectFd.close()
         _gSocketFd.close()
   if not socketCreated or not connectionAccepted:
-    print("PSHELL_ERROR: Cannot create socket for TCP Server: %s On Host: %s, Port: %d" %
+    _printError("Cannot create socket for TCP Server: %s On Host: %s, Port: %d" %
           (_gServerName, _gHostnameOrIpAddr, _gPort))
 
 #################################################################################
@@ -1110,7 +1177,7 @@ def _reply():
     try:
       _gSocketFd.sendto(struct.pack(_gPshellMsgHeaderFormat+str(len(_gPshellMsg["payload"]))+"s", *_gPshellMsg.values()), _gFromAddr)
     except Exception as error:
-      print("PSHELL_ERROR: {}".format(error))
+      _printError("{}".format(error))
 
 #################################################################################
 #################################################################################
@@ -1265,6 +1332,44 @@ def _flush():
     _gPshellMsg["payload"] = ""
 
 #################################################################################
+#################################################################################
+def _setLogLevel(level_):
+  global _logLevel
+  _logLevel = level_
+
+#################################################################################
+#################################################################################
+def _setLogFunction(function_):
+  global _logFunction
+  _logFunction = function_
+
+#################################################################################
+#################################################################################
+def _printError(message_):
+  if _logLevel >= LOG_LEVEL_ERROR:
+    _printLog("PSHELL_ERROR: {}".format(message_))
+
+#################################################################################
+#################################################################################
+def _printWarning(message_):
+  if _logLevel >= LOG_LEVEL_WARNING:
+    _printLog("PSHELL_WARNING: {}".format(message_))
+
+#################################################################################
+#################################################################################
+def _printInfo(message_):
+  if _logLevel >= LOG_LEVEL_INFO:
+    _printLog("PSHELL_INFO: {}".format(message_))
+
+#################################################################################
+#################################################################################
+def _printLog(message_):
+  if _logFunction is not None:
+    _logFunction(message_)
+  else:
+    print(message_)
+
+#################################################################################
 #
 # global "private" data
 #
@@ -1361,6 +1466,10 @@ _gTcpPrompt = None
 _gTcpTitle = None
 # flag to indicate the special pshell.py client
 _gPshellClient = False
+
+# log level and log print function
+_logLevel = LOG_LEVEL_DEFAULT
+_logFunction = None
 
 ##############################
 #
