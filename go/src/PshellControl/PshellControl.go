@@ -539,8 +539,10 @@ func addMulticast(sid_ int, keyword_ string) {
 func sendMulticast(format_ string, command_ ...interface{}) {
   command := fmt.Sprintf(format_, command_...)
   keyword := strings.Split(strings.TrimSpace(command), " ")[0]
+  keywordFound := false
   for _, multicast := range(_gMulticastList) {
     if ((multicast.keyword == MULTICAST_ALL) || (keyword == multicast.keyword)) {
+      keywordFound = true
       for _, sid := range(multicast.sidList) {
         if ((sid >= 0) && (sid < len(_gControlList))) {
           control := _gControlList[sid]
@@ -548,6 +550,9 @@ func sendMulticast(format_ string, command_ ...interface{}) {
         }
       }
     }
+  }
+  if keywordFound == false {
+    printError("Multicast command: '%s', not found", command)
   }
 }
 
@@ -577,6 +582,7 @@ func sendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
     control := _gControlList[sid_]
     return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _NO_DATA_NEEDED)
   } else {
+    printError("No control defined for sid: %d", sid_)
     return INVALID_SID
   }
 }
@@ -588,6 +594,7 @@ func sendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...in
     control := _gControlList[sid_]
     return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _NO_DATA_NEEDED)
   } else {
+    printError("No control defined for sid: %d", sid_)
     return INVALID_SID
   }
 }
@@ -600,6 +607,7 @@ func sendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, strin
     return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
+    printError("No control defined for sid: %d", sid_)
     return INVALID_SID, ""
   }
 }
@@ -612,6 +620,7 @@ func sendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...in
     return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
+    printError("No control defined for sid: %d", sid_)
     return INVALID_SID, ""
   }
 }
@@ -683,13 +692,23 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
         if (err == nil) {
           retCode = int(getMsgType(control_.recvMsg))
           recvSeqNum := getSeqNum(control_.recvMsg)
-          if (sendSeqNum == recvSeqNum) {
+          if (sendSeqNum > recvSeqNum) {
+            // make sure we have the correct response, this condition can happen if we had
+            // a very short timeout for the previous call and missed the response, in which
+            // case the response to the previous call will be queued in the socket ahead of
+            // our current expected response, when we detect that condition, we read the
+            // socket until we either find the correct response or timeout, we toss any previous
+            // unmatched responses
+            printWarning("Received seqNum: %d, does not match sent seqNum: %d", recvSeqNum, sendSeqNum)
+          } else {
             break
           }
         } else {
           retCode = SOCKET_TIMEOUT
         }
       }
+    } else if (dataNeeded_ == _DATA_NEEDED) {
+      printWarning("Trying to extract data with a 0 wait timeout, no data will be extracted")
     }
     if (retCode == _COMMAND_COMPLETE) {
       retCode = COMMAND_SUCCESS

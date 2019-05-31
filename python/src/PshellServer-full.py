@@ -54,7 +54,7 @@ runCommand()       -- run a registered command from the parent (i.e. registering
 setLogLevel()      -- set the internal log level for this module
 setLogFunction()   -- register a user function to receive all logs
 
-The following commands can only be called from within the context of
+The following commands should only be called from within the context of
 a pshell callback function
 
 printf()         -- display a message from a pshell callback function to the client
@@ -65,12 +65,12 @@ showUsage()      -- show the usage the command is registered with
 isHelp()         -- checks if the user has requested help on this command
 isSubString()    -- checks for string1 substring of string2 at position 0
 getOption()      -- parses arg of format -<key><value> or <key>=<value>
-isFloat()        -- returns True is value is floating point
-isDec()          -- returns True is value is dec
-isHex()          -- returns True is value is hex, with or without the predeeding 0x
-isAlpha()        -- returns True is value is alphabetic
-isNumeric()      -- returns True is isDec or isHex
-isAlphaNumeric() -- returns True is value is alpha-numeric
+isFloat()        -- returns True if value is floating point
+isDec()          -- returns True if value is dec
+isHex()          -- returns True if value is hex, with or without the preceeding 0x
+isAlpha()        -- returns True if value is alphabetic
+isNumeric()      -- returns True if isDec or isHex
+isAlphaNumeric() -- returns True if value is alpha-numeric
 getBool()        -- returns True if value is 'true', 'yes', 'on'
 
 Integer constants:
@@ -290,7 +290,7 @@ def setLogLevel(level):
 def setLogFunction(function):
   """
   Provide a user callback function to send the logs to, this allows an
-  application to get all the logs issued by this module to put in it's
+  application to extract all the logs issued by this module to put in it's
   own logfile.  If a log function is not set, all internal logs are just
   sent to the 'print' function.
 
@@ -445,16 +445,12 @@ def isFloat(value):
   This function will parse a value to see if it is in valid floating point format
 
     Args:
-        arg (str) : The argument string to parse
+        value (str) : The value string to parse
 
     Returns:
         bool : True if valid floating point format
   """
-  split = value.split(".")
-  if len(split) != 2:
-    return False
-  else:
-    return split[1][0] != "-" and isDec(split[0]) and isDec(split[1])
+  return _isFloat(value)
 
 #################################################################################
 #################################################################################
@@ -463,16 +459,12 @@ def isDec(value):
   This function will parse a value to see if it is in valid decimal format
 
     Args:
-        arg (str) : The argument string to parse
+        value (str) : The value string to parse
 
     Returns:
         bool : True if valid decimal format
   """
-  try:
-    int(value, 10)
-    return True
-  except ValueError:
-    return False
+  return _isDec(value)
 
 #################################################################################
 #################################################################################
@@ -482,16 +474,12 @@ def isHex(value):
   with or without the preceeding 0x
 
     Args:
-        arg (str) : The argument string to parse
+        value (str) : The value string to parse
 
     Returns:
         bool : True if valid hexidecimal format
   """
-  try:
-    int(value, 16)
-    return True
-  except ValueError:
-    return False
+  return _isHex(value)
 
 #################################################################################
 #################################################################################
@@ -500,12 +488,12 @@ def isAlpha(value):
   This function will parse a value to see if it is in valid alphatebetic format
 
     Args:
-        arg (str) : The argument string to parse
+        value (str) : The value string to parse
 
     Returns:
         bool : True if valid alphabetic format
   """
-  return value.isalpha()
+  return _isAlpha(value)
 
 #################################################################################
 #################################################################################
@@ -515,12 +503,12 @@ def isNumeric(value):
   hex or decimal
 
     Args:
-        arg (str) : The argument string to parse
+        value (str) : The value string to parse
 
     Returns:
         bool : True if valid numeric format
   """
-  return isDec(value) or isHex(value)
+  return _isNumeric(value)
 
 #################################################################################
 #################################################################################
@@ -529,12 +517,12 @@ def isAlphaNumeric(value):
   This function will parse a value to see if it is in valid alphanumeric format
 
     Args:
-        arg (str) : The argument string to parse
+        value (str) : The value string to parse
 
     Returns:
         bool : True if valid alphanumeric format
   """
-  return value.isalnum()
+  return _isAlphaNumeric(value)
 
 #################################################################################
 #################################################################################
@@ -543,14 +531,12 @@ def getBool(value):
   This function will parse a value to see if it 'true', 'yes', or 'on'
 
     Args:
-        arg (str) : The argument string to parse
+        value (str) : The value string to parse
 
     Returns:
         bool : True if 'true', 'yes', 'on'
   """
-  return ((value.lower() == "true") or
-          (value.lower() == "yes") or
-          (value.lower() == "on"))
+  return _getBool(value)
 
 #################################################################################
 #
@@ -580,6 +566,55 @@ def _getOption(arg):
       return (True, value[0], '='.join(value[1:]))
     else:
       return (False, "", "")
+
+#################################################################################
+#################################################################################
+def _isFloat(value_):
+  split = value_.split(".")
+  if len(split) != 2:
+    return False
+  else:
+    return split[1][0] != "-" and isDec(split[0]) and isDec(split[1])
+
+#################################################################################
+#################################################################################
+def _isDec(value_):
+  try:
+    int(value_, 10)
+    return True
+  except ValueError:
+    return False
+
+#################################################################################
+#################################################################################
+def _isHex(value_):
+  try:
+    int(value_, 16)
+    return True
+  except ValueError:
+    return False
+
+#################################################################################
+#################################################################################
+def _isAlpha(value_):
+  return value_.isalpha()
+
+#################################################################################
+#################################################################################
+def _isNumeric(value_):
+  return _isDec(value_) or _isHex(value_)
+
+#################################################################################
+#################################################################################
+def _isAlphaNumeric(value_):
+  return value_.isalnum()
+
+#################################################################################
+#################################################################################
+def _getBool(value_):
+  return ((value_.lower() == "true") or
+          (value_.lower() == "yes") or
+          (value_.lower() == "on"))
 
 #################################################################################
 #################################################################################
