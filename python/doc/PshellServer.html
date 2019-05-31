@@ -38,14 +38,21 @@ Functions:<br>
 The&nbsp;following&nbsp;commands&nbsp;can&nbsp;only&nbsp;be&nbsp;called&nbsp;from&nbsp;within&nbsp;the&nbsp;context&nbsp;of<br>
 a&nbsp;pshell&nbsp;callback&nbsp;function<br>
 &nbsp;<br>
-<a href="#-printf">printf</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;display&nbsp;a&nbsp;message&nbsp;from&nbsp;a&nbsp;pshell&nbsp;callback&nbsp;function&nbsp;to&nbsp;the&nbsp;client<br>
-<a href="#-flush">flush</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;flush&nbsp;the&nbsp;transfer&nbsp;buffer&nbsp;to&nbsp;the&nbsp;client&nbsp;(UDP/UNIX&nbsp;servers&nbsp;only)<br>
-<a href="#-wheel">wheel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;spinning&nbsp;ascii&nbsp;wheel&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive<br>
-<a href="#-march">march</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;marching&nbsp;ascii&nbsp;character&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive<br>
-<a href="#-showUsage">showUsage</a>()&nbsp;&nbsp;&nbsp;--&nbsp;show&nbsp;the&nbsp;usage&nbsp;the&nbsp;command&nbsp;is&nbsp;registered&nbsp;with<br>
-<a href="#-isHelp">isHelp</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;requested&nbsp;help&nbsp;on&nbsp;this&nbsp;command<br>
-<a href="#-isSubString">isSubString</a>()&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0<br>
-<a href="#-getOption">getOption</a>()&nbsp;&nbsp;&nbsp;--&nbsp;parses&nbsp;arg&nbsp;of&nbsp;format&nbsp;-&lt;key&gt;&lt;value&gt;&nbsp;or&nbsp;&lt;key&gt;=&lt;value&gt;<br>
+<a href="#-printf">printf</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;display&nbsp;a&nbsp;message&nbsp;from&nbsp;a&nbsp;pshell&nbsp;callback&nbsp;function&nbsp;to&nbsp;the&nbsp;client<br>
+<a href="#-flush">flush</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;flush&nbsp;the&nbsp;transfer&nbsp;buffer&nbsp;to&nbsp;the&nbsp;client&nbsp;(UDP/UNIX&nbsp;servers&nbsp;only)<br>
+<a href="#-wheel">wheel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;spinning&nbsp;ascii&nbsp;wheel&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive<br>
+<a href="#-march">march</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;marching&nbsp;ascii&nbsp;character&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive<br>
+<a href="#-showUsage">showUsage</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;show&nbsp;the&nbsp;usage&nbsp;the&nbsp;command&nbsp;is&nbsp;registered&nbsp;with<br>
+<a href="#-isHelp">isHelp</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;requested&nbsp;help&nbsp;on&nbsp;this&nbsp;command<br>
+<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0<br>
+<a href="#-getOption">getOption</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;parses&nbsp;arg&nbsp;of&nbsp;format&nbsp;-&lt;key&gt;&lt;value&gt;&nbsp;or&nbsp;&lt;key&gt;=&lt;value&gt;<br>
+<a href="#-isFloat">isFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;value&nbsp;is&nbsp;floating&nbsp;point<br>
+<a href="#-isDec">isDec</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;value&nbsp;is&nbsp;dec<br>
+<a href="#-isHex">isHex</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;value&nbsp;is&nbsp;hex,&nbsp;with&nbsp;or&nbsp;without&nbsp;the&nbsp;predeeding&nbsp;0x<br>
+<a href="#-isAlpha">isAlpha</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;value&nbsp;is&nbsp;alphabetic<br>
+<a href="#-isNumeric">isNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;isDec&nbsp;or&nbsp;isHex<br>
+<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;value&nbsp;is&nbsp;alpha-numeric<br>
+<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;value&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
 &nbsp;<br>
 Integer&nbsp;constants:<br>
 &nbsp;<br>
@@ -150,6 +157,13 @@ results&nbsp;in&nbsp;a&nbsp;program&nbsp;termination.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-getBool"><strong>getBool</strong></a>(value)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;value&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;'true',&nbsp;'yes',&nbsp;or&nbsp;'on'<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg&nbsp;(str)&nbsp;:&nbsp;The&nbsp;argument&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;'true',&nbsp;'yes',&nbsp;'on'</tt></dd></dl>
  <dl><dt><a name="-getOption"><strong>getOption</strong></a>(arg)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;an&nbsp;argument&nbsp;string&nbsp;of&nbsp;the&nbsp;formats&nbsp;-&lt;key&gt;&lt;value&gt;&nbsp;where<br>
 key&nbsp;is&nbsp;one&nbsp;letter&nbsp;only,&nbsp;i.e.&nbsp;'-t',&nbsp;or&nbsp;&lt;key&gt;=&lt;value&gt;&nbsp;where&nbsp;key&nbsp;can&nbsp;be&nbsp;any&nbsp;length<br>
 word,&nbsp;i.e.&nbsp;'timeout',&nbsp;and&nbsp;return&nbsp;a&nbsp;3-tuple&nbsp;indicating&nbsp;if&nbsp;the&nbsp;arg&nbsp;was&nbsp;parsed<br>
@@ -163,6 +177,34 @@ of&nbsp;the&nbsp;two&nbsp;valid&nbsp;formats&nbsp;are&nbsp;-t10,&nbsp;timeout=10
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;string&nbsp;parses&nbsp;correctly,&nbsp;i.e.&nbsp;-&lt;key&gt;&lt;value&gt;&nbsp;or&nbsp;&lt;key&gt;=&lt;value&gt;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;&nbsp;:&nbsp;The&nbsp;key&nbsp;value&nbsp;found<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;&nbsp;:&nbsp;The&nbsp;value&nbsp;associated&nbsp;with&nbsp;the&nbsp;key</tt></dd></dl>
+ <dl><dt><a name="-isAlpha"><strong>isAlpha</strong></a>(value)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;value&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;alphatebetic&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg&nbsp;(str)&nbsp;:&nbsp;The&nbsp;argument&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;alphabetic&nbsp;format</tt></dd></dl>
+ <dl><dt><a name="-isAlphaNumeric"><strong>isAlphaNumeric</strong></a>(value)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;value&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;alphanumeric&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg&nbsp;(str)&nbsp;:&nbsp;The&nbsp;argument&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;alphanumeric&nbsp;format</tt></dd></dl>
+ <dl><dt><a name="-isDec"><strong>isDec</strong></a>(value)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;value&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;decimal&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg&nbsp;(str)&nbsp;:&nbsp;The&nbsp;argument&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;decimal&nbsp;format</tt></dd></dl>
+ <dl><dt><a name="-isFloat"><strong>isFloat</strong></a>(value)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;value&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;floating&nbsp;point&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg&nbsp;(str)&nbsp;:&nbsp;The&nbsp;argument&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;floating&nbsp;point&nbsp;format</tt></dd></dl>
  <dl><dt><a name="-isHelp"><strong>isHelp</strong></a>()</dt><dd><tt>Check&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;asked&nbsp;for&nbsp;help&nbsp;on&nbsp;this&nbsp;command.&nbsp;&nbsp;Command&nbsp;must&nbsp;be<br>
 registered&nbsp;with&nbsp;the&nbsp;showUsage&nbsp;=&nbsp;False&nbsp;option.<br>
 &nbsp;<br>
@@ -171,6 +213,22 @@ registered&nbsp;with&nbsp;the&nbsp;showUsage&nbsp;=&nbsp;False&nbsp;option.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;user&nbsp;is&nbsp;requesting&nbsp;command&nbsp;help,&nbsp;False&nbsp;otherwise</tt></dd></dl>
+ <dl><dt><a name="-isHex"><strong>isHex</strong></a>(value)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;value&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;hexidecimal&nbsp;format,<br>
+with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg&nbsp;(str)&nbsp;:&nbsp;The&nbsp;argument&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;hexidecimal&nbsp;format</tt></dd></dl>
+ <dl><dt><a name="-isNumeric"><strong>isNumeric</strong></a>(value)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;value&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;numerc&nbsp;format,<br>
+hex&nbsp;or&nbsp;decimal<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arg&nbsp;(str)&nbsp;:&nbsp;The&nbsp;argument&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;numeric&nbsp;format</tt></dd></dl>
  <dl><dt><a name="-isSubString"><strong>isSubString</strong></a>(string1, string2, minMatchLength<font color="#909090">=0</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;return&nbsp;True&nbsp;if&nbsp;string1&nbsp;is&nbsp;a&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at<br>
 position&nbsp;0.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;is&nbsp;0,&nbsp;then&nbsp;it&nbsp;will&nbsp;compare&nbsp;up&nbsp;to&nbsp;the<br>
 length&nbsp;of&nbsp;string1.&nbsp;&nbsp;If&nbsp;the&nbsp;minMatchLength&nbsp;&gt;&nbsp;0,&nbsp;it&nbsp;will&nbsp;require&nbsp;a&nbsp;minimum<br>

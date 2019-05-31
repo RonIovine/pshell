@@ -83,6 +83,23 @@ def enhancedUsage(argv):
 
 #################################################################################
 #################################################################################
+def formatChecking(argv):
+  PshellServer.printf("formatChecking command dispatched:")
+  if PshellServer.isDec(argv[0]):
+    PshellServer.printf("Decimal arg: '%s' entered" % argv[0])
+  elif PshellServer.isHex(argv[0]):
+    PshellServer.printf("Hex arg: '%s' entered" % argv[0])
+  elif PshellServer.isAlpha(argv[0]):
+    PshellServer.printf("Alphabetic arg: '%s' entered" % argv[0])
+  elif PshellServer.isAlphaNumeric(argv[0]):
+    PshellServer.printf("Alpha numeric arg: '%s' entered" % argv[0])
+  elif PshellServer.isFloat(argv[0]):
+    PshellServer.printf("Float arg: '%s' entered" % argv[0])
+  else:
+    PshellServer.printf("Unknown arg format: '%s'" % argv[0])
+
+#################################################################################
+#################################################################################
 def wildcardMatch(argv):
   if (PshellServer.isHelp()):
     PshellServer.printf()
@@ -246,6 +263,13 @@ if (__name__ == '__main__'):
                           minArgs     = 0,
                           maxArgs     = 20)
 
+  PshellServer.addCommand(function    = wildcardMatch,
+                          command     = "wildcardMatch",
+                          description = "command that does a wildcard matching",
+                          usage       = "<arg>",
+                          minArgs     = 1,
+                          showUsage   = False)
+
   PshellServer.addCommand(function    = enhancedUsage,
                           command     = "enhancedUsage",
                           description = "command with enhanced usage",
@@ -253,12 +277,11 @@ if (__name__ == '__main__'):
                           minArgs     = 1,
                           showUsage   = False)
 
-  PshellServer.addCommand(function    = wildcardMatch,
-                          command     = "wildcardMatch",
-                          description = "command that does a wildcard matching",
-                          usage       = "<arg>",
-                          minArgs     = 1,
-                          showUsage   = False)
+  PshellServer.addCommand(function    = formatChecking,
+                          command     = "formatChecking",
+                          description = "command with arg format checking",
+                          usage       = "<arg1>",
+                          minArgs     = 1)
 
   PshellServer.addCommand(function    = getOptions,
                           command     = "getOptions",

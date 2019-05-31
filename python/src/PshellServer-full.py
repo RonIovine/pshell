@@ -57,14 +57,21 @@ setLogFunction()   -- register a user function to receive all logs
 The following commands can only be called from within the context of
 a pshell callback function
 
-printf()      -- display a message from a pshell callback function to the client
-flush()       -- flush the transfer buffer to the client (UDP/UNIX servers only)
-wheel()       -- spinning ascii wheel to keep UDP/UNIX client alive
-march()       -- marching ascii character to keep UDP/UNIX client alive
-showUsage()   -- show the usage the command is registered with
-isHelp()      -- checks if the user has requested help on this command
-isSubString() -- checks for string1 substring of string2 at position 0
-getOption()   -- parses arg of format -<key><value> or <key>=<value>
+printf()         -- display a message from a pshell callback function to the client
+flush()          -- flush the transfer buffer to the client (UDP/UNIX servers only)
+wheel()          -- spinning ascii wheel to keep UDP/UNIX client alive
+march()          -- marching ascii character to keep UDP/UNIX client alive
+showUsage()      -- show the usage the command is registered with
+isHelp()         -- checks if the user has requested help on this command
+isSubString()    -- checks for string1 substring of string2 at position 0
+getOption()      -- parses arg of format -<key><value> or <key>=<value>
+isFloat()        -- returns True is value is floating point
+isDec()          -- returns True is value is dec
+isHex()          -- returns True is value is hex, with or without the predeeding 0x
+isAlpha()        -- returns True is value is alphabetic
+isNumeric()      -- returns True is isDec or isHex
+isAlphaNumeric() -- returns True is value is alpha-numeric
+getBool()        -- returns True if value is 'true', 'yes', 'on'
 
 Integer constants:
 
@@ -430,6 +437,120 @@ def getOption(arg):
         str  : The value associated with the key
   """
   return (_getOption(arg))
+
+#################################################################################
+#################################################################################
+def isFloat(value):
+  """
+  This function will parse a value to see if it is in valid floating point format
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if valid floating point format
+  """
+  split = value.split(".")
+  if len(split) != 2:
+    return False
+  else:
+    return split[1][0] != "-" and isDec(split[0]) and isDec(split[1])
+
+#################################################################################
+#################################################################################
+def isDec(value):
+  """
+  This function will parse a value to see if it is in valid decimal format
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if valid decimal format
+  """
+  try:
+    int(value, 10)
+    return True
+  except ValueError:
+    return False
+
+#################################################################################
+#################################################################################
+def isHex(value):
+  """
+  This function will parse a value to see if it is in valid hexidecimal format,
+  with or without the preceeding 0x
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if valid hexidecimal format
+  """
+  try:
+    int(value, 16)
+    return True
+  except ValueError:
+    return False
+
+#################################################################################
+#################################################################################
+def isAlpha(value):
+  """
+  This function will parse a value to see if it is in valid alphatebetic format
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if valid alphabetic format
+  """
+  return value.isalpha()
+
+#################################################################################
+#################################################################################
+def isNumeric(value):
+  """
+  This function will parse a value to see if it is in valid numerc format,
+  hex or decimal
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if valid numeric format
+  """
+  return isDec(value) or isHex(value)
+
+#################################################################################
+#################################################################################
+def isAlphaNumeric(value):
+  """
+  This function will parse a value to see if it is in valid alphanumeric format
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if valid alphanumeric format
+  """
+  return value.isalnum()
+
+#################################################################################
+#################################################################################
+def getBool(value):
+  """
+  This function will parse a value to see if it 'true', 'yes', or 'on'
+
+    Args:
+        arg (str) : The argument string to parse
+
+    Returns:
+        bool : True if 'true', 'yes', 'on'
+  """
+  return ((value.lower() == "true") or
+          (value.lower() == "yes") or
+          (value.lower() == "on"))
 
 #################################################################################
 #

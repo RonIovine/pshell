@@ -205,6 +205,62 @@ def isSubString(string1, string2, minMatchLength = 0):
   """
   return (True)
 
+#################################################################################
+#################################################################################
+def isFloat(value):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isDec(value):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isHex(value):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isAlpha(value):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isNumeric(value):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isAlphaNumeric(value):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def getBool(value):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
 ##############################
 #
 # start of main program
