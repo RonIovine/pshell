@@ -37,6 +37,7 @@ package PshellServer
 
 import "fmt"
 import "time"
+import "strings"
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -85,6 +86,13 @@ const (
   LOG_LEVEL_INFO = 3
   LOG_LEVEL_ALL = LOG_LEVEL_INFO
   LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+)
+
+// Used to specify the radix extraction format for the getInt function
+const (
+  RADIX_DEC = 0
+  RADIX_HEX = 1
+  RADIX_ANY = 2
 )
 
 type pshellFunction func([]string)
@@ -182,8 +190,106 @@ func ShowUsage() {
 //
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
+func Tokenize(string string, delimiter string) (int, []string) {
+  return 0, strings.Split(strings.TrimSpace(string), delimiter)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetLength(string string) int {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsEqual(string1 string, string2 string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsEqualNoCase(string1 string, string2 string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
 func IsSubString(string1 string, string2 string, minMatchLength int) bool {
   return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsSubStringNoCase(string1 string, string2 string, minMatchLength int) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsFloat(string string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsDec(string string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsHex(string string, needHexPrefix bool) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsAlpha(string string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsNumeric(string string, needHexPrefix bool) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func IsAlphaNumeric(string1 string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetBool(string string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetInt(string string, radix int, needHexPrefix bool) int {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetFloat(string string) float64 {
+  return (0.0)
 }
 
 //

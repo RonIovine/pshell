@@ -145,6 +145,8 @@ def wildcardMatch(argv):
     PshellServer.printf("    d*efault")
     PshellServer.printf()
 
+#################################################################################
+#################################################################################
 def keepAlive(argv):
   if (argv[0] == "dots"):
     PshellServer.printf("marching dots keep alive:")

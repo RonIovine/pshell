@@ -104,6 +104,13 @@ const (
   LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
 )
 
+// Used to specify the radix extraction format for the getInt function
+const (
+  RADIX_DEC = 0
+  RADIX_HEX = 1
+  RADIX_ANY = 2
+)
+
 /////////////////////////////////////////////////////////////////////////////////
 //
 // global "private" data
@@ -441,6 +448,63 @@ func ShowUsage() {
 }
 
 //
+// This will parse a string based on a delimiter and return the parsed
+// string as a list
+//
+//   Args:
+//       string (str)    : string to tokenize
+//       delemiter (str) : the delimiter to parse the string
+//
+//   Returns:
+//       int  : Number of tokens parsed
+//       list : The parsed tokens list
+//
+func Tokenize(string string, delimiter string) (int, []string) {
+  return (tokenize(string, delimiter))
+}
+
+//
+// This will return the length of the passed in string
+//
+//   Args:
+//       string (str) : string to return length on
+//
+//   Returns:
+//       int : the length of the string
+//
+func GetLength(string string) int {
+  return (getLength(string))
+}
+
+//
+// This will do a case sensitive compare for string equality
+//
+//   Args:
+//       string1 (str) : The source string
+//       string2 (str) : The target string
+//
+//   Returns:
+//       int : True if strings are equal, False otherwise
+//
+func IsEqual(string1 string, string2 string) bool {
+  return (isEqual(string1, string2))
+}
+
+//
+// This will do a case insensitive compare for string equality
+//
+//   Args:
+//       string1 (str) : The source string
+//       string2 (str) : The target string
+//
+//   Returns:
+//       int : True if strings are equal, False otherwise
+//
+func IsEqualNoCase(string1 string, string2 string) bool {
+  return (isEqualNoCase(string1, string2))
+}
+
+//
 //  This function will return True if string1 is a substring of string2 at
 //  position 0.  If the minMatchLength is 0, then it will compare up to the
 //  length of string1.  If the minMatchLength > 0, it will require a minimum
@@ -456,10 +520,153 @@ func ShowUsage() {
 //        minMatchLength (int) : The minimum required characters match
 //
 //    Returns:
-//        bool : True if substring matches, false otherwise
+//        bool : True if substring matches, false otherwise, case sensitive
 //
 func IsSubString(string1 string, string2 string, minMatchLength int) bool {
   return isSubString(string1, string2, minMatchLength)
+}
+
+//
+// This function will return True if string1 is a substring of string2 at
+// position 0.  If the minMatchLength is 0, then it will compare up to the
+// length of string1.  If the minMatchLength > 0, it will require a minimum
+// of that many characters to match.  A string that is longer than the min
+// match length must still match for the remaining charactes, e.g. with a
+// minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
+// will match, 'quix' will not match.  This function is useful for wildcard
+// matching.  This does a case insensitive match
+//
+//   Args:
+//       string1 (str)        : The substring
+//       string2 (str)        : The target string
+//       minMatchLength (int) : The minimum required characters match
+//
+//   Returns:
+//       bool : True if substring matches, False otherwise
+//
+func IsSubStringNoCase(string1 string, string2 string, minMatchLength int) bool {
+  return (isSubStringNoCase(string1, string2, minMatchLength))
+}
+
+//
+// This function will parse a string to see if it is in valid floating point format
+//
+//   Args:
+//       string (str) : The string to parse
+//
+//   Returns:
+//       bool : True if valid floating point format
+//
+func IsFloat(string string) bool {
+  return (isFloat(string))
+}
+
+//
+// This function will parse a string to see if it is in valid decimal format
+//
+//   Args:
+//       string (str) : The string string to parse
+//
+//   Returns:
+//       bool : True if valid decimal format
+//
+func IsDec(string string) bool {
+  return (isDec(string))
+}
+
+//
+// This function will parse a string to see if it is in valid hexidecimal format,
+// with or without the preceeding 0x
+//
+//   Args:
+//       string (str) : The string to parse
+//
+//   Returns:
+//       bool : True if valid hexidecimal format
+//
+func IsHex(string string, needHexPrefix bool) bool {
+  return (isHex(string, needHexPrefix))
+}
+
+//
+// This function will parse a string to see if it is in valid alphatebetic format
+//
+//   Args:
+//       string (str) : The string to parse
+//
+//   Returns:
+//       bool : True if valid alphabetic format
+//
+func IsAlpha(string string) bool {
+  return (isAlpha(string))
+}
+
+//
+// This function will parse a string to see if it is in valid numerc format,
+// hex or decimal
+//
+//   Args:
+//       string (str) : The string to parse
+//
+//   Returns:
+//       bool : True if valid numeric format
+//
+func IsNumeric(string string, needHexPrefix bool) bool {
+  return (isNumeric(string, needHexPrefix))
+}
+
+//
+// This function will parse a string to see if it is in valid alphanumeric format
+//
+//   Args:
+//       string (str) : The string to parse
+//
+//   Returns:
+//       bool : True if valid alphanumeric format
+//
+func IsAlphaNumeric(string string) bool {
+  return (isAlphaNumeric(string))
+}
+
+//
+// This function will parse a string to see if it 'true', 'yes', or 'on'
+//
+//   Args:
+//       string (str) : The string to parse
+//
+//   Returns:
+//       bool : True if 'true', 'yes', 'on'
+//
+func GetBool(string string) bool {
+  return (getBool(string))
+}
+
+//
+// Returns the integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to integer
+//
+//   Returns:
+//       bool : True if string is valid integer format, False otherwise
+//       int  : Integer value of corresponding string
+//
+func GetInt(string string, radix int, needHexPrefix bool) int {
+  return (getInt(string, radix, needHexPrefix))
+}
+
+//
+// Returns the float value of the corresponding string
+//
+//   Args:
+//       string : string to convert to float
+//
+//   Returns:
+//       bool : True if string is valid float format, False otherwise
+//       int  : Float value of corresponding string
+//
+func GetFloat(string string) float64 {
+  return (getFloat(string))
 }
 
 //
@@ -715,12 +922,96 @@ func showUsage() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func tokenize(string string, delimiter string) (int, []string) {
+  return 0, strings.Split(strings.TrimSpace(string), delimiter)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getLength(string string) int {
+  return (0)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isEqual(string1 string, string2 string, ) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isEqualNoCase(string1 string, string2 string, ) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func isSubString(string1_ string, string2_ string, minMatchLength_ int) bool {
   if (minMatchLength_ > len(string1_)) {
     return false
   } else {
     return strings.HasPrefix(string2_, string1_)
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isSubStringNoCase(string1 string, string2 string, minMatchLength int) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isFloat(string string) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isDec(string string) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isHex(string string, needHexPrefix bool) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isAlpha(string string) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isNumeric(string string, needHexPrefix bool) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isAlphaNumeric(string1 string) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getBool(string string) bool {
+  return (true)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getInt(string string, radix int, needHexPrefix bool) int {
+  return (0)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getFloat(string string) float64 {
+  return (0.0)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

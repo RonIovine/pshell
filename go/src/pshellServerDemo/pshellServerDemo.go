@@ -166,6 +166,95 @@ func keepAlive(argv []string) {
   PshellServer.Printf("\n")
 }
 
+// function to show advanced command line parsing using the pshell_tokenize function
+
+const (
+  MAX_YEAR   = 3000
+   MAX_MONTH  = 12
+   MAX_DAY    = 31
+   MAX_HOUR   = 23
+   MAX_MINUTE = 59
+   MAX_SECOND = 59
+)
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func advancedParsing(argv []string) {
+
+  numTokens, timestamp := PshellServer.Tokenize(argv[0], ":")
+
+  if (numTokens != 6) {
+    PshellServer.Printf("ERROR: Improper timestamp format!!\n")
+    PshellServer.ShowUsage()
+  } else if (!PshellServer.IsDec(timestamp[0]) ||
+             (PshellServer.GetInt(timestamp[0], PshellServer.RADIX_ANY, false) > MAX_YEAR)) {
+    PshellServer.Printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
+                        timestamp[0],
+                        MAX_YEAR)
+  } else if (!PshellServer.IsDec(timestamp[1]) ||
+             (PshellServer.GetInt(timestamp[1], PshellServer.RADIX_ANY, false) > MAX_MONTH)) {
+    PshellServer.Printf("ERROR: Invalid month: %s, must be numeric value <= %d\n",
+                        timestamp[1],
+                        MAX_MONTH)
+  } else if (!PshellServer.IsDec(timestamp[2]) ||
+             (PshellServer.GetInt(timestamp[2], PshellServer.RADIX_ANY, false) > MAX_DAY)) {
+    PshellServer.Printf("ERROR: Invalid day: %s, must be numeric value <= %d\n",
+                        timestamp[2],
+                        MAX_DAY)
+  } else if (!PshellServer.IsDec(timestamp[3]) ||
+             (PshellServer.GetInt(timestamp[3], PshellServer.RADIX_ANY, false) > MAX_HOUR)) {
+    PshellServer.Printf("ERROR: Invalid hour: %s, must be numeric value <= %d\n",
+                        timestamp[3],
+                        MAX_HOUR)
+  } else if (!PshellServer.IsDec(timestamp[4]) ||
+             (PshellServer.GetInt(timestamp[4], PshellServer.RADIX_ANY, false) > MAX_MINUTE)) {
+    PshellServer.Printf("ERROR: Invalid minute: %s, must be numeric value <= %d\n",
+                        timestamp[4],
+                        MAX_MINUTE)
+  } else if (!PshellServer.IsDec(timestamp[5]) ||
+             (PshellServer.GetInt(timestamp[5], PshellServer.RADIX_ANY, false) > MAX_SECOND)) {
+    PshellServer.Printf("ERROR: Invalid second: %s, must be numeric value <= %d\n",
+                        timestamp[5],
+                        MAX_SECOND)
+  } else {
+    PshellServer.Printf("Year   : %s\n", timestamp[0])
+    PshellServer.Printf("Month  : %s\n", timestamp[1])
+    PshellServer.Printf("Day    : %s\n", timestamp[2])
+    PshellServer.Printf("Hour   : %s\n", timestamp[3])
+    PshellServer.Printf("Minute : %s\n", timestamp[4])
+    PshellServer.Printf("Second : %s\n", timestamp[5])
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func formatChecking(argv []string) {
+
+  PshellServer.Printf("formatChecking command dispatched:\n")
+
+  if (PshellServer.IsDec(argv[0])) {
+    PshellServer.Printf("Decimal arg: %d entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, false))
+  } else if (PshellServer.IsHex(argv[0], true)) {
+    PshellServer.Printf("Hex arg: 0x%x entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, true))
+  } else if (PshellServer.IsAlpha(argv[0])) {
+    if (PshellServer.IsEqual(argv[0], "myarg")) {
+      PshellServer.Printf("Alphabetic arg: '%s' equal to 'myarg'\n", argv[0])
+    } else {
+      PshellServer.Printf("Alphabetic arg: '%s' not equal to 'myarg'\n", argv[0])
+    }
+  } else if (PshellServer.IsAlphaNumeric(argv[0])) {
+    if (PshellServer.IsEqual(argv[0], "myarg1")) {
+      PshellServer.Printf("Alpha numeric arg: '%s' equal to 'myarg1'\n", argv[0])
+    } else {
+      PshellServer.Printf("Alpha numeric arg: '%s' not equal to 'myarg1'\n", argv[0])
+    }
+  } else if (PshellServer.IsFloat(argv[0])) {
+    PshellServer.Printf("Float arg: %.2f entered\n", PshellServer.GetFloat(argv[0]))
+  } else {
+    PshellServer.Printf("Unknown arg format: '%s'\n", argv[0])
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getOptions(argv []string) {
@@ -225,16 +314,16 @@ func registerSignalHandlers() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func showUsage() {
-  fmt.Printf("\n");
-  fmt.Printf("Usage: pshellServerDemo -udp [<port>] | -tcp [<port>] | -unix | -local\n");
-  fmt.Printf("\n");
-  fmt.Printf("  where:\n");
-  fmt.Printf("    -udp   - Multi-session UDP server\n");
-  fmt.Printf("    -tcp   - Single session TCP server\n");
-  fmt.Printf("    -unix  - Multi-session UNIX domain server\n");
-  fmt.Printf("    -local - Local command dispatching server\n");
-  fmt.Printf("    <port> - Desired UDP or TCP port, default: %s\n", PSHELL_DEMO_PORT);
-  fmt.Printf("\n");
+  fmt.Printf("\n")
+  fmt.Printf("Usage: pshellServerDemo -udp [<port>] | -tcp [<port>] | -unix | -local\n")
+  fmt.Printf("\n")
+  fmt.Printf("  where:\n")
+  fmt.Printf("    -udp   - Multi-session UDP server\n")
+  fmt.Printf("    -tcp   - Single session TCP server\n")
+  fmt.Printf("    -unix  - Multi-session UNIX domain server\n")
+  fmt.Printf("    -local - Local command dispatching server\n")
+  fmt.Printf("    <port> - Desired UDP or TCP port, default: %s\n", PSHELL_DEMO_PORT)
+  fmt.Printf("\n")
   os.Exit(0)
 }
 
@@ -276,30 +365,6 @@ func main() {
                           20,                                    // maxArgs
                           true)                                  // showUsage on '?'
 
-  PshellServer.AddCommand(enhancedUsage,                   // function
-                          "enhancedUsage",                 // command
-                          "command with enhanced usage",   // description
-                          "<arg1>",                        // usage
-                          1,                               // minArgs
-                          1,                               // maxArgs
-                          false)                           // showUsage on '?'
-
-  PshellServer.AddCommand(wildcardMatch,                            // function
-                          "wildcardMatch",                          // command
-                          "command that does a wildcard matching",  // description
-                          "<arg>",                                  // usage
-                          1,                                        // minArgs
-                          1,                                        // maxArgs
-                          false)                                    // showUsage on "?"
-
-  PshellServer.AddCommand(getOptions,                                  // function
-                          "getOptions",                                // command
-                          "example of parsing command line options",   // description
-                          "<arg1> [<arg2>...<argN>]",                  // usage
-                          1,                                           // minArgs
-                          20,                                          // maxArgs
-                          false)                                       // showUsage on '?'
-
   // TCP or LOCAL servers don't need a keep-alive, so only add
   // this command for connectionless datagram type servers
   if ((serverType == PshellServer.UDP) || (serverType == PshellServer.UNIX)) {
@@ -311,6 +376,46 @@ func main() {
                             1,                                     // maxArgs
                             false)                                 // showUsage on '?'
   }
+
+  PshellServer.AddCommand(wildcardMatch,                            // function
+                          "wildcardMatch",                          // command
+                          "command that does a wildcard matching",  // description
+                          "<arg>",                                  // usage
+                          1,                                        // minArgs
+                          1,                                        // maxArgs
+                          false)                                    // showUsage on "?"
+
+  PshellServer.AddCommand(advancedParsing,                                // function
+                          "advancedParsing",                              // command
+                          "command with advanced command line parsing",   // description
+                          "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",              // usage
+                          1,                                              // minArgs
+                          1,                                              // maxArgs
+                          true)                                           // showUsage on "?"
+
+  PshellServer.AddCommand(formatChecking,                       // function
+                          "formatChecking",                     // command
+                          "command with arg format checking",   // description
+                          "<arg1>",                             // usage
+                          1,                                    // minArgs
+                          1,                                    // maxArgs
+                          true)                                 // showUsage on "?"
+
+  PshellServer.AddCommand(enhancedUsage,                   // function
+                          "enhancedUsage",                 // command
+                          "command with enhanced usage",   // description
+                          "<arg1>",                        // usage
+                          1,                               // minArgs
+                          1,                               // maxArgs
+                          false)                           // showUsage on '?'
+
+  PshellServer.AddCommand(getOptions,                                  // function
+                          "getOptions",                                // command
+                          "example of parsing command line options",   // description
+                          "<arg1> [<arg2>...<argN>]",                  // usage
+                          1,                                           // minArgs
+                          20,                                          // maxArgs
+                          false)                                       // showUsage on '?'
 
   // run a registered command from within it's parent process, this can be done before
   // or after the server is started, as long as the command being called is regstered
