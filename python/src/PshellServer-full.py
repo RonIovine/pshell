@@ -47,31 +47,51 @@ control mechanism.
 
 Functions:
 
+The main API calls to register PSHELL commands and start the server
+
 addCommand()       -- register a pshell command with the server
 startServer()      -- start the pshell server
 cleanupResources() -- release all resources claimed by the server
-runCommand()       -- run a registered command from the parent (i.e. registering) program
-setLogLevel()      -- set the internal log level for this module
-setLogFunction()   -- register a user function to receive all logs
+
+Function to allow a parent application to call it's own PSHELL function
+
+runCommand() -- run a registered command from the parent (i.e. registering) program
+
+Functions to allow extraction of internal log messages from parent application
+
+setLogLevel()    -- set the internal log level for this module
+setLogFunction() -- register a user function to receive all logs
+
+Functions to help in argument parsing/extraction, even though many of these
+operations can easily be done with native Python constructs, they are provided
+here for consistency of the API across all language implementations
+
+tokenize()          -- parse a string based on token delimeters
+getLength()         -- return the string length
+isEqual()           -- compare two strings for equality, case sensitive
+isEqualNoCase()     -- compare two strings for equality, case insensitive
+isSubString()       -- checks for string1 substring of string2 at position 0, case sensitive
+isSubStringNoCase() -- checks for string1 substring of string2 at position 0, case insensitive
+isFloat()           -- returns True if string is floating point
+isDec()             -- returns True if string is dec
+isHex()             -- returns True if string is hex, with or without the preceeding 0x
+isAlpha()           -- returns True if string is alphabetic
+isNumeric()         -- returns True if string isDec or isHex
+isAlphaNumeric()    -- returns True if string is alpha-numeric
+getBool()           -- returns True if string is 'true', 'yes', 'on'
+getInt()            -- return the integer value from the string
+getFloat()          -- return the float value from the string
 
 The following commands should only be called from within the context of
-a pshell callback function
+a PSHELL callback function
 
-printf()         -- display a message from a pshell callback function to the client
-flush()          -- flush the transfer buffer to the client (UDP/UNIX servers only)
-wheel()          -- spinning ascii wheel to keep UDP/UNIX client alive
-march()          -- marching ascii character to keep UDP/UNIX client alive
-showUsage()      -- show the usage the command is registered with
-isHelp()         -- checks if the user has requested help on this command
-isSubString()    -- checks for string1 substring of string2 at position 0
-getOption()      -- parses arg of format -<key><value> or <key>=<value>
-isFloat()        -- returns True if value is floating point
-isDec()          -- returns True if value is dec
-isHex()          -- returns True if value is hex, with or without the preceeding 0x
-isAlpha()        -- returns True if value is alphabetic
-isNumeric()      -- returns True if isDec or isHex
-isAlphaNumeric() -- returns True if value is alpha-numeric
-getBool()        -- returns True if value is 'true', 'yes', 'on'
+printf()    -- display a message from a pshell callback function to the client
+flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
+wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive
+march()     -- marching ascii character to keep UDP/UNIX client alive
+showUsage() -- show the usage the command is registered with
+isHelp()    -- checks if the user has requested help on this command
+getOption() -- parses arg of format -<key><value> or <key>=<value>
 
 Integer constants:
 
@@ -116,6 +136,12 @@ LOG_LEVEL_WARNING
 LOG_LEVEL_INFO
 LOG_LEVEL_ALL
 LOG_LEVEL_DEFAULT
+
+Used to specify the radix extraction format for the getInt() function
+
+RADIX_DEC
+RADIX_HEX
+RADIX_ANY
 
 A complete example of the usage of the API can be found in the included
 demo program pshellServerDemo.py.
@@ -174,6 +200,11 @@ LOG_LEVEL_WARNING = 2
 LOG_LEVEL_INFO = 3
 LOG_LEVEL_ALL = LOG_LEVEL_INFO
 LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+
+# Used to specify the radix extraction format for the getInt function
+RADIX_DEC = 0
+RADIX_HEX = 1
+RADIX_ANY = 2
 
 #################################################################################
 #
@@ -397,6 +428,67 @@ def isHelp():
 
 #################################################################################
 #################################################################################
+def tokenize(string, delimiter):
+  """
+  This will parse a string based on a delimiter and return the parsed
+  string as a list
+
+    Args:
+        string (str)    : string to tokenize
+        delemiter (str) : the delimiter to parse the string
+
+    Returns:
+        int  : Number of tokens parsed
+        list : The parsed tokens list
+  """
+  return (_tokenize(string, delimiter))
+
+#################################################################################
+#################################################################################
+def getLength(string):
+  """
+  This will return the length of the passed in string
+
+    Args:
+        string (str) : string to return length on
+
+    Returns:
+        int : the length of the string
+  """
+  return (_getLength(string))
+
+#################################################################################
+#################################################################################
+def isEqual(string1, string2):
+  """
+  This will do a case sensitive compare for string equality
+
+    Args:
+        string1 (str) : The source string
+        string2 (str) : The target string
+
+    Returns:
+        int : True if strings are equal, False otherwise
+  """
+  return (_isEqual(string1, string2))
+
+#################################################################################
+#################################################################################
+def isEqualNoCase(string1, string2):
+  """
+  This will do a case insensitive compare for string equality
+
+    Args:
+        string1 (str) : The source string
+        string2 (str) : The target string
+
+    Returns:
+        int : True if strings are equal, False otherwise
+  """
+  return (_isEqualNoCase(string1, string2))
+
+#################################################################################
+#################################################################################
 def isSubString(string1, string2, minMatchLength = 0):
   """
   This function will return True if string1 is a substring of string2 at
@@ -420,6 +512,29 @@ def isSubString(string1, string2, minMatchLength = 0):
 
 #################################################################################
 #################################################################################
+def isSubStringNoCase(string1, string2, minMatchLength = 0):
+  """
+  This function will return True if string1 is a substring of string2 at
+  position 0.  If the minMatchLength is 0, then it will compare up to the
+  length of string1.  If the minMatchLength > 0, it will require a minimum
+  of that many characters to match.  A string that is longer than the min
+  match length must still match for the remaining charactes, e.g. with a
+  minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
+  will match, 'quix' will not match.  This function is useful for wildcard
+  matching.  This does a case insensitive match
+
+    Args:
+        string1 (str)        : The substring
+        string2 (str)        : The target string
+        minMatchLength (int) : The minimum required characters match
+
+    Returns:
+        bool : True if substring matches, False otherwise
+  """
+  return (_isSubStringNoCase(string1, string2, minMatchLength))
+
+#################################################################################
+#################################################################################
 def getOption(arg):
   """
   This function will parse an argument string of the formats -<key><value> where
@@ -440,103 +555,133 @@ def getOption(arg):
 
 #################################################################################
 #################################################################################
-def isFloat(value):
+def isFloat(string):
   """
-  This function will parse a value to see if it is in valid floating point format
+  This function will parse a string to see if it is in valid floating point format
 
     Args:
-        value (str) : The value string to parse
+        string (str) : The string to parse
 
     Returns:
         bool : True if valid floating point format
   """
-  return _isFloat(value)
+  return _isFloat(string)
 
 #################################################################################
 #################################################################################
-def isDec(value):
+def isDec(string):
   """
-  This function will parse a value to see if it is in valid decimal format
+  This function will parse a string to see if it is in valid decimal format
 
     Args:
-        value (str) : The value string to parse
+        string (str) : The string string to parse
 
     Returns:
         bool : True if valid decimal format
   """
-  return _isDec(value)
+  return _isDec(string)
 
 #################################################################################
 #################################################################################
-def isHex(value):
+def isHex(string, needHexPrefix = True):
   """
-  This function will parse a value to see if it is in valid hexidecimal format,
+  This function will parse a string to see if it is in valid hexidecimal format,
   with or without the preceeding 0x
 
     Args:
-        value (str) : The value string to parse
+        string (str) : The string to parse
 
     Returns:
         bool : True if valid hexidecimal format
   """
-  return _isHex(value)
+  return _isHex(string, needHexPrefix)
 
 #################################################################################
 #################################################################################
-def isAlpha(value):
+def isAlpha(string):
   """
-  This function will parse a value to see if it is in valid alphatebetic format
+  This function will parse a string to see if it is in valid alphatebetic format
 
     Args:
-        value (str) : The value string to parse
+        string (str) : The string to parse
 
     Returns:
         bool : True if valid alphabetic format
   """
-  return _isAlpha(value)
+  return _isAlpha(string)
 
 #################################################################################
 #################################################################################
-def isNumeric(value):
+def isNumeric(string, needHexPrefix = True):
   """
-  This function will parse a value to see if it is in valid numerc format,
+  This function will parse a string to see if it is in valid numerc format,
   hex or decimal
 
     Args:
-        value (str) : The value string to parse
+        string (str) : The string to parse
 
     Returns:
         bool : True if valid numeric format
   """
-  return _isNumeric(value)
+  return _isNumeric(string, needHexPrefix)
 
 #################################################################################
 #################################################################################
-def isAlphaNumeric(value):
+def isAlphaNumeric(string):
   """
-  This function will parse a value to see if it is in valid alphanumeric format
+  This function will parse a string to see if it is in valid alphanumeric format
 
     Args:
-        value (str) : The value string to parse
+        string (str) : The string to parse
 
     Returns:
         bool : True if valid alphanumeric format
   """
-  return _isAlphaNumeric(value)
+  return _isAlphaNumeric(string)
 
 #################################################################################
 #################################################################################
-def getBool(value):
+def getBool(string):
   """
-  This function will parse a value to see if it 'true', 'yes', or 'on'
+  This function will parse a string to see if it 'true', 'yes', or 'on'
 
     Args:
-        value (str) : The value string to parse
+        string (str) : The string to parse
 
     Returns:
         bool : True if 'true', 'yes', 'on'
   """
-  return _getBool(value)
+  return _getBool(string)
+
+#################################################################################
+#################################################################################
+def getInt(string, radix = RADIX_ANY, needHexPrefix = True):
+  """
+  Returns the integer value of the corresponding string
+
+    Args:
+        string : string to convert to integer
+
+    Returns:
+        bool : True if string is valid integer format, False otherwise
+        int  : Integer value of corresponding string
+  """
+  return (_getInt(string, radix, needHexPrefix))
+
+#################################################################################
+#################################################################################
+def getFloat(string):
+  """
+  Returns the float value of the corresponding string
+
+    Args:
+        string : string to convert to float
+
+    Returns:
+        bool : True if string is valid float format, False otherwise
+        int  : Float value of corresponding string
+  """
+  return (_getFloat(string))
 
 #################################################################################
 #
@@ -550,18 +695,43 @@ def getBool(value):
 
 #################################################################################
 #################################################################################
-def _isSubString(string1_, string2_, minMatchLength_):
-  return (PshellReadline.isSubString(string1_, string2_, minMatchLength_))
+def _tokenize(string_, delimiter_):
+  return (len(str(string_).split(delimiter_)), str(string_).split(delimiter_))
 
 #################################################################################
 #################################################################################
-def _getOption(arg):
-  if (len(arg) < 3):
+def _getLength(string_):
+  return (len(str(string_)))
+
+#################################################################################
+#################################################################################
+def _isEqual(string1_, string2_):
+  return (str(string1_) == str(string2_))
+
+#################################################################################
+#################################################################################
+def _isEqualNoCase(string1_, string2_):
+  return (isEqual(str(string1_).lower(), str(string2_).lower()))
+
+#################################################################################
+#################################################################################
+def _isSubString(string1_, string2_, minMatchLength_):
+  return (PshellReadline.isSubString(str(string1_), str(string2_), minMatchLength_))
+
+#################################################################################
+#################################################################################
+def _isSubStringNoCase(string1_, string2_, minMatchLength_ = 0):
+  return (_isSubString(str(string1_).lower(), str(string2_).lower(), minMatchLength))
+
+#################################################################################
+#################################################################################
+def _getOption(arg_):
+  if (len(arg_) < 3):
     return (False, "", "")
-  elif (arg[0] == "-"):
-    return (True, arg[:2], arg[2:])
+  elif (arg_[0] == "-"):
+    return (True, arg_[:2], arg_[2:])
   else:
-    value = arg.split("=")
+    value = arg_.split("=")
     if (len(value) >= 2):
       return (True, value[0], '='.join(value[1:]))
     else:
@@ -569,8 +739,8 @@ def _getOption(arg):
 
 #################################################################################
 #################################################################################
-def _isFloat(value_):
-  split = value_.split(".")
+def _isFloat(string_):
+  split = str(string_).split(".")
   if len(split) != 2:
     return False
   else:
@@ -578,43 +748,77 @@ def _isFloat(value_):
 
 #################################################################################
 #################################################################################
-def _isDec(value_):
+def _isDec(string_):
   try:
-    int(value_, 10)
+    int(str(string_), 10)
     return True
   except ValueError:
     return False
 
 #################################################################################
 #################################################################################
-def _isHex(value_):
+def _isHex(string_, needHexPrefix_):
+  string = str(string_)
+  if needHexPrefix_ and (len(string) < 3 or string[0:2].lower() != "0x"):
+      return False
   try:
-    int(value_, 16)
+    int(string, 16)
     return True
   except ValueError:
     return False
 
 #################################################################################
 #################################################################################
-def _isAlpha(value_):
-  return value_.isalpha()
+def _isAlpha(string_):
+  return str(string_).isalpha()
 
 #################################################################################
 #################################################################################
-def _isNumeric(value_):
-  return _isDec(value_) or _isHex(value_)
+def _isNumeric(string_, needHexPrefix_):
+  return _isDec(string_) or _isHex(string_, needHexPrefix_)
 
 #################################################################################
 #################################################################################
-def _isAlphaNumeric(value_):
-  return value_.isalnum()
+def _isAlphaNumeric(string_):
+  return str(string_).isalnum()
 
 #################################################################################
 #################################################################################
-def _getBool(value_):
-  return ((value_.lower() == "true") or
-          (value_.lower() == "yes") or
-          (value_.lower() == "on"))
+def _getBool(string_):
+  string = str(string_)
+  return ((string.lower() == "true") or
+          (string.lower() == "yes") or
+          (string.lower() == "on"))
+
+#################################################################################
+#################################################################################
+def _getInt(string_, radix_, needHexPrefix_):
+  string = str(string_)
+  if radix_ == RADIX_ANY:
+    if _isDec(string):
+      return (int(string, 10))
+    elif _isHex(string, needHexPrefix_):
+      return (int(string, 16))
+    else:
+      _printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.isNumeric()" % string)
+      return (0)
+  elif radix_ == RADIX_DEC and _isDex(string):
+    return (True, int(string, 10))
+  elif radix_ == RADIX_HEX and _isHex(string, needHexPrefix_):
+    return (int(string, 16))
+  else:
+    _printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.isNumeric()" % string)
+    return (0)
+
+#################################################################################
+#################################################################################
+def _getFloat(string_):
+  string = str(string_)
+  if _isFloat(string):
+    return (float(string))
+  else:
+    _printError("Could not extract floating point value from string: '%s', consider checking format with PshellServer.isFloat()" % string)
+    return (0)
 
 #################################################################################
 #################################################################################

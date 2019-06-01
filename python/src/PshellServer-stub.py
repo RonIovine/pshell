@@ -81,6 +81,11 @@ LOG_LEVEL_INFO = 3
 LOG_LEVEL_ALL = LOG_LEVEL_INFO
 LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
 
+# Used to specify the radix extraction format for the getInt function
+RADIX_DEC = 0
+RADIX_HEX = 1
+RADIX_ANY = 2
+
 #################################################################################
 #
 # "public" API functions
@@ -199,6 +204,94 @@ def getOption(arg):
 
 #################################################################################
 #################################################################################
+def isFloat(string):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isDec(string):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isHex(string, needHexPrefix):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isAlpha(string):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isNumeric(string, needHexPrefix):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isAlphaNumeric(string):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def getBool(string):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def tokenize(string, delimiter):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (str(string).split(delimiter), 0)
+
+#################################################################################
+#################################################################################
+def getLength(string):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (0)
+
+#################################################################################
+#################################################################################
+def isEqual(string1, string2):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
+def isEqualNoCase(string1, string2):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
 def isSubString(string1, string2, minMatchLength = 0):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
@@ -207,7 +300,7 @@ def isSubString(string1, string2, minMatchLength = 0):
 
 #################################################################################
 #################################################################################
-def isFloat(value):
+def isSubStringNoCase(string1, string2, minMatchLength = 0):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
   """
@@ -215,51 +308,19 @@ def isFloat(value):
 
 #################################################################################
 #################################################################################
-def isDec(value):
+def getInt(string, radix, needHexPrefix):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
   """
-  return (True)
+  return (0)
 
 #################################################################################
 #################################################################################
-def isHex(value):
+def getFloat(string):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
   """
-  return (True)
-
-#################################################################################
-#################################################################################
-def isAlpha(value):
-  """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
-  """
-  return (True)
-
-#################################################################################
-#################################################################################
-def isNumeric(value):
-  """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
-  """
-  return (True)
-
-#################################################################################
-#################################################################################
-def isAlphaNumeric(value):
-  """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
-  """
-  return (True)
-
-#################################################################################
-#################################################################################
-def getBool(value):
-  """
-  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
-  """
-  return (True)
+  return (0.0)
 
 ##############################
 #

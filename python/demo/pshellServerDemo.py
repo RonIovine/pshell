@@ -86,15 +86,21 @@ def enhancedUsage(argv):
 def formatChecking(argv):
   PshellServer.printf("formatChecking command dispatched:")
   if PshellServer.isDec(argv[0]):
-    PshellServer.printf("Decimal arg: '%s' entered" % argv[0])
+    PshellServer.printf("Decimal arg: %d entered" % PshellServer.getInt(argv[0]))
   elif PshellServer.isHex(argv[0]):
-    PshellServer.printf("Hex arg: '%s' entered" % argv[0])
+    PshellServer.printf("Hex arg: 0x%x entered" % PshellServer.getInt(argv[0]))
   elif PshellServer.isAlpha(argv[0]):
-    PshellServer.printf("Alphabetic arg: '%s' entered" % argv[0])
+    if PshellServer.isEqual(argv[0], "myarg"):
+      PshellServer.printf("Alphabetic arg: '%s' equal to 'myarg'" % argv[0])
+    else:
+      PshellServer.printf("Alphabetic arg: '%s' not equal to 'myarg'" % argv[0])
   elif PshellServer.isAlphaNumeric(argv[0]):
-    PshellServer.printf("Alpha numeric arg: '%s' entered" % argv[0])
+    if PshellServer.isEqual(argv[0], "myarg1"):
+      PshellServer.printf("Alpha numeric arg: '%s' equal to 'myarg1'" % argv[0])
+    else:
+      PshellServer.printf("Alpha numeric arg: '%s' not equal to 'myarg1'" % argv[0])
   elif PshellServer.isFloat(argv[0]):
-    PshellServer.printf("Float arg: '%s' entered" % argv[0])
+    PshellServer.printf("Float arg: %.2f entered" % PshellServer.getFloat(argv[0]))
   else:
     PshellServer.printf("Unknown arg format: '%s'" % argv[0])
 
@@ -139,8 +145,6 @@ def wildcardMatch(argv):
     PshellServer.printf("    d*efault")
     PshellServer.printf()
 
-#################################################################################
-#################################################################################
 def keepAlive(argv):
   if (argv[0] == "dots"):
     PshellServer.printf("marching dots keep alive:")
@@ -167,6 +171,56 @@ def keepAlive(argv):
     PshellServer.showUsage()
     return
   PshellServer.printf()
+
+# function to show advanced command line parsing using the PshellServer.tokenize function
+
+MAX_YEAR   = 3000
+MAX_MONTH  = 12
+MAX_DAY    = 31
+MAX_HOUR   = 23
+MAX_MINUTE = 59
+MAX_SECOND = 59
+
+#################################################################################
+#################################################################################
+def advancedParsing(argv):
+
+  numTokens, timestamp = PshellServer.tokenize(argv[0], ":")
+
+  if (numTokens != 6):
+    PshellServer.printf("ERROR: Improper timestamp format!!")
+    PshellServer.showUsage()
+  elif (not PshellServer.isDec(timestamp[0]) or
+        PshellServer.getInt(timestamp[0]) > MAX_YEAR):
+    PshellServer.printf("ERROR: Invalid year: %s, must be numeric value <= %d" %
+                       (timestamp[0], MAX_YEAR))
+  elif (not PshellServer.isDec(timestamp[1]) or
+        PshellServer.getInt(timestamp[1]) > MAX_MONTH):
+    PshellServer.printf("ERROR: Invalid month: %s, must be numeric value <= %d" %
+                        (timestamp[1], MAX_MONTH))
+  elif (not PshellServer.isDec(timestamp[2]) or
+        PshellServer.getInt(timestamp[2]) > MAX_DAY):
+    PshellServer.printf("ERROR: Invalid day: %s, must be numeric value <= %d" %
+                        (timestamp[2], MAX_DAY))
+  elif (not PshellServer.isDec(timestamp[3]) or
+        PshellServer.getInt(timestamp[3]) > MAX_HOUR):
+    PshellServer.printf("ERROR: Invalid hour: %s, must be numeric value <= %d" %
+                        (timestamp[3], MAX_HOUR))
+  elif (not PshellServer.isDec(timestamp[4]) or
+        PshellServer.getInt(timestamp[4]) > MAX_MINUTE):
+    PshellServer.printf("ERROR: Invalid minute: %s, must be numeric value <= %d" %
+                        (timestamp[4], MAX_MINUTE))
+  elif (not PshellServer.isDec(timestamp[5]) or
+        PshellServer.getInt(timestamp[5]) > MAX_SECOND):
+    PshellServer.printf("ERROR: Invalid second: %s, must be numeric value <= %d" %
+                        (timestamp[5], MAX_SECOND))
+  else:
+    PshellServer.printf("Year   : %s" % timestamp[0])
+    PshellServer.printf("Month  : %s" % timestamp[1])
+    PshellServer.printf("Day    : %s" % timestamp[2])
+    PshellServer.printf("Hour   : %s" % timestamp[3])
+    PshellServer.printf("Minute : %s" % timestamp[4])
+    PshellServer.printf("Second : %s" % timestamp[5])
 
 #################################################################################
 #################################################################################
@@ -198,7 +252,7 @@ def showUsage():
   print("    -unix  - Multi-session UNIX domain server")
   print("    -local - Local command dispatching server")
   print("    <port> - Desired UDP or TCP port, default: %d" % PSHELL_DEMO_PORT)
-  print("");
+  print("")
   sys.exit()
 
 #################################################################################
@@ -263,6 +317,15 @@ if (__name__ == '__main__'):
                           minArgs     = 0,
                           maxArgs     = 20)
 
+  # TCP or LOCAL servers don't need a keep-alive, so only add
+  # this command for connectionless datagram type servers
+  if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
+    PshellServer.addCommand(function    = keepAlive,
+                            command     = "keepAlive",
+                            description = "command to show client keep-alive",
+                            usage       = "dots | bang | pound | wheel",
+                            minArgs     = 1)
+
   PshellServer.addCommand(function    = wildcardMatch,
                           command     = "wildcardMatch",
                           description = "command that does a wildcard matching",
@@ -283,6 +346,12 @@ if (__name__ == '__main__'):
                           usage       = "<arg1>",
                           minArgs     = 1)
 
+  PshellServer.addCommand(function    = advancedParsing,
+                          command     = "advancedParsing",
+                          description = "command with advanced command line parsing",
+                          usage       = "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",
+                          minArgs     = 1)
+
   PshellServer.addCommand(function    = getOptions,
                           command     = "getOptions",
                           description = "example of parsing command line options",
@@ -290,15 +359,6 @@ if (__name__ == '__main__'):
                           minArgs     = 1,
                           maxArgs     = 20,
                           showUsage   = False)
-
-  # TCP or LOCAL servers don't need a keep-alive, so only add
-  # this command for connectionless datagram type servers
-  if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
-    PshellServer.addCommand(function    = keepAlive,
-                            command     = "keepAlive",
-                            description = "command to show client keep-alive",
-                            usage       = "dots | bang | pound | wheel",
-                            minArgs     = 1)
 
   # run a registered command from within it's parent process, this can be done before
   # or after the server is started, as long as the command being called is regstered
