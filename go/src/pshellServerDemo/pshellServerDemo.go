@@ -231,7 +231,6 @@ func advancedParsing(argv []string) {
 func formatChecking(argv []string) {
 
   PshellServer.Printf("formatChecking command dispatched:\n")
-
   if (PshellServer.IsDec(argv[0])) {
     PshellServer.Printf("Decimal arg: %d entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, false))
   } else if (PshellServer.IsHex(argv[0], true)) {

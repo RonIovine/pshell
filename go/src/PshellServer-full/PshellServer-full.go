@@ -646,10 +646,9 @@ func GetBool(string string) bool {
 // Returns the integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to integer
+//       string : string to convert to integer 64
 //
 //   Returns:
-//       bool : True if string is valid integer format, False otherwise
 //       int  : Integer value of corresponding string
 //
 func GetInt(string string, radix int, needHexPrefix bool) int64 {
@@ -657,17 +656,172 @@ func GetInt(string string, radix int, needHexPrefix bool) int64 {
 }
 
 //
-// Returns the float value of the corresponding string
+// Returns the integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to float
+//       string : string to convert to integer 64
 //
 //   Returns:
-//       bool : True if string is valid float format, False otherwise
+//       int  : Integer value of corresponding string
+//
+func GetInt64(string string, radix int, needHexPrefix bool) int64 {
+  return (getInt(string, radix, needHexPrefix))
+}
+
+//
+// Returns the integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to integer 32
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetInt32(string string, radix int, needHexPrefix bool) int32 {
+  return (int32(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to integer 16
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetInt16(string string, radix int, needHexPrefix bool) int16 {
+  return (int16(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to integer 8
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetInt8(string string, radix int, needHexPrefix bool) int8 {
+  return (int8(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the unsigned integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to unsigned integer 64
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetUint(string string, radix int, needHexPrefix bool) uint64 {
+  return (uint64(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the unsigned integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to unsigned integer 64
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetUint64(string string, radix int, needHexPrefix bool) uint64 {
+  return (uint64(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the unsigned integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to unsigned integer 32
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetUint32(string string, radix int, needHexPrefix bool) uint32 {
+  return (uint32(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the unsigned integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to unsigned integer 16
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetUint16(string string, radix int, needHexPrefix bool) uint16 {
+  return (uint16(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the unsigned integer value of the corresponding string
+//
+//   Args:
+//       string : string to convert to unsigned integer 8
+//
+//   Returns:
+//       int  : Integer value of corresponding string
+//
+func GetUint8(string string, radix int, needHexPrefix bool) uint8 {
+  return (uint8(getInt(string, radix, needHexPrefix)))
+}
+
+//
+// Returns the double precision float value of the corresponding string
+//
+//   Args:
+//       string : string to convert to double precision float
+//
+//   Returns:
 //       int  : Float value of corresponding string
 //
-func GetFloat(string string) float64 {
+func GetDouble(string string) float64 {
   return (getFloat(string))
+}
+
+//
+// Returns the double precision float value of the corresponding string
+//
+//   Args:
+//       string : string to convert to double precision float
+//
+//   Returns:
+//       int  : Float value of corresponding string
+//
+func GetFloat64(string string) float64 {
+  return (getFloat(string))
+}
+
+//
+// Returns the single precision float value of the corresponding string
+//
+//   Args:
+//       string : string to convert to single precision float
+//
+//   Returns:
+//       int  : Float value of corresponding string
+//
+func GetFloat(string string) float32 {
+  return (float32(getFloat(string)))
+}
+
+//
+// Returns the single precision float value of the corresponding string
+//
+//   Args:
+//       string : string to convert to single precision float
+//
+//   Returns:
+//       int  : Float value of corresponding string
+//
+func GetFloat32(string string) float32 {
+  return (float32(getFloat(string)))
 }
 
 //
@@ -923,27 +1077,27 @@ func showUsage() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func tokenize(string string, delimiter string) (int, []string) {
-  return len(strings.Split(strings.TrimSpace(string), delimiter)),
-         strings.Split(strings.TrimSpace(string), delimiter)
+func tokenize(string_ string, delimiter_ string) (int, []string) {
+  return len(strings.Split(strings.TrimSpace(string_), delimiter_)),
+         strings.Split(strings.TrimSpace(string_), delimiter_)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getLength(string string) int {
-  return (len(string))
+func getLength(string_ string) int {
+  return (len(string_))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isEqual(string1 string, string2 string, ) bool {
-  return (string1 == string2)
+func isEqual(string1_ string, string2_ string) bool {
+  return (string1_ == string2_)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isEqualNoCase(string1 string, string2 string, ) bool {
-  return (strings.ToLower(string1) == strings.ToLower(string2))
+func isEqualNoCase(string1_ string, string2_ string) bool {
+  return (strings.ToLower(string1_) == strings.ToLower(string2_))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -958,16 +1112,16 @@ func isSubString(string1_ string, string2_ string, minMatchLength_ int) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isSubStringNoCase(string1 string, string2 string, minMatchLength int) bool {
-  return (isSubString(strings.ToLower(string1),
-                      strings.ToLower(string2),
-                      minMatchLength))
+func isSubStringNoCase(string1_ string, string2_ string, minMatchLength_ int) bool {
+  return (isSubString(strings.ToLower(string1_),
+                      strings.ToLower(string2_),
+                      minMatchLength_))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isFloat(string string) bool {
-  _, err := strconv.ParseFloat(string, 64)
+func isFloat(string_ string) bool {
+  _, err := strconv.ParseFloat(string_, 64)
   if err == nil {
     return (true)
   } else {
@@ -977,8 +1131,8 @@ func isFloat(string string) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isDec(string string) bool {
-  _, err := strconv.ParseInt(string, 10, 64)
+func isDec(string_ string) bool {
+  _, err := strconv.ParseInt(string_, 10, 64)
   if err == nil {
     return (true)
   } else {
@@ -988,18 +1142,18 @@ func isDec(string string) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isHex(string_ string, needHexPrefix bool) bool {
-  var string1 string
-  if (needHexPrefix == true) {
+func isHex(string_ string, needHexPrefix_ bool) bool {
+  var string string
+  if (needHexPrefix_ == true) {
     if (len(string_) < 3 || strings.ToLower(string_[0:2]) != "0x") {
       return false
     } else {
-      string1 = string_[2:]
+      string = string_[2:]
     }
   } else {
-    string1 = string_
+    string = string_
   }
-  _, err := strconv.ParseInt(string1, 16, 64)
+  _, err := strconv.ParseInt(string, 16, 64)
   if err == nil {
     return (true)
   } else {
@@ -1009,8 +1163,8 @@ func isHex(string_ string, needHexPrefix bool) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isAlpha(string string) bool {
-  for _, char := range string {
+func isAlpha(string_ string) bool {
+  for _, char := range string_ {
     if !unicode.IsLetter(char) {
       return (false)
     }
@@ -1020,17 +1174,15 @@ func isAlpha(string string) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isNumeric(string string, needHexPrefix bool) bool {
-  return (isDec(string) || isHex(string, needHexPrefix))
+func isNumeric(string_ string, needHexPrefix_ bool) bool {
+  return (isDec(string_) || isHex(string_, needHexPrefix_))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isAlphaNumeric(string string) bool {
-  for _, char := range string {
-    if (!((char >= '0' && char <= '9') ||
-          (char >= 'a' && char <= 'z') ||
-          (char >= 'A' && char <= 'Z'))) {
+func isAlphaNumeric(string_ string) bool {
+  for _, char := range string_ {
+    if !unicode.IsLetter(char) && !unicode.IsNumber(char) {
       return (false)
     }
   }
@@ -1039,56 +1191,56 @@ func isAlphaNumeric(string string) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getBool(string string) bool {
-  return (strings.ToLower(string) == "true" ||
-          strings.ToLower(string) == "yes" ||
-          strings.ToLower(string) == "on")
+func getBool(string_ string) bool {
+  return (strings.ToLower(string_) == "true" ||
+          strings.ToLower(string_) == "yes" ||
+          strings.ToLower(string_) == "on")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getInt(string string, radix int, needHexPrefix bool) int64 {
-  if radix == RADIX_ANY {
-    if isDec(string) {
-      value, _ := strconv.ParseInt(string, 10, 64)
+func getInt(string_ string, radix_ int, needHexPrefix_ bool) int64 {
+  if radix_ == RADIX_ANY {
+    if isDec(string_) {
+      value, _ := strconv.ParseInt(string_, 10, 64)
       return (value)
-    } else if isHex(string, needHexPrefix) {
-      if needHexPrefix {
-        value, _ := strconv.ParseInt(string[2:], 16, 64)
+    } else if isHex(string_, needHexPrefix_) {
+      if needHexPrefix_ {
+        value, _ := strconv.ParseInt(string_[2:], 16, 64)
         return (value)
       } else {
-        value, _ := strconv.ParseInt(string, 16, 64)
+        value, _ := strconv.ParseInt(string_, 16, 64)
         return (value)
       }
     } else {
-      printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.isNumeric()\n",  string)
+      printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.isNumeric()\n",  string_)
       return (0)
     }
-  } else if radix == RADIX_DEC && isDec(string) {
-    value, _ := strconv.ParseInt(string, 10, 64)
+  } else if radix_ == RADIX_DEC && isDec(string_) {
+    value, _ := strconv.ParseInt(string_, 10, 64)
     return (value)
-  } else if radix == RADIX_HEX && isHex(string, needHexPrefix) {
-    if needHexPrefix {
-      value, _ := strconv.ParseInt(string[2:], 16, 64)
+  } else if radix_ == RADIX_HEX && isHex(string_, needHexPrefix_) {
+    if needHexPrefix_ {
+      value, _ := strconv.ParseInt(string_[2:], 16, 64)
       return (value)
     } else {
-      value, _ := strconv.ParseInt(string, 16, 64)
+      value, _ := strconv.ParseInt(string_, 16, 64)
       return (value)
     }
   } else {
-    printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.IsNumeric()\n", string)
+    printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.IsNumeric()\n", string_)
     return (0)
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getFloat(string string) float64 {
-  if isFloat(string) {
-    value, _ := strconv.ParseFloat(string, 64)
+func getFloat(string_ string) float64 {
+  if isFloat(string_) {
+    value, _ := strconv.ParseFloat(string_, 64)
     return (value)
   } else {
-    printError("Could not extract floating point value from string: '%s', consider checking format with PshellServer.IsFloat()\n", string)
+    printError("Could not extract floating point value from string: '%s', consider checking format with PshellServer.IsFloat()\n", string_)
     return (0.0)
   }
 }

@@ -663,7 +663,6 @@ def getInt(string, radix = RADIX_ANY, needHexPrefix = True):
         string : string to convert to integer
 
     Returns:
-        bool : True if string is valid integer format, False otherwise
         int  : Integer value of corresponding string
   """
   return (_getInt(string, radix, needHexPrefix))
@@ -678,7 +677,6 @@ def getFloat(string):
         string : string to convert to float
 
     Returns:
-        bool : True if string is valid float format, False otherwise
         int  : Float value of corresponding string
   """
   return (_getFloat(string))
