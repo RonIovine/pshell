@@ -802,8 +802,8 @@ def _getInt(string_, radix_, needHexPrefix_):
     else:
       _printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.isNumeric()" % string)
       return (0)
-  elif radix_ == RADIX_DEC and _isDex(string):
-    return (True, int(string, 10))
+  elif radix_ == RADIX_DEC and _isDec(string):
+    return (int(string, 10))
   elif radix_ == RADIX_HEX and _isHex(string, needHexPrefix_):
     return (int(string, 16))
   else:
@@ -818,7 +818,7 @@ def _getFloat(string_):
     return (float(string))
   else:
     _printError("Could not extract floating point value from string: '%s', consider checking format with PshellServer.isFloat()" % string)
-    return (0)
+    return (0.0)
 
 #################################################################################
 #################################################################################

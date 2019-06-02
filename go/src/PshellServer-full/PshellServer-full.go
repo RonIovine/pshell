@@ -53,6 +53,7 @@ import "os"
 import "math"
 import "bufio"
 import "time"
+import "unicode"
 
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -651,7 +652,7 @@ func GetBool(string string) bool {
 //       bool : True if string is valid integer format, False otherwise
 //       int  : Integer value of corresponding string
 //
-func GetInt(string string, radix int, needHexPrefix bool) int {
+func GetInt(string string, radix int, needHexPrefix bool) int64 {
   return (getInt(string, radix, needHexPrefix))
 }
 
@@ -923,25 +924,26 @@ func showUsage() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func tokenize(string string, delimiter string) (int, []string) {
-  return 0, strings.Split(strings.TrimSpace(string), delimiter)
+  return len(strings.Split(strings.TrimSpace(string), delimiter)),
+         strings.Split(strings.TrimSpace(string), delimiter)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getLength(string string) int {
-  return (0)
+  return (len(string))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isEqual(string1 string, string2 string, ) bool {
-  return (true)
+  return (string1 == string2)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isEqualNoCase(string1 string, string2 string, ) bool {
-  return (true)
+  return (strings.ToLower(string1) == strings.ToLower(string2))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -957,61 +959,138 @@ func isSubString(string1_ string, string2_ string, minMatchLength_ int) bool {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isSubStringNoCase(string1 string, string2 string, minMatchLength int) bool {
-  return (true)
+  return (isSubString(strings.ToLower(string1),
+                      strings.ToLower(string2),
+                      minMatchLength))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isFloat(string string) bool {
-  return (true)
+  _, err := strconv.ParseFloat(string, 64)
+  if err == nil {
+    return (true)
+  } else {
+    return (false)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isDec(string string) bool {
-  return (true)
+  _, err := strconv.ParseInt(string, 10, 64)
+  if err == nil {
+    return (true)
+  } else {
+    return (false)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isHex(string string, needHexPrefix bool) bool {
-  return (true)
+func isHex(string_ string, needHexPrefix bool) bool {
+  var string1 string
+  if (needHexPrefix == true) {
+    if (len(string_) < 3 || strings.ToLower(string_[0:2]) != "0x") {
+      return false
+    } else {
+      string1 = string_[2:]
+    }
+  } else {
+    string1 = string_
+  }
+  _, err := strconv.ParseInt(string1, 16, 64)
+  if err == nil {
+    return (true)
+  } else {
+    return (false)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isAlpha(string string) bool {
+  for _, char := range string {
+    if !unicode.IsLetter(char) {
+      return (false)
+    }
+  }
   return (true)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func isNumeric(string string, needHexPrefix bool) bool {
-  return (true)
+  return (isDec(string) || isHex(string, needHexPrefix))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func isAlphaNumeric(string1 string) bool {
+func isAlphaNumeric(string string) bool {
+  for _, char := range string {
+    if (!((char >= '0' && char <= '9') ||
+          (char >= 'a' && char <= 'z') ||
+          (char >= 'A' && char <= 'Z'))) {
+      return (false)
+    }
+  }
   return (true)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getBool(string string) bool {
-  return (true)
+  return (strings.ToLower(string) == "true" ||
+          strings.ToLower(string) == "yes" ||
+          strings.ToLower(string) == "on")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func getInt(string string, radix int, needHexPrefix bool) int {
-  return (0)
+func getInt(string string, radix int, needHexPrefix bool) int64 {
+  if radix == RADIX_ANY {
+    if isDec(string) {
+      value, _ := strconv.ParseInt(string, 10, 64)
+      return (value)
+    } else if isHex(string, needHexPrefix) {
+      if needHexPrefix {
+        value, _ := strconv.ParseInt(string[2:], 16, 64)
+        return (value)
+      } else {
+        value, _ := strconv.ParseInt(string, 16, 64)
+        return (value)
+      }
+    } else {
+      printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.isNumeric()\n",  string)
+      return (0)
+    }
+  } else if radix == RADIX_DEC && isDec(string) {
+    value, _ := strconv.ParseInt(string, 10, 64)
+    return (value)
+  } else if radix == RADIX_HEX && isHex(string, needHexPrefix) {
+    if needHexPrefix {
+      value, _ := strconv.ParseInt(string[2:], 16, 64)
+      return (value)
+    } else {
+      value, _ := strconv.ParseInt(string, 16, 64)
+      return (value)
+    }
+  } else {
+    printError("Could not extract numeric value from string: '%s', consider checking format with PshellServer.IsNumeric()\n", string)
+    return (0)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getFloat(string string) float64 {
-  return (0.0)
+  if isFloat(string) {
+    value, _ := strconv.ParseFloat(string, 64)
+    return (value)
+  } else {
+    printError("Could not extract floating point value from string: '%s', consider checking format with PshellServer.IsFloat()\n", string)
+    return (0.0)
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
