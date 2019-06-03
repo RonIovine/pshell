@@ -288,7 +288,91 @@ func GetInt(string string, radix int, needHexPrefix bool) int {
 //
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
-func GetFloat(string string) float64 {
+func GetInt64(string string, radix int, needHexPrefix bool) int64 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetInt32(string string, radix int, needHexPrefix bool) int32 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetInt16(string string, radix int, needHexPrefix bool) int16 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetInt8(string string, radix int, needHexPrefix bool) int8 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetUint(string string, radix int, needHexPrefix bool) uint64 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetUint64(string string, radix int, needHexPrefix bool) uint64 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetUint32(string string, radix int, needHexPrefix bool) uint32 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetUint16(string string, radix int, needHexPrefix bool) uint16 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetUint8(string string, radix int, needHexPrefix bool) uint8 {
+  return (0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetDouble(string string) float64 {
+  return (0.0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetFloat64(string string) float64 {
+  return (0.0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetFloat(string string) float32 {
+  return (0.0)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
+func GetFloat32(string string) float32 {
   return (0.0)
 }
 
