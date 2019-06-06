@@ -18,9 +18,13 @@ void pshell_rl_setFileDescriptors(int inFd_,
                                   PshellSerialType serialType_,
                                   int idleTimeout_ = PSHELL_RL_IDLE_TIMEOUT_NONE);
 
-/* write a string to the output file descriptor */
+/* write a raw string to the output file descriptor */
 
-void pshell_rl_writeOutput(const char* format_, ...);
+void pshell_rl_writeOutput(const char* string_);
+
+/* write a formatted string to the output file descriptor */
+
+void pshell_rl_printf(const char* format_, ...);
 
 /* get a line of user input */
 

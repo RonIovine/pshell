@@ -72,6 +72,10 @@ static int _outFd = STDOUT_FILENO;
 static int _idleTimeout = PSHELL_RL_IDLE_TIMEOUT_NONE;
 static const char *_tcpNegotiate = "\xFF\xFB\x03\xFF\xFB\x01\xFF\xFD\x03\xFF\xFD\x01";
 
+/* this should be sized for the max espected single 'printf' call */
+#define FORMATTED_OUTPUT_SIZE 4096
+static char _formattedString[FORMATTED_OUTPUT_SIZE] = {0};
+
 /****************************************
  * private "member" function prototypes
  ****************************************/
@@ -127,33 +131,47 @@ void pshell_rl_setFileDescriptors(int inFd_, int outFd_, PshellSerialType serial
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_rl_writeOutput(const char* format_, ...)
+void pshell_rl_writeOutput(const char* string_)
 {
-  char string[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
-  char socketString[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
-  va_list args;
-
-  va_start(args, format_);
-  vsnprintf(string, sizeof(string), format_, args);
-  va_end(args);
+  int length = strlen(string_);
   if (_serialType == PSHELL_RL_SOCKET)
   {
-    // need to convert \n to \r\n
-    unsigned j = 0;
-    for (unsigned i = 0; i < strlen(string); i++)
+    int printPos = 0;
+    int printLen = 1;
+    for (int pos = 0; pos < length; pos++)
     {
-      if (string[i] == '\n')
+      if (string_[pos] == '\n')
       {
-        socketString[j++] = '\r';
+        write(_outFd, &string_[printPos], printLen);
+        write(_outFd, "\r", 1);
+        printPos = pos + 1;
+        printLen = 0;
       }
-      socketString[j++] = string[i];
+      printLen++;
     }
-    write(_outFd, socketString, strlen(socketString));
+    write(_outFd, &string_[printPos], printLen);
   }
   else
   {
-    write(_outFd, string, strlen(string));
+    write(_outFd, string_, length);
   }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void pshell_rl_printf(const char* format_, ...)
+{
+  int requestedSize;
+  va_list args;
+
+  va_start(args, format_);
+  requestedSize = vsnprintf(_formattedString, sizeof(_formattedString), format_, args);
+  va_end(args);
+  if (requestedSize > FORMATTED_OUTPUT_SIZE)
+  {
+    printf("RequestedSize: %d, larger than available size: %d, truncating\n", requestedSize, FORMATTED_OUTPUT_SIZE);
+  }
+  pshell_rl_writeOutput(_formattedString);
 }
 
 /******************************************************************************/
@@ -312,13 +330,13 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
               input_[0] = 0;
               cursorPos = 0;
               tabCount = 0;
-              pshell_rl_writeOutput("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
+              pshell_rl_printf("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n", index+1, _numHistory);
               pshell_rl_writeOutput(prompt_);
             }
           }
           else
           {
-            pshell_rl_writeOutput("PSHELL_ERROR: Invalid history index: '%s'\n", &input_[1]);
+            pshell_rl_printf("PSHELL_ERROR: Invalid history index: '%s'\n", &input_[1]);
             pshell_rl_writeOutput(prompt_);
             input_[0] = 0;
             cursorPos = 0;
@@ -448,8 +466,8 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
     else if (ch != 9)
     {
       // don't print out tab if multi keyword command
-      //pshell_rl_writeOutput("\nchar value: %d" % ch)
-      //pshell_rl_writeOutput("\n"+prompt_)
+      //pshell_rl_printf("\nchar value: %d" % ch)
+      //pshell_rl_printf("\n"+prompt_)
     }
   }
 }
@@ -668,7 +686,7 @@ static void showTabCompletions(char *completionList_[],
     unsigned numPrinted = 0;
     for (unsigned i = 0; i < numCompletions_; i++)
     {
-      pshell_rl_writeOutput("%s", completionList_[i]);
+      pshell_rl_writeOutput(completionList_[i]);
       space(maxCompletionLength_-strlen(completionList_[i]));
       numPrinted += 1;
       totPrinted += 1;
@@ -681,7 +699,7 @@ static void showTabCompletions(char *completionList_[],
     va_start(args, format_);
     vsnprintf(prompt, sizeof(prompt), format_, args);
     va_end(args);
-    pshell_rl_writeOutput("\n%s", prompt);
+    pshell_rl_printf("\n%s", prompt);
   }
 }
 
@@ -740,7 +758,7 @@ static void deleteUnderCursor(unsigned cursorPos_, char *command_)
 {
   if (cursorPos_ < strlen(command_))
   {
-    pshell_rl_writeOutput("%s ", &command_[cursorPos_+1]);
+    pshell_rl_printf("%s ", &command_[cursorPos_+1]);
     backspace(strlen(&command_[cursorPos_]));
     command_[cursorPos_] = 0;
     sprintf(command_, "%s%s", command_, &command_[cursorPos_+1]);
@@ -754,7 +772,7 @@ static void backspaceDelete(unsigned &cursorPos_, char *command_)
   if ((strlen(command_) > 0) && (cursorPos_ > 0))
   {
     backspace();
-    pshell_rl_writeOutput("%s ", &command_[cursorPos_]);
+    pshell_rl_printf("%s ", &command_[cursorPos_]);
     backspace(strlen(&command_[cursorPos_])+1);
     sprintf(&command_[cursorPos_-1], "%s", &command_[cursorPos_]);
     cursorPos_ -= 1;
@@ -887,7 +905,7 @@ static void showHistory(void)
 {
   for (unsigned i = 0; i < _numHistory; i++)
   {
-    pshell_rl_writeOutput("%-3d %s\n", i+1, _history[i]);
+    pshell_rl_printf("%-3d %s\n", i+1, _history[i]);
   }
 }
 

@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
   while (((idleSession = pshell_rl_getInput("prompt> ", input)) == false) && !pshell_rl_isSubString(input, "quit"))
   {
-    pshell_rl_writeOutput("input: '%s'\n", input);
+    pshell_rl_printf("input: '%s'\n", input);
   }
 
   return (0);

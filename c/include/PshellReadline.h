@@ -50,7 +50,8 @@ extern "C" {
  * pshell_rl_addTabCompletion()   -- add a keyword to the TAB completion list
  * pshell_rl_setTabStyle()        -- sets the tab behavour style ("fast" or bash)
  * pshell_rl_getInput()           -- get a line of user input from our input file descriptor
- * pshell_rl_writeOutput()        -- write a string to our output file descriptor
+ * pshell_rl_writeOutput()        -- write raw string to our output file descriptor
+ * pshell_rl_printf()             -- write formatted string to our output file descriptor
  * pshell_rl_isSubString()        -- checks for string1 substring of string2 at position 0
  *
  * Use for the timeout value when setting the idleSessionTimeout, default=none
@@ -131,9 +132,16 @@ void pshell_rl_setFileDescriptors(int inFd_,
 /*
  * pshell_rl_writeOutput:
  *
- * Write a string to our output file descriptor
+ * Write a raw string to our output file descriptor
  */
-void pshell_rl_writeOutput(const char* format_, ...);
+void pshell_rl_writeOutput(const char* string_);
+
+/*
+ * pshell_rl_printf:
+ *
+ * Write a formatted string to our output file descriptor
+ */
+void pshell_rl_printf(const char* format_, ...);
 
 /*
  * pshell_rl_getInput:

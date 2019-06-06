@@ -95,8 +95,11 @@ unsigned maxLocalName = strlen(localNameLabel);
 unsigned maxRemoteName = strlen(remoteNameLabel);
 unsigned maxMulticastKeyword = strlen(keywordLabel);
 
-/* make sure the results array is big enough for any possible output */
-char results[4096];
+/*
+ * make sure the results array is big enough for any possible output,
+ * we use the max datagram size
+ */
+char results[1024*64];
 
 /******************************************************************************/
 /******************************************************************************/

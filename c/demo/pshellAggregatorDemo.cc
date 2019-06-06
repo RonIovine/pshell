@@ -111,8 +111,11 @@ char *buildCommand(char *command, unsigned size, int argc, char *argv[])
  * every control specific callback for this aggregator
  */
 
-/* make sure the results array is big enough for any possible output */
-char results[4096];
+/*
+ * make sure the results array is big enough for any possible output,
+ * we use the max datagram size
+ */
+char results[1024*64];
 
 /******************************************************************************/
 /******************************************************************************/
