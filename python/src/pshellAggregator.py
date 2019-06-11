@@ -343,9 +343,10 @@ if (__name__ == '__main__'):
 
   # start our local pshell server
   PshellServer.startServer("pshellAggregator", PshellServer.LOCAL, PshellServer.BLOCKING)
-
+  print("here-1")
   # disconnect all our remote control servers
   PshellControl.disconnectAllServers()
 
   # cleanup our local server's resources
   PshellServer.cleanupResources()
+

@@ -1367,9 +1367,10 @@ func showWelcome() {
                          _gServerType)
   } else {
     printf("\033]0;%s\007", _gTcpTitle)
-    server = fmt.Sprintf("#  Single session TCP server: %s[%s]\n",
+    server = fmt.Sprintf("#  Single session TCP server: %s[%s:%s]\n",
                          _gServerName,
-                         _gTcpConnectSockName)
+                         _gTcpConnectSockName,
+                         _gPort)
   }
   maxBorderWidth := math.Max(58, float64(len(banner)-1))
   maxBorderWidth = math.Max(maxBorderWidth, float64(len(server)))+2
@@ -1629,9 +1630,9 @@ func runTCPServer() {
       }
       connectionAccepted = acceptConnection()
       if connectionAccepted {
-        _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
+        _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + ":" + _gPort + "]:" + _gPrompt
         _gTcpTitle = _gTitle + ": " + _gServerName + "[" +
-                     _gTcpConnectSockName + "], Mode: INTERACTIVE"
+                     _gTcpConnectSockName + ":" + _gPort + "], Mode: INTERACTIVE"
         // shutdown original socket to not allow any new connections
         // until we are done with this one
         _gTcpSocket.Close()

@@ -125,6 +125,7 @@ struct sockaddr_in _sourceIpAddress;
 struct sockaddr_in _destIpAddress;
 struct sockaddr_un _sourceUnixAddress;
 struct sockaddr_un _destUnixAddress;
+int _destPort = 0;
 bool _isUnixConnected = false;
 
 #define MAX_UNIX_CLIENTS 1000
@@ -139,6 +140,7 @@ char _ipAddress[PSHELL_RL_MAX_COMMAND_SIZE];
 char _title[PSHELL_RL_MAX_COMMAND_SIZE];
 char _banner[PSHELL_RL_MAX_COMMAND_SIZE];
 char _prompt[PSHELL_RL_MAX_COMMAND_SIZE];
+char _serverDisplay[PSHELL_RL_MAX_COMMAND_SIZE];
 const char *_host;
 const char *_server;
 unsigned _version;
@@ -235,15 +237,15 @@ void showWelcome(void)
   char sessionInfo[256];
   if (_isBroadcastServer)
   {
-    sprintf(sessionInfo, "Multi-session BROADCAST server: %s[%s]", _serverName, _ipAddress);
+    sprintf(sessionInfo, "Multi-session BROADCAST server: %s", _serverDisplay);
   }
   else if (_serverType == UDP)
   {
-    sprintf(sessionInfo, "Multi-session UDP server: %s[%s]", _serverName, _ipAddress);
+    sprintf(sessionInfo, "Multi-session UDP server: %s", _serverDisplay);
   }
   else
   {
-    sprintf(sessionInfo, "Multi-session UNIX server: %s[%s]", _serverName, _ipAddress);
+    sprintf(sessionInfo, "Multi-session UNIX server: %s", _serverDisplay);
   }
   unsigned maxLength = MAX(strlen(_banner), strlen(sessionInfo))+3;
   PSHELL_PRINT_WELCOME_BORDER(printf, maxLength);
@@ -447,7 +449,6 @@ bool init(const char *destination_, const char *server_)
   char requestedHost[180];
   char destination[180];
   struct hostent *host;
-  int destPort = 0;
   const char *port;
   int retCode = -1;
   char *ipAddrOctets[MAX_TOKENS];
@@ -457,19 +458,19 @@ bool init(const char *destination_, const char *server_)
    /* see if it is a named server, numeric port, or UNIX domain server */
   if (strcmp(destination_, "unix") == 0)
   {
-    destPort = 0;
+    _destPort = 0;
   }
   else if (isNumeric(server_))
   {
-    destPort = atoi(server_);
+    _destPort = atoi(server_);
   }
   else if ((port = findServerPort(server_)) != NULL)
   {
-    destPort = atoi(port);
+    _destPort = atoi(port);
   }
 
   /* see if our destination is a UDP or UNIX domain socket */
-  if (destPort > 0)
+  if (_destPort > 0)
   {
 
     /* UDP socket destination */
@@ -517,7 +518,7 @@ bool init(const char *destination_, const char *server_)
 
     /* setup our destination */
     _destIpAddress.sin_family = AF_INET;
-    _destIpAddress.sin_port = htons(destPort);
+    _destIpAddress.sin_port = htons(_destPort);
 
     /* see if they supplied an IP address */
     if (inet_aton(destination_, &_destIpAddress.sin_addr) == 0)
@@ -594,12 +595,27 @@ bool init(const char *destination_, const char *server_)
   }
   else
   {
-    return (getVersion() &&
-            getPayloadSize() &&
-            getServerName() &&
-            getTitle() &&
-            getBanner() &&
-            getPrompt());
+    if (getVersion() &&
+        getPayloadSize() &&
+        getServerName() &&
+        getTitle() &&
+        getBanner() &&
+        getPrompt())
+    {
+      if (_serverType == UNIX)
+      {
+        sprintf(_serverDisplay, "%s[%s]", _serverName, _ipAddress);
+      }
+      else
+      {
+        sprintf(_serverDisplay, "%s[%s:%d]", _serverName, _ipAddress, _destPort);
+      }
+      return (true);
+    }
+    else
+    {
+      return (false);
+    }
   }
 }
 
@@ -716,10 +732,9 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
     {
       iteration++;
       fprintf(stdout,
-              "\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC, Iteration: %d of %d\007",
+              "\033]0;%s: %s, Mode: COMMAND LINE[%s], Rate: %d SEC, Iteration: %d of %d\007",
               _title,
-              _serverName,
-              _ipAddress,
+              _serverDisplay,
               command_,
               rate_,
               iteration,
@@ -891,17 +906,15 @@ bool initInteractiveMode(void)
 
   /* setup our prompt */
   sprintf(_interactivePrompt,
-          "%s[%s]:%s",
-          _serverName,
-          _ipAddress,
+          "%s:%s",
+          _serverDisplay,
           _prompt);
 
   /* setup our title bar */
   fprintf(stdout,
-          "\033]0;%s: %s[%s], Mode: INTERACTIVE\007",
+          "\033]0;%s: %s, Mode: INTERACTIVE\007",
           _title,
-          _serverName,
-          _ipAddress);
+          _serverDisplay);
   fflush(stdout);
 
   return (true);
@@ -952,10 +965,9 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
       {
         iteration++;
         fprintf(stdout,
-                "\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007",
+                "\033]0;%s: %s, Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007",
                 _title,
-                _serverName,
-                _ipAddress,
+                _serverDisplay,
                 filename_,
                 rate_,
                 iteration,
@@ -1531,10 +1543,9 @@ int main(int argc, char *argv[])
       if ((rate > 0) && (repeat == 0))
       {
         fprintf(stdout,
-                "\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007",
+                "\033]0;%s: %s, Mode: COMMAND LINE[%s], Rate: %d SEC\007",
                 _title,
-                _serverName,
-                _ipAddress,
+                _serverDisplay,
                 command,
                 rate);
         fflush(stdout);
@@ -1551,10 +1562,9 @@ int main(int argc, char *argv[])
       if ((rate > 0) && (repeat == 0))
       {
         fprintf(stdout,
-                "\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007",
+                "\033]0;%s: %s, Mode: BATCH[%s], Rate: %d SEC\007",
                 _title,
-                _serverName,
-                _ipAddress,
+                _serverDisplay,
                 filename,
                 rate);
         fflush(stdout);

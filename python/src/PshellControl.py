@@ -568,6 +568,7 @@ def _disconnectAllServers():
   global _gPshellControl
   for control in _gPshellControl:
     _removeControl(control)
+  _gPshellControl = []
 
 #################################################################################
 #################################################################################
@@ -837,7 +838,6 @@ def _removeControl(control_):
   if (control_["serverType"] == "unix"):
     os.unlink(control_["sourceAddress"])
   control_["socket"].close()
-  _gPshellControl.remove(control_)
 
 #################################################################################
 #################################################################################

@@ -376,6 +376,7 @@ static void showWelcome(void);
 
 static int getIpAddress(const char *interface_, char *ipAddress_);
 static bool createSocket(void);
+static bool bindSocket(void);
 
 /* common functions (UDP, TCP, UNIX, and LOCAL servers) */
 
@@ -408,6 +409,7 @@ static void quit(int argc, char *argv[]);
 static void batch(int argc, char *argv[]);
 
 #define PSHELL_NO_SERVER (PshellServerType)255
+#define PSHELL_MAX_BIND_ATTEMPTS 1000
 
 /* output display macros */
 static void _printf(const char *format_, ...);
@@ -1848,7 +1850,7 @@ static void runTCPServer(void)
         /* shutdown original socket to not allow any new connections until we are done with this one */
         getsockname(_connectFd, (sockaddr *)&addr, &addrlen);
         strcpy(_ipAddress, inet_ntoa(addr.sin_addr));
-        sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
+        sprintf(_interactivePrompt, "%s[%s:%d]:%s", _serverName, _ipAddress, _port, _prompt);
         pshell_rl_setFileDescriptors(_connectFd,
                                      _connectFd,
                                      PSHELL_RL_SOCKET,
@@ -1938,10 +1940,19 @@ static int getIpAddress(const char *interface_, char *ipAddress_)
 static void showWelcome(void)
 {
   char sessionInfo[256];
-  sprintf(sessionInfo, "Single session %s server: %s[%s]", ((_serverType == PSHELL_TCP_SERVER) ? "TCP" : "LOCAL"), _serverName, _ipAddress);
-  unsigned maxLength = MAX(strlen(_banner), strlen(sessionInfo))+3;
+  unsigned maxLength;
   /* set our terminal title bar */
-  pshell_printf("\033]0;%s: %s[%s], Mode: INTERACTIVE\007", _title, _serverName, _ipAddress);
+  if (_serverType == PSHELL_TCP_SERVER)
+  {
+    sprintf(sessionInfo, "Single session %s server: %s[%s:%d]", ((_serverType == PSHELL_TCP_SERVER) ? "TCP" : "LOCAL"), _serverName, _ipAddress, _port);
+    pshell_printf("\033]0;%s: %s[%s:%d], Mode: INTERACTIVE\007", _title, _serverName, _ipAddress, _port);
+  }
+  else
+  {
+    sprintf(sessionInfo, "Single session %s server: %s[%s]", ((_serverType == PSHELL_TCP_SERVER) ? "TCP" : "LOCAL"), _serverName, _ipAddress);
+    pshell_printf("\033]0;%s: %s[%s], Mode: INTERACTIVE\007", _title, _serverName, _ipAddress);
+  }
+  maxLength = MAX(strlen(_banner), strlen(sessionInfo))+3;
   /* show our welcome screen */
   pshell_printf("\n");
   PSHELL_PRINT_WELCOME_BORDER(pshell_printf, maxLength);
@@ -1983,10 +1994,6 @@ static void showWelcome(void)
 static void quit(int argc, char *argv[])
 {
   _quit = true;
-  if (_serverType == PSHELL_LOCAL_SERVER)
-  {
-    exit(0);
-  }
 }
 
 /******************************************************************************/
@@ -2603,6 +2610,74 @@ static void loadConfigFile(void)
 
 /******************************************************************************/
 /******************************************************************************/
+static bool bindSocket(void)
+{
+  unsigned port = _port;
+  bool bound = false;
+  for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS; attempt++)
+  {
+    if (_serverType == PSHELL_UNIX_SERVER)
+    {
+      _localUnixAddress.sun_family = AF_UNIX;
+      sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
+      unlink(_localUnixAddress.sun_path);
+
+      /* bind to our source socket */
+      if (bind(_socketFd,
+               (struct sockaddr *) &_localUnixAddress,
+               sizeof(_localUnixAddress)) < 0)
+      {
+        break;
+      }
+      strcpy(_ipAddress, "unix");
+      bound = true;
+      break;
+    }
+    else
+    {
+      /* IP socket */
+      _localIpAddress.sin_port = htons(port);
+      if (bind(_socketFd,
+               (struct sockaddr *) &_localIpAddress,
+               sizeof(_localIpAddress)) < 0)
+      {
+        if (attempt == 1)
+        {
+          PSHELL_WARNING("Could not bind to requested port: %d, looking for first available port", _port);
+        }
+        port = _port + attempt;
+      }
+      else
+      {
+        bound = true;
+        break;
+      }
+    }
+  }
+  if (!bound)
+  {
+    if (_serverType == PSHELL_UNIX_SERVER)
+    {
+      PSHELL_ERROR("Could not find available address after %d attempts", PSHELL_MAX_BIND_ATTEMPTS)
+      PSHELL_ERROR("Cannot bind to UNIX socket: %s", _serverName);
+    }
+    else
+    {
+      PSHELL_ERROR("Could not find available port after %d attempts", PSHELL_MAX_BIND_ATTEMPTS);
+      PSHELL_ERROR("Cannot bind to socket: address: %s, port: %d",
+                   inet_ntoa(_localIpAddress.sin_addr),
+                   _port);
+    }
+  }
+  else
+  {
+    _port = port;
+  }
+  return (bound);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static bool createSocket(void)
 {
   char requestedHost[180];
@@ -2637,19 +2712,10 @@ static bool createSocket(void)
 
   if (_serverType == PSHELL_UNIX_SERVER)
   {
-    _localUnixAddress.sun_family = AF_UNIX;
-    sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
-    unlink(_localUnixAddress.sun_path);
-
-    /* bind to our source socket */
-    if (bind(_socketFd,
-             (struct sockaddr *) &_localUnixAddress,
-             sizeof(_localUnixAddress)) < 0)
+    if (!bindSocket())
     {
-      PSHELL_ERROR("Cannot bind to UNIX socket: %s", _localUnixAddress.sun_path);
       return (false);
     }
-    strcpy(_ipAddress, "unix");
   }
   else
   {
@@ -2718,14 +2784,8 @@ static bool createSocket(void)
       cleanupTokens();
     }
 
-    /* bind to our source socket */
-    if (bind(_socketFd,
-             (struct sockaddr *) &_localIpAddress,
-             sizeof(_localIpAddress)) < 0)
+    if (!bindSocket())
     {
-      PSHELL_ERROR("Cannot bind to socket: address: %s, port: %d",
-                   inet_ntoa(_localIpAddress.sin_addr),
-                   ntohs(_localIpAddress.sin_port));
       return (false);
     }
 
@@ -2737,7 +2797,15 @@ static bool createSocket(void)
 
   }
 
-  sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
+  if (_serverType == PSHELL_UNIX_SERVER)
+  {
+    /* for a UNIX server the _ipAddress value is set to 'unix' for display purposes only */
+    sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
+  }
+  else
+  {
+    sprintf(_interactivePrompt, "%s[%s:%d]:%s", _serverName, _ipAddress, _port, _prompt);
+  }
 
   return (true);
 

@@ -147,12 +147,12 @@ def _comandDispatcher(args_):
 def _getIpAddress():
   global _gRemoteServer
   global _gPort
-  if (_gPort == "unix"):
+  if (_gPort == PshellControl.UNIX):
     return (_gPort)
   elif (_gRemoteServer == "localhost"):
-    return ("127.0.0.1")
+    return ("127.0.0.1"+":"+str(_gPort))
   else:
-    return (_gRemoteServer)
+    return (_gRemoteServer+":"+str(_gPort))
 
 #################################################################################
 #################################################################################
@@ -272,6 +272,7 @@ def _configureLocalServer():
   prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
+    print(PshellServer._gPromptOverride)
 
   title = PshellControl._extractTitle(_gSid)
   if (len(title) > 0):
@@ -291,6 +292,9 @@ def _configureLocalServer():
     PshellServer._gServerTypeOverride = "127.0.0.1"
   else:
     PshellServer._gServerTypeOverride = _gRemoteServer
+
+  if _gPort != PshellServer.UNIX:
+     PshellServer._gServerTypeOverride += ":{}".format(_gPort)
 
   PshellServer._gTcpTimeout = _gTimeout
 
@@ -586,8 +590,12 @@ if (__name__ == '__main__'):
       _showWelcome()
 
       command = ""
+      if _gPort == PshellServer.UNIX:
+        prompt = "%s[%s]:PSHELL> " % (_gServerName, _gRemoteServer)
+      else:
+        prompt = "%s[%s:%s]:PSHELL> " % (_gServerName, _gRemoteServer, str(_gPort))
       while (not PshellReadline.isSubString(command, "quit")):
-        (command, idleSession) = PshellReadline.getInput("%s[%s]:PSHELL> " % (_gServerName, _gRemoteServer))
+        (command, idleSession) = PshellReadline.getInput(prompt)
         if (not PshellReadline.isSubString(command, "quit")):
           _processCommand(command)
 

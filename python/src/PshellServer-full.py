@@ -931,6 +931,48 @@ def _serverThread():
 
 #################################################################################
 #################################################################################
+def _bindSocket(address_):
+  global _gSocketFd
+  global _gPort
+  global _gServerType
+  global _gUnixSourceAddress
+  global _gServerName
+  maxAttempts = 1000
+  if _gServerType == UNIX:
+    # Unix domain socket
+    address = address_
+    serverName = _gServerName
+    for attempt in range(1,maxAttempts+1):
+      try:
+        _gSocketFd.bind((address))
+        return
+      except Exception as error:
+        if attempt == 1:
+          # only print message on first attemps
+          _printWarning("Could not bind to UNIX address: {}, looking for first available address".format(_gServerName))
+        address = address_ + str(attempt)
+        _gUnixSourceAddress = address
+        _gServerName = serverName + str(attempt)
+    _printError("Could not find available address after {} attempts".format(maxAttempts))
+    _gServerName = serverName
+  else:
+    # IP domain socket
+    port = _gPort
+    for attempt in range(1,maxAttempts+1):
+      try:
+        _gSocketFd.bind((address_, port))
+        return
+      except Exception as error:
+        if attempt == 1:
+          # only print message on first attemps
+          _printWarning("Could not bind to requested port: {}, looking for first available port".format(_gPort))
+        port = _gPort + attempt
+        _gPort = port
+    _printError("Could not find available port after {} attempts".format(maxAttempts))
+  raise Exception(error)
+
+#################################################################################
+#################################################################################
 def _createSocket():
   global _gServerName
   global _gServerType
@@ -945,34 +987,40 @@ def _createSocket():
       _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
       ipAddrOctets = _gHostnameOrIpAddr.split(".")
       if (_gHostnameOrIpAddr == ANYHOST):
-        _gSocketFd.bind(("", _gPort))
+        _bindSocket("")
+        #_gSocketFd.bind(("", _gPort))
       elif (_gHostnameOrIpAddr == LOCALHOST):
-        _gSocketFd.bind(("127.0.0.1", _gPort))
+        _bindSocket("127.0.0.1")
       elif (_gHostnameOrIpAddr == ANYBCAST):
         # global broadcast address
         _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        _gSocketFd.bind(("255.255.255.255", _gPort))
+        _bindSocket("255.255.255.255")
       elif ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
         # subnet broadcast address
         _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
+        _bindSocket(_gHostnameOrIpAddr)
       else:
-        _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
+        _bindSocket(_gHostnameOrIpAddr)
     elif (_gServerType == TCP):
       # IP domain socket (TCP)
       _gSocketFd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       _gSocketFd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
       # Bind the socket to the port
       if (_gHostnameOrIpAddr == ANYHOST):
-        _gSocketFd.bind(("", _gPort))
+        _bindSocket("")
       elif (_gHostnameOrIpAddr == LOCALHOST):
-        _gSocketFd.bind(("127.0.0.1", _gPort))
+        _bindSocket("127.0.0.1")
       else:
-        _gSocketFd.bind((_gHostnameOrIpAddr, _gPort))
+        _bindSocket(_gHostnameOrIpAddr)
       # Listen for incoming connections
       _gSocketFd.listen(1)
     elif (_gServerType == UNIX):
-      # UNIX domain socket
+      # UNIX domain socket, still not sure if it correct to cleanup any
+      # old socket file handle, if we do this, it will prevent multiple
+      # instances of the same process from being run on a given host, however,
+      # if we look for free addresses, we risk leaving old file handles
+      # hanging around if the process does not gracefully terminate and
+      # call the 'cleanupResources' function
       _gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
       _gUnixSourceAddress = _gUnixSocketPath+_gServerName
       # cleanup any old handle that might be hanging around
@@ -981,6 +1029,11 @@ def _createSocket():
       except:
         None
       _gSocketFd.bind(_gUnixSourceAddress)
+      # the following code is for the retries on a different address,
+      # still not sure if that is the right thing to do for UINIX servers
+      #_gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+      #_gUnixSourceAddress = _gUnixSocketPath+_gServerName
+      #_bindSocket(_gUnixSourceAddress)
     return (True)
   except Exception as error:
     _printError("{}".format(error))
@@ -1074,9 +1127,9 @@ def _runTCPServer():
       if connectionAccepted:
         # shutdown original socket to not allow any new connections
         # until we are done with this one
-        _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + "]:" + _gPrompt
+        _gTcpPrompt = _gServerName + "[" + _gTcpConnectSockName + ":" + str(_gPort) + "]:" + _gPrompt
         _gTcpTitle = _gTitle + ": " + _gServerName + "[" + \
-                     _gTcpConnectSockName + "], Mode: INTERACTIVE"
+                     _gTcpConnectSockName + ":" + str(_gPort) + "], Mode: INTERACTIVE"
         PshellReadline.setFileDescriptors(_gConnectFd,
                                           _gConnectFd,
                                           PshellReadline.SOCKET,
@@ -1426,7 +1479,8 @@ def _showWelcome():
   global _gServerName
   global _gTcpConnectSockName
   global _gTcpTitle
-  global  _gPshellClient
+  global _gPshellClient
+  global _gPort
   # show our welcome screen
   banner = "#  %s" % _getDisplayBanner()
   if (_gPshellClient == True):
@@ -1446,8 +1500,9 @@ def _showWelcome():
   else:
     # put up our window title banner
     printf("\033]0;" + _gTcpTitle + "\007", newline=False)
-    server = "#  Single session TCP server: %s[%s]" % (_gServerName,
-                                                       _gTcpConnectSockName)
+    server = "#  Single session TCP server: %s[%s:%d]" % (_gServerName,
+                                                          _gTcpConnectSockName,
+                                                          _gPort)
   maxBorderWidth = max(58, len(banner),len(server))+2
   printf()
   printf("#"*maxBorderWidth)

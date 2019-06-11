@@ -500,6 +500,7 @@ func disconnectAllServers() {
   for sid, _ := range(_gControlList) {
     disconnectServer(sid)
   }
+  _gControlList = []pshellControl{}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
