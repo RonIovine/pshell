@@ -310,6 +310,10 @@ set serverName [lindex [split $serverNameAndIpAddress "\["] 0]
 set serverName [lindex [split $serverName "\r"] 1]
 set ipAddress [lindex [split $serverNameAndIpAddress "\]"] 0]
 set ipAddress [lindex [split $ipAddress "\["] 1]
+set port [lindex [split $ipAddress "}"] 1]
+set port [string trim [lindex [split $port "\\"] 0] " "]
+set ipAddress [lindex [split $ipAddress "}"] 0]
+set ipAddress $ipAddress:$port
 set send_slow {1 .001}
 
 # process our request
