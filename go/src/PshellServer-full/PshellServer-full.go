@@ -192,6 +192,8 @@ var _gCommandInteractive = true
 var _gArgs []string
 var _gFoundCommand pshellCmd
 
+const _MAX_BIND_ATTEMPTS = 1000
+
 var _gCommandList = []pshellCmd{}
 var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
 var _gPshellSendPayload = ""
@@ -206,7 +208,6 @@ var _gRecvAddr net.Addr
 var _gMaxLength = 0
 var _gWheelPos = 0
 var _gWheel = "|/-\\"
-
 
 const _TAB_SPACING = 5
 const _TAB_COLUMNS = 80
@@ -665,7 +666,7 @@ func GetInt(string string, radix int, needHexPrefix bool) int64 {
 //       int  : Integer value of corresponding string
 //
 func GetInt64(string string, radix int, needHexPrefix bool) int64 {
-  return (getInt(string, radix, needHexPrefix))
+  return (int64(getInt(string, radix, needHexPrefix)))
 }
 
 //
@@ -1665,58 +1666,69 @@ func createSocket() bool {
   } else {
     hostnameOrIpAddr = _gHostnameOrIpAddr
   }
-  if (_gServerType == UDP) {
-    serverAddr := hostnameOrIpAddr + ":" + _gPort
-    udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
-    if err == nil {
-      _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
+  port := getInt(_gPort, RADIX_DEC, false)
+  for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
+    if (_gServerType == UDP) {
+      serverAddr := hostnameOrIpAddr + ":" + strconv.Itoa(int(port))
+      udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
       if err == nil {
-        return (true)
+        _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
+        if err == nil {
+          _gPort = strconv.Itoa(int(port))
+          return (true)
+        } else {
+          if (attempt == 1) {
+            printWarning("Could not bind to requested port: %s, looking for first available port", _gPort)
+          }
+          port += 1
+        }
+      } else {
+        printError("%s", err)
+        return (false)
+      }
+    } else if (_gServerType == UNIX) {
+      _gUnixSourceAddress = _gUnixSocketPath + _gServerName
+      os.Remove(_gUnixSourceAddress)
+      unixAddr, err := net.ResolveUnixAddr("unixgram", _gUnixSourceAddress)
+      if err == nil {
+        _gUnixSocket, err = net.ListenUnixgram("unixgram", unixAddr)
+        if err == nil {
+          return (true)
+        } else {
+          printError("%s", err)
+          return (false)
+        }
+      } else {
+        printError("%s", err)
+        return (false)
+      }
+      return (true)
+    } else if (_gServerType == TCP) {
+      // Listen for incoming connections
+      serverAddr := hostnameOrIpAddr + ":" + strconv.Itoa(int(port))
+      tcpAddr, err := net.ResolveTCPAddr("tcp", serverAddr)
+      if err == nil {
+        _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
+        if err == nil {
+          _gPort = strconv.Itoa(int(port))
+          return (true)
+        } else {
+          if (attempt == 1) {
+            printWarning("Could not bind to requested port: %s, looking for first available port", _gPort)
+          }
+          port += 1
+        }
       } else {
         printError("%s", err)
         return (false)
       }
     } else {
-      printError("%s", err)
+      printError("Invalid server type: '%s'", _gServerType)
       return (false)
     }
-  } else if (_gServerType == UNIX) {
-    _gUnixSourceAddress = _gUnixSocketPath + _gServerName
-    os.Remove(_gUnixSourceAddress)
-    unixAddr, err := net.ResolveUnixAddr("unixgram", _gUnixSourceAddress)
-    if err == nil {
-      _gUnixSocket, err = net.ListenUnixgram("unixgram", unixAddr)
-      if err == nil {
-        return (true)
-      } else {
-        printError("%s", err)
-        return (false)
-      }
-    } else {
-      printError("%s", err)
-      return (false)
-    }
-    return (true)
-  } else if (_gServerType == TCP) {
-    // Listen for incoming connections
-    serverAddr := hostnameOrIpAddr + ":" + _gPort
-    tcpAddr, err := net.ResolveTCPAddr("tcp", serverAddr)
-    if err == nil {
-      _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
-      if err == nil {
-        return (true)
-      } else {
-        printError("%s", err)
-        return (false)
-      }
-    } else {
-      printError("%s", err)
-      return (false)
-    }
-  } else {
-    printError("Invalid server type: '%s'", _gServerType)
-    return (false)
   }
+  printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
+  return (false)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

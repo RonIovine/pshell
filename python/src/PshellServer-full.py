@@ -937,12 +937,12 @@ def _bindSocket(address_):
   global _gServerType
   global _gUnixSourceAddress
   global _gServerName
-  maxAttempts = 1000
+  global _MAX_BIND_ATTEMPTS
   if _gServerType == UNIX:
     # Unix domain socket
     address = address_
     serverName = _gServerName
-    for attempt in range(1,maxAttempts+1):
+    for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
         _gSocketFd.bind((address))
         return
@@ -953,12 +953,12 @@ def _bindSocket(address_):
         address = address_ + str(attempt)
         _gUnixSourceAddress = address
         _gServerName = serverName + str(attempt)
-    _printError("Could not find available address after {} attempts".format(maxAttempts))
+    _printError("Could not find available address after {} attempts".format(_MAX_BIND_ATTEMPTS))
     _gServerName = serverName
   else:
     # IP domain socket
     port = _gPort
-    for attempt in range(1,maxAttempts+1):
+    for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
         _gSocketFd.bind((address_, port))
         return
@@ -968,7 +968,7 @@ def _bindSocket(address_):
           _printWarning("Could not bind to requested port: {}, looking for first available port".format(_gPort))
         port = _gPort + attempt
         _gPort = port
-    _printError("Could not find available port after {} attempts".format(maxAttempts))
+    _printError("Could not find available port after {} attempts".format(_MAX_BIND_ATTEMPTS))
   raise Exception(error)
 
 #################################################################################
@@ -1883,6 +1883,8 @@ _gPshellClient = False
 # log level and log print function
 _logLevel = LOG_LEVEL_DEFAULT
 _logFunction = None
+
+_MAX_BIND_ATTEMPTS = 1000
 
 ##############################
 #
