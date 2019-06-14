@@ -2144,7 +2144,22 @@ func receiveTCP() {
               printf("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n", index+1, len(_gCommandHistory))
             }
           } else {
-            printf("PSHELL_ERROR: Invalid history index: '%s'\n", command[1:])
+            // they did not enter a numberic index, look for a command match
+            found := false
+            for index := len(_gCommandHistory); index > 0; index-- {
+              if isSubString(command[1:], _gCommandHistory[index-1], len(command[1:])) {
+                found = true
+                if (_gCommandHistory[index-1] == "history") {
+                  showHistory()
+                } else {
+                  processCommand(_gCommandHistory[index-1])
+                  break;
+                }
+              }
+            }
+            if !found {
+              printf("PSHELL_ERROR: Command (sub)string: '%s' not found in history\n", command[1:])
+            }
           }
         } else {
           processCommand(command)

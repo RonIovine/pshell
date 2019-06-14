@@ -2614,7 +2614,7 @@ static bool bindSocket(void)
 {
   unsigned port = _port;
   bool bound = false;
-  for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS; attempt++)
+  for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
   {
     if (_serverType == PSHELL_UNIX_SERVER)
     {

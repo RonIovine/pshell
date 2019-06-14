@@ -336,11 +336,39 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
           }
           else
           {
-            pshell_rl_printf("PSHELL_ERROR: Invalid history index: '%s'\n", &input_[1]);
-            pshell_rl_writeOutput(prompt_);
-            input_[0] = 0;
-            cursorPos = 0;
-            tabCount = 0;
+            bool found = false;
+            for (int index = _numHistory; index > 0; index--)
+            {
+              if (pshell_rl_isSubString(&input_[1], _history[index-1]))
+              {
+                input_[0] = 0;
+                strcpy(input_, _history[index-1]);
+                addHistory(input_);
+                if (strcmp(_history[index-1], "history") == 0)
+                {
+                  showHistory();
+                  input_[0] = 0;
+                  cursorPos = 0;
+                  tabCount = 0;
+                  pshell_rl_writeOutput(prompt_);
+                }
+                else
+                {
+                  stripWhitespace(input_);
+                  return (false);
+                }
+                found = true;
+                break;
+              }
+            }
+            if (!found)
+            {
+              pshell_rl_printf("PSHELL_ERROR: Command (sub)string: '%s' not found in history\n", &input_[1]);
+              pshell_rl_writeOutput(prompt_);
+              input_[0] = 0;
+              cursorPos = 0;
+              tabCount = 0;
+            }
           }
         }
         else

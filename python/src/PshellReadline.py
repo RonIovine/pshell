@@ -542,11 +542,28 @@ def _getInput(prompt_):
               _writeOutput("PSHELL_ERROR: History index: %d, out of bounds, range 1-%d\n" % (index+1, len(_gCommandHistory)))
               _writeOutput(prompt_)
           except:
-            _writeOutput("PSHELL_ERROR: Invalid history index: '%s'\n" % command[1:])
-            command = ""
-            cursorPos = 0
-            tabCount = 0
-            _writeOutput(prompt_)
+            # they did not enter a numberic index, look for a command
+            found = False
+            for index in range(len(_gCommandHistory),0,-1):
+              if isSubString(command[1:], _gCommandHistory[index-1]):
+                found = True
+                command = _gCommandHistory[index-1]
+                _addHistory(command)
+                if command == "history":
+                  # we process the history internally
+                  _showHistory()
+                  command = ""
+                  cursorPos = 0
+                  tabCount = 0
+                  _writeOutput(prompt_)
+                else:
+                  return (command.strip(), False)
+            if not found:
+              _writeOutput("PSHELL_ERROR: Command (sub)string: '%s' not found in history\n" % command[1:])
+              command = ""
+              cursorPos = 0
+              tabCount = 0
+              _writeOutput(prompt_)
         else:
           # add input_ to our command history
           _addHistory(command)
