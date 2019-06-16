@@ -304,6 +304,7 @@ static unsigned _logLevel = PSHELL_SERVER_LOG_LEVEL_DEFAULT;
 static int _socketFd;
 static struct sockaddr_in _localIpAddress;
 static struct sockaddr_un _localUnixAddress;
+static char _unixLockFile[300];
 
 static PshellServerType _serverType = PSHELL_LOCAL_SERVER;
 static PshellServerMode _serverMode = PSHELL_BLOCKING;
@@ -1130,14 +1131,10 @@ void pshell_noServer(int argc, char *argv[])
 /******************************************************************************/
 void pshell_cleanupResources(void)
 {
-  char unixLockFile[300];
-  char unixSocketFile[300];
   if (_isRunning && (_serverType == PSHELL_UNIX_SERVER))
   {
-    sprintf(unixLockFile, "%s/%s.lock", PSHELL_UNIX_SOCKET_PATH, _serverName);
-    sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
-    unlink(unixLockFile);
-    unlink(unixSocketFile);
+    unlink(_localUnixAddress.sun_path);
+    unlink(_unixLockFile);
     cleanupUnixResources();
   }
 }
@@ -2634,8 +2631,8 @@ static void cleanupUnixResources(void)
       if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
       {
         /* we got the lock, nobody else has it, ok to clean it up */
-        unlink(unixLockFile);
         unlink(unixSocketFile);
+        unlink(unixLockFile);
       }
     }
     sprintf(unixSocketFile, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, _serverName, index);
@@ -2649,17 +2646,16 @@ static bool bindSocket(void)
 {
   unsigned port = _port;
   int unixLockFd;
-  char unixLockFile[300];
   if (_serverType == PSHELL_UNIX_SERVER)
   {
     _localUnixAddress.sun_family = AF_UNIX;
     sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
-    sprintf(unixLockFile, "%s/%s.lock", PSHELL_UNIX_SOCKET_PATH, _serverName);
+    sprintf(_unixLockFile, "%s.lock", _localUnixAddress.sun_path);
     cleanupUnixResources();
     for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
     {
       /* try to open lock file */
-      if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+      if ((unixLockFd = open(_unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
       {
         /* file exists, try to see if another process has it locked */
         if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
@@ -2688,7 +2684,7 @@ static bool bindSocket(void)
           PSHELL_WARNING("Could not bind to UNIX address: %s, looking for first available address", _serverName);
         }
         sprintf(_localUnixAddress.sun_path, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, _serverName, attempt);
-        sprintf(unixLockFile, "%s/%s%d.lock", PSHELL_UNIX_SOCKET_PATH, _serverName, attempt);
+        sprintf(_unixLockFile, "%s.lock", _localUnixAddress.sun_path);
       }
     }
     PSHELL_ERROR("Could not find available address after %d attempts", PSHELL_MAX_BIND_ATTEMPTS)

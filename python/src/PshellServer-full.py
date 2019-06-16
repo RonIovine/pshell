@@ -941,8 +941,8 @@ def _cleanupUnixResources():
       try:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         # we got the lock, delete the lock file and corresponding socket file
-        os.unlink(unixBaseFile+".lock")
         os.unlink(unixBaseFile)
+        os.unlink(unixBaseFile+".lock")
       except Exception as error:
         # file handle is in use and locked by another process, skip it
         None
@@ -958,28 +958,27 @@ def _bindSocket(address_):
   global _gServerType
   global _gUnixSourceAddress
   global _gServerName
-  global _gUnixFileLock
+  global _gUnixLockFd
   global _MAX_BIND_ATTEMPTS
   if _gServerType == UNIX:
     # Unix domain socket
+    _gUnixLockFile = _gUnixSourceAddress+".lock"
     _cleanupUnixResources()
-    address = address_
-    serverName = _gServerName
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
-        _gUnixFileLock = open((address+".lock"), "w+")
-        fcntl.flock(_gUnixFileLock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        _gSocketFd.bind((address))
+        _gUnixLockFd = open((_gUnixLockFile), "w+")
+        fcntl.flock(_gUnixLockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _gSocketFd.bind((_gUnixSourceAddress))
+        if attempt > 1:
+          _gServerName = _gServerName + str(attempt-1)
         return
       except Exception as error:
         if attempt == 1:
           # only print message on first attemps
           _printWarning("Could not bind to UNIX address: {}, looking for first available address".format(_gServerName))
-        address = address_ + str(attempt)
-        _gUnixSourceAddress = address
-        _gServerName = serverName + str(attempt)
+        _gUnixSourceAddress = address_ + str(attempt)
+        _gUnixLockFile = _gUnixSourceAddress+".lock"
     _printError("Could not find available address after {} attempts".format(_MAX_BIND_ATTEMPTS))
-    _gServerName = serverName
   else:
     # IP domain socket
     port = _gPort
@@ -1607,8 +1606,8 @@ def _cleanupResources():
   global _gUnixSourceAddress
   global _gSocketFd
   if (_gUnixSourceAddress != None):
-    os.unlink(_gUnixSourceAddress+".lock")
     os.unlink(_gUnixSourceAddress)
+    os.unlink(_gUnixSourceAddress+".lock")
     _cleanupUnixResources()
   if (_gSocketFd != None):
     try:
@@ -1817,6 +1816,8 @@ _gUnixSocketPath = "/tmp/"
 _gArgs = None
 _gFoundCommand = None
 _gUnixSourceAddress = None
+_gUnixLockFile = None
+_gUnixLockFd = None
 _gRunning = False
 _gCommandDispatched = False
 _gCommandInteractive = True
@@ -1887,8 +1888,6 @@ _gTcpPrompt = None
 _gTcpTitle = None
 # flag to indicate the special pshell.py client
 _gPshellClient = False
-
-_gUnixFileLock = None
 
 # log level and log print function
 _logLevel = LOG_LEVEL_DEFAULT

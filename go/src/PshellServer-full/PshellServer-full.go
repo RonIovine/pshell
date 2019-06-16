@@ -202,6 +202,7 @@ var _gUdpSocket *net.UDPConn
 var _gUnixSocket *net.UnixConn
 var _gUnixSocketPath = "/tmp/"
 var _gUnixSourceAddress string
+var _gUnixLockFile string
 var _gTcpSocket *net.TCPListener
 var _gConnectFd *net.TCPConn
 var _gTcpNegotiate = []byte{0xFF, 0xFB, 0x03, 0xFF, 0xFB, 0x01, 0xFF, 0xFD, 0x03, 0xFF, 0xFD, 0x01}
@@ -964,7 +965,7 @@ func startServer(serverName_ string,
 func cleanupResources() {
   if _gServerType == UNIX {
     os.Remove(_gUnixSourceAddress)
-    os.Remove(_gUnixSourceAddress+".lock")
+    os.Remove(_gUnixLockFile)
     cleanupUnixResources()
   }
 }
@@ -1668,8 +1669,8 @@ func cleanupUnixResources() {
       // file exists, try to see if another process has it locked
       if err == nil {
         // we got the lock, nobody else has it, ok to clean it up
-        os.Remove(unixLockFile)
         os.Remove(unixSocketFile)
+        os.Remove(unixLockFile)
       }
     }
     unixSocketFile = _gUnixSourceAddress + strconv.Itoa(index)
@@ -1740,10 +1741,10 @@ func createSocket() bool {
     printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
   } else if (_gServerType == UNIX) {
     _gUnixSourceAddress = _gUnixSocketPath + _gServerName
-    unixLockFile := _gUnixSourceAddress + ".lock"
+    _gUnixLockFile = _gUnixSourceAddress + ".lock"
     cleanupUnixResources()
     for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
-      _unixLockFd, err = os.Create(unixLockFile)
+      _unixLockFd, err = os.Create(_gUnixLockFile)
       if err == nil {
         err = syscall.Flock(int(_unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
         // file exists, try to see if another process has it locked
@@ -1768,7 +1769,7 @@ func createSocket() bool {
           printWarning("Could not bind to UNIX address: %s, looking for first available address", _gServerName);
         }
         _gUnixSourceAddress = _gUnixSocketPath + _gServerName + strconv.Itoa(attempt)
-        unixLockFile = _gUnixSourceAddress + ".lock"
+        _gUnixLockFile = _gUnixSourceAddress + ".lock"
       }
     }
     printError("Could not find available address after %d attempts", _MAX_BIND_ATTEMPTS)
