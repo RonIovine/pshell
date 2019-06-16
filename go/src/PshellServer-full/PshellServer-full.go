@@ -48,6 +48,7 @@ import "net"
 import "fmt"
 import "strings"
 import "strconv"
+import "syscall"
 import "io/ioutil"
 import "os"
 import "math"
@@ -223,6 +224,8 @@ var _gCommandHistoryPos = 0
 type logFunction func(string)
 var _logLevel = LOG_LEVEL_DEFAULT
 var _logFunction logFunction
+
+var _unixLockFd *os.File
 
 /////////////////////////////////
 //
@@ -961,6 +964,8 @@ func startServer(serverName_ string,
 func cleanupResources() {
   if _gServerType == UNIX {
     os.Remove(_gUnixSourceAddress)
+    os.Remove(_gUnixSourceAddress+".lock")
+    cleanupUnixResources()
   }
 }
 
@@ -1652,7 +1657,30 @@ func runTCPServer() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func cleanupUnixResources() {
+  unixSocketFile := _gUnixSourceAddress
+  unixLockFile := unixSocketFile + ".lock"
+  for index := 1; index < _MAX_BIND_ATTEMPTS+1; index++ {
+    // try to open lock file
+    unixLockFd, err := os.Create(unixLockFile)
+    if err == nil {
+      err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+      // file exists, try to see if another process has it locked
+      if err == nil {
+        // we got the lock, nobody else has it, ok to clean it up
+        os.Remove(unixLockFile)
+        os.Remove(unixSocketFile)
+      }
+    }
+    unixSocketFile = _gUnixSourceAddress + strconv.Itoa(index)
+    unixLockFile = unixSocketFile + ".lock"
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func createSocket() bool {
+  var err error
   var hostnameOrIpAddr = ""
   if (_gHostnameOrIpAddr == ANYHOST) {
     // all interfaces of this host
@@ -1667,8 +1695,8 @@ func createSocket() bool {
     hostnameOrIpAddr = _gHostnameOrIpAddr
   }
   port := getInt(_gPort, RADIX_DEC, false)
-  for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
-    if (_gServerType == UDP) {
+  if (_gServerType == UDP) {
+    for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
       serverAddr := hostnameOrIpAddr + ":" + strconv.Itoa(int(port))
       udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
       if err == nil {
@@ -1686,25 +1714,11 @@ func createSocket() bool {
         printError("%s", err)
         return (false)
       }
-    } else if (_gServerType == UNIX) {
-      _gUnixSourceAddress = _gUnixSocketPath + _gServerName
-      os.Remove(_gUnixSourceAddress)
-      unixAddr, err := net.ResolveUnixAddr("unixgram", _gUnixSourceAddress)
-      if err == nil {
-        _gUnixSocket, err = net.ListenUnixgram("unixgram", unixAddr)
-        if err == nil {
-          return (true)
-        } else {
-          printError("%s", err)
-          return (false)
-        }
-      } else {
-        printError("%s", err)
-        return (false)
-      }
-      return (true)
-    } else if (_gServerType == TCP) {
-      // Listen for incoming connections
+    }
+    printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
+  } else if (_gServerType == TCP) {
+    // Listen for incoming connections
+    for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
       serverAddr := hostnameOrIpAddr + ":" + strconv.Itoa(int(port))
       tcpAddr, err := net.ResolveTCPAddr("tcp", serverAddr)
       if err == nil {
@@ -1722,12 +1736,45 @@ func createSocket() bool {
         printError("%s", err)
         return (false)
       }
-    } else {
-      printError("Invalid server type: '%s'", _gServerType)
-      return (false)
     }
+    printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
+  } else if (_gServerType == UNIX) {
+    _gUnixSourceAddress = _gUnixSocketPath + _gServerName
+    unixLockFile := _gUnixSourceAddress + ".lock"
+    cleanupUnixResources()
+    for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
+      _unixLockFd, err = os.Create(unixLockFile)
+      if err == nil {
+        err = syscall.Flock(int(_unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+        // file exists, try to see if another process has it locked
+        if err == nil {
+          unixAddr, err := net.ResolveUnixAddr("unixgram", _gUnixSourceAddress)
+          if err == nil {
+            _gUnixSocket, err = net.ListenUnixgram("unixgram", unixAddr)
+            if err == nil {
+              if (attempt > 1) {
+                _gServerName = _gServerName + strconv.Itoa(attempt-1)
+              }
+              return (true)
+            } else {
+              printError("%s", err)
+              return (false)
+            }
+          } else {
+            printError("%s", err)
+            return (false)
+          }
+        } else if (attempt == 1) {
+          printWarning("Could not bind to UNIX address: %s, looking for first available address", _gServerName);
+        }
+        _gUnixSourceAddress = _gUnixSocketPath + _gServerName + strconv.Itoa(attempt)
+        unixLockFile = _gUnixSourceAddress + ".lock"
+      }
+    }
+    printError("Could not find available address after %d attempts", _MAX_BIND_ATTEMPTS)
+  } else {
+    printError("Invalid server type: '%s'", _gServerType)
   }
-  printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
   return (false)
 }
 

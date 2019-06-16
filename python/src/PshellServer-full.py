@@ -156,6 +156,7 @@ import socket
 import struct
 import random
 import thread
+import fcntl
 from collections import OrderedDict
 from collections import namedtuple
 import PshellReadline
@@ -931,19 +932,43 @@ def _serverThread():
 
 #################################################################################
 #################################################################################
+def _cleanupUnixResources():
+  global _gUnixSourceAddress
+  unixBaseFile = _gUnixSourceAddress
+  for index in range(1,_MAX_BIND_ATTEMPTS+1):
+    try:
+      fd = open(unixBaseFile+".lock", "r")
+      try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # we got the lock, delete the lock file and corresponding socket file
+        os.unlink(unixBaseFile+".lock")
+        os.unlink(unixBaseFile)
+      except Exception as error:
+        # file handle is in use and locked by another process, skip it
+        None
+    except:
+      None
+    unixBaseFile = _gUnixSourceAddress + str(index)
+
+#################################################################################
+#################################################################################
 def _bindSocket(address_):
   global _gSocketFd
   global _gPort
   global _gServerType
   global _gUnixSourceAddress
   global _gServerName
+  global _gUnixFileLock
   global _MAX_BIND_ATTEMPTS
   if _gServerType == UNIX:
     # Unix domain socket
+    _cleanupUnixResources()
     address = address_
     serverName = _gServerName
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
+        _gUnixFileLock = open((address+".lock"), "w+")
+        fcntl.flock(_gUnixFileLock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         _gSocketFd.bind((address))
         return
       except Exception as error:
@@ -1015,25 +1040,9 @@ def _createSocket():
       # Listen for incoming connections
       _gSocketFd.listen(1)
     elif (_gServerType == UNIX):
-      # UNIX domain socket, still not sure if it correct to cleanup any
-      # old socket file handle, if we do this, it will prevent multiple
-      # instances of the same process from being run on a given host, however,
-      # if we look for free addresses, we risk leaving old file handles
-      # hanging around if the process does not gracefully terminate and
-      # call the 'cleanupResources' function
       _gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
       _gUnixSourceAddress = _gUnixSocketPath+_gServerName
-      # cleanup any old handle that might be hanging around
-      try:
-        os.unlink(_gUnixSourceAddress)
-      except:
-        None
-      _gSocketFd.bind(_gUnixSourceAddress)
-      # the following code is for the retries on a different address,
-      # still not sure if that is the right thing to do for UINIX servers
-      #_gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-      #_gUnixSourceAddress = _gUnixSocketPath+_gServerName
-      #_bindSocket(_gUnixSourceAddress)
+      _bindSocket(_gUnixSourceAddress)
     return (True)
   except Exception as error:
     _printError("{}".format(error))
@@ -1598,10 +1607,9 @@ def _cleanupResources():
   global _gUnixSourceAddress
   global _gSocketFd
   if (_gUnixSourceAddress != None):
-    try:
-      os.unlink(_gUnixSourceAddress)
-    except:
-      None
+    os.unlink(_gUnixSourceAddress+".lock")
+    os.unlink(_gUnixSourceAddress)
+    _cleanupUnixResources()
   if (_gSocketFd != None):
     try:
       _gSocketFd.close()
@@ -1879,6 +1887,8 @@ _gTcpPrompt = None
 _gTcpTitle = None
 # flag to indicate the special pshell.py client
 _gPshellClient = False
+
+_gUnixFileLock = None
 
 # log level and log print function
 _logLevel = LOG_LEVEL_DEFAULT

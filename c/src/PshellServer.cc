@@ -31,6 +31,7 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/file.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -377,6 +378,7 @@ static void showWelcome(void);
 static int getIpAddress(const char *interface_, char *ipAddress_);
 static bool createSocket(void);
 static bool bindSocket(void);
+static void cleanupUnixResources(void);
 
 /* common functions (UDP, TCP, UNIX, and LOCAL servers) */
 
@@ -1128,9 +1130,15 @@ void pshell_noServer(int argc, char *argv[])
 /******************************************************************************/
 void pshell_cleanupResources(void)
 {
+  char unixLockFile[300];
+  char unixSocketFile[300];
   if (_isRunning && (_serverType == PSHELL_UNIX_SERVER))
   {
-    unlink(_localUnixAddress.sun_path);
+    sprintf(unixLockFile, "%s/%s.lock", PSHELL_UNIX_SOCKET_PATH, _serverName);
+    sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
+    unlink(unixLockFile);
+    unlink(unixSocketFile);
+    cleanupUnixResources();
   }
 }
 
@@ -2610,32 +2618,87 @@ static void loadConfigFile(void)
 
 /******************************************************************************/
 /******************************************************************************/
+static void cleanupUnixResources(void)
+{
+  int unixLockFd;
+  char unixLockFile[300];
+  char unixSocketFile[300];
+  sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
+  sprintf(unixLockFile, "%s.lock", unixSocketFile);
+  for (unsigned index = 1; index <= PSHELL_MAX_BIND_ATTEMPTS+1; index++)
+  {
+    /* try to open lock file */
+    if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+    {
+      /* file exists, try to see if another process has it locked */
+      if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+      {
+        /* we got the lock, nobody else has it, ok to clean it up */
+        unlink(unixLockFile);
+        unlink(unixSocketFile);
+      }
+    }
+    sprintf(unixSocketFile, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, _serverName, index);
+    sprintf(unixLockFile, "%s.lock", unixSocketFile);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static bool bindSocket(void)
 {
   unsigned port = _port;
-  bool bound = false;
-  for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
+  int unixLockFd;
+  char unixLockFile[300];
+  if (_serverType == PSHELL_UNIX_SERVER)
   {
-    if (_serverType == PSHELL_UNIX_SERVER)
+    _localUnixAddress.sun_family = AF_UNIX;
+    sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
+    sprintf(unixLockFile, "%s/%s.lock", PSHELL_UNIX_SOCKET_PATH, _serverName);
+    cleanupUnixResources();
+    for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
     {
-      _localUnixAddress.sun_family = AF_UNIX;
-      sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
-      unlink(_localUnixAddress.sun_path);
-
-      /* bind to our source socket */
-      if (bind(_socketFd,
-               (struct sockaddr *) &_localUnixAddress,
-               sizeof(_localUnixAddress)) < 0)
+      /* try to open lock file */
+      if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
       {
-        break;
+        /* file exists, try to see if another process has it locked */
+        if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+        {
+          /* we got the lock, nobody else has it, bind to our socket */
+          if (bind(_socketFd,
+                   (struct sockaddr *) &_localUnixAddress,
+                   sizeof(_localUnixAddress)) < 0)
+          {
+            PSHELL_ERROR("Cannot bind to UNIX socket: %s", _serverName);
+            return (false);
+          }
+          else
+          {
+            /* success */
+            strcpy(_ipAddress, "unix");
+            if (attempt > 1)
+            {
+              sprintf(_serverName, "%s%d", _serverName, attempt-1);
+            }
+            return (true);
+          }
+        }
+        else if (attempt == 1)
+        {
+          PSHELL_WARNING("Could not bind to UNIX address: %s, looking for first available address", _serverName);
+        }
+        sprintf(_localUnixAddress.sun_path, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, _serverName, attempt);
+        sprintf(unixLockFile, "%s/%s%d.lock", PSHELL_UNIX_SOCKET_PATH, _serverName, attempt);
       }
-      strcpy(_ipAddress, "unix");
-      bound = true;
-      break;
     }
-    else
+    PSHELL_ERROR("Could not find available address after %d attempts", PSHELL_MAX_BIND_ATTEMPTS)
+    PSHELL_ERROR("Cannot bind to UNIX socket: %s", _serverName);
+  }
+  else
+  {
+    /* IP socket */
+    for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
     {
-      /* IP socket */
       _localIpAddress.sin_port = htons(port);
       if (bind(_socketFd,
                (struct sockaddr *) &_localIpAddress,
@@ -2649,31 +2712,17 @@ static bool bindSocket(void)
       }
       else
       {
-        bound = true;
-        break;
+        _port = port;
+        return (true);
       }
     }
+    PSHELL_ERROR("Could not find available port after %d attempts", PSHELL_MAX_BIND_ATTEMPTS);
+    PSHELL_ERROR("Cannot bind to socket: address: %s, port: %d",
+                 inet_ntoa(_localIpAddress.sin_addr),
+                 _port);
+    return (false);
   }
-  if (!bound)
-  {
-    if (_serverType == PSHELL_UNIX_SERVER)
-    {
-      PSHELL_ERROR("Could not find available address after %d attempts", PSHELL_MAX_BIND_ATTEMPTS)
-      PSHELL_ERROR("Cannot bind to UNIX socket: %s", _serverName);
-    }
-    else
-    {
-      PSHELL_ERROR("Could not find available port after %d attempts", PSHELL_MAX_BIND_ATTEMPTS);
-      PSHELL_ERROR("Cannot bind to socket: address: %s, port: %d",
-                   inet_ntoa(_localIpAddress.sin_addr),
-                   _port);
-    }
-  }
-  else
-  {
-    _port = port;
-  }
-  return (bound);
+  return (false);
 }
 
 /******************************************************************************/
