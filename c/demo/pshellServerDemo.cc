@@ -96,7 +96,21 @@ void helloWorld(int argc, char *argv[])
 /******************************************************************************/
 void keepAlive(int argc, char *argv[])
 {
-  if (pshell_isEqual(argv[0], "dots"))
+  if (pshell_isHelp())
+  {
+    pshell_printf("\n");
+    pshell_showUsage();
+    pshell_printf("\n");
+    pshell_printf("Note, this function demonstrates intermediate flushes in a\n");
+    pshell_printf("callback command to keep the UDP/UNIX interactive client from\n" );
+    pshell_printf("timing out for commands that take longer than the response\n");
+    pshell_printf("timeout (default=5 sec).  This is only supported in the 'C'\n");
+    pshell_printf("version of the pshell interactive client, the Python version\n");
+    pshell_printf("of the interactive client does not support intermediate flushes.\n");
+    pshell_printf("\n");
+    return;
+  }
+  else if (pshell_isEqual(argv[0], "dots"))
   {
     pshell_printf("marching dots keep alive:\n");
     for (unsigned i = 0; i < 10; i++)
@@ -534,13 +548,13 @@ int main(int argc, char *argv[])
 
   if ((serverType == PSHELL_UDP_SERVER) || (serverType == PSHELL_UNIX_SERVER))
   {
-    pshell_addCommand(keepAlive,                            /* function */
-                      "keepAlive",                          /* command */
-                      "command to show client keep-alive",  /* description */
-                      "dots | bang | pound | wheel",        /* usage */
-                      1,                                    /* minArgs */
-                      1,                                    /* maxArgs */
-                      true);                                /* showUsage on "?" */
+    pshell_addCommand(keepAlive,                                              /* function */
+                      "keepAlive",                                            /* command */
+                      "command to show client keep-alive ('C' client only)",  /* description */
+                      "dots | bang | pound | wheel",                          /* usage */
+                      1,                                                      /* minArgs */
+                      1,                                                      /* maxArgs */
+                      false);                                                 /* showUsage on "?" */
   }
 
   pshell_addCommand(wildcardMatch,                            /* function */

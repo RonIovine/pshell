@@ -134,7 +134,19 @@ func wildcardMatch(argv []string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func keepAlive(argv []string) {
-  if (argv[0] == "dots") {
+  if (PshellServer.IsHelp()) {
+    PshellServer.Printf("\n")
+    PshellServer.ShowUsage()
+    PshellServer.Printf("\n")
+    PshellServer.Printf("Note, this function demonstrates intermediate flushes in a\n")
+    PshellServer.Printf("callback command to keep the UDP/UNIX interactive client from\n" )
+    PshellServer.Printf("timing out for commands that take longer than the response\n")
+    PshellServer.Printf("timeout (default=5 sec).  This is only supported in the 'C'\n")
+    PshellServer.Printf("version of the pshell interactive client, the Python version\n")
+    PshellServer.Printf("of the interactive client does not support intermediate flushes.\n")
+    PshellServer.Printf("\n")
+    return
+  } else if (argv[0] == "dots") {
     PshellServer.Printf("marching dots keep alive:\n")
     for i := 0; i < 10; i++ {
       PshellServer.March(".")
@@ -367,13 +379,13 @@ func main() {
   // TCP or LOCAL servers don't need a keep-alive, so only add
   // this command for connectionless datagram type servers
   if ((serverType == PshellServer.UDP) || (serverType == PshellServer.UNIX)) {
-    PshellServer.AddCommand(keepAlive,                             // function
-                            "keepAlive",                           // command
-                            "command to show client keep-alive",   // description
-                            "dots | bang | pound | wheel",         // usage
-                            1,                                     // minArgs
-                            1,                                     // maxArgs
-                            false)                                 // showUsage on '?'
+    PshellServer.AddCommand(keepAlive,                                               // function
+                            "keepAlive",                                             // command
+                            "command to show client keep-alive ('C' client only)",   // description
+                            "dots | bang | pound | wheel",                           // usage
+                            1,                                                       // minArgs
+                            1,                                                       // maxArgs
+                            false)                                                   // showUsage on '?'
   }
 
   PshellServer.AddCommand(wildcardMatch,                            // function
@@ -384,13 +396,13 @@ func main() {
                           1,                                        // maxArgs
                           false)                                    // showUsage on "?"
 
-  PshellServer.AddCommand(advancedParsing,                                // function
-                          "advancedParsing",                              // command
-                          "command with advanced command line parsing",   // description
-                          "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",              // usage
-                          1,                                              // minArgs
-                          1,                                              // maxArgs
-                          true)                                           // showUsage on "?"
+  PshellServer.AddCommand(enhancedUsage,                   // function
+                          "enhancedUsage",                 // command
+                          "command with enhanced usage",   // description
+                          "<arg1>",                        // usage
+                          1,                               // minArgs
+                          1,                               // maxArgs
+                          false)                           // showUsage on '?'
 
   PshellServer.AddCommand(formatChecking,                       // function
                           "formatChecking",                     // command
@@ -400,13 +412,13 @@ func main() {
                           1,                                    // maxArgs
                           true)                                 // showUsage on "?"
 
-  PshellServer.AddCommand(enhancedUsage,                   // function
-                          "enhancedUsage",                 // command
-                          "command with enhanced usage",   // description
-                          "<arg1>",                        // usage
-                          1,                               // minArgs
-                          1,                               // maxArgs
-                          false)                           // showUsage on '?'
+  PshellServer.AddCommand(advancedParsing,                                // function
+                          "advancedParsing",                              // command
+                          "command with advanced command line parsing",   // description
+                          "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",              // usage
+                          1,                                              // minArgs
+                          1,                                              // maxArgs
+                          true)                                           // showUsage on "?"
 
   PshellServer.AddCommand(getOptions,                                  // function
                           "getOptions",                                // command

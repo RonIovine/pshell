@@ -64,6 +64,8 @@ import PshellReadline
 _gSid = None
 _gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
+MAX_UNIX_INSTANCES = 1000
+
 #################################################################################
 #################################################################################
 def _showWelcome():
@@ -84,6 +86,8 @@ def _showWelcome():
   print(server)
   print("#")
   print("#  Idle session timeout: NONE")
+  print("#")
+  print("#  Command response timeout: {} seconds".format(_gTimeout))
   print("#")
   print("#  Type '?' or 'help' at prompt for command summary")
   print("#  Type '?' or '-h' after command for command usage")
@@ -353,6 +357,36 @@ def _loadServers():
 
 #####################################################
 #####################################################
+def _showUnixServers(unixServer_):
+  unixServer = unixServer_
+  unixBaseFile = "/tmp/"+unixServer
+  print("")
+  print("***************************************")
+  print("*    Running UNIX Server Instances    *")
+  print("***************************************")
+  print("")
+  banner = "UNIX Server Instances For: {}".format(unixServer_)
+  print(banner)
+  print("%s" % ("="*len(banner)))
+  for index in range(1,MAX_UNIX_INSTANCES+1):
+    try:
+      fd = open(unixBaseFile+".lock", "r")
+      try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # we got the lock, delete the lock file and don't print anything
+        os.unlink(unixBaseFile+".lock")
+      except Exception as error:
+        # file handle is in use and locked by another process, print it
+        print(unixServer)
+    except:
+      None
+    unixServer = unixServer_ + str(index)
+    unixBaseFile = "/tmp/"+unixServer
+  print("")
+  exit(0)
+
+#####################################################
+#####################################################
 def _showServers():
   global _gServerList
   global _gMaxServerNameLength
@@ -372,12 +406,13 @@ def _showServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s -s | {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
-  print("                      [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
+  print("Usage: %s {-s [<unixServerName>]} |" % os.path.basename(sys.argv[0]))
+  print("                 {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]")
+  print("                 [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
-  print("    -s             - show named servers in pshell-client.conf file")
+  print("    -s             - show named servers in pshell-client.conf file or local running UNIX server")
   print("    -c             - run command from command line")
   print("    -f             - run commands from a batch file")
   print("    -t             - change the default server response timeout")
@@ -480,7 +515,12 @@ if (__name__ == '__main__'):
   _loadServers()
 
   if sys.argv[1] == "-s":
-    _showServers()
+    if (len(sys.argv) == 2):
+      _showServers()
+    elif (len(sys.argv) == 3):
+      _showUnixServers(sys.argv[2])
+    else:
+      showUsage()
   else:
     _gRemoteServer = sys.argv[1]
 

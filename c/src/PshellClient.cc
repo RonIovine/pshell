@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/file.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -129,6 +130,7 @@ int _destPort = 0;
 bool _isUnixConnected = false;
 
 #define MAX_UNIX_CLIENTS 1000
+#define MAX_SERVER_INSTANCES 1000
 
 ServerType _serverType = UDP;
 
@@ -218,6 +220,7 @@ void processInteractiveMode(void);
 void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
 void getNamedServers(void);
 void showNamedServers(void);
+void showUnixServers(char *unixServer_);
 void showCommands(void);
 void stripWhitespace(char *string_);
 void showUsage(void);
@@ -1162,6 +1165,49 @@ void getNamedServers(void)
 
 /******************************************************************************/
 /******************************************************************************/
+void showUnixServers(char *unixServer_)
+{
+  char unixServer[300];
+  char unixLockFile[300];
+  char banner[300];
+  int unixLockFd;
+  sprintf(unixServer, "%s", unixServer_);
+  sprintf(unixLockFile, "/tmp/%s.lock", unixServer);
+  printf("\n");
+  printf("***************************************\n");
+  printf("*    Running UNIX Server Instances    *\n");
+  printf("***************************************\n");
+  printf("\n");
+  sprintf(banner, "UNIX Server Instances For: %s", unixServer_);
+  printf("%s\n", banner);
+  for (unsigned i = 0; i < strlen(banner); i++) printf("=");
+  printf("\n");
+  for (unsigned index = 1; index <= MAX_SERVER_INSTANCES+1; index++)
+  {
+    /* try to open lock file */
+    if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+    {
+      /* file exists, try to see if another process has it locked */
+      if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+      {
+        /* we got the lock, nobody else has it, server not running, remove lock file */
+        unlink(unixLockFile);
+      }
+      else
+      {
+        // file handle is in use and locked by another process, print it
+        printf("%s\n", unixServer);
+      }
+    }
+    sprintf(unixServer, "%s%d", unixServer_, index);
+    sprintf(unixLockFile, "/tmp/%s.lock", unixServer);
+  }
+  printf("\n");
+  exitProgram(0);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void showNamedServers(void)
 {
 
@@ -1244,12 +1290,13 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>\n");
-  printf("                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
+  printf("Usage: pshell {-s [<unixServerName>]} |\n");
+  printf("              {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]\n");
+  printf("              [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
-  printf("    -s             - show named servers in pshell-client.conf file\n");
+  printf("    -s             - show named servers in pshell-client.conf file or local running UNIX server\n");
   printf("    -c             - run command from command line\n");
   printf("    -f             - run commands from a batch file\n");
   printf("    -t             - change the default server response timeout\n");
@@ -1315,6 +1362,10 @@ void parseCommandLine(int *argc, char *argv[])
         _server = argv[0];
         *argc = 0;
       }
+  }
+  else if ((*argc == 2) && (strcmp(argv[0], "-s") == 0))
+  {
+    showUnixServers(argv[1]);
   }
   else if (*argc < 8)
   {

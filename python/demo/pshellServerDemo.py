@@ -148,7 +148,19 @@ def wildcardMatch(argv):
 #################################################################################
 #################################################################################
 def keepAlive(argv):
-  if (argv[0] == "dots"):
+  if (PshellServer.isHelp()):
+    PshellServer.printf()
+    PshellServer.showUsage()
+    PshellServer.printf()
+    PshellServer.printf("Note, this function demonstrates intermediate flushes in a")
+    PshellServer.printf("callback command to keep the UDP/UNIX interactive client from" )
+    PshellServer.printf("timing out for commands that take longer than the response")
+    PshellServer.printf("timeout (default=5 sec).  This is only supported in the 'C'")
+    PshellServer.printf("version of the pshell interactive client, the Python version")
+    PshellServer.printf("of the interactive client does not support intermediate flushes.")
+    PshellServer.printf()
+    return
+  elif (argv[0] == "dots"):
     PshellServer.printf("marching dots keep alive:")
     for i in range(1,10):
       PshellServer.march(".")
@@ -324,9 +336,10 @@ if (__name__ == '__main__'):
   if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
     PshellServer.addCommand(function    = keepAlive,
                             command     = "keepAlive",
-                            description = "command to show client keep-alive",
+                            description = "command to show client keep-alive ('C' client only)",
                             usage       = "dots | bang | pound | wheel",
-                            minArgs     = 1)
+                            minArgs     = 1,
+                            showUsage   = False)
 
   PshellServer.addCommand(function    = wildcardMatch,
                           command     = "wildcardMatch",
