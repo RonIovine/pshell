@@ -157,6 +157,7 @@ import struct
 import random
 import thread
 import fcntl
+import fnmatch
 from collections import OrderedDict
 from collections import namedtuple
 import PshellReadline
@@ -933,22 +934,28 @@ def _serverThread():
 #################################################################################
 #################################################################################
 def _cleanupUnixResources():
-  global _gUnixSourceAddress
-  unixBaseFile = _gUnixSourceAddress
-  for index in range(1,_MAX_BIND_ATTEMPTS+1):
+  global _gUnixSocketPath
+  global _gLockFileExtension
+  lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
+  lockFiles.sort()
+  for file in lockFiles:
     try:
-      fd = open(unixBaseFile+".lock", "r")
+      fd = open(_gUnixSocketPath+file, "r")
       try:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        # we got the lock, delete the lock file and corresponding socket file
-        os.unlink(unixBaseFile)
-        os.unlink(unixBaseFile+".lock")
-      except Exception as error:
-        # file handle is in use and locked by another process, skip it
+        # we got the lock, delete any socket file and lock file and don't print anything
+        try:
+          os.unlink(_gUnixSocketPath+file.split(".")[0])
+        except:
+          None
+        try:
+          os.unlink(_gUnixSocketPath+file)
+        except:
+          None
+      except:
         None
     except:
       None
-    unixBaseFile = _gUnixSourceAddress + str(index)
 
 #################################################################################
 #################################################################################
@@ -959,10 +966,12 @@ def _bindSocket(address_):
   global _gUnixSourceAddress
   global _gServerName
   global _gUnixLockFd
+  global _gUnixLockFile
+  global _gLockFileExtension
   global _MAX_BIND_ATTEMPTS
   if _gServerType == UNIX:
     # Unix domain socket
-    _gUnixLockFile = _gUnixSourceAddress+".lock"
+    _gUnixLockFile = _gUnixSourceAddress+_gLockFileExtension
     _cleanupUnixResources()
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
@@ -977,7 +986,7 @@ def _bindSocket(address_):
           # only print message on first attemps
           _printWarning("Could not bind to UNIX address: {}, looking for first available address".format(_gServerName))
         _gUnixSourceAddress = address_ + str(attempt)
-        _gUnixLockFile = _gUnixSourceAddress+".lock"
+        _gUnixLockFile = _gUnixSourceAddress+_gLockFileExtension
     _printError("Could not find available address after {} attempts".format(_MAX_BIND_ATTEMPTS))
   else:
     # IP domain socket
@@ -1604,10 +1613,11 @@ def _reply():
 #################################################################################
 def _cleanupResources():
   global _gUnixSourceAddress
+  global _gUnixLockFile
   global _gSocketFd
   if (_gUnixSourceAddress != None):
     os.unlink(_gUnixSourceAddress)
-    os.unlink(_gUnixSourceAddress+".lock")
+    os.unlink(_gUnixLockFile)
     _cleanupUnixResources()
   if (_gSocketFd != None):
     try:
@@ -1754,38 +1764,38 @@ def _flush():
 #################################################################################
 #################################################################################
 def _setLogLevel(level_):
-  global _logLevel
-  _logLevel = level_
+  global _gLogLevel
+  _gLogLevel = level_
 
 #################################################################################
 #################################################################################
 def _setLogFunction(function_):
-  global _logFunction
-  _logFunction = function_
+  global _gLogFunction
+  _gLogFunction = function_
 
 #################################################################################
 #################################################################################
 def _printError(message_):
-  if _logLevel >= LOG_LEVEL_ERROR:
+  if _gLogLevel >= LOG_LEVEL_ERROR:
     _printLog("PSHELL_ERROR: {}".format(message_))
 
 #################################################################################
 #################################################################################
 def _printWarning(message_):
-  if _logLevel >= LOG_LEVEL_WARNING:
+  if _gLogLevel >= LOG_LEVEL_WARNING:
     _printLog("PSHELL_WARNING: {}".format(message_))
 
 #################################################################################
 #################################################################################
 def _printInfo(message_):
-  if _logLevel >= LOG_LEVEL_INFO:
+  if _gLogLevel >= LOG_LEVEL_INFO:
     _printLog("PSHELL_INFO: {}".format(message_))
 
 #################################################################################
 #################################################################################
 def _printLog(message_):
-  if _logFunction is not None:
-    _logFunction(message_)
+  if _gLogFunction is not None:
+    _gLogFunction(message_)
   else:
     print(message_)
 
@@ -1817,6 +1827,7 @@ _gArgs = None
 _gFoundCommand = None
 _gUnixSourceAddress = None
 _gUnixLockFile = None
+_gLockFileExtension = ".pshell-lock"
 _gUnixLockFd = None
 _gRunning = False
 _gCommandDispatched = False
@@ -1886,12 +1897,12 @@ _gTcpTimeout = 10  # minutes
 _gTcpConnectSockName = None
 _gTcpPrompt = None
 _gTcpTitle = None
-# flag to indicate the special pshell.py client
+# flag to indicate thespecial pshell.py client
 _gPshellClient = False
 
 # log level and log print function
-_logLevel = LOG_LEVEL_DEFAULT
-_logFunction = None
+_gLogLevel = LOG_LEVEL_DEFAULT
+_gLogFunction = None
 
 _MAX_BIND_ATTEMPTS = 1000
 

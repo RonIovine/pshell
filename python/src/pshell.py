@@ -54,6 +54,8 @@ on the above modules.
 
 # import all our necessary module
 import os
+import fnmatch
+import fcntl
 import sys
 import signal
 import time
@@ -64,7 +66,8 @@ import PshellReadline
 _gSid = None
 _gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
-MAX_UNIX_INSTANCES = 1000
+_gUnixSocketPath = "/tmp/"
+_gLockFileExtension = ".pshell-lock"
 
 #################################################################################
 #################################################################################
@@ -276,7 +279,6 @@ def _configureLocalServer():
   prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
-    print(PshellServer._gPromptOverride)
 
   title = PshellControl._extractTitle(_gSid)
   if (len(title) > 0):
@@ -357,32 +359,75 @@ def _loadServers():
 
 #####################################################
 #####################################################
-def _showUnixServers(unixServer_):
-  unixServer = unixServer_
-  unixBaseFile = "/tmp/"+unixServer
-  print("")
-  print("***************************************")
-  print("*    Running UNIX Server Instances    *")
-  print("***************************************")
-  print("")
-  banner = "UNIX Server Instances For: {}".format(unixServer_)
-  print(banner)
-  print("%s" % ("="*len(banner)))
-  for index in range(1,MAX_UNIX_INSTANCES+1):
+def _getUnixServerName(index):
+  activeUnixServers = []
+  lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
+  lockFiles.sort()
+  for file in lockFiles:
     try:
-      fd = open(unixBaseFile+".lock", "r")
+      fd = open(_gUnixSocketPath+file, "r")
       try:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        # we got the lock, delete the lock file and don't print anything
-        os.unlink(unixBaseFile+".lock")
-      except Exception as error:
+        # we got the lock, delete any socket file and lock file and don't print anything
+        try:
+          os.unlink(_gUnixSocketPath+file.split(".")[0])
+        except:
+          None
+        try:
+          os.unlink(_gUnixSocketPath+file)
+        except:
+          None
+      except:
         # file handle is in use and locked by another process, print it
-        print(unixServer)
+        activeUnixServers.append(file.split(".")[0])
     except:
       None
-    unixServer = unixServer_ + str(index)
-    unixBaseFile = "/tmp/"+unixServer
+  if index-1 >= 0 and index-1 < len(activeUnixServers):
+    return activeUnixServers[index-1]
+  else:
+    print("ERROR: Index: %d out of range for UNIX servers, run 'pshell -u' to see UNIX server list" % index)
+    exit(0)
+
+#####################################################
+#####################################################
+def _showUnixServers():
+  global _gUnixSocketPath
+  global _gLockFileExtension
   print("")
+  print("*******************************")
+  print("*     Active UNIX Servers     *")
+  print("*******************************")
+  print("")
+  lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
+  lockFiles.sort()
+  activeServers = False
+  if len(lockFiles) > 0:
+    print("Index    Server Name")
+    print("=====    ====================")
+  for index, file in enumerate(lockFiles):
+    try:
+      fd = open(_gUnixSocketPath+file, "r")
+      try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # we got the lock, delete any socket file and lock file and don't print anything
+        try:
+          os.unlink(_gUnixSocketPath+file.split(".")[0])
+        except:
+          None
+        try:
+          os.unlink(_gUnixSocketPath+file)
+        except:
+          None
+      except:
+        # file handle is in use and locked by another process, print it
+        print("%-5d    %-20s" % (index+1, file.split(".")[0]))
+        activeServers = True
+    except:
+      None
+  print("")
+  if activeServers:
+    print("A UNIX server can be connected to by either its server name or server index")
+    print("")
   exit(0)
 
 #####################################################
@@ -406,13 +451,13 @@ def _showServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s {-s [<unixServerName>]} |" % os.path.basename(sys.argv[0]))
-  print("                 {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]")
-  print("                 [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
+  print("Usage: %s -s | -u | {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("                           [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
-  print("    -s             - show named servers in pshell-client.conf file or local running UNIX server")
+  print("    -s             - show named servers in pshell-client.conf file")
+  print("    -u             - show local running UNIX server")
   print("    -c             - run command from command line")
   print("    -f             - run commands from a batch file")
   print("    -t             - change the default server response timeout")
@@ -515,14 +560,15 @@ if (__name__ == '__main__'):
   _loadServers()
 
   if sys.argv[1] == "-s":
-    if (len(sys.argv) == 2):
-      _showServers()
-    elif (len(sys.argv) == 3):
-      _showUnixServers(sys.argv[2])
-    else:
-      showUsage()
+    _showServers()
+  elif sys.argv[1] == "-u":
+    _showUnixServers()
   else:
-    _gRemoteServer = sys.argv[1]
+    try:
+      int(sys.argv[1], 10)
+      _gRemoteServer = _getUnixServerName(int(sys.argv[1]))
+    except ValueError:
+      _gRemoteServer = sys.argv[1]
 
   needFile = False
   needCommand = False
@@ -612,6 +658,7 @@ if (__name__ == '__main__'):
         # configure our local server to interact with a remote server, we override the display settings
         # (i.e. prompt, server name, banner, title etc), to make it appear that our local server is really
         # a remote server
+
         _configureLocalServer()
 
         # now start our local server which will interact with a remote server via the pshell control machanism
