@@ -68,6 +68,7 @@ _gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
 _gUnixSocketPath = "/tmp/"
 _gLockFileExtension = ".pshell-lock"
+_gActiveUnixServers = []
 
 #################################################################################
 #################################################################################
@@ -359,8 +360,10 @@ def _loadServers():
 
 #####################################################
 #####################################################
-def _getUnixServerName(index):
-  activeUnixServers = []
+def _cleanupUnixResources():
+  global _gUnixSocketPath
+  global _gLockFileExtension
+  global _gActiveUnixServers
   lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
   lockFiles.sort()
   for file in lockFiles:
@@ -379,11 +382,16 @@ def _getUnixServerName(index):
           None
       except:
         # file handle is in use and locked by another process, print it
-        activeUnixServers.append(file.split(".")[0])
+        _gActiveUnixServers.append(file.split(".")[0])
     except:
       None
-  if index-1 >= 0 and index-1 < len(activeUnixServers):
-    return activeUnixServers[index-1]
+
+#####################################################
+#####################################################
+def _getUnixServerName(index):
+  global _gActiveUnixServers
+  if index-1 >= 0 and index-1 < len(_gActiveUnixServers):
+    return _gActiveUnixServers[index-1]
   else:
     print("ERROR: Index: %d out of range for UNIX servers, run 'pshell -u' to see UNIX server list" % index)
     exit(0)
@@ -391,41 +399,19 @@ def _getUnixServerName(index):
 #####################################################
 #####################################################
 def _showUnixServers():
-  global _gUnixSocketPath
-  global _gLockFileExtension
+  global _gActiveUnixServers
   print("")
   print("*******************************")
   print("*     Active UNIX Servers     *")
   print("*******************************")
   print("")
-  lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
-  lockFiles.sort()
-  activeServers = False
-  if len(lockFiles) > 0:
+  if len(_gActiveUnixServers) > 0:
     print("Index    Server Name")
     print("=====    ====================")
-  for index, file in enumerate(lockFiles):
-    try:
-      fd = open(_gUnixSocketPath+file, "r")
-      try:
-        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        # we got the lock, delete any socket file and lock file and don't print anything
-        try:
-          os.unlink(_gUnixSocketPath+file.split(".")[0])
-        except:
-          None
-        try:
-          os.unlink(_gUnixSocketPath+file)
-        except:
-          None
-      except:
-        # file handle is in use and locked by another process, print it
-        print("%-5d    %-20s" % (index+1, file.split(".")[0]))
-        activeServers = True
-    except:
-      None
-  print("")
-  if activeServers:
+  for index, server in enumerate(_gActiveUnixServers):
+    print("%-5d    %-20s" % (index+1, server))
+  if len(_gActiveUnixServers) > 0:
+    print("")
     print("A UNIX server can be connected to by either its server name or server index")
     print("")
   exit(0)
@@ -457,7 +443,7 @@ def _showUsage():
   print("  where:")
   print("")
   print("    -s             - show named servers in pshell-client.conf file")
-  print("    -u             - show local running UNIX server")
+  print("    -u             - show all local running active UNIX servers")
   print("    -c             - run command from command line")
   print("    -f             - run commands from a batch file")
   print("    -t             - change the default server response timeout")
@@ -558,6 +544,7 @@ if (__name__ == '__main__'):
   _gServerList = []
 
   _loadServers()
+  _cleanupUnixResources()
 
   if sys.argv[1] == "-s":
     _showServers()

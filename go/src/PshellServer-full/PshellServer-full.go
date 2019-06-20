@@ -227,6 +227,7 @@ var _logLevel = LOG_LEVEL_DEFAULT
 var _logFunction logFunction
 
 var _unixLockFd *os.File
+const _LOCK_FILE_EXTENSION = ".pshell-lock"
 
 /////////////////////////////////
 //
@@ -1660,7 +1661,7 @@ func runTCPServer() {
 ////////////////////////////////////////////////////////////////////////////////
 func cleanupUnixResources() {
   unixSocketFile := _gUnixSourceAddress
-  unixLockFile := unixSocketFile + ".lock"
+  unixLockFile := unixSocketFile + _LOCK_FILE_EXTENSION
   for index := 1; index < _MAX_BIND_ATTEMPTS+1; index++ {
     // try to open lock file
     unixLockFd, err := os.Create(unixLockFile)
@@ -1674,7 +1675,7 @@ func cleanupUnixResources() {
       }
     }
     unixSocketFile = _gUnixSourceAddress + strconv.Itoa(index)
-    unixLockFile = unixSocketFile + ".lock"
+    unixLockFile = unixSocketFile + _LOCK_FILE_EXTENSION
   }
 }
 
@@ -1741,7 +1742,7 @@ func createSocket() bool {
     printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
   } else if (_gServerType == UNIX) {
     _gUnixSourceAddress = _gUnixSocketPath + _gServerName
-    _gUnixLockFile = _gUnixSourceAddress + ".lock"
+    _gUnixLockFile = _gUnixSourceAddress + _LOCK_FILE_EXTENSION
     cleanupUnixResources()
     for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
       _unixLockFd, err = os.Create(_gUnixLockFile)
@@ -1769,7 +1770,7 @@ func createSocket() bool {
           printWarning("Could not bind to UNIX address: %s, looking for first available address", _gServerName);
         }
         _gUnixSourceAddress = _gUnixSocketPath + _gServerName + strconv.Itoa(attempt)
-        _gUnixLockFile = _gUnixSourceAddress + ".lock"
+        _gUnixLockFile = _gUnixSourceAddress + _LOCK_FILE_EXTENSION
       }
     }
     printError("Could not find available address after %d attempts", _MAX_BIND_ATTEMPTS)

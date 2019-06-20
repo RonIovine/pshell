@@ -39,6 +39,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
+#include <dirent.h>
 
 #include <PshellCommon.h>
 #include <PshellReadline.h>
@@ -130,9 +131,15 @@ int _destPort = 0;
 bool _isUnixConnected = false;
 
 #define MAX_UNIX_CLIENTS 1000
-#define MAX_SERVER_INSTANCES 1000
 
 ServerType _serverType = UDP;
+
+#define MAX_ACTIVE_UNIX_SERVERS 1000
+const char *_unixSocketPath = "/tmp/";
+const char *_lockFileExtension = ".pshell-lock";
+DIR *_dir;
+unsigned _numActiveUnixServers = 0;
+char *_activeUnixServers[MAX_ACTIVE_UNIX_SERVERS];
 
 char _unixLocalSocketName[256];
 char _interactiveCommand[PSHELL_RL_MAX_COMMAND_SIZE];
@@ -220,7 +227,9 @@ void processInteractiveMode(void);
 void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
 void getNamedServers(void);
 void showNamedServers(void);
-void showUnixServers(char *unixServer_);
+void showUnixServers(void);
+char *getUnixServerName(unsigned index_);
+void cleanupUnixResources(void);
 void showCommands(void);
 void stripWhitespace(char *string_);
 void showUsage(void);
@@ -1165,44 +1174,83 @@ void getNamedServers(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void showUnixServers(char *unixServer_)
+void cleanupUnixResources(void)
 {
-  char unixServer[300];
-  char unixLockFile[300];
-  char banner[300];
   int unixLockFd;
-  sprintf(unixServer, "%s", unixServer_);
-  sprintf(unixLockFile, "/tmp/%s.lock", unixServer);
-  printf("\n");
-  printf("***************************************\n");
-  printf("*    Running UNIX Server Instances    *\n");
-  printf("***************************************\n");
-  printf("\n");
-  sprintf(banner, "UNIX Server Instances For: %s", unixServer_);
-  printf("%s\n", banner);
-  for (unsigned i = 0; i < strlen(banner); i++) printf("=");
-  printf("\n");
-  for (unsigned index = 1; index <= MAX_SERVER_INSTANCES+1; index++)
+  char unixLockFile[300];
+  char unixSocketFile[300];
+  struct dirent *dirEntry;
+  _dir = opendir(_unixSocketPath);
+  if (_dir)
   {
-    /* try to open lock file */
-    if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+    while ((dirEntry = readdir(_dir)) != NULL)
     {
-      /* file exists, try to see if another process has it locked */
-      if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+      if (strstr(dirEntry->d_name, _lockFileExtension))
       {
-        /* we got the lock, nobody else has it, server not running, remove lock file */
-        unlink(unixLockFile);
-      }
-      else
-      {
-        // file handle is in use and locked by another process, print it
-        printf("%s\n", unixServer);
+        sprintf(unixLockFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
+        /* try to open lock file */
+        if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+        {
+          *strstr(dirEntry->d_name, ".") = 0;
+          sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
+          /* file exists, try to see if another process has it locked */
+          if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+          {
+            /* we got the lock, nobody else has it, ok to clean it up */
+            unlink(unixSocketFile);
+            unlink(unixLockFile);
+          }
+          else if (_numActiveUnixServers < MAX_ACTIVE_UNIX_SERVERS)
+          {
+            _activeUnixServers[_numActiveUnixServers++] = dirEntry->d_name;
+          }
+        }
       }
     }
-    sprintf(unixServer, "%s%d", unixServer_, index);
-    sprintf(unixLockFile, "/tmp/%s.lock", unixServer);
+    closedir(_dir);
   }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+char *getUnixServerName(unsigned index_)
+{
+  if ((index_-1 >= 0) && (index_-1 < _numActiveUnixServers))
+  {
+    return (_activeUnixServers[index_-1]);
+  }
+  else
+  {
+    printf("ERROR: Index: %d out of range for UNIX servers, run 'pshell -u' to see UNIX server list\n", index_);
+    exitProgram(0);
+  }
+  return (NULL);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void showUnixServers(void)
+{
   printf("\n");
+  printf("*******************************\n");
+  printf("*     Active UNIX Servers     *\n");
+  printf("*******************************\n");
+  printf("\n");
+  if (_numActiveUnixServers > 0)
+  {
+    printf("Index    Server Name\n");
+    printf("=====    ====================\n");
+  }
+  for (unsigned index = 0; index < _numActiveUnixServers; index++)
+  {
+    printf("%-5d    %-20s\n", index+1, _activeUnixServers[index]);
+  }
+  if (_numActiveUnixServers > 0)
+  {
+    printf("\n");
+    printf("A UNIX server can be connected to by either its server name or server index\n");
+    printf("\n");
+  }
   exitProgram(0);
 }
 
@@ -1290,13 +1338,13 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell {-s [<unixServerName>]} |\n");
-  printf("              {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]\n");
-  printf("              [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
+  printf("Usage: pshell -s | -u | {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]\n");
+  printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
-  printf("    -s             - show named servers in pshell-client.conf file or local running UNIX server\n");
+  printf("    -s             - show named servers in pshell-client.conf file\n");
+  printf("    -u             - show all local running active UNIX servers\n");
   printf("    -c             - run command from command line\n");
   printf("    -f             - run commands from a batch file\n");
   printf("    -t             - change the default server response timeout\n");
@@ -1337,6 +1385,7 @@ void parseCommandLine(int *argc, char *argv[])
 {
   int i;
   getNamedServers();
+  cleanupUnixResources();
   for (i = 0; i < (*argc-1); i++)
   {
     argv[i] = argv[i+1];
@@ -1356,16 +1405,22 @@ void parseCommandLine(int *argc, char *argv[])
       {
         showNamedServers();
       }
+      else if (strcmp(argv[0], "-u") == 0)
+      {
+        showUnixServers();
+      }
+      else if (isNumeric(argv[0]))
+      {
+        _host = "unix";
+        _server = getUnixServerName(atoi(argv[0]));
+        *argc = 0;
+      }
       else
       {
         _host = "unix";
         _server = argv[0];
         *argc = 0;
       }
-  }
-  else if ((*argc == 2) && (strcmp(argv[0], "-s") == 0))
-  {
-    showUnixServers(argv[1]);
   }
   else if (*argc < 8)
   {
@@ -1625,22 +1680,3 @@ int main(int argc, char *argv[])
   }
   exitProgram(0);
 }
-
-
-/*
-#include <dirent.h>
-#include <stdio.h>
-
-int main(void) {
-  DIR *d;
-  struct dirent *dir;
-  d = opendir(".");
-  if (d) {
-    while ((dir = readdir(d)) != NULL) {
-      printf("%s\n", dir->d_name);
-    }
-    closedir(d);
-  }
-  return(0);
-}
-*/
