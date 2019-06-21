@@ -446,7 +446,7 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
     remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
     rand := rand.New(rand.NewSource(time.Now().UnixNano()))
     for {
-      sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
+      sourceAddress = _UNIX_SOCKET_PATH+"pshellControl"+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
       localAddr := net.UnixAddr{sourceAddress, "unixgram"}
       if socket, retCode = net.DialUnix("unixgram", &localAddr, &remoteAddr); retCode == nil {
         break

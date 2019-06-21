@@ -503,14 +503,14 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
     # UNIX domain socket
     socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     # bind our source socket so we can get replies
-    sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
+    sourceAddress = _gUnixSocketPath+"pshellControl"+str(random.randrange(1000))
     bound = False
     while (not bound):
       try:
         socketFd.bind(sourceAddress)
         bound = True
       except Exception as e:
-        sourceAddress = _gUnixSocketPath+remoteServer_+str(random.randrange(1000))
+        sourceAddress = _gUnixSocketPath+"pshellControl"+str(random.randrange(1000))
     _gPshellControl.append({"socket":socketFd,
                             "timeout":defaultTimeout_,
                             "serverType":"unix",

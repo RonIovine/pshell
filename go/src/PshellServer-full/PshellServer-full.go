@@ -200,9 +200,7 @@ var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
 var _gPshellSendPayload = ""
 var _gUdpSocket *net.UDPConn
 var _gUnixSocket *net.UnixConn
-var _gUnixSocketPath = "/tmp/"
 var _gUnixSourceAddress string
-var _gUnixLockFile string
 var _gTcpSocket *net.TCPListener
 var _gConnectFd *net.TCPConn
 var _gTcpNegotiate = []byte{0xFF, 0xFB, 0x03, 0xFF, 0xFB, 0x01, 0xFF, 0xFD, 0x03, 0xFF, 0xFD, 0x01}
@@ -226,7 +224,9 @@ type logFunction func(string)
 var _logLevel = LOG_LEVEL_DEFAULT
 var _logFunction logFunction
 
+var _gUnixLockFile string
 var _unixLockFd *os.File
+const _UNIX_SOCKET_PATH = "/tmp/"
 const _LOCK_FILE_EXTENSION = ".pshell-lock"
 
 /////////////////////////////////
@@ -1660,22 +1660,25 @@ func runTCPServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func cleanupUnixResources() {
-  unixSocketFile := _gUnixSourceAddress
-  unixLockFile := unixSocketFile + _LOCK_FILE_EXTENSION
-  for index := 1; index < _MAX_BIND_ATTEMPTS+1; index++ {
-    // try to open lock file
-    unixLockFd, err := os.Create(unixLockFile)
-    if err == nil {
-      err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
-      // file exists, try to see if another process has it locked
-      if err == nil {
-        // we got the lock, nobody else has it, ok to clean it up
-        os.Remove(unixSocketFile)
-        os.Remove(unixLockFile)
+  fileInfo, err := ioutil.ReadDir(_UNIX_SOCKET_PATH)
+  if err == nil {
+    for _, file := range fileInfo {
+      if strings.HasSuffix(file.Name(), _LOCK_FILE_EXTENSION) {
+        // try to open lock file
+        unixLockFile := file.Name()
+        unixSocketFile := strings.Split(unixLockFile, ".")[0]
+        unixLockFd, err := os.Open(unixLockFile)
+        if err == nil {
+          err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+          // file exists, try to see if another process has it locked
+          if err == nil {
+            // we got the lock, nobody else has it, ok to clean it up
+            os.Remove(unixSocketFile)
+            os.Remove(unixLockFile)
+          }
+        }
       }
     }
-    unixSocketFile = _gUnixSourceAddress + strconv.Itoa(index)
-    unixLockFile = unixSocketFile + _LOCK_FILE_EXTENSION
   }
 }
 
@@ -1741,7 +1744,7 @@ func createSocket() bool {
     }
     printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
   } else if (_gServerType == UNIX) {
-    _gUnixSourceAddress = _gUnixSocketPath + _gServerName
+    _gUnixSourceAddress = _UNIX_SOCKET_PATH + _gServerName
     _gUnixLockFile = _gUnixSourceAddress + _LOCK_FILE_EXTENSION
     cleanupUnixResources()
     for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
@@ -1769,7 +1772,7 @@ func createSocket() bool {
         } else if (attempt == 1) {
           printWarning("Could not bind to UNIX address: %s, looking for first available address", _gServerName);
         }
-        _gUnixSourceAddress = _gUnixSocketPath + _gServerName + strconv.Itoa(attempt)
+        _gUnixSourceAddress = _UNIX_SOCKET_PATH + _gServerName + strconv.Itoa(attempt)
         _gUnixLockFile = _gUnixSourceAddress + _LOCK_FILE_EXTENSION
       }
     }

@@ -588,7 +588,7 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
       sprintf(control_->sourceUnixAddress.sun_path,
               "%s/%s%d",
               PSHELL_UNIX_SOCKET_PATH,
-              remoteServer_,
+              "pshellControl",
               (rand()%MAX_UNIX_CLIENTS));
       retCode = bind(control_->socketFd,
                      (struct sockaddr *)&control_->sourceUnixAddress,
