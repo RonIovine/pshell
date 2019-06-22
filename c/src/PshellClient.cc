@@ -1200,7 +1200,8 @@ void cleanupUnixResources(void)
             unlink(unixSocketFile);
             unlink(unixLockFile);
           }
-          else if (_numActiveUnixServers < MAX_ACTIVE_UNIX_SERVERS)
+          else if ((_numActiveUnixServers < MAX_ACTIVE_UNIX_SERVERS) &&
+                   (strstr(dirEntry->d_name, "-control") == NULL))
           {
             _activeUnixServers[_numActiveUnixServers++] = dirEntry->d_name;
           }

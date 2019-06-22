@@ -29,6 +29,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/stat.h>
+#include <sys/file.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -39,6 +41,8 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <pthread.h>
+#include <dirent.h>
+#include <fcntl.h>
 
 #include <PshellCommon.h>
 #include <PshellControl.h>
@@ -116,6 +120,8 @@ static PshellLogFunction _logFunction = NULL;
 static unsigned _logLevel = PSHELL_CONTROL_LOG_LEVEL_DEFAULT;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static const char *_errorPad = "              ";
+static const char *_unixSocketPath = "/tmp/";
+static const char *_lockFileExtension = ".pshell-lock";
 
 /******************************************
  * private "member" function prototypes
@@ -128,6 +134,7 @@ static bool sendPshellMsg(PshellControl *control_);
 static int extractResults(PshellControl *control_, char *results_, int size_);
 static bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned port_, unsigned defaultMsecTimeout_);
 static void loadConfigFile(const char *controlName_, char *remoteServer_, unsigned &port_, unsigned &defaultTimeout_);
+static void cleanupUnixResources(void);
 
 static void _printf(const char *format_, ...);
 
@@ -201,17 +208,21 @@ int pshell_connectServer(const char *controlName_,
 void pshell_disconnectServer(int sid_)
 {
   pthread_mutex_lock(&_mutex);
+  char unixLockFile[MAX_STRING_SIZE];
   PshellControl *control;
   if ((control = getControl(sid_)) != NULL)
   {
     if (control->serverType == UNIX)
     {
+      sprintf(unixLockFile, "%s%s", control->sourceUnixAddress.sun_path, _lockFileExtension);
       unlink(control->sourceUnixAddress.sun_path);
+      unlink(unixLockFile);
     }
     close(control->socketFd);
     free(control);
     _control[sid_] = NULL;
   }
+  cleanupUnixResources();
   pthread_mutex_unlock(&_mutex);
 }
 
@@ -563,11 +574,50 @@ const char *pshell_getResponseString(int results_)
 
 /******************************************************************************/
 /******************************************************************************/
+static void cleanupUnixResources(void)
+{
+  DIR *dir;
+  int unixLockFd;
+  char unixLockFile[MAX_STRING_SIZE];
+  char unixSocketFile[MAX_STRING_SIZE];
+  struct dirent *dirEntry;
+  dir = opendir(_unixSocketPath);
+  if (dir)
+  {
+    while ((dirEntry = readdir(dir)) != NULL)
+    {
+      if (strstr(dirEntry->d_name, _lockFileExtension))
+      {
+        sprintf(unixLockFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
+        /* try to open lock file */
+        if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+        {
+          *strstr(dirEntry->d_name, ".") = 0;
+          sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
+          /* file exists, try to see if another process has it locked */
+          if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+          {
+            /* we got the lock, nobody else has it, ok to clean it up */
+            unlink(unixSocketFile);
+            unlink(unixLockFile);
+          }
+        }
+      }
+    }
+    closedir(dir);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned port_, unsigned defaultTimeout_)
 {
   struct hostent *host;
   int retCode = -1;
+  char unixLockFile[MAX_STRING_SIZE];
+  int unixLockFd;
 
+  cleanupUnixResources();
   control_->defaultTimeout = defaultTimeout_;
   if (port_ == PSHELL_UNIX_CONTROL)
   {
@@ -586,13 +636,21 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
     for (int i = 0; ((i < MAX_UNIX_CLIENTS) && (retCode < 0)); i++)
     {
       sprintf(control_->sourceUnixAddress.sun_path,
-              "%s/%s%d",
+              "%s/%s-control%d",
               PSHELL_UNIX_SOCKET_PATH,
-              "pshellControl",
+              remoteServer_,
               (rand()%MAX_UNIX_CLIENTS));
-      retCode = bind(control_->socketFd,
-                     (struct sockaddr *)&control_->sourceUnixAddress,
-                     sizeof(control_->sourceUnixAddress));
+      sprintf(unixLockFile, "%s%s", control_->sourceUnixAddress.sun_path, _lockFileExtension);
+      if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+      {
+        /* file exists, try to see if another process has it locked */
+        if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+        {
+          retCode = bind(control_->socketFd,
+                         (struct sockaddr *)&control_->sourceUnixAddress,
+                         sizeof(control_->sourceUnixAddress));
+        }
+      }
     }
 
     if (retCode < 0)

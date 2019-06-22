@@ -980,6 +980,8 @@ void pshell_startServer(const char *serverName_,
 {
   pthread_t pshellServerThreadTID;
 
+  cleanupUnixResources();
+
   if ((serverType_ != PSHELL_UDP_SERVER) &&
       (serverType_ != PSHELL_UNIX_SERVER) &&
       (serverType_ != PSHELL_TCP_SERVER) &&
@@ -1138,8 +1140,8 @@ void pshell_cleanupResources(void)
   {
     unlink(_localUnixAddress.sun_path);
     unlink(_unixLockFile);
-    cleanupUnixResources();
   }
+  cleanupUnixResources();
 }
 
 /**************************************************
@@ -2663,7 +2665,6 @@ static bool bindSocket(void)
     _localUnixAddress.sun_family = AF_UNIX;
     sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
     sprintf(_unixLockFile, "%s%s", _localUnixAddress.sun_path, _lockFileExtension);
-    cleanupUnixResources();
     for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
     {
       /* try to open lock file */

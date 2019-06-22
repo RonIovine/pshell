@@ -944,6 +944,7 @@ func startServer(serverName_ string,
                  serverMode_ int,
                  hostnameOrIpAddr_ string,
                  port_ string) {
+  cleanupUnixResources()
   if (_gRunning == false) {
     _gServerName = serverName_
     _gServerType = serverType_
@@ -967,8 +968,8 @@ func cleanupResources() {
   if _gServerType == UNIX {
     os.Remove(_gUnixSourceAddress)
     os.Remove(_gUnixLockFile)
-    cleanupUnixResources()
   }
+  cleanupUnixResources()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1746,7 +1747,6 @@ func createSocket() bool {
   } else if (_gServerType == UNIX) {
     _gUnixSourceAddress = _UNIX_SOCKET_PATH + _gServerName
     _gUnixLockFile = _gUnixSourceAddress + _LOCK_FILE_EXTENSION
-    cleanupUnixResources()
     for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
       _unixLockFd, err = os.Create(_gUnixLockFile)
       if err == nil {

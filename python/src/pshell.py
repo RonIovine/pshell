@@ -382,7 +382,8 @@ def _cleanupUnixResources():
           None
       except:
         # file handle is in use and locked by another process, print it
-        _gActiveUnixServers.append(file.split(".")[0])
+        if "-control" not in file:
+          _gActiveUnixServers.append(file.split(".")[0])
     except:
       None
 

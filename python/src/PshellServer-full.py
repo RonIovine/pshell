@@ -911,6 +911,7 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
   global _gHostnameOrIpAddr
   global _gPort
   global _gRunning
+  _cleanupUnixResources()
   if (_gRunning == False):
     _gServerName = serverName_
     _gServerType = serverType_
@@ -937,7 +938,6 @@ def _cleanupUnixResources():
   global _gUnixSocketPath
   global _gLockFileExtension
   lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
-  lockFiles.sort()
   for file in lockFiles:
     try:
       fd = open(_gUnixSocketPath+file, "r")
@@ -972,7 +972,6 @@ def _bindSocket(address_):
   if _gServerType == UNIX:
     # Unix domain socket
     _gUnixLockFile = _gUnixSourceAddress+_gLockFileExtension
-    _cleanupUnixResources()
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
         _gUnixLockFd = open((_gUnixLockFile), "w+")
@@ -1616,9 +1615,15 @@ def _cleanupResources():
   global _gUnixLockFile
   global _gSocketFd
   if (_gUnixSourceAddress != None):
-    os.unlink(_gUnixSourceAddress)
-    os.unlink(_gUnixLockFile)
-    _cleanupUnixResources()
+    try:
+      os.unlink(_gUnixSourceAddress)
+    except:
+      None
+    try:
+      os.unlink(_gUnixLockFile)
+    except:
+      None
+  _cleanupUnixResources()
   if (_gSocketFd != None):
     try:
       _gSocketFd.close()

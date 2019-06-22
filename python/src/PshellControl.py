@@ -119,6 +119,8 @@ import select
 import socket
 import struct
 import random
+import fcntl
+import fnmatch
 from collections import OrderedDict
 from collections import namedtuple
 
@@ -495,26 +497,33 @@ def setLogFunction(function):
 def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   global _gPshellControl
   global _gUnixSocketPath
+  global _gLockFileExtension
   global _gPshellMsgPayloadLength
   isBroadcastAddress = False
   sid = INVALID_SID
+  _cleanupUnixResources()
   (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_.lower() == "unix"):
     # UNIX domain socket
     socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     # bind our source socket so we can get replies
-    sourceAddress = _gUnixSocketPath+"pshellControl"+str(random.randrange(1000))
+    sourceAddress = _gUnixSocketPath+remoteServer_+"-control"+str(random.randrange(1000))
+    lockFile = sourceAddress+_gLockFileExtension
     bound = False
     while (not bound):
       try:
+        lockFd = open((lockFile), "w+")
+        fcntl.flock(lockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         socketFd.bind(sourceAddress)
         bound = True
       except Exception as e:
-        sourceAddress = _gUnixSocketPath+"pshellControl"+str(random.randrange(1000))
+        sourceAddress = _gUnixSocketPath+remoteServer_+"-control"+str(random.randrange(1000))
+        lockFile = sourceAddress+_gLockFileExtension
     _gPshellControl.append({"socket":socketFd,
                             "timeout":defaultTimeout_,
                             "serverType":"unix",
                             "isBroadcastAddress":isBroadcastAddress,
+                            "lockFd":lockFd,
                             "sourceAddress":sourceAddress,
                             "destAddress":_gUnixSocketPath+remoteServer_,
                             "remoteServer":controlName_+"[unix]",
@@ -542,6 +551,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                             "timeout":defaultTimeout_,
                             "serverType":"udp",
                             "isBroadcastAddress":isBroadcastAddress,
+                            "lockFd":None,
                             "sourceAddress":None,
                             "destAddress":(remoteServer_, int(port_)),
                             "remoteServer":controlName_+"["+remoteServer_+"]",
@@ -833,10 +843,44 @@ def _getResponseString(retCode):
 
 #################################################################################
 #################################################################################
+def _cleanupUnixResources():
+  global _gUnixSocketPath
+  global _gLockFileExtension
+  lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
+  for file in lockFiles:
+    try:
+      fd = open(_gUnixSocketPath+file, "r")
+      try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # we got the lock, delete any socket file and lock file and don't print anything
+        try:
+          os.unlink(_gUnixSocketPath+file.split(".")[0])
+        except:
+          None
+        try:
+          os.unlink(_gUnixSocketPath+file)
+        except:
+          None
+      except:
+        None
+    except:
+      None
+
+#################################################################################
+#################################################################################
 def _removeControl(control_):
   global _gPshellControl
+  global _gLockFileExtension
   if (control_["serverType"] == "unix"):
-    os.unlink(control_["sourceAddress"])
+    try:
+      os.unlink(control_["sourceAddress"])
+    except:
+      None
+    try:
+      os.unlink(control_["sourceAddress"]+_gLockFileExtension)
+    except:
+      None
+  _cleanupUnixResources()
   control_["socket"].close()
 
 #################################################################################
@@ -899,38 +943,38 @@ def _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_):
 #################################################################################
 #################################################################################
 def _setLogLevel(level_):
-  global _logLevel
-  _logLevel = level_
+  global _gLogLevel
+  _gLogLevel = level_
 
 #################################################################################
 #################################################################################
 def _setLogFunction(function_):
-  global _logFunction
-  _logFunction = function_
+  global _gLogFunction
+  _gLogFunction = function_
 
 #################################################################################
 #################################################################################
 def _printError(message_):
-  if _logLevel >= LOG_LEVEL_ERROR:
+  if _gLogLevel >= LOG_LEVEL_ERROR:
     _printLog("PSHELL_ERROR: {}".format(message_))
 
 #################################################################################
 #################################################################################
 def _printWarning(message_):
-  if _logLevel >= LOG_LEVEL_WARNING:
+  if _gLogLevel >= LOG_LEVEL_WARNING:
     _printLog("PSHELL_WARNING: {}".format(message_))
 
 #################################################################################
 #################################################################################
 def _printInfo(message_):
-  if _logLevel >= LOG_LEVEL_INFO:
+  if _gLogLevel >= LOG_LEVEL_INFO:
     _printLog("PSHELL_INFO: {}".format(message_))
 
 #################################################################################
 #################################################################################
 def _printLog(message_):
-  if _logFunction is not None:
-    _logFunction(message_)
+  if _gLogFunction is not None:
+    _gLogFunction(message_)
   else:
     print(message_)
 
@@ -948,6 +992,7 @@ _gPshellMulticast = []
 
 # path of unix domain socket handle for client sockets
 _gUnixSocketPath = "/tmp/"
+_gLockFileExtension = ".pshell-lock"
 _PSHELL_CONFIG_DIR = "/etc/pshell/config"
 _PSHELL_CONFIG_FILE = "pshell-control.conf"
 
@@ -985,5 +1030,5 @@ _gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
 _gSupressInvalidArgCountMessage = False
 
 # log level and log print function
-_logLevel = LOG_LEVEL_DEFAULT
-_logFunction = None
+_gLogLevel = LOG_LEVEL_DEFAULT
+_gLogFunction = None

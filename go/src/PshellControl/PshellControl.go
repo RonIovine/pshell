@@ -47,6 +47,7 @@ import "strings"
 import "strconv"
 import "io/ioutil"
 import "os"
+import "syscall"
 import "fmt"
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -101,6 +102,7 @@ const (
 /////////////////////////////////////////////////////////////////////////////////
 
 const _UNIX_SOCKET_PATH = "/tmp/"
+const _LOCK_FILE_EXTENSION = ".pshell-lock"
 const _NO_RESP_NEEDED = 0
 const _NO_DATA_NEEDED = 0
 const _RESP_NEEDED = 1
@@ -119,6 +121,7 @@ type pshellControl struct {
   socket net.Conn
   defaultTimeout int
   serverType string
+  unixLockFd *os.File
   sourceAddress string
   sendMsg []byte
   recvMsg []byte
@@ -436,26 +439,37 @@ func SetLogFunction(function logFunction) {
 ////////////////////////////////////////////////////////////////////////////////
 func connectServer(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) int {
   // setup our destination socket
-  var retCode error
+  var err error
   var sid = INVALID_SID
   var socket net.Conn
   var sourceAddress string
+  var unixLockFd *os.File
+  cleanupUnixResources()
   remoteServer_, port_, defaultTimeout_ = loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
   if (port_ == UNIX) {
     // UNIX domain socket
     remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
     rand := rand.New(rand.NewSource(time.Now().UnixNano()))
     for {
-      sourceAddress = _UNIX_SOCKET_PATH+"pshellControl"+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
+      sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+"-control"+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
       localAddr := net.UnixAddr{sourceAddress, "unixgram"}
-      if socket, retCode = net.DialUnix("unixgram", &localAddr, &remoteAddr); retCode == nil {
-        break
+      unixLockFile := sourceAddress+_LOCK_FILE_EXTENSION
+      unixLockFd, err = os.Create(unixLockFile)
+      if err == nil {
+        err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+        if err == nil {
+          socket, err = net.DialUnix("unixgram", &localAddr, &remoteAddr)
+          if err == nil {
+            break
+          }
+        }
       }
     }
     _gControlList = append(_gControlList,
                            pshellControl{socket,
                                          defaultTimeout_,
                                          "unix",
+                                         unixLockFd,
                                          sourceAddress,                   // unix file handle, used for cleanup
                                          []byte{},                        // sendMsg
                                          make([]byte, _RCV_BUFFER_SIZE),  // recvMsg
@@ -465,12 +479,13 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
   } else {
     // IP (UDP) domain socket
     remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
-    socket, retCode = net.DialUDP("udp", nil, remoteAddr)
-    if (retCode == nil) {
+    socket, err = net.DialUDP("udp", nil, remoteAddr)
+    if (err == nil) {
       _gControlList = append(_gControlList,
                              pshellControl{socket,
                                            defaultTimeout_,
                                            "udp",
+                                           unixLockFd,
                                            "",                              // sourceAddress not used for UDP socket
                                            []byte{},                        // sendMsg
                                            make([]byte, _RCV_BUFFER_SIZE),  // recvMsg
@@ -485,13 +500,40 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func cleanupUnixResources() {
+  fileInfo, err := ioutil.ReadDir(_UNIX_SOCKET_PATH)
+  if err == nil {
+    for _, file := range fileInfo {
+      if strings.HasSuffix(file.Name(), _LOCK_FILE_EXTENSION) {
+        // try to open lock file
+        unixLockFile := file.Name()
+        unixSocketFile := strings.Split(unixLockFile, ".")[0]
+        unixLockFd, err := os.Open(unixLockFile)
+        if err == nil {
+          err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+          // file exists, try to see if another process has it locked
+          if err == nil {
+            // we got the lock, nobody else has it, ok to clean it up
+            os.Remove(unixSocketFile)
+            os.Remove(unixLockFile)
+          }
+        }
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func disconnectServer(sid_ int) {
   if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
     control := _gControlList[sid_]
     if (control.serverType == UNIX) {
       os.Remove(control.sourceAddress)
+      os.Remove(control.sourceAddress+_LOCK_FILE_EXTENSION)
     }
   }
+  cleanupUnixResources()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
