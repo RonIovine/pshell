@@ -229,6 +229,7 @@ void getNamedServers(void);
 void showNamedServers(void);
 void showUnixServers(void);
 char *getUnixServerName(unsigned index_);
+int stringCompare(const void* string1_, const void* string2_);
 void cleanupUnixResources(void);
 void showCommands(void);
 void stripWhitespace(char *string_);
@@ -460,6 +461,8 @@ bool init(const char *destination_, const char *server_)
 {
   char requestedHost[180];
   char destination[180];
+  char unixLockFile[180];
+  int unixLockFd;
   struct hostent *host;
   const char *port;
   int retCode = -1;
@@ -580,8 +583,18 @@ bool init(const char *destination_, const char *server_)
     /* bind to our source socket */
     for (int i = 0; ((i < MAX_UNIX_CLIENTS) && (retCode < 0)); i++)
     {
-      sprintf(_sourceUnixAddress.sun_path, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, server_, (rand()%MAX_UNIX_CLIENTS));
-      retCode = bind(_socketFd, (struct sockaddr *) &_sourceUnixAddress, sizeof(_sourceUnixAddress));
+      sprintf(_sourceUnixAddress.sun_path, "%s/%s-control%d", PSHELL_UNIX_SOCKET_PATH, server_, (rand()%MAX_UNIX_CLIENTS));
+      sprintf(unixLockFile, "%s%s", _sourceUnixAddress.sun_path, _lockFileExtension);
+      /* try to open lock file */
+      if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+      {
+        /* file exists, try to see if another process has it locked */
+        if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
+        {
+          /* we got the lock, nobody else has it, bind to our socket */
+          retCode = bind(_socketFd, (struct sockaddr *) &_sourceUnixAddress, sizeof(_sourceUnixAddress));
+        }
+      }
     }
 
     if (retCode < 0)
@@ -1174,6 +1187,13 @@ void getNamedServers(void)
 
 /******************************************************************************/
 /******************************************************************************/
+int stringCompare(const void* string1_, const void* string2_)
+{
+  return strcmp(*(char**)string1_, *(char**)string2_);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void cleanupUnixResources(void)
 {
   int unixLockFd;
@@ -1210,6 +1230,7 @@ void cleanupUnixResources(void)
     }
     closedir(_dir);
   }
+  qsort(_activeUnixServers, _numActiveUnixServers, sizeof(const char*), stringCompare);
 }
 
 /******************************************************************************/
@@ -1488,10 +1509,14 @@ void parseCommandLine(int *argc, char *argv[])
 /******************************************************************************/
 void exitProgram(int exitCode_)
 {
+  char unixLockFile[180];
   if (_isUnixConnected)
   {
+    sprintf(unixLockFile, "%s%s", _sourceUnixAddress.sun_path, _lockFileExtension);
     unlink(_sourceUnixAddress.sun_path);
+    unlink(unixLockFile);
   }
+  cleanupUnixResources();
   if (exitCode_ > 0)
   {
     printf("\n");
