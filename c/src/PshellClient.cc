@@ -228,7 +228,7 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
 void getNamedServers(void);
 void showNamedServers(void);
 void showUnixServers(void);
-char *getUnixServerName(unsigned index_);
+char *getUnixServer(unsigned index_);
 int stringCompare(const void* string1_, const void* string2_);
 void cleanupUnixResources(void);
 void showCommands(void);
@@ -328,18 +328,47 @@ bool isNumeric(const char *string_)
 const char *findServerPort(const char *name_)
 {
   unsigned server;
+  unsigned index;
+  unsigned numFound = 0;
 
-  for (server = 0; server < _numPshellServers; server++)
+  for (index = 0; index < _numPshellServers; index++)
   {
-    if (strncmp(name_, _pshellServersList[server].serverName, strlen(name_)) == 0)
+    if ((strlen(name_) == strlen(_pshellServersList[index].serverName)) &&
+         strcmp(name_, _pshellServersList[index].serverName) == 0)
     {
-      /* only set the server response timeout if we did not get a command line override */
-      if (!_serverResponseTimeoutOverride)
-      {
-        _serverResponseTimeout = _pshellServersList[server].timeout;
-      }
-      return (_pshellServersList[server].portNum);
+      /* exact match, break out, assumes list does not have duplicate entries */
+      server = index;
+      numFound = 1;
+      break;
     }
+    else if (strncmp(name_, _pshellServersList[index].serverName, strlen(name_)) == 0)
+    {
+      server = index;
+      numFound++;
+    }
+  }
+  if (numFound == 1)
+  {
+    /* only set the server response timeout if we did not get a command line override */
+    if (!_serverResponseTimeoutOverride)
+    {
+      _serverResponseTimeout = _pshellServersList[server].timeout;
+    }
+    return (_pshellServersList[server].portNum);
+  }
+  else if (numFound == 0)
+  {
+    printf("\n");
+    printf("PSHELL_ERROR: Could not find server: '%s' in file: 'pshell-client.conf'\n", name_);
+    showNamedServers();
+    exitProgram(0);
+  }
+  else if (numFound > 1)
+  {
+    printf("\n");
+    printf("PSHELL_ERROR: Ambiguous server name: '%s' found in pshell-client.conf file\n", name_);
+    showNamedServers();
+    exitProgram(0);
   }
   return (NULL);
 }
@@ -1235,16 +1264,62 @@ void cleanupUnixResources(void)
 
 /******************************************************************************/
 /******************************************************************************/
-char *getUnixServerName(unsigned index_)
+char *getUnixServer(char *server_)
 {
-  if ((index_-1 >= 0) && (index_-1 < _numActiveUnixServers))
+  unsigned index;
+  unsigned server;
+  unsigned numFound = 0;
+  if (isNumeric(server_))
   {
-    return (_activeUnixServers[index_-1]);
+    index = atoi(server_);
+    if ((index-1 >= 0) && (index-1 < _numActiveUnixServers))
+    {
+      return (_activeUnixServers[index-1]);
+    }
+    else
+    {
+      printf("\n");
+      printf("PSHELL_ERROR: Index: %d out of range for UNIX server\n", index);
+      showUnixServers();
+      exitProgram(0);
+    }
   }
   else
   {
-    printf("ERROR: Index: %d out of range for UNIX servers, run 'pshell -u' to see UNIX server list\n", index_);
-    exitProgram(0);
+    for (index = 0; index < _numActiveUnixServers; index++)
+    {
+      if ((strlen(server_) == strlen(_activeUnixServers[index])) &&
+          strcmp(server_, _activeUnixServers[index]) == 0)
+      {
+        /* exact match, break out, assumes list does not have duplicate entries */
+        server = index;
+        numFound = 1;
+        break;
+      }
+      else if (strncmp(server_, _activeUnixServers[index], strlen(server_)) == 0)
+      {
+        server = index;
+        numFound++;
+      }
+    }
+    if (numFound == 1)
+    {
+      return (_activeUnixServers[server]);
+    }
+    else if (numFound == 0)
+    {
+      printf("\n");
+      printf("PSHELL_ERROR: UNIX server: '%s' not running on localhost\n", server_);
+      showUnixServers();
+      exitProgram(0);
+    }
+    else if (numFound > 1)
+    {
+      printf("\n");
+      printf("PSHELL_ERROR: Ambiguous UNIX server name: '%s'\n", server_);
+      showUnixServers();
+      exitProgram(0);
+    }
   }
   return (NULL);
 }
@@ -1360,27 +1435,28 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -s | -u | {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]\n");
+  printf("Usage: pshell -s | -u | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]\n");
   printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
-  printf("    -s             - show named servers in pshell-client.conf file\n");
-  printf("    -u             - show all local running active UNIX servers\n");
-  printf("    -c             - run command from command line\n");
-  printf("    -f             - run commands from a batch file\n");
-  printf("    -t             - change the default server response timeout\n");
-  printf("    hostName       - hostname of UDP server\n");
-  printf("    ipAddr         - IP address of UDP server\n");
-  printf("    portNum        - port number of UDP server\n");
-  printf("    serverName     - name of UDP server from pshell-client.conf file\n");
-  printf("    unixServerName - name of UNIX server\n");
-  printf("    timeout        - response wait timeout in sec (default=5)\n");
-  printf("    command        - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")\n");
-  printf("    fileName       - optional batch file to execute\n");
-  printf("    rate           - optional rate to repeat command or batch file (in seconds)\n");
-  printf("    repeat         - optional repeat count for command or batch file (default=forever)\n");
-  printf("    clear          - optional clear screen between commands or batch file passes\n");
+  printf("    -s              - show named IP servers in pshell-client.conf file\n");
+  printf("    -u              - show all local running active UNIX servers\n");
+  printf("    -c              - run command from command line\n");
+  printf("    -f              - run commands from a batch file\n");
+  printf("    -t              - change the default server response timeout\n");
+  printf("    hostName        - hostname of UDP server\n");
+  printf("    ipAddr          - IP addr of UDP server\n");
+  printf("    portNum         - port number of UDP server\n");
+  printf("    udpServerName   - name of UDP server from pshell-client.conf file\n");
+  printf("    unixServerName  - name of UNIX server ('-u' option to list UNIX servers)\n");
+  printf("    unixServerIndex - index of UNIX server ('-u' option to list UNIX servers)\n");
+  printf("    timeout         - response wait timeout in sec (default=5)\n");
+  printf("    command         - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")\n");
+  printf("    fileName        - optional batch file to execute\n");
+  printf("    rate            - optional rate to repeat command or batch file (in seconds)\n");
+  printf("    repeat          - optional repeat count for command or batch file (default=forever)\n");
+  printf("    clear           - optional clear screen between commands or batch file passes\n");
   printf("\n");
   printf("    NOTE: If no <command> is given, pshell will be started\n");
   printf("          up in interactive mode, commands issued in command\n");
@@ -1431,16 +1507,9 @@ void parseCommandLine(int *argc, char *argv[])
       {
         showUnixServers();
       }
-      else if (isNumeric(argv[0]))
+      else if ((_server = getUnixServer(argv[0])) != NULL)
       {
         _host = "unix";
-        _server = getUnixServerName(atoi(argv[0]));
-        *argc = 0;
-      }
-      else
-      {
-        _host = "unix";
-        _server = argv[0];
         *argc = 0;
       }
   }

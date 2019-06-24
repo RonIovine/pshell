@@ -307,15 +307,28 @@ def _configureLocalServer():
 
 #####################################################
 #####################################################
-def _getServer(arg):
+def _getNamedServer(arg):
   global _gServerList
   global _gPort
   global _gTimeout
+  numFound = 0
   for server in _gServerList:
-    if server["server"] == arg:
-      _gPort = server["port"]
-      _gTimeout = server["timeout"]
-      return True
+    if len(server["server"]) == len(arg) and server["server"] == arg:
+      # exact match found, assumes no duplicates in list
+      numFound = 1
+      break
+    elif arg == server["server"][:len(arg)]:
+      numFound += 1
+  if numFound == 1:
+    _gPort = server["port"]
+    _gTimeout = server["timeout"]
+    return True
+  elif numFound == 0:
+    print("")
+    print("PSHELL_ERROR: Could not find server: '%s' in file: '%s'" % (arg, _gClientConfigFile))
+  elif numFound > 1:
+    print("")
+    print("PSHELL_ERROR: Ambiguous server name: '%s' found in file: '%s'" % (arg, _gClientConfigFile))
   return False
 
 #####################################################
@@ -389,13 +402,38 @@ def _cleanupUnixResources():
 
 #####################################################
 #####################################################
-def _getUnixServerName(index):
+def _getUnixServer(arg):
   global _gActiveUnixServers
-  if index-1 >= 0 and index-1 < len(_gActiveUnixServers):
-    return _gActiveUnixServers[index-1]
-  else:
-    print("ERROR: Index: %d out of range for UNIX servers, run 'pshell -u' to see UNIX server list" % index)
-    exit(0)
+  global _gRemoteServer
+  try:
+    int(arg, 10)
+    index = int(arg)
+    if index-1 >= 0 and index-1 < len(_gActiveUnixServers):
+      _gRemoteServer = _gActiveUnixServers[index-1]
+      return True
+    else:
+      print("")
+      print("PSHELL_ERROR: Index: %d out of range for UNIX server" % index)
+      return False
+  except:
+    numFound = 0
+    for server in _gActiveUnixServers:
+      if len(server) == len(arg) and server == arg:
+        # exact match found, assumes no duplicates in list
+        numFound = 1
+        break
+      elif arg == server[:len(arg)]:
+        numFound += 1
+    if numFound == 1:
+      _gRemoteServer = server
+      return True
+    elif numFound == 0:
+      print("")
+      print("PSHELL_ERROR: UNIX server: '%s' not running on localhost" % arg)
+    elif numFound > 1:
+      print("")
+      print("PSHELL_ERROR: Ambiguous UNIX server name: '%s'" % arg)
+    return False
 
 #####################################################
 #####################################################
@@ -419,7 +457,7 @@ def _showUnixServers():
 
 #####################################################
 #####################################################
-def _showServers():
+def _showNamedServers():
   global _gServerList
   global _gMaxServerNameLength
   print("")
@@ -438,27 +476,28 @@ def _showServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s -s | -u | {{{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("Usage: %s -s | -u | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]" % os.path.basename(sys.argv[0]))
   print("                           [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
-  print("    -s             - show named servers in pshell-client.conf file")
-  print("    -u             - show all local running active UNIX servers")
-  print("    -c             - run command from command line")
-  print("    -f             - run commands from a batch file")
-  print("    -t             - change the default server response timeout")
-  print("    hostName       - hostname of UDP server")
-  print("    ipAddr         - IP address of UDP server")
-  print("    portNum        - port number of UDP server")
-  print("    serverName     - name of UDP server from pshell-client.conf file")
-  print("    unixServerName - name of UNIX server")
-  print("    timeout        - response wait timeout in sec (default=5)")
-  print("    command        - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")")
-  print("    fileName       - optional batch file to execute")
-  print("    rate           - optional rate to repeat command or batch file (in seconds)")
-  print("    repeat         - optional repeat count for command or batch file (default=forever)")
-  print("    clear          - optional clear screen between commands or batch file passes")
+  print("    -s              - show named IP servers in pshell-client.conf file")
+  print("    -u              - show all local running active UNIX servers")
+  print("    -c              - run command from command line")
+  print("    -f              - run commands from a batch file")
+  print("    -t              - change the default server response timeout")
+  print("    hostName        - hostname of UDP server")
+  print("    ipAddr          - IP address of UDP server")
+  print("    portNum         - port number of UDP server")
+  print("    udpServerName   - name of UDP server from pshell-client.conf file")
+  print("    unixServerName  - name of UNIX server ('-u' option to list UNIX servers)")
+  print("    unixServerIndex - index of UNIX server ('-u' option to list UNIX servers)")
+  print("    timeout         - response wait timeout in sec (default=5)")
+  print("    command         - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")")
+  print("    fileName        - optional batch file to execute")
+  print("    rate            - optional rate to repeat command or batch file (in seconds)")
+  print("    repeat          - optional repeat count for command or batch file (default=forever)")
+  print("    clear           - optional clear screen between commands or batch file passes")
   print("")
   print("    NOTE: If no <command> is given, pshell will be started")
   print("          up in interactive mode, commands issued in command")
@@ -548,15 +587,11 @@ if (__name__ == '__main__'):
   _cleanupUnixResources()
 
   if sys.argv[1] == "-s":
-    _showServers()
+    _showNamedServers()
   elif sys.argv[1] == "-u":
     _showUnixServers()
-  else:
-    try:
-      int(sys.argv[1], 10)
-      _gRemoteServer = _getUnixServerName(int(sys.argv[1]))
-    except ValueError:
-      _gRemoteServer = sys.argv[1]
+  elif not _getUnixServer(sys.argv[1]):
+    _showUnixServers()
 
   needFile = False
   needCommand = False
@@ -574,10 +609,8 @@ if (__name__ == '__main__'):
     elif index == 0:
       if (arg.isdigit()):
         _gPort = arg
-      elif not _getServer(arg):
-        print("")
-        print("PSHELL_ERROR: Could not find server: '%s' in file: '%s'" % (arg, _gClientConfigFile))
-        _showServers()
+      elif not _getNamedServer(arg):
+        _showNamedServers()
     elif "=" in arg:
       rateOrRepeat = arg.split("=")
       if len(rateOrRepeat) == 2 and rateOrRepeat[0] == "rate" and rateOrRepeat[1].isdigit():
