@@ -476,12 +476,12 @@ def _showNamedServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s -s | -u | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("Usage: %s -n | -u | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]" % os.path.basename(sys.argv[0]))
   print("                           [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
-  print("    -s              - show named IP servers in pshell-client.conf file")
+  print("    -n              - show named IP server/port mappings in pshell-client.conf file")
   print("    -u              - show all local running active UNIX servers")
   print("    -c              - run command from command line")
   print("    -f              - run commands from a batch file")
@@ -586,7 +586,7 @@ if (__name__ == '__main__'):
   _loadServers()
   _cleanupUnixResources()
 
-  if sys.argv[1] == "-s":
+  if sys.argv[1] == "-n":
     _showNamedServers()
   elif sys.argv[1] == "-u":
     _showUnixServers()

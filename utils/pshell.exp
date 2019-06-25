@@ -57,12 +57,12 @@ proc showUsage {} {
   variable defaultClientConfigFile
   variable defaultServerConfigFile
   puts ""
-  puts "Usage: pshell.exp -s | {<hostName> | ipAddr>} {<portNum> | <serverName>}"
+  puts "Usage: pshell.exp -n | {<hostName> | ipAddr>} {<portNum> | <serverName>}"
   puts "                       \[{{-c <command> | -f <filename>} \[rate=<seconds>\] \[repeat=<count>\] \[clear\]}]"
   puts ""
   puts "  where:"
   puts ""
-  puts "    -s         - show named servers in $defaultClientConfigFile file"
+  puts "    -n         - show named IP server/port mappings in $defaultClientConfigFile file"
   puts "    -c         - run command from command line"
   puts "    -f         - run commands from a batch file"
   puts "    hostName   - hostname of TCP server"
@@ -191,7 +191,7 @@ if {[llength $argv] < 1 || [llength $argv] > 6} {
 loadServers
 
 if {[llength $argv] == 1} {
-  if {[lindex $argv 0] == "-s"} {
+  if {[lindex $argv 0] == "-n"} {
     showServers
   } else {
     showUsage

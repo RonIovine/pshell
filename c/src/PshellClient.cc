@@ -1435,12 +1435,12 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -s | -u | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]\n");
+  printf("Usage: pshell -n | -u | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]\n");
   printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
-  printf("    -s              - show named IP servers in pshell-client.conf file\n");
+  printf("    -n              - show named IP server/port mappings in pshell-client.conf file\n");
   printf("    -u              - show all local running active UNIX servers\n");
   printf("    -c              - run command from command line\n");
   printf("    -f              - run commands from a batch file\n");
@@ -1499,7 +1499,7 @@ void parseCommandLine(int *argc, char *argv[])
       {
         showUsage();
       }
-      else if (strcmp(argv[0], "-s") == 0)
+      else if (strcmp(argv[0], "-n") == 0)
       {
         showNamedServers();
       }
