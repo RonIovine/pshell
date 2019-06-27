@@ -493,7 +493,7 @@ void registerSignalHandlers(void)
 int main(int argc, char *argv[])
 {
 
-  PshellServerType serverType;
+  PshellServerType serverType = PSHELL_LOCAL_SERVER;
   unsigned port = PSHELL_DEMO_PORT;
 
   /* validate our command line arguments and get the server type */

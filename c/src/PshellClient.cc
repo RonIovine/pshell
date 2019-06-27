@@ -138,7 +138,7 @@ ServerType _serverType = UDP;
 const char *_unixSocketPath = "/tmp/";
 const char *_lockFileExtension = ".pshell-lock";
 DIR *_dir;
-unsigned _numActiveUnixServers = 0;
+int _numActiveUnixServers = 0;
 char *_activeUnixServers[MAX_ACTIVE_UNIX_SERVERS];
 
 char _unixLocalSocketName[256];
@@ -1266,9 +1266,9 @@ void cleanupUnixResources(void)
 /******************************************************************************/
 char *getUnixServer(char *server_)
 {
-  unsigned index;
-  unsigned server;
-  unsigned numFound = 0;
+  int index;
+  int server;
+  int numFound = 0;
   if (isNumeric(server_))
   {
     index = atoi(server_);
@@ -1338,7 +1338,7 @@ void showUnixServers(void)
     printf("Index    Server Name\n");
     printf("=====    ====================\n");
   }
-  for (unsigned index = 0; index < _numActiveUnixServers; index++)
+  for (int index = 0; index < _numActiveUnixServers; index++)
   {
     printf("%-5d    %-20s\n", index+1, _activeUnixServers[index]);
   }

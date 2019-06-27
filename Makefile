@@ -41,6 +41,8 @@ GO=go
 export GOPATH=$(abspath go)
 ifeq ($(shell which $(GO)), /usr/bin/$(GO))
   BUILD_GO=y
+else ifeq ($(shell which $(GO)), /usr/local/bin/$(GO))
+  BUILD_GO=y
 else
   $(warning $(nl)WARNING: 'go' not installed, not building 'go' modules)
 endif
