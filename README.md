@@ -234,26 +234,28 @@ a `-h` to show the usage as follows:
 ```
 $ pshell -h
 
-Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>
-                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]
+Usage: pshell -n | -u | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]
+                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 
-    -s             - show named servers in pshell-client.conf file
-    -c             - run command from command line
-    -f             - run commands from a batch file
-    -t             - change the default server response timeout
-    hostName       - hostname of UDP server
-    ipAddr         - IP address of UDP server
-    portNum        - port number of UDP server
-    serverName     - name of UDP server from pshell-client.conf file
-    unixServerName - name of UNIX server
-    timeout        - response wait timeout in sec (default=5)
-    command        - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
-    fileName       - optional batch file to execute
-    rate           - optional rate to repeat command or batch file (in seconds)
-    repeat         - optional repeat count for command or batch file (default=forever)
-    clear          - optional clear screen between commands or batch file passes
+    -n              - show named IP server/port mappings in pshell-client.conf file
+    -u              - show all local running active UNIX servers
+    -c              - run command from command line
+    -f              - run commands from a batch file
+    -t              - change the default server response timeout
+    hostName        - hostname of UDP server
+    ipAddr          - IP addr of UDP server
+    portNum         - port number of UDP server
+    udpServerName   - name of UDP server from pshell-client.conf file
+    unixServerName  - name of UNIX server ('-u' option to list UNIX servers)
+    unixServerIndex - index of UNIX server ('-u' option to list UNIX servers)
+    timeout         - response wait timeout in sec (default=5)
+    command         - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName        - optional batch file to execute
+    rate            - optional rate to repeat command or batch file (in seconds)
+    repeat          - optional repeat count for command or batch file (default=forever)
+    clear           - optional clear screen between commands or batch file passes
 
     NOTE: If no <command> is given, pshell will be started
           up in interactive mode, commands issued in command
@@ -277,12 +279,12 @@ on your host.  The following is the usage of the expect script.
 ```
 $ pshell.exp -h
 
-Usage: pshell.exp -s | {<hostName> | ipAddr>} {<portNum> | <serverName>}
+Usage: pshell.exp -n | {<hostName> | ipAddr>} {<portNum> | <serverName>}
                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 
-    -s         - show named servers in pshell-client.conf file
+    -n         - show named IP server/port mappings in pshell-client.conf file
     -c         - run command from command line
     -f         - run commands from a batch file
     hostName   - hostname of TCP server
