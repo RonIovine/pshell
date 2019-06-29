@@ -210,10 +210,12 @@ PshellServer.html
 PshellControl.html
 PshellReadline.html
 ```
-The following Go modules also support embedded 'godoc' documentation:
+The following HTML 'godoc' generated documentation is available in the
+go/doc directory, the user can also use the command line 'godoc' to see
+the embedded documentation on all the corresponding Go modules.
 ```
-PshellControl.go
-PshellServer.go
+PshellControl.html
+PshellServer.html
 ```
 
 <a name="interactive-clients"></a>
