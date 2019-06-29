@@ -38,8 +38,117 @@
 // functions based on how the pshell server is configured, which is described
 // in documentation further down in this file.
 //
+// Functions:
+//
+// The main API calls to register PSHELL commands and start the server
+//
+//   AddCommand()       -- register a pshell command with the server
+//   StartServer()      -- start the pshell server
+//   CleanupResources() -- release all resources claimed by the server
+//
+// Function to allow a parent application to call it's own PSHELL function
+//
+//   RunCommand() -- run a registered command from the parent (i.e. registering) program
+//
+// Functions to allow extraction of internal log messages from parent application
+//
+//   SetLogLevel()    -- set the internal log level for this module
+//   SetLogFunction() -- register a user function to receive all logs
+//
+// Functions to help in argument parsing/extraction, even though many of these
+// operations can easily be done with native Python constructs, they are provided
+// here for consistency of the API across all language implementations
+//
+//   Tokenize()          -- parse a string based on token delimeters
+//   GetLength()         -- return the string length
+//   IsEqual()           -- compare two strings for equality, case sensitive
+//   IsEqualNoCase()     -- compare two strings for equality, case insensitive
+//   IsSubString()       -- checks for string1 substring of string2 at position 0, case sensitive
+//   IsSubStringNoCase() -- checks for string1 substring of string2 at position 0, case insensitive
+//   IsFloat()           -- returns True if string is floating point
+//   IsDec()             -- returns True if string is dec
+//   IsHex()             -- returns True if string is hex, with or without the preceeding 0x
+//   IsAlpha()           -- returns True if string is alphabetic
+//   IsNumeric()         -- returns True if string isDec or isHex
+//   IsAlphaNumeric()    -- returns True if string is alpha-numeric
+//   GetBool()           -- returns True if string is 'true', 'yes', 'on'
+//   GetInt()            -- return the signed integer (64 bit) value from the string
+//   GetInt64()          -- return the 64 bit signed integer value from the string
+//   GetInt32()          -- return the 32 bit signed integer value from the string
+//   GetInt16()          -- return the 16 bit signed integer value from the string
+//   GetInt8()           -- return the 8 bit signed integer value from the string
+//   GetUint()           -- return the unsigned integer (64 bit) value from the string
+//   GetUint64()         -- return the 64 bit unsigned integer value from the string
+//   GetUint32()         -- return the 32 bit unsigned integer value from the string
+//   GetUint16()         -- return the 16 bit unsigned integer value from the string
+//   GetUint8()          -- return the 8 bit unsigned integer value from the string
+//   GetDouble()         -- return the double precision (64 bit) float value from the string
+//   GetFloat()          -- return the 32 bit float value from the string
+//   GetFloat32()        -- return the 32 bit float value from the string
+//
+// The following commands should only be called from within the context of
+// a PSHELL callback function
+//
+//   Printf()    -- display a message from a pshell callback function to the client
+//   Flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
+//   Wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive
+//   March()     -- marching ascii character to keep UDP/UNIX client alive
+//   ShowUsage() -- show the usage the command is registered with
+//   IsHelp()    -- checks if the user has requested help on this command
+//   SetOption() -- parses arg of format -<key><value> or <key>=<value>
+//
+// Integer constants:
+//
+// These are the identifiers for the serverMode.  BLOCKING wil never return
+// control to the caller of startServer, NON_BLOCKING will spawn a thread to
+// run the server and will return control to the caller of startServer
+//
+//   BLOCKING
+//   NON_BLOCKING
+//
+// Constants to let the host program set the internal debug log level,
+// if the user of this API does not want to see any internal message
+// printed out, set the debug log level to LOG_LEVEL_NONE, the default
+// log level is LOG_LEVEL_ALL
+//
+//   LOG_LEVEL_NONE
+//   LOG_LEVEL_ERROR
+//   LOG_LEVEL_WARNING
+//   LOG_LEVEL_INFO
+//   LOG_LEVEL_ALL
+//   LOG_LEVEL_DEFAULT
+//
+// Used to specify the radix extraction format for the getInt() function
+//
+//   RADIX_DEC
+//   RADIX_HEX
+//   RADIX_ANY
+//
+// String constants:
+//
+// Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
+// client programs, TCP servers require a 'telnet' client, local servers
+// require no client (all user interaction done directly with server running
+// in the parent host program)
+//
+//   UDP
+//   TCP
+//   UNIX
+//   LOCAL
+//
+// These three identifiers that can be used for the hostnameOrIpAddr argument
+// of the startServer call.  PshellServer.ANYHOST will bind the server socket
+// to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
+// 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+// the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
+// it also supported, e.g. x.y.z.255
+//
+//   ANYHOST
+//   ANYBCAST
+//   LOCALHOST
+//
 // A complete example of the usage of the API can be found in the included
-// demo program file pshellServerDemo.go
+// demo program pshellServerDemo.go
 //
 package PshellServer
 
@@ -256,13 +365,7 @@ const _LOCK_FILE_EXTENSION = ".pshell-lock"
 //    Returns:
 //        none
 //
-func AddCommand(function pshellFunction,
-                command string,
-                description string,
-                usage string,
-                minArgs int,
-                maxArgs int,
-                showUsage bool) {
+func AddCommand(function pshellFunction, command string, description string, usage string, minArgs int, maxArgs int, showUsage bool) {
   addCommand(function,
              command,
              description,
@@ -290,11 +393,7 @@ func AddCommand(function pshellFunction,
 //    Returns:
 //        none
 //
-func StartServer(serverName string,
-                 serverType string,
-                 serverMode int,
-                 hostnameOrIpAddr string,
-                 port string) {
+func StartServer(serverName string, serverType string, serverMode int, hostnameOrIpAddr string, port string) {
   startServer(serverName,
               serverType,
               serverMode,

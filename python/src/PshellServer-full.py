@@ -102,6 +102,24 @@ run the server and will return control to the caller of startServer
 BLOCKING
 NON_BLOCKING
 
+Constants to let the host program set the internal debug log level,
+if the user of this API does not want to see any internal message
+printed out, set the debug log level to LOG_LEVEL_NONE, the default
+log level is LOG_LEVEL_ALL
+
+LOG_LEVEL_NONE
+LOG_LEVEL_ERROR
+LOG_LEVEL_WARNING
+LOG_LEVEL_INFO
+LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT
+
+Used to specify the radix extraction format for the getInt() function
+
+RADIX_DEC
+RADIX_HEX
+RADIX_ANY
+
 String constants:
 
 Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
@@ -124,24 +142,6 @@ it also supported, e.g. x.y.z.255
 ANYHOST
 ANYBCAST
 LOCALHOST
-
-Constants to let the host program set the internal debug log level,
-if the user of this API does not want to see any internal message
-printed out, set the debug log level to LOG_LEVEL_NONE, the default
-log level is LOG_LEVEL_ALL
-
-LOG_LEVEL_NONE
-LOG_LEVEL_ERROR
-LOG_LEVEL_WARNING
-LOG_LEVEL_INFO
-LOG_LEVEL_ALL
-LOG_LEVEL_DEFAULT
-
-Used to specify the radix extraction format for the getInt() function
-
-RADIX_DEC
-RADIX_HEX
-RADIX_ANY
 
 A complete example of the usage of the API can be found in the included
 demo program pshellServerDemo.py.

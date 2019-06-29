@@ -1,0 +1,1121 @@
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "PshellServer"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+This API provides the Process Specific Embedded Command Line Shell (PSHELL)
+user API functionality.  It provides the ability for a client program to
+register functions that can be invoked via a command line user interface.
+This is the &#39;go&#39; implementation, there are also corresponding C/C++ and
+Python implementations.
+</p>
+<p>
+The functions are similar to the prototype of the &#39;main&#39; in &#39;go&#39;, i.e.
+&#39;func myFunc([]string), there are several ways to invoke these embedded
+functions based on how the pshell server is configured, which is described
+in documentation further down in this file.
+</p>
+<p>
+Functions:
+</p>
+<p>
+The main API calls to register PSHELL commands and start the server
+</p>
+<pre>AddCommand()       -- register a pshell command with the server
+StartServer()      -- start the pshell server
+CleanupResources() -- release all resources claimed by the server
+</pre>
+<p>
+Function to allow a parent application to call it&#39;s own PSHELL function
+</p>
+<pre>RunCommand() -- run a registered command from the parent (i.e. registering) program
+</pre>
+<p>
+Functions to allow extraction of internal log messages from parent application
+</p>
+<pre>SetLogLevel()    -- set the internal log level for this module
+SetLogFunction() -- register a user function to receive all logs
+</pre>
+<p>
+Functions to help in argument parsing/extraction, even though many of these
+operations can easily be done with native Python constructs, they are provided
+here for consistency of the API across all language implementations
+</p>
+<pre>Tokenize()          -- parse a string based on token delimeters
+GetLength()         -- return the string length
+IsEqual()           -- compare two strings for equality, case sensitive
+IsEqualNoCase()     -- compare two strings for equality, case insensitive
+IsSubString()       -- checks for string1 substring of string2 at position 0, case sensitive
+IsSubStringNoCase() -- checks for string1 substring of string2 at position 0, case insensitive
+IsFloat()           -- returns True if string is floating point
+IsDec()             -- returns True if string is dec
+IsHex()             -- returns True if string is hex, with or without the preceeding 0x
+IsAlpha()           -- returns True if string is alphabetic
+IsNumeric()         -- returns True if string isDec or isHex
+IsAlphaNumeric()    -- returns True if string is alpha-numeric
+GetBool()           -- returns True if string is &#39;true&#39;, &#39;yes&#39;, &#39;on&#39;
+GetInt()            -- return the signed integer (64 bit) value from the string
+GetInt64()          -- return the 64 bit signed integer value from the string
+GetInt32()          -- return the 32 bit signed integer value from the string
+GetInt16()          -- return the 16 bit signed integer value from the string
+GetInt8()           -- return the 8 bit signed integer value from the string
+GetUint()           -- return the unsigned integer (64 bit) value from the string
+GetUint64()         -- return the 64 bit unsigned integer value from the string
+GetUint32()         -- return the 32 bit unsigned integer value from the string
+GetUint16()         -- return the 16 bit unsigned integer value from the string
+GetUint8()          -- return the 8 bit unsigned integer value from the string
+GetDouble()         -- return the double precision (64 bit) float value from the string
+GetFloat()          -- return the 32 bit float value from the string
+GetFloat32()        -- return the 32 bit float value from the string
+</pre>
+<p>
+The following commands should only be called from within the context of
+a PSHELL callback function
+</p>
+<pre>Printf()    -- display a message from a pshell callback function to the client
+Flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
+Wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive
+March()     -- marching ascii character to keep UDP/UNIX client alive
+ShowUsage() -- show the usage the command is registered with
+IsHelp()    -- checks if the user has requested help on this command
+SetOption() -- parses arg of format -&lt;key&gt;&lt;value&gt; or &lt;key&gt;=&lt;value&gt;
+</pre>
+<p>
+Integer constants:
+</p>
+<p>
+These are the identifiers for the serverMode.  BLOCKING wil never return
+control to the caller of startServer, NON_BLOCKING will spawn a thread to
+run the server and will return control to the caller of startServer
+</p>
+<pre>BLOCKING
+NON_BLOCKING
+</pre>
+<p>
+Constants to let the host program set the internal debug log level,
+if the user of this API does not want to see any internal message
+printed out, set the debug log level to LOG_LEVEL_NONE, the default
+log level is LOG_LEVEL_ALL
+</p>
+<pre>LOG_LEVEL_NONE
+LOG_LEVEL_ERROR
+LOG_LEVEL_WARNING
+LOG_LEVEL_INFO
+LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT
+</pre>
+<p>
+Used to specify the radix extraction format for the getInt() function
+</p>
+<pre>RADIX_DEC
+RADIX_HEX
+RADIX_ANY
+</pre>
+<p>
+String constants:
+</p>
+<p>
+Valid server types, UDP/UNIX servers require the &#39;pshell&#39; or &#39;pshell.py&#39;
+client programs, TCP servers require a &#39;telnet&#39; client, local servers
+require no client (all user interaction done directly with server running
+in the parent host program)
+</p>
+<pre>UDP
+TCP
+UNIX
+LOCAL
+</pre>
+<p>
+These three identifiers that can be used for the hostnameOrIpAddr argument
+of the startServer call.  PshellServer.ANYHOST will bind the server socket
+to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
+255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
+it also supported, e.g. x.y.z.255
+</p>
+<pre>ANYHOST
+ANYBCAST
+LOCALHOST
+</pre>
+<p>
+A complete example of the usage of the API can be found in the included
+demo program pshellServerDemo.go
+</p>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="#pkg-constants">Constants</a></dd>
+			
+			
+			
+				
+				<dd><a href="#AddCommand">func AddCommand(function pshellFunction, command string, description string, usage string, minArgs int, maxArgs int, showUsage bool)</a></dd>
+			
+				
+				<dd><a href="#CleanupResources">func CleanupResources()</a></dd>
+			
+				
+				<dd><a href="#Flush">func Flush()</a></dd>
+			
+				
+				<dd><a href="#GetBool">func GetBool(string string) bool</a></dd>
+			
+				
+				<dd><a href="#GetDouble">func GetDouble(string string) float64</a></dd>
+			
+				
+				<dd><a href="#GetFloat">func GetFloat(string string) float32</a></dd>
+			
+				
+				<dd><a href="#GetFloat32">func GetFloat32(string string) float32</a></dd>
+			
+				
+				<dd><a href="#GetFloat64">func GetFloat64(string string) float64</a></dd>
+			
+				
+				<dd><a href="#GetInt">func GetInt(string string, radix int, needHexPrefix bool) int64</a></dd>
+			
+				
+				<dd><a href="#GetInt16">func GetInt16(string string, radix int, needHexPrefix bool) int16</a></dd>
+			
+				
+				<dd><a href="#GetInt32">func GetInt32(string string, radix int, needHexPrefix bool) int32</a></dd>
+			
+				
+				<dd><a href="#GetInt64">func GetInt64(string string, radix int, needHexPrefix bool) int64</a></dd>
+			
+				
+				<dd><a href="#GetInt8">func GetInt8(string string, radix int, needHexPrefix bool) int8</a></dd>
+			
+				
+				<dd><a href="#GetLength">func GetLength(string string) int</a></dd>
+			
+				
+				<dd><a href="#GetOption">func GetOption(arg string) (bool, string, string)</a></dd>
+			
+				
+				<dd><a href="#GetUint">func GetUint(string string, radix int, needHexPrefix bool) uint64</a></dd>
+			
+				
+				<dd><a href="#GetUint16">func GetUint16(string string, radix int, needHexPrefix bool) uint16</a></dd>
+			
+				
+				<dd><a href="#GetUint32">func GetUint32(string string, radix int, needHexPrefix bool) uint32</a></dd>
+			
+				
+				<dd><a href="#GetUint64">func GetUint64(string string, radix int, needHexPrefix bool) uint64</a></dd>
+			
+				
+				<dd><a href="#GetUint8">func GetUint8(string string, radix int, needHexPrefix bool) uint8</a></dd>
+			
+				
+				<dd><a href="#IsAlpha">func IsAlpha(string string) bool</a></dd>
+			
+				
+				<dd><a href="#IsAlphaNumeric">func IsAlphaNumeric(string string) bool</a></dd>
+			
+				
+				<dd><a href="#IsDec">func IsDec(string string) bool</a></dd>
+			
+				
+				<dd><a href="#IsEqual">func IsEqual(string1 string, string2 string) bool</a></dd>
+			
+				
+				<dd><a href="#IsEqualNoCase">func IsEqualNoCase(string1 string, string2 string) bool</a></dd>
+			
+				
+				<dd><a href="#IsFloat">func IsFloat(string string) bool</a></dd>
+			
+				
+				<dd><a href="#IsHelp">func IsHelp() bool</a></dd>
+			
+				
+				<dd><a href="#IsHex">func IsHex(string string, needHexPrefix bool) bool</a></dd>
+			
+				
+				<dd><a href="#IsNumeric">func IsNumeric(string string, needHexPrefix bool) bool</a></dd>
+			
+				
+				<dd><a href="#IsSubString">func IsSubString(string1 string, string2 string, minMatchLength int) bool</a></dd>
+			
+				
+				<dd><a href="#IsSubStringNoCase">func IsSubStringNoCase(string1 string, string2 string, minMatchLength int) bool</a></dd>
+			
+				
+				<dd><a href="#March">func March(message string)</a></dd>
+			
+				
+				<dd><a href="#Printf">func Printf(format string, message ...interface{})</a></dd>
+			
+				
+				<dd><a href="#RunCommand">func RunCommand(format string, command ...interface{})</a></dd>
+			
+				
+				<dd><a href="#SetLogFunction">func SetLogFunction(function logFunction)</a></dd>
+			
+				
+				<dd><a href="#SetLogLevel">func SetLogLevel(level int)</a></dd>
+			
+				
+				<dd><a href="#ShowUsage">func ShowUsage()</a></dd>
+			
+				
+				<dd><a href="#StartServer">func StartServer(serverName string, serverType string, serverMode int, hostnameOrIpAddr string, port string)</a></dd>
+			
+				
+				<dd><a href="#Tokenize">func Tokenize(string string, delimiter string) (int, []string)</a></dd>
+			
+				
+				<dd><a href="#Wheel">func Wheel(message string)</a></dd>
+			
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/target/PshellServer.go">PshellServer.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<pre>const (
+    <span id="UDP">UDP</span>   = &#34;udp&#34;
+    <span id="TCP">TCP</span>   = &#34;tcp&#34;
+    <span id="UNIX">UNIX</span>  = &#34;unix&#34;
+    <span id="LOCAL">LOCAL</span> = &#34;local&#34;
+)</pre>
+				<p>
+Valid server types, UDP/UNIX servers require the &#39;pshell&#39; or &#39;pshell.py&#39;
+client programs, TCP servers require a &#39;telnet&#39; client, local servers
+require no client (all user interaction done directly with server running
+in the parent host program)
+</p>
+
+			
+				<pre>const (
+    <span id="BLOCKING">BLOCKING</span>     = 0
+    <span id="NON_BLOCKING">NON_BLOCKING</span> = 1
+)</pre>
+				<p>
+These are the identifiers for the serverMode.  BLOCKING wil never return
+control to the caller of startServer, NON_BLOCKING will spawn a thread to
+run the server and will return control to the caller of startServer
+</p>
+
+			
+				<pre>const (
+    <span id="ANYHOST">ANYHOST</span>   = &#34;anyhost&#34;
+    <span id="ANYBCAST">ANYBCAST</span>  = &#34;anybcast&#34;
+    <span id="LOCALHOST">LOCALHOST</span> = &#34;localhost&#34;
+)</pre>
+				<p>
+These three identifiers that can be used for the hostnameOrIpAddr argument
+of the startServer call.  PshellServer.ANYHOST will bind the server socket
+to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
+255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
+it also supported, e.g. x.y.z.255
+</p>
+
+			
+				<pre>const (
+    <span id="LOG_LEVEL_NONE">LOG_LEVEL_NONE</span>    = 0
+    <span id="LOG_LEVEL_ERROR">LOG_LEVEL_ERROR</span>   = 1
+    <span id="LOG_LEVEL_WARNING">LOG_LEVEL_WARNING</span> = 2
+    <span id="LOG_LEVEL_INFO">LOG_LEVEL_INFO</span>    = 3
+    <span id="LOG_LEVEL_ALL">LOG_LEVEL_ALL</span>     = <a href="#LOG_LEVEL_INFO">LOG_LEVEL_INFO</a>
+    <span id="LOG_LEVEL_DEFAULT">LOG_LEVEL_DEFAULT</span> = <a href="#LOG_LEVEL_ALL">LOG_LEVEL_ALL</a>
+)</pre>
+				<p>
+constants to let the host program set the internal debug log level,
+if the user of this API does not want to see any internal message
+printed out, set the debug log level to LOG_LEVEL_NONE (0)
+</p>
+
+			
+				<pre>const (
+    <span id="RADIX_DEC">RADIX_DEC</span> = 0
+    <span id="RADIX_HEX">RADIX_HEX</span> = 1
+    <span id="RADIX_ANY">RADIX_ANY</span> = 2
+)</pre>
+				<p>
+Used to specify the radix extraction format for the getInt function
+</p>
+
+			
+		
+		
+		
+			
+			
+			<h2 id="AddCommand">func <a href="/target/PshellServer.go?s=13669:13801#L358">AddCommand</a></h2>
+			<pre>func AddCommand(function pshellFunction, command <a href="/pkg/builtin/#string">string</a>, description <a href="/pkg/builtin/#string">string</a>, usage <a href="/pkg/builtin/#string">string</a>, minArgs <a href="/pkg/builtin/#int">int</a>, maxArgs <a href="/pkg/builtin/#int">int</a>, showUsage <a href="/pkg/builtin/#bool">bool</a>)</pre>
+			<p>
+Register callback commands to our PSHELL server.  If the command takes
+no arguments, the usage should be set to &#34;&#34; and minArgs and maxArgs
+should be set to 0.  If the command takes an exact number of parameters,
+set minArgs and maxArgs to be the same.  If the user wants the callback
+function to handle all help initiated usage, set the showUsage parameter
+to false, otherwise if set to true, the framework will display the registered
+usage upon a &#39;?&#39; or &#39;-h&#39; typed after the command.
+</p>
+<pre>Args:
+    function (ptr)    : User callback function
+    command (str)     : Command to dispatch the function (single keyword only)
+    description (str) : One line description of command
+    usage (str)       : One line command usage (Unix style preferred)
+    minArgs (int)     : Minimum number of required arguments
+    maxArgs (int)     : Maximum number of required arguments
+    showUsage (bool)  : Show registered usage on a &#39;?&#39; or &#39;-h&#39;
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="CleanupResources">func <a href="/target/PshellServer.go?s=15403:15426#L406">CleanupResources</a></h2>
+			<pre>func CleanupResources()</pre>
+			<p>
+Cleanup and release any system resources claimed by this module.  This includes
+any open socked handles, file descriptors, or system &#39;tmp&#39; files.  This should
+be called at program exit time as well as any signal exception handler that
+results in a program termination.
+</p>
+<pre>Args:
+    none
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="Flush">func <a href="/target/PshellServer.go?s=17165:17177#L489">Flush</a></h2>
+			<pre>func Flush()</pre>
+			<p>
+Flush the reply (i.e. display) buffer back to the remote client
+</p>
+<pre>Args:
+    none
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetBool">func <a href="/target/PshellServer.go?s=23397:23429#L736">GetBool</a></h2>
+			<pre>func GetBool(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it &#39;true&#39;, &#39;yes&#39;, or &#39;on&#39;
+</p>
+<pre>Args:
+    string (str) : The string to parse
+
+Returns:
+    bool : True if &#39;true&#39;, &#39;yes&#39;, &#39;on&#39;
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetDouble">func <a href="/target/PshellServer.go?s=27011:27048#L879">GetDouble</a></h2>
+			<pre>func GetDouble(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+			<p>
+Returns the double precision float value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to double precision float
+
+Returns:
+    int  : Float value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetFloat">func <a href="/target/PshellServer.go?s=27600:27636#L905">GetFloat</a></h2>
+			<pre>func GetFloat(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float32">float32</a></pre>
+			<p>
+Returns the single precision float value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to single precision float
+
+Returns:
+    int  : Float value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetFloat32">func <a href="/target/PshellServer.go?s=27902:27940#L918">GetFloat32</a></h2>
+			<pre>func GetFloat32(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float32">float32</a></pre>
+			<p>
+Returns the single precision float value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to single precision float
+
+Returns:
+    int  : Float value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetFloat64">func <a href="/target/PshellServer.go?s=27305:27343#L892">GetFloat64</a></h2>
+			<pre>func GetFloat64(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
+			<p>
+Returns the double precision float value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to double precision float
+
+Returns:
+    int  : Float value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetInt">func <a href="/target/PshellServer.go?s=23660:23723#L749">GetInt</a></h2>
+			<pre>func GetInt(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int64">int64</a></pre>
+			<p>
+Returns the integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to integer 64
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetInt16">func <a href="/target/PshellServer.go?s=24623:24688#L788">GetInt16</a></h2>
+			<pre>func GetInt16(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int16">int16</a></pre>
+			<p>
+Returns the integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to integer 16
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetInt32">func <a href="/target/PshellServer.go?s=24299:24364#L775">GetInt32</a></h2>
+			<pre>func GetInt32(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int32">int32</a></pre>
+			<p>
+Returns the integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to integer 32
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetInt64">func <a href="/target/PshellServer.go?s=23975:24040#L762">GetInt64</a></h2>
+			<pre>func GetInt64(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int64">int64</a></pre>
+			<p>
+Returns the integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to integer 64
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetInt8">func <a href="/target/PshellServer.go?s=24946:25009#L801">GetInt8</a></h2>
+			<pre>func GetInt8(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int8">int8</a></pre>
+			<p>
+Returns the integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to integer 8
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetLength">func <a href="/target/PshellServer.go?s=18706:18739#L571">GetLength</a></h2>
+			<pre>func GetLength(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#int">int</a></pre>
+			<p>
+This will return the length of the passed in string
+</p>
+<pre>Args:
+    string (str) : string to return length on
+
+Returns:
+    int : the length of the string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetOption">func <a href="/target/PshellServer.go?s=28625:28674#L937">GetOption</a></h2>
+			<pre>func GetOption(arg <a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/builtin/#bool">bool</a>, <a href="/pkg/builtin/#string">string</a>, <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+This function will parse an argument string of the formats -&lt;key&gt;&lt;value&gt; where
+key is one letter only, i.e. &#39;-t&#39;, or &lt;key&gt;=&lt;value&gt; where key can be any length
+word, i.e. &#39;timeout&#39;, and return a 3-tuple indicating if the arg was parsed
+correctly, along with the associated key and corresponding value.  An example
+of the two valid formats are -t10, timeout=10.
+</p>
+<p>
+Args:
+</p>
+<pre>    arg (str) : The argument string to parse
+
+Returns:
+    bool : True if string parses correctly, i.e. -&lt;key&gt;&lt;value&gt; or &lt;key&gt;=&lt;value&gt;
+    str  : The key value found
+    str  : The value associated with the key
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetUint">func <a href="/target/PshellServer.go?s=25285:25350#L814">GetUint</a></h2>
+			<pre>func GetUint(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint64">uint64</a></pre>
+			<p>
+Returns the unsigned integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to unsigned integer 64
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetUint16">func <a href="/target/PshellServer.go?s=26318:26385#L853">GetUint16</a></h2>
+			<pre>func GetUint16(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint16">uint16</a></pre>
+			<p>
+Returns the unsigned integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to unsigned integer 16
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetUint32">func <a href="/target/PshellServer.go?s=25973:26040#L840">GetUint32</a></h2>
+			<pre>func GetUint32(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint32">uint32</a></pre>
+			<p>
+Returns the unsigned integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to unsigned integer 32
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetUint64">func <a href="/target/PshellServer.go?s=25628:25695#L827">GetUint64</a></h2>
+			<pre>func GetUint64(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint64">uint64</a></pre>
+			<p>
+Returns the unsigned integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to unsigned integer 64
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetUint8">func <a href="/target/PshellServer.go?s=26662:26727#L866">GetUint8</a></h2>
+			<pre>func GetUint8(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint8">uint8</a></pre>
+			<p>
+Returns the unsigned integer value of the corresponding string
+</p>
+<pre>Args:
+    string : string to convert to unsigned integer 8
+
+Returns:
+    int  : Integer value of corresponding string
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsAlpha">func <a href="/target/PshellServer.go?s=22517:22549#L696">IsAlpha</a></h2>
+			<pre>func IsAlpha(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it is in valid alphatebetic format
+</p>
+<pre>Args:
+    string (str) : The string to parse
+
+Returns:
+    bool : True if valid alphabetic format
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsAlphaNumeric">func <a href="/target/PshellServer.go?s=23120:23159#L723">IsAlphaNumeric</a></h2>
+			<pre>func IsAlphaNumeric(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it is in valid alphanumeric format
+</p>
+<pre>Args:
+    string (str) : The string to parse
+
+Returns:
+    bool : True if valid alphanumeric format
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsDec">func <a href="/target/PshellServer.go?s=21900:21930#L669">IsDec</a></h2>
+			<pre>func IsDec(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it is in valid decimal format
+</p>
+<pre>Args:
+    string (str) : The string string to parse
+
+Returns:
+    bool : True if valid decimal format
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsEqual">func <a href="/target/PshellServer.go?s=19016:19065#L585">IsEqual</a></h2>
+			<pre>func IsEqual(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This will do a case sensitive compare for string equality
+</p>
+<pre>Args:
+    string1 (str) : The source string
+    string2 (str) : The target string
+
+Returns:
+    int : True if strings are equal, False otherwise
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsEqualNoCase">func <a href="/target/PshellServer.go?s=19352:19407#L599">IsEqualNoCase</a></h2>
+			<pre>func IsEqualNoCase(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This will do a case insensitive compare for string equality
+</p>
+<pre>Args:
+    string1 (str) : The source string
+    string2 (str) : The target string
+
+Returns:
+    int : True if strings are equal, False otherwise
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsFloat">func <a href="/target/PshellServer.go?s=21625:21657#L656">IsFloat</a></h2>
+			<pre>func IsFloat(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it is in valid floating point format
+</p>
+<pre>Args:
+    string (str) : The string to parse
+
+Returns:
+    bool : True if valid floating point format
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsHelp">func <a href="/target/PshellServer.go?s=17913:17931#L529">IsHelp</a></h2>
+			<pre>func IsHelp() <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+Check if the user has asked for help on this command.  Command must be
+registered with the showUsage = false option.
+</p>
+<pre>Args:
+    none
+
+Returns:
+    bool : True if user is requesting command help, false otherwise
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsHex">func <a href="/target/PshellServer.go?s=22210:22260#L683">IsHex</a></h2>
+			<pre>func IsHex(string <a href="/pkg/builtin/#string">string</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it is in valid hexidecimal format,
+with or without the preceeding 0x
+</p>
+<pre>Args:
+    string (str) : The string to parse
+
+Returns:
+    bool : True if valid hexidecimal format
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsNumeric">func <a href="/target/PshellServer.go?s=22803:22857#L710">IsNumeric</a></h2>
+			<pre>func IsNumeric(string <a href="/pkg/builtin/#string">string</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it is in valid numerc format,
+hex or decimal
+</p>
+<pre>Args:
+    string (str) : The string to parse
+
+Returns:
+    bool : True if valid numeric format
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsSubString">func <a href="/target/PshellServer.go?s=20288:20361#L621">IsSubString</a></h2>
+			<pre>func IsSubString(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>, minMatchLength <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will return True if string1 is a substring of string2 at
+position 0.  If the minMatchLength is 0, then it will compare up to the
+length of string1.  If the minMatchLength &gt; 0, it will require a minimum
+of that many characters to match.  A string that is longer than the min
+match length must still match for the remaining charactes, e.g. with a
+minMatchLength of 2, &#39;q&#39; will not match &#39;quit&#39;, but &#39;qu&#39;, &#39;qui&#39; or &#39;quit&#39;
+will match, &#39;quix&#39; will not match.  This function is useful for wildcard
+matching.
+</p>
+<pre>Args:
+    string1 (str)        : The substring
+    string2 (str)        : The target string
+    minMatchLength (int) : The minimum required characters match
+
+Returns:
+    bool : True if substring matches, false otherwise, case sensitive
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsSubStringNoCase">func <a href="/target/PshellServer.go?s=21260:21339#L643">IsSubStringNoCase</a></h2>
+			<pre>func IsSubStringNoCase(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>, minMatchLength <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will return True if string1 is a substring of string2 at
+position 0.  If the minMatchLength is 0, then it will compare up to the
+length of string1.  If the minMatchLength &gt; 0, it will require a minimum
+of that many characters to match.  A string that is longer than the min
+match length must still match for the remaining charactes, e.g. with a
+minMatchLength of 2, &#39;q&#39; will not match &#39;quit&#39;, but &#39;qu&#39;, &#39;qui&#39; or &#39;quit&#39;
+will match, &#39;quix&#39; will not match.  This function is useful for wildcard
+matching.  This does a case insensitive match
+</p>
+<pre>Args:
+    string1 (str)        : The substring
+    string2 (str)        : The target string
+    minMatchLength (int) : The minimum required characters match
+
+Returns:
+    bool : True if substring matches, False otherwise
+</pre>
+
+			
+		
+			
+			
+			<h2 id="March">func <a href="/target/PshellServer.go?s=17611:17637#L515">March</a></h2>
+			<pre>func March(message <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+March a message or character keep alive across the screen
+</p>
+<pre>Args:
+    message (str) : String or char to march across the screen
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="Printf">func <a href="/target/PshellServer.go?s=16943:16993#L476">Printf</a></h2>
+			<pre>func Printf(format <a href="/pkg/builtin/#string">string</a>, message ...interface{})</pre>
+			<p>
+Display data back to the remote client
+</p>
+<pre>Args:
+    string (str)   : Message to display to the client user
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="RunCommand">func <a href="/target/PshellServer.go?s=15628:15682#L419">RunCommand</a></h2>
+			<pre>func RunCommand(format <a href="/pkg/builtin/#string">string</a>, command ...interface{})</pre>
+			<p>
+Run a registered command from within its parent process
+</p>
+<pre>Args:
+    command (str) : Registered callback command to run
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SetLogFunction">func <a href="/target/PshellServer.go?s=16436:16477#L456">SetLogFunction</a></h2>
+			<pre>func SetLogFunction(function logFunction)</pre>
+			<p>
+Provide a user callback function to send the logs to, this allows an
+application to get all the logs issued by this module to put in it&#39;s
+own logfile.  If a log function is not set, all internal logs are just
+sent to the &#39;print&#39; function.
+</p>
+<pre>Args:
+    function (ptr) : Log callback function
+
+Returns:
+    None
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SetLogLevel">func <a href="/target/PshellServer.go?s=16024:16051#L440">SetLogLevel</a></h2>
+			<pre>func SetLogLevel(level <a href="/pkg/builtin/#int">int</a>)</pre>
+			<p>
+Set the internal log level, valid levels are:
+</p>
+<p>
+LOG_LEVEL_ERROR
+LOG_LEVEL_WARNING
+LOG_LEVEL_INFO
+LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT
+</p>
+<p>
+Where the default is LOG_LEVEL_ALL
+</p>
+<pre>Args:
+    level (int) : The desired log level to set
+
+Returns:
+    None
+</pre>
+
+			
+		
+			
+			
+			<h2 id="ShowUsage">func <a href="/target/PshellServer.go?s=18066:18082#L542">ShowUsage</a></h2>
+			<pre>func ShowUsage()</pre>
+			<p>
+Show the command&#39;s registered usage
+</p>
+<pre>Args:
+    none
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="StartServer">func <a href="/target/PshellServer.go?s=14805:14913#L386">StartServer</a></h2>
+			<pre>func StartServer(serverName <a href="/pkg/builtin/#string">string</a>, serverType <a href="/pkg/builtin/#string">string</a>, serverMode <a href="/pkg/builtin/#int">int</a>, hostnameOrIpAddr <a href="/pkg/builtin/#string">string</a>, port <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+Start our PSHELL server, if serverType is UNIX or LOCAL, the hostnameOrIpAddr
+and port will be ignored (they can be set to &#34;&#34;).  All of these parameters except
+serverMode can be overridden on a per serverName basis via the pshell-server.conf
+config file.  All commands in the &lt;serverName&gt;.startup file will be executed in
+this function at server startup time.
+</p>
+<pre>Args:
+    serverName (str)       : Logical name of the Pshell server
+    serverType (str)       : Desired server type (UDP, UNIX, TCP, LOCAL)
+    serverMode (str)       : Desired server mode (BLOCKING, NON_BLOCKING)
+    hostnameOrIpAddr (str) : Hostname or IP address to run server on
+    port (int)             : Port number to run server on (UDP or TCP only)
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="Tokenize">func <a href="/target/PshellServer.go?s=18416:18478#L558">Tokenize</a></h2>
+			<pre>func Tokenize(string <a href="/pkg/builtin/#string">string</a>, delimiter <a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/builtin/#int">int</a>, []<a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+This will parse a string based on a delimiter and return the parsed
+string as a list
+</p>
+<pre>Args:
+    string (str)    : string to tokenize
+    delemiter (str) : the delimiter to parse the string
+
+Returns:
+    int  : Number of tokens parsed
+    list : The parsed tokens list
+</pre>
+
+			
+		
+			
+			
+			<h2 id="Wheel">func <a href="/target/PshellServer.go?s=17378:17404#L502">Wheel</a></h2>
+			<pre>func Wheel(message <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+Spinning ascii wheel keep alive, user string is optional
+</p>
+<pre>Args:
+    message (str) : String to display before the spinning wheel
+
+Returns:
+    none
+</pre>
+
+			
+		
+		
+	
+
+	
+
+
+
+
+

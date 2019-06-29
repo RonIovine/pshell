@@ -78,22 +78,9 @@ SOCKET_RECEIVE_FAILURE
 SOCKET_TIMEOUT
 SOCKET_NOT_CONNECTED
 
-Integer constants:
-
 Used if we cannot connect to a local UNIX socket
 
 INVALID_SID
-
-String constants:
-
-Use this as the "port" identifier for the connectServer
-call when using a UNIX domain server
-
-UNIX
-
-Specifies if the addMulticast should add the given sid to all commands
-
-MULTICAST_ALL
 
 Constants to let the host program set the internal debug log level,
 if the user of this API does not want to see any internal message
@@ -106,6 +93,17 @@ LOG_LEVEL_WARNING
 LOG_LEVEL_INFO
 LOG_LEVEL_ALL
 LOG_LEVEL_DEFAULT
+
+String constants:
+
+Use this as the "port" identifier for the connectServer
+call when using a UNIX domain server
+
+UNIX
+
+Specifies if the addMulticast should add the given sid to all commands
+
+MULTICAST_ALL
 
 A complete example of the usage of the API can be found in the included
 demo programs pshellControlDemo.py and pshellAggregatorDemo.py

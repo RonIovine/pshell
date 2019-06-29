@@ -83,6 +83,24 @@ run&nbsp;the&nbsp;server&nbsp;and&nbsp;will&nbsp;return&nbsp;control&nbsp;to&nbs
 BLOCKING<br>
 NON_BLOCKING<br>
 &nbsp;<br>
+Constants&nbsp;to&nbsp;let&nbsp;the&nbsp;host&nbsp;program&nbsp;set&nbsp;the&nbsp;internal&nbsp;debug&nbsp;log&nbsp;level,<br>
+if&nbsp;the&nbsp;user&nbsp;of&nbsp;this&nbsp;API&nbsp;does&nbsp;not&nbsp;want&nbsp;to&nbsp;see&nbsp;any&nbsp;internal&nbsp;message<br>
+printed&nbsp;out,&nbsp;set&nbsp;the&nbsp;debug&nbsp;log&nbsp;level&nbsp;to&nbsp;LOG_LEVEL_NONE,&nbsp;the&nbsp;default<br>
+log&nbsp;level&nbsp;is&nbsp;LOG_LEVEL_ALL<br>
+&nbsp;<br>
+LOG_LEVEL_NONE<br>
+LOG_LEVEL_ERROR<br>
+LOG_LEVEL_WARNING<br>
+LOG_LEVEL_INFO<br>
+LOG_LEVEL_ALL<br>
+LOG_LEVEL_DEFAULT<br>
+&nbsp;<br>
+Used&nbsp;to&nbsp;specify&nbsp;the&nbsp;radix&nbsp;extraction&nbsp;format&nbsp;for&nbsp;the&nbsp;<a href="#-getInt">getInt</a>()&nbsp;function<br>
+&nbsp;<br>
+RADIX_DEC<br>
+RADIX_HEX<br>
+RADIX_ANY<br>
+&nbsp;<br>
 String&nbsp;constants:<br>
 &nbsp;<br>
 Valid&nbsp;server&nbsp;types,&nbsp;UDP/UNIX&nbsp;servers&nbsp;require&nbsp;the&nbsp;'pshell'&nbsp;or&nbsp;'pshell.py'<br>
@@ -106,24 +124,6 @@ ANYHOST<br>
 ANYBCAST<br>
 LOCALHOST<br>
 &nbsp;<br>
-Constants&nbsp;to&nbsp;let&nbsp;the&nbsp;host&nbsp;program&nbsp;set&nbsp;the&nbsp;internal&nbsp;debug&nbsp;log&nbsp;level,<br>
-if&nbsp;the&nbsp;user&nbsp;of&nbsp;this&nbsp;API&nbsp;does&nbsp;not&nbsp;want&nbsp;to&nbsp;see&nbsp;any&nbsp;internal&nbsp;message<br>
-printed&nbsp;out,&nbsp;set&nbsp;the&nbsp;debug&nbsp;log&nbsp;level&nbsp;to&nbsp;LOG_LEVEL_NONE,&nbsp;the&nbsp;default<br>
-log&nbsp;level&nbsp;is&nbsp;LOG_LEVEL_ALL<br>
-&nbsp;<br>
-LOG_LEVEL_NONE<br>
-LOG_LEVEL_ERROR<br>
-LOG_LEVEL_WARNING<br>
-LOG_LEVEL_INFO<br>
-LOG_LEVEL_ALL<br>
-LOG_LEVEL_DEFAULT<br>
-&nbsp;<br>
-Used&nbsp;to&nbsp;specify&nbsp;the&nbsp;radix&nbsp;extraction&nbsp;format&nbsp;for&nbsp;the&nbsp;<a href="#-getInt">getInt</a>()&nbsp;function<br>
-&nbsp;<br>
-RADIX_DEC<br>
-RADIX_HEX<br>
-RADIX_ANY<br>
-&nbsp;<br>
 A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included<br>
 demo&nbsp;program&nbsp;pshellServerDemo.py.</tt></p>
 <p>
@@ -134,15 +134,17 @@ demo&nbsp;program&nbsp;pshellServerDemo.py.</tt></p>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PshellReadline.html">PshellReadline</a><br>
-<a href="os.html">os</a><br>
+<a href="fcntl.html">fcntl</a><br>
+<a href="fnmatch.html">fnmatch</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
 <a href="random.html">random</a><br>
-</td><td width="25%" valign=top><a href="select.html">select</a><br>
-<a href="socket.html">socket</a><br>
+<a href="select.html">select</a><br>
+</td><td width="25%" valign=top><a href="socket.html">socket</a><br>
 <a href="struct.html">struct</a><br>
-</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
-<a href="thread.html">thread</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="thread.html">thread</a><br>
 <a href="time.html">time</a><br>
-</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
 <td colspan=3 valign=bottom>&nbsp;<br>

@@ -34,6 +34,72 @@
 // provides a very lightweight way to provide a control mechanism into a program
 // that is running a pshell, this is analagous to a remote procedure call (rpc).
 //
+// This module provides the same functionality as the PshellControl.h API and
+// the libpshell-control linkable 'C' library, but implemented as a Go module.
+//
+// Functions:
+//
+//   ConnectServer()        -- connect to a remote pshell server
+//   DisconnectServer()     -- disconnect from a remote pshell server
+//   DisconnectAllServers() -- disconnect from all connected remote pshell servers
+//   SetDefaultTimeout()    -- set the default server response timeout
+//   ExtractCommands()      -- extract all commands from remote server
+//   AddMulticast()         -- add a command keyword to a multicast group
+//   SendMulticast()        -- send a command to a multicast group
+//   SendCommand1()         -- send command to server using default timeout, no results extracted
+//   SendCommand2()         -- send command to server using timeout override, no results extracted
+//   SendCommand3()         -- send command to server using default timeout, results extracted
+//   SendCommand4()         -- send command to server using timeout override, results extracted
+//   SetResponseString()    -- return the human readable form of one of the command response return codes
+//   SetLogLevel()          -- set the internal log level for this module
+//   SetLogFunction()       -- register a user function to receive all logs
+//
+// Integer constants:
+//
+// Helpful items used for the server response timeout values
+//
+//   NO_WAIT
+//   ONE_MSEC
+//   ONE_SEC
+//
+// These are returned from the sendCommandN functions
+//
+//   COMMAND_SUCCESS
+//   COMMAND_NOT_FOUND
+//   COMMAND_INVALID_ARG_COUNT
+//   SOCKET_SEND_FAILURE
+//   SOCKET_SELECT_FAILURE
+//   SOCKET_RECEIVE_FAILURE
+//   SOCKET_TIMEOUT
+//   SOCKET_NOT_CONNECTED
+//
+// Used if we cannot connect to a local UNIX socket
+//
+//   INVALID_SID
+//
+// Constants to let the host program set the internal debug log level,
+// if the user of this API does not want to see any internal message
+// printed out, set the debug log level to LOG_LEVEL_NONE, the default
+// log level is LOG_LEVEL_ALL
+//
+//   LOG_LEVEL_NONE
+//   LOG_LEVEL_ERROR
+//   LOG_LEVEL_WARNING
+//   LOG_LEVEL_INFO
+//   LOG_LEVEL_ALL
+//   LOG_LEVEL_DEFAULT
+//
+// String constants:
+//
+// Use this as the "port" identifier for the connectServer
+// call when using a UNIX domain server
+//
+//   UNIX
+//
+// Specifies if the addMulticast should add the given sid to all commands
+//
+//   MULTICAST_ALL
+//
 // A complete example of the usage of the API can be found in the included
 // demo program pshellControlDemo.go
 //

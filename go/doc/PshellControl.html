@@ -1,0 +1,581 @@
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "PshellControl"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				<p>
+This API provides the ability for a client program to invoke pshell commands
+that are registered in a remote program that is running a pshell UDP or UNIX
+server.  The format of the command string that is sent to the pshell should
+be in the same usage format that the given command is expecting.  This
+provides a very lightweight way to provide a control mechanism into a program
+that is running a pshell, this is analagous to a remote procedure call (rpc).
+</p>
+<p>
+This module provides the same functionality as the PshellControl.h API and
+the libpshell-control linkable &#39;C&#39; library, but implemented as a Go module.
+</p>
+<p>
+Functions:
+</p>
+<pre>ConnectServer()        -- connect to a remote pshell server
+DisconnectServer()     -- disconnect from a remote pshell server
+DisconnectAllServers() -- disconnect from all connected remote pshell servers
+SetDefaultTimeout()    -- set the default server response timeout
+ExtractCommands()      -- extract all commands from remote server
+AddMulticast()         -- add a command keyword to a multicast group
+SendMulticast()        -- send a command to a multicast group
+SendCommand1()         -- send command to server using default timeout, no results extracted
+SendCommand2()         -- send command to server using timeout override, no results extracted
+SendCommand3()         -- send command to server using default timeout, results extracted
+SendCommand4()         -- send command to server using timeout override, results extracted
+SetResponseString()    -- return the human readable form of one of the command response return codes
+SetLogLevel()          -- set the internal log level for this module
+SetLogFunction()       -- register a user function to receive all logs
+</pre>
+<p>
+Integer constants:
+</p>
+<p>
+Helpful items used for the server response timeout values
+</p>
+<pre>NO_WAIT
+ONE_MSEC
+ONE_SEC
+</pre>
+<p>
+These are returned from the sendCommandN functions
+</p>
+<pre>COMMAND_SUCCESS
+COMMAND_NOT_FOUND
+COMMAND_INVALID_ARG_COUNT
+SOCKET_SEND_FAILURE
+SOCKET_SELECT_FAILURE
+SOCKET_RECEIVE_FAILURE
+SOCKET_TIMEOUT
+SOCKET_NOT_CONNECTED
+</pre>
+<p>
+Used if we cannot connect to a local UNIX socket
+</p>
+<pre>INVALID_SID
+</pre>
+<p>
+Constants to let the host program set the internal debug log level,
+if the user of this API does not want to see any internal message
+printed out, set the debug log level to LOG_LEVEL_NONE, the default
+log level is LOG_LEVEL_ALL
+</p>
+<pre>LOG_LEVEL_NONE
+LOG_LEVEL_ERROR
+LOG_LEVEL_WARNING
+LOG_LEVEL_INFO
+LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT
+</pre>
+<p>
+String constants:
+</p>
+<p>
+Use this as the &#34;port&#34; identifier for the connectServer
+call when using a UNIX domain server
+</p>
+<pre>UNIX
+</pre>
+<p>
+Specifies if the addMulticast should add the given sid to all commands
+</p>
+<pre>MULTICAST_ALL
+</pre>
+<p>
+A complete example of the usage of the API can be found in the included
+demo program pshellControlDemo.go
+</p>
+
+			</div>
+		</div>
+		
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+				<dd><a href="#pkg-constants">Constants</a></dd>
+			
+			
+			
+				
+				<dd><a href="#AddMulticast">func AddMulticast(sid int, keyword string)</a></dd>
+			
+				
+				<dd><a href="#ConnectServer">func ConnectServer(controlName string, remoteServer string, port string, defaultTimeout int) int</a></dd>
+			
+				
+				<dd><a href="#DisconnectAllServers">func DisconnectAllServers()</a></dd>
+			
+				
+				<dd><a href="#DisconnectServer">func DisconnectServer(sid int)</a></dd>
+			
+				
+				<dd><a href="#GetResponseString">func GetResponseString(retCode int) string</a></dd>
+			
+				
+				<dd><a href="#SendCommand1">func SendCommand1(sid int, format string, command ...interface{}) int</a></dd>
+			
+				
+				<dd><a href="#SendCommand2">func SendCommand2(sid int, timeoutOverride int, format string, command ...interface{}) int</a></dd>
+			
+				
+				<dd><a href="#SendCommand3">func SendCommand3(sid int, format string, command ...interface{}) (int, string)</a></dd>
+			
+				
+				<dd><a href="#SendCommand4">func SendCommand4(sid int, timeoutOverride int, format string, command ...interface{}) (int, string)</a></dd>
+			
+				
+				<dd><a href="#SendMulticast">func SendMulticast(format string, command ...interface{})</a></dd>
+			
+				
+				<dd><a href="#SetDefaultTimeout">func SetDefaultTimeout(sid int, defaultTimeout int)</a></dd>
+			
+				
+				<dd><a href="#SetLogFunction">func SetLogFunction(function logFunction)</a></dd>
+			
+				
+				<dd><a href="#SetLogLevel">func SetLogLevel(level int)</a></dd>
+			
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h4>Package files</h4>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/target/PshellControl.go">PshellControl.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+			<h2 id="pkg-constants">Constants</h2>
+			
+				<pre>const (
+    <span id="COMMAND_SUCCESS">COMMAND_SUCCESS</span>           = 0
+    <span id="COMMAND_NOT_FOUND">COMMAND_NOT_FOUND</span>         = 1
+    <span id="COMMAND_INVALID_ARG_COUNT">COMMAND_INVALID_ARG_COUNT</span> = 2
+    <span class="comment">// the following &#34;SOCKET&#34; enums are generated internally by the sendCommandN functions</span>
+    <span id="SOCKET_SEND_FAILURE">SOCKET_SEND_FAILURE</span>    = 3
+    <span id="SOCKET_SELECT_FAILURE">SOCKET_SELECT_FAILURE</span>  = 4
+    <span id="SOCKET_RECEIVE_FAILURE">SOCKET_RECEIVE_FAILURE</span> = 5
+    <span id="SOCKET_TIMEOUT">SOCKET_TIMEOUT</span>         = 6
+    <span id="SOCKET_NOT_CONNECTED">SOCKET_NOT_CONNECTED</span>   = 7
+)</pre>
+				<p>
+these enum values are returned by the non-extraction
+based sendCommand1 and sendCommand2 functions
+</p>
+<p>
+the &#34;COMMAND&#34; enums are returned by the remote pshell server
+and must match their corresponding values in PshellServer.cc
+</p>
+
+			
+				<pre>const (
+    <span id="LOG_LEVEL_NONE">LOG_LEVEL_NONE</span>    = 0
+    <span id="LOG_LEVEL_ERROR">LOG_LEVEL_ERROR</span>   = 1
+    <span id="LOG_LEVEL_WARNING">LOG_LEVEL_WARNING</span> = 2
+    <span id="LOG_LEVEL_INFO">LOG_LEVEL_INFO</span>    = 3
+    <span id="LOG_LEVEL_ALL">LOG_LEVEL_ALL</span>     = <a href="#LOG_LEVEL_INFO">LOG_LEVEL_INFO</a>
+    <span id="LOG_LEVEL_DEFAULT">LOG_LEVEL_DEFAULT</span> = <a href="#LOG_LEVEL_ALL">LOG_LEVEL_ALL</a>
+)</pre>
+				<p>
+constants to let the host program set the internal debug log level,
+if the user of this API does not want to see any internal message
+printed out, set the debug log level to LOG_LEVEL_NONE (0)
+</p>
+
+			
+				<pre>const <span id="INVALID_SID">INVALID_SID</span> = -1</pre>
+				<p>
+This is returned on a failure of the ConnectServer function
+</p>
+
+			
+				<pre>const <span id="MULTICAST_ALL">MULTICAST_ALL</span> = &#34;__multicast_all__&#34;</pre>
+				<p>
+specifies if the addMulticast should add the given sid to all commands
+</p>
+
+			
+				<pre>const <span id="UNIX">UNIX</span> = &#34;unix&#34;</pre>
+				<p>
+use this as the &#34;port&#34; identifier for the connectServer call when
+using a UNIX domain server
+</p>
+
+			
+		
+		
+		
+			
+			
+			<h2 id="AddMulticast">func <a href="/target/PshellControl.go?s=11751:11793#L312">AddMulticast</a></h2>
+			<pre>func AddMulticast(sid <a href="/pkg/builtin/#int">int</a>, keyword <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+This command will add a given multicast receiver (i.e. sid) to a multicast
+group, multicast groups are either based on the command&#39;s keyword, or if
+no keyword is supplied, the given sid will receive all multicast commands
+</p>
+<pre>Args:
+    sid (int)     : The ServerId as returned from the connectServer call
+    keyword (str) : The multicast keyword that the sid is associated with
+                    If no keyword is supplied, all multicast commands will
+                    go to the corresponding sid
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="ConnectServer">func <a href="/target/PshellControl.go?s=9716:9812#L248">ConnectServer</a></h2>
+			<pre>func ConnectServer(controlName <a href="/pkg/builtin/#string">string</a>, remoteServer <a href="/pkg/builtin/#string">string</a>, port <a href="/pkg/builtin/#string">string</a>, defaultTimeout <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#int">int</a></pre>
+			<p>
+Connect to a pshell server in another process, note that this does
+not do any handshaking to the remote pshell or maintain a connection
+state, it meerly sets the internal destination remote pshell server
+information to use when sending commands via the sendCommandN
+functions and sets up any resources necessary for the source socket,
+the timeout value is the number of milliseconds to wait for a response
+from the remote command in the sendCommandN functions, a timeout
+value of 0 will not wait for a response, in which case the function
+will return either SOCKET_NOT_CONNECTED, SOCKET_SEND_FAILURE, or
+COMMAND_SUCCESS, the timeout value entered in this function will
+be used as the default timeout for all calls to sendCommandN that
+do not provide an override timeout value, for a UDP server, the
+remoteServer must be either a valid hostname or IP address and a
+valid destination port must be provided, for a UNIX server, only
+a valid server name must be provided along with the identifier
+PshellControl.UNIX for the &#39;port&#39; parameter
+</p>
+<p>
+This function returns a Server ID (sid) handle which must be saved and
+used for all subsequent calls into this module
+</p>
+<pre>Args:
+    controlName (str)    : The logical name of the control server
+    remoteServer (str)   : The server name (UNIX) or hostname/IP address (UDP) of the remote server
+    port (str)           : The UDP port of the remote server
+    defaultTimeout (int) : The default timeout (in msec) for the remote server response
+
+Returns:
+    int: The ServerId (sid) handle of the connected server or INVALID_SID on failure
+</pre>
+
+			
+		
+			
+			
+			<h2 id="DisconnectAllServers">func <a href="/target/PshellControl.go?s=10660:10687#L279">DisconnectAllServers</a></h2>
+			<pre>func DisconnectAllServers()</pre>
+			<p>
+Use this function to cleanup any resources for all connected servers, this
+function should be called upon program termination, either in a graceful
+termination or within an exception signal handler, it is especially important
+that this be called when a unix server is used since there are associated file
+handles that need to be cleaned up
+</p>
+<pre>Args:
+    none
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="DisconnectServer">func <a href="/target/PshellControl.go?s=10171:10201#L262">DisconnectServer</a></h2>
+			<pre>func DisconnectServer(sid <a href="/pkg/builtin/#int">int</a>)</pre>
+			<p>
+Cleanup any resources associated with the server connection, including
+releasing any temp file handles, closing any local socket handles etc.
+</p>
+<pre>Args:
+    sid (int) : The ServerId as returned from the connectServer call
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="GetResponseString">func <a href="/target/PshellControl.go?s=16773:16815#L447">GetResponseString</a></h2>
+			<pre>func GetResponseString(retCode <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#string">string</a></pre>
+			<p>
+Returns the string value corresponding to a received response code
+</p>
+<pre>Args:
+    retCode (int) : One of the response code enum constants
+
+Returns:
+    str: The string representation of the enum value
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SendCommand1">func <a href="/target/PshellControl.go?s=13180:13249#L354">SendCommand1</a></h2>
+			<pre>func SendCommand1(sid <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) <a href="/pkg/builtin/#int">int</a></pre>
+			<p>
+Send a command using the default timeout setup in the connectServer call,
+if the default timeout is 0, the server will not reply with a response and
+this function will not wait for one
+</p>
+<pre>Args:
+    sid (int)     : The ServerId as returned from the connectServer call
+    command (str) : The command to send to the remote server
+
+Returns:
+    int: Return code result of the command:
+           COMMAND_SUCCESS
+           COMMAND_NOT_FOUND
+           COMMAND_INVALID_ARG_COUNT
+           SOCKET_SEND_FAILURE
+           SOCKET_SELECT_FAILURE
+           SOCKET_RECEIVE_FAILURE
+           SOCKET_TIMEOUT
+           SOCKET_NOT_CONNECTED
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SendCommand2">func <a href="/target/PshellControl.go?s=14112:14202#L379">SendCommand2</a></h2>
+			<pre>func SendCommand2(sid <a href="/pkg/builtin/#int">int</a>, timeoutOverride <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) <a href="/pkg/builtin/#int">int</a></pre>
+			<p>
+Send a command overriding the default timeout, if the override timeout is 0,
+the server will not reply with a response and this function will not wait for
+one
+</p>
+<pre>Args:
+    sid (int)             : The ServerId as returned from the connectServer call
+    timeoutOverride (int) : The server timeout override (in msec) for this command
+    command (str)         : The command to send to the remote server
+
+Returns:
+    int: Return code result of the command:
+           COMMAND_SUCCESS
+           COMMAND_NOT_FOUND
+           COMMAND_INVALID_ARG_COUNT
+           SOCKET_SEND_FAILURE
+           SOCKET_SELECT_FAILURE
+           SOCKET_RECEIVE_FAILURE
+           SOCKET_TIMEOUT
+           SOCKET_NOT_CONNECTED
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SendCommand3">func <a href="/target/PshellControl.go?s=15210:15289#L406">SendCommand3</a></h2>
+			<pre>func SendCommand3(sid <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) (<a href="/pkg/builtin/#int">int</a>, <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+Send a command using the default timeout setup in the connectServer call and
+return any results received in the payload, if the default timeout is 0, the
+server will not reply with a response and this function will not wait for one,
+and no results will be extracted
+</p>
+<pre>Args:
+    sid (int)     : The ServerId as returned from the connectServer call
+    command (str) : The command to send to the remote server
+
+Returns:
+    str: The human readable results of the command response or NULL
+         if no results or command failure
+    int: Return code result of the command:
+           COMMAND_SUCCESS
+           COMMAND_NOT_FOUND
+           COMMAND_INVALID_ARG_COUNT
+           SOCKET_SEND_FAILURE
+           SOCKET_SELECT_FAILURE
+           SOCKET_RECEIVE_FAILURE
+           SOCKET_TIMEOUT
+           SOCKET_NOT_CONNECTED
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SendCommand4">func <a href="/target/PshellControl.go?s=16375:16475#L434">SendCommand4</a></h2>
+			<pre>func SendCommand4(sid <a href="/pkg/builtin/#int">int</a>, timeoutOverride <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) (<a href="/pkg/builtin/#int">int</a>, <a href="/pkg/builtin/#string">string</a>)</pre>
+			<p>
+Send a command overriding the default timeout and return any results received
+in the payload, if the timeout override default timeout is 0, the server will
+not reply with a response and this function will not wait for one, and no
+results will be extracted
+</p>
+<pre>Args:
+    sid (int)             : The ServerId as returned from the connectServer call
+    timeoutOverride (int) : The server timeout override (in msec) for this command
+    command (str)         : The command to send to the remote server
+
+Returns:
+    str: The human readable results of the command response or NULL
+         if no results or command failure
+    int: Return code result of the command:
+           COMMAND_SUCCESS
+           COMMAND_NOT_FOUND
+           COMMAND_INVALID_ARG_COUNT
+           SOCKET_SEND_FAILURE
+           SOCKET_SELECT_FAILURE
+           SOCKET_RECEIVE_FAILURE
+           SOCKET_TIMEOUT
+           SOCKET_NOT_CONNECTED
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SendMulticast">func <a href="/target/PshellControl.go?s=12352:12409#L330">SendMulticast</a></h2>
+			<pre>func SendMulticast(format <a href="/pkg/builtin/#string">string</a>, command ...interface{})</pre>
+			<p>
+This command will send a given command to all the registered multicast
+receivers (i.e. sids) for this multicast group, multicast groups are
+based on the command&#39;s keyword, this function will issue the command as
+a best effort fire-and-forget command to each receiver in the multicast
+group, no results will be requested or expected, and no response will be
+requested or expected
+</p>
+<pre>Args:
+    command (str) : The command to send to the remote server
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SetDefaultTimeout">func <a href="/target/PshellControl.go?s=11071:11122#L294">SetDefaultTimeout</a></h2>
+			<pre>func SetDefaultTimeout(sid <a href="/pkg/builtin/#int">int</a>, defaultTimeout <a href="/pkg/builtin/#int">int</a>)</pre>
+			<p>
+Set the default server response timeout that is used in the &#39;send&#39; commands
+that don&#39;t take a timeout override
+</p>
+<pre>Args:
+    sid (int)            : The ServerId as returned from the connectServer call
+    defaultTimeout (int) : The default timeout (in msec) for the remote server response
+
+Returns:
+    none
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SetLogFunction">func <a href="/target/PshellControl.go?s=17574:17615#L484">SetLogFunction</a></h2>
+			<pre>func SetLogFunction(function logFunction)</pre>
+			<p>
+Provide a user callback function to send the logs to, this allows an
+application to get all the logs issued by this module to put in it&#39;s
+own logfile.  If a log function is not set, all internal logs are just
+sent to the &#39;print&#39; function.
+</p>
+<pre>Args:
+    function (ptr) : Log callback function
+
+Returns:
+    None
+</pre>
+
+			
+		
+			
+			
+			<h2 id="SetLogLevel">func <a href="/target/PshellControl.go?s=17162:17189#L468">SetLogLevel</a></h2>
+			<pre>func SetLogLevel(level <a href="/pkg/builtin/#int">int</a>)</pre>
+			<p>
+Set the internal log level, valid levels are:
+</p>
+<p>
+LOG_LEVEL_ERROR
+LOG_LEVEL_WARNING
+LOG_LEVEL_INFO
+LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT
+</p>
+<p>
+Where the default is LOG_LEVEL_ALL
+</p>
+<pre>Args:
+    level (int) : The desired log level to set
+
+Returns:
+    None
+</pre>
+
+			
+		
+		
+	
+
+	
+
+
+
+
+
