@@ -91,6 +91,10 @@ else
   rm -f $libDir/libpshell-control.so
   rm -f $libDir/libpshell-control.a
 
+  echo "Removing softlink $libDir/libpshell-readline"
+  rm -f $libDir/libpshell-readline.so
+  rm -f $libDir/libpshell-readline.a
+
   echo "Removing pshell$fileExt from $binDir"
   rm -f $binDir/pshell$fileExt
 

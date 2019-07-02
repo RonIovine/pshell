@@ -199,6 +199,10 @@ else
   cp -f $localLibDir/libpshell-control.so $libDir/pshell/.
   echo "Copying libpshell-control.a to $libDir/pshell"
   cp -f $localLibDir/libpshell-control.a $libDir/pshell/.
+  echo "Copying libpshell-readline.so to $libDir/pshell"
+  cp -f $localLibDir/libpshell-readline.so $libDir/pshell/.
+  echo "Copying libpshell-readline.a to $libDir/pshell"
+  cp -f $localLibDir/libpshell-readline.a $libDir/pshell/.
 
   echo "Setting softlink $libDir/libpshell-server to $libDir/pshell/libpshell-server-full"
   rm -f $libDir/libpshell-server.so
@@ -213,6 +217,13 @@ else
 
   rm -f $libDir/libpshell-control.a
   ln -s $libDir/pshell/libpshell-control.a $libDir/libpshell-control.a
+
+  echo "Setting softlink $libDir/libpshell-readline to $libDir/pshell/libpshell-readline"
+  rm -f $libDir/libpshell-readline.so
+  ln -s $libDir/pshell/libpshell-readline.so $libDir/libpshell-readline.so
+
+  rm -f $libDir/libpshell-readline.a
+  ln -s $libDir/pshell/libpshell-readline.a $libDir/libpshell-readline.a
 
   echo "Installing bins..."
   echo "Copying pshell$fileExt to $binDir"
