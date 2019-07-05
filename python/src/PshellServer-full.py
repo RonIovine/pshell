@@ -911,7 +911,7 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
   global _gHostnameOrIpAddr
   global _gPort
   global _gRunning
-  _cleanupUnixResources()
+  _cleanupFileSystemResources()
   if (_gRunning == False):
     _gServerName = serverName_
     _gServerType = serverType_
@@ -934,22 +934,22 @@ def _serverThread():
 
 #################################################################################
 #################################################################################
-def _cleanupUnixResources():
-  global _gUnixSocketPath
+def _cleanupFileSystemResources():
+  global _gFileSystemPath
   global _gLockFileExtension
-  lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
+  lockFiles = fnmatch.filter(os.listdir(_gFileSystemPath), "*"+_gLockFileExtension)
   for file in lockFiles:
     try:
-      fd = open(_gUnixSocketPath+file, "r")
+      fd = open(_gFileSystemPath+file, "r")
       try:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         # we got the lock, delete any socket file and lock file and don't print anything
         try:
-          os.unlink(_gUnixSocketPath+file.split(".")[0])
+          os.unlink(_gFileSystemPath+file.split(".")[0])
         except:
           None
         try:
-          os.unlink(_gUnixSocketPath+file)
+          os.unlink(_gFileSystemPath+file)
         except:
           None
       except:
@@ -965,17 +965,18 @@ def _bindSocket(address_):
   global _gServerType
   global _gUnixSourceAddress
   global _gServerName
-  global _gUnixLockFd
-  global _gUnixLockFile
+  global _gLockFd
+  global _gLockFile
   global _gLockFileExtension
+  global _gFileSystemPath
   global _MAX_BIND_ATTEMPTS
   if _gServerType == UNIX:
     # Unix domain socket
-    _gUnixLockFile = _gUnixSourceAddress+_gLockFileExtension
+    _gLockFile = _gUnixSourceAddress+"-unix"+_gLockFileExtension
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
-        _gUnixLockFd = open((_gUnixLockFile), "w+")
-        fcntl.flock(_gUnixLockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        _gLockFd = open((_gLockFile), "w+")
+        fcntl.flock(_gLockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         _gSocketFd.bind((_gUnixSourceAddress))
         if attempt > 1:
           _gServerName = _gServerName + str(attempt-1)
@@ -985,7 +986,7 @@ def _bindSocket(address_):
           # only print message on first attemps
           _printWarning("Could not bind to UNIX address: {}, looking for first available address".format(_gServerName))
         _gUnixSourceAddress = address_ + str(attempt)
-        _gUnixLockFile = _gUnixSourceAddress+_gLockFileExtension
+        _gLockFile = _gUnixSourceAddress+"-unix"+_gLockFileExtension
     _printError("Could not find available address after {} attempts".format(_MAX_BIND_ATTEMPTS))
   else:
     # IP domain socket
@@ -993,6 +994,9 @@ def _bindSocket(address_):
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
         _gSocketFd.bind((address_, port))
+        _gLockFile = _gFileSystemPath + _gServerName + "-" + _gServerType + "-" + str(port) + _gLockFileExtension
+        _gLockFd = open((_gLockFile), "w+")
+        fcntl.flock(_gLockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         return
       except Exception as error:
         if attempt == 1:
@@ -1011,7 +1015,7 @@ def _createSocket():
   global _gHostnameOrIpAddr
   global _gPort
   global _gSocketFd
-  global _gUnixSocketPath
+  global _gFileSystemPath
   global _gUnixSourceAddress
   try:
     if (_gServerType == UDP):
@@ -1048,7 +1052,7 @@ def _createSocket():
       _gSocketFd.listen(1)
     elif (_gServerType == UNIX):
       _gSocketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-      _gUnixSourceAddress = _gUnixSocketPath+_gServerName
+      _gUnixSourceAddress = _gFileSystemPath+_gServerName
       _bindSocket(_gUnixSourceAddress)
     return (True)
   except Exception as error:
@@ -1612,18 +1616,18 @@ def _reply():
 #################################################################################
 def _cleanupResources():
   global _gUnixSourceAddress
-  global _gUnixLockFile
+  global _gLockFile
   global _gSocketFd
   if (_gUnixSourceAddress != None):
     try:
       os.unlink(_gUnixSourceAddress)
     except:
       None
-    try:
-      os.unlink(_gUnixLockFile)
-    except:
-      None
-  _cleanupUnixResources()
+  try:
+    os.unlink(_gLockFile)
+  except:
+    None
+  _cleanupFileSystemResources()
   if (_gSocketFd != None):
     try:
       _gSocketFd.close()
@@ -1827,13 +1831,13 @@ _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 _gSocketFd = None
 _gConnectFd = None
 _gFromAddr = None
-_gUnixSocketPath = "/tmp/"
+_gFileSystemPath = "/tmp/"
 _gArgs = None
 _gFoundCommand = None
 _gUnixSourceAddress = None
-_gUnixLockFile = None
+_gLockFile = None
 _gLockFileExtension = ".pshell-lock"
-_gUnixLockFd = None
+_gLockFd = None
 _gRunning = False
 _gCommandDispatched = False
 _gCommandInteractive = True

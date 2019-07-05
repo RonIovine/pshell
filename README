@@ -333,26 +333,28 @@ wrapper.
 The usage of the "pshell" and "pshell.exp" (see NOTE) command line client
 programs are as follows:
 
-Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverName>}} | <unixServerName>
-                   [{{-c <command> | -f <fileName>} [rate=<seconds>] [repeat=<count>] [clear]}]
+Usage: pshell -n | -l |  [-t<timeout>] {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex}
+                                       [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 
-    -s             - show named servers in pshell-client.conf file
-    -c             - run command from command line
-    -f             - run commands from a batch file
-    -t             - change the default server response timeout
-    hostName       - hostname of UDP server
-    ipAddr         - IP address of UDP server
-    portNum        - port number of UDP server
-    serverName     - name of UDP server from pshell-client.conf file
-    unixServerName - name of UNIX server
-    timeout        - response wait timeout in sec (default=5)
-    command        - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
-    fileName       - optional batch file to execute
-    rate           - optional rate to repeat command or batch file (in seconds)
-    repeat         - optional repeat count for command or batch file (default=forever)
-    clear          - optional clear screen between commands or batch file passes
+    -n              - show named IP server/port mappings in pshell-client.conf file
+    -l              - show all servers running on the local host
+    -c              - run command from command line
+    -f              - run commands from a batch file
+    -t              - change the default server response timeout
+    hostName        - hostname of UDP server
+    ipAddr          - IP addr of UDP server
+    portNum         - port number of UDP server
+    udpServerName   - name of UDP server from pshell-client.conf file
+    unixServerName  - name of UNIX server (use '-l' option to list servers)
+    serverIndex     - index of local UNIX or UDP server (use '-l' option to list servers)
+    timeout         - response wait timeout in sec (default=5)
+    command         - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName        - optional batch file to execute
+    rate            - optional rate to repeat command or batch file (in seconds)
+    repeat          - optional repeat count for command or batch file (default=forever)
+    clear           - optional clear screen between commands or batch file passes
 
     NOTE: If no <command> is given, pshell will be started
           up in interactive mode, commands issued in command
@@ -367,7 +369,6 @@ Usage: pshell -s | [-t<timeout>] {{<hostName> | <ipAddr>} {<portNum> | <serverNa
           see all available commands, to get help on a single
           command, type '<command> {? | -h}'.  Use TAB completion
           to fill out partial commands and up-arrow to recall
-          for command history.
 
 NOTE: The "-t<timeout>" option, the "unix" specifier are only
       supported on the UDP/UNIX client/server.
@@ -386,7 +387,7 @@ $ pshell localhost pshellServerDemo
 Once this command is invoked, an interactive command line prompt is
 given as follows:
 
-pshellServerDemo[127.0.0.1]:PSHELL>
+pshellServerDemo[127.0.0.1:6001]:PSHELL>
 
 The following is an example of specifying a different server response
 timeout value.  If a value is given, the default response timeout of
@@ -397,7 +398,7 @@ $ pshell -t20 localhost pshellServerDemo
 Commands can then be entered interactivley.  The following example shows
 how to display the command list in interactive mode (note that "?" also work):
 
-pshellServerDemo[127.0.0.1]:PSHELL> help
+pshellServerDemo[127.0.0.1:6001]:PSHELL> help
 
 The following shows the same command entered in command line mode:
 
@@ -405,7 +406,7 @@ $ pshell localhost pshellServerDemo -h
 
 The following shows an example of executing a command with arguments:
 
-pshellServerDemo[127.0.0.1]:PSHELL> hello 1 2 3
+pshellServerDemo[127.0.0.1:6001]:PSHELL> hello 1 2 3
 
 The following shows the same command entered in command line mode:
 
@@ -414,7 +415,7 @@ $ pshell localhost pshellServerDemo "hello 1 2 3"
 The following shows how to execute command from a batch file in
 interactive mode (UDP/UNIX client only):
 
-pshellServerDemo[127.0.0.1]:PSHELL> batch pshellServerDemo.batch
+pshellServerDemo[127.0.0.1:6001]:PSHELL> batch pshellServerDemo.batch
 
 The following shows the same command entered in command line mode:
 
@@ -423,7 +424,7 @@ $ pshell localhost pshellServerDemo -f pshellServerDemo.batch
 The following example shows how to display the usage of a given command
 in ineractive mode (note that "-h" also works)
 
-pshellServerDemo[127.0.0.1]:PSHELL> hello ?
+pshellServerDemo[127.0.0.1:6001]:PSHELL> hello ?
 
 The following shows the same command entered in command line mode,
 note that "-h" will also accomplish the same thing:

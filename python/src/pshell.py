@@ -66,9 +66,9 @@ import PshellReadline
 _gSid = None
 _gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
-_gUnixSocketPath = "/tmp/"
+_gFileSystemPath = "/tmp/"
 _gLockFileExtension = ".pshell-lock"
-_gActiveUnixServers = []
+_gActiveServers = []
 
 #################################################################################
 #################################################################################
@@ -312,16 +312,20 @@ def _getNamedServer(arg):
   global _gPort
   global _gTimeout
   numFound = 0
-  for server in _gServerList:
+  foundIndex = 0
+  for index, server in enumerate(_gServerList):
+    #print("arg: {}, server: {}".format(arg, server["server"][:len(arg)]))
     if len(server["server"]) == len(arg) and server["server"] == arg:
       # exact match found, assumes no duplicates in list
       numFound = 1
+      foundIndex = index
       break
     elif arg == server["server"][:len(arg)]:
       numFound += 1
+      foundIndex = index
   if numFound == 1:
-    _gPort = server["port"]
-    _gTimeout = server["timeout"]
+    _gPort = _gServerList[foundIndex]["port"]
+    _gTimeout = _gServerList[foundIndex]["timeout"]
     return True
   elif numFound == 0:
     print("")
@@ -373,85 +377,105 @@ def _loadServers():
 
 #####################################################
 #####################################################
-def _cleanupUnixResources():
-  global _gUnixSocketPath
+def _cleanupFileSystemResources():
+  global _gFileSystemPath
   global _gLockFileExtension
-  global _gActiveUnixServers
-  lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
+  global _gActiveServers
+  lockFiles = fnmatch.filter(os.listdir(_gFileSystemPath), "*"+_gLockFileExtension)
   lockFiles.sort()
   for file in lockFiles:
     try:
-      fd = open(_gUnixSocketPath+file, "r")
+      fd = open(_gFileSystemPath+file, "r")
       try:
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         # we got the lock, delete any socket file and lock file and don't print anything
         try:
-          os.unlink(_gUnixSocketPath+file.split(".")[0])
+          os.unlink(_gFileSystemPath+file.split(".")[0])
         except:
           None
         try:
-          os.unlink(_gUnixSocketPath+file)
+          os.unlink(_gFileSystemPath+file)
         except:
           None
       except:
         # file handle is in use and locked by another process, print it
         if "-control" not in file:
-          _gActiveUnixServers.append(file.split(".")[0])
+          server = file.split(".")[0]
+          server = server.split("-")
+          if len(server) == 2:
+            _gActiveServers.append({"name":server[0], "type":server[1], "port":"N/A"})
+          elif len(server) == 3:
+            _gActiveServers.append({"name":server[0], "type":server[1], "port":server[2]})
+          #_gActiveUnixServers.append(file.split(".")[0])
     except:
       None
 
 #####################################################
 #####################################################
-def _getUnixServer(arg):
-  global _gActiveUnixServers
+def _getActiveServer(arg):
+  global _gActiveServers
   global _gRemoteServer
+  global _gPort
   try:
     int(arg, 10)
+    isInt = True
+  except:
+    isInt = False
+  if isInt:
     index = int(arg)
-    if index-1 >= 0 and index-1 < len(_gActiveUnixServers):
-      _gRemoteServer = _gActiveUnixServers[index-1]
-      return True
+    if index-1 >= 0 and index-1 < len(_gActiveServers):
+      if _gActiveServers[index-1]["type"] == "unix":
+        _gRemoteServer = _gActiveServers[index-1]["name"]
+        return True
+      elif _gActiveServers[index-1]["type"] == "udp":
+        _gRemoteServer = "localhost"
+        _gPort = _gActiveServers[index-1]["port"]
+        return True
+      else:
+        print("")
+        print("PSHELL_ERROR: Cannot use 'pshell' client for TCP server, use 'telnet' instead")
+        _showActiveServers()
     else:
       print("")
-      print("PSHELL_ERROR: Index: %d out of range for UNIX server" % index)
-      return False
-  except:
+      print("PSHELL_ERROR: Index: %d out of range for server, valid range: 1-%d" % (index, len(_gActiveServers)))
+      _showActiveServers()
+  else:
+    # they did not enter an integer value, look for a matching server name, we only do this
+    # for UNIX servers sinced they are guaranteed to be unique, whereas an IP based server
+    # can have the same name running different instances on different ports
     numFound = 0
-    for server in _gActiveUnixServers:
-      if len(server) == len(arg) and server == arg:
+    for server in _gActiveServers:
+      if len(server["name"]) == len(arg) and server["name"] == arg and server["type"] == "unix":
         # exact match found, assumes no duplicates in list
         numFound = 1
         break
-      elif arg == server[:len(arg)]:
+      elif arg == server["name"][:len(arg)] and server["type"] == "unix":
         numFound += 1
     if numFound == 1:
-      _gRemoteServer = server
+      _gRemoteServer = server["name"]
       return True
-    elif numFound == 0:
-      print("")
-      print("PSHELL_ERROR: UNIX server: '%s' not running on localhost" % arg)
-    elif numFound > 1:
-      print("")
-      print("PSHELL_ERROR: Ambiguous UNIX server name: '%s'" % arg)
-    return False
+    else:
+      return False
 
 #####################################################
 #####################################################
-def _showUnixServers():
-  global _gActiveUnixServers
+def _showActiveServers():
+  global _gActiveServers
   print("")
-  print("*******************************")
-  print("*     Active UNIX Servers     *")
-  print("*******************************")
+  print("*******************************************")
+  print("*   Active PSHELL Servers On Local Host   *")
+  print("*******************************************")
   print("")
-  if len(_gActiveUnixServers) > 0:
-    print("Index    Server Name")
-    print("=====    ====================")
-  for index, server in enumerate(_gActiveUnixServers):
-    print("%-5d    %-20s" % (index+1, server))
-  if len(_gActiveUnixServers) > 0:
+  if len(_gActiveServers) > 0:
+    print("Index   Server Name            Type   Port")
+    print("=====   ====================   ====   ====")
+  for index, server in enumerate(_gActiveServers):
+    print("%-5d   %-20s   %-4s   %-4s" % (index+1, server["name"], server["type"], server["port"]))
+  if len(_gActiveServers) > 0:
     print("")
-    print("A UNIX server can be connected to by either its server name or server index")
+    print("A UNIX server can be connected via 'pshell' client using server name or index")
+    print("A UDP server can be connected via 'pshell' client using host/port or index")
+    print("A TCP server can be connected via 'telnet' client using host/port")
     print("")
   exit(0)
 
@@ -461,9 +485,9 @@ def _showNamedServers():
   global _gServerList
   global _gMaxServerNameLength
   print("")
-  print("**************************************")
-  print("*      Available PSHELL Servers      *")
-  print("**************************************")
+  print("****************************************")
+  print("*         Named PSHELL Servers         *")
+  print("****************************************")
   print("")
   print("%s  Port Number  Response Timeout" % "Server Name".ljust(_gMaxServerNameLength))
   print("%s  ===========  ================" % ("="*_gMaxServerNameLength))
@@ -476,13 +500,13 @@ def _showNamedServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s -n | -u | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("Usage: %s -n | -l | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
   print("                           [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
   print("    -n              - show named IP server/port mappings in pshell-client.conf file")
-  print("    -u              - show all local running active UNIX servers")
+  print("    -l              - show all servers running on the local host")
   print("    -c              - run command from command line")
   print("    -f              - run commands from a batch file")
   print("    -t              - change the default server response timeout")
@@ -490,8 +514,8 @@ def _showUsage():
   print("    ipAddr          - IP address of UDP server")
   print("    portNum         - port number of UDP server")
   print("    udpServerName   - name of UDP server from pshell-client.conf file")
-  print("    unixServerName  - name of UNIX server ('-u' option to list UNIX servers)")
-  print("    unixServerIndex - index of UNIX server ('-u' option to list UNIX servers)")
+  print("    unixServerName  - name of UNIX server (use '-l' option to list servers)")
+  print("    serverIndex     - index of local UNIX or UDP server (use '-l' option to list servers)")
   print("    timeout         - response wait timeout in sec (default=5)")
   print("    command         - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")")
   print("    fileName        - optional batch file to execute")
@@ -584,14 +608,14 @@ if (__name__ == '__main__'):
   _gServerList = []
 
   _loadServers()
-  _cleanupUnixResources()
+  _cleanupFileSystemResources()
 
   if sys.argv[1] == "-n":
     _showNamedServers()
-  elif sys.argv[1] == "-u":
-    _showUnixServers()
-  elif not _getUnixServer(sys.argv[1]):
-    _showUnixServers()
+  elif sys.argv[1] == "-l":
+    _showActiveServers()
+  elif not _getActiveServer(sys.argv[1]):
+    _gRemoteServer = sys.argv[1]
 
   needFile = False
   needCommand = False

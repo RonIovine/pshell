@@ -305,8 +305,8 @@ static unsigned _logLevel = PSHELL_SERVER_LOG_LEVEL_DEFAULT;
 static int _socketFd;
 static struct sockaddr_in _localIpAddress;
 static struct sockaddr_un _localUnixAddress;
-static char _unixLockFile[300];
-static const char *_unixSocketPath = "/tmp/";
+static char _lockFile[300];
+static const char *_fileSystemPath = "/tmp/";
 static const char *_lockFileExtension = ".pshell-lock";
 
 static PshellServerType _serverType = PSHELL_LOCAL_SERVER;
@@ -382,7 +382,7 @@ static void showWelcome(void);
 static int getIpAddress(const char *interface_, char *ipAddress_);
 static bool createSocket(void);
 static bool bindSocket(void);
-static void cleanupUnixResources(void);
+static void cleanupFileSystemResources(void);
 
 /* common functions (UDP, TCP, UNIX, and LOCAL servers) */
 
@@ -980,7 +980,7 @@ void pshell_startServer(const char *serverName_,
 {
   pthread_t pshellServerThreadTID;
 
-  cleanupUnixResources();
+  cleanupFileSystemResources();
 
   if ((serverType_ != PSHELL_UDP_SERVER) &&
       (serverType_ != PSHELL_UNIX_SERVER) &&
@@ -1139,9 +1139,9 @@ void pshell_cleanupResources(void)
   if (_isRunning && (_serverType == PSHELL_UNIX_SERVER))
   {
     unlink(_localUnixAddress.sun_path);
-    unlink(_unixLockFile);
   }
-  cleanupUnixResources();
+  unlink(_lockFile);
+  cleanupFileSystemResources();
 }
 
 /**************************************************
@@ -2620,14 +2620,14 @@ static void loadConfigFile(void)
 
 /******************************************************************************/
 /******************************************************************************/
-static void cleanupUnixResources(void)
+static void cleanupFileSystemResources(void)
 {
   DIR *dir;
   int unixLockFd;
   char unixLockFile[300];
   char unixSocketFile[300];
   struct dirent *dirEntry;
-  dir = opendir(_unixSocketPath);
+  dir = opendir(_fileSystemPath);
   if (dir)
   {
     while ((dirEntry = readdir(dir)) != NULL)
@@ -2664,11 +2664,11 @@ static bool bindSocket(void)
   {
     _localUnixAddress.sun_family = AF_UNIX;
     sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
-    sprintf(_unixLockFile, "%s%s", _localUnixAddress.sun_path, _lockFileExtension);
+    sprintf(_lockFile, "%s-unix%s", _localUnixAddress.sun_path, _lockFileExtension);
     for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
     {
       /* try to open lock file */
-      if ((unixLockFd = open(_unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+      if ((unixLockFd = open(_lockFile, O_RDONLY | O_CREAT, 0600)) > -1)
       {
         /* file exists, try to see if another process has it locked */
         if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
@@ -2697,7 +2697,7 @@ static bool bindSocket(void)
           PSHELL_WARNING("Could not bind to UNIX address: %s, looking for first available address", _serverName);
         }
         sprintf(_localUnixAddress.sun_path, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, _serverName, attempt);
-        sprintf(_unixLockFile, "%s%s", _localUnixAddress.sun_path, _lockFileExtension);
+        sprintf(_lockFile, "%s-unix%s", _localUnixAddress.sun_path, _lockFileExtension);
       }
     }
     PSHELL_ERROR("Could not find available address after %d attempts", PSHELL_MAX_BIND_ATTEMPTS)
@@ -2722,6 +2722,18 @@ static bool bindSocket(void)
       else
       {
         _port = port;
+        if (_serverType == PSHELL_UDP_SERVER)
+        {
+          sprintf(_lockFile, "%s%s-udp-%d%s", _fileSystemPath, _serverName, _port, _lockFileExtension);
+        }
+        else  /* TCP server */
+        {
+          sprintf(_lockFile, "%s%s-tcp-%d%s", _fileSystemPath, _serverName, _port, _lockFileExtension);
+        }
+        if ((unixLockFd = open(_lockFile, O_RDONLY | O_CREAT, 0600)) > -1)
+        {
+          flock(unixLockFd, LOCK_EX | LOCK_NB);
+        }
         return (true);
       }
     }

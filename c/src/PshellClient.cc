@@ -134,12 +134,19 @@ bool _isUnixConnected = false;
 
 ServerType _serverType = UDP;
 
-#define MAX_ACTIVE_UNIX_SERVERS 1000
+#define MAX_ACTIVE_SERVERS 1000
 const char *_unixSocketPath = "/tmp/";
 const char *_lockFileExtension = ".pshell-lock";
 DIR *_dir;
-int _numActiveUnixServers = 0;
-char *_activeUnixServers[MAX_ACTIVE_UNIX_SERVERS];
+struct ActiveServer
+{
+  char *name;
+  char *type;
+  char port[80];
+};
+int _numActiveServers = 0;
+//char *_activeServers[MAX_ACTIVE_SERVERS];
+ActiveServer _activeServers[MAX_ACTIVE_SERVERS] = {};
 
 char _unixLocalSocketName[256];
 char _interactiveCommand[PSHELL_RL_MAX_COMMAND_SIZE];
@@ -227,10 +234,10 @@ void processInteractiveMode(void);
 void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
 void getNamedServers(void);
 void showNamedServers(void);
-void showUnixServers(void);
-char *getUnixServer(unsigned index_);
+void showActiveServers(void);
+char *getActiveServer(unsigned index_);
 int stringCompare(const void* string1_, const void* string2_);
-void cleanupUnixResources(void);
+void cleanupFileSystemResources(void);
 void showCommands(void);
 void stripWhitespace(char *string_);
 void showUsage(void);
@@ -1223,12 +1230,14 @@ int stringCompare(const void* string1_, const void* string2_)
 
 /******************************************************************************/
 /******************************************************************************/
-void cleanupUnixResources(void)
+void cleanupFileSystemResources(void)
 {
   int unixLockFd;
   char unixLockFile[300];
   char unixSocketFile[300];
   struct dirent *dirEntry;
+  char *serverInfo[MAX_TOKENS];
+  unsigned numTokens;
   _dir = opendir(_unixSocketPath);
   if (_dir)
   {
@@ -1249,22 +1258,33 @@ void cleanupUnixResources(void)
             unlink(unixSocketFile);
             unlink(unixLockFile);
           }
-          else if ((_numActiveUnixServers < MAX_ACTIVE_UNIX_SERVERS) &&
+          else if ((_numActiveServers < MAX_ACTIVE_SERVERS) &&
                    (strstr(dirEntry->d_name, "-control") == NULL))
           {
-            _activeUnixServers[_numActiveUnixServers++] = dirEntry->d_name;
+            tokenize(dirEntry->d_name, "-", serverInfo, MAX_TOKENS, &numTokens);
+            _activeServers[_numActiveServers].name = serverInfo[0];
+            _activeServers[_numActiveServers].type = serverInfo[1];
+            if (numTokens == 2)
+            {
+              sprintf(_activeServers[_numActiveServers].port, "%s", "N/A");
+            }
+            else if (numTokens == 3)
+            {
+              sprintf(_activeServers[_numActiveServers].port, "%s", serverInfo[2]);
+            }
+            _numActiveServers++;
           }
         }
       }
     }
     closedir(_dir);
   }
-  qsort(_activeUnixServers, _numActiveUnixServers, sizeof(const char*), stringCompare);
+  //qsort(_activeServers, _numActiveServers, sizeof(const char*), stringCompare);
 }
 
 /******************************************************************************/
 /******************************************************************************/
-char *getUnixServer(char *server_)
+char *getActiveServer(char *server_)
 {
   int index;
   int server;
@@ -1272,31 +1292,42 @@ char *getUnixServer(char *server_)
   if (isNumeric(server_))
   {
     index = atoi(server_);
-    if ((index-1 >= 0) && (index-1 < _numActiveUnixServers))
+    if ((index-1 >= 0) && (index-1 < _numActiveServers))
     {
-      return (_activeUnixServers[index-1]);
+      if (strcmp(_activeServers[index-1].type, "unix") == 0)
+      {
+        _host = "unix";
+        return (_activeServers[index-1].name);
+      }
+      else
+      {
+        _host = "localhost";
+        return (_activeServers[index-1].port);
+      }
     }
     else
     {
       printf("\n");
-      printf("PSHELL_ERROR: Index: %d out of range for UNIX server\n", index);
-      showUnixServers();
+      printf("PSHELL_ERROR: Index: %d out of range for UNIX server, valid range: 1-%d\n", index, _numActiveServers);
+      showActiveServers();
       exitProgram(0);
     }
   }
   else
   {
-    for (index = 0; index < _numActiveUnixServers; index++)
+    for (index = 0; index < _numActiveServers; index++)
     {
-      if ((strlen(server_) == strlen(_activeUnixServers[index])) &&
-          strcmp(server_, _activeUnixServers[index]) == 0)
+      if ((strlen(server_) == strlen(_activeServers[index].name)) &&
+          (strcmp(_activeServers[index].type, "unix") == 0) &&
+          (strcmp(server_, _activeServers[index].name) == 0))
       {
         /* exact match, break out, assumes list does not have duplicate entries */
         server = index;
         numFound = 1;
         break;
       }
-      else if (strncmp(server_, _activeUnixServers[index], strlen(server_)) == 0)
+      else if ((strncmp(server_, _activeServers[index].name, strlen(server_)) == 0) &&
+               (strcmp(_activeServers[index].type, "unix") == 0))
       {
         server = index;
         numFound++;
@@ -1304,21 +1335,8 @@ char *getUnixServer(char *server_)
     }
     if (numFound == 1)
     {
-      return (_activeUnixServers[server]);
-    }
-    else if (numFound == 0)
-    {
-      printf("\n");
-      printf("PSHELL_ERROR: UNIX server: '%s' not running on localhost\n", server_);
-      showUnixServers();
-      exitProgram(0);
-    }
-    else if (numFound > 1)
-    {
-      printf("\n");
-      printf("PSHELL_ERROR: Ambiguous UNIX server name: '%s'\n", server_);
-      showUnixServers();
-      exitProgram(0);
+      _host = "unix";
+      return (_activeServers[server].name);
     }
   }
   return (NULL);
@@ -1326,26 +1344,28 @@ char *getUnixServer(char *server_)
 
 /******************************************************************************/
 /******************************************************************************/
-void showUnixServers(void)
+void showActiveServers(void)
 {
   printf("\n");
-  printf("*******************************\n");
-  printf("*     Active UNIX Servers     *\n");
-  printf("*******************************\n");
+  printf("*******************************************\n");
+  printf("*   Active PSHELL Servers On Local Host   *\n");
+  printf("*******************************************\n");
   printf("\n");
-  if (_numActiveUnixServers > 0)
+  if (_numActiveServers > 0)
   {
-    printf("Index    Server Name\n");
-    printf("=====    ====================\n");
+    printf("Index   Server Name            Type   Port\n");
+    printf("=====   ====================   ====   ====\n");
   }
-  for (int index = 0; index < _numActiveUnixServers; index++)
+  for (int index = 0; index < _numActiveServers; index++)
   {
-    printf("%-5d    %-20s\n", index+1, _activeUnixServers[index]);
+    printf("%-5d   %-20s   %-4s   %-4s\n", index+1, _activeServers[index].name, _activeServers[index].type, _activeServers[index].port);
   }
-  if (_numActiveUnixServers > 0)
+  if (_numActiveServers > 0)
   {
     printf("\n");
-    printf("A UNIX server can be connected to by either its server name or server index\n");
+    printf("A UNIX server can be connected via 'pshell' client using server name or index\n");
+    printf("A UDP server can be connected via 'pshell' client using host/port or index\n");
+    printf("A TCP server can be connected via 'telnet' client using host/port\n");
     printf("\n");
   }
   exitProgram(0);
@@ -1435,13 +1455,13 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -n | -u | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | {<unixServerName> | <unixServerIndex}} [-t<timeout>]\n");
-  printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
+  printf("Usage: pshell -n | -l |  [-t<timeout>] {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex}\n");
+  printf("                                       [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
   printf("    -n              - show named IP server/port mappings in pshell-client.conf file\n");
-  printf("    -u              - show all local running active UNIX servers\n");
+  printf("    -l              - show all servers running on the local host\n");
   printf("    -c              - run command from command line\n");
   printf("    -f              - run commands from a batch file\n");
   printf("    -t              - change the default server response timeout\n");
@@ -1449,8 +1469,8 @@ void showUsage(void)
   printf("    ipAddr          - IP addr of UDP server\n");
   printf("    portNum         - port number of UDP server\n");
   printf("    udpServerName   - name of UDP server from pshell-client.conf file\n");
-  printf("    unixServerName  - name of UNIX server ('-u' option to list UNIX servers)\n");
-  printf("    unixServerIndex - index of UNIX server ('-u' option to list UNIX servers)\n");
+  printf("    unixServerName  - name of UNIX server (use '-l' option to list servers)\n");
+  printf("    serverIndex     - index of local UNIX or UDP server (use '-l' option to list servers)\n");
   printf("    timeout         - response wait timeout in sec (default=5)\n");
   printf("    command         - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")\n");
   printf("    fileName        - optional batch file to execute\n");
@@ -1483,7 +1503,7 @@ void parseCommandLine(int *argc, char *argv[])
 {
   int i;
   getNamedServers();
-  cleanupUnixResources();
+  cleanupFileSystemResources();
   for (i = 0; i < (*argc-1); i++)
   {
     argv[i] = argv[i+1];
@@ -1495,23 +1515,22 @@ void parseCommandLine(int *argc, char *argv[])
   }
   else if (*argc == 1)
   {
-      if ((strcmp(argv[0], "-h") == 0) || (strcmp(argv[0], "?") == 0))
-      {
-        showUsage();
-      }
-      else if (strcmp(argv[0], "-n") == 0)
-      {
-        showNamedServers();
-      }
-      else if (strcmp(argv[0], "-u") == 0)
-      {
-        showUnixServers();
-      }
-      else if ((_server = getUnixServer(argv[0])) != NULL)
-      {
-        _host = "unix";
-        *argc = 0;
-      }
+    if ((strcmp(argv[0], "-h") == 0) || (strcmp(argv[0], "?") == 0))
+    {
+      showUsage();
+    }
+    else if (strcmp(argv[0], "-n") == 0)
+    {
+      showNamedServers();
+    }
+    else if (strcmp(argv[0], "-l") == 0)
+    {
+      showActiveServers();
+    }
+    else if ((_server = getActiveServer(argv[0])) != NULL)
+    {
+      *argc = 0;
+    }
   }
   else if (*argc < 8)
   {
@@ -1532,35 +1551,40 @@ void parseCommandLine(int *argc, char *argv[])
       }
       (*argc)--;
     }
-    if (*argc == 1)
+    if ((_server = getActiveServer(argv[0])) == NULL)
     {
-      _host = "unix";
-      _server = argv[0];
-      *argc = 0;
-    }
-    else if (isNumeric(argv[1]))
-    {
-      _host = argv[0];
-      _server = argv[1];
-      for (i = 0; i < (*argc-1); i++)
+      if (isNumeric(argv[1]))
       {
-        argv[i] = argv[i+2];
+        _host = argv[0];
+        _server = argv[1];
+        for (i = 0; i < (*argc-1); i++)
+        {
+          argv[i] = argv[i+2];
+        }
+        (*argc) -= 2;
       }
-      (*argc) -= 2;
-    }
-    else if ((_server = findServerPort(argv[1])) != NULL)
-    {
-      _host = argv[0];
-      for (i = 0; i < (*argc-1); i++)
+      else if ((_server = findServerPort(argv[1])) != NULL)
       {
-        argv[i] = argv[i+2];
+        _host = argv[0];
+        for (i = 0; i < (*argc-1); i++)
+        {
+          argv[i] = argv[i+2];
+        }
+        (*argc) -= 2;
       }
-      (*argc) -= 2;
+      else
+      {
+        _host = "unix";
+        _server = argv[0];
+        for (i = 0; i < (*argc-1); i++)
+        {
+          argv[i] = argv[i+1];
+        }
+        (*argc)--;
+      }
     }
     else
     {
-      _host = "unix";
-      _server = argv[0];
       for (i = 0; i < (*argc-1); i++)
       {
         argv[i] = argv[i+1];
@@ -1585,7 +1609,7 @@ void exitProgram(int exitCode_)
     unlink(_sourceUnixAddress.sun_path);
     unlink(unixLockFile);
   }
-  cleanupUnixResources();
+  cleanupFileSystemResources();
   if (exitCode_ > 0)
   {
     printf("\n");

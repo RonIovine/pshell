@@ -330,12 +330,12 @@ var _gCommandHistory []string
 var _gCommandHistoryPos = 0
 
 type logFunction func(string)
-var _logLevel = LOG_LEVEL_DEFAULT
-var _logFunction logFunction
+var _gLogLevel = LOG_LEVEL_DEFAULT
+var _gLogFunction logFunction
 
-var _gUnixLockFile string
-var _unixLockFd *os.File
-const _UNIX_SOCKET_PATH = "/tmp/"
+var _gLockFile string
+var _gLockFd *os.File
+const _FILE_SYSTEM_PATH = "/tmp/"
 const _LOCK_FILE_EXTENSION = ".pshell-lock"
 
 /////////////////////////////////
@@ -1043,7 +1043,7 @@ func startServer(serverName_ string,
                  serverMode_ int,
                  hostnameOrIpAddr_ string,
                  port_ string) {
-  cleanupUnixResources()
+  cleanupFileSystemResources()
   if (_gRunning == false) {
     _gServerName = serverName_
     _gServerType = serverType_
@@ -1066,9 +1066,9 @@ func startServer(serverName_ string,
 func cleanupResources() {
   if _gServerType == UNIX {
     os.Remove(_gUnixSourceAddress)
-    os.Remove(_gUnixLockFile)
   }
-  cleanupUnixResources()
+  os.Remove(_gLockFile)
+  cleanupFileSystemResources()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1103,13 +1103,13 @@ func runCommand(format_ string, command_ ...interface{}) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func setLogLevel(level_ int) {
-  _logLevel = level_
+  _gLogLevel = level_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func setLogFunction(function_ logFunction) {
-  _logFunction = function_
+  _gLogFunction = function_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1373,7 +1373,7 @@ func getOption(arg_ string) (bool, string, string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func printError(format_ string, message_ ...interface{}) {
-  if _logLevel >= LOG_LEVEL_ERROR {
+  if _gLogLevel >= LOG_LEVEL_ERROR {
     printLog("PSHELL_ERROR: "+fmt.Sprintf(format_, message_...)+"\n")
   }
 }
@@ -1381,7 +1381,7 @@ func printError(format_ string, message_ ...interface{}) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func printWarning(format_ string, message_ ...interface{}) {
-  if _logLevel >= LOG_LEVEL_WARNING {
+  if _gLogLevel >= LOG_LEVEL_WARNING {
     printLog("PSHELL_WARNING: "+fmt.Sprintf(format_, message_...)+"\n")
   }
 }
@@ -1389,7 +1389,7 @@ func printWarning(format_ string, message_ ...interface{}) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func printInfo(format_ string, message_ ...interface{}) {
-  if _logLevel >= LOG_LEVEL_INFO {
+  if _gLogLevel >= LOG_LEVEL_INFO {
     printLog("PSHELL_INFO: "+fmt.Sprintf(format_, message_...)+"\n")
   }
 }
@@ -1397,8 +1397,8 @@ func printInfo(format_ string, message_ ...interface{}) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func printLog(message_ string) {
-  if _logFunction != nil {
-    _logFunction(message_)
+  if _gLogFunction != nil {
+    _gLogFunction(message_)
   } else {
     fmt.Printf(message_)
   }
@@ -1759,8 +1759,8 @@ func runTCPServer() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func cleanupUnixResources() {
-  fileInfo, err := ioutil.ReadDir(_UNIX_SOCKET_PATH)
+func cleanupFileSystemResources() {
+  fileInfo, err := ioutil.ReadDir(_FILE_SYSTEM_PATH)
   if err == nil {
     for _, file := range fileInfo {
       if strings.HasSuffix(file.Name(), _LOCK_FILE_EXTENSION) {
@@ -1808,6 +1808,11 @@ func createSocket() bool {
         _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
         if err == nil {
           _gPort = strconv.Itoa(int(port))
+          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gPort + _LOCK_FILE_EXTENSION
+          _gLockFd, err = os.Create(_gLockFile)
+          if err == nil {
+            syscall.Flock(int(_gLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+          }
           return (true)
         } else {
           if (attempt == 1) {
@@ -1830,6 +1835,11 @@ func createSocket() bool {
         _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
         if err == nil {
           _gPort = strconv.Itoa(int(port))
+          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gPort + _LOCK_FILE_EXTENSION
+          _gLockFd, err = os.Create(_gLockFile)
+          if err == nil {
+            syscall.Flock(int(_gLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+          }
           return (true)
         } else {
           if (attempt == 1) {
@@ -1844,12 +1854,12 @@ func createSocket() bool {
     }
     printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
   } else if (_gServerType == UNIX) {
-    _gUnixSourceAddress = _UNIX_SOCKET_PATH + _gServerName
-    _gUnixLockFile = _gUnixSourceAddress + _LOCK_FILE_EXTENSION
+    _gUnixSourceAddress = _FILE_SYSTEM_PATH + _gServerName
+    _gLockFile = _gUnixSourceAddress + "-unix" + _LOCK_FILE_EXTENSION
     for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
-      _unixLockFd, err = os.Create(_gUnixLockFile)
+      _gLockFd, err = os.Create(_gLockFile)
       if err == nil {
-        err = syscall.Flock(int(_unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+        err = syscall.Flock(int(_gLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
         // file exists, try to see if another process has it locked
         if err == nil {
           unixAddr, err := net.ResolveUnixAddr("unixgram", _gUnixSourceAddress)
@@ -1871,8 +1881,8 @@ func createSocket() bool {
         } else if (attempt == 1) {
           printWarning("Could not bind to UNIX address: %s, looking for first available address", _gServerName);
         }
-        _gUnixSourceAddress = _UNIX_SOCKET_PATH + _gServerName + strconv.Itoa(attempt)
-        _gUnixLockFile = _gUnixSourceAddress + _LOCK_FILE_EXTENSION
+        _gUnixSourceAddress = _FILE_SYSTEM_PATH + _gServerName + strconv.Itoa(attempt)
+        _gLockFile = _gUnixSourceAddress + "-unix" + _LOCK_FILE_EXTENSION
       }
     }
     printError("Could not find available address after %d attempts", _MAX_BIND_ATTEMPTS)
