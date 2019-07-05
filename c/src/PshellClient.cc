@@ -1299,10 +1299,16 @@ char *getActiveServer(char *server_)
         _host = "unix";
         return (_activeServers[index-1].name);
       }
-      else
+      else if (strcmp(_activeServers[index-1].type, "udp") == 0)
       {
         _host = "localhost";
         return (_activeServers[index-1].port);
+      }
+      else
+      {
+        printf("\n");
+        printf("PSHELL_ERROR: Cannot use 'pshell' client for TCP server, use 'telnet' instead\n");
+        showActiveServers();
       }
     }
     else
@@ -1489,8 +1495,7 @@ void showUsage(void)
   printf("          \"<command> ?\" or \"<command> -h\".  To get help in\n");
   printf("          interactive mode type 'help' or '?' at the prompt to\n");
   printf("          see all available commands, to get help on a single\n");
-  printf("          command, type '<command> {? | -h}'.");
-  printf("  Use TAB completion\n");
+  printf("          command, type '<command> {? | -h}'.  Use TAB completion\n");
   printf("          to fill out partial commands and up-arrow to recall\n");
   printf("          for command history.\n");
   printf("\n");
