@@ -333,8 +333,8 @@ wrapper.
 The usage of the "pshell" and "pshell.exp" (see NOTE) command line client
 programs are as follows:
 
-Usage: pshell -n | -l |  [-t<timeout>] {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex}
-                                       [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
+Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
+                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 

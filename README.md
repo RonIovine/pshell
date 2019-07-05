@@ -236,8 +236,8 @@ a `-h` to show the usage as follows:
 ```
 $ pshell -h
 
-Usage: pshell -n | -l |  [-t<timeout>] {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex}
-                                       [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
+Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
+                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 

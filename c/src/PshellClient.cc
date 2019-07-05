@@ -1461,8 +1461,8 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -n | -l |  [-t<timeout>] {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex}\n");
-  printf("                                       [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
+  printf("Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]\n");
+  printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
@@ -1539,23 +1539,6 @@ void parseCommandLine(int *argc, char *argv[])
   }
   else if (*argc < 8)
   {
-    if (strstr(argv[0], "-t") == argv[0])
-    {
-      if ((strlen(argv[0]) > 2) && (isNumeric(&argv[0][2])))
-      {
-        _serverResponseTimeout = atoi(&argv[0][2]);
-        _serverResponseTimeoutOverride = true;
-      }
-      else
-      {
-        printf("PSHELL_ERROR: Must provide value for timeout, e.g. -t20\n");
-      }
-      for (i = 0; i < (*argc-1); i++)
-      {
-        argv[i] = argv[i+1];
-      }
-      (*argc)--;
-    }
     if ((_server = getActiveServer(argv[0])) == NULL)
     {
       if (isNumeric(argv[1]))
@@ -1590,6 +1573,23 @@ void parseCommandLine(int *argc, char *argv[])
     }
     else
     {
+      for (i = 0; i < (*argc-1); i++)
+      {
+        argv[i] = argv[i+1];
+      }
+      (*argc)--;
+    }
+    if (strstr(argv[0], "-t") == argv[0])
+    {
+      if ((strlen(argv[0]) > 2) && (isNumeric(&argv[0][2])))
+      {
+        _serverResponseTimeout = atoi(&argv[0][2]);
+        _serverResponseTimeoutOverride = true;
+      }
+      else
+      {
+        printf("PSHELL_ERROR: Must provide value for timeout, e.g. -t20\n");
+      }
       for (i = 0; i < (*argc-1); i++)
       {
         argv[i] = argv[i+1];
