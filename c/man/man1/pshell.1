@@ -20,22 +20,28 @@ Note, there is also a python version of the UDP/UNIX client (pshell.py), it has 
 functionality but doesn't currently have all the command line command and batch file processing,
 see pydoc pshell for the docmentation.
 .SH USAGE
-Usage: pshell -s | [-t<timeout>] {{<hostNameOrIpAddr> <port>} | <unixServerName>}
-              [{<command> [<rate> [clear]]} | {-f <fileName> [<rate> [clear]}]
+Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
+                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 
-    -s               - show named servers in $PSHELL_CONFIG_DIR/pshell-client.conf file
-    -f               - run commands from a batch file
-    -t               - change the default server response timeout
-    hostNameOrIpAddr - hostname or IP address of UDP server
-    port             - port number of UDP server
-    unixServerName   - name of UNIX server
-    timeout          - response wait timeout in sec (default=5)
-    command          - optional command to execute
-    fileName         - optional batch file to execute
-    rate             - optional rate to repeat command or batch file (in seconds)
-    clear            - clear screen between commands or batch file passes
+    -n              - show named IP server/port mappings in pshell-client.conf file
+    -l              - show all servers running on the local host
+    -c              - run command from command line
+    -f              - run commands from a batch file
+    -t              - change the default server response timeout
+    hostName        - hostname of UDP server
+    ipAddr          - IP addr of UDP server
+    portNum         - port number of UDP server
+    udpServerName   - name of UDP server from pshell-client.conf file
+    unixServerName  - name of UNIX server (use '-l' option to list servers)
+    serverIndex     - index of local UNIX or UDP server (use '-l' option to list servers)
+    timeout         - response wait timeout in sec (default=5)
+    command         - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName        - optional batch file to execute
+    rate            - optional rate to repeat command or batch file (in seconds)
+    repeat          - optional repeat count for command or batch file (default=forever)
+    clear           - optional clear screen between commands or batch file passes
 
     NOTE: If no <command> is given, pshell will be started
           up in interactive mode, commands issued in command
