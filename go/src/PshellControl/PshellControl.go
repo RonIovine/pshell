@@ -43,7 +43,6 @@
 //   DisconnectServer()     -- disconnect from a remote pshell server
 //   DisconnectAllServers() -- disconnect from all connected remote pshell servers
 //   SetDefaultTimeout()    -- set the default server response timeout
-//   ExtractCommands()      -- extract all commands from remote server
 //   AddMulticast()         -- add a command keyword to a multicast group
 //   SendMulticast()        -- send a command to a multicast group
 //   SendCommand1()         -- send command to server using default timeout, no results extracted
