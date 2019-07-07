@@ -256,6 +256,7 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
   pthread_mutex_lock(&_mutex);
   PshellControl *control;
   int retCode;
+  results_[0] = 0;
   if ((results_ != NULL) && (control = getControl(sid_)) != NULL)
   {
     control->pshellMsg.header.msgType =  PSHELL_QUERY_COMMANDS1;
@@ -263,7 +264,6 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
     control->pshellMsg.payload[0] = 0;
     if ((retCode = sendPshellCommand(control, PSHELL_QUERY_COMMANDS1, "query commands", PSHELL_ONE_SEC*5)) == PSHELL_COMMAND_SUCCESS)
     {
-      results_[0] = 0;
       snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "\n");
       for (unsigned i = 0; i < strlen(control->remoteServer)+22; i++) snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "*");
       snprintf(&results_[strlen(results_)], (size_-strlen(results_)), "\n");
