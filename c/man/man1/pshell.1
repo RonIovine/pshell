@@ -16,9 +16,8 @@ that are running a TCP based PshellServer as the 'pshell' UDP/UNIX client progra
 the 'pshell.exp' script is optional, the 'telnet' client can be used directly to interface
 to a TCP PshellServer, however, only interactive mode is supported.
 
-Note, there is also a python version of the UDP/UNIX client (pshell.py), it has the same basic
-functionality but doesn't currently have all the command line command and batch file processing,
-see pydoc pshell for the docmentation.
+Note, there is also a python version of the UDP/UNIX client (pshell.py), it has the same usage
+and functionality as this compiled 'C' version, see pydoc pshell for the docmentation.
 .SH USAGE
 Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
                         [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
