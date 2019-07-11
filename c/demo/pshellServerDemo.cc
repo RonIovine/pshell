@@ -663,7 +663,10 @@ int main(int argc, char *argv[])
    */
   pshell_startServer("pshellServerDemo", serverType, PSHELL_BLOCKING, PSHELL_ANYHOST, port);
 
-  /* should never get here, but cleanup any pshell system resources as good practice */
+  /*
+   * should never get here because the server is started in BLOCKING mode,
+   * but cleanup any pshell system resources as good practice
+   */
   pshell_cleanupResources();
 
   return (0);

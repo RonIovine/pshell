@@ -95,7 +95,7 @@
 //   March()     -- marching ascii character to keep UDP/UNIX client alive
 //   ShowUsage() -- show the usage the command is registered with
 //   IsHelp()    -- checks if the user has requested help on this command
-//   SetOption() -- parses arg of format -<key><value> or <key>=<value>
+//   GetOption() -- parses arg of format -<key><value> or <key>=<value>
 //
 // Integer constants:
 //
@@ -1003,6 +1003,7 @@ func addCommand(function_ pshellFunction,
       return
     }
   }
+
   if len(strings.Split(strings.TrimSpace(command_), " ")) > 1 {
     // we do not allow any commands with whitespace, single keyword commands only
     printError("Whitespace found, command: '%s' not added", command_)
@@ -1058,6 +1059,8 @@ func startServer(serverName_ string,
     } else {
       go runServer()
     }
+  } else {
+    printError("PSHELL server: '%s' is already running", serverName_)
   }
 }
 

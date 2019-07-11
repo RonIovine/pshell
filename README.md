@@ -393,11 +393,11 @@ Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
 
-###########################################################
+################################################################
 #
 #  PSHELL: Process Specific Embedded Command Line Shell
 #
-#  Single session TCP server: pshellServerDemo[127.0.0.1]
+#  Single session TCP server: pshellServerDemo[127.0.0.1:6001]
 #
 #  Idle session timeout: 10 minutes
 #
@@ -407,19 +407,19 @@ Escape character is '^]'.
 #  Full <TAB> completion, command history, command
 #  line editing, and command abbreviation supported
 #
-###########################################################
+################################################################
 
-pshellServerDemo[127.0.0.1]:PSHELL>
+pshellServerDemo[127.0.0.1:6001]:PSHELL>
 ```
 To connect to the UDP server type:
 ```
 $ pshell localhost 6001
 
-##########################################################
+###############################################################
 #
 #  PSHELL: Process Specific Embedded Command Line Shell
 #
-#  Multi-session UDP server: pshellServerDemo[127.0.0.1]
+#  Multi-session UDP server: pshellServerDemo[127.0.0.1:6001]
 #
 #  Idle session timeout: NONE
 #
@@ -431,9 +431,9 @@ $ pshell localhost 6001
 #  Full <TAB> completion, command history, command
 #  line editing, and command abbreviation supported
 #
-##########################################################
+###############################################################
 
-pshellServerDemo[127.0.0.1]:PSHELL>
+pshellServerDemo[127.0.0.1:6001]:PSHELL>
 ```
 To connect to the Unix server type:
 ```

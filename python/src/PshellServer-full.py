@@ -926,6 +926,8 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
     else:
       # spawn thread
       thread.start_new_thread(_serverThread, ())
+  else:
+    _printError("PSHELL server: '%s' is already running" % serverName_)
 
 #################################################################################
 #################################################################################

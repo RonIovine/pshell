@@ -435,5 +435,8 @@ if (__name__ == '__main__'):
   #
   PshellServer.startServer("pshellServerDemo", serverType, PshellServer.BLOCKING, PshellServer.ANYHOST, PSHELL_DEMO_PORT)
 
-  # should never get here, but cleanup any pshell system resources as good practice
+  #
+  # should never get here because the server is started in BLOCKING mode,
+  # but cleanup any pshell system resources as good practice
+  #
   PshellServer.cleanupResources()
