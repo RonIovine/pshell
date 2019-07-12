@@ -1059,7 +1059,7 @@ void pshell_startServer(const char *serverName_,
   }
   else
   {
-    PSHELL_ERROR("PSHELL server: '%s' is already running", serverName_);
+    PSHELL_ERROR("PSHELL server: %s is already running", serverName_);
   }
 
 }

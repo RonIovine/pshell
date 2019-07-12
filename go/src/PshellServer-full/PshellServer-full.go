@@ -1060,7 +1060,7 @@ func startServer(serverName_ string,
       go runServer()
     }
   } else {
-    printError("PSHELL server: '%s' is already running", serverName_)
+    printError("PSHELL server: %s is already running", serverName_)
   }
 }
 

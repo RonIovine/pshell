@@ -20,21 +20,22 @@
  ### Overview
 This package contains all the necessary code, documentation and examples for
 building C/C++/Python/Go applications that incorporate a Process Specific Embedded
-Command Line Shell (PSHELL).  The PSHELL library provides a simple, lightweight,
-framework and API to embed functions within a C/C++/Python/Go application that can
-be invoked either via a separate remote client program or directly from within the
-application itself.
+Command Line Shell (PSHELL).  PSHELL is a multi-language, cross platform framework
+that provides a simple mechanhism to embed interactive functions/commands within any
+C/C++/Python/Go application.  Those functions can be invoked either via a separate
+remote client program or directly from within the application itself.
 
 The Python, C, and Go versions are consistent with each other at the API level (i.e.
 similar functional API, usage, process interaction etc) and fully interoperable with each
 other at the protocol level and can be mixed and matched in any combination.
 
-The prototype for the callback functions follow the paradigms of the `main` for each
-language.  A pshell callback function can be thought of as a collection of mini `mains`
-within the given process that is invoked via its registered keyword.  The arguments are
-passed into each function just like they would be passed into the `main` from the host's
-command line shell (i.e. bash) for each language as shown below.  See the included [demo
-programs](#demo-programs) for language specific examples.
+The functions/commands are registered as function callbacks to the framework.  The
+prototype for the callback functions follow the paradigms of the `main` for each language.
+A pshell callback function can be thought of as a collection of mini `mains` within the
+given process that is invoked via its registered keyword.  The arguments are passed into
+each function just like they would be passed into the `main` from the host's command line
+shell (i.e. bash) for each language as shown below.  See the included [demo programs](#demo-programs)
+for language specific examples.
 
 #### C callback:
 
