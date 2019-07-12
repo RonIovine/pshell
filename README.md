@@ -20,7 +20,7 @@
  ### Overview
 This package contains all the necessary code, documentation and examples for
 building C/C++/Python/Go applications that incorporate a Process Specific Embedded
-Command Line Shell (PSHELL).  PSHELL is a multi-language, cross platform framework
+Command Line Shell (PSHELL).  PSHELL is a multi-language, [cross platform](#building) framework
 that provides a simple mechanhism to embed interactive functions/commands within any
 C/C++/Python/Go application.  Those functions can be invoked either via a separate
 remote client program or directly from within the application itself.
