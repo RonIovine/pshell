@@ -1053,6 +1053,9 @@ func startServer(serverName_ string,
     _gPort = port_
     loadConfigFile()
     loadStartupFile()
+    if (_gPrompt[len(_gPrompt)-1] != ' ') {
+      _gPrompt = _gPrompt + " "
+    }
     _gRunning = true
     if (_gServerMode == BLOCKING) {
       runServer()

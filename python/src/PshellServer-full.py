@@ -911,6 +911,7 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
   global _gHostnameOrIpAddr
   global _gPort
   global _gRunning
+  global _gPrompt
   _cleanupFileSystemResources()
   if (_gRunning == False):
     _gServerName = serverName_
@@ -920,6 +921,8 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
     _gPort = port_
     _loadConfigFile()
     _loadStartupFile()
+    if _gPrompt[-1] != " ":
+      _gPrompt = _gPrompt + " "
     _gRunning = True
     if (_gServerMode == BLOCKING):
       _runServer()

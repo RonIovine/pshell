@@ -1020,10 +1020,6 @@ void pshell_startServer(const char *serverName_,
       strcpy(_title, _defaultTitle);
       strcpy(_banner, _defaultBanner);
       strcpy(_prompt, _defaultPrompt);
-      if (_prompt[strlen(_prompt)-1] != ' ')
-      {
-        strcat(_prompt, " ");
-      }
       _port = port_;
       _serverType = serverType_;
       _serverMode = serverMode_;
@@ -1037,6 +1033,11 @@ void pshell_startServer(const char *serverName_,
 
       /* load any startup file */
       loadStartupFile();
+
+      if (_prompt[strlen(_prompt)-1] != ' ')
+      {
+        strcat(_prompt, " ");
+      }
 
       if (_serverMode == PSHELL_BLOCKING)
       {
