@@ -542,7 +542,7 @@ void pshell_rl_addTabCompletion(const char *keyword_)
       return;
     }
   }
-  if (strlen(keyword_) > _maxTabCompletionKeywordLength)
+  if (strlen(keyword_)+TAB_SPACING > _maxTabCompletionKeywordLength)
   {
     _maxTabCompletionKeywordLength = strlen(keyword_)+TAB_SPACING;
     _maxCompletionsPerLine = TAB_COLUMNS/_maxTabCompletionKeywordLength;

@@ -1935,7 +1935,7 @@ func addTabCompletion(keyword_ string) {
       return
     }
   }
-  if (len(keyword_) > _gMaxTabCompletionKeywordLength) {
+  if (len(keyword_)+_TAB_SPACING > _gMaxTabCompletionKeywordLength) {
     _gMaxTabCompletionKeywordLength = len(keyword_)+_TAB_SPACING
     _gMaxCompletionsPerLine = _TAB_COLUMNS/_gMaxTabCompletionKeywordLength
   }

@@ -49,8 +49,8 @@ for language specific examples.
 
 `func myFunc(argv []string)`
 
-Command line pshell functions can also display information back to the interactive clients
-via a mechanism similar to the familiar 'printf' as follows:
+Pshell functions can also display information back to the interactive clients via a
+mechanism similar to the familiar 'printf' as follows:
 
 #### C printf:
 
@@ -69,8 +69,8 @@ server is configured.  The following shows the various PSHELL server types along
 associated invokation method:
 
 * TCP Server   : Uses standard `telnet` interactive client to invoke functions
-* UDP Server   : Uses included `pshell/pshellAggregator` interactive client or control API to invoke functions
-* UNIX Server  : Uses included `pshell/pshellAggregator` interactive client or control API to invoke functions
+* UDP Server   : Uses included `pshell/pshellAggregator` interactive clients or control API to invoke functions
+* UNIX Server  : Uses included `pshell/pshellAggregator` interactive clients or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application
                  itself via local command line interactive prompting
 

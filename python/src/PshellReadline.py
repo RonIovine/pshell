@@ -297,7 +297,7 @@ def _addTabCompletion(keyword_):
     if (keyword == keyword_):
       # duplicate keyword found, return
       return
-  if (len(keyword_) > _gMaxTabCompletionKeywordLength):
+  if (len(keyword_)+_gTabSpacing > _gMaxTabCompletionKeywordLength):
     _gMaxTabCompletionKeywordLength = len(keyword_)+_gTabSpacing
     _gMaxCompletionsPerLine = _gTabColumns/_gMaxTabCompletionKeywordLength
   _gTabCompletions.append(keyword_.strip())
