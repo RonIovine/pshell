@@ -293,6 +293,12 @@ void showWelcome(void)
       printf("%s           as 'fire-and-forget', no results will be\n", PSHELL_WELCOME_BORDER);
       printf("%s           extracted or displayed\n", PSHELL_WELCOME_BORDER);
     }
+    printf("%s\n", PSHELL_WELCOME_BORDER);
+    printf("%s  The response timeout can be changed on a per-command\n", PSHELL_WELCOME_BORDER);
+    printf("%s  basis by inserting the option -t<timeout> between the\n", PSHELL_WELCOME_BORDER);
+    printf("%s  command name any arguments as follows:\n", PSHELL_WELCOME_BORDER);
+    printf("%s\n", PSHELL_WELCOME_BORDER);
+    printf("%s  command -t10 [<args>]\n", PSHELL_WELCOME_BORDER);
   }
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
@@ -850,20 +856,35 @@ bool findCommand(char *command_)
 bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_)
 {
   unsigned iteration = 0;
+  unsigned arg;
   unsigned numTokens;
   char *tokens[MAX_TOKENS];
   char command[PSHELL_RL_MAX_COMMAND_SIZE];
-  int serverResponseTimeout;
+  int serverResponseTimeout = _serverResponseTimeout;
 
-  if (_serverResponseTimeout == 0)
+  _pshellSendMsg.header.respNeeded = true;
+  if (msgType_ == PSHELL_USER_COMMAND)
   {
-    if (msgType_ == PSHELL_USER_COMMAND)
+    strcpy(command, command_);
+    tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
+    if (numTokens > 1)
     {
-      strcpy(command, command_);
-      tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
+      if ((strlen(tokens[1]) > 2) && isSubString("-t", tokens[1], 2))
+      {
+        serverResponseTimeout = atoi(&tokens[1][2]);
+        sprintf(command_, "%s ", tokens[0]);
+        for (arg = 2; arg < numTokens; arg++)
+        {
+          sprintf(&command_[strlen(command_)], "%s ", tokens[arg]);
+        }
+        command_[strlen(command_)-1] = 0;
+      }
+    }
+    if (serverResponseTimeout == 0)
+    {
       if ((numTokens == 2) && ((strcmp(tokens[1], "?") == 0) || (strcmp(tokens[1], "-h") == 0)))
       {
-        _pshellSendMsg.header.respNeeded = true;
+        /* force our timeout response for the command help request to non-0 */
         serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
       }
       else if (!findCommand(tokens[0]))
@@ -873,20 +894,15 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
       }
       else
       {
+        printf("PSHELL_INFO: Command sent fire-and-forget\n");
         _pshellSendMsg.header.respNeeded = false;
-        serverResponseTimeout = _serverResponseTimeout;
       }
     }
-    else
-    {
-      _pshellSendMsg.header.respNeeded = true;
-      serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
-    }
   }
-  else
+  else if (serverResponseTimeout == 0)
   {
-    _pshellSendMsg.header.respNeeded = true;
-    serverResponseTimeout = _serverResponseTimeout;
+    /* need to use a non-0 server response timeout for all msgTypes other than PSHELL_USER_COMMAND */
+    serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
   }
 
   _pshellSendMsg.header.msgType = msgType_;

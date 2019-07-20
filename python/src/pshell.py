@@ -142,18 +142,29 @@ def _comandDispatcher(args_):
   global _gInteractive
   global _gTimeout
   results = None
+  timeout = _gTimeout
+  if len(args_) > 1 and "-t" in args_[1]:
+    if len(args_[1]) > 2:
+      timeout = int(args_[1][2:])
+    if len(args_) > 2:
+      command = args_[0] + " " + ' '.join(args_[2:])
+    else:
+      command = args_[0]
+  else:
+    command = ' '.join(args_)
   if args_[0] in _gHelp:
     results = PshellControl.extractCommands(_gSid, includeName=False)
-  elif _gTimeout == 0:
+  elif timeout == 0:
     # if they asked for command help, go ahead and dispatch the command and
     # extract the results, otherwise, just send command with no extraction
     # or display
     if len(args_) == 2 and args_[1] in _gHelp:
-      (results, retCode) = PshellControl.sendCommand4(_gSid, PshellControl.ONE_SEC*5, ' '.join(args_))
+      (results, retCode) = PshellControl.sendCommand4(_gSid, PshellControl.ONE_SEC*5, command)
     else:
-      PshellControl.sendCommand1(_gSid, ' '.join(args_))
+      print("PSHELL_INFO: Command sent fire-and-forget")
+      PshellControl.sendCommand1(_gSid, command)
   else:
-    (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
+    (results, retCode) = PshellControl.sendCommand4(_gSid, timeout, command)
   if results != None:
     if _gInteractive == True:
       PshellServer.printf(results, newline=False)
