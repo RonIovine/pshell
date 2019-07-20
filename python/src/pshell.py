@@ -91,7 +91,7 @@ def _showWelcome():
   print("#")
   print("#  Idle session timeout: NONE")
   print("#")
-  print("#  Command response timeout: {} seconds".format(_gTimeout))
+  print("#  Command response timeout: NONE")
   print("#")
   print("#  Type '?' or 'help' at prompt for command summary")
   print("#  Type '?' or '-h' after command for command usage")
@@ -140,15 +140,26 @@ def _comandDispatcher(args_):
   global _gSid
   global _gHelp
   global _gInteractive
+  global _gTimeout
+  results = None
   if args_[0] in _gHelp:
     results = PshellControl.extractCommands(_gSid, includeName=False)
+  elif _gTimeout == 0:
+    # if they asked for command help, go ahead and dispatch the command and
+    # extract the results, otherwise, just send command with no extraction
+    # or display
+    if len(args_) == 2 and args_[1] in _gHelp:
+      (results, retCode) = PshellControl.sendCommand4(_gSid, PshellControl.ONE_SEC*5, ' '.join(args_))
+    else:
+      PshellControl.sendCommand1(_gSid, ' '.join(args_))
   else:
     (results, retCode) = PshellControl.sendCommand3(_gSid, ' '.join(args_))
-  if (_gInteractive == True):
-    PshellServer.printf(results, newline=False)
-  else:
-    # command line mode
-    sys.stdout.write(results)
+  if results != None:
+    if _gInteractive == True:
+      PshellServer.printf(results, newline=False)
+    else:
+      # command line mode
+      sys.stdout.write(results)
 
 #################################################################################
 #################################################################################
@@ -271,12 +282,16 @@ def _configureLocalServer():
   # line client so it can process commands correctly and display
   # the correct banner  information
   PshellServer._gPshellClient = True
+  # set the client timeout so we can show a warning message in the
+  # startup banner
+  PshellServer._gPshellClientTimeout = _gTimeout
   # supress the automatic invalid arg count message from the PshellControl.py
   # module so we can display the returned usage
   PshellControl._gSupressInvalidArgCountMessage = True
   # extract information from our remote server via the special
   # "private" control API so we can feed the info to our local
   # pshell server to make it look like a remote server
+
   prompt = PshellControl._extractPrompt(_gSid)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
@@ -302,8 +317,6 @@ def _configureLocalServer():
 
   if _gPort != PshellServer.UNIX:
      PshellServer._gServerTypeOverride += ":{}".format(_gPort)
-
-  PshellServer._gTcpTimeout = _gTimeout
 
 #####################################################
 #####################################################

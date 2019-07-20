@@ -1505,6 +1505,7 @@ def _showWelcome():
   global _gTcpConnectSockName
   global _gTcpTitle
   global _gPshellClient
+  global _gPshellClientTimeout
   global _gPort
   # show our welcome screen
   banner = "#  %s" % _getDisplayBanner()
@@ -1542,8 +1543,16 @@ def _showWelcome():
     printf("#  Idle session timeout: %d minutes" % _gTcpTimeout)
   printf("#")
   if (_gPshellClient == True):
-    printf("#  Command response timeout: %d seconds" % _gTcpTimeout)
-    printf("#")
+    if _gPshellClientTimeout > 0:
+      printf("#  Command response timeout: {} seconds".format(_gPshellClientTimeout))
+    else:
+      printf("#  Command response timeout: NONE")
+      printf("#")
+      printf("#  WARNING: Interactive client started with no command")
+      printf("#           response timeout.  All commands will be sent")
+      printf("#           as 'fire-and-forget', no results will be")
+      printf("#           extracted or displayed")
+  printf("#")
   printf("#  Type '?' or 'help' at prompt for command summary")
   printf("#  Type '?' or '-h' after command for command usage")
   printf("#")
@@ -1908,6 +1917,7 @@ _gWheel = "|/-\\"
 
 _gQuitTcp = False
 _gTcpTimeout = 10  # minutes
+_gPshellClientTimeout = 5  # seconds
 _gTcpConnectSockName = None
 _gTcpPrompt = None
 _gTcpTitle = None

@@ -226,7 +226,7 @@ bool getPayloadSize(void);
 bool getVersion(void);
 bool init(const char *destination_, const char *server_);
 bool send(void);
-bool receive(void);
+bool receive(int serverResponseTimeout);
 void tokenize(char *string_, const char *delimeter_, char *tokens_[], unsigned maxTokens_, unsigned *numTokens_);
 bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_);
 bool initInteractiveMode(void);
@@ -248,6 +248,8 @@ void showWelcome(void);
 void exitProgram(int exitCode_);
 void registerSignalHandlers(void);
 void parseCommandLine(int *argc, char *argv[], char *host, char *port);
+bool findCommand(char *command_);
+bool isSubString(const char *string1_, const char *string2_, unsigned minChars_);
 
 /******************************************************************************/
 /******************************************************************************/
@@ -278,7 +280,19 @@ void showWelcome(void)
   if (!_isBroadcastServer)
   {
     printf("%s\n", PSHELL_WELCOME_BORDER);
-    printf("%s  Command response timeout: %d seconds\n", PSHELL_WELCOME_BORDER, _serverResponseTimeout);
+    if (_serverResponseTimeout > 0)
+    {
+      printf("%s  Command response timeout: %d seconds\n", PSHELL_WELCOME_BORDER, _serverResponseTimeout);
+    }
+    else
+    {
+      printf("%s  Command response timeout: NONE\n", PSHELL_WELCOME_BORDER);
+      printf("%s\n", PSHELL_WELCOME_BORDER);
+      printf("%s  WARNING: Interactive client started with no command\n", PSHELL_WELCOME_BORDER);
+      printf("%s           response timeout.  All commands will be sent\n", PSHELL_WELCOME_BORDER);
+      printf("%s           as 'fire-and-forget', no results will be\n", PSHELL_WELCOME_BORDER);
+      printf("%s           extracted or displayed\n", PSHELL_WELCOME_BORDER);
+    }
   }
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
@@ -715,63 +729,120 @@ bool send(void)
 
 /******************************************************************************/
 /******************************************************************************/
-bool receive(void)
+bool receive(int serverResponseTimeout)
 {
   bool bufferOverflow;
   int receivedSize = 0;
   fd_set readFd;
   struct timeval timeout;
 
-  FD_ZERO (&readFd);
-  FD_SET(_socketFd,&readFd);
-
-  memset(&timeout, 0, sizeof(timeout));
-  timeout.tv_sec = _serverResponseTimeout;
-  timeout.tv_usec = 0;
-
-  do
+  if (serverResponseTimeout > 0)
   {
-    bufferOverflow = false;
-    if ((select(_socketFd+1, &readFd, NULL, NULL, &timeout)) < 0)
-    {
-      printf("PSHELL_ERROR: Error on socket select\n");
-      return (false);
-    }
 
-    if (FD_ISSET(_socketFd, &readFd))
+    FD_ZERO (&readFd);
+    FD_SET(_socketFd,&readFd);
+
+    memset(&timeout, 0, sizeof(timeout));
+    timeout.tv_sec = serverResponseTimeout;
+    timeout.tv_usec = 0;
+
+    do
     {
-      if ((receivedSize = recvfrom(_socketFd,
-                                   (char *)_pshellRcvMsg,
-                                   _pshellPayloadSize+PSHELL_HEADER_SIZE,
-                                   0,
-                                   (struct sockaddr *)0,
-                                   (socklen_t *)0)) < 0)
+      bufferOverflow = false;
+      if ((select(_socketFd+1, &readFd, NULL, NULL, &timeout)) < 0)
       {
-        printf("PSHELL_ERROR: Data receive error from remote pshellServer\n");
+        printf("PSHELL_ERROR: Error on socket select\n");
         return (false);
       }
+
+      if (FD_ISSET(_socketFd, &readFd))
+      {
+        if ((receivedSize = recvfrom(_socketFd,
+                                     (char *)_pshellRcvMsg,
+                                     _pshellPayloadSize+PSHELL_HEADER_SIZE,
+                                     0,
+                                     (struct sockaddr *)0,
+                                     (socklen_t *)0)) < 0)
+        {
+          printf("PSHELL_ERROR: Data receive error from remote pshellServer\n");
+          return (false);
+        }
+      }
+      else
+      {
+        printf("PSHELL_ERROR: Response timeout from remote pshellServer\n");
+        return (false);
+      }
+
+      /* make sure we null terminate the buffer so it displays good */
+      _pshellRcvMsg->payload[receivedSize-PSHELL_HEADER_SIZE] = 0;
+
+      /* check for a buffer overflow indication */
+      if (_pshellRcvMsg->header.msgType == PSHELL_UPDATE_PAYLOAD_SIZE)
+      {
+        /* buffer overflow, adjust our buffer size */
+        _pshellPayloadSize = atoi(_pshellRcvMsg->payload);
+        _pshellRcvMsg = (PshellMsg*)realloc(_pshellRcvMsg, _pshellPayloadSize+PSHELL_HEADER_SIZE);
+        bufferOverflow = true;
+      }
+
+    } while (bufferOverflow);
+  }
+  else
+  {
+    _pshellRcvMsg->payload[0] = 0;
+    _pshellRcvMsg->header.msgType = PSHELL_COMMAND_COMPLETE;
+  }
+
+  return (true);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool isSubString(const char *string1_, const char *string2_, unsigned minChars_)
+{
+  unsigned length;
+  if ((string1_ == NULL) && (string2_ == NULL))
+  {
+    return (true);
+  }
+  else if ((string1_ != NULL) && (string2_ != NULL))
+  {
+    if ((length = strlen(string1_)) > strlen(string2_))
+    {
+      return (false);
     }
     else
     {
-      printf("PSHELL_ERROR: Response timeout from remote pshellServer\n");
-      return (false);
+      return (strncmp(string1_, string2_, MAX(length, minChars_)) == 0);
     }
+  }
+  else
+  {
+    return (false);
+  }
+}
 
-    /* make sure we null terminate the buffer so it displays good */
-    _pshellRcvMsg->payload[receivedSize-PSHELL_HEADER_SIZE] = 0;
-
-    /* check for a buffer overflow indication */
-    if (_pshellRcvMsg->header.msgType == PSHELL_UPDATE_PAYLOAD_SIZE)
+/******************************************************************************/
+/******************************************************************************/
+bool findCommand(char *command_)
+{
+  unsigned index;
+  for (index = 0; index < _numNativeInteractiveCommands; index++)
+  {
+    if (isSubString(command_, _nativeInteractiveCommands[index], strlen(command_)))
     {
-      /* buffer overflow, adjust our buffer size */
-      _pshellPayloadSize = atoi(_pshellRcvMsg->payload);
-      _pshellRcvMsg = (PshellMsg*)realloc(_pshellRcvMsg, _pshellPayloadSize+PSHELL_HEADER_SIZE);
-      bufferOverflow = true;
+      return (true);
     }
-
-  } while (bufferOverflow);
-
-  return (true);
+  }
+  for (index = 0; index < _numPshellCommands; index++)
+  {
+    if (isSubString(command_, _pshellCommandList[index], strlen(command_)))
+    {
+      return (true);
+    }
+  }
+  return (false);
 }
 
 /******************************************************************************/
@@ -779,9 +850,48 @@ bool receive(void)
 bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_)
 {
   unsigned iteration = 0;
+  unsigned numTokens;
+  char *tokens[MAX_TOKENS];
+  char command[PSHELL_RL_MAX_COMMAND_SIZE];
+  int serverResponseTimeout;
+
+  if (_serverResponseTimeout == 0)
+  {
+    if (msgType_ == PSHELL_USER_COMMAND)
+    {
+      strcpy(command, command_);
+      tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
+      if ((numTokens == 2) && ((strcmp(tokens[1], "?") == 0) || (strcmp(tokens[1], "-h") == 0)))
+      {
+        _pshellSendMsg.header.respNeeded = true;
+        serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
+      }
+      else if (!findCommand(tokens[0]))
+      {
+        printf("PSHELL_ERROR: Command: '%s' not found\n", tokens[0]);
+        return (true);
+      }
+      else
+      {
+        _pshellSendMsg.header.respNeeded = false;
+        serverResponseTimeout = _serverResponseTimeout;
+      }
+    }
+    else
+    {
+      _pshellSendMsg.header.respNeeded = true;
+      serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
+    }
+  }
+  else
+  {
+    _pshellSendMsg.header.respNeeded = true;
+    serverResponseTimeout = _serverResponseTimeout;
+  }
+
   _pshellSendMsg.header.msgType = msgType_;
-  _pshellSendMsg.header.respNeeded = true;
   _pshellSendMsg.payload[0] = 0;
+
   if (command_ != NULL)
   {
     strncpy(_pshellSendMsg.payload, command_, PSHELL_RL_MAX_COMMAND_SIZE);
@@ -813,7 +923,7 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
       {
         while (_pshellRcvMsg->header.msgType != PSHELL_COMMAND_COMPLETE)
         {
-          if (receive())
+          if (receive(serverResponseTimeout))
           {
             if (!silent_)
             {
