@@ -899,7 +899,7 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
         /* force our timeout response for the command help request to non-0 */
         serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
       }
-      else if (!findCommand(tokens[commandPos]))
+      else if (!findCommand(tokens[commandPos]) && _mode == INTERACTIVE)
       {
         printf("PSHELL_ERROR: Command: '%s' not found\n", tokens[commandPos]);
         return (true);

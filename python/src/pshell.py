@@ -189,6 +189,8 @@ def _processCommandLine():
   global _gTitle
   global _gRepeat
   global _gIteration
+  global _gTimeout
+  PshellServer._gPshellClientTimeout = _gTimeout
   command = _gCommand.split()
   if _gRate > 0 and _gRepeat == 0:
     sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gCommand, _gRate))
@@ -224,6 +226,8 @@ def _processBatchFile():
   global _gRepeat
   global _gIteration
   global _gDefaultBatchDir
+  global _gTimeout
+  PshellServer._gPshellClientTimeout = _gTimeout
   batchFile1 = ""
   batchPath = os.getenv('PSHELL_BATCH_DIR')
   if (batchPath != None):
