@@ -295,10 +295,13 @@ void showWelcome(void)
     }
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  The response timeout can be changed on a per-command\n", PSHELL_WELCOME_BORDER);
-    printf("%s  basis by inserting the option -t<timeout> between the\n", PSHELL_WELCOME_BORDER);
-    printf("%s  command name any arguments as follows:\n", PSHELL_WELCOME_BORDER);
+    printf("%s  basis by preceeding the command with option -t<timeout>\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
-    printf("%s  command -t10 [<args>]\n", PSHELL_WELCOME_BORDER);
+    printf("%s  e.g. -t10 command\n", PSHELL_WELCOME_BORDER);
+    printf("%s\n", PSHELL_WELCOME_BORDER);
+    printf("%s  The default timeout for all commands can be changed by\n", PSHELL_WELCOME_BORDER);
+    printf("%s  using the -t<timeout> option with no command, and the\n", PSHELL_WELCOME_BORDER);
+    printf("%s  current default timeout can be displayed with just -t\n", PSHELL_WELCOME_BORDER);
   }
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
@@ -856,8 +859,8 @@ bool findCommand(char *command_)
 bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_)
 {
   unsigned iteration = 0;
-  unsigned arg;
   unsigned numTokens;
+  unsigned commandPos = 0;
   char *tokens[MAX_TOKENS];
   char command[PSHELL_RL_MAX_COMMAND_SIZE];
   int serverResponseTimeout = _serverResponseTimeout;
@@ -867,29 +870,38 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
   {
     strcpy(command, command_);
     tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
-    if (numTokens > 1)
+    if (isSubString("-t", tokens[0], 2))
     {
-      if ((strlen(tokens[1]) > 2) && isSubString("-t", tokens[1], 2))
+      if (numTokens == 1)
       {
-        serverResponseTimeout = atoi(&tokens[1][2]);
-        sprintf(command_, "%s ", tokens[0]);
-        for (arg = 2; arg < numTokens; arg++)
-        {
-          sprintf(&command_[strlen(command_)], "%s ", tokens[arg]);
-        }
-        command_[strlen(command_)-1] = 0;
+         if (strlen(tokens[0]) > 2)
+         {
+           _serverResponseTimeout = atoi(&tokens[0][2]);
+           printf("PSHELL_INFO: Setting server response timeout to: %d seconds\n", _serverResponseTimeout);
+         }
+         else
+         {
+           printf("PSHELL_INFO: Current server response timeout: %d seconds\n", _serverResponseTimeout);
+         }
+         return (true);
       }
+      else if (strlen(tokens[0]) > 2)
+      {
+        serverResponseTimeout = atoi(&tokens[0][2]);
+      }
+      commandPos = 1;
+      command_ = &command_[strlen(tokens[0])+1];
     }
     if (serverResponseTimeout == 0)
     {
-      if ((numTokens == 2) && ((strcmp(tokens[1], "?") == 0) || (strcmp(tokens[1], "-h") == 0)))
+      if ((numTokens == commandPos+2) && ((strcmp(tokens[commandPos+1], "?") == 0) || (strcmp(tokens[commandPos+1], "-h") == 0)))
       {
         /* force our timeout response for the command help request to non-0 */
         serverResponseTimeout = PSHELL_SERVER_RESPONSE_TIMEOUT;
       }
-      else if (!findCommand(tokens[0]))
+      else if (!findCommand(tokens[commandPos]))
       {
-        printf("PSHELL_ERROR: Command: '%s' not found\n", tokens[0]);
+        printf("PSHELL_ERROR: Command: '%s' not found\n", tokens[commandPos]);
         return (true);
       }
       else

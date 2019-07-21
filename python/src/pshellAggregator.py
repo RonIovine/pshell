@@ -91,6 +91,10 @@ def _getServer(localName):
 #################################################################################
 #################################################################################
 def _controlServer(argv):
+  timeout = PshellServer._gPshellClientTimeout
+  if PshellServer._gClientTimeoutOverride:
+    if len(PshellServer._gClientTimeoutOverride) > 2:
+      timeout = int(PshellServer._gClientTimeoutOverride[2:])
   server = _getServer(argv[0])
   if (server != None):
     # see if they asked for help
@@ -103,9 +107,12 @@ def _controlServer(argv):
         (argv[1] == "?")):
       # user asked for help, display all the registered commands of the remote server
       PshellServer.printf(PshellControl.extractCommands(server["sid"]), newline=False)
+    elif timeout == 0:
+      print("PSHELL_INFO: Command sent fire-and-forget")
+      PshellControl.sendCommand1(server["sid"], ' '.join(argv[1:]))
     else:
       # reconstitute and dispatch original command to remote server minus the first keyword
-      (results, retCode) = PshellControl.sendCommand3(server["sid"], ' '.join(argv[1:]))
+      (results, retCode) = PshellControl.sendCommand4(server["sid"], timeout, ' '.join(argv[1:]))
       # good return, display results back to user
       if (retCode == PshellControl.COMMAND_SUCCESS):
         PshellServer.printf(results, newline=False)
@@ -343,7 +350,7 @@ if (__name__ == '__main__'):
 
   # start our local pshell server
   PshellServer.startServer("pshellAggregator", PshellServer.LOCAL, PshellServer.BLOCKING)
-  print("here-1")
+
   # disconnect all our remote control servers
   PshellControl.disconnectAllServers()
 

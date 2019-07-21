@@ -1323,6 +1323,9 @@ def _processCommand(command_):
   global _gFirstArgPos
   global _gFoundCommand
   global _gCommandDispatched
+  global _gPshellClient
+  global _gClientTimeoutOverride
+  global _gPshellClientTimeout
 
   _gPshellMsg["payload"] = ""
   if (_gPshellMsg["msgType"] == _gMsgTypes["queryVersion"]):
@@ -1343,6 +1346,17 @@ def _processCommand(command_):
     _processQueryCommands2()
   else:
     _gCommandDispatched = True
+    _gClientTimeoutOverride = None
+    if _gPshellClient and "-t" in command_.split()[0]:
+      _gClientTimeoutOverride = command_.split()[0]
+      command_ = ' '.join(command_.split()[1:])
+      if len(command_) == 0:
+        if len(_gClientTimeoutOverride) > 2:
+          _gPshellClientTimeout = int(_gClientTimeoutOverride[2:])
+          printf("PSHELL_INFO: Setting server response timeout to: %d seconds" % _gPshellClientTimeout)
+        else:
+          printf("PSHELL_INFO: Current server response timeout: %d seconds" % _gPshellClientTimeout)
+        return
     _gArgs = command_.split()[_gFirstArgPos:]
     command_ = command_.split()[0]
     numMatches = 0
@@ -1554,10 +1568,13 @@ def _showWelcome():
       printf("#           extracted or displayed")
     printf("#")
     printf("#  The response timeout can be changed on a per-command")
-    printf("#  basis by inserting the option -t<timeout> between the")
-    printf("#  command name any arguments as follows:")
+    printf("#  basis by preceeding the command with option -t<timeout>")
     printf("#")
-    printf("#  command -t10 [<args>]")
+    printf("#  e.g. -t10 command")
+    printf("#")
+    printf("#  The default timeout for all commands can be changed by")
+    printf("#  using the -t<timeout> option with no command, and the")
+    printf("#  current default timeout can be displayed with just -t")
   printf("#")
   printf("#  Type '?' or 'help' at prompt for command summary")
   printf("#  Type '?' or '-h' after command for command usage")
@@ -1929,6 +1946,7 @@ _gTcpPrompt = None
 _gTcpTitle = None
 # flag to indicate thespecial pshell.py client
 _gPshellClient = False
+_gClientTimeoutOverride = None
 
 # log level and log print function
 _gLogLevel = LOG_LEVEL_DEFAULT

@@ -142,16 +142,11 @@ def _comandDispatcher(args_):
   global _gInteractive
   global _gTimeout
   results = None
-  timeout = _gTimeout
-  if len(args_) > 1 and "-t" in args_[1]:
-    if len(args_[1]) > 2:
-      timeout = int(args_[1][2:])
-    if len(args_) > 2:
-      command = args_[0] + " " + ' '.join(args_[2:])
-    else:
-      command = args_[0]
-  else:
-    command = ' '.join(args_)
+  timeout = PshellServer._gPshellClientTimeout
+  if PshellServer._gClientTimeoutOverride:
+    if len(PshellServer._gClientTimeoutOverride) > 2:
+      timeout = int(PshellServer._gClientTimeoutOverride[2:])
+  command = ' '.join(args_)
   if args_[0] in _gHelp:
     results = PshellControl.extractCommands(_gSid, includeName=False)
   elif timeout == 0:
