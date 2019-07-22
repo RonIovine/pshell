@@ -289,19 +289,21 @@ void showWelcome(void)
       printf("%s  Command response timeout: NONE\n", PSHELL_WELCOME_BORDER);
       printf("%s\n", PSHELL_WELCOME_BORDER);
       printf("%s  WARNING: Interactive client started with no command\n", PSHELL_WELCOME_BORDER);
-      printf("%s           response timeout.  All commands will be sent\n", PSHELL_WELCOME_BORDER);
-      printf("%s           as 'fire-and-forget', no results will be\n", PSHELL_WELCOME_BORDER);
-      printf("%s           extracted or displayed\n", PSHELL_WELCOME_BORDER);
+      printf("%s           response timeout.  All commands will be\n", PSHELL_WELCOME_BORDER);
+      printf("%s           sent as 'fire-and-forget', no results will\n", PSHELL_WELCOME_BORDER);
+      printf("%s           be extracted or displayed\n", PSHELL_WELCOME_BORDER);
     }
     printf("%s\n", PSHELL_WELCOME_BORDER);
-    printf("%s  The response timeout can be changed on a per-command\n", PSHELL_WELCOME_BORDER);
-    printf("%s  basis by preceeding the command with option -t<timeout>\n", PSHELL_WELCOME_BORDER);
+    printf("%s  The default response timeout can be changed on a\n", PSHELL_WELCOME_BORDER);
+    printf("%s  per-command basis by preceeding the command with\n", PSHELL_WELCOME_BORDER);
+    printf("%s  option -t<timeout>\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  e.g. -t10 command\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
-    printf("%s  The default timeout for all commands can be changed by\n", PSHELL_WELCOME_BORDER);
-    printf("%s  using the -t<timeout> option with no command, and the\n", PSHELL_WELCOME_BORDER);
-    printf("%s  current default timeout can be displayed with just -t\n", PSHELL_WELCOME_BORDER);
+    printf("%s  The default timeout for all commands can be changed\n", PSHELL_WELCOME_BORDER);
+    printf("%s  by using the -t<timeout> option with no command,\n", PSHELL_WELCOME_BORDER);
+    printf("%s  the current default timeout can be displayed with\n", PSHELL_WELCOME_BORDER);
+    printf("%s  just -t\n", PSHELL_WELCOME_BORDER);
   }
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);

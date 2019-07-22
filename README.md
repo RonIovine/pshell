@@ -427,6 +427,17 @@ $ pshell localhost 6001
 #
 #  Command response timeout: 5 seconds
 #
+#  The default response timeout can be changed on a
+#  per-command basis by preceeding the command with
+#  option -t<timeout>
+#
+#  e.g. -t10 command
+#
+#  The default timeout for all commands can be changed
+#  by using the -t<timeout> option with no command,
+#  the current default timeout can be displayed with
+#  just -t
+#
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage
 #
@@ -450,6 +461,17 @@ $ pshell pshellServerDemo
 #  Idle session timeout: NONE
 #
 #  Command response timeout: 5 seconds
+#
+#  The default response timeout can be changed on a
+#  per-command basis by preceeding the command with
+#  option -t<timeout>
+#
+#  e.g. -t10 command
+#
+#  The default timeout for all commands can be changed
+#  by using the -t<timeout> option with no command,
+#  the current default timeout can be displayed with
+#  just -t
 #
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage
