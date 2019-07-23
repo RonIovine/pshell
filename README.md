@@ -435,8 +435,7 @@ $ pshell localhost 6001
 #
 #  The default timeout for all commands can be changed
 #  by using the -t<timeout> option with no command,
-#  the current default timeout can be displayed with
-#  just -t
+#  display the current default timeout with just -t
 #
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage
@@ -470,8 +469,7 @@ $ pshell pshellServerDemo
 #
 #  The default timeout for all commands can be changed
 #  by using the -t<timeout> option with no command,
-#  the current default timeout can be displayed with
-#  just -t
+#  display the current default timeout with just -t
 #
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage

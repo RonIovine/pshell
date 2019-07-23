@@ -302,8 +302,7 @@ void showWelcome(void)
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  The default timeout for all commands can be changed\n", PSHELL_WELCOME_BORDER);
     printf("%s  by using the -t<timeout> option with no command,\n", PSHELL_WELCOME_BORDER);
-    printf("%s  the current default timeout can be displayed with\n", PSHELL_WELCOME_BORDER);
-    printf("%s  just -t\n", PSHELL_WELCOME_BORDER);
+    printf("%s  display the current default timeout with just -t\n", PSHELL_WELCOME_BORDER);
   }
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
