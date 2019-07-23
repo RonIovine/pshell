@@ -108,7 +108,7 @@ def _controlServer(argv):
       # user asked for help, display all the registered commands of the remote server
       PshellServer.printf(PshellControl.extractCommands(server["sid"]), newline=False)
     elif timeout == 0:
-      print("PSHELL_INFO: Command sent fire-and-forget")
+      print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
       PshellControl.sendCommand1(server["sid"], ' '.join(argv[1:]))
     else:
       # reconstitute and dispatch original command to remote server minus the first keyword

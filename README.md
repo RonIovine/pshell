@@ -429,7 +429,7 @@ $ pshell localhost 6001
 #
 #  The default response timeout can be changed on a
 #  per-command basis by preceeding the command with
-#  option -t<timeout>
+#  option -t<timeout> (use -t0 for no response)
 #
 #  e.g. -t10 command
 #
@@ -464,7 +464,7 @@ $ pshell pshellServerDemo
 #
 #  The default response timeout can be changed on a
 #  per-command basis by preceeding the command with
-#  option -t<timeout>
+#  option -t<timeout> (use -t0 for no response)
 #
 #  e.g. -t10 command
 #

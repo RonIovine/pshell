@@ -1569,7 +1569,7 @@ def _showWelcome():
     printf("#")
     printf("#  The default response timeout can be changed on a")
     printf("#  per-command basis by preceeding the command with")
-    printf("#  option -t<timeout>")
+    printf("#  option -t<timeout> (use -t0 for no response)")
     printf("#")
     printf("#  e.g. -t10 command")
     printf("#")

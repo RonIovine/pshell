@@ -100,7 +100,7 @@ def _showWelcome():
   print("#  line editing, and command abbreviation supported")
   print("#")
   print("#  NOTE: Connected to a broadcast address, all commands")
-  print("#        are single-shot, 'fire-and'forget', with no")
+  print("#        are single-shot, 'fire-and-forget', with no")
   print("#        response requested or expected, and no results")
   print("#        displayed.  All commands are 'invisible' since")
   print("#        no remote command query is requested.")
@@ -156,7 +156,7 @@ def _comandDispatcher(args_):
     if len(args_) == 2 and args_[1] in _gHelp:
       (results, retCode) = PshellControl.sendCommand4(_gSid, PshellControl.ONE_SEC*5, command)
     else:
-      print("PSHELL_INFO: Command sent fire-and-forget")
+      print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
       PshellControl.sendCommand1(_gSid, command)
   else:
     (results, retCode) = PshellControl.sendCommand4(_gSid, timeout, command)

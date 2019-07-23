@@ -296,7 +296,7 @@ void showWelcome(void)
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  The default response timeout can be changed on a\n", PSHELL_WELCOME_BORDER);
     printf("%s  per-command basis by preceeding the command with\n", PSHELL_WELCOME_BORDER);
-    printf("%s  option -t<timeout>\n", PSHELL_WELCOME_BORDER);
+    printf("%s  option -t<timeout> (use -t0 for no response)\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  e.g. -t10 command\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
@@ -315,7 +315,7 @@ void showWelcome(void)
   {
   printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  NOTE: Connected to a broadcast address, all commands\n", PSHELL_WELCOME_BORDER);
-    printf("%s        are single-shot, 'fire-and'forget', with no\n", PSHELL_WELCOME_BORDER);
+    printf("%s        are single-shot, 'fire-and-forget', with no\n", PSHELL_WELCOME_BORDER);
     printf("%s        response requested or expected, and no results\n", PSHELL_WELCOME_BORDER);
     printf("%s        displayed.  All commands are 'invisible' since\n", PSHELL_WELCOME_BORDER);
     printf("%s        no remote command query is requested.\n", PSHELL_WELCOME_BORDER);
@@ -908,7 +908,7 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
       }
       else
       {
-        printf("PSHELL_INFO: Command sent fire-and-forget\n");
+        printf("PSHELL_INFO: Command sent fire-and-forget, no response requested\n");
         _pshellSendMsg.header.respNeeded = false;
       }
     }
