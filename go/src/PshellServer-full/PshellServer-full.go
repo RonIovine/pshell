@@ -1662,15 +1662,15 @@ func runDGRAMServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func addNativeCommands() {
-  addCommand(batch,
-             "batch",
-             "run commands from a batch file",
-             "<filename>",
-             1,
-             2,
-             true,
-             true)
   if ((_gServerType == TCP) || (_gServerType == LOCAL)) {
+    addCommand(batch,
+               "batch",
+               "run commands from a batch file",
+               "<filename>",
+               1,
+               2,
+               true,
+               true)
     addCommand(help,
                "help",
                "show all available commands",

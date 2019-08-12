@@ -165,14 +165,17 @@ unsigned _maxCommandLength = strlen("batch");
 const char *_nativeInteractiveCommands [] =
 {
   "quit",
-  "help"
+  "help",
+  "batch"
 };
 #define QUIT_INDEX 0
 #define HELP_INDEX 1
+#define BATCH_INDEX 2
 const char *_nativeInteractiveCommandDescriptions [] =
 {
   "exit interactive mode",
-  "show all available commands"
+  "show all available commands",
+  "run commands from a batch file"
 };
 unsigned _numNativeInteractiveCommands = sizeof(_nativeInteractiveCommands)/sizeof(char*);
 
@@ -248,7 +251,7 @@ void showWelcome(void);
 void exitProgram(int exitCode_);
 void registerSignalHandlers(void);
 void parseCommandLine(int *argc, char *argv[], char *host, char *port);
-bool findCommand(char *command_);
+unsigned findCommand(char *command_);
 bool isSubString(const char *string1_, const char *string2_, unsigned minChars_);
 
 /******************************************************************************/
@@ -835,24 +838,25 @@ bool isSubString(const char *string1_, const char *string2_, unsigned minChars_)
 
 /******************************************************************************/
 /******************************************************************************/
-bool findCommand(char *command_)
+unsigned findCommand(char *command_)
 {
   unsigned index;
+  unsigned numFound = 0;
   for (index = 0; index < _numNativeInteractiveCommands; index++)
   {
     if (isSubString(command_, _nativeInteractiveCommands[index], strlen(command_)))
     {
-      return (true);
+      numFound++;
     }
   }
   for (index = 0; index < _numPshellCommands; index++)
   {
     if (isSubString(command_, _pshellCommandList[index], strlen(command_)))
     {
-      return (true);
+      numFound++;
     }
   }
-  return (false);
+  return (numFound);
 }
 
 /******************************************************************************/
@@ -1017,9 +1021,8 @@ bool isDuplicate(char *command_)
   {
     if (strcmp(_nativeInteractiveCommands[i], command_) == 0)
     {
-      printf("PSHELL_WARNING: Server command: '%s', is duplicate of a native interactive client command\n",
-             command_);
-      printf("              server command will be available in command line mode only\n");
+      printf("PSHELL_WARNING: Server command: '%s', is duplicate of a native interactive client command,\n", command_);
+      printf("                server command will be available in command line mode only\n");
       return (true);
     }
   }
@@ -1243,16 +1246,19 @@ void processInteractiveMode(void)
       pshell_rl_getInput(_interactivePrompt, _interactiveCommand);
       strcpy(command, _interactiveCommand);
       tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
-      if ((strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) ==
-          _nativeInteractiveCommands[HELP_INDEX]) ||
-          (strcmp(_interactiveCommand, "?") == 0) ||
-          (strcmp(_interactiveCommand, "-h") == 0) ||
-          (strcmp(_interactiveCommand, "-help") == 0) ||
-          (strcmp(_interactiveCommand, "--help") == 0))
+      if ((strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) == _nativeInteractiveCommands[HELP_INDEX]) ||
+          (strcmp(tokens[0], "?") == 0))
       {
         if (numTokens == 1)
         {
-          showCommands();
+          if ((findCommand(tokens[0]) == 2) || (strcmp(tokens[0], "?") == 0))
+          {
+            showCommands();
+          }
+          else
+          {
+            printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", tokens[0]);
+          }
         }
         else
         {
@@ -1269,6 +1275,29 @@ void processInteractiveMode(void)
         else
         {
           printf("Usage: quit\n");
+        }
+      }
+      else if (strstr(_nativeInteractiveCommands[BATCH_INDEX], tokens[0]) ==
+               _nativeInteractiveCommands[BATCH_INDEX])
+      {
+        if (numTokens == 2)
+        {
+          if (strcmp(tokens[1], "?") == 0)
+          {
+            printf("Usage: batch <filename>\n");
+          }
+          else
+          {
+            processBatchFile(tokens[1], 0, 0, false);
+          }
+        }
+        else if (findCommand(tokens[0]) > 2)
+        {
+          printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", tokens[0]);
+        }
+        else
+        {
+          printf("Usage: batch <filename>\n");
         }
       }
       else

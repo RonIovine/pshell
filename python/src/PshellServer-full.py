@@ -1193,7 +1193,7 @@ def _runLocalServer():
 def _addNativeCommands():
   global _gPshellClient
   global _gServerType
-  if (not _gPshellClient):
+  if ((_gServerType == TCP) or (_gServerType == LOCAL)):
     _addCommand(_batch,
                 "batch",
                 "run commands from a batch file",
@@ -1202,7 +1202,6 @@ def _addNativeCommands():
                 2,
                 True,
                 True)
-  if ((_gServerType == TCP) or (_gServerType == LOCAL)):
     _addCommand(_help,
                 "help",
                 "show all available commands",
@@ -1360,7 +1359,7 @@ def _processCommand(command_):
     _gArgs = command_.split()[_gFirstArgPos:]
     command_ = command_.split()[0]
     numMatches = 0
-    if ((command_ == "?") or (command_ in "help")):
+    if ((command_ == "?") or (command_ == "help")):
       _help(_gArgs)
       _gCommandDispatched = False
       return

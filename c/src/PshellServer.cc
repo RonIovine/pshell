@@ -2097,7 +2097,7 @@ static void help(int argc, char *argv[])
 static void batch(int argc, char *argv[])
 {
   unsigned rate = 0;
-  unsigned repeat = 1;
+  unsigned repeat = 0;
   bool clear = false;
   PshellTokens *argAndValue;
   if (pshell_isHelp())
@@ -2368,7 +2368,7 @@ static void addNativeCommands(void)
     numNativeCommands += 1;
   }
 
-  if ((_serverType == PSHELL_LOCAL_SERVER) || (_serverType == PSHELL_NO_SERVER))
+  if (_serverType == PSHELL_NO_SERVER)
   {
     /* add our built in command for all server types */
     pshell_addCommand(batch,
@@ -2378,6 +2378,7 @@ static void addNativeCommands(void)
                       1,
                       4,
                       false);
+    numNativeCommands += 1;
   }
   else
   {
@@ -2387,7 +2388,7 @@ static void addNativeCommands(void)
                       "<filename>",
                       1,
                       1,
-                      false);
+                      true);
   }
 
   /* move these commands to be first in the command list */
