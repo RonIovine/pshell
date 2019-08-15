@@ -56,7 +56,7 @@
 //   SetLogFunction() -- register a user function to receive all logs
 //
 // Functions to help in argument parsing/extraction, even though many of these
-// operations can easily be done with native Python constructs, they are provided
+// operations can easily be done with native Go constructs, they are provided
 // here for consistency of the API across all language implementations
 //
 //   Tokenize()          -- parse a string based on token delimeters
@@ -100,8 +100,8 @@
 // Integer constants:
 //
 // These are the identifiers for the serverMode.  BLOCKING wil never return
-// control to the caller of startServer, NON_BLOCKING will spawn a thread to
-// run the server and will return control to the caller of startServer
+// control to the caller of StartServer, NON_BLOCKING will spawn a thread to
+// run the server and will return control to the caller of StartServer
 //
 //   BLOCKING
 //   NON_BLOCKING
@@ -137,7 +137,7 @@
 //   LOCAL
 //
 // These three identifiers that can be used for the hostnameOrIpAddr argument
-// of the startServer call.  PshellServer.ANYHOST will bind the server socket
+// of the StartServer call.  PshellServer.ANYHOST will bind the server socket
 // to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
 // 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
 // the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
@@ -184,15 +184,15 @@ const (
 )
 
 // These are the identifiers for the serverMode.  BLOCKING wil never return
-// control to the caller of startServer, NON_BLOCKING will spawn a thread to
-// run the server and will return control to the caller of startServer
+// control to the caller of StartServer, NON_BLOCKING will spawn a thread to
+// run the server and will return control to the caller of StartServer
 const (
   BLOCKING = 0
   NON_BLOCKING = 1
 )
 
 // These three identifiers that can be used for the hostnameOrIpAddr argument
-// of the startServer call.  PshellServer.ANYHOST will bind the server socket
+// of the StartServer call.  PshellServer.ANYHOST will bind the server socket
 // to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
 // 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
 // the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
@@ -285,6 +285,7 @@ var _gTitle = "PSHELL"
 var _gTcpTitle = "PSHELL"
 var _gTcpPrompt = ""
 var _gQuitTcp = false
+var _gQuitLocal = false
 var _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 var _gServerVersion = "1"
 var _gPshellMsgPayloadLength = 1024*64  // 64k buffer size
@@ -1601,8 +1602,7 @@ func help(argv_ []string) {
 ////////////////////////////////////////////////////////////////////////////////
 func exit(argv_ []string) {
   if (_gServerType == LOCAL) {
-    //local server, exit the process
-    os.Exit(0)
+    _gQuitLocal = true
   } else if (_gServerType == TCP) {
     _gQuitTcp = true
   }
@@ -1700,7 +1700,7 @@ func runLocalServer() {
   addNativeCommands()
   showWelcome()
   reader := bufio.NewReader(os.Stdin)
-  for {
+  for (_gQuitLocal == false) {
     fmt.Print(_gPrompt)
     command, _ := reader.ReadString('\n')
     command = strings.TrimSuffix(command, "\n")

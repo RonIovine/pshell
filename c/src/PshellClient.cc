@@ -1270,7 +1270,14 @@ void processInteractiveMode(void)
       {
         if (numTokens == 1)
         {
-          exitProgram(0);
+          if (findCommand(tokens[0]) > 2)
+          {
+            printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", tokens[0]);
+          }
+          else
+          {
+            exitProgram(0);
+          }
         }
         else
         {

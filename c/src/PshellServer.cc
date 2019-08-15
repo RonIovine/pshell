@@ -2335,17 +2335,18 @@ static void loadBatchFile(const char *batchFile_)
 /******************************************************************************/
 static void addNativeCommands(void)
 {
-  int numNativeCommands = 1;
+  int numNativeCommands = 0;
   int i;
 
-  if ((_serverType != PSHELL_UDP_SERVER) &&
-      (_serverType != PSHELL_UNIX_SERVER))
+  /*
+   * add our two built in commands for the TCP/LOCAL server,
+   * for the UDP/UNIX server, these are implemented in the
+   * stand-alone 'pshell' client program
+   */
+  if ((_serverType == PSHELL_TCP_SERVER) ||
+      (_serverType == PSHELL_LOCAL_SERVER) ||
+      (_serverType == PSHELL_NO_SERVER))
   {
-    /*
-     * add our two built in commands for the TCP/LOCAL server,
-     * for the UDP/UNIX server, these are implemented in the
-     * stand-alone 'pshell' client program
-     */
     if (_serverType != PSHELL_NO_SERVER)
     {
       pshell_addCommand(quit,
@@ -2366,41 +2367,43 @@ static void addNativeCommands(void)
                       0,
                       true);
     numNativeCommands += 1;
-  }
 
-  if (_serverType == PSHELL_NO_SERVER)
-  {
-    /* add our built in command for all server types */
-    pshell_addCommand(batch,
-                      "batch",
-                      "run commands from a batch file",
-                      "<filename> [repeat=<count> [rate=<seconds>]] [clear]",
-                      1,
-                      4,
-                      false);
+    if (_serverType == PSHELL_NO_SERVER)
+    {
+      /* add our built in command for all server types */
+      pshell_addCommand(batch,
+                        "batch",
+                        "run commands from a batch file",
+                        "<filename> [repeat=<count> [rate=<seconds>]] [clear]",
+                        1,
+                        4,
+                        false);
+    }
+    else
+    {
+      pshell_addCommand(batch,
+                        "batch",
+                        "run commands from a batch file",
+                        "<filename>",
+                        1,
+                        1,
+                        true);
+    }
+
     numNativeCommands += 1;
-  }
-  else
-  {
-    pshell_addCommand(batch,
-                      "batch",
-                      "run commands from a batch file",
-                      "<filename>",
-                      1,
-                      1,
-                      true);
+
+    /* save off the command info */
+    _batchCmd.function = _commandTable[_numCommands-1].function;
+    _batchCmd.command = _commandTable[_numCommands-1].command;
+    _batchCmd.usage = _commandTable[_numCommands-1].usage;
+    _batchCmd.description = _commandTable[_numCommands-1].description;
+    _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+    _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+    _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+
   }
 
   /* move these commands to be first in the command list */
-
-  /* save off the command info */
-  _batchCmd.function = _commandTable[_numCommands-1].function;
-  _batchCmd.command = _commandTable[_numCommands-1].command;
-  _batchCmd.usage = _commandTable[_numCommands-1].usage;
-  _batchCmd.description = _commandTable[_numCommands-1].description;
-  _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
-  _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
-  _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
 
   if (numNativeCommands == 3)
   {
@@ -2487,16 +2490,6 @@ static void addNativeCommands(void)
     _commandTable[1].minArgs = _batchCmd.minArgs;
     _commandTable[1].maxArgs = _batchCmd.maxArgs;
     _commandTable[1].showUsage = _batchCmd.showUsage;
-  }
-  else
-  {
-    _commandTable[0].function = _batchCmd.function;
-    _commandTable[0].command = _batchCmd.command;
-    _commandTable[0].usage = _batchCmd.usage;
-    _commandTable[0].description = _batchCmd.description;
-    _commandTable[0].minArgs = _batchCmd.minArgs;
-    _commandTable[0].maxArgs = _batchCmd.maxArgs;
-    _commandTable[0].showUsage = _batchCmd.showUsage;
   }
 
   _setupCmd.function = setup;

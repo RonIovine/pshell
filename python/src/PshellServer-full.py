@@ -851,7 +851,7 @@ def _addCommand(function_,
     return
 
   # if they provided no usage for a function with arguments
-  if (((maxArgs_ > 0) or (minArgs_ > 0)) and ((usage_ == None) or (len(usage_) == 0))):
+  if (((maxArgs_ > 0) or (minArgs_ > 0)) and (command_ != "quit") and ((usage_ == None) or (len(usage_) == 0))):
     _printError("NULL usage for command that takes arguments, command: '%s' not added" % command_)
     return
 
@@ -1176,16 +1176,18 @@ def _runTCPServer():
 def _runLocalServer():
   global _gPrompt
   global _gTitle
+  global _gQuitLocal
   _gPrompt = _getDisplayServerName() + "[" + \
              _getDisplayServerType() + "]:" + _getDisplayPrompt()
   _gTitle = _getDisplayTitle() + ": " + _getDisplayServerName() + \
             "[" + _getDisplayServerType() + "], Mode: INTERACTIVE"
   _addNativeCommands()
   _showWelcome()
+  _gQuitLocal = False
   command = ""
-  while (not isSubString(command, "quit")):
+  while (not _gQuitLocal):
     (command, idleSession) = PshellReadline.getInput(_gPrompt)
-    if (not isSubString(command, "quit")):
+    if (not _gQuitLocal):
       _processCommand(command)
 
 #################################################################################
@@ -1210,12 +1212,12 @@ def _addNativeCommands():
                 0,
                 True,
                 True)
-    _addCommand(_exit,
+    _addCommand(_quit,
                 "quit",
                 "exit interactive mode",
                 "",
                 0,
-                0,
+                1,
                 True,
                 True)
   _addTabCompletions()
@@ -1463,7 +1465,10 @@ def _batch(command_):
   batchFile2 = _PSHELL_BATCH_DIR+"/"+batchFile
   batchFile3 = os.getcwd()+"/"+batchFile
   batchFile4 = batchFile
-  if (os.path.isfile(batchFile1)):
+  if batchFile == "?" or batchFile == "-h":
+    _showUsage()
+    return
+  elif (os.path.isfile(batchFile1)):
     file = open(batchFile1, 'r')
   elif (os.path.isfile(batchFile2)):
     file = open(batchFile2, 'r')
@@ -1477,7 +1482,7 @@ def _batch(command_):
   else:
     printf("ERROR: Could not find batch file: '%s'" % batchFile)
     return
-  # found a config file, process it
+  # found a batch file, process it
   for line in file:
     # skip comments
     line = line.strip()
@@ -1497,15 +1502,16 @@ def _help(command_):
 
 #################################################################################
 #################################################################################
-def _exit(command_):
+def _quit(command_):
   global _gQuitTcp
+  global _gQuitLocal
   global _gServerType
   if (_gServerType == TCP):
     # TCP server, signal receiveTCP function to quit
     _gQuitTcp = True
   else:
     # local server, exit the process
-    sys.exit()
+    _gQuitLocal = True
 
 #################################################################################
 #################################################################################
@@ -1938,6 +1944,7 @@ _gHelpLength = 1
 _gWheelPos = 0
 _gWheel = "|/-\\"
 
+_gQuitLocal = False
 _gQuitTcp = False
 _gTcpTimeout = 10  # minutes
 _gPshellClientTimeout = 5  # seconds
