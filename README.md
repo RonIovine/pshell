@@ -97,7 +97,8 @@ supports messaging to broadcast pshell servers (i.e. UDP server running at a sub
 broadcast address, e.g. x.y.z.255).
 
 
-See the full README file for a complete description of all the components, installation, building, and usage.
+See the full [README](https://github.com/RonIovine/pshell/blob/master/README) file for a complete description
+of all the components, installation, building, and usage.
 
 Note, this package was originally hosted at [code.google.com](https://code.google.com) as
 [RDB-Lite](https://code.google.com/p/rdb-lite), it was re-christened as 'pshell' when it was
