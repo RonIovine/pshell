@@ -362,11 +362,11 @@ def _getNamedServer(arg):
 #####################################################
 def _loadServers():
   global _gDefaultConfigDir
-  global _gMaxServerNameLength
+  global _gMaxNamedServerLength
   global _gServerList
   global _gClientConfigFile
   _gServerList = []
-  _gMaxServerNameLength = 11
+  _gMaxNamedServerLength = 11
   configFile1 = ""
   configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
@@ -391,10 +391,10 @@ def _loadServers():
     if ((len(line) > 0) and (line[0] != "#")):
       server = line.split(":")
       if len(server) == 2:
-        _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
+        _gMaxNamedServerLength = max(_gMaxNamedServerLength, len(server[0]))
         _gServerList.append({"server":server[0], "port":server[1], "timeout":5})
       elif len(server) == 3:
-        _gMaxServerNameLength = max(_gMaxServerNameLength, len(server[0]))
+        _gMaxNamedServerLength = max(_gMaxNamedServerLength, len(server[0]))
         _gServerList.append({"server":server[0], "port":server[1], "timeout":int(server[2])})
   file.close()
 
@@ -404,6 +404,8 @@ def _cleanupFileSystemResources():
   global _gFileSystemPath
   global _gLockFileExtension
   global _gActiveServers
+  global _gMaxHostnameLength
+  global _gMaxActiveServerLength
   lockFiles = fnmatch.filter(os.listdir(_gFileSystemPath), "*"+_gLockFileExtension)
   lockFiles.sort()
   for file in lockFiles:
@@ -413,10 +415,12 @@ def _cleanupFileSystemResources():
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         # we got the lock, delete any socket file and lock file and don't print anything
         try:
-          os.unlink(_gFileSystemPath+file.split(".")[0])
+          # unix temp socket file
+          os.unlink(_gFileSystemPath+file.split("-")[0])
         except:
           None
         try:
+          # lockfile
           os.unlink(_gFileSystemPath+file)
         except:
           None
@@ -425,11 +429,12 @@ def _cleanupFileSystemResources():
         if "-control" not in file:
           server = file.split(".")[0]
           server = server.split("-")
+          _gMaxActiveServerLength = max(len(server[0]), _gMaxActiveServerLength)
           if len(server) == 2:
-            _gActiveServers.append({"name":server[0], "type":server[1], "port":"N/A"})
-          elif len(server) == 3:
-            _gActiveServers.append({"name":server[0], "type":server[1], "port":server[2]})
-          #_gActiveUnixServers.append(file.split(".")[0])
+            _gActiveServers.append({"name":server[0], "type":server[1], "host":"N/A", "port":"N/A"})
+          elif len(server) == 4:
+            _gActiveServers.append({"name":server[0], "type":server[1], "host":server[2], "port":server[3]})
+            _gMaxHostnameLength = max(len(server[2]), _gMaxHostnameLength)
     except:
       None
 
@@ -438,6 +443,7 @@ def _cleanupFileSystemResources():
 def _getActiveServer(arg):
   global _gActiveServers
   global _gRemoteServer
+  global _gMaxHostnameLength
   global _gPort
   try:
     int(arg, 10)
@@ -451,7 +457,12 @@ def _getActiveServer(arg):
         _gRemoteServer = _gActiveServers[index-1]["name"]
         return True
       elif _gActiveServers[index-1]["type"] == "udp":
-        _gRemoteServer = "localhost"
+        if _gActiveServers[index-1]["host"] == "anyhost":
+          _gRemoteServer = "localhost"
+        elif _gActiveServers[index-1]["host"] == "anybcast":
+          _gRemoteServer = "255.255.255.255"
+        else:
+          _gRemoteServer = _gActiveServers[index-1]["host"]
         _gPort = _gActiveServers[index-1]["port"]
         return True
       else:
@@ -484,16 +495,18 @@ def _getActiveServer(arg):
 #####################################################
 def _showActiveServers():
   global _gActiveServers
+  global _gMaxHostnameLength
+  global _gMaxActiveServerLength
   print("")
-  print("*******************************************")
-  print("*   Active PSHELL Servers On Local Host   *")
-  print("*******************************************")
+  print("***************************************************")
+  print("*   Active PSHELL Servers Running On Local Host   *")
+  print("***************************************************")
   print("")
   if len(_gActiveServers) > 0:
-    print("Index   Server Name            Type   Port")
-    print("=====   ====================   ====   ====")
+    print("Index   %s   Type   Host%s   Port" % ("Server Name".ljust(_gMaxActiveServerLength), " "*(_gMaxHostnameLength-4)))
+    print("=====   %s   ====   %s   =====" % ("="*_gMaxActiveServerLength, "="*_gMaxHostnameLength))
   for index, server in enumerate(_gActiveServers):
-    print("%-5d   %-20s   %-4s   %-4s" % (index+1, server["name"], server["type"], server["port"]))
+    print("%-5d   %s   %-4s   %s   %-4s" % (index+1, server["name"].ljust(_gMaxActiveServerLength), server["type"], server["host"].ljust(_gMaxHostnameLength), server["port"]))
   if len(_gActiveServers) > 0:
     print("")
     print("A UNIX server can be connected via 'pshell' client using server name or index")
@@ -506,16 +519,16 @@ def _showActiveServers():
 #####################################################
 def _showNamedServers():
   global _gServerList
-  global _gMaxServerNameLength
+  global _gMaxNamedServerLength
   print("")
   print("****************************************")
   print("*         Named PSHELL Servers         *")
   print("****************************************")
   print("")
-  print("%s  Port Number  Response Timeout" % "Server Name".ljust(_gMaxServerNameLength))
-  print("%s  ===========  ================" % ("="*_gMaxServerNameLength))
+  print("%s  Port Number  Response Timeout" % "Server Name".ljust(_gMaxNamedServerLength))
+  print("%s  ===========  ================" % ("="*_gMaxNamedServerLength))
   for server in _gServerList:
-    print("%s  %s  %d seconds" % (server["server"].ljust(_gMaxServerNameLength), server["port"].ljust(11), server["timeout"]))
+    print("%s  %s  %d seconds" % (server["server"].ljust(_gMaxNamedServerLength), server["port"].ljust(11), server["timeout"]))
   print("")
   exit(0)
 
@@ -622,12 +635,14 @@ if (__name__ == '__main__'):
   _gFilename = None
   _gCommand = None
   _gInteractive = False
+  _gMaxHostnameLength = 4
 
   _gDefaultInstallDir = "/etc/pshell"
   _gDefaultConfigDir = _gDefaultInstallDir+"/config"
   _gDefaultBatchDir = _gDefaultInstallDir+"/batch"
   _gClientConfigFile = "pshell-client.conf"
-  _gMaxServerNameLength = 11
+  _gMaxNamedServerLength = 11
+  _gMaxActiveServerLength = 11
   _gServerList = []
 
   _loadServers()
@@ -755,5 +770,3 @@ if (__name__ == '__main__'):
           _processCommand(command)
 
   _cleanupAndExit()
-
-

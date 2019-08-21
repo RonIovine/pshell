@@ -140,9 +140,10 @@ const char *_lockFileExtension = ".pshell-lock";
 DIR *_dir;
 struct ActiveServer
 {
-  char *name;
-  char *type;
-  char port[80];
+  const char *name;
+  const char *type;
+  const char *host;
+  const char *port;
 };
 int _numActiveServers = 0;
 //char *_activeServers[MAX_ACTIVE_SERVERS];
@@ -211,7 +212,9 @@ struct PshellServers
 PshellServers *_pshellServersList;
 unsigned _numPshellServers = 0;
 unsigned _pshellServersListSize = PSHELL_SERVERS_CHUNK;
-unsigned _maxServerNameLength = 0;
+unsigned _maxNamedServerLength = 11;
+unsigned _maxActiveServerLength = 11;
+unsigned _maxHostnameLenth = 4;
 
 const char **_pshellCommandList;
 unsigned _numPshellCommands = 0;
@@ -238,7 +241,7 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
 void getNamedServers(void);
 void showNamedServers(void);
 void showActiveServers(void);
-char *getActiveServer(unsigned index_);
+const char *getActiveServer(unsigned index_);
 int stringCompare(const void* string1_, const void* string2_);
 void cleanupFileSystemResources(void);
 void showCommands(void);
@@ -1360,9 +1363,9 @@ void getNamedServers(void)
             {
               _pshellServersList[_numPshellServers].timeout = _serverResponseTimeout;
             }
-            if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxServerNameLength)
+            if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxNamedServerLength)
             {
-              _maxServerNameLength = strlen(_pshellServersList[_numPshellServers].serverName);
+              _maxNamedServerLength = strlen(_pshellServersList[_numPshellServers].serverName);
             }
             _numPshellServers++;
           }
@@ -1383,9 +1386,9 @@ void getNamedServers(void)
             {
               _pshellServersList[_numPshellServers].timeout = _serverResponseTimeout;
             }
-            if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxServerNameLength)
+            if (strlen(_pshellServersList[_numPshellServers].serverName) > _maxNamedServerLength)
             {
-              _maxServerNameLength = strlen(_pshellServersList[_numPshellServers].serverName);
+              _maxNamedServerLength = strlen(_pshellServersList[_numPshellServers].serverName);
             }
             _numPshellServers++;
           }
@@ -1410,6 +1413,7 @@ void cleanupFileSystemResources(void)
   int unixLockFd;
   char unixLockFile[300];
   char unixSocketFile[300];
+  char tempDirEntry[300];
   struct dirent *dirEntry;
   char *serverInfo[MAX_TOKENS];
   unsigned numTokens;
@@ -1420,11 +1424,13 @@ void cleanupFileSystemResources(void)
     {
       if (strstr(dirEntry->d_name, _lockFileExtension))
       {
+        strcpy(tempDirEntry, dirEntry->d_name);
         sprintf(unixLockFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
         /* try to open lock file */
         if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
         {
-          *strstr(dirEntry->d_name, ".") = 0;
+          *strchr(tempDirEntry, '-') = 0;
+          *strrchr(dirEntry->d_name, '.') = 0;
           sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
           /* file exists, try to see if another process has it locked */
           if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
@@ -1439,13 +1445,23 @@ void cleanupFileSystemResources(void)
             tokenize(dirEntry->d_name, "-", serverInfo, MAX_TOKENS, &numTokens);
             _activeServers[_numActiveServers].name = serverInfo[0];
             _activeServers[_numActiveServers].type = serverInfo[1];
+            if (strlen(_activeServers[_numActiveServers].name) > _maxActiveServerLength)
+            {
+              _maxActiveServerLength = strlen(_activeServers[_numActiveServers].name);
+            }
             if (numTokens == 2)
             {
-              sprintf(_activeServers[_numActiveServers].port, "%s", "N/A");
+              _activeServers[_numActiveServers].host = "N/A";
+              _activeServers[_numActiveServers].port = "N/A";
             }
-            else if (numTokens == 3)
+            else if (numTokens == 4)
             {
-              sprintf(_activeServers[_numActiveServers].port, "%s", serverInfo[2]);
+              _activeServers[_numActiveServers].host = serverInfo[2];
+              _activeServers[_numActiveServers].port = serverInfo[3];
+              if (strlen(_activeServers[_numActiveServers].host) > _maxHostnameLenth)
+              {
+                _maxHostnameLenth = strlen(_activeServers[_numActiveServers].host);
+              }
             }
             _numActiveServers++;
           }
@@ -1459,7 +1475,7 @@ void cleanupFileSystemResources(void)
 
 /******************************************************************************/
 /******************************************************************************/
-char *getActiveServer(char *server_)
+const char *getActiveServer(char *server_)
 {
   int index;
   int server;
@@ -1476,7 +1492,18 @@ char *getActiveServer(char *server_)
       }
       else if (strcmp(_activeServers[index-1].type, "udp") == 0)
       {
-        _host = "localhost";
+        if (strcmp(_activeServers[index-1].host, "anyhost") == 0)
+        {
+          _host = "localhost";
+        }
+        else if (strcmp(_activeServers[index-1].host, "anybcast") == 0)
+        {
+          _host = "255.255.255.255";
+        }
+        else
+        {
+          _host = _activeServers[index-1].host;
+        }
         return (_activeServers[index-1].port);
       }
       else
@@ -1528,18 +1555,35 @@ char *getActiveServer(char *server_)
 void showActiveServers(void)
 {
   printf("\n");
-  printf("*******************************************\n");
-  printf("*   Active PSHELL Servers On Local Host   *\n");
-  printf("*******************************************\n");
+  printf("***************************************************\n");
+  printf("*   Active PSHELL Servers Running On Local Host   *\n");
+  printf("***************************************************\n");
   printf("\n");
   if (_numActiveServers > 0)
   {
-    printf("Index   Server Name            Type   Port\n");
-    printf("=====   ====================   ====   ====\n");
+    printf("Index   %-*s   Type   %-*s   Port\n", _maxActiveServerLength, "Server Name", _maxHostnameLenth, "Host");
+    printf("=====   ");
+    for (unsigned i = 0; i < _maxActiveServerLength; i++)
+    {
+      printf("=");
+    }
+    printf("   ====   ");
+    for (unsigned i = 0; i < _maxHostnameLenth; i++)
+    {
+      printf("=");
+    }
+    printf("   =====\n");
   }
   for (int index = 0; index < _numActiveServers; index++)
   {
-    printf("%-5d   %-20s   %-4s   %-4s\n", index+1, _activeServers[index].name, _activeServers[index].type, _activeServers[index].port);
+    printf("%-5d   %-*s   %-4s   %-*s   %-4s\n",
+           index+1,
+           _maxActiveServerLength,
+           _activeServers[index].name,
+           _activeServers[index].type,
+           _maxHostnameLenth,
+           _activeServers[index].host,
+           _activeServers[index].port);
   }
   if (_numActiveServers > 0)
   {
@@ -1568,7 +1612,7 @@ void showNamedServers(void)
   printf("**************************************\n");
   printf("\n");
 
-  strlen(banner) > _maxServerNameLength ? fieldWidth = strlen(banner) : fieldWidth = _maxServerNameLength;
+  strlen(banner) > _maxNamedServerLength ? fieldWidth = strlen(banner) : fieldWidth = _maxNamedServerLength;
   printf("%s", banner);
 
   for (i = strlen(banner); i < fieldWidth; i++)

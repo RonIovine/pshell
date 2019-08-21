@@ -1772,7 +1772,7 @@ func cleanupFileSystemResources() {
       if strings.HasSuffix(file.Name(), _LOCK_FILE_EXTENSION) {
         // try to open lock file
         unixLockFile := file.Name()
-        unixSocketFile := strings.Split(unixLockFile, ".")[0]
+        unixSocketFile := strings.Split(unixLockFile, "-")[0]
         unixLockFd, err := os.Open(unixLockFile)
         if err == nil {
           err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
@@ -1814,7 +1814,7 @@ func createSocket() bool {
         _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
         if err == nil {
           _gPort = strconv.Itoa(int(port))
-          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gPort + _LOCK_FILE_EXTENSION
+          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gHostnameOrIpAddr + "-" + _gPort + _LOCK_FILE_EXTENSION
           _gLockFd, err = os.Create(_gLockFile)
           if err == nil {
             syscall.Flock(int(_gLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
@@ -1841,7 +1841,7 @@ func createSocket() bool {
         _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
         if err == nil {
           _gPort = strconv.Itoa(int(port))
-          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gPort + _LOCK_FILE_EXTENSION
+          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gHostnameOrIpAddr + "-" + _gPort + _LOCK_FILE_EXTENSION
           _gLockFd, err = os.Create(_gLockFile)
           if err == nil {
             syscall.Flock(int(_gLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)

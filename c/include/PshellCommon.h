@@ -38,15 +38,7 @@
 
 #define PSHELL_UNIX_SOCKET_PATH  "/tmp"
 
-/*
- * this is just used for the initial receive message used by the
- * UDP/UNIX client, the actual payload size is then negotiated between
- * the UDP/UNIX client and server, this is also used as-is for the client
- * side transmit message (i.e. in the "send"), so the payload size
- * needs to be big enough for any reasonable sized command and
- * its arguments
- */
-#define PSHELL_PAYLOAD_SIZE 1024*64   /* 64k payload size */
+#define PSHELL_PAYLOAD_SIZE 1024*64   /* 64k UDP/Unix payload size */
 
 /* message structures used to communicate between the client and server */
 

@@ -950,10 +950,12 @@ def _cleanupFileSystemResources():
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         # we got the lock, delete any socket file and lock file and don't print anything
         try:
-          os.unlink(_gFileSystemPath+file.split(".")[0])
+          # unix temp socket file
+          os.unlink(_gFileSystemPath+file.split("-")[0])
         except:
           None
         try:
+          # lockfile
           os.unlink(_gFileSystemPath+file)
         except:
           None
@@ -967,6 +969,7 @@ def _cleanupFileSystemResources():
 def _bindSocket(address_):
   global _gSocketFd
   global _gPort
+  global _gHostnameOrIpAddr
   global _gServerType
   global _gUnixSourceAddress
   global _gServerName
@@ -999,7 +1002,7 @@ def _bindSocket(address_):
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
         _gSocketFd.bind((address_, port))
-        _gLockFile = _gFileSystemPath + _gServerName + "-" + _gServerType + "-" + str(port) + _gLockFileExtension
+        _gLockFile = _gFileSystemPath + _gServerName + "-" + _gServerType + "-" + _gHostnameOrIpAddr + "-" + str(port) + _gLockFileExtension
         _gLockFd = open((_gLockFile), "w+")
         fcntl.flock(_gLockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         return

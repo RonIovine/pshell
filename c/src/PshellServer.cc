@@ -2621,6 +2621,7 @@ static void cleanupFileSystemResources(void)
   int unixLockFd;
   char unixLockFile[300];
   char unixSocketFile[300];
+  char tempDirEntry[300];
   struct dirent *dirEntry;
   dir = opendir(_fileSystemPath);
   if (dir)
@@ -2629,11 +2630,13 @@ static void cleanupFileSystemResources(void)
     {
       if (strstr(dirEntry->d_name, _lockFileExtension))
       {
+        strcpy(tempDirEntry, dirEntry->d_name);
         sprintf(unixLockFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
         /* try to open lock file */
         if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
         {
-          *strstr(dirEntry->d_name, ".") = 0;
+          *strchr(tempDirEntry, '-') = 0;
+          *strrchr(dirEntry->d_name, '.') = 0;
           sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
           /* file exists, try to see if another process has it locked */
           if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
@@ -2719,11 +2722,11 @@ static bool bindSocket(void)
         _port = port;
         if (_serverType == PSHELL_UDP_SERVER)
         {
-          sprintf(_lockFile, "%s%s-udp-%d%s", _fileSystemPath, _serverName, _port, _lockFileExtension);
+          sprintf(_lockFile, "%s%s-udp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
         }
         else  /* TCP server */
         {
-          sprintf(_lockFile, "%s%s-tcp-%d%s", _fileSystemPath, _serverName, _port, _lockFileExtension);
+          sprintf(_lockFile, "%s%s-tcp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
         }
         if ((unixLockFd = open(_lockFile, O_RDONLY | O_CREAT, 0600)) > -1)
         {
