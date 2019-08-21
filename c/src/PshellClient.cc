@@ -1431,7 +1431,7 @@ void cleanupFileSystemResources(void)
         {
           *strchr(tempDirEntry, '-') = 0;
           *strrchr(dirEntry->d_name, '.') = 0;
-          sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, dirEntry->d_name);
+          sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, tempDirEntry);
           /* file exists, try to see if another process has it locked */
           if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
           {

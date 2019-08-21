@@ -1771,7 +1771,7 @@ func cleanupFileSystemResources() {
     for _, file := range fileInfo {
       if strings.HasSuffix(file.Name(), _LOCK_FILE_EXTENSION) {
         // try to open lock file
-        unixLockFile := file.Name()
+        unixLockFile := _FILE_SYSTEM_PATH+file.Name()
         unixSocketFile := strings.Split(unixLockFile, "-")[0]
         unixLockFd, err := os.Open(unixLockFile)
         if err == nil {
