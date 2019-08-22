@@ -942,6 +942,7 @@ def _serverThread():
 def _cleanupFileSystemResources():
   global _gFileSystemPath
   global _gLockFileExtension
+  global _gUnixLockFileId
   lockFiles = fnmatch.filter(os.listdir(_gFileSystemPath), "*"+_gLockFileExtension)
   for file in lockFiles:
     try:
@@ -951,7 +952,8 @@ def _cleanupFileSystemResources():
         # we got the lock, delete any socket file and lock file and don't print anything
         try:
           # unix temp socket file
-          os.unlink(_gFileSystemPath+file.split("-")[0])
+          if _gUnixLockFileId in file:
+            os.unlink(_gFileSystemPath+file.split("-")[0])
         except:
           None
         try:
@@ -1883,6 +1885,7 @@ _gFoundCommand = None
 _gUnixSourceAddress = None
 _gLockFile = None
 _gLockFileExtension = ".pshell-lock"
+_gUnixLockFileId = "unix"+_gLockFileExtension
 _gLockFd = None
 _gRunning = False
 _gCommandDispatched = False

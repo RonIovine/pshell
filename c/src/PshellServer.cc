@@ -308,6 +308,7 @@ static struct sockaddr_un _localUnixAddress;
 static char _lockFile[300];
 static const char *_fileSystemPath = "/tmp/";
 static const char *_lockFileExtension = ".pshell-lock";
+static const char *_unixLockFileId = "unix.pshell-lock";
 
 static PshellServerType _serverType = PSHELL_LOCAL_SERVER;
 static PshellServerMode _serverMode = PSHELL_BLOCKING;
@@ -2642,7 +2643,10 @@ static void cleanupFileSystemResources(void)
           if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
           {
             /* we got the lock, nobody else has it, ok to clean it up */
-            unlink(unixSocketFile);
+            if (strstr(unixLockFile, _unixLockFileId) != NULL)
+            {
+              unlink(unixSocketFile);
+            }
             unlink(unixLockFile);
           }
         }

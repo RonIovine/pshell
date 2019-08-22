@@ -137,6 +137,7 @@ ServerType _serverType = UDP;
 #define MAX_ACTIVE_SERVERS 1000
 const char *_unixSocketPath = "/tmp/";
 const char *_lockFileExtension = ".pshell-lock";
+static const char *_unixLockFileId = "unix.pshell-lock";
 DIR *_dir;
 struct ActiveServer
 {
@@ -1436,7 +1437,10 @@ void cleanupFileSystemResources(void)
           if (flock(unixLockFd, LOCK_EX | LOCK_NB) == 0)
           {
             /* we got the lock, nobody else has it, ok to clean it up */
-            unlink(unixSocketFile);
+            if (strstr(unixLockFile, _unixLockFileId) != NULL)
+            {
+              unlink(unixSocketFile);
+            }
             unlink(unixLockFile);
           }
           else if ((_numActiveServers < MAX_ACTIVE_SERVERS) &&

@@ -338,6 +338,7 @@ var _gLockFile string
 var _gLockFd *os.File
 const _FILE_SYSTEM_PATH = "/tmp/"
 const _LOCK_FILE_EXTENSION = ".pshell-lock"
+const _UNIX_LOCK_FILE_ID = "unix.pshell-lock"
 
 /////////////////////////////////
 //
@@ -1779,7 +1780,9 @@ func cleanupFileSystemResources() {
           // file exists, try to see if another process has it locked
           if err == nil {
             // we got the lock, nobody else has it, ok to clean it up
-            os.Remove(unixSocketFile)
+            if strings.Contains(unixLockFile, _UNIX_LOCK_FILE_ID) {
+              os.Remove(unixSocketFile)
+            }
             os.Remove(unixLockFile)
           }
         }
