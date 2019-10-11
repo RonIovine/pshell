@@ -276,11 +276,11 @@ void formatChecking(int argc, char *argv[])
 
   if (pshell_isIpv4Addr(argv[0]))
   {
-    pshell_printf("IP V4 address entered: %s entered\n", argv[0]);
+    pshell_printf("IPv4 address entered: '%s' entered\n", argv[0]);
   }
   else if (pshell_isIpv4AddrWithNetmask(argv[0]))
   {
-    pshell_printf("IP V4 address/netmask entered: %s entered\n", argv[0]);
+    pshell_printf("IPv4 address/netmask entered: '%s' entered\n", argv[0]);
   }
   else if (pshell_isDec(argv[0]))
   {

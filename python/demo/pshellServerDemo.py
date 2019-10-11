@@ -86,9 +86,9 @@ def enhancedUsage(argv):
 def formatChecking(argv):
   PshellServer.printf("formatChecking command dispatched:")
   if PshellServer.isIpv4Addr(argv[0]):
-    PshellServer.printf("IP V4 address entered: %s entered" % argv[0])
+    PshellServer.printf("IPv4 address entered: '%s' entered" % argv[0])
   elif PshellServer.isIpv4AddrWithNetmask(argv[0]):
-    PshellServer.printf("IP V4 address/netmask entered: %s entered" % argv[0])
+    PshellServer.printf("IPv4 address/netmask entered: '%s' entered" % argv[0])
   elif PshellServer.isDec(argv[0]):
     PshellServer.printf("Decimal arg: %d entered" % PshellServer.getInt(argv[0]))
   elif PshellServer.isHex(argv[0]):
