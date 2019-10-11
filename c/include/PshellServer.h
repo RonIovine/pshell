@@ -335,6 +335,8 @@ bool pshell_isDec(const char *string_);
 bool pshell_isHex(const char *string_, bool needHexPrefix_ = true);
 bool pshell_isNumeric(const char *string_, bool needHexPrefix_ = true);  /* isDec || isHex */
 bool pshell_isFloat(const char *string_);
+bool pshell_isIpv4Addr(const char *string_);
+bool pshell_isIpv4AddrWithNetmask(const char *string_);
 
 /*
  * various data extraction functions:

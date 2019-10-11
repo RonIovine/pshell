@@ -424,7 +424,7 @@ bool getVersion(void)
              _version,
              PSHELL_VERSION_1,
              PSHELL_VERSION);
-             return (false);
+      return (false);
     }
     else
     {
@@ -595,7 +595,7 @@ bool init(const char *destination_, const char *server_)
       printf("PSHELL_ERROR: Cannot bind UDP socket: address: %s, port: %d\n",
              inet_ntoa(_sourceIpAddress.sin_addr),
              ntohs(_sourceIpAddress.sin_port));
-             return (false);
+      return (false);
     }
 
     /* setup our destination */

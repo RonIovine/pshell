@@ -85,6 +85,8 @@ bool pshell_isAlphaNumeric(const char *string_){return (true);}
 bool pshell_isDec(const char *string_){return (true);}
 bool pshell_isHex(const char *string_, bool needHexPrefix_){return (true);}
 bool pshell_isFloat(const char *string_){return (true);}
+bool pshell_isIpv4Addr(const char *string_){return (true);}
+bool pshell_isIpv4AddrWithNetmask(const char *string_){return (true);}
 bool pshell_getOption(const char *string_, char *option_, char *value_){return (false);}
 void *pshell_getAddress(const char *string_){return ((void*)0);}
 bool pshell_getBool(const char *string_){return (false);}

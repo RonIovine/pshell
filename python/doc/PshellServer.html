@@ -47,21 +47,23 @@ Functions&nbsp;to&nbsp;help&nbsp;in&nbsp;argument&nbsp;parsing/extraction,&nbsp;
 operations&nbsp;can&nbsp;easily&nbsp;be&nbsp;done&nbsp;with&nbsp;native&nbsp;Python&nbsp;constructs,&nbsp;they&nbsp;are&nbsp;provided<br>
 here&nbsp;for&nbsp;consistency&nbsp;of&nbsp;the&nbsp;API&nbsp;across&nbsp;all&nbsp;language&nbsp;implementations<br>
 &nbsp;<br>
-<a href="#-tokenize">tokenize</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;parse&nbsp;a&nbsp;string&nbsp;based&nbsp;on&nbsp;token&nbsp;delimeters<br>
-<a href="#-getLength">getLength</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;string&nbsp;length<br>
-<a href="#-isEqual">isEqual</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;sensitive<br>
-<a href="#-isEqualNoCase">isEqualNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;insensitive<br>
-<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;sensitive<br>
-<a href="#-isSubStringNoCase">isSubStringNoCase</a>()&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;insensitive<br>
-<a href="#-isFloat">isFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;floating&nbsp;point<br>
-<a href="#-isDec">isDec</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;dec<br>
-<a href="#-isHex">isHex</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;hex,&nbsp;with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
-<a href="#-isAlpha">isAlpha</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alphabetic<br>
-<a href="#-isNumeric">isNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;isDec&nbsp;or&nbsp;isHex<br>
-<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alpha-numeric<br>
-<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
-<a href="#-getInt">getInt</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;integer&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
-<a href="#-getFloat">getFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;float&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
+<a href="#-tokenize">tokenize</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;parse&nbsp;a&nbsp;string&nbsp;based&nbsp;on&nbsp;token&nbsp;delimeters<br>
+<a href="#-getLength">getLength</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;string&nbsp;length<br>
+<a href="#-isEqual">isEqual</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;sensitive<br>
+<a href="#-isEqualNoCase">isEqualNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;insensitive<br>
+<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;sensitive<br>
+<a href="#-isSubStringNoCase">isSubStringNoCase</a>()&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;insensitive<br>
+<a href="#-isFloat">isFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;floating&nbsp;point<br>
+<a href="#-isDec">isDec</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;dec<br>
+<a href="#-isHex">isHex</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;hex,&nbsp;with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
+<a href="#-isAlpha">isAlpha</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alphabetic<br>
+<a href="#-isNumeric">isNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;isDec&nbsp;or&nbsp;isHex<br>
+<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alpha-numeric<br>
+isIpv4Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format<br>
+isIpv4AddrWithNetmask&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format<br>
+<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
+<a href="#-getInt">getInt</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;integer&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
+<a href="#-getFloat">getFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;float&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
 &nbsp;<br>
 The&nbsp;following&nbsp;commands&nbsp;should&nbsp;only&nbsp;be&nbsp;called&nbsp;from&nbsp;within&nbsp;the&nbsp;context&nbsp;of<br>
 a&nbsp;PSHELL&nbsp;callback&nbsp;function<br>
@@ -286,6 +288,21 @@ with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;hexidecimal&nbsp;format</tt></dd></dl>
+ <dl><dt><a name="-isIpv4Addr"><strong>isIpv4Addr</strong></a>(string)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;string&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format</tt></dd></dl>
+ <dl><dt><a name="-isIpv4AddrWithNetmask"><strong>isIpv4AddrWithNetmask</strong></a>(string)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;string&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;ipv4<br>
+address/netmask&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format</tt></dd></dl>
  <dl><dt><a name="-isNumeric"><strong>isNumeric</strong></a>(string, needHexPrefix<font color="#909090">=True</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;string&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;numerc&nbsp;format,<br>
 hex&nbsp;or&nbsp;decimal<br>
 &nbsp;<br>

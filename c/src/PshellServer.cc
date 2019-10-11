@@ -1450,6 +1450,40 @@ bool pshell_isFloat(const char *string_)
   }
 }
 
+/******************************************************************************/
+/******************************************************************************/
+bool pshell_isIpv4Addr(const char *string_)\
+{
+  PshellTokens *addr;
+  addr = pshell_tokenize(string_, ".");
+  return (addr->numTokens == 4 &&
+          pshell_isDec(addr->tokens[0]) &&
+          pshell_getInt(addr->tokens[0]) >= 0 &&
+          pshell_getInt(addr->tokens[0]) <= 255 &&
+          pshell_isDec(addr->tokens[1]) &&
+          pshell_getInt(addr->tokens[1]) >= 0 &&
+          pshell_getInt(addr->tokens[1]) <= 255 &&
+          pshell_isDec(addr->tokens[2]) &&
+          pshell_getInt(addr->tokens[2]) >= 0 &&
+          pshell_getInt(addr->tokens[2]) <= 255 &&
+          pshell_isDec(addr->tokens[3]) &&
+          pshell_getInt(addr->tokens[3]) >= 0 &&
+          pshell_getInt(addr->tokens[3]) <= 255);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool pshell_isIpv4AddrWithNetmask(const char *string_)
+{
+  PshellTokens *addr;
+  addr = pshell_tokenize(string_, "/");
+  return (addr->numTokens == 2 &&
+          pshell_isIpv4Addr(addr->tokens[0]) &&
+          pshell_isDec(addr->tokens[1]) &&
+          pshell_getInt(addr->tokens[1]) >= 0 &&
+          pshell_getInt(addr->tokens[1]) <= 32);
+}
+
 /**********************************************
  * command line agrument conversion functions
  **********************************************/

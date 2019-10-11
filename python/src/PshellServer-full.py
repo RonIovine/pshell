@@ -66,21 +66,23 @@ Functions to help in argument parsing/extraction, even though many of these
 operations can easily be done with native Python constructs, they are provided
 here for consistency of the API across all language implementations
 
-tokenize()          -- parse a string based on token delimeters
-getLength()         -- return the string length
-isEqual()           -- compare two strings for equality, case sensitive
-isEqualNoCase()     -- compare two strings for equality, case insensitive
-isSubString()       -- checks for string1 substring of string2 at position 0, case sensitive
-isSubStringNoCase() -- checks for string1 substring of string2 at position 0, case insensitive
-isFloat()           -- returns True if string is floating point
-isDec()             -- returns True if string is dec
-isHex()             -- returns True if string is hex, with or without the preceeding 0x
-isAlpha()           -- returns True if string is alphabetic
-isNumeric()         -- returns True if string isDec or isHex
-isAlphaNumeric()    -- returns True if string is alpha-numeric
-getBool()           -- returns True if string is 'true', 'yes', 'on'
-getInt()            -- return the integer value from the string
-getFloat()          -- return the float value from the string
+tokenize()            -- parse a string based on token delimeters
+getLength()           -- return the string length
+isEqual()             -- compare two strings for equality, case sensitive
+isEqualNoCase()       -- compare two strings for equality, case insensitive
+isSubString()         -- checks for string1 substring of string2 at position 0, case sensitive
+isSubStringNoCase()   -- checks for string1 substring of string2 at position 0, case insensitive
+isFloat()             -- returns True if string is floating point
+isDec()               -- returns True if string is dec
+isHex()               -- returns True if string is hex, with or without the preceeding 0x
+isAlpha()             -- returns True if string is alphabetic
+isNumeric()           -- returns True if string isDec or isHex
+isAlphaNumeric()      -- returns True if string is alpha-numeric
+isIpv4Addr            -- returns True if string is valid ipv4 address format
+isIpv4AddrWithNetmask -- returns True is string is valid ipv4 address/netmask format
+getBool()             -- returns True if string is 'true', 'yes', 'on'
+getInt()              -- return the integer value from the string
+getFloat()            -- return the float value from the string
 
 The following commands should only be called from within the context of
 a PSHELL callback function
@@ -643,6 +645,35 @@ def isAlphaNumeric(string):
 
 #################################################################################
 #################################################################################
+def isIpv4Addr(string):
+  """
+  This function will parse a string to see if it is in valid ipv4 address format
+
+    Args:
+        string (str) : The string to parse
+
+    Returns:
+        bool : True if valid ipv4 address format
+  """
+  return _isIpv4Addr(string)
+
+#################################################################################
+#################################################################################
+def isIpv4AddrWithNetmask(string):
+  """
+  This function will parse a string to see if it is in valid ipv4
+  address/netmask format
+
+    Args:
+        string (str) : The string to parse
+
+    Returns:
+        bool : True if valid ipv4 address/netmask format
+  """
+  return _isIpv4AddrWithNetmask(string)
+
+#################################################################################
+#################################################################################
 def getBool(string):
   """
   This function will parse a string to see if it 'true', 'yes', or 'on'
@@ -781,6 +812,34 @@ def _isNumeric(string_, needHexPrefix_):
 #################################################################################
 def _isAlphaNumeric(string_):
   return str(string_).isalnum()
+
+#################################################################################
+#################################################################################
+def _isIpv4Addr(string_):
+  addr = string_.split(".")
+  return (len(addr) == 4 and
+          isDec(addr[0]) and
+          getInt(addr[0]) >= 0 and
+          getInt(addr[0]) <= 255 and
+          isDec(addr[1]) and
+          getInt(addr[1]) >= 0 and
+          getInt(addr[1]) <= 255 and
+          isDec(addr[2]) and
+          getInt(addr[2]) >= 0 and
+          getInt(addr[2]) <= 255 and
+          isDec(addr[3]) and
+          getInt(addr[3]) >= 0 and
+          getInt(addr[3]) <= 255)
+
+#################################################################################
+#################################################################################
+def _isIpv4AddrWithNetmask(string_):
+  addr = string_.split("/")
+  return (len(addr) == 2 and
+          isIpv4Addr(addr[0]) and
+          isDec(addr[1]) and
+          getInt(addr[1]) >= 0 and
+          getInt(addr[1]) <= 32)
 
 #################################################################################
 #################################################################################

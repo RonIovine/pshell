@@ -243,7 +243,11 @@ func advancedParsing(argv []string) {
 func formatChecking(argv []string) {
 
   PshellServer.Printf("formatChecking command dispatched:\n")
-  if (PshellServer.IsDec(argv[0])) {
+  if (PshellServer.IsIpv4Addr(argv[0])) {
+    PshellServer.Printf("IP V4 address entered: %s entered\n", argv[0])
+  } else if (PshellServer.IsIpv4AddrWithNetmask(argv[0])) {
+    PshellServer.Printf("IP V4 address/netmask entered: %s entered\n", argv[0])
+  } else if (PshellServer.IsDec(argv[0])) {
     PshellServer.Printf("Decimal arg: %d entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, false))
   } else if (PshellServer.IsHex(argv[0], true)) {
     PshellServer.Printf("Hex arg: 0x%x entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, true))
