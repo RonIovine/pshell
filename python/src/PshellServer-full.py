@@ -66,23 +66,23 @@ Functions to help in argument parsing/extraction, even though many of these
 operations can easily be done with native Python constructs, they are provided
 here for consistency of the API across all language implementations
 
-tokenize()            -- parse a string based on token delimeters
-getLength()           -- return the string length
-isEqual()             -- compare two strings for equality, case sensitive
-isEqualNoCase()       -- compare two strings for equality, case insensitive
-isSubString()         -- checks for string1 substring of string2 at position 0, case sensitive
-isSubStringNoCase()   -- checks for string1 substring of string2 at position 0, case insensitive
-isFloat()             -- returns True if string is floating point
-isDec()               -- returns True if string is dec
-isHex()               -- returns True if string is hex, with or without the preceeding 0x
-isAlpha()             -- returns True if string is alphabetic
-isNumeric()           -- returns True if string isDec or isHex
-isAlphaNumeric()      -- returns True if string is alpha-numeric
-isIpv4Addr            -- returns True if string is valid ipv4 address format
-isIpv4AddrWithNetmask -- returns True is string is valid ipv4 address/netmask format
-getBool()             -- returns True if string is 'true', 'yes', 'on'
-getInt()              -- return the integer value from the string
-getFloat()            -- return the float value from the string
+tokenize()              -- parse a string based on token delimeters
+getLength()             -- return the string length
+isEqual()               -- compare two strings for equality, case sensitive
+isEqualNoCase()         -- compare two strings for equality, case insensitive
+isSubString()           -- checks for string1 substring of string2 at position 0, case sensitive
+isSubStringNoCase()     -- checks for string1 substring of string2 at position 0, case insensitive
+isFloat()               -- returns True if string is floating point
+isDec()                 -- returns True if string is dec
+isHex()                 -- returns True if string is hex, with or without the preceeding 0x
+isAlpha()               -- returns True if string is alphabetic
+isNumeric()             -- returns True if string isDec or isHex
+isAlphaNumeric()        -- returns True if string is alpha-numeric
+isIpv4Addr()            -- returns True if string is valid ipv4 address format
+isIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+getBool()               -- returns True if string is 'true', 'yes', 'on'
+getInt()                -- return the integer value from the string
+getFloat()              -- return the float value from the string
 
 The following commands should only be called from within the context of
 a PSHELL callback function

@@ -59,34 +59,34 @@
 // operations can easily be done with native Go constructs, they are provided
 // here for consistency of the API across all language implementations
 //
-//   Tokenize()            -- parse a string based on token delimeters
-//   GetLength()           -- return the string length
-//   IsEqual()             -- compare two strings for equality, case sensitive
-//   IsEqualNoCase()       -- compare two strings for equality, case insensitive
-//   IsSubString()         -- checks for string1 substring of string2 at position 0, case sensitive
-//   IsSubStringNoCase()   -- checks for string1 substring of string2 at position 0, case insensitive
-//   IsFloat()             -- returns True if string is floating point
-//   IsDec()               -- returns True if string is dec
-//   IsHex()               -- returns True if string is hex, with or without the preceeding 0x
-//   IsAlpha()             -- returns True if string is alphabetic
-//   IsNumeric()           -- returns True if string isDec or isHex
-//   IsAlphaNumeric()      -- returns True if string is alpha-numeric
-//   IsIpv4Addr            -- returns True if string is valid ipv4 address format
-//   IsIpv4AddrWithNetmask -- returns True is string is valid ipv4 address/netmask format
-//   GetBool()             -- returns True if string is 'true', 'yes', 'on'
-//   GetInt()              -- return the signed integer (64 bit) value from the string
-//   GetInt64()            -- return the 64 bit signed integer value from the string
-//   GetInt32()            -- return the 32 bit signed integer value from the string
-//   GetInt16()            -- return the 16 bit signed integer value from the string
-//   GetInt8()             -- return the 8 bit signed integer value from the string
-//   GetUint()             -- return the unsigned integer (64 bit) value from the string
-//   GetUint64()           -- return the 64 bit unsigned integer value from the string
-//   GetUint32()           -- return the 32 bit unsigned integer value from the string
-//   GetUint16()           -- return the 16 bit unsigned integer value from the string
-//   GetUint8()            -- return the 8 bit unsigned integer value from the string
-//   GetDouble()           -- return the double precision (64 bit) float value from the string
-//   GetFloat()            -- return the 32 bit float value from the string
-//   GetFloat32()          -- return the 32 bit float value from the string
+//   Tokenize()              -- parse a string based on token delimeters
+//   GetLength()             -- return the string length
+//   IsEqual()               -- compare two strings for equality, case sensitive
+//   IsEqualNoCase()         -- compare two strings for equality, case insensitive
+//   IsSubString()           -- checks for string1 substring of string2 at position 0, case sensitive
+//   IsSubStringNoCase()     -- checks for string1 substring of string2 at position 0, case insensitive
+//   IsFloat()               -- returns True if string is floating point
+//   IsDec()                 -- returns True if string is dec
+//   IsHex()                 -- returns True if string is hex, with or without the preceeding 0x
+//   IsAlpha()               -- returns True if string is alphabetic
+//   IsNumeric()             -- returns True if string isDec or isHex
+//   IsAlphaNumeric()        -- returns True if string is alpha-numeric
+//   IsIpv4Addr()            -- returns True if string is valid ipv4 address format
+//   IsIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+//   GetBool()               -- returns True if string is 'true', 'yes', 'on'
+//   GetInt()                -- return the signed integer (64 bit) value from the string
+//   GetInt64()              -- return the 64 bit signed integer value from the string
+//   GetInt32()              -- return the 32 bit signed integer value from the string
+//   GetInt16()              -- return the 16 bit signed integer value from the string
+//   GetInt8()               -- return the 8 bit signed integer value from the string
+//   GetUint()               -- return the unsigned integer (64 bit) value from the string
+//   GetUint64()             -- return the 64 bit unsigned integer value from the string
+//   GetUint32()             -- return the 32 bit unsigned integer value from the string
+//   GetUint16()             -- return the 16 bit unsigned integer value from the string
+//   GetUint8()              -- return the 8 bit unsigned integer value from the string
+//   GetDouble()             -- return the double precision (64 bit) float value from the string
+//   GetFloat()              -- return the 32 bit float value from the string
+//   GetFloat32()            -- return the 32 bit float value from the string
 //
 // The following commands should only be called from within the context of
 // a PSHELL callback function

@@ -47,23 +47,23 @@ Functions&nbsp;to&nbsp;help&nbsp;in&nbsp;argument&nbsp;parsing/extraction,&nbsp;
 operations&nbsp;can&nbsp;easily&nbsp;be&nbsp;done&nbsp;with&nbsp;native&nbsp;Python&nbsp;constructs,&nbsp;they&nbsp;are&nbsp;provided<br>
 here&nbsp;for&nbsp;consistency&nbsp;of&nbsp;the&nbsp;API&nbsp;across&nbsp;all&nbsp;language&nbsp;implementations<br>
 &nbsp;<br>
-<a href="#-tokenize">tokenize</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;parse&nbsp;a&nbsp;string&nbsp;based&nbsp;on&nbsp;token&nbsp;delimeters<br>
-<a href="#-getLength">getLength</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;string&nbsp;length<br>
-<a href="#-isEqual">isEqual</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;sensitive<br>
-<a href="#-isEqualNoCase">isEqualNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;insensitive<br>
-<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;sensitive<br>
-<a href="#-isSubStringNoCase">isSubStringNoCase</a>()&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;insensitive<br>
-<a href="#-isFloat">isFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;floating&nbsp;point<br>
-<a href="#-isDec">isDec</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;dec<br>
-<a href="#-isHex">isHex</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;hex,&nbsp;with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
-<a href="#-isAlpha">isAlpha</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alphabetic<br>
-<a href="#-isNumeric">isNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;isDec&nbsp;or&nbsp;isHex<br>
-<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alpha-numeric<br>
-isIpv4Addr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format<br>
-isIpv4AddrWithNetmask&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format<br>
-<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
-<a href="#-getInt">getInt</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;integer&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
-<a href="#-getFloat">getFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;float&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
+<a href="#-tokenize">tokenize</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;parse&nbsp;a&nbsp;string&nbsp;based&nbsp;on&nbsp;token&nbsp;delimeters<br>
+<a href="#-getLength">getLength</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;string&nbsp;length<br>
+<a href="#-isEqual">isEqual</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;sensitive<br>
+<a href="#-isEqualNoCase">isEqualNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;insensitive<br>
+<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;sensitive<br>
+<a href="#-isSubStringNoCase">isSubStringNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;insensitive<br>
+<a href="#-isFloat">isFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;floating&nbsp;point<br>
+<a href="#-isDec">isDec</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;dec<br>
+<a href="#-isHex">isHex</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;hex,&nbsp;with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
+<a href="#-isAlpha">isAlpha</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alphabetic<br>
+<a href="#-isNumeric">isNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;isDec&nbsp;or&nbsp;isHex<br>
+<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alpha-numeric<br>
+<a href="#-isIpv4Addr">isIpv4Addr</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format<br>
+<a href="#-isIpv4AddrWithNetmask">isIpv4AddrWithNetmask</a>()&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format<br>
+<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
+<a href="#-getInt">getInt</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;integer&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
+<a href="#-getFloat">getFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;float&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
 &nbsp;<br>
 The&nbsp;following&nbsp;commands&nbsp;should&nbsp;only&nbsp;be&nbsp;called&nbsp;from&nbsp;within&nbsp;the&nbsp;context&nbsp;of<br>
 a&nbsp;PSHELL&nbsp;callback&nbsp;function<br>
