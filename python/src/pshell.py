@@ -512,9 +512,9 @@ def _showActiveServers():
     print("%-5d   %s   %-4s   %s   %-4s" % (index+1, server["name"].ljust(_gMaxActiveServerLength), server["type"], server["host"].ljust(_gMaxHostnameLength), server["port"]))
   if len(_gActiveServers) > 0:
     print("")
-    print("A UNIX server can be connected via 'pshell' client using server name or index")
-    print("A UDP server can be connected via 'pshell' client using host/port or index")
-    print("A TCP server can be connected via 'telnet' client using host/port")
+    print("Connect to TCP server with: telnet <host> <port>")
+    print("Connect to UDP server with: pshell {{<host> <port>} | <index>}")
+    print("Connect to UNIX server with: pshell <serverName> | <index>")
     print("")
   exit(0)
 

@@ -1592,9 +1592,9 @@ void showActiveServers(void)
   if (_numActiveServers > 0)
   {
     printf("\n");
-    printf("A UNIX server can be connected via 'pshell' client using server name or index\n");
-    printf("A UDP server can be connected via 'pshell' client using host/port or index\n");
-    printf("A TCP server can be connected via 'telnet' client using host/port\n");
+    printf("Connect to TCP server with: telnet <host> <port>\n");
+    printf("Connect to UDP server with: pshell {{<host> <port>} | <index>}\n");
+    printf("Connect to UNIX server with: pshell <serverName> | <index>\n");
     printf("\n");
   }
   exitProgram(0);
