@@ -66,6 +66,8 @@ Helpful items used for the server response timeout values
 NO_WAIT
 ONE_MSEC
 ONE_SEC
+ONE_MINUTE
+ONE_HOUR
 
 These are returned from the sendCommandN functions
 
@@ -95,6 +97,11 @@ LOG_LEVEL_ALL
 LOG_LEVEL_DEFAULT
 
 String constants:
+
+This is used for the host when connecting to a server running
+at the loopback localhost address
+
+LOCALHOST
 
 Use this as the "port" identifier for the connectServer
 call when using a UNIX domain server
@@ -132,6 +139,11 @@ from collections import namedtuple
 NO_WAIT = 0
 ONE_MSEC = 1
 ONE_SEC = ONE_MSEC*1000
+ONE_MINUTE = ONE_SEC*60
+ONE_HOUR = ONE_MINUTE*60
+
+# use this when connecting to server running at loopback address
+LOCALHOST = "localhost"
 
 # use this as the "port" identifier for the connectServer call when
 # using a UNIX domain server

@@ -105,7 +105,7 @@ int main (int argc, char *argv[])
   char input[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   bool idleSession = false;
   char results[4096];
-  int timeout = PSHELL_ONE_MSEC*100;
+  int timeout = 1000;
   int port = 0;
   int logLevel = PSHELL_CONTROL_LOG_LEVEL_ALL;
   bool extract = false;
@@ -145,7 +145,7 @@ int main (int argc, char *argv[])
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
 
-  if ((sid = pshell_connectServer(argv[0], argv[1], port, timeout)) != PSHELL_INVALID_SID)
+  if ((sid = pshell_connectServer(argv[0], argv[1], port, PSHELL_ONE_MSEC*timeout)) != PSHELL_INVALID_SID)
   {
     // set our debug level
     pshell_setControlLogLevel(logLevel);

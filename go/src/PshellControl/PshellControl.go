@@ -60,6 +60,8 @@
 //   NO_WAIT
 //   ONE_MSEC
 //   ONE_SEC
+//   ONE_MINUTE
+//   ONE_HOUR
 //
 // These are returned from the sendCommandN functions
 //
@@ -89,6 +91,10 @@
 //   LOG_LEVEL_DEFAULT
 //
 // String constants:
+//
+// Use this when connecting to server running at loopback address
+//
+//   LOCALHOST
 //
 // Use this as the "port" identifier for the connectServer
 // call when using a UNIX domain server
@@ -138,6 +144,16 @@ const (
   SOCKET_NOT_CONNECTED = 7
 )
 
+// helpful items used for the timeout values
+const NO_WAIT = 0
+const ONE_MSEC = 1
+const ONE_SEC = ONE_MSEC*1000
+const ONE_MINUTE = ONE_SEC*60
+const ONE_HOUR = ONE_MINUTE*60
+
+// use this when connecting to server running at loopback address
+const LOCALHOST = "localhost"
+
 // use this as the "port" identifier for the connectServer call when
 // using a UNIX domain server
 const UNIX = "unix"
@@ -172,7 +188,6 @@ const _NO_RESP_NEEDED = 0
 const _NO_DATA_NEEDED = 0
 const _RESP_NEEDED = 1
 const _DATA_NEEDED = 1
-const _NO_WAIT = 0
 const _RCV_BUFFER_SIZE = 1024*64  // 64k buffer size
 
 const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
@@ -654,7 +669,7 @@ func sendMulticast(format_ string, command_ ...interface{}) {
       for _, sid := range(multicast.sidList) {
         if ((sid >= 0) && (sid < len(_gControlList))) {
           control := _gControlList[sid]
-          sendCommand(&control, command, _NO_WAIT, _NO_DATA_NEEDED)
+          sendCommand(&control, command, NO_WAIT, _NO_DATA_NEEDED)
         }
       }
     }
@@ -792,7 +807,7 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
   }
   _, err := control_.socket.Write(control_.sendMsg)
   if (err == nil) {
-    if (timeout_ > _NO_WAIT) {
+    if (timeout_ > NO_WAIT) {
       for {
         control_.socket.SetReadDeadline(time.Now().Add(time.Millisecond*time.Duration(timeout_)))
         var err error

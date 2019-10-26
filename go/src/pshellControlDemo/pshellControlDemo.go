@@ -125,7 +125,7 @@ func main() {
   // register signal handlers so we can do a graceful termination and cleanup any system resources
   registerSignalHandlers()
 
-  sid := PshellControl.ConnectServer("pshellControlDemo", os.Args[1], os.Args[2], timeout)
+  sid := PshellControl.ConnectServer("pshellControlDemo", os.Args[1], os.Args[2], PshellControl.ONE_MSEC*timeout)
 
   if (sid != PshellControl.INVALID_SID) {
     command := ""
