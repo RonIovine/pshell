@@ -338,7 +338,7 @@ var _gLogFunction logFunction
 
 var _gLockFile string
 var _gLockFd *os.File
-const _FILE_SYSTEM_PATH = "/tmp/pshell/"
+const _FILE_SYSTEM_PATH = "/tmp/.pshell/"
 const _LOCK_FILE_EXTENSION = ".lock"
 const _UNIX_LOCK_FILE_ID = "unix.lock"
 

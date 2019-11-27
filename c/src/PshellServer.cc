@@ -306,7 +306,7 @@ static int _socketFd;
 static struct sockaddr_in _localIpAddress;
 static struct sockaddr_un _localUnixAddress;
 static char _lockFile[300];
-static const char *_fileSystemPath = "/tmp/pshell/";
+static const char *_fileSystemPath = "/tmp/.pshell/";
 static const char *_lockFileExtension = ".lock";
 static const char *_unixLockFileId = "unix.lock";
 

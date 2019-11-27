@@ -36,7 +36,7 @@
  * between the pshell UDP/UNIX client and server
  */
 
-#define PSHELL_UNIX_SOCKET_PATH  "/tmp/pshell"
+#define PSHELL_UNIX_SOCKET_PATH  "/tmp/.pshell"
 
 #define PSHELL_PAYLOAD_SIZE 1024*64   /* 64k UDP/Unix payload size */
 

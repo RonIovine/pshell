@@ -109,7 +109,7 @@ import PshellReadline
 _gSid = None
 _gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
-_gFileSystemPath = "/tmp/pshell/"
+_gFileSystemPath = "/tmp/.pshell/"
 _gLockFileExtension = ".lock"
 _gUnixLockFileId = "unix"+_gLockFileExtension
 _gActiveServers = []

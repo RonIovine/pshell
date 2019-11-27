@@ -120,7 +120,7 @@ static PshellLogFunction _logFunction = NULL;
 static unsigned _logLevel = PSHELL_CONTROL_LOG_LEVEL_DEFAULT;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static const char *_errorPad = "              ";
-static const char *_unixSocketPath = "/tmp/pshell/";
+static const char *_unixSocketPath = "/tmp/.pshell/";
 static const char *_lockFileExtension = ".lock";
 
 /******************************************

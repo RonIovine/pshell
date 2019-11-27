@@ -1004,7 +1004,7 @@ _gPshellControl = []
 _gPshellMulticast = []
 
 # path of unix domain socket handle for client sockets
-_gUnixSocketPath = "/tmp/pshell/"
+_gUnixSocketPath = "/tmp/.pshell/"
 _gLockFileExtension = ".lock"
 _PSHELL_CONFIG_DIR = "/etc/pshell/config"
 _PSHELL_CONFIG_FILE = "pshell-control.conf"

@@ -182,7 +182,7 @@ const (
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-const _UNIX_SOCKET_PATH = "/tmp/pshell/"
+const _UNIX_SOCKET_PATH = "/tmp/.pshell/"
 const _LOCK_FILE_EXTENSION = ".lock"
 const _NO_RESP_NEEDED = 0
 const _NO_DATA_NEEDED = 0

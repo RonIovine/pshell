@@ -223,7 +223,7 @@ void pshell_startServer(const char *serverName_,
  * a pshell server upon program termination, either via a normal, graceful
  * termination or via a signal handler exception based termination, this is
  * only really necessary for a 'unix' type pshell server in order to cleanup
- * the temporary file handle in the /tmp/pshell directory that is associated
+ * the temporary file handle in the /tmp/.pshell directory that is associated
  * with the server, although as good practice, this function should be called
  * upon program termination regardless of the server type
  */

@@ -135,7 +135,7 @@ bool _isUnixConnected = false;
 ServerType _serverType = UDP;
 
 #define MAX_ACTIVE_SERVERS 1000
-const char *_unixSocketPath = "/tmp/pshell/";
+const char *_unixSocketPath = "/tmp/.pshell/";
 const char *_lockFileExtension = ".lock";
 static const char *_unixLockFileId = "unix.lock";
 DIR *_dir;
