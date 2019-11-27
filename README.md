@@ -239,13 +239,12 @@ a `-h` to show the usage as follows:
 ```
 $ pshell -h
 
-Usage: pshell -n | -s | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
+Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
                         [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
-
-    -n              - show named IP server/port mappings in pshell-client.conf file
     -s              - show all servers running on the local host
+    -n              - show named IP server/port mappings in pshell-client.conf file
     -c              - run command from command line
     -f              - run commands from a batch file
     -t              - change the default server response timeout
@@ -288,7 +287,6 @@ Usage: pshell.exp -n | {<hostName> | ipAddr>} {<portNum> | <serverName>}
                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
-
     -n         - show named IP server/port mappings in pshell-client.conf file
     -c         - run command from command line
     -f         - run commands from a batch file

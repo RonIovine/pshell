@@ -61,7 +61,6 @@ proc showUsage {} {
   puts "                       \[{{-c <command> | -f <filename>} \[rate=<seconds>\] \[repeat=<count>\] \[clear\]}]"
   puts ""
   puts "  where:"
-  puts ""
   puts "    -n         - show named IP server/port mappings in $defaultClientConfigFile file"
   puts "    -c         - run command from command line"
   puts "    -f         - run commands from a batch file"

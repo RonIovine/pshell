@@ -1692,13 +1692,12 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -n | -s | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]\n");
+  printf("Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]\n");
   printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
-  printf("\n");
-  printf("    -n              - show named IP server/port mappings in pshell-client.conf file\n");
   printf("    -s              - show all servers running on the local host\n");
+  printf("    -n              - show named IP server/port mappings in pshell-client.conf file\n");
   printf("    -c              - run command from command line\n");
   printf("    -f              - run commands from a batch file\n");
   printf("    -t              - change the default server response timeout\n");

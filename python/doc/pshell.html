@@ -9,20 +9,21 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>pshell</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/riovine/tools/pshell/python/pshell.py">/home/riovine/tools/pshell/python/pshell.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/riovine/tools/pshell/python/src/pshell.py">/home/riovine/tools/pshell/python/src/pshell.py</a></font></td></tr></table>
     <p><tt>A&nbsp;Python&nbsp;program&nbsp;to&nbsp;provide&nbsp;remote&nbsp;client&nbsp;access&nbsp;to&nbsp;UDP/UNIX&nbsp;PshellServers<br>
 &nbsp;<br>
-This&nbsp;stand-alone&nbsp;client&nbsp;process&nbsp;will&nbsp;provide&nbsp;remote&nbsp;user&nbsp;interaction&nbsp;to&nbsp;<br>
-any&nbsp;process&nbsp;that&nbsp;is&nbsp;running&nbsp;a&nbsp;UDP&nbsp;or&nbsp;UNIX&nbsp;PshellServer&nbsp;(TCP&nbsp;PshellServers&nbsp;<br>
-are&nbsp;controlled&nbsp;via&nbsp;a&nbsp;standard&nbsp;'telnet'&nbsp;client).&nbsp;&nbsp;It&nbsp;can&nbsp;control&nbsp;processes&nbsp;<br>
-that&nbsp;are&nbsp;running&nbsp;either&nbsp;the&nbsp;'C'&nbsp;version&nbsp;of&nbsp;the&nbsp;PshellServer,&nbsp;which&nbsp;is&nbsp;<br>
-provided&nbsp;via&nbsp;the&nbsp;PshellServer.h&nbsp;API&nbsp;and&nbsp;the&nbsp;libpshell-server&nbsp;link&nbsp;libaray,&nbsp;<br>
-or&nbsp;the&nbsp;Python&nbsp;version&nbsp;that&nbsp;is&nbsp;provided&nbsp;via&nbsp;the&nbsp;PshellServer.py&nbsp;module.<br>
+This&nbsp;stand-alone&nbsp;client&nbsp;process&nbsp;will&nbsp;provide&nbsp;remote&nbsp;user&nbsp;interaction&nbsp;to<br>
+any&nbsp;process&nbsp;that&nbsp;is&nbsp;running&nbsp;a&nbsp;UDP&nbsp;or&nbsp;UNIX&nbsp;PshellServer&nbsp;(TCP&nbsp;PshellServers<br>
+are&nbsp;controlled&nbsp;via&nbsp;a&nbsp;standard&nbsp;'telnet'&nbsp;client).&nbsp;&nbsp;It&nbsp;can&nbsp;control&nbsp;processes<br>
+that&nbsp;are&nbsp;running&nbsp;either&nbsp;the&nbsp;'C'&nbsp;version&nbsp;of&nbsp;the&nbsp;PshellServer,&nbsp;which&nbsp;is<br>
+provided&nbsp;via&nbsp;the&nbsp;PshellServer.h&nbsp;API&nbsp;and&nbsp;the&nbsp;libpshell-server&nbsp;link&nbsp;libaray,<br>
+the&nbsp;Python&nbsp;version&nbsp;that&nbsp;is&nbsp;provided&nbsp;via&nbsp;the&nbsp;PshellServer.py&nbsp;module,&nbsp;or&nbsp;the<br>
+Go&nbsp;(Golang)&nbsp;version&nbsp;that&nbsp;is&nbsp;provided&nbsp;by&nbsp;the&nbsp;PshellServer.go&nbsp;module&nbsp;and&nbsp;API.<br>
 &nbsp;<br>
 Modules:<br>
 &nbsp;<br>
 The&nbsp;following&nbsp;Python&nbsp;modules&nbsp;are&nbsp;provided&nbsp;for&nbsp;programs&nbsp;to&nbsp;embed&nbsp;their&nbsp;own<br>
-PshellServer&nbsp;functionality&nbsp;and&nbsp;to&nbsp;programatically&nbsp;control&nbsp;PshellServers&nbsp;<br>
+PshellServer&nbsp;functionality&nbsp;and&nbsp;to&nbsp;programatically&nbsp;control&nbsp;PshellServers<br>
 running&nbsp;in&nbsp;other&nbsp;processes.<br>
 &nbsp;<br>
 PshellServer.py&nbsp;&nbsp;&nbsp;--&nbsp;provide&nbsp;PshellServer&nbsp;capability&nbsp;in&nbsp;a&nbsp;given&nbsp;process<br>
@@ -30,7 +31,49 @@ PshellControl.py&nbsp;&nbsp;--&nbsp;invoke&nbsp;PshellServer&nbsp;callback&nbsp;
 PshellReadline.py&nbsp;--&nbsp;provide&nbsp;a&nbsp;readline&nbsp;like&nbsp;capability&nbsp;to&nbsp;solicit&nbsp;user&nbsp;input<br>
 &nbsp;<br>
 See&nbsp;the&nbsp;respective&nbsp;'pydoc'&nbsp;pages&nbsp;(text&nbsp;or&nbsp;HTML)&nbsp;for&nbsp;more&nbsp;detailed&nbsp;documentation<br>
-on&nbsp;the&nbsp;above&nbsp;modules.</tt></p>
+on&nbsp;the&nbsp;above&nbsp;modules.<br>
+&nbsp;<br>
+Usage:<br>
+&nbsp;<br>
+The&nbsp;following&nbsp;shows&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;UDP/UNIX&nbsp;pshell&nbsp;interactive&nbsp;client&nbsp;program:<br>
+&nbsp;<br>
+Usage:&nbsp;pshell&nbsp;-s&nbsp;|&nbsp;-n&nbsp;|&nbsp;{{{&lt;hostName&nbsp;|&nbsp;ipAddr&gt;}&nbsp;{&lt;portNum&gt;&nbsp;|&nbsp;&lt;udpServerName&gt;}}&nbsp;|&nbsp;&lt;unixServerName&gt;&nbsp;|&nbsp;&lt;serverIndex}&nbsp;[-t&lt;timeout&gt;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[{{-c&nbsp;&lt;command&gt;&nbsp;|&nbsp;-f&nbsp;&lt;filename&gt;}&nbsp;[rate=&lt;seconds&gt;]&nbsp;[repeat=&lt;count&gt;]&nbsp;[clear]}]<br>
+&nbsp;<br>
+&nbsp;&nbsp;where:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;show&nbsp;all&nbsp;servers&nbsp;running&nbsp;on&nbsp;the&nbsp;local&nbsp;host<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;show&nbsp;named&nbsp;IP&nbsp;server/port&nbsp;mappings&nbsp;in&nbsp;pshell-client.conf&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;run&nbsp;command&nbsp;from&nbsp;command&nbsp;line<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;run&nbsp;commands&nbsp;from&nbsp;a&nbsp;batch&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;change&nbsp;the&nbsp;default&nbsp;server&nbsp;response&nbsp;timeout<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hostName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;hostname&nbsp;of&nbsp;UDP&nbsp;server<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ipAddr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;IP&nbsp;addr&nbsp;of&nbsp;UDP&nbsp;server<br>
+&nbsp;&nbsp;&nbsp;&nbsp;portNum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;port&nbsp;number&nbsp;of&nbsp;UDP&nbsp;server<br>
+&nbsp;&nbsp;&nbsp;&nbsp;udpServerName&nbsp;&nbsp;&nbsp;-&nbsp;name&nbsp;of&nbsp;UDP&nbsp;server&nbsp;from&nbsp;pshell-client.conf&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;unixServerName&nbsp;&nbsp;-&nbsp;name&nbsp;of&nbsp;UNIX&nbsp;server&nbsp;(use&nbsp;'-s'&nbsp;option&nbsp;to&nbsp;list&nbsp;servers)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;serverIndex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;index&nbsp;of&nbsp;local&nbsp;UNIX&nbsp;or&nbsp;UDP&nbsp;server&nbsp;(use&nbsp;'-s'&nbsp;option&nbsp;to&nbsp;list&nbsp;servers)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;timeout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;response&nbsp;wait&nbsp;timeout&nbsp;in&nbsp;sec&nbsp;(default=5)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;optional&nbsp;command&nbsp;to&nbsp;execute&nbsp;(in&nbsp;double&nbsp;quotes,&nbsp;ex.&nbsp;-c&nbsp;"myCommand&nbsp;arg1&nbsp;arg2")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fileName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;optional&nbsp;batch&nbsp;file&nbsp;to&nbsp;execute<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;optional&nbsp;rate&nbsp;to&nbsp;repeat&nbsp;command&nbsp;or&nbsp;batch&nbsp;file&nbsp;(in&nbsp;seconds)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repeat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;optional&nbsp;repeat&nbsp;count&nbsp;for&nbsp;command&nbsp;or&nbsp;batch&nbsp;file&nbsp;(default=forever)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clear&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;optional&nbsp;clear&nbsp;screen&nbsp;between&nbsp;commands&nbsp;or&nbsp;batch&nbsp;file&nbsp;passes<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;NOTE:&nbsp;If&nbsp;no&nbsp;&lt;command&gt;&nbsp;is&nbsp;given,&nbsp;pshell&nbsp;will&nbsp;be&nbsp;started<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;up&nbsp;in&nbsp;interactive&nbsp;mode,&nbsp;commands&nbsp;issued&nbsp;in&nbsp;command<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;line&nbsp;mode&nbsp;that&nbsp;require&nbsp;arguments&nbsp;must&nbsp;be&nbsp;enclosed<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;double&nbsp;quotes,&nbsp;commands&nbsp;issued&nbsp;in&nbsp;interactive<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mode&nbsp;that&nbsp;require&nbsp;arguments&nbsp;do&nbsp;not&nbsp;require&nbsp;double<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quotes.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;get&nbsp;help&nbsp;on&nbsp;a&nbsp;command&nbsp;in&nbsp;command&nbsp;line&nbsp;mode,&nbsp;type<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"&lt;command&gt;&nbsp;?"&nbsp;or&nbsp;"&lt;command&gt;&nbsp;-h".&nbsp;&nbsp;To&nbsp;get&nbsp;help&nbsp;in<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interactive&nbsp;mode&nbsp;type&nbsp;'help'&nbsp;or&nbsp;'?'&nbsp;at&nbsp;the&nbsp;prompt&nbsp;to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;see&nbsp;all&nbsp;available&nbsp;commands,&nbsp;to&nbsp;get&nbsp;help&nbsp;on&nbsp;a&nbsp;single<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command,&nbsp;type&nbsp;'&lt;command&gt;&nbsp;{?&nbsp;|&nbsp;-h}'.&nbsp;&nbsp;Use&nbsp;TAB&nbsp;completion<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;fill&nbsp;out&nbsp;partial&nbsp;commands&nbsp;and&nbsp;up-arrow&nbsp;to&nbsp;recall<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;command&nbsp;history.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -40,9 +83,12 @@ on&nbsp;the&nbsp;above&nbsp;modules.</tt></p>
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PshellControl.html">PshellControl</a><br>
 <a href="PshellReadline.html">PshellReadline</a><br>
-</td><td width="25%" valign=top><a href="PshellServer.html">PshellServer</a><br>
+<a href="PshellServer.html">PshellServer</a><br>
+</td><td width="25%" valign=top><a href="fcntl.html">fcntl</a><br>
+<a href="fnmatch.html">fnmatch</a><br>
 <a href="os.html">os</a><br>
 </td><td width="25%" valign=top><a href="signal.html">signal</a><br>
 <a href="sys.html">sys</a><br>
+<a href="time.html">time</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table>
 </body></html>

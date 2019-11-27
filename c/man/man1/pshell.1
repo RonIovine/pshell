@@ -8,7 +8,11 @@ client program (called 'pshell') or via a standard 'telnet' based client.
 
 The 'pshell' program provides the client side command line interface (CLI) functionality
 to remotely invoke the callback functions that are registered within a program running a
-UDP or UNIX based PshellServer.
+UDP or UNIX based PshellServer.  It can control processes that are running either the 'C'
+version of the PshellServer, which is provided via the PshellServer.h API and the libpshell-server
+link libaray, the Python version that is provided via the PshellServer.py module, or the
+Go (Golang) version that is provided by the PshellServer.go module and API.
+
 
 The corresponding 'pshell.exp' 'expect' script provides a wrapper around a standard 'telnet'
 client to give a similar functionality (i.e. batch mode, command line mode etc) for programs
@@ -19,13 +23,12 @@ to a TCP PshellServer, however, only interactive mode is supported.
 Note, there is also a python version of the UDP/UNIX client (pshell.py), it has the same usage
 and functionality as this compiled 'C' version, see pydoc pshell for the docmentation.
 .SH USAGE
-Usage: pshell -n | -s | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
+Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
                         [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
-
-    -n              - show named IP server/port mappings in pshell-client.conf file
     -s              - show all servers running on the local host
+    -n              - show named IP server/port mappings in pshell-client.conf file
     -c              - run command from command line
     -f              - run commands from a batch file
     -t              - change the default server response timeout

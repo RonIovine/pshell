@@ -36,7 +36,8 @@ any process that is running a UDP or UNIX PshellServer (TCP PshellServers
 are controlled via a standard 'telnet' client).  It can control processes
 that are running either the 'C' version of the PshellServer, which is
 provided via the PshellServer.h API and the libpshell-server link libaray,
-or the Python version that is provided via the PshellServer.py module.
+the Python version that is provided via the PshellServer.py module, or the
+Go (Golang) version that is provided by the PshellServer.go module and API.
 
 Modules:
 
@@ -50,6 +51,48 @@ PshellReadline.py -- provide a readline like capability to solicit user input
 
 See the respective 'pydoc' pages (text or HTML) for more detailed documentation
 on the above modules.
+
+Usage:
+
+The following shows the usage of the UDP/UNIX pshell interactive client program:
+
+Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
+                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
+
+  where:
+    -s              - show all servers running on the local host
+    -n              - show named IP server/port mappings in pshell-client.conf file
+    -c              - run command from command line
+    -f              - run commands from a batch file
+    -t              - change the default server response timeout
+    hostName        - hostname of UDP server
+    ipAddr          - IP addr of UDP server
+    portNum         - port number of UDP server
+    udpServerName   - name of UDP server from pshell-client.conf file
+    unixServerName  - name of UNIX server (use '-s' option to list servers)
+    serverIndex     - index of local UNIX or UDP server (use '-s' option to list servers)
+    timeout         - response wait timeout in sec (default=5)
+    command         - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
+    fileName        - optional batch file to execute
+    rate            - optional rate to repeat command or batch file (in seconds)
+    repeat          - optional repeat count for command or batch file (default=forever)
+    clear           - optional clear screen between commands or batch file passes
+
+    NOTE: If no <command> is given, pshell will be started
+          up in interactive mode, commands issued in command
+          line mode that require arguments must be enclosed
+          in double quotes, commands issued in interactive
+          mode that require arguments do not require double
+          quotes.
+
+          To get help on a command in command line mode, type
+          "<command> ?" or "<command> -h".  To get help in
+          interactive mode type 'help' or '?' at the prompt to
+          see all available commands, to get help on a single
+          command, type '<command> {? | -h}'.  Use TAB completion
+          to fill out partial commands and up-arrow to recall
+          for command history.
+
 """
 
 # import all our necessary module
@@ -542,13 +585,12 @@ def _showNamedServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s -n | -s | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("Usage: %s -s | -n | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
   print("                           [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
-  print("")
-  print("    -n              - show named IP server/port mappings in pshell-client.conf file")
   print("    -s              - show all servers running on the local host")
+  print("    -n              - show named IP server/port mappings in pshell-client.conf file")
   print("    -c              - run command from command line")
   print("    -f              - run commands from a batch file")
   print("    -t              - change the default server response timeout")
