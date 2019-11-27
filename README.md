@@ -239,13 +239,13 @@ a `-h` to show the usage as follows:
 ```
 $ pshell -h
 
-Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
+Usage: pshell -n | -s | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]
                         [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]
 
   where:
 
     -n              - show named IP server/port mappings in pshell-client.conf file
-    -l              - show all servers running on the local host
+    -s              - show all servers running on the local host
     -c              - run command from command line
     -f              - run commands from a batch file
     -t              - change the default server response timeout
@@ -253,8 +253,8 @@ Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
     ipAddr          - IP addr of UDP server
     portNum         - port number of UDP server
     udpServerName   - name of UDP server from pshell-client.conf file
-    unixServerName  - name of UNIX server (use '-l' option to list servers)
-    serverIndex     - index of local UNIX or UDP server (use '-l' option to list servers)
+    unixServerName  - name of UNIX server (use '-s' option to list servers)
+    serverIndex     - index of local UNIX or UDP server (use '-s' option to list servers)
     timeout         - response wait timeout in sec (default=5)
     command         - optional command to execute (in double quotes, ex. -c "myCommand arg1 arg2")
     fileName        - optional batch file to execute
