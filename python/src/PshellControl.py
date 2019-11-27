@@ -856,6 +856,9 @@ def _getResponseString(retCode):
 def _cleanupUnixResources():
   global _gUnixSocketPath
   global _gLockFileExtension
+  if not os.path.isdir(_gUnixSocketPath):
+    os.system("mkdir %s" % _gFileSystemPath)
+    os.system("chmod 777 %s" % _gFileSystemPath)
   lockFiles = fnmatch.filter(os.listdir(_gUnixSocketPath), "*"+_gLockFileExtension)
   for file in lockFiles:
     try:
@@ -1001,8 +1004,8 @@ _gPshellControl = []
 _gPshellMulticast = []
 
 # path of unix domain socket handle for client sockets
-_gUnixSocketPath = "/tmp/"
-_gLockFileExtension = ".pshell-lock"
+_gUnixSocketPath = "/tmp/pshell/"
+_gLockFileExtension = ".lock"
 _PSHELL_CONFIG_DIR = "/etc/pshell/config"
 _PSHELL_CONFIG_FILE = "pshell-control.conf"
 

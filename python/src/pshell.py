@@ -66,8 +66,8 @@ import PshellReadline
 _gSid = None
 _gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
-_gFileSystemPath = "/tmp/"
-_gLockFileExtension = ".pshell-lock"
+_gFileSystemPath = "/tmp/pshell/"
+_gLockFileExtension = ".lock"
 _gUnixLockFileId = "unix"+_gLockFileExtension
 _gActiveServers = []
 
@@ -408,6 +408,9 @@ def _cleanupFileSystemResources():
   global _gMaxHostnameLength
   global _gMaxActiveServerLength
   global _gUnixLockFileId
+  if not os.path.isdir(_gFileSystemPath):
+    os.system("mkdir %s" % _gFileSystemPath)
+    os.system("chmod 777 %s" % _gFileSystemPath)
   lockFiles = fnmatch.filter(os.listdir(_gFileSystemPath), "*"+_gLockFileExtension)
   lockFiles.sort()
   for file in lockFiles:
@@ -539,13 +542,13 @@ def _showNamedServers():
 #####################################################
 def _showUsage():
   print("")
-  print("Usage: %s -n | -l | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
+  print("Usage: %s -n | -s | {{{<hostName> | <ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex>} [-t<timeout>]" % os.path.basename(sys.argv[0]))
   print("                           [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]")
   print("")
   print("  where:")
   print("")
   print("    -n              - show named IP server/port mappings in pshell-client.conf file")
-  print("    -l              - show all servers running on the local host")
+  print("    -s              - show all servers running on the local host")
   print("    -c              - run command from command line")
   print("    -f              - run commands from a batch file")
   print("    -t              - change the default server response timeout")
@@ -553,8 +556,8 @@ def _showUsage():
   print("    ipAddr          - IP address of UDP server")
   print("    portNum         - port number of UDP server")
   print("    udpServerName   - name of UDP server from pshell-client.conf file")
-  print("    unixServerName  - name of UNIX server (use '-l' option to list servers)")
-  print("    serverIndex     - index of local UNIX or UDP server (use '-l' option to list servers)")
+  print("    unixServerName  - name of UNIX server (use '-s' option to list servers)")
+  print("    serverIndex     - index of local UNIX or UDP server (use '-s' option to list servers)")
   print("    timeout         - response wait timeout in sec (default=5)")
   print("    command         - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")")
   print("    fileName        - optional batch file to execute")
@@ -653,7 +656,7 @@ if (__name__ == '__main__'):
 
   if sys.argv[1] == "-n":
     _showNamedServers()
-  elif sys.argv[1] == "-l":
+  elif sys.argv[1] == "-s":
     _showActiveServers()
   elif not _getActiveServer(sys.argv[1]):
     _gRemoteServer = sys.argv[1]

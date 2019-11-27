@@ -306,9 +306,9 @@ static int _socketFd;
 static struct sockaddr_in _localIpAddress;
 static struct sockaddr_un _localUnixAddress;
 static char _lockFile[300];
-static const char *_fileSystemPath = "/tmp/";
-static const char *_lockFileExtension = ".pshell-lock";
-static const char *_unixLockFileId = "unix.pshell-lock";
+static const char *_fileSystemPath = "/tmp/pshell/";
+static const char *_lockFileExtension = ".lock";
+static const char *_unixLockFileId = "unix.lock";
 
 static PshellServerType _serverType = PSHELL_LOCAL_SERVER;
 static PshellServerMode _serverMode = PSHELL_BLOCKING;
@@ -2659,6 +2659,14 @@ static void cleanupFileSystemResources(void)
   char tempDirEntry[300];
   struct dirent *dirEntry;
   dir = opendir(_fileSystemPath);
+  if (!dir)
+  {
+    sprintf(tempDirEntry, "mkdir %s", _fileSystemPath);
+    system(tempDirEntry);
+    sprintf(tempDirEntry, "chmod 777 %s", _fileSystemPath);
+    system(tempDirEntry);
+    dir = opendir(_fileSystemPath);
+  }
   if (dir)
   {
     while ((dirEntry = readdir(dir)) != NULL)

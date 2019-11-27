@@ -182,8 +182,8 @@ const (
 //
 /////////////////////////////////////////////////////////////////////////////////
 
-const _UNIX_SOCKET_PATH = "/tmp/"
-const _LOCK_FILE_EXTENSION = ".pshell-lock"
+const _UNIX_SOCKET_PATH = "/tmp/pshell/"
+const _LOCK_FILE_EXTENSION = ".lock"
 const _NO_RESP_NEEDED = 0
 const _NO_DATA_NEEDED = 0
 const _RESP_NEEDED = 1
@@ -581,6 +581,10 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func cleanupUnixResources() {
+  if _, err := os.Stat(_UNIX_SOCKET_PATH); os.IsNotExist(err) {
+    os.Mkdir(_UNIX_SOCKET_PATH, 0777)
+    os.Chmod(_UNIX_SOCKET_PATH, 0777)
+  }
   fileInfo, err := ioutil.ReadDir(_UNIX_SOCKET_PATH)
   if err == nil {
     for _, file := range fileInfo {

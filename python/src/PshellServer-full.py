@@ -42,8 +42,8 @@ the libpshell-server linkable 'C' library, but implemented as a Python module.
 It supports all the server types as the corresponding 'C' impelmentation, TCP,
 UDP, UNIX and LOCAL server types are all supported.  Applications using this
 module can be controlled via the pshell UDP/UNIX stand-alone 'C' client program
-or via the PshellControl.h/libpshell-control or PshellControl.py
-control mechanism.
+or via the PshellControl.h/libpshell-control, PshellControl.py control mechanism
+or the PshellControl.go module and API.
 
 Functions:
 
@@ -1002,6 +1002,9 @@ def _cleanupFileSystemResources():
   global _gFileSystemPath
   global _gLockFileExtension
   global _gUnixLockFileId
+  if not os.path.isdir(_gFileSystemPath):
+    os.system("mkdir %s" % _gFileSystemPath)
+    os.system("chmod 777 %s" % _gFileSystemPath)
   lockFiles = fnmatch.filter(os.listdir(_gFileSystemPath), "*"+_gLockFileExtension)
   for file in lockFiles:
     try:
@@ -1938,12 +1941,12 @@ _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
 _gSocketFd = None
 _gConnectFd = None
 _gFromAddr = None
-_gFileSystemPath = "/tmp/"
+_gFileSystemPath = "/tmp/pshell/"
 _gArgs = None
 _gFoundCommand = None
 _gUnixSourceAddress = None
 _gLockFile = None
-_gLockFileExtension = ".pshell-lock"
+_gLockFileExtension = ".lock"
 _gUnixLockFileId = "unix"+_gLockFileExtension
 _gLockFd = None
 _gRunning = False

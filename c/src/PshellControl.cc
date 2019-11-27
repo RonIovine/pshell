@@ -120,8 +120,8 @@ static PshellLogFunction _logFunction = NULL;
 static unsigned _logLevel = PSHELL_CONTROL_LOG_LEVEL_DEFAULT;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static const char *_errorPad = "              ";
-static const char *_unixSocketPath = "/tmp/";
-static const char *_lockFileExtension = ".pshell-lock";
+static const char *_unixSocketPath = "/tmp/pshell/";
+static const char *_lockFileExtension = ".lock";
 
 /******************************************
  * private "member" function prototypes
@@ -580,8 +580,17 @@ static void cleanupUnixResources(void)
   int unixLockFd;
   char unixLockFile[MAX_STRING_SIZE];
   char unixSocketFile[MAX_STRING_SIZE];
+  char tempDirEntry[MAX_STRING_SIZE];
   struct dirent *dirEntry;
   dir = opendir(_unixSocketPath);
+  if (!dir)
+  {
+    sprintf(tempDirEntry, "mkdir %s", _unixSocketPath);
+    system(tempDirEntry);
+    sprintf(tempDirEntry, "chmod 777 %s", _unixSocketPath);
+    system(tempDirEntry);
+    dir = opendir(_unixSocketPath);
+  }
   if (dir)
   {
     while ((dirEntry = readdir(dir)) != NULL)

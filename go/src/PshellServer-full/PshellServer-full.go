@@ -338,9 +338,9 @@ var _gLogFunction logFunction
 
 var _gLockFile string
 var _gLockFd *os.File
-const _FILE_SYSTEM_PATH = "/tmp/"
-const _LOCK_FILE_EXTENSION = ".pshell-lock"
-const _UNIX_LOCK_FILE_ID = "unix.pshell-lock"
+const _FILE_SYSTEM_PATH = "/tmp/pshell/"
+const _LOCK_FILE_EXTENSION = ".lock"
+const _UNIX_LOCK_FILE_ID = "unix.lock"
 
 /////////////////////////////////
 //
@@ -1827,6 +1827,10 @@ func runTCPServer() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func cleanupFileSystemResources() {
+  if _, err := os.Stat(_FILE_SYSTEM_PATH); os.IsNotExist(err) {
+    os.Mkdir(_FILE_SYSTEM_PATH, 0777)
+    os.Chmod(_FILE_SYSTEM_PATH, 0777)
+  }
   fileInfo, err := ioutil.ReadDir(_FILE_SYSTEM_PATH)
   if err == nil {
     for _, file := range fileInfo {

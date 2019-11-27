@@ -135,9 +135,9 @@ bool _isUnixConnected = false;
 ServerType _serverType = UDP;
 
 #define MAX_ACTIVE_SERVERS 1000
-const char *_unixSocketPath = "/tmp/";
-const char *_lockFileExtension = ".pshell-lock";
-static const char *_unixLockFileId = "unix.pshell-lock";
+const char *_unixSocketPath = "/tmp/pshell/";
+const char *_lockFileExtension = ".lock";
+static const char *_unixLockFileId = "unix.lock";
 DIR *_dir;
 struct ActiveServer
 {
@@ -1419,6 +1419,14 @@ void cleanupFileSystemResources(void)
   char *serverInfo[MAX_TOKENS];
   unsigned numTokens;
   _dir = opendir(_unixSocketPath);
+  if (!_dir)
+  {
+    sprintf(tempDirEntry, "mkdir %s", _unixSocketPath);
+    system(tempDirEntry);
+    sprintf(tempDirEntry, "chmod 777 %s", _unixSocketPath);
+    system(tempDirEntry);
+    _dir = opendir(_unixSocketPath);
+  }
   if (_dir)
   {
     while ((dirEntry = readdir(_dir)) != NULL)
@@ -1684,13 +1692,13 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -n | -l | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]\n");
+  printf("Usage: pshell -n | -s | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]\n");
   printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");
   printf("\n");
   printf("    -n              - show named IP server/port mappings in pshell-client.conf file\n");
-  printf("    -l              - show all servers running on the local host\n");
+  printf("    -s              - show all servers running on the local host\n");
   printf("    -c              - run command from command line\n");
   printf("    -f              - run commands from a batch file\n");
   printf("    -t              - change the default server response timeout\n");
@@ -1698,8 +1706,8 @@ void showUsage(void)
   printf("    ipAddr          - IP addr of UDP server\n");
   printf("    portNum         - port number of UDP server\n");
   printf("    udpServerName   - name of UDP server from pshell-client.conf file\n");
-  printf("    unixServerName  - name of UNIX server (use '-l' option to list servers)\n");
-  printf("    serverIndex     - index of local UNIX or UDP server (use '-l' option to list servers)\n");
+  printf("    unixServerName  - name of UNIX server (use '-s' option to list servers)\n");
+  printf("    serverIndex     - index of local UNIX or UDP server (use '-s' option to list servers)\n");
   printf("    timeout         - response wait timeout in sec (default=5)\n");
   printf("    command         - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")\n");
   printf("    fileName        - optional batch file to execute\n");
@@ -1751,7 +1759,7 @@ void parseCommandLine(int *argc, char *argv[])
     {
       showNamedServers();
     }
-    else if (strcmp(argv[0], "-l") == 0)
+    else if (strcmp(argv[0], "-s") == 0)
     {
       showActiveServers();
     }
