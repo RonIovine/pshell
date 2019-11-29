@@ -546,6 +546,9 @@ def _showActiveServers():
   global _gActiveServers
   global _gMaxHostnameLength
   global _gMaxActiveServerLength
+  tcpFound = False
+  udpFound = False
+  unixFound = False
   print("")
   print("***************************************************")
   print("*   Active PSHELL Servers Running On Local Host   *")
@@ -555,12 +558,21 @@ def _showActiveServers():
     print("Index   %s   Type   Host%s   Port" % ("Server Name".ljust(_gMaxActiveServerLength), " "*(_gMaxHostnameLength-4)))
     print("=====   %s   ====   %s   =====" % ("="*_gMaxActiveServerLength, "="*_gMaxHostnameLength))
   for index, server in enumerate(_gActiveServers):
+    if server["type"] == "tcp":
+      tcpFound = True
+    if server["type"] == "udp":
+      udpFound = True
+    if server["type"] == "unix":
+      unixFound = True
     print("%-5d   %s   %-4s   %s   %-4s" % (index+1, server["name"].ljust(_gMaxActiveServerLength), server["type"], server["host"].ljust(_gMaxHostnameLength), server["port"]))
   if len(_gActiveServers) > 0:
     print("")
-    print("Connect to TCP server with: telnet <host> <port>")
-    print("Connect to UDP server with: pshell {{<host> <port>} | <index>}")
-    print("Connect to UNIX server with: pshell <serverName> | <index>")
+    if tcpFound:
+      print("Connect to TCP server with: telnet <host> <port>")
+    if udpFound:
+      print("Connect to UDP server with: pshell {<host> <port>} | <index>")
+    if unixFound:
+      print("Connect to UNIX server with: pshell <name> | <index>")
     print("")
   exit(0)
 

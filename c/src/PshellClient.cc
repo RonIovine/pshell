@@ -1566,6 +1566,9 @@ const char *getActiveServer(char *server_)
 /******************************************************************************/
 void showActiveServers(void)
 {
+  bool tcpFound = false;
+  bool unixFound = false;
+  bool udpFound = false;
   printf("\n");
   printf("***************************************************\n");
   printf("*   Active PSHELL Servers Running On Local Host   *\n");
@@ -1588,6 +1591,18 @@ void showActiveServers(void)
   }
   for (int index = 0; index < _numActiveServers; index++)
   {
+    if (strcmp(_activeServers[index].type, "tcp") == 0)
+    {
+      tcpFound = true;
+    }
+    if (strcmp(_activeServers[index].type, "udp") == 0)
+    {
+      udpFound = true;
+    }
+    if (strcmp(_activeServers[index].type, "unix") == 0)
+    {
+      unixFound = true;
+    }
     printf("%-5d   %-*s   %-4s   %-*s   %-4s\n",
            index+1,
            _maxActiveServerLength,
@@ -1600,9 +1615,18 @@ void showActiveServers(void)
   if (_numActiveServers > 0)
   {
     printf("\n");
-    printf("Connect to TCP server with: telnet <host> <port>\n");
-    printf("Connect to UDP server with: pshell {{<host> <port>} | <index>}\n");
-    printf("Connect to UNIX server with: pshell <serverName> | <index>\n");
+    if (tcpFound)
+    {
+      printf("Connect to TCP server with: telnet <host> <port>\n");
+    }
+    if (udpFound)
+    {
+      printf("Connect to UDP server with: pshell {<host> <port>} | <index>\n");
+    }
+    if (unixFound)
+    {
+      printf("Connect to UNIX server with: pshell <name> | <index>\n");
+    }
     printf("\n");
   }
   exitProgram(0);
