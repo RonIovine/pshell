@@ -120,7 +120,6 @@ func wildcardMatch(argv []string) {
     PshellServer.ShowUsage()
     PshellServer.Printf("\n")
     PshellServer.Printf("  where valid <args> are:\n")
-    PshellServer.Printf("\n")
     PshellServer.Printf("    on\n")
     PshellServer.Printf("    of*f\n")
     PshellServer.Printf("    a*ll\n")

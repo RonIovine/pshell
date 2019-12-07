@@ -142,7 +142,6 @@ def _add(argv):
     PshellServer.showUsage()
     PshellServer.printf()
     PshellServer.printf("  where:")
-    PshellServer.printf()
     PshellServer.printf("    <localName>    - Local logical name of the server, must be unique")
     PshellServer.printf("    <remoteServer> - Hostname or IP address of UDP server or name of UNIX server")
     PshellServer.printf("    <port>         - UDP port number or 'unix' for UNIX server (can be omitted for UNIX)")

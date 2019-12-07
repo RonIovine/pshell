@@ -140,7 +140,6 @@ def wildcardMatch(argv):
     PshellServer.showUsage()
     PshellServer.printf()
     PshellServer.printf("  where valid <args> are:")
-    PshellServer.printf()
     PshellServer.printf("    on")
     PshellServer.printf("    of*f")
     PshellServer.printf("    a*ll")

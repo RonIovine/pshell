@@ -196,7 +196,6 @@ void add(int argc, char *argv[])
     pshell_showUsage();
     pshell_printf("\n");
     pshell_printf("  where:\n");
-    pshell_printf("\n");
     pshell_printf("    <localName>    - Local logical name of the server, must be unique\n");
     pshell_printf("    <remoteServer> - Hostname or IP address of UDP server or name of UNIX server\n");
     pshell_printf("    <port>         - UDP port number or 'unix' for UNIX server (can be omitted for UNIX)\n");

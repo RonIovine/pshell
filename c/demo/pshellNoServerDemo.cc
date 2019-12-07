@@ -119,7 +119,6 @@ void wildcardMatch(int argc, char *argv[])
     pshell_showUsage();
     pshell_printf("\n");
     pshell_printf("  where valid <args> are:\n");
-    pshell_printf("\n");
     pshell_printf("    on\n");
     pshell_printf("    of*f\n");
     pshell_printf("    a*ll\n");
@@ -302,7 +301,7 @@ void getOptions(int argc, char *argv[])
     pshell_printf("\n");
     pshell_showUsage();
     pshell_printf("\n");
-    pshell_printf("  where::\n");
+    pshell_printf("  where:\n");
     pshell_printf("    all    - extract all options\n");
     pshell_printf("    <opt>  - option identifier to extract (e.g. '-t', 'timeout' etc)\n");
     pshell_printf("    <optN> - option identifier along with value (e.g. '-t10', 'timeout=10', etc)\n");
