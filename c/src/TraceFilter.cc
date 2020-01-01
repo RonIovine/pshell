@@ -140,11 +140,14 @@ static const void showThreads(char *thread_);
 static bool isLevel(char *string_);
 static bool isWatchHit(void);
 static void getWatchValue(void);
+static void processBreakpoint(const char *file_, const char *function_, int line_);
+static void stopProgram(const char *file_, const char *function_, int line_);
 static void printLog(const char *name_,
                      const char *file_,
                      const char *function_,
                      int line_,
                      const char *message_);
+static const char *stripPath(const char *file_);
 #ifdef TF_FAST_FILENAME_LOOKUP
 static const void showSymbols(char *symbol_);
 #endif
@@ -291,6 +294,16 @@ static int _callbackNumHits = 0;
 static tf_TraceControl _callbackControl = TF_ONCE;
 static tf_TraceLogFunction _logFunction = NULL;
 
+/* breakpoint data */
+static bool _step = false;
+static bool _continue = false;
+static bool _breakpointEnabled = false;
+static pthread_t _breakpointThread = 0;
+static char _breakpointFile[180];
+static int _breakpointLine = 0;
+static const char *_currentFile = NULL;
+static int _currentLine = 0;
+
 /* this hierarchical level will be applied when the trace is
  * on but the filter is off, the 'tf_isFilterPassed' will
  * return 'true' if this level is >= the level passed in,
@@ -306,6 +319,8 @@ static unsigned _defaultHierarchicalLevel = 0;
 /* define the string based names of the trace levels */
 #define TF_CALLBACK_STRING "Callback"
 #define TF_WATCH_STRING "Watch"
+#define TF_BREAKPOINT_STRING "Breakpoint"
+#define TF_STEP_STRING "Step"
 
 /************************************
  * "public" function bodies
@@ -368,6 +383,8 @@ void tf_init(void)
                     "             prefix {on | off} |\n"
                     "             timestamp {on | off} |\n"
 #endif
+                    "             breakpoint {on | off | <file>:<line>} |\n"
+                    "             continue | step |\n"
                     "             level {all | default | <value>} |\n"
                     "             filter {on | off} |\n"
                     "             global {on | off | all | default | [+|-]<level> [<level>] ...} |\n"
@@ -434,6 +451,7 @@ bool tf_isFilterPassed(const char *file_,
                        const char *function_,
                        unsigned level_)
 {
+  const char *file;
   char traceOutputString[180];
   FileFilter *fileFilter = NULL;
   FunctionFilter *functionFilter = NULL;
@@ -443,6 +461,8 @@ bool tf_isFilterPassed(const char *file_,
   bool threadFilterPassed = !_threadFilterEnabled;
   bool filterPassed = false;
   unsigned level = _levelFilters[level_].level;
+  file = stripPath(file_);
+  processBreakpoint(file, function_, line_);
   if (isWatchHit() && ((_watchNumHits == 0) || (_watchControl != TF_ONCE)))
   {
 
@@ -452,7 +472,7 @@ bool tf_isFilterPassed(const char *file_,
 
     /* print out the current trace where the value change was detected */
     sprintf(traceOutputString, _watchFormatString, "curr", _watchCurrValue);
-    printLog(TF_WATCH_STRING, file_, function_, line_, traceOutputString);
+    printLog(TF_WATCH_STRING, file, function_, line_, traceOutputString);
 
     _watchPrevValue = _watchCurrValue;
     _watchNumHits++;
@@ -484,7 +504,7 @@ bool tf_isFilterPassed(const char *file_,
   {
     /* evaluate any file filters */
     if ((_fileFilterEnabled) &&
-        ((fileFilter = findFileFilter(file_)) != NULL) &&
+        ((fileFilter = findFileFilter(file)) != NULL) &&
         ((fileFilterPassed = ((fileFilter->numLineFilters == 0) &&
          (fileFilter->level & level))) == false))
     {
@@ -557,7 +577,7 @@ bool tf_isFilterPassed(const char *file_,
                  traceOutputString);
         /* print out the current trace where the condition was first detected */
         sprintf(traceOutputString, "Callback condition TRUE: Function: %s", _callbackName);
-        printLog(TF_CALLBACK_STRING, file_, function_, line_, traceOutputString);
+        printLog(TF_CALLBACK_STRING, file, function_, line_, traceOutputString);
         /* see if they requested an abort on the condition being met */
         if (_callbackControl == TF_ABORT)
         {
@@ -587,7 +607,7 @@ bool tf_isFilterPassed(const char *file_,
                  traceOutputString);
         /* print out the current trace where the condition was first detected */
         sprintf(traceOutputString, "Callback condition FALSE: Function: %s", _callbackName);
-        printLog(TF_CALLBACK_STRING, file_, function_, line_, traceOutputString);
+        printLog(TF_CALLBACK_STRING, file, function_, line_, traceOutputString);
         /* see if they requested an abort on the condition being met */
         if (_callbackControl == TF_ABORT)
         {
@@ -603,7 +623,7 @@ bool tf_isFilterPassed(const char *file_,
     }
 
     /* save off the previous trace location info */
-    _callbackPrevFile = file_;
+    _callbackPrevFile = file;
     _callbackPrevFunction = function_;
     _callbackPrevLine = line_;
 
@@ -613,7 +633,7 @@ bool tf_isFilterPassed(const char *file_,
   /* if we have a watchpoint enabled, remember our previous, file/function/line info */
   if (_watchSymbol != NULL)
   {
-    _watchPrevFile = file_;
+    _watchPrevFile = file;
     _watchPrevFunction = function_;
     _watchPrevLine = line_;
   }
@@ -621,7 +641,7 @@ bool tf_isFilterPassed(const char *file_,
   /* if we have a callback enabled, remember our previous, file/function/line info */
   if (_callbackFunction != NULL)
   {
-    _callbackPrevFile = file_;
+    _callbackPrevFile = file;
     _callbackPrevFunction = function_;
     _callbackPrevLine = line_;
   }
@@ -730,16 +750,16 @@ void printLog(const char *name_,
               const char *message_)
 {
 #ifdef TF_INTEGRATED_TRACE_LOG
-  trace_outputLog(name_, file_, function_, line_, message_);
+  trace_outputLog(name_, stripPath(file_), function_, line_, message_);
 #else
   if (_logFunction == NULL)
   {
-    printf("%s: %s(%s):%d - %s\n", name_, file_, function_, line_, message_);
+    printf("%s: %s(%s):%d - %s\n", name_, stripPath(file_), function_, line_, message_);
   }
   else
   {
     char traceOutputLine[180];
-    sprintf(traceOutputLine, "%s: %s(%s):%d - %s\n", name_, file_, function_, line_, message_);
+    sprintf(traceOutputLine, "%s: %s(%s):%d - %s\n", name_, stripPath(file_), function_, line_, message_);
     (*_logFunction)(traceOutputLine);
   }
 #endif
@@ -801,6 +821,30 @@ void showConfig(void)
   pshell_printf("Trace prefix............: %s\n", ((trace_isPrefixEnabled()) ? ON : OFF));
   pshell_printf("Trace timestamp.........: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
 #endif
+  if (_breakpointLine != 0)
+  {
+    pshell_printf("Trace breakpoint........: %s\n", (_breakpointEnabled ? ON : OFF));
+    if (_breakpointLine == 0)
+    {
+      pshell_printf("  Breakpoint Location...: None\n");
+    }
+    else
+    {
+      pshell_printf("  Breakpoint Location...: %s:%d\n", _breakpointFile, _breakpointLine);
+    }
+    if (_currentLine == 0)
+    {
+      pshell_printf("  Current Location......: None\n");
+    }
+    else
+    {
+      pshell_printf("  Current Location......: %s:%d\n", _currentFile, _currentLine);
+    }
+  }
+  else
+  {
+    pshell_printf("Trace breakpoint........: %s\n", NONE);
+  }
   if (_watchSymbol != NULL)
   {
     pshell_printf("Trace watchpoint........: %s\n", _watchSymbol);
@@ -983,6 +1027,8 @@ void showUsage(void)
   pshell_printf("    <level>      - one of the available trace levels\n");
   pshell_printf("    <lineSpec>   - list of one or more lines to filter (e.g. 1,3,5-7,9)\n");
   pshell_printf("    <levelSpec>  - list of one or more levels or 'default' (e.g. enter,exit)\n");
+  pshell_printf("    <file>       - file to set for breakpoint\n");
+  pshell_printf("    <line>       - line to set for breakpoint\n");
   pshell_printf("    +            - append the filter item to the specified list\n");
   pshell_printf("    -            - remove the filter item from the specified list\n");
   pshell_printf("\n");
@@ -998,6 +1044,7 @@ void showUsage(void)
 /******************************************************************************/
 void configureFilter(int argc, char *argv[])
 {
+  Tokens breakpoint;
 
   if (pshell_isHelp())
   {
@@ -1103,6 +1150,50 @@ void configureFilter(int argc, char *argv[])
     }
   }
 #endif
+  else if (pshell_isSubString(argv[0], "breakpoint", 1) && (argc == 2))
+  {
+    if (pshell_isSubString(argv[1], "on", 2))
+    {
+      if (_breakpointLine > 0)
+      {
+        _breakpointEnabled = true;
+        _breakpointThread = 0;
+      }
+      else
+      {
+        pshell_printf("Must set a breakpoint location to enable breakpoint\n");
+      }
+    }
+    else if (pshell_isSubString(argv[1], "off", 2))
+    {
+      _breakpointEnabled = false;
+      _breakpointThread = 0;
+    }
+    else
+    {
+      tokenize(argv[1], breakpoint, ":");
+      if (breakpoint.numTokens == 2)
+      {
+        strcpy(_breakpointFile, breakpoint.tokens[0]);
+        _breakpointLine = atoi(breakpoint.tokens[1]);
+        _breakpointEnabled = true;
+        _breakpointThread = 0;
+      }
+      else
+      {
+        showUsage();
+      }
+    }
+  }
+  else if (pshell_isSubString(argv[0], "step", 2) && (argc == 1))
+  {
+    _step = true;
+    _continue = true;
+  }
+  else if (pshell_isSubString(argv[0], "continue", 1) && (argc == 1))
+  {
+    _continue = true;
+  }
   else if (pshell_isSubString(argv[0], "function", 4) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "on", 2))
@@ -1194,7 +1285,7 @@ void configureFilter(int argc, char *argv[])
       showUsage();
     }
   }
-  else if (pshell_isSubString(argv[0], "show", 1) && (argc > 1))
+  else if (pshell_isSubString(argv[0], "show", 2) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "config", 1))
     {
@@ -1385,9 +1476,9 @@ const char *findSymbol(const char *symbol_)
       }
     }
   }
-  return (symbol);
+  return (stripPath(symbol));
 #else
-  return (symbol_);
+  return (stripPath(symbol_));
 #endif
 }
 
@@ -1658,8 +1749,8 @@ void addFileFilter(const char *file_, bool interactive_)
   Tokens lineRange;
   char originalRequest[300];
   char file[300];
-  strcpy(originalRequest, file_);
-  strcpy(file, file_);
+  strcpy(originalRequest, stripPath(file_));
+  strcpy(file, stripPath(file_));
   tokenize(file, tokens, ":");
   FileFilter *filter;
   char *ptr;
@@ -2147,5 +2238,62 @@ void tokenize(char *string_, Tokens &tokens_, const char *delimiter_)
         break;
       }
     }
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void stopProgram(const char *file_, const char *function_, int line_)
+{
+  _currentFile = file_;
+  _currentLine = line_;
+  _breakpointThread = pthread_self();
+  if (_step)
+  {
+    printLog(TF_STEP_STRING, file_, function_, line_, "Stepped to next location, program stopped...");
+  }
+  else
+  {
+    printLog(TF_BREAKPOINT_STRING, file_, function_, line_, "Breakpoint hit, program stopped...");
+  }
+  _continue = false;
+  _step = false;
+  while (!_continue && _breakpointEnabled)
+  {
+    sleep(1);
+  }
+  _currentFile = NULL;
+  _currentLine = 0;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void processBreakpoint(const char *file_, const char *function_, int line_)
+{
+  pthread_t currThread = pthread_self();
+  if (_breakpointEnabled)
+  {
+    if (((strcmp(file_, _breakpointFile) == 0) &&
+         (line_ == _breakpointLine) &&
+         ((_breakpointThread == 0) || (_breakpointThread == currThread))) ||
+        (_step && (_breakpointThread == currThread)))
+    {
+      stopProgram(file_, function_, line_);
+    }
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+const char *stripPath(const char *file_)
+{
+  const char *file;
+  if ((file = strrchr(file_, '/')) != NULL)
+  {
+    return (++file);
+  }
+  else
+  {
+    return (file_);
   }
 }
