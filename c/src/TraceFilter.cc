@@ -301,6 +301,7 @@ static bool _breakpointEnabled = false;
 static pthread_t _breakpointThread = 0;
 static char _breakpointFile[180];
 static int _breakpointLine = 0;
+static int _breakpointNumHits = 0;
 static const char *_currentFile = NULL;
 static int _currentLine = 0;
 
@@ -831,6 +832,7 @@ void showConfig(void)
     else
     {
       pshell_printf("  Breakpoint Location...: %s:%d\n", _breakpointFile, _breakpointLine);
+      pshell_printf("  Breakpoint Num Hits...: %d\n", _breakpointNumHits);
     }
     if (_currentLine == 0)
     {
@@ -1178,6 +1180,7 @@ void configureFilter(int argc, char *argv[])
         _breakpointLine = atoi(breakpoint.tokens[1]);
         _breakpointEnabled = true;
         _breakpointThread = 0;
+        _breakpointNumHits = 0;
       }
       else
       {
@@ -2255,6 +2258,7 @@ void stopProgram(const char *file_, const char *function_, int line_)
   else
   {
     printLog(TF_BREAKPOINT_STRING, file_, function_, line_, "Breakpoint hit, program stopped...");
+    _breakpointNumHits++;
   }
   _continue = false;
   _step = false;
