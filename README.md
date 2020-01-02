@@ -217,8 +217,8 @@ The following HTML 'godoc' generated documentation is available in the
 go/doc directory, the user can also use the command line 'godoc' to see
 the embedded documentation on all the corresponding Go modules.
 ```
-PshellControl.html
 PshellServer.html
+PshellControl.html
 ```
 
 <a name="interactive-clients"></a>
@@ -602,8 +602,9 @@ Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <
 #### 6. pshellReadlineDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy
 stand-alone readline like implementation that can be used by any application to solicit user input.
-It has native command recall history, TAB completion, and command line editing capability.  The following
-is the usage of this program:
+It will work with any raw serial character based I/O from either a TCP socket in telnet mode or over
+a raw TTY serial port.  It has native command recall history, TAB completion, and command line editing
+capability.  The following is the usage of this program:
 ```
 $ pshellReadlineDemo -h
 

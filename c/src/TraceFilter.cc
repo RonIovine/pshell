@@ -543,7 +543,7 @@ bool tf_isFilterPassed(const char *file_,
       /* found at least one matching filter for either the file or function,
          return the results of the filter evaluation */
       filterPassed = (fileFilterPassed && functionFilterPassed && threadFilterPassed);
-     }
+    }
   }
   else if (_globalFilterEnabled)
   {
