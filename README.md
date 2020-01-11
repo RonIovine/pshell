@@ -7,7 +7,11 @@
 [Building](#building)<br>
 [Documentation](#documentation)<br>
 [Interactive clients](#interactive-clients)<br>
-[Demo programs](#demo-programs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[UDP/Unix (datagram) clients](#datagram-clients)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshell client](#pshell-client)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregator client](#pshellAggregator-client)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[TCP clients](#tcp-clients)<br>
+Demo programs](#demo-programs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellServerDemo](#pshellServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellControlDemo](#pshellControlDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[traceFilterDemo](#traceFilterDemo)<br>
@@ -68,9 +72,9 @@ These functions can be invoked via several methods depending on how the internal
 server is configured.  The following shows the various PSHELL server types along with their
 associated invokation method:
 
-* TCP Server   : Uses standard `telnet` interactive client to invoke functions
-* UDP Server   : Uses included `pshell/pshellAggregator` interactive clients or control API to invoke functions
-* UNIX Server  : Uses included `pshell/pshellAggregator` interactive clients or control API to invoke functions
+* TCP Server   : Uses standard [`telnet`](#tcp-client) interactive client to invoke functions
+* UDP Server   : Uses included [`pshell/pshellAggregator`] interactive clients or control API to invoke functions
+* UNIX Server  : Uses included [`pshell/pshellAggregator`](#datagram-client) interactive clients or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application
                  itself via local command line interactive prompting
 
@@ -228,14 +232,20 @@ generic and are server agnostic.  A custom client never needs to be created unle
 create a custom server aggregator client.  See the below section for the [pshellAggregatorDemo](#pshellAggregatorDemo) demo programs
 for more information on creating custom aggregators.
 
-A TCP pshell server just uses a standard `telnet` client for interactive access.  The datagram based servers
-(UDP/Unix) require the provided `pshell` interactive client.
+<a name="datagram-clients"></a>
+### UDP/Unix (datagram) clients
+The UDP/Unix based server uses one of the datagram based clients for interactivce access.  There is a client
+for access to a single datagram server called `pshell`, and a client for access to multiple datagram based
+servers called `pshellAggregator'.
 
-Note that there are 2 versions of the pshell UDP/Unix client programs, `pshell`, which is a compiled
-C implementation, and `pshell.py`, which is a Python implementation.  Any of those can interface to
-any of the [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the
-[traceFilterDemo](#traceFilterDemo) program.  The `pshell` and `pshell.py` client programs both take
-a `-h` to show the usage as follows:
+Note that there are 2 versions of bot datagram based client programs, `pshell/pshellAggregator`, which are compiled C implementations,
+and `pshell.py/pshellAggregarot.py`, which are a Python implementation.  Any of those can interface to any of the
+[pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
+
+
+<a name="pshell-client"></a>
+### pshell client
+The `pshell` and `pshell.py` client programs have the same usage and both take a `-h` to show the usage as follows:
 ```
 $ pshell -h
 
@@ -276,6 +286,27 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
           to fill out partial commands and up-arrow to recall
           for command history.
 ```
+
+<a name="pshellAggregator-client"></a>
+### pshellAggregator client
+The `pshellAggregator` and `pshellAggregator.py` client programs have the same usage and both take a `-h` to show the usage as follows:
+```
+$ pshellAggregator -h
+
+Usage: pshellAggregator
+
+  Client program that will allow for the aggregation of multiple remote
+  UDP/UNIX pshell servers into one consolidated client shell.  This program
+  can also create multicast groups for sets of remote servers.  The remote
+  servers and multicast groups can be added interactively via the 'add'
+  command or at startup via the 'pshellAggregator.startup' file.
+```
+
+<a name="tcp-clients"></a>
+### TCP clients
+ TCP pshell server just uses a standard `telnet` client for interactive access.  The datagram based servers
+(UDP/Unix) require the provided `pshell` interactive client.
+
 There is also an `expect` wrapper script, `pshell.exp`, that will wrap `telnet` to provide functionality
 similar to the above `pshell` client for things like command mode single-shot commands, file based commands,
 command/file repeat etc but for TCP based pshell servers.  The `expect` scripting package must be installed
@@ -323,21 +354,6 @@ Usage: pshell.exp -n | {<hostName> | ipAddr>} {<portNum> | <serverName>}
           a serverName as opposed to a portNum, this script will automatically
           detect that and assign the new values
 
-```
-Finally, there is a generic `pshellAggregator` UDP/Unix client program implemented in both C and Python that
-can be used to consolidate the pshell server commands from several remote applications into one comprehensive interactive session.  Note that this is different than the [custom aggregator](#pshellAggregatorDemo) described below.
-
-The following is the usage:
-```
-$ pshellAggregator -h
-
-Usage: pshellAggregator
-
-  Client program that will allow for the aggregation of multiple remote
-  UDP/UNIX pshell servers into one consolidated client shell.  This program
-  can also create multicast groups for sets of remote servers.  The remote
-  servers and multicast groups can be added interactively via the 'add'
-  command or at startup via the 'pshellAggregator.startup' file.
 ```
 
 <a name="demo-programs"></a>
