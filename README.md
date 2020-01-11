@@ -11,7 +11,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshell client](#pshell-client)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregator client](#pshellAggregator-client)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[TCP clients](#tcp-clients)<br>
-Demo programs](#demo-programs)<br>
+[Demo programs](#demo-programs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellServerDemo](#pshellServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellControlDemo](#pshellControlDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[traceFilterDemo](#traceFilterDemo)<br>
@@ -73,7 +73,7 @@ server is configured.  The following shows the various PSHELL server types along
 associated invokation method:
 
 * TCP Server   : Uses standard [`telnet`](#tcp-client) interactive client to invoke functions
-* UDP Server   : Uses included [`pshell/pshellAggregator`] interactive clients or control API to invoke functions
+* UDP Server   : Uses included [`pshell/pshellAggregator`](#datagram-client) interactive clients or control API to invoke functions
 * UNIX Server  : Uses included [`pshell/pshellAggregator`](#datagram-client) interactive clients or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application
                  itself via local command line interactive prompting
@@ -238,8 +238,8 @@ The UDP/Unix based server uses one of the datagram based clients for interactivc
 for access to a single datagram server called `pshell`, and a client for access to multiple datagram based
 servers called `pshellAggregator'.
 
-Note that there are 2 versions of bot datagram based client programs, `pshell/pshellAggregator`, which are compiled C implementations,
-and `pshell.py/pshellAggregarot.py`, which are a Python implementation.  Any of those can interface to any of the
+Note that there are 2 versions of h datagram based client programs, `pshell/pshellAggregator`, which are compiled C implementations,
+and `pshell.py/pshellAggregator.py`, which are a Python implementations.  Any of those can interface to any of the
 [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
 
 
