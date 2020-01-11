@@ -240,14 +240,14 @@ for access to a single datagram server called `pshell`, and a client for access 
 servers called `pshellAggregator`.  The datagram based servers support multiple client sessions with
 no idle session timeout.
 
-Note that there are 2 versions of each datagram client program, `pshell/pshellAggregator`, which are compiled 'C' implementations,
+There are 2 versions of each datagram client program, `pshell/pshellAggregator`, which are compiled 'C' implementations,
 and `pshell.py/pshellAggregator.py`, which are Python implementations.  Any of those can interface to any of the
 [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
 
 <a name="pshell-client"></a>
 ### pshell client
 The pshell client programs are used to access a specific datagram pshell server.  Both the the compiled
-'C' version (`pshell')and Python version (`pshell.py`) have the same usage as follows:
+'C' version (`pshell`)and Python version (`pshell.py`) have the same usage as follows:
 ```
 $ pshell -h
 
@@ -293,7 +293,7 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
 ### pshellAggregator client
 The pshellAggregator client programs are used to access multiple datagram pshell servers.  This is
 useful to consolidate the functionality of several pshell servers into one comrehensive interactive
-user session.  Both the the compiled 'C' version (`pshellAggregator')and Python version (`pshellAggregator.py`)
+user session.  Both the the compiled 'C' version (`pshellAggregator`)and Python version (`pshellAggregator.py`)
 have the same usage as follows:
 ```
 $ pshellAggregator -h
