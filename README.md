@@ -237,16 +237,17 @@ for more information on creating custom aggregators.
 ### UDP/Unix (datagram) clients
 The UDP/Unix based servers use one of the datagram clients for interactivce access.  There is a client
 for access to a single datagram server called `pshell`, and a client for access to multiple datagram
-servers called `pshellAggregator`
+servers called `pshellAggregator`.  The datagram based servers support multiple client sessions with
+no idle session timeout.
 
-Note that there are 2 versions of both datagram client programs, `pshell/pshellAggregator`, which are compiled C implementations,
-and `pshell.py/pshellAggregator.py`, which are a Python implementations.  Any of those can interface to any of the
+Note that there are 2 versions of each datagram client program, `pshell/pshellAggregator`, which are compiled 'C' implementations,
+and `pshell.py/pshellAggregator.py`, which are Python implementations.  Any of those can interface to any of the
 [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
-
 
 <a name="pshell-client"></a>
 ### pshell client
-The `pshell` and `pshell.py` client programs have the same usage and both take a `-h` to show the usage as follows:
+The pshell client programs are used to access a specific datagram pshell server.  Both the the compiled
+'C' version (`pshell')and Python version (`pshell.py`) have the same usage as follows:
 ```
 $ pshell -h
 
@@ -290,7 +291,10 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
 
 <a name="pshellAggregator-client"></a>
 ### pshellAggregator client
-The `pshellAggregator` and `pshellAggregator.py` client programs have the same usage and both take a `-h` to show the usage as follows:
+The pshellAggregator client programs are used to access multiple datagram pshell servers.  This is
+useful to consolidate the functionality of several pshell servers into one comrehensive interactive
+user session.  Both the the compiled 'C' version (`pshellAggregator')and Python version (`pshellAggregator.py`)
+have the same usage as follows:
 ```
 $ pshellAggregator -h
 
@@ -305,7 +309,8 @@ Usage: pshellAggregator
 
 <a name="tcp-clients"></a>
 ### TCP clients
-The TCP based servers just use a standard `telnet` client for interactive access.
+The TCP based servers just use a standard `telnet` client for interactive access.  The TCP based
+servers support only a single client session with a default 10 minute idle session timeout/disconnect.
 
 There is also an `expect` wrapper script, `pshell.exp`, that will wrap `telnet` to provide functionality
 similar to the above `pshell` client for things like command mode single-shot commands, file based commands,
