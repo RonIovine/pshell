@@ -72,9 +72,9 @@ These functions can be invoked via several methods depending on how the internal
 server is configured.  The following shows the various PSHELL server types along with their
 associated invokation method:
 
-* TCP Server   : Uses standard [`telnet`](#tcp-client) interactive client to invoke functions
-* UDP Server   : Uses included [`pshell/pshellAggregator`](#datagram-client) interactive clients or control API to invoke functions
-* UNIX Server  : Uses included [`pshell/pshellAggregator`](#datagram-client) interactive clients or control API to invoke functions
+* TCP Server   : Uses standard [telnet](#tcp-client) interactive client to invoke functions
+* UDP Server   : Uses included [pshell/pshellAggregator](#datagram-client) interactive clients or control API to invoke functions
+* UNIX Server  : Uses included [pshell/pshellAggregator](#datagram-client) interactive clients or control API to invoke functions
 * LOCAL Server : No client program needed, functions invoked directly from within application
                  itself via local command line interactive prompting
 
@@ -236,9 +236,9 @@ for more information on creating custom aggregators.
 ### UDP/Unix (datagram) clients
 The UDP/Unix based server uses one of the datagram based clients for interactivce access.  There is a client
 for access to a single datagram server called `pshell`, and a client for access to multiple datagram based
-servers called `pshellAggregator'.
+servers called `pshellAggregator`
 
-Note that there are 2 versions of h datagram based client programs, `pshell/pshellAggregator`, which are compiled C implementations,
+Note that there are 2 versions of both datagram based client programs, `pshell/pshellAggregator`, which are compiled C implementations,
 and `pshell.py/pshellAggregator.py`, which are a Python implementations.  Any of those can interface to any of the
 [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
 
@@ -304,8 +304,7 @@ Usage: pshellAggregator
 
 <a name="tcp-clients"></a>
 ### TCP clients
- TCP pshell server just uses a standard `telnet` client for interactive access.  The datagram based servers
-(UDP/Unix) require the provided `pshell` interactive client.
+ TCP pshell server just uses a standard `telnet` client for interactive access.
 
 There is also an `expect` wrapper script, `pshell.exp`, that will wrap `telnet` to provide functionality
 similar to the above `pshell` client for things like command mode single-shot commands, file based commands,
