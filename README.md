@@ -234,7 +234,7 @@ create a custom server aggregator client.  See the below section for the [pshell
 for more information on creating custom aggregators.
 
 <a name="datagram-clients"></a>
-### UDP/Unix (datagram) clients
+#### UDP/Unix (datagram) clients
 The UDP/Unix based servers use one of the datagram clients for interactivce access.  There is a client
 for access to a single datagram server called `pshell`, and a client for access to multiple datagram
 servers called `pshellAggregator`.  The datagram based servers support multiple client sessions with
@@ -245,7 +245,7 @@ and `pshell.py/pshellAggregator.py`, which are Python implementations.  Any of t
 [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
 
 <a name="pshell-client"></a>
-### pshell client
+##### pshell client
 The pshell client programs are used to access a specific datagram pshell server.  Both the the compiled
 'C' version (`pshell`)and Python version (`pshell.py`) have the same usage as follows:
 ```
@@ -290,7 +290,7 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
 ```
 
 <a name="pshellAggregator-client"></a>
-### pshellAggregator client
+##### pshellAggregator client
 The pshellAggregator client programs are used to access multiple datagram pshell servers.  This is
 useful to consolidate the functionality of several pshell servers into one comrehensive interactive
 user session.  Both the the compiled 'C' version (`pshellAggregator`)and Python version (`pshellAggregator.py`)
@@ -308,7 +308,7 @@ Usage: pshellAggregator
 ```
 
 <a name="tcp-clients"></a>
-### TCP clients
+#### TCP clients
 The TCP based servers just use a standard `telnet` client for interactive access.  The TCP based
 servers support only a single client session with a default 10 minute idle session timeout/disconnect.
 
