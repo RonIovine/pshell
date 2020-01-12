@@ -8,8 +8,8 @@
 [Documentation](#documentation)<br>
 [Interactive clients](#interactive-clients)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[UDP/Unix (datagram) clients](#datagram-clients)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshell client](#pshell-client)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregator client](#pshellAggregator-client)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshell UDP/Unix client](#pshell-client)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregator UDP/Unix client](#pshellAggregator-client)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[TCP clients](#tcp-clients)<br>
 [Demo programs](#demo-programs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellServerDemo](#pshellServerDemo)<br>
@@ -245,7 +245,7 @@ and `pshell.py/pshellAggregator.py`, which are Python implementations.  Any of t
 [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
 
 <a name="pshell-client"></a>
-##### pshell client
+##### pshell UDP/Unix client
 The pshell client programs are used to access a specific datagram pshell server.  Both the the compiled
 'C' version (`pshell`)and Python version (`pshell.py`) have the same usage as follows:
 ```
@@ -290,7 +290,7 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
 ```
 
 <a name="pshellAggregator-client"></a>
-##### pshellAggregator client
+##### pshellAggregator UDP/Unix client
 The pshellAggregator client programs are used to access multiple datagram pshell servers.  This is
 useful to consolidate the functionality of several pshell servers into one comrehensive interactive
 user session.  Both the the compiled 'C' version (`pshellAggregator`)and Python version (`pshellAggregator.py`)
