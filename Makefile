@@ -325,7 +325,7 @@ help:
 	@echo
 
 lib:
-	@echo "Building libpshell-server-full.a..."
+	@echo "Building libpshell-server-full.a (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
@@ -333,7 +333,7 @@ lib:
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-full.a $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 
-	@echo "Building libpshell-server-full.so..."
+	@echo "Building libpshell-server-full.so (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
@@ -341,32 +341,32 @@ lib:
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-full.so $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 
-	@echo "Building libpshell-server-stub.a..."
+	@echo "Building libpshell-server-stub.a (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-stub.a PshellStub.o
 	$(VERBOSE)rm *.o
 
-	@echo "Building libpshell-server-stub.so..."
+	@echo "Building libpshell-server-stub.so (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-stub.so PshellStub.o
 	$(VERBOSE)rm *.o
 
-	@echo "Building libpshell-control.a..."
+	@echo "Building libpshell-control.a (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellControl.$(SRC_EXT) -o PshellControl.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-control.a PshellControl.o
 	$(VERBOSE)rm *.o
 
-	@echo "Building libpshell-control.so..."
+	@echo "Building libpshell-control.so (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellControl.$(SRC_EXT) -o PshellControl.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-control.so PshellControl.o
 	$(VERBOSE)rm *.o
 
-	@echo "Building libpshell-readline.a..."
+	@echo "Building libpshell-readline.a (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-readline.a PshellReadline.o
 	$(VERBOSE)rm *.o
 
-	@echo "Building libpshell-readline.so..."
+	@echo "Building libpshell-readline.so (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-readline.so PshellReadline.o
 	$(VERBOSE)rm *.o
@@ -380,48 +380,43 @@ ifeq ($(BUILD_GO), y)
 
 	@echo "Building PshellControl.a (go)..."
 	$(VERBOSE)$(GO) $(GO_OPTIONS) PshellControl
+
+	@echo "Setting libpshell-server to libpshell-server-full, PshellServer.a to PshellServer-full.a, and PshellServer.py to PshellServer-full.py..."
+else
+	@echo "Setting libpshell-server to libpshell-server-full and PshellServer.py to PshellServer-full.py..."
 endif
 
-	@echo "Setting libpshell-server to libpshell-server-full and PshellServer.a to PshellServer-full.a..."
 	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full
 
 pshell:
-	@echo "Building pshellAggregator stand-alone UDP/UNIX aggregator client..."
+	@echo "Building pshellAggregator stand-alone UDP/UNIX aggregator client (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellAggregator.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregator
 
-	@echo "Building pshell stand-alone UDP/UNIX client..."
+	@echo "Building pshell stand-alone UDP/UNIX client (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellClient.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) -o $(BIN_DIR)/pshell
 
 demo:
-ifeq ($(BUILD_GO), y)
 	@echo "Building pshellServerDemo program (C)..."
-else
-	@echo "Building pshellServerDemo program..."
-endif
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellServerDemo
 
-	@echo "Building pshellNoServerDemo program..."
+	@echo "Building pshellNoServerDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellNoServerDemo.$(SRC_EXT) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellNoServerDemo
 
-ifeq ($(BUILD_GO), y)
 	@echo "Building pshellControlDemo program (C)..."
-else
-	@echo "Building pshellControlDemo program..."
-endif
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellControlDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) -o $(BIN_DIR)/pshellControlDemo
 
-	@echo "Building pshellReadlineDemo program..."
+	@echo "Building pshellReadlineDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellReadlineDemo.$(SRC_EXT) $(PSHELL_READLINE_DEMO_LIBS) -o $(BIN_DIR)/pshellReadlineDemo
 
-	@echo "Building pshellAggregatorDemo program..."
+	@echo "Building pshellAggregatorDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(DEMO_DIR)/pshellAggregatorDemo.$(SRC_EXT) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregatorDemo
 
 ifeq ($(TF_INTEGRATED_TRACE_LOG), y)
-	@echo "Building traceFilterDemo program..."
+	@echo "Building traceFilterDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_FILTER_DEMO_FLAGS) $(DEMO_DIR)/traceFilterDemo.$(SRC_EXT) $(TRACE_FILTER_DEMO_LIBS) -o $(BIN_DIR)/traceFilterDemo
 endif
 
-	@echo "Building traceLogDemo program..."
+	@echo "Building traceLogDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) -o $(BIN_DIR)/traceLogDemo
 
 ifeq ($(BUILD_GO), y)
