@@ -381,9 +381,9 @@ ifeq ($(BUILD_GO), y)
 	@echo "Building PshellControl.a (go)..."
 	$(VERBOSE)$(GO) $(GO_OPTIONS) PshellControl
 
-	@echo "Setting libpshell-server to libpshell-server-full, PshellServer.a to PshellServer-full.a, and PshellServer.py to PshellServer-full.py..."
+	@echo "Setting PSHELL 'C' libraries, Python modules, and Go packages to FULL version..."
 else
-	@echo "Setting libpshell-server to libpshell-server-full and PshellServer.py to PshellServer-full.py..."
+	@echo "Setting PSHELL 'C' libraries and Python modules to FULL version..."
 endif
 
 	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full

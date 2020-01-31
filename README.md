@@ -27,7 +27,8 @@ building C/C++/Python/Go applications that incorporate a Process Specific Embedd
 Command Line Shell (PSHELL).  PSHELL is a multi-language, [cross platform](#building) framework
 that provides a simple mechanism to embed interactive functions/commands within any
 C/C++/Python/Go application.  Those functions can be invoked interactively either via
-a separate remote client program or directly via the application itself.
+a separate remote client program, directly from within the application itself, or
+externally from another process via the control API.
 
 The Python, C, and Go versions are consistent with each other at the API level (i.e.
 similar functional API, usage, process interaction etc) and fully interoperable with each
@@ -36,9 +37,9 @@ other at the protocol level and can be mixed and matched in any combination.
 The functions/commands are registered as callback functions to the framework.  The
 prototype for the callback functions follow the paradigms of the `main` for each language.
 Pshell callback functions can be thought of as a collection of mini `mains` within the
-given process that is invoked via its registered keyword.  The arguments are passed into
-each function just like they would be passed into the `main` from the host's command line
-shell (i.e. bash) for each language as shown below.  See the included [demo programs](#demo-programs)
+given process that are invoked via their registered keywords.  The arguments are passed
+into each function just like they would be passed into the `main` from the host's command
+line shell (i.e. bash) for each language as shown below.  See the included [demo programs](#demo-programs)
 for language specific examples.
 
 #### C callback:
@@ -101,7 +102,6 @@ like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet
 broadcast address, e.g. x.y.z.255).
 
-
 See the full [README](https://github.com/RonIovine/pshell/blob/master/README) file for a complete description
 of all the components, installation, building, and usage.
 
@@ -144,9 +144,10 @@ The simplest install is a local install, from the top level pshell directory run
 
 `$ ./install.sh -local`
 
-This will create an environment file, `.pshellrc` that should be sourced in your local shell, it should
-also be added to your shell env file, i.e. `.bashrc`.  This will setup several softlinks and environment
-variables that will allow access to the various parts of the framework.
+This will create an environment file, `.pshellrc` that should be sourced in your system's local command
+line shell (e.g. `bash`), it should also be added to your shell env file, i.e. `.bashrc`.  This will
+setup several softlinks and environment variables that will allow access to the various parts of the
+framework.
 
 <a name="building"></a>
 ### Building
@@ -292,8 +293,8 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
 <a name="pshellAggregator-client"></a>
 ##### pshellAggregator UDP/Unix client
 The pshellAggregator client programs are used to access multiple datagram pshell servers.  This is
-useful to consolidate the functionality of several pshell servers into one comrehensive interactive
-user session.  Both the the compiled 'C' version (`pshellAggregator`)and Python version (`pshellAggregator.py`)
+useful to consolidate the functionality of several pshell servers into one comprehensive interactive
+user session.  Both the the compiled 'C' version (`pshellAggregator`) and Python version (`pshellAggregator.py`)
 have the same usage as follows:
 ```
 $ pshellAggregator -h
@@ -313,9 +314,9 @@ The TCP based servers just use a standard `telnet` client for interactive access
 servers support only a single client session with a default 10 minute idle session timeout/disconnect.
 
 There is also an `expect` wrapper script, `pshell.exp`, that will wrap `telnet` to provide functionality
-similar to the above `pshell` client for things like command mode single-shot commands, file based commands,
-command/file repeat etc but for TCP based pshell servers.  The `expect` scripting package must be installed
-on your host.  The following is the usage of the expect script.
+similar to the above `pshell` datagram clients for things like command mode single-shot commands, file
+based commands, command/file repeat etc but for TCP based pshell servers.  The `expect` scripting package
+must be installed on your host.  The following is the usage of the expect script.
 ```
 $ pshell.exp -h
 

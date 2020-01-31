@@ -189,7 +189,8 @@ void pshell_runCommand(const char *command_, ...);
  * single-shot command and exit, this command must be run with the initial argc,
  * argv as they are passed into the 'main' from the command line, see the example
  * demo program pshellNoServerDemo.cc that is included with this package for the
- * usage of this function
+ * usage of this function, this is useful for creating multi-call binaries with
+ * multiple discrete entry points similar to the Busybox framework
  */
 void pshell_noServer(int argc_, char *argv_[]);
 
