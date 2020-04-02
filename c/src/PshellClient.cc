@@ -184,7 +184,7 @@ unsigned _numNativeInteractiveCommands = sizeof(_nativeInteractiveCommands)/size
 /*
  * the initial message buffer is just used for the initial
  * PSHELL_QUERY_VERSION and PSHELL_QUERY_PAYLOAD_SIZE messages,
- * after that the message payload is dynaically allocate for
+ * after that the message payload is dynaically allocated for
  * the negotiated transfer size, this is to ensure the client
  * does not use a receive buffer that is smaller than the one
  * the server is using, the server will also send an
@@ -319,7 +319,7 @@ void showWelcome(void)
   printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
   if (_isBroadcastServer)
   {
-  printf("%s\n", PSHELL_WELCOME_BORDER);
+    printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  NOTE: Connected to a broadcast address, all commands\n", PSHELL_WELCOME_BORDER);
     printf("%s        are single-shot, 'fire-and-forget', with no\n", PSHELL_WELCOME_BORDER);
     printf("%s        response requested or expected, and no results\n", PSHELL_WELCOME_BORDER);

@@ -38,9 +38,9 @@ The functions/commands are registered as callback functions to the framework.  T
 prototype for the callback functions follow the paradigms of the `main` for each language.
 Pshell callback functions can be thought of as a collection of mini `mains` within the
 given process that are invoked via their registered keywords.  The arguments are passed
-into each function just like they would be passed into the `main` from the host's command
-line shell (i.e. bash) for each language as shown below.  See the included [demo programs](#demo-programs)
-for language specific examples.
+into each function just like they would be passed into the `main` from the host's native
+command line shell (i.e. bash) for each language as shown below.  See the included
+[demo programs](#demo-programs) for language specific examples.
 
 #### C callback:
 
@@ -248,7 +248,7 @@ and `pshell.py/pshellAggregator.py`, which are Python implementations.  Any of t
 <a name="pshell-client"></a>
 ##### pshell UDP/Unix client
 The pshell client programs are used to access a specific datagram pshell server.  Both the the compiled
-'C' version (`pshell`)and Python version (`pshell.py`) have the same usage as follows:
+'C' version (`pshell`) and Python version (`pshell.py`) have the same usage as follows:
 ```
 $ pshell -h
 
