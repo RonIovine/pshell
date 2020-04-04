@@ -1,5 +1,5 @@
 # pshell
-**A Lightweight, Process-Specific, Embedded Command Line Shell for C/C++/Python/Go Applications**
+**A Lightweight, Process-Specific, Embedded Command Line Shell/CLI for C/C++/Python/Go Applications**
 
 [Overview](#overview)<br>
 [Getting started](#getting-started)<br>
