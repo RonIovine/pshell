@@ -167,11 +167,11 @@ void setTriggers(int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
-void sampleLogFunction(const char *outputString_)
+void sampleOutputFunction(const char *outputString_)
 {
   /*
-   * this sample log function is registered with the TraceLog
-   * 'trace_registerLogFunction' call to show a client supplied
+   * this sample log output function is registered with the TraceLog
+   * 'trace_registerOutputFunction' call to show a client supplied
    * log function, the string passed in is a fully formatted log
    * string, it is up to the registering application to decide
    * what to do with that string, i.e. write to stdout, write to
@@ -332,11 +332,11 @@ int main (int argc, char *argv[])
   trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3, false, true);
 
   /*
-   * optionally set a log prefix, if not set, 'TRACE' will be used,
-   * if set to 'NULL', no prefix will be used
+   * optionally set a log name prefix, if not set, 'TRACE' will be used,
+   * if set to 'NULL', no name prefix will be used
    */
 
-  trace_setLogPrefix("demo");
+  trace_setLogName("demo");
 
   /*
    * register a custom client provided log function, this function will
@@ -352,7 +352,7 @@ int main (int argc, char *argv[])
   openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
 
   /* register our log function */
-  trace_registerLogFunction(sampleLogFunction);
+  trace_registerOutputFunction(sampleOutputFunction);
 
   /*
    * add a trace thread name, this should be done in the initialization

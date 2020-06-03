@@ -819,7 +819,7 @@ void showConfig(void)
 #ifdef TF_INTEGRATED_TRACE_LOG
   pshell_printf("Trace location..........: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
   pshell_printf("Trace path..............: %s\n", ((trace_isPathEnabled()) ? ON : OFF));
-  pshell_printf("Trace prefix............: %s\n", ((trace_isPrefixEnabled()) ? ON : OFF));
+  pshell_printf("Trace name..............: %s\n", ((trace_isLogNameEnabled()) ? ON : OFF));
   pshell_printf("Trace timestamp.........: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
 #endif
   if (_breakpointLine != 0)
@@ -1136,15 +1136,15 @@ void configureFilter(int argc, char *argv[])
       pshell_showUsage();
     }
   }
-  else if (pshell_isSubString(argv[0], "prefix", 3) && (argc > 1))
+  else if (pshell_isSubString(argv[0], "name", 3) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "on", 2))
     {
-      trace_enablePrefix(true);
+      trace_enableLogName(true);
     }
     else if (pshell_isSubString(argv[1], "off", 2))
     {
-      trace_enablePrefix(false);
+      trace_enableLogName(false);
     }
     else
     {

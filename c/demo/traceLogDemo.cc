@@ -85,11 +85,11 @@ void bar(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void sampleLogFunction(const char *outputString_)
+void sampleOutputFunction(const char *outputString_)
 {
   /*
-   * this sample log function is registered with the TraceLog
-   * 'trace_registerLogFunction' call to show a client supplied
+   * this sample log output function is registered with the TraceLog
+   * 'trace_registerOutputFunction' call to show a client supplied
    * log function, the string passed in is a fully formatted log
    * string, it is up to the registering application to decide
    * what to do with that string, i.e. write to stdout, write to
@@ -105,13 +105,61 @@ void sampleLogFunction(const char *outputString_)
 
 /******************************************************************************/
 /******************************************************************************/
+void sampleFormatFunction(const char *level_,
+                          const char *file_,
+                          const char *function_,
+                          int line_,
+                          const char *timestamp_,
+                          const char *userMessage_,
+                          char *outputString_)
+{
+  /*
+   * this sample format function is registered with the TraceLog
+   * 'trace_registerFormatFunction' call to show a client supplied
+   * formatting function, the formating myst be done into the outputString_
+   * variable, the user can check to see if the various formatting items
+   * are enabled, or they can just use a fixed format
+   */
+
+  // standard output format, see what items are enabled, each item is separated by a '|'
+  // custom format is: 2014-08-17 23:11:00.114192 level [name:file:line] user-message
+
+  // add any timestamp if enabled
+  if (trace_isTimestampEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "%s ", timestamp_);
+  }
+
+  // add the level
+  sprintf(&outputString_[strlen(outputString_)], "%s ", level_);
+
+  if (trace_isLogNameEnabled() && trace_isLocationEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "[%s:%s:%d] ", trace_getLogName(), file_, line_);
+  }
+  else if (trace_isLogNameEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "[%s] ", trace_getLogName());
+  }
+  else if (trace_isLocationEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "[%s:%d] ", file_, line_);
+  }
+
+  // add the user message
+  sprintf(&outputString_[strlen(outputString_)], "%s\n", userMessage_);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: traceLogDemo <level>\n");
+  printf("Usage: traceLogDemo <level> [custom]\n");
   printf("\n");
   printf("  where:\n");
   printf("    <level>  - The desired log level value, 0-%d\n", TL_USER_LEVEL3);
+  printf("    custom   - Use a custom log format\n");
   printf("\n");
   exit(0);
 }
@@ -127,16 +175,27 @@ int main (int argc, char *argv[])
   unsigned logLevel = 0;
 
   /* validate our command line arguments and get desired log level */
-  if (argc == 2)
+  if ((argc == 2) || (argc == 3))
   {
     if (strcmp(argv[1], "-h") == 0)
     {
       showUsage();
     }
-    else
+    if (argc == 3)
     {
-      logLevel = atoi(argv[1]);
+      if (strcmp(argv[2], "custom")  == 0)
+      {
+        /* register our custom format function */
+        trace_registerFormatFunction(sampleFormatFunction);
+        /* set a custom timestamp format, add the date, the time must be last because the usec portion is appended to the time */
+        trace_setTimestampFormat("%Y-%m-%d %T");
+      }
+      else
+      {
+        showUsage();
+      }
     }
+    logLevel = atoi(argv[1]);
   }
   else
   {
@@ -175,11 +234,11 @@ int main (int argc, char *argv[])
   trace_setLogLevel(logLevel);
 
   /*
-   * optionally set a log prefix, if not set, 'TRACE' will be used,
-   * if set to 'NULL', no prefix will be used
+   * optionally set a log name prefix, if not set, 'TRACE' will be used,
+   * if set to 'NULL', no name prefix will be used
    */
 
-  trace_setLogPrefix("demo");
+  trace_setLogName("demo");
 
   /*
    * register a custom client provided log function, this function will
@@ -194,8 +253,8 @@ int main (int argc, char *argv[])
   /* open syslog with our program name */
   openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
 
-  /* register our log function */
-  trace_registerLogFunction(sampleLogFunction);
+  /* register our log output function */
+  trace_registerOutputFunction(sampleOutputFunction);
 
   /* go into an infinite loop issuing some traces so we can demonstrate dynamic trace filtering */
   for (;;)

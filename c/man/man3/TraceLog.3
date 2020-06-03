@@ -42,7 +42,7 @@ control via the PSHELL client interface.
 
 /*
 .br
- * trace_registerLogFunction::
+ * trace_registerOutputFunction::
 .br
  *
 .br
@@ -54,13 +54,45 @@ control via the PSHELL client interface.
 .br
  */
 .br
-typedef void (*TraceLogFunction)(const char *outputString_);
+typedef void (*TraceOutputFunction)(const char *outputString_);
 .br
-void trace_registerLogFunction(TraceLogFunction logFunction_);
+void trace_registerOutputFunction(TraceOutputFunction outputFunction_);
+
+/*
+ * trace_registerFormatFunction:
+ *
+ * typedef and function to allow a client program to register a custom format
+ * function for formatting the trace output line, if no format function is
+ * registered the default formatting will be used, e.g.
+ *
+ * name | level | timestamp | file(function):line | user-message
+ *
+ */
+.br
+typedef void (*TraceFormatFunction)(const char *level_,
+                                    const char *file_,
+                                    const char *function_,
+                                    int line_,
+                                    const char *timestamp_,
+                                    const char *userMessage_,
+                                    char *outputString_);
+.br
+void trace_registerFormatFunction(TraceFormatFunction formatFunction_);
+
+/*
+ * trace_setTimestampFormat:
+ *
+ * set the timestamp format for the strftime function, the default format is hh:mm:ss.usec,
+ * if the 'addUsec_' argument is set to true, be sure to use a format where the sec is last
+ * since the usec will be appended to that, if no format is specified, the default formatting
+ * will be used, e.g. hh:mm:ss.usec in 24 hour local time
+ */
+.br
+void trace_setTimestampFormat(const char *format_, bool addUsec_ = true);
 
 /*
 .br
- * trace_setLogPrefix:
+ * trace_setLogName:
 .br
  *
 .br
@@ -76,7 +108,7 @@ void trace_registerLogFunction(TraceLogFunction logFunction_);
 .br
  */
 .br
-void trace_setLogPrefix(const char *name_);
+void trace_setLogName(const char *name_);
 
 /*
 .br
@@ -94,7 +126,7 @@ void trace_registerLevels(void);
 
 Link with the library libpshell-server
 .SH EXAMPLES
-See the file traceFilterDemo.c in the pshell distribution package for a complete
+See the file traceFilterDemo.cc in the pshell distribution package for a complete
 list of examples of using the TraceLog utility trace logging system.
 .SH MT-LEVEL
 Safe

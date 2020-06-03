@@ -37,7 +37,7 @@
 
 /* constants */
 
-#define MAX_STRING_SIZE 256
+#define MAX_STRING_SIZE 512
 
 /*
  * coding convention is leading underscore for global data,
@@ -63,25 +63,34 @@ unsigned _traceLogLevel = TL_DEFAULT_LEVEL;
  * private "member" data
  *************************/
 
-static TraceLogFunction _logFunction = NULL;
-static char _logPrefix[MAX_STRING_SIZE] = {"Trace | "};
+static TraceOutputFunction _outputFunction = NULL;
+static TraceFormatFunction _formatFunction = NULL;
+static char _logName[MAX_STRING_SIZE] = {"Trace"};
+static bool _logNameEnabled = true;
+static char _outputString[MAX_STRING_SIZE];
+static char _userMessage[MAX_STRING_SIZE];
+static char _timestamp[MAX_STRING_SIZE];
+static const char *_timestampFormat = NULL;
+static bool _timestampAddUsec = true;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool _printLocation = true;
 static bool _printPath = false;
-static const char *_printPrefix = _logPrefix;
 static bool _printTimestamp = true;
-static unsigned _maxTypeLength = 0;
+static unsigned _maxLevelLength = 0;
 
 /***************************************
  * private "member" function prototypes
  ***************************************/
 
+static const char *getTimestamp(void);
 static void printLine(char *line_);
-static void formatHeader(const char *type_,
-                         const char *file_,
-                         const char *function_,
-                         int line_,
-                         char *outputString_);
+static void formatTrace(const char *level_,
+                        const char *file_,
+                        const char *function_,
+                        int line_,
+                        const char *timestamp_,
+                        const char *userMessage_,
+                        char *outputString_);
 
 /**************************************
  * public API "member" function bodies
@@ -107,30 +116,51 @@ unsigned trace_getLogLevel(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_registerLogFunction(TraceLogFunction logFunction_)
+void trace_registerOutputFunction(TraceOutputFunction outputFunction_)
 {
-  if (logFunction_ != NULL)
+  if (outputFunction_ != NULL)
   {
-    _logFunction = logFunction_;
+    _outputFunction = outputFunction_;
   }
   else
   {
-    TRACE_ERROR("NULL logFunction, not registered");
+    TRACE_ERROR("NULL outputFunction, not registered");
   }
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_setLogPrefix(const char *name_)
+void trace_registerFormatFunction(TraceFormatFunction formatFunction_)
 {
-  if ((name_ != NULL) && (strlen(name_) > 0))
+  if (formatFunction_ != NULL)
   {
-    sprintf(_logPrefix, "%s | ", name_);
+    _formatFunction = formatFunction_;
   }
   else
   {
-    _logPrefix[0] = '\0';
+    TRACE_ERROR("NULL formatFunction, not registered");
   }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_setLogName(const char *name_)
+{
+  if ((name_ != NULL) && (strlen(name_) > 0))
+  {
+    sprintf(_logName, "%s", name_);
+  }
+  else
+  {
+    _logName[0] = '\0';
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+const char *trace_getLogName(void)
+{
+  return (_logName);
 }
 
 /******************************************************************************/
@@ -177,23 +207,16 @@ bool trace_isPathEnabled(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_enablePrefix(bool enable_)
+void trace_enableLogName(bool enable_)
 {
-  if (enable_)
-  {
-    _printPrefix = _logPrefix;
-  }
-  else
-  {
-    _printPrefix = "";
-  }
+  _logNameEnabled = enable_;
 }
 
 /******************************************************************************/
 /******************************************************************************/
-bool trace_isPrefixEnabled(void)
+bool trace_isLogNameEnabled(void)
 {
-  return (strcmp(_printPrefix, "") != 0);
+  return (_logNameEnabled);
 }
 
 /******************************************************************************/
@@ -205,9 +228,9 @@ void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDef
    * track of our max level name string length so our trace display can
    * be formatted and aligned correctly
    */
-  if (strlen(levelName_) > _maxTypeLength)
+  if (strlen(levelName_) > _maxLevelLength)
   {
-    _maxTypeLength = strlen(levelName_);
+    _maxLevelLength = strlen(levelName_);
   }
 #ifdef DYNAMIC_TRACE_FILTER
   tf_addLevel(levelName_, levelValue_, isDefault_, isMaskable_);
@@ -234,22 +257,35 @@ void trace_registerLevels(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_outputLog(const char *type_,
+void trace_setTimestampFormat(const char *format_, bool addUsec_)
+{
+  _timestampFormat = format_;
+  _timestampAddUsec = addUsec_;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_outputLog(const char *level_,
                      const char *file_,
                      const char *function_,
                      int line_,
                      const char *format_, ...)
 {
   pthread_mutex_lock(&_mutex);
-  char outputString[MAX_STRING_SIZE];
-  formatHeader(type_, file_, function_, line_, outputString);
+
+  // format the user message
+  _userMessage[0] = 0;
   va_list args;
   va_start(args, format_);
-  vsprintf(&outputString[strlen(outputString)], format_, args);
+  vsprintf(&_userMessage[strlen(_userMessage)], format_, args);
   va_end(args);
-  // add newline
-  strcat(outputString, "\n");
-  printLine(outputString);
+
+  // format the trace
+  formatTrace(level_, file_, function_, line_, getTimestamp(), _userMessage, _outputString);
+
+  // output the trace
+  printLine(_outputString);
+
   pthread_mutex_unlock(&_mutex);
 }
 
@@ -257,7 +293,7 @@ void trace_outputLog(const char *type_,
 /******************************************************************************/
 void trace_outputDump(void *address_,
                       unsigned length_,
-                      const char *type_,
+                      const char *level_,
                       const char *file_,
                       const char *function_,
                       int line_,
@@ -268,19 +304,23 @@ void trace_outputDump(void *address_,
   const unsigned bytesPerLine = 16;
   unsigned char *bytes = (unsigned char *)address_;
   unsigned short offset = 0;
-  char outputString[MAX_STRING_SIZE];
-  formatHeader(type_, file_, function_, line_, outputString);
-  // add the number of bytes in this hex dump
-  sprintf(&outputString[strlen(outputString)], "%d Bytes | ", length_);
+
+  // format the user message
+  _userMessage[0] = 0;
   va_list args;
   va_start(args, format_);
-  vsprintf(&outputString[strlen(outputString)], format_, args);
+  vsprintf(&_userMessage[strlen(_userMessage)], format_, args);
   va_end(args);
-  // add newline
-  strcat(outputString, "\n");
-  printLine(outputString);
+
+  // format the trace
+  formatTrace(level_, file_, function_, line_, getTimestamp(), _userMessage, _outputString);
+
+  // output the trace
+  printLine(_outputString);
+
+  // output our hex dump and ascii equivalent
   asciiLine[0] = 0;
-  outputString[0] = 0;
+  _outputString[0] = 0;
   for (unsigned i = 0; i < length_; i++)
   {
     // see if we are on a full line boundry
@@ -290,24 +330,24 @@ void trace_outputDump(void *address_,
       if (i > 0)
       {
         /* done with this line, add the asciii data & print it */
-        sprintf(&outputString[strlen(outputString)], "  %s\n", asciiLine);
-        printLine(outputString);
+        sprintf(&_outputString[strlen(_outputString)], "  %s\n", asciiLine);
+        printLine(_outputString);
         // line  printed, clear them it for next time
         asciiLine[0] = 0;
-        outputString[0] = 0;
+        _outputString[0] = 0;
       }
       // format our our offset
-      sprintf(&outputString[strlen(outputString)], "  %04x  ", offset);
+      sprintf(&_outputString[strlen(_outputString)], "  %04x  ", offset);
       offset += bytesPerLine;
     }
     // create our line of ascii data, for non-printable ascii characters just use a "."
     sprintf(&asciiLine[strlen(asciiLine)], "%c", ((isprint(bytes[i]) && (bytes[i] < 128)) ? bytes[i] : '.'));
     // format our line of hex byte
-    sprintf(&outputString[strlen(outputString)], "%02x ", bytes[i]);
+    sprintf(&_outputString[strlen(_outputString)], "%02x ", bytes[i]);
   }
   // done, format & print the final line & ascii data
-  sprintf(&outputString[strlen(outputString)], "  %*s\n", (int)(((bytesPerLine-strlen(asciiLine))*3)+strlen(asciiLine)), asciiLine);
-  printLine(outputString);
+  sprintf(&_outputString[strlen(_outputString)], "  %*s\n", (int)(((bytesPerLine-strlen(asciiLine))*3)+strlen(asciiLine)), asciiLine);
+  printLine(_outputString);
   pthread_mutex_unlock(&_mutex);
 }
 
@@ -317,18 +357,44 @@ void trace_outputDump(void *address_,
 
 /******************************************************************************/
 /******************************************************************************/
-void formatHeader(const char *type_, const char *file_, const char *function_, int line_, char *outputString_)
+const char *getTimestamp(void)
 {
-  char timestamp[MAX_STRING_SIZE];
   struct timeval tv;
   struct tm tm;
-  const char *file;
+
   // get timestamp
   gettimeofday(&tv, NULL);
-  gmtime_r(&tv.tv_sec, &tm);
-  strftime(timestamp, sizeof(timestamp), "%T", &tm);
-  // strip off any leading path of filename
-  if (!_printPath && ((file = strrchr(file_, '/')) != NULL))
+  localtime_r(&tv.tv_sec, &tm);
+  if (_timestampFormat == NULL)
+  {
+    strftime(_timestamp, sizeof(_timestamp), "%T", &tm);
+  }
+  else
+  {
+    strftime(_timestamp, sizeof(_timestamp), _timestampFormat, &tm);
+  }
+  // add the microseconds is requested
+  if (_timestampAddUsec)
+  {
+    sprintf(_timestamp, "%s.%-6ld", _timestamp, (long)tv.tv_usec);
+  }
+  return (_timestamp);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void formatTrace(const char *level_,
+                 const char *file_,
+                 const char *function_,
+                 int line_,
+                 const char *timestamp_,
+                 const char *userMessage_,
+                 char *outputString_)
+{
+  const char *file;
+
+  // strip off any leading path of filename if the path is disabled
+  if (!trace_isPathEnabled() && ((file = strrchr(file_, '/')) != NULL))
   {
     file++;
   }
@@ -337,21 +403,39 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
     file = file_;
   }
 
-  if (_printLocation && _printTimestamp)
+  _outputString[0] = 0;
+  if (_formatFunction != NULL)
   {
-    sprintf(outputString_, "%s%-*s | %s.%-6ld | %s(%s):%d | ", _printPrefix, _maxTypeLength, type_, timestamp, (long)tv.tv_usec, file, function_, line_);
-  }
-  else if (_printLocation)
-  {
-    sprintf(outputString_, "%s%-*s | %s(%s):%d | ", _printPrefix, _maxTypeLength, type_, file, function_, line_);
-  }
-  else if (_printTimestamp)
-  {
-    sprintf(outputString_, "%s%-*s | %s.%-6ld | ", _printPrefix, _maxTypeLength, type_, timestamp, (long)tv.tv_usec);
+    // custom format function registered, call it
+    (*_formatFunction)(level_, file, function_, line_, timestamp_, userMessage_, outputString_);
   }
   else
   {
-    sprintf(outputString_, "%s%-*s | ", _printPrefix, _maxTypeLength, type_);
+    // standard output format, see what items are enabled, each item is separated by a '|'
+
+    // add the prefix if enabled, this is usually the program name
+    if (trace_isLogNameEnabled())
+    {
+      sprintf(&_outputString[strlen(_outputString)], "%s | ", trace_getLogName());
+    }
+
+    // add the level
+    sprintf(&_outputString[strlen(_outputString)], "%-*s | ", _maxLevelLength, level_);
+
+    // add any timestamp if enabled
+    if (trace_isTimestampEnabled())
+    {
+      sprintf(&_outputString[strlen(_outputString)], "%s | ", timestamp_);
+    }
+
+    // add any location if enabled
+    if (trace_isLocationEnabled())
+    {
+      sprintf(&_outputString[strlen(_outputString)], "%s(%s):%d | ", file, function_, line_);
+    }
+
+    // add the user message
+    sprintf(&_outputString[strlen(_outputString)], "%s\n", userMessage_);
   }
 
 }
@@ -360,12 +444,13 @@ void formatHeader(const char *type_, const char *file_, const char *function_, i
 /******************************************************************************/
 void printLine(char *line_)
 {
-  if (_logFunction == NULL)
+  if (_outputFunction != NULL)
   {
-    printf("%s", line_);
+    // custom output function registered, call it
+    (*_outputFunction)(line_);
   }
   else
   {
-    (*_logFunction)(line_);
+    printf("%s", line_);
   }
 }

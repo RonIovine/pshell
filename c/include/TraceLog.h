@@ -112,25 +112,61 @@ extern "C" {
 #define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, TL_DUMP_STRING, format, ## args)
 
 /*
- * trace_registerLogFunction:
+ * trace_registerOutputFunction:
  *
- * typedef and function to allow a client program to register a logging
+ * typedef and function to allow a client program to register a cusatom logging
  * function for message output logging, if no output function is registered
  * 'printf' will be used to print out the log messages
  */
-typedef void (*TraceLogFunction)(const char *outputString_);
-void trace_registerLogFunction(TraceLogFunction logFunction_);
+typedef void (*TraceOutputFunction)(const char *outputString_);
+void trace_registerOutputFunction(TraceOutputFunction outputFunction_);
 
 /*
- * trace_setLogPrefix:
+ * trace_registerFormatFunction:
+ *
+ * typedef and function to allow a client program to register a custom format
+ * function for formatting the trace output line, if no format function is
+ * registered the default formatting will be used, e.g.
+ *
+ * name | level | timestamp | file(function):line | user-message
+ */
+typedef void (*TraceFormatFunction)(const char *level_,
+                                    const char *file_,
+                                    const char *function_,
+                                    int line_,
+                                    const char *timestamp_,
+                                    const char *userMessage_,
+                                    char *outputString_);
+void trace_registerFormatFunction(TraceFormatFunction formatFunction_);
+
+/*
+ * trace_setTimestampFormat:
+ *
+ * set the timestamp format for the strftime function, the default format is hh:mm:ss.usec,
+ * if the 'addUsec_' argument is set to true, be sure to use a format where the sec is last
+ * since the usec will be appended to that, if no format is specified, the default formatting
+ * will be used, e.g. hh:mm:ss.usec in 24 hour local time
+ */
+void trace_setTimestampFormat(const char *format_, bool addUsec_ = true);
+
+/*
+ * trace_setLogName:
  *
  * set a log name that is used as a prefix for the log type,
  * if this function is not called, the prefix will default to
  * "TRACE", e.g. TRACE | ERROR..., TRACE | WARNING... etc, if
  * this function is called with a NULL prefix, the trace name
  * type will have no prefix, e.g. just ERROR..., WARNING... etc.
+ * this should typically be set to the program name
  */
-void trace_setLogPrefix(const char *name_);
+void trace_setLogName(const char *name_);
+
+/*
+ * trace_getLogName:
+ *
+ * returns the registred log name
+ */
+const char *trace_getLogName(void);
 
 /*
  * trace_registerLevels:
@@ -218,18 +254,18 @@ void trace_enableTimestamp(bool enable_);
 bool trace_isTimestampEnabled(void);
 
 /*
- * trace_enablePrefix:
+ * trace_enableName
  *
- * enable/disable the displaying of the prefix in the trace logs
+ * enable/disable the displaying of the name in the trace logs
  */
-void trace_enablePrefix(bool enable_);
+void trace_enableLogName(bool enable_);
 
 /*
- * trace_isPrefixEnabled:
+ * trace_isNameEnabled:
  *
- * returns if the trace prefix is enabled
+ * returns if the trace log name is enabled
  */
-bool trace_isPrefixEnabled(void);
+bool trace_isLogNameEnabled(void);
 
 /****************************************************************************
  *
@@ -244,8 +280,8 @@ bool trace_isPrefixEnabled(void);
  * levels map to, these functions and macros should NOT be called directly
  * by client code
  */
-extern void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
-extern void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...);
+extern void trace_outputLog(const char *level_, const char *file_, const char *function_, int line_, const char *format_, ...);
+extern void trace_outputDump(void *address_, unsigned length_, const char *level_, const char *file_, const char *function_, int line_, const char *format_, ...);
 
 #ifdef TRACE_LOG_DISABLED
 
