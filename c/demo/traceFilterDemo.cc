@@ -187,6 +187,53 @@ void sampleOutputFunction(const char *outputString_)
 
 /******************************************************************************/
 /******************************************************************************/
+void sampleFormatFunction(const char *level_,
+                          const char *file_,
+                          const char *function_,
+                          int line_,
+                          const char *timestamp_,
+                          const char *userMessage_,
+                          char *outputString_)
+{
+  /*
+   * this sample format function is registered with the TraceLog
+   * 'trace_registerFormatFunction' call to show a client supplied
+   * formatting function, the formating myst be done into the outputString_
+   * variable, the user can check to see if the various formatting items
+   * are enabled, or they can just use a fixed format
+   */
+
+  // standard output format, see what items are enabled, each item is separated by a '|'
+  // custom format is: 2014-08-17 23:11:00.114192 level [name:file:line] user-message
+
+  // add any timestamp if enabled
+  if (trace_isTimestampEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "%s ", timestamp_);
+  }
+
+  // add the level
+  sprintf(&outputString_[strlen(outputString_)], "%s ", level_);
+
+  if (trace_isLogNameEnabled() && trace_isLocationEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "[%s:%s:%d] ", trace_getLogName(), file_, line_);
+  }
+  else if (trace_isLogNameEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "[%s] ", trace_getLogName());
+  }
+  else if (trace_isLocationEnabled())
+  {
+    sprintf(&outputString_[strlen(outputString_)], "[%s:%d] ", file_, line_);
+  }
+
+  // add the user message
+  sprintf(&outputString_[strlen(outputString_)], "%s\n", userMessage_);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void showUsage(void)
 {
   printf("\n");

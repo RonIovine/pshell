@@ -142,10 +142,10 @@ void trace_registerFormatFunction(TraceFormatFunction formatFunction_);
 /*
  * trace_setTimestampFormat:
  *
- * set the timestamp format for the strftime function, the default format is hh:mm:ss.usec,
- * if the 'addUsec_' argument is set to true, be sure to use a format where the sec is last
- * since the usec will be appended to that, if no format is specified, the default formatting
- * will be used, e.g. hh:mm:ss.usec in 24 hour local time
+ * set the timestamp format for the strftime function, if the 'addUsec_' argument is
+ * set to true, be sure to use a format where the sec is last since the usec will be
+ * appended to that, if no format is specified, the default formatting will be used,
+ * e.g. hh:mm:ss.usec in 24 hour local time
  */
 void trace_setTimestampFormat(const char *format_, bool addUsec_ = true);
 
@@ -254,14 +254,14 @@ void trace_enableTimestamp(bool enable_);
 bool trace_isTimestampEnabled(void);
 
 /*
- * trace_enableName
+ * trace_enableLogName
  *
  * enable/disable the displaying of the name in the trace logs
  */
 void trace_enableLogName(bool enable_);
 
 /*
- * trace_isNameEnabled:
+ * trace_isLogNameEnabled:
  *
  * returns if the trace log name is enabled
  */
