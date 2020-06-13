@@ -67,15 +67,15 @@ extern "C" {
 #define TL_DEFAULT_LEVEL TL_FAILURE
 
 /* define the string based names of the trace levels */
-#define TL_ERROR_STRING "Error"
-#define TL_WARNING_STRING "Warning"
-#define TL_FAILURE_STRING "Failure"
-#define TL_INFO_STRING "Info"
-#define TL_DEBUG_STRING "Debug"
-#define TL_ENTER_STRING "Enter"
-#define TL_EXIT_STRING "Exit"
-#define TL_DUMP_STRING "Dump"
-#define TL_FORCE_STRING "Force"
+#define TL_ERROR_STRING "ERROR"
+#define TL_WARNING_STRING "WARNING"
+#define TL_FAILURE_STRING "FAILURE"
+#define TL_INFO_STRING "INFO"
+#define TL_DEBUG_STRING "DEBUG"
+#define TL_ENTER_STRING "ENTER"
+#define TL_EXIT_STRING "EXIT"
+#define TL_DUMP_STRING "DUMP"
+#define TL_FORCE_STRING "FORCE"
 
 /*
  * the following are some example TRACE macros to illustrate integrating the

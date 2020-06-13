@@ -648,8 +648,9 @@ usage of this program:
 ```
 $ traceLogDemo -h
 
-Usage: traceLogDemo <level>
+Usage: traceLogDemo <level> [custom]
 
   where:
     <level>  - The desired log level value, 0-10
+    custom   - Use a custom log format
 ```

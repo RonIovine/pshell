@@ -318,10 +318,10 @@ static unsigned _maxHierarchicalLevel = 0;
 static unsigned _defaultHierarchicalLevel = 0;
 
 /* define the string based names of the trace levels */
-#define TF_CALLBACK_STRING "Callback"
-#define TF_WATCH_STRING "Watch"
-#define TF_BREAKPOINT_STRING "Breakpoint"
-#define TF_STEP_STRING "Step"
+#define TF_CALLBACK_STRING "CALLBACK"
+#define TF_WATCH_STRING "WATCH"
+#define TF_BREAKPOINT_STRING "BREAKPOINT"
+#define TF_STEP_STRING "STEP"
 
 /************************************
  * "public" function bodies

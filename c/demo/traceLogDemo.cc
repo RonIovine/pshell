@@ -54,9 +54,9 @@
 #define TL_USER_LEVEL3   TL_MAX_LEVELS+3
 
 /* define the string based names of the trace levels */
-#define TL_USER_LEVEL1_STRING "UserLevel1"
-#define TL_USER_LEVEL2_STRING "UserLevel2"
-#define TL_USER_LEVEL3_STRING "UserLevel3"
+#define TL_USER_LEVEL1_STRING "USER-LEVEL1"
+#define TL_USER_LEVEL2_STRING "USER-LEVEL2"
+#define TL_USER_LEVEL3_STRING "USER-LEVEL3"
 
 /* define some program specific trace macros */
 #define TRACE_USER_LEVEL1(format, args...) __TRACE(TL_USER_LEVEL1, TL_USER_LEVEL1_STRING, format, ## args)
@@ -238,7 +238,7 @@ int main (int argc, char *argv[])
    * if set to 'NULL', no name prefix will be used
    */
 
-  trace_setLogName("demo");
+  trace_setLogName("DEMO");
 
   /*
    * register a custom client provided log function, this function will
