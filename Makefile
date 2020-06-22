@@ -328,27 +328,45 @@ lib:
 	@echo "Building libpshell-server-full.a (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(STATIC_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
+ifeq ($(PSHELL_INCLUDE_TRACE_FILTER), y)
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
+endif
+ifeq ($(TF_INTEGRATED_TRACE_LOG), y)
 	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
+endif
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-full.a $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 
 	@echo "Building libpshell-server-full.so (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellServer.$(SRC_EXT) -o PshellServer.o
 	$(VERBOSE)$(CC) $(INCLUDE) $(SHARED_OBJ) $(SRC_DIR)/PshellReadline.$(SRC_EXT) -o PshellReadline.o
+ifeq ($(PSHELL_INCLUDE_TRACE_FILTER), y)
 	$(VERBOSE)$(CC) $(INCLUDE) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceFilter.$(SRC_EXT) -o TraceFilter.o
+endif
+ifeq ($(TF_INTEGRATED_TRACE_LOG), y)
 	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
+endif
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-full.so $(PSHELL_OBJS)
 	$(VERBOSE)rm *.o
 
 	@echo "Building libpshell-server-stub.a (C)..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
+ifeq ($(TF_INTEGRATED_TRACE_LOG), y)
+	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(STATIC_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
+	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-stub.a TraceLog.o PshellStub.o
+else
 	$(VERBOSE)$(STATIC_LIB) $(LIB_DIR)/libpshell-server-stub.a PshellStub.o
+endif
 	$(VERBOSE)rm *.o
 
 	@echo "Building libpshell-server-stub.so (C)..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
+	$(VERBOSE)$(CC) $(INCLUDE) $(PSHELL_FLAGS) $(TF_FLAGS) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/PshellStub.$(SRC_EXT) -o PshellStub.o
+ifeq ($(TF_INTEGRATED_TRACE_LOG), y)
+	$(VERBOSE)$(CC) $(INCLUDE) $(TRACE_FLAGS) $(SHARED_OBJ) $(SRC_DIR)/TraceLog.$(SRC_EXT) -o TraceLog.o
+	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-stub.so TraceLog.o PshellStub.o
+else
 	$(VERBOSE)$(SHARED_LIB) $(LIB_DIR)/libpshell-server-stub.so PshellStub.o
+endif
 	$(VERBOSE)rm *.o
 
 	@echo "Building libpshell-control.a (C)..."

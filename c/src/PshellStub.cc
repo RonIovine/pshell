@@ -29,8 +29,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <TraceLog.h>
+#ifdef DYNAMIC_TRACE_FILTER
 #include <TraceFilter.h>
+#endif
 #include <PshellServer.h>
 
 /*
@@ -101,6 +102,8 @@ unsigned char pshell_getUnsignedChar(const char *string_, PshellRadix radix_, bo
 float pshell_getFloat(const char *string_){return ((float)0.0);}
 double pshell_getDouble(const char *string_){return ((double)0.0);}
 
+#ifdef DYNAMIC_TRACE_FILTER
+
 /* TraceFilter private "member" data */
 
 #ifdef TF_FAST_FILENAME_LOOKUP
@@ -118,24 +121,4 @@ bool tf_isFilterPassed(const char *file_, int line_, const char *function_, unsi
 void tf_watch(const char *file_, int line_, const char *function_, const char *symbol_, void *address_, int width_, const char *format_, tf_TraceControl control_){}
 void tf_callback(const char *file_, int line_, const char *function_, const char *callbackName_, tf_TraceCallback callbackFunction_, tf_TraceControl control_){}
 
-/* TraceLog public API functions */
-
-void trace_registerOutputFunction(TraceOutputFunction outputFunction_){}
-void trace_registerFormatFunction(TraceFormatFunction formatFunction_){}
-void trace_setTimestampFormat(const char *format_, bool addUsec_){}
-void trace_setLogName(const char *name_){}
-const char *trace_getLogName(void){return ("");}
-void trace_registerLevels(void){}
-void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_){};
-void trace_setLogLevel(unsigned _logLevel){};
-unsigned trace_getLogLevel(void){return (0);};
-void trace_enableLocation(bool enable_){}
-bool trace_isLocationEnabled(void){return (true);}
-void trace_enablePath(bool enable_){}
-bool trace_isPathEnabled(void){return (true);}
-void trace_enableTimestamp(bool enable_){}
-bool trace_isTimestampEnabled(void){return (true);}
-void trace_enableLogName(bool enable_){};
-bool trace_isLogNameEnabled(void){return (true);}
-void trace_outputLog(const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}
-void trace_outputDump(void *address_, unsigned length_, const char *type_, const char *file_, const char *function_, int line_, const char *format_, ...){}
+#endif
