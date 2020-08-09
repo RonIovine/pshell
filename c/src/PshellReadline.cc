@@ -72,7 +72,7 @@ static int _outFd = STDOUT_FILENO;
 static int _idleTimeout = PSHELL_RL_IDLE_TIMEOUT_NONE;
 static const char *_tcpNegotiate = "\xFF\xFB\x03\xFF\xFB\x01\xFF\xFD\x03\xFF\xFD\x01";
 
-/* this should be sized for the max espected single 'printf' call */
+/* this should be sized for the max expected single 'printf' call */
 #define FORMATTED_OUTPUT_SIZE 4096
 static char _formattedString[FORMATTED_OUTPUT_SIZE] = {0};
 

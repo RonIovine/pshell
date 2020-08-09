@@ -11,6 +11,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshell UDP/Unix client](#pshell-client)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregator UDP/Unix client](#pshellAggregator-client)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[TCP clients](#tcp-clients)<br>
+[Security](#security)<br>
 [Demo programs](#demo-programs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellServerDemo](#pshellServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellControlDemo](#pshellControlDemo)<br>
@@ -361,6 +362,32 @@ Usage: pshell.exp -n | {<hostName> | ipAddr>} {<portNum> | <serverName>}
           detect that and assign the new values
 
 ```
+
+<a name="security"></a>
+### Security
+
+This framework was created to provide a debug/diagnostics interface for developers,
+testers, manufacturing, field support etc, it was not conceived as an end-user/customer-facing
+UI.  It provides for remote interaction and control of a process running the PshellServer
+framework via an IP based client/server paradigm.  The pshell protocol used to
+communicate between the client and server is an unencrypted plain text protocol.
+As such, if security is an issue, it should be treated as any other unsecure protocol,
+such as telnet.  The local target's PshellServer IP address and port should only be
+exposed within a trusted local network or secure VPN, but should not be exposed for
+general use over untrusted networks, such as the public Internet.  For maximum security
+between the client and server, the server can be run either as a UNIX domain server or
+at the target host's local loopback address (i.e. 127.0.0.1) and the PSHELL client
+application (pshell or telnet) can be installed to run on the same local host as the
+target application.  Of course, a secure mechanism (like ssh) would then need to be
+used to provide a secure user access method to that host.
+
+For complete security a stub library/modules are provided that honor the complete
+PshellServer API but with the underlying functionality stubbed out.  The build/packaging
+system for the target applications can be setup such that for a development build, the
+fully functional PshellServer libraries/modules are utilized, but for a final release build
+the stub versions are used.  However one note of caution to be considered in this regard
+is if the PshellControl API is used as a control plane IPC, building/packaging with the
+stub versions of the PshellServer will render the control plane inoperable.
 
 <a name="demo-programs"></a>
 ### Demo programs
