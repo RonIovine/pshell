@@ -80,7 +80,7 @@ SOCKET_RECEIVE_FAILURE
 SOCKET_TIMEOUT
 SOCKET_NOT_CONNECTED
 
-Used if we cannot connect to a local UNIX socket
+Used if we cannot connect to the local source socket
 
 INVALID_SID
 

@@ -49,7 +49,7 @@
 //   SendCommand2()         -- send command to server using timeout override, no results extracted
 //   SendCommand3()         -- send command to server using default timeout, results extracted
 //   SendCommand4()         -- send command to server using timeout override, results extracted
-//   SetResponseString()    -- return the human readable form of one of the command response return codes
+//   GetResponseString()    -- return the human readable form of one of the command response return codes
 //   SetLogLevel()          -- set the internal log level for this module
 //   SetLogFunction()       -- register a user function to receive all logs
 //
@@ -74,7 +74,7 @@
 //   SOCKET_TIMEOUT
 //   SOCKET_NOT_CONNECTED
 //
-// Used if we cannot connect to a local UNIX socket
+// Used if we cannot connect to the local source socket
 //
 //   INVALID_SID
 //
