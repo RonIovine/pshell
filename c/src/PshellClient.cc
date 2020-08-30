@@ -1716,7 +1716,7 @@ void showCommands(void)
 void showUsage(void)
 {
   printf("\n");
-  printf("Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex} [-t<timeout>]\n");
+  printf("Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} | <unixServerName> | <serverIndex>} [-t<timeout>]\n");
   printf("                        [{{-c <command> | -f <filename>} [rate=<seconds>] [repeat=<count>] [clear]}]\n");
   printf("\n");
   printf("  where:\n");

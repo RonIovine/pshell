@@ -161,11 +161,11 @@ To see the make options, type:
 ```
 $ make
 
-Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]
+Usage: make {all | client | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]
 
   where:
     all          - build all components of the pshell package
-    pshell       - build the pshell UDP/UNIX stand-alone client program only
+    client       - build the pshell UDP/UNIX stand-alone client programs only
     lib          - build the pshell link libraries only (shared, static and stub)
     demo         - build the pshell stand-alone demo programs only
     install      - build and install all pshell components
@@ -295,8 +295,10 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
 ##### pshellAggregator UDP/Unix client
 The pshellAggregator client programs are used to access multiple datagram pshell servers.  This is
 useful to consolidate the functionality of several pshell servers into one comprehensive interactive
-user session.  Both the the compiled 'C' version (`pshellAggregator`) and Python version (`pshellAggregator.py`)
-have the same usage as follows:
+user session.  This is the generic aggregator client that can be used to aggregate any datagram based
+pshell server.  This is different than the custom aggregator, [pshellAggregatorDemo](#pshellAggregatorDemo)
+that typically will only aggregate specific hardcoded pshell servers.  Both the the compiled 'C' version
+(`pshellAggregator`) and Python version (`pshellAggregator.py`) have the same usage as follows:
 ```
 $ pshellAggregator -h
 
@@ -636,11 +638,11 @@ privlidges depending on the directory settings.
 <a name="pshellAggregatorDemo"></a>
 #### 5. pshellAggregatorDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
-interactive session.  Note that this is different than the generic pshellAggregator client program described
-above in that this is a custom aggregator by where the servers being aggregated are typically hardcoded.
-This can be useful for creating a client that does not expose all the raw native server commands, but rather
-might want to hide certain commands from individual servers and also create 'meta' commands that consist
-of several discrete commands to several different servers.  The following is the usage of the program:
+interactive session.  Note that this is different than the generic [pshellAggregator](#pshellAggregator-client))
+client program described above in that this is a custom aggregator by where the servers being aggregated are
+typically hardcoded.  This can be useful for creating a client that does not expose all the raw native server
+commands, but rather might want to hide certain commands from individual servers and also create 'meta' commands
+that consist of several discrete commands to several different servers.  The following is the usage of the program:
 ```
 $ pshellAggregatorDemo -h
 

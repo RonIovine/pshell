@@ -298,11 +298,11 @@ endif
 
 help:
 	@echo
-	@echo "Usage: make {all | pshell | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]"
+	@echo "Usage: make {all | client | lib | demo | install | clean} [verbose=y] [local=y [shellEnvFile=<file>]]"
 	@echo
 	@echo "  where:"
 	@echo "    all          - build all components of the pshell package"
-	@echo "    pshell       - build the pshell UDP/UNIX stand-alone client program only"
+	@echo "    client       - build the pshell UDP/UNIX stand-alone client programs only"
 	@echo "    lib          - build the pshell link libraries only (shared, static and stub)"
 	@echo "    demo         - build the pshell stand-alone demo programs only"
 	@echo "    install      - build and install all pshell components"
@@ -406,7 +406,7 @@ endif
 
 	$(VERBOSE)$(UTILS_DIR)/setPshellLib -full
 
-pshell:
+client:
 	@echo "Building pshellAggregator stand-alone UDP/UNIX aggregator client (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(CLIENT_FLAGS) $(SRC_DIR)/PshellAggregator.$(SRC_EXT) $(SRC_DIR)/PshellReadline.$(SRC_EXT) $(CLIENT_LIBS) $(PSHELL_CONTROL_DEMO_LIBS) $(PSHELL_SERVER_DEMO_LIBS) -o $(BIN_DIR)/pshellAggregator
 
@@ -445,7 +445,7 @@ ifeq ($(BUILD_GO), y)
 	$(VERBOSE)$(GO) $(GO_OPTIONS) pshellControlDemo
 endif
 
-all: clean lib pshell demo
+all: clean lib client demo
 	@echo "PSHELL package successfully built..."
 
 install: all
