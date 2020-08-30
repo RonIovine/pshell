@@ -309,7 +309,7 @@ void strrpt(int count, const char *string)
 /******************************************************************************/
 void show(int argc, char *argv[])
 {
-  if (pshell_isSubString(argv[0], "server", 1))
+  if (pshell_isSubString(argv[0], "servers", 1))
   {
     pshell_printf("\n");
     pshell_printf("*************************************************\n");
