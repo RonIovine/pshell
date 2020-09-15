@@ -129,9 +129,10 @@ multicast&nbsp;command,&nbsp;e.g.<br>
 PshellControl.<a href="#-addMulticast">addMulticast</a>("command",&nbsp;"control1,control2,control3")<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keyword&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;multicast&nbsp;keyword&nbsp;that&nbsp;the&nbsp;sid&nbsp;is&nbsp;associated&nbsp;with<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;no&nbsp;keyword&nbsp;is&nbsp;supplied,&nbsp;all&nbsp;multicast&nbsp;commands&nbsp;will<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;go&nbsp;to&nbsp;every&nbsp;server&nbsp;in&nbsp;the&nbsp;controlList<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keyword&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;multicast&nbsp;keyword&nbsp;that&nbsp;will&nbsp;be&nbsp;distributed&nbsp;to&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;following&nbsp;controlList,&nbsp;if&nbsp;the&nbsp;special&nbsp;MULTICAST_ALL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;identifier&nbsp;is&nbsp;used,&nbsp;then&nbsp;the&nbsp;controlList&nbsp;will&nbsp;receive<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;multicast&nbsp;initiated&nbsp;commands<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlList&nbsp;(str)&nbsp;:&nbsp;A&nbsp;CSV&nbsp;formatted&nbsp;list&nbsp;of&nbsp;all&nbsp;the&nbsp;desired&nbsp;controlNames<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(as&nbsp;provided&nbsp;in&nbsp;the&nbsp;first&nbsp;argument&nbsp;of&nbsp;the&nbsp;connectServer<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command)&nbsp;that&nbsp;will&nbsp;receive&nbsp;this&nbsp;multicast&nbsp;command<br>

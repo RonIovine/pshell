@@ -307,9 +307,10 @@ def addMulticast(keyword, controlList):
   PshellControl.addMulticast("command", "control1,control2,control3")
 
     Args:
-        keyword (str)     : The multicast keyword that the sid is associated with
-                            If no keyword is supplied, all multicast commands will
-                            go to every server in the controlList
+        keyword (str)     : The multicast keyword that will be distributed to the
+                            following controlList, if the special MULTICAST_ALL
+                            identifier is used, then the controlList will receive
+                            all multicast initiated commands
         controlList (str) : A CSV formatted list of all the desired controlNames
                             (as provided in the first argument of the connectServer
                             command) that will receive this multicast command
