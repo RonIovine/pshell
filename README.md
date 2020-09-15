@@ -248,7 +248,7 @@ and `pshell.py/pshellAggregator.py`, which are Python implementations.  Any of t
 
 <a name="pshell-client"></a>
 ##### pshell UDP/Unix client
-The pshell client programs are used to access a specific datagram pshell server.  Both the the compiled
+The pshell client programs are used to access a specific datagram pshell server.  Both the compiled
 'C' version (`pshell`) and Python version (`pshell.py`) have the same usage as follows:
 ```
 $ pshell -h
@@ -296,8 +296,8 @@ Usage: pshell -s | -n | {{{<hostName | ipAddr>} {<portNum> | <udpServerName>}} |
 The pshellAggregator client programs are used to access multiple datagram pshell servers.  This is
 useful to consolidate the functionality of several pshell servers into one comprehensive interactive
 user session.  This is the generic aggregator client that can be used to aggregate any datagram based
-pshell server.  This is different than the custom aggregator, [pshellAggregatorDemo](#pshellAggregatorDemo),
-that typically will only aggregate specific hardcoded pshell servers.  Both the the compiled 'C' version
+pshell server.  This is different than the custom aggregator ([pshellAggregatorDemo](#pshellAggregatorDemo))
+that typically will only aggregate specific hardcoded pshell servers.  Both the compiled 'C' version
 (`pshellAggregator`) and Python version (`pshellAggregator.py`) have the same usage as follows:
 ```
 $ pshellAggregator -h

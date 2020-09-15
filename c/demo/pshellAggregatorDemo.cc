@@ -255,14 +255,14 @@ int main (int argc, char *argv[])
   }
 
   /*
-   * add some multicast groups for our control sids, a multicast group is based
-   * on the command's keyword
+   * add some multicast groups for our above controlNames,
+   * a multicast group is based on the command's keyword,
+   * the controlNames that receive the multicast keyword
+   * should be provided in the form of a CSV list of
+   * controlNames as shown below
    */
-  pshell_addMulticast(pshellServerDemoSid, "trace");
-  pshell_addMulticast(traceFilterDemoSid, "trace");
-
-  pshell_addMulticast(pshellServerDemoSid, "test");
-  pshell_addMulticast(traceFilterDemoSid, "test");
+  pshell_addMulticast("trace", "pshellServerDemo,traceFilterDemo");
+  pshell_addMulticast("test", "pshellServerDemo,traceFilterDemo");
 
   /* register our local pshell commands */
 

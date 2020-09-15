@@ -95,7 +95,7 @@
  * the maximum number of command line arguments that can be tokenized
  */
 
-#define MAX_TOKENS 20
+#define MAX_TOKENS 64
 
 /* enums */
 
@@ -1228,7 +1228,7 @@ void tokenize(char *string_,
   {
     stripWhitespace(str);
     tokens_[(*numTokens_)++] = str;
-    while ((str = strtok(NULL, delimeter_)) != NULL)
+    while (((str = strtok(NULL, delimeter_)) != NULL) && ((*numTokens_) < maxTokens_))
     {
       stripWhitespace(str);
       tokens_[(*numTokens_)++] = str;

@@ -173,7 +173,7 @@ const (
   LOG_LEVEL_WARNING = 2
   LOG_LEVEL_INFO = 3
   LOG_LEVEL_ALL = LOG_LEVEL_INFO
-  LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+  LOG_LEVEL_DEFAULT = LOG_LEVEL_WARNING
 )
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -206,6 +206,7 @@ type pshellControl struct {
   sendMsg []byte
   recvMsg []byte
   recvSize int
+  controlName string
   remoteServer string
 }
 var _gControlList = []pshellControl{}
@@ -320,21 +321,29 @@ func SetDefaultTimeout(sid int, defaultTimeout int) {
 }
 
 //
-//  This command will add a given multicast receiver (i.e. sid) to a multicast
-//  group, multicast groups are either based on the command's keyword, or if
-//  no keyword is supplied, the given sid will receive all multicast commands
+//  This command will add a controlList of multicast receivers to a multicast
+//  group, multicast groups are based either on the command's keyword, or if
+//  the special argument PshellControl.MULTICAST_ALL is used, the given controlList
+//  will receive all multicast commands, the format of the controlList is a
+//  CSV formatted list of all the desired controlNames (as provided in the first
+//  argument of the PshellConrol.connectServer command) that will receive this
+//  multicast command, e.g.
+//
+//  PshellControl.AddMulticast("command", "control1,control2,control3")
 //
 //    Args:
-//        sid (int)     : The ServerId as returned from the connectServer call
-//        keyword (str) : The multicast keyword that the sid is associated with
-//                        If no keyword is supplied, all multicast commands will
-//                        go to the corresponding sid
+//        keyword (str)     : The multicast keyword that the sid is associated with
+//                            If no keyword is supplied, all multicast commands will
+//                            go to every server in the controlList
+//        controlList (str) : A CSV formatted list of all the desired controlNames
+//                            (as provided in the first argument of the connectServer
+//                            command) that will receive this multicast command
 //
 //    Returns:
 //        none
 //
-func AddMulticast(sid int, keyword string) {
-  addMulticast(sid, keyword)
+func AddMulticast(keyword string, controlList string) {
+  addMulticast(keyword, controlList)
 }
 
 //
@@ -520,60 +529,66 @@ func SetLogFunction(function logFunction) {
 func connectServer(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) int {
   // setup our destination socket
   var err error
-  var sid = INVALID_SID
   var socket net.Conn
   var sourceAddress string
   var unixLockFd *os.File
   cleanupUnixResources()
-  remoteServer_, port_, defaultTimeout_ = loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
-  if (port_ == UNIX) {
-    // UNIX domain socket
-    remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
-    rand := rand.New(rand.NewSource(time.Now().UnixNano()))
-    for {
-      sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+"-control"+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
-      localAddr := net.UnixAddr{sourceAddress, "unixgram"}
-      unixLockFile := sourceAddress+_LOCK_FILE_EXTENSION
-      unixLockFd, err = os.Create(unixLockFile)
-      if err == nil {
-        err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
+  sid := getSid(controlName_)
+  if (sid == INVALID_SID) {
+    remoteServer_, port_, defaultTimeout_ = loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
+    if (port_ == UNIX) {
+      // UNIX domain socket
+      remoteAddr := net.UnixAddr{_UNIX_SOCKET_PATH+remoteServer_, "unixgram"}
+      rand := rand.New(rand.NewSource(time.Now().UnixNano()))
+      for {
+        sourceAddress = _UNIX_SOCKET_PATH+remoteServer_+"-control"+strconv.FormatUint(uint64(rand.Uint32()%1000), 10)
+        localAddr := net.UnixAddr{sourceAddress, "unixgram"}
+        unixLockFile := sourceAddress+_LOCK_FILE_EXTENSION
+        unixLockFd, err = os.Create(unixLockFile)
         if err == nil {
-          socket, err = net.DialUnix("unixgram", &localAddr, &remoteAddr)
+          err = syscall.Flock(int(unixLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
           if err == nil {
-            break
+            socket, err = net.DialUnix("unixgram", &localAddr, &remoteAddr)
+            if err == nil {
+              break
+            }
           }
         }
       }
-    }
-    _gControlList = append(_gControlList,
-                           pshellControl{socket,
-                                         defaultTimeout_,
-                                         "unix",
-                                         unixLockFd,
-                                         sourceAddress,                   // unix file handle, used for cleanup
-                                         []byte{},                        // sendMsg
-                                         make([]byte, _RCV_BUFFER_SIZE),  // recvMsg
-                                         0,                               // recvSize
-                                         strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
-    sid = len(_gControlList)-1
-  } else {
-    // IP (UDP) domain socket
-    remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
-    socket, err = net.DialUDP("udp", nil, remoteAddr)
-    if (err == nil) {
       _gControlList = append(_gControlList,
                              pshellControl{socket,
                                            defaultTimeout_,
-                                           "udp",
+                                           "unix",
                                            unixLockFd,
-                                           "",                              // sourceAddress not used for UDP socket
+                                           sourceAddress,                   // unix file handle, used for cleanup
                                            []byte{},                        // sendMsg
                                            make([]byte, _RCV_BUFFER_SIZE),  // recvMsg
                                            0,                               // recvSize
+                                           controlName_,
                                            strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
-
       sid = len(_gControlList)-1
+    } else {
+      // IP (UDP) domain socket
+      remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
+      socket, err = net.DialUDP("udp", nil, remoteAddr)
+      if (err == nil) {
+        _gControlList = append(_gControlList,
+                               pshellControl{socket,
+                                             defaultTimeout_,
+                                             "udp",
+                                             unixLockFd,
+                                             "",                              // sourceAddress not used for UDP socket
+                                             []byte{},                        // sendMsg
+                                             make([]byte, _RCV_BUFFER_SIZE),  // recvMsg
+                                             0,                               // recvSize
+                                             controlName_,
+                                             strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
+
+        sid = len(_gControlList)-1
+      }
     }
+  } else {
+    printWarning("Control name: '%s' already exists, must use unique control name", controlName_)
   }
   return (sid)
 }
@@ -631,32 +646,56 @@ func disconnectAllServers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func addMulticast(sid_ int, keyword_ string) {
+func getSid(controlName_ string) int {
+  for sid, control := range(_gControlList) {
+    if (control.controlName == controlName_) {
+      return (sid)
+    }
+  }
+  return (INVALID_SID)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func addMulticast(keyword_ string, controlList_ string) {
   var sidList []int
-  if (sid_ <  len(_gControlList)) {
-    multicastFound := false
-    for _, multicast := range(_gMulticastList) {
-      if (multicast.keyword == keyword_) {
-        multicastFound = true
-        sidList = multicast.sidList
-        break
+  controlNames := strings.Split(strings.TrimSpace(controlList_), ",")
+  for _, controlName := range(controlNames) {
+    controlSid := getSid(controlName)
+    if (controlSid != INVALID_SID) {
+      multicastFound := false
+      for _, multicast := range(_gMulticastList) {
+        if (multicast.keyword == keyword_) {
+          multicastFound = true
+          sidList = multicast.sidList
+          break
+        }
       }
-    }
-    if (multicastFound == false) {
-      // multicast entry not found for this keyword, add a new one
-      _gMulticastList = append(_gMulticastList, pshellMulticast{keyword_, []int{}})
-      sidList = _gMulticastList[len(_gMulticastList)-1].sidList
-    }
-    sidFound := false
-    for _, sid := range(sidList) {
-      if (sid == sid_) {
-        sidFound = true
-        break
+      if (multicastFound == false) {
+        // multicast entry not found for this keyword, add a new one
+        _gMulticastList = append(_gMulticastList, pshellMulticast{keyword_, []int{}})
+        sidList = _gMulticastList[len(_gMulticastList)-1].sidList
+        printInfo("Adding new multicast group keyword: '%s', numGroups: %d", keyword_, len(_gMulticastList))
       }
-    }
-    if (sidFound == false) {
-      // sid not found for this multicast group, add it for this group
-      sidList = append(sidList, sid_)
+      sidFound := false
+      for _, sid := range(sidList) {
+        if (sid == controlSid) {
+          sidFound = true
+          printWarning("Control name: '%s', already added to multicast group: keyword: '%s'", controlName, keyword_)
+          break
+        }
+      }
+      if (sidFound == false) {
+        // sid not found for this multicast group, add it for this group
+        sidList = append(sidList, controlSid)
+        printInfo("Adding new multicast group: controlName: '%s', sid: %d, keyword: '%s', numGroups: %d, numSids: %d", controlName,
+                                                                                                                       controlSid,
+                                                                                                                       keyword_,
+                                                                                                                       len(_gMulticastList),
+                                                                                                                       len(sidList))
+      }
+    } else {
+      printWarning("Control name: '%s' not found", controlName)
     }
   }
 }

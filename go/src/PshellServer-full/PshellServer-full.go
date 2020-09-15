@@ -214,7 +214,7 @@ const (
   LOG_LEVEL_WARNING = 2
   LOG_LEVEL_INFO = 3
   LOG_LEVEL_ALL = LOG_LEVEL_INFO
-  LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+  LOG_LEVEL_DEFAULT = LOG_LEVEL_WARNING
 )
 
 // Used to specify the radix extraction format for the getInt function

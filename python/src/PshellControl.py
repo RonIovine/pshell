@@ -178,7 +178,7 @@ LOG_LEVEL_ERROR = 1     # PSHELL_ERROR
 LOG_LEVEL_WARNING = 2   # PSHELL_ERROR, PSHELL_WARNING
 LOG_LEVEL_INFO = 3      # PSHELL_ERROR, PSHELL_WARNING, PSHELL_INFO
 LOG_LEVEL_ALL = LOG_LEVEL_INFO
-LOG_LEVEL_DEFAULT = LOG_LEVEL_ALL
+LOG_LEVEL_DEFAULT = LOG_LEVEL_WARNING
 
 #################################################################################
 #
@@ -294,24 +294,32 @@ def extractCommands(sid, includeName = True):
 
 #################################################################################
 #################################################################################
-def addMulticast(sid, keyword = MULTICAST_ALL):
+def addMulticast(keyword, controlList):
   """
-  This command will add a given multicast receiver (i.e. sid) to a multicast
-  group, multicast groups are either based on the command's keyword, or if
-  no keyword is supplied, the given sid will receive all multicast commands
+  This command will add a controlList of multicast receivers to a multicast
+  group, multicast groups are based either on the command's keyword, or if
+  the special argument PshellControl.MULTICAST_ALL is used, the given controlList
+  will receive all multicast commands, the format of the controlList is a
+  CSV formatted list of all the desired controlNames (as provided in the first
+  argument of the PshellConrol.connectServer command) that will receive this
+  multicast command, e.g.
+
+  PshellControl.addMulticast("command", "control1,control2,control3")
 
     Args:
-        sid (int)     : The ServerId as returned from the connectServer call
-        keyword (str) : The multicast keyword that the sid is associated with
-                        If no keyword is supplied, all multicast commands will
-                        go to the corresponding sid
+        keyword (str)     : The multicast keyword that the sid is associated with
+                            If no keyword is supplied, all multicast commands will
+                            go to every server in the controlList
+        controlList (str) : A CSV formatted list of all the desired controlNames
+                            (as provided in the first argument of the connectServer
+                            command) that will receive this multicast command
 
     Returns:
         none
   """
-  _addMulticast(sid, keyword)
+  _addMulticast(keyword, controlList)
 
-#################################################################################
+##################################################################################
 #################################################################################
 def sendMulticast(command):
   """
@@ -510,69 +518,74 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   global _gLockFileExtension
   global _gPshellMsgPayloadLength
   isBroadcastAddress = False
-  sid = INVALID_SID
   _cleanupUnixResources()
-  (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
-  if (port_.lower() == "unix"):
-    # UNIX domain socket
-    socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    # bind our source socket so we can get replies
-    sourceAddress = _gUnixSocketPath+remoteServer_+"-control"+str(random.randrange(1000))
-    lockFile = sourceAddress+_gLockFileExtension
-    bound = False
-    while (not bound):
-      try:
-        lockFd = open((lockFile), "w+")
-        fcntl.flock(lockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        socketFd.bind(sourceAddress)
-        bound = True
-      except Exception as e:
-        sourceAddress = _gUnixSocketPath+remoteServer_+"-control"+str(random.randrange(1000))
-        lockFile = sourceAddress+_gLockFileExtension
-    _gPshellControl.append({"socket":socketFd,
-                            "timeout":defaultTimeout_,
-                            "serverType":"unix",
-                            "isBroadcastAddress":isBroadcastAddress,
-                            "lockFd":lockFd,
-                            "sourceAddress":sourceAddress,
-                            "destAddress":_gUnixSocketPath+remoteServer_,
-                            "remoteServer":controlName_+"[unix]",
-                            "pshellMsg":OrderedDict([("msgType",0),
-                                                     ("respNeeded",True),
-                                                     ("dataNeeded",True),
-                                                     ("pad",0),
-                                                     ("seqNum",0),
-                                                     ("payload","")])})
-    # return the newly appended list entry as the SID
-    sid = len(_gPshellControl)-1
+  sid = _getSid(controlName_)
+  if sid == INVALID_SID:
+    (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
+    if (port_.lower() == "unix"):
+      # UNIX domain socket
+      socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+      # bind our source socket so we can get replies
+      sourceAddress = _gUnixSocketPath+remoteServer_+"-control"+str(random.randrange(1000))
+      lockFile = sourceAddress+_gLockFileExtension
+      bound = False
+      while (not bound):
+        try:
+          lockFd = open((lockFile), "w+")
+          fcntl.flock(lockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+          socketFd.bind(sourceAddress)
+          bound = True
+        except Exception as e:
+          sourceAddress = _gUnixSocketPath+remoteServer_+"-control"+str(random.randrange(1000))
+          lockFile = sourceAddress+_gLockFileExtension
+      _gPshellControl.append({"socket":socketFd,
+                              "timeout":defaultTimeout_,
+                              "serverType":"unix",
+                              "isBroadcastAddress":isBroadcastAddress,
+                              "lockFd":lockFd,
+                              "sourceAddress":sourceAddress,
+                              "destAddress":_gUnixSocketPath+remoteServer_,
+                              "controlName":controlName_,
+                              "remoteServer":controlName_+"[unix]",
+                              "pshellMsg":OrderedDict([("msgType",0),
+                                                       ("respNeeded",True),
+                                                       ("dataNeeded",True),
+                                                       ("pad",0),
+                                                       ("seqNum",0),
+                                                       ("payload","")])})
+      # return the newly appended list entry as the SID
+      sid = len(_gPshellControl)-1
+    else:
+      # IP domain socket
+      socketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+      ipAddrOctets = remoteServer_.split(".")
+      # if we are trying to use a subnet broadcast address, set our socket option
+      if ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
+        # subnet broadcast address
+        isBroadcastAddress = True
+        defaultTimeout_ = NO_WAIT
+        socketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+      # bind our source socket so we can get replies
+      socketFd.bind(("", 0))
+      _gPshellControl.append({"socket":socketFd,
+                              "timeout":defaultTimeout_,
+                              "serverType":"udp",
+                              "isBroadcastAddress":isBroadcastAddress,
+                              "lockFd":None,
+                              "sourceAddress":None,
+                              "destAddress":(remoteServer_, int(port_)),
+                              "controlName":controlName_,
+                              "remoteServer":controlName_+"["+remoteServer_+"]",
+                              "pshellMsg":OrderedDict([("msgType",0),
+                                                       ("respNeeded",True),
+                                                       ("dataNeeded",True),
+                                                       ("pad",0),
+                                                       ("seqNum",0),
+                                                       ("payload","")])})
+      # return the newly appended list entry as the SID
+      sid = len(_gPshellControl)-1
   else:
-    # IP domain socket
-    socketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    ipAddrOctets = remoteServer_.split(".")
-    # if we are trying to use a subnet broadcast address, set our socket option
-    if ((len(ipAddrOctets) == 4) and (ipAddrOctets[3] == "255")):
-      # subnet broadcast address
-      isBroadcastAddress = True
-      defaultTimeout_ = NO_WAIT
-      socketFd.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    # bind our source socket so we can get replies
-    socketFd.bind(("", 0))
-    _gPshellControl.append({"socket":socketFd,
-                            "timeout":defaultTimeout_,
-                            "serverType":"udp",
-                            "isBroadcastAddress":isBroadcastAddress,
-                            "lockFd":None,
-                            "sourceAddress":None,
-                            "destAddress":(remoteServer_, int(port_)),
-                            "remoteServer":controlName_+"["+remoteServer_+"]",
-                            "pshellMsg":OrderedDict([("msgType",0),
-                                                     ("respNeeded",True),
-                                                     ("dataNeeded",True),
-                                                     ("pad",0),
-                                                     ("seqNum",0),
-                                                     ("payload","")])})
-    # return the newly appended list entry as the SID
-    sid = len(_gPshellControl)-1
+    _printWarning("Control name: '{}' already exists, must use unique control name".format(controlName_))
   return (sid)
 
 #################################################################################
@@ -672,28 +685,49 @@ def _extractPrompt(sid_):
 
 #################################################################################
 #################################################################################
-def _addMulticast(sid_, keyword_):
+def _getSid(controlName_):
   global _gPshellControl
   global _gPshellMulticast
-  if (sid_ <  len(_gPshellControl)):
-    multicastFound = False
-    for multicast in _gPshellMulticast:
-      if (multicast["keyword"] == keyword_):
-        multicastFound = True
-        sidList = multicast["sidList"]
-        break
-    if (not multicastFound):
-      # multicast entry not found for this keyword, add a new one
-      _gPshellMulticast.append({"keyword":keyword_, "sidList":[]})
-      sidList = _gPshellMulticast[-1]["sidList"]
-    sidFound = False
-    for sid in sidList:
-      if (sid == sid_):
-        sidFound = True
-        break
-    if (not sidFound):
-      # sid not found for this multicast group, add it for this group
-      sidList.append(sid_)
+  for sid, control in enumerate(_gPshellControl):
+    if control["controlName"] == controlName_:
+      return sid
+  return INVALID_SID
+
+#################################################################################
+#################################################################################
+def _addMulticast(keyword_, controlList_):
+  controlNames = controlList_.split(",")
+  for controlName in controlNames:
+    controlSid = _getSid(controlName.strip())
+    if controlSid != INVALID_SID:
+      multicastFound = False
+      for multicast in _gPshellMulticast:
+        if (multicast["keyword"] == keyword_):
+          multicastFound = True
+          sidList = multicast["sidList"]
+          break
+      if not multicastFound:
+        # multicast entry not found for this keyword, add a new one
+        _gPshellMulticast.append({"keyword":keyword_, "sidList":[]})
+        sidList = _gPshellMulticast[-1]["sidList"]
+        _printInfo("Adding new multicast group keyword: '{}', numGroups: {}".format(keyword_, len(_gPshellMulticast)))
+      sidFound = False
+      for sid in sidList:
+        if sid == controlSid:
+          # make sure we don't add the same sid twice
+          sidFound = True
+          _printWarning("Control name: '{}', already added to multicast group: keyword: '{}'".format(controlName, keyword_))
+          break
+      if not sidFound:
+        # sid not found for this multicast group, add it for this group
+        sidList.append(controlSid)
+        _printInfo("Adding new multicast group: controlName: '{}', sid: {}, keyword: '{}', numGroups: {}, numSids: {}".format(controlName,
+                                                                                                                              controlSid,
+                                                                                                                              keyword_,
+                                                                                                                              len(_gPshellMulticast),
+                                                                                                                              len(sidList)))
+    else:
+      _printWarning("Control name: '{}' not found".format(controlName))
 
 #################################################################################
 #################################################################################

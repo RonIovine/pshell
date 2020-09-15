@@ -147,13 +147,13 @@ if (__name__ == '__main__'):
                                                    traceFilterDemoPort,
                                                    PshellControl.ONE_SEC*5)
 
-  # add some multicast groups for our control sids, a multicast group is based
-  # on the command's keyword
-  PshellControl.addMulticast(pshellServerDemoSid, "trace");
-  PshellControl.addMulticast(traceFilterDemoSid, "trace");
-
-  PshellControl.addMulticast(pshellServerDemoSid, "test");
-  PshellControl.addMulticast(traceFilterDemoSid, "test");
+  # add some multicast groups for our above controlNames,
+  # a multicast group is based on the command's keyword,
+  # the controlNames that receive the multicast keyword
+  # should be provided in the form of a CSV list of
+  # controlNames as shown below
+  PshellControl.addMulticast("trace", "pshellServerDemo,traceFilterDemo")
+  PshellControl.addMulticast("test", "pshellServerDemo,traceFilterDemo")
 
   # register our callback commands
   PshellServer.addCommand(pshellServerDemo,

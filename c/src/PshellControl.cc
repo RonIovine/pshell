@@ -69,6 +69,8 @@
 
 #define MAX_STRING_SIZE 300
 
+#define MAX_TOKENS 64
+
 /* enums */
 
 enum ServerType
@@ -97,6 +99,7 @@ struct PshellControl
   struct sockaddr_in destIpAddress;
   struct sockaddr_un sourceUnixAddress;
   struct sockaddr_un destUnixAddress;
+  char controlName[MAX_STRING_SIZE];
   char remoteServer[MAX_STRING_SIZE];
 };
 
@@ -128,6 +131,7 @@ static const char *_lockFileExtension = ".lock";
  ******************************************/
 
 static PshellControl *getControl(int sid_);
+static int getSid(const char *controlName_);
 static int createControl(void);
 static int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, unsigned timeoutOverride_);
 static bool sendPshellMsg(PshellControl *control_);
@@ -135,6 +139,8 @@ static int extractResults(PshellControl *control_, char *results_, int size_);
 static bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned port_, unsigned defaultMsecTimeout_);
 static void loadConfigFile(const char *controlName_, char *remoteServer_, unsigned &port_, unsigned &defaultTimeout_);
 static void cleanupUnixResources(void);
+static void tokenize(char *string_, const char *delimeter_, char *tokens_[], unsigned maxTokens_, unsigned *numTokens_);
+static void stripWhitespace(char *string_);
 
 static void _printf(const char *format_, ...);
 
@@ -176,28 +182,39 @@ int pshell_connectServer(const char *controlName_,
                          unsigned defaultTimeout_)
 {
   pthread_mutex_lock(&_mutex);
-  int sid;
+  int sid = PSHELL_INVALID_SID;
   char remoteServer[MAX_STRING_SIZE];
   unsigned port = port_;
   unsigned defaultTimeout = defaultTimeout_;
-  if ((sid = createControl()) != PSHELL_INVALID_SID)
+  if (getSid(controlName_) == PSHELL_INVALID_SID)
   {
-    strcpy(remoteServer, remoteServer_);
-    loadConfigFile(controlName_, remoteServer, port, defaultTimeout);
-    if (!connectServer(_control[sid], remoteServer, port, defaultTimeout))
+    if ((sid = createControl()) != PSHELL_INVALID_SID)
     {
-      free(_control[sid]);
-      _control[sid] = NULL;
-      sid = PSHELL_INVALID_SID;
+      strcpy(remoteServer, remoteServer_);
+      loadConfigFile(controlName_, remoteServer, port, defaultTimeout);
+      if (!connectServer(_control[sid], remoteServer, port, defaultTimeout))
+      {
+        free(_control[sid]);
+        _control[sid] = NULL;
+        sid = PSHELL_INVALID_SID;
+      }
+      else
+      {
+        if (_control[sid]->serverType == UNIX)
+        {
+          sprintf(_control[sid]->remoteServer,  "%s[unix]", controlName_);
+        }
+        else
+        {
+          sprintf(_control[sid]->remoteServer,  "%s[%s]", controlName_, remoteServer);
+        }
+        sprintf(_control[sid]->controlName,  "%s", controlName_);
+      }
     }
-    else if (_control[sid]->serverType == UNIX)
-    {
-      sprintf(_control[sid]->remoteServer,  "%s[unix]", controlName_);
-    }
-    else
-    {
-      sprintf(_control[sid]->remoteServer,  "%s[%s]", controlName_, remoteServer);
-    }
+  }
+  else
+  {
+    PSHELL_WARNING("Control name: '%s' already exists, must use unique control name", controlName_);
   }
   pthread_mutex_unlock(&_mutex);
   return (sid);
@@ -281,9 +298,13 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_addMulticast(int sid_, const char *keyword_)
+void pshell_addMulticast(const char *keyword_, const char *controlList_)
 {
   pthread_mutex_lock(&_mutex);
+  char *controlNames[MAX_TOKENS];
+  char controlList[MAX_STRING_SIZE];
+  unsigned numControlNames;
+  int sid;
   int groupIndex = _multicastList.numGroups;
   for (int i = 0; i < _multicastList.numGroups; i++)
   {
@@ -296,40 +317,57 @@ void pshell_addMulticast(int sid_, const char *keyword_)
   }
   if (groupIndex < MAX_MULTICAST_GROUPS)
   {
-    /* group found, now see if we have a new unique sid for this group */
-    int sidIndex = _multicastList.groups[groupIndex].numSids;
-    for (int i = 0; i < _multicastList.groups[groupIndex].numSids; i++)
+    strncpy(controlList, controlList_, MAX_STRING_SIZE);
+    tokenize(controlList, ",", controlNames, MAX_TOKENS, &numControlNames);
+    for (unsigned i = 0; i < numControlNames; i++)
     {
-      if (_multicastList.groups[groupIndex].sidList[i] == sid_)
+      if ((sid = getSid(controlNames[i])) != PSHELL_INVALID_SID)
       {
-        sidIndex = i;
-        break;
+        /* group found, now see if we have a new unique sid for this group */
+        int sidIndex = _multicastList.groups[groupIndex].numSids;
+        for (int j = 0; j < _multicastList.groups[groupIndex].numSids; j++)
+        {
+          if (_multicastList.groups[groupIndex].sidList[j] == sid)
+          {
+            sidIndex = j;
+            break;
+          }
+        }
+        if (sidIndex < PSHELL_MAX_SERVERS)
+        {
+          /* see if we have a new multicast group (keyword) */
+          if (groupIndex == _multicastList.numGroups)
+          {
+            /* new keyword (group), add the new entry */
+            strcpy(_multicastList.groups[_multicastList.numGroups++].keyword, keyword_);
+            PSHELL_INFO("Adding new multicast group keyword: '%s', numGroups: %d", keyword_, _multicastList.numGroups);
+          }
+          /* see if we have a new sid for this group */
+          if (sidIndex == _multicastList.groups[groupIndex].numSids)
+          {
+            /* new sid for this group, add it */
+            _multicastList.groups[groupIndex].sidList[_multicastList.groups[groupIndex].numSids++] = sid;
+            PSHELL_INFO("Adding new multicast group: controlName: '%s', sid: %d, keyword: '%s', numGroups: %d, numSids: %d",
+                        controlNames[i],
+                        sid,
+                        keyword_,
+                        _multicastList.numGroups,
+                        _multicastList.groups[groupIndex].numSids);
+          }
+          else
+          {
+            PSHELL_WARNING("Control name: '%s', already added to multicast group: keyword: '%s'", controlNames[i], keyword_);
+          }
+        }
+        else
+        {
+          PSHELL_ERROR("Max servers: %d exceeded for multicast group: '%s'", PSHELL_MAX_SERVERS, _multicastList.groups[groupIndex].keyword);
+        }
       }
-    }
-    if (sidIndex < PSHELL_MAX_SERVERS)
-    {
-      /* see if we have a new multicast group (keyword) */
-      if (groupIndex == _multicastList.numGroups)
+      else
       {
-        /* new keyword (group), add the new entry */
-        strcpy(_multicastList.groups[_multicastList.numGroups++].keyword, keyword_);
-        PSHELL_INFO("Adding new multicast group keyword: '%s', numGroups: %d", keyword_, _multicastList.numGroups);
+        PSHELL_WARNING("Control name: '%s' not found", controlNames[i]);
       }
-      /* see if we have a new sid for this group */
-      if (sidIndex == _multicastList.groups[groupIndex].numSids)
-      {
-        /* new sid for this group, add it */
-        _multicastList.groups[groupIndex].sidList[_multicastList.groups[groupIndex].numSids++] = sid_;
-        PSHELL_INFO("Adding new multicast group sid: %d, keyword: '%s', numGroups: %d, numSids: %d",
-                    sid_,
-                    keyword_,
-                    _multicastList.numGroups,
-                    _multicastList.groups[groupIndex].numSids);
-      }
-    }
-    else
-    {
-      PSHELL_ERROR("Max servers: %d exceeded for multicast group: '%s'", PSHELL_MAX_SERVERS, _multicastList.groups[groupIndex].keyword);
     }
   }
   else
@@ -619,7 +657,10 @@ static void cleanupUnixResources(void)
 
 /******************************************************************************/
 /******************************************************************************/
-bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned port_, unsigned defaultTimeout_)
+static bool connectServer(PshellControl *control_,
+                          const char *remoteServer_,
+                          unsigned port_,
+                          unsigned defaultTimeout_)
 {
   struct hostent *host;
   int retCode = -1;
@@ -729,7 +770,10 @@ bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned
 
 /******************************************************************************/
 /******************************************************************************/
-int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, unsigned timeoutOverride_)
+static int sendPshellCommand(PshellControl *control_,
+                             int commandType_,
+                             const char *command_,
+                             unsigned timeoutOverride_)
 {
   fd_set readFd;
   struct timeval timeout;
@@ -845,7 +889,7 @@ int sendPshellCommand(PshellControl *control_, int commandType_, const char *com
 
 /******************************************************************************/
 /******************************************************************************/
-bool sendPshellMsg(PshellControl *control_)
+static bool sendPshellMsg(PshellControl *control_)
 {
   if (control_->serverType == UDP)
   {
@@ -869,7 +913,7 @@ bool sendPshellMsg(PshellControl *control_)
 
 /******************************************************************************/
 /******************************************************************************/
-int extractResults(PshellControl *control_, char *results_, int size_)
+static int extractResults(PshellControl *control_, char *results_, int size_)
 {
   int bytesExtracted = 0;
   int payloadSize = strlen(control_->pshellMsg.payload);
@@ -890,7 +934,7 @@ int extractResults(PshellControl *control_, char *results_, int size_)
 
 /******************************************************************************/
 /******************************************************************************/
-int createControl(void)
+static int createControl(void)
 {
   int sid = PSHELL_INVALID_SID;
   int tmpSid;
@@ -918,7 +962,7 @@ int createControl(void)
 
 /******************************************************************************/
 /******************************************************************************/
-PshellControl *getControl(int sid_)
+static PshellControl *getControl(int sid_)
 {
   PshellControl *control = NULL;
   if ((sid_ >= 0) && (sid_ < PSHELL_MAX_SERVERS))
@@ -930,6 +974,20 @@ PshellControl *getControl(int sid_)
     PSHELL_ERROR("Out of range sid: %d, valid range: 0-%d", sid_, PSHELL_MAX_SERVERS-1);
   }
   return (control);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static int getSid(const char *controlName_)
+{
+  for (int i = 0; i < PSHELL_MAX_SERVERS; i++)
+  {
+    if ((_control[i] != NULL) && (strcmp(_control[i]->controlName, controlName_) == 0))
+    {
+      return (i);
+    }
+  }
+  return (PSHELL_INVALID_SID);
 }
 
 /******************************************************************************/
@@ -1030,7 +1088,55 @@ static void loadConfigFile(const char *controlName_,
 
 /******************************************************************************/
 /******************************************************************************/
-void _printf(const char *format_, ...)
+static void tokenize(char *string_,
+                     const char *delimeter_,
+                     char *tokens_[],
+                     unsigned maxTokens_,
+                     unsigned *numTokens_)
+{
+  char *str;
+  *numTokens_ = 0;
+  if ((str = strtok(string_, delimeter_)) != NULL)
+  {
+    stripWhitespace(str);
+    tokens_[(*numTokens_)++] = str;
+    while (((str = strtok(NULL, delimeter_)) != NULL) && ((*numTokens_) < maxTokens_))
+    {
+      stripWhitespace(str);
+      tokens_[(*numTokens_)++] = str;
+    }
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static void stripWhitespace(char *string_)
+{
+  unsigned i;
+  char *str = string_;
+
+  for (i = 0; i < strlen(string_); i++)
+  {
+    if (!isspace(string_[i]))
+    {
+      str = &string_[i];
+      break;
+    }
+  }
+  if (string_ != str)
+  {
+    strcpy(string_, str);
+  }
+  /* now NULL terminate the string */
+  if (string_[strlen(string_)-1] == '\n')
+  {
+    string_[strlen(string_)-1] = 0;
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static void _printf(const char *format_, ...)
 {
   char outputString[MAX_STRING_SIZE];
   int bytesFormatted = 0;

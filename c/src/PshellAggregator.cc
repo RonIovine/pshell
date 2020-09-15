@@ -281,7 +281,7 @@ void add(int argc, char *argv[])
       {
         if (multicast->numServers < MAX_SERVERS)
         {
-          pshell_addMulticast(server->sid, argv[1]);
+          pshell_addMulticast(argv[1], server->localName);
           multicast->servers[multicast->numServers] = server;
           multicast->numServers++;
         }

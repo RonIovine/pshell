@@ -186,7 +186,7 @@ def _add(argv):
     for localName in argv[3:]:
       server = _getServer(localName)
       if (server != None):
-        PshellControl.addMulticast(server["sid"], argv[2])
+        PshellControl.addMulticast(argv[2], server["localName"])
         multicast["servers"].append(server)
   else:
     PshellServer.showUsage()

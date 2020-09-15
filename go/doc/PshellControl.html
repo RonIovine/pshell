@@ -145,7 +145,7 @@ demo program pshellControlDemo.go
 			
 			
 				
-				<dd><a href="#AddMulticast">func AddMulticast(sid int, keyword string)</a></dd>
+				<dd><a href="#AddMulticast">func AddMulticast(keyword string, controlList string)</a></dd>
 			
 				
 				<dd><a href="#ConnectServer">func ConnectServer(controlName string, remoteServer string, port string, defaultTimeout int) int</a></dd>
@@ -233,7 +233,7 @@ and must match their corresponding values in PshellServer.cc
     <span id="LOG_LEVEL_WARNING">LOG_LEVEL_WARNING</span> = 2
     <span id="LOG_LEVEL_INFO">LOG_LEVEL_INFO</span>    = 3
     <span id="LOG_LEVEL_ALL">LOG_LEVEL_ALL</span>     = <a href="#LOG_LEVEL_INFO">LOG_LEVEL_INFO</a>
-    <span id="LOG_LEVEL_DEFAULT">LOG_LEVEL_DEFAULT</span> = <a href="#LOG_LEVEL_ALL">LOG_LEVEL_ALL</a>
+    <span id="LOG_LEVEL_DEFAULT">LOG_LEVEL_DEFAULT</span> = <a href="#LOG_LEVEL_WARNING">LOG_LEVEL_WARNING</a>
 )</pre>
 				<p>
 constants to let the host program set the internal debug log level,
@@ -290,18 +290,27 @@ using a UNIX domain server
 		
 			
 			
-			<h2 id="AddMulticast">func <a href="/target/PshellControl.go?s=12054:12096#L326">AddMulticast</a></h2>
-			<pre>func AddMulticast(sid <a href="/pkg/builtin/#int">int</a>, keyword <a href="/pkg/builtin/#string">string</a>)</pre>
+			<h2 id="AddMulticast">func <a href="/target/PshellControl.go?s=12615:12668#L335">AddMulticast</a></h2>
+			<pre>func AddMulticast(keyword <a href="/pkg/builtin/#string">string</a>, controlList <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
-This command will add a given multicast receiver (i.e. sid) to a multicast
-group, multicast groups are either based on the command&#39;s keyword, or if
-no keyword is supplied, the given sid will receive all multicast commands
+This command will add a controlList of multicast receivers to a multicast
+group, multicast groups are based either on the command&#39;s keyword, or if
+the special argument PshellControl.MULTICAST_ALL is used, the given controlList
+will receive all multicast commands, the format of the controlList is a
+CSV formatted list of all the desired controlNames (as provided in the first
+argument of the PshellConrol.connectServer command) that will receive this
+multicast command, e.g.
+</p>
+<p>
+PshellControl.AddMulticast(&#34;command&#34;, &#34;control1,control2,control3&#34;)
 </p>
 <pre>Args:
-    sid (int)     : The ServerId as returned from the connectServer call
-    keyword (str) : The multicast keyword that the sid is associated with
-                    If no keyword is supplied, all multicast commands will
-                    go to the corresponding sid
+    keyword (str)     : The multicast keyword that the sid is associated with
+                        If no keyword is supplied, all multicast commands will
+                        go to every server in the controlList
+    controlList (str) : A CSV formatted list of all the desired controlNames
+                        (as provided in the first argument of the connectServer
+                        command) that will receive this multicast command
 
 Returns:
     none
@@ -311,7 +320,7 @@ Returns:
 		
 			
 			
-			<h2 id="ConnectServer">func <a href="/target/PshellControl.go?s=10019:10115#L262">ConnectServer</a></h2>
+			<h2 id="ConnectServer">func <a href="/target/PshellControl.go?s=10044:10140#L263">ConnectServer</a></h2>
 			<pre>func ConnectServer(controlName <a href="/pkg/builtin/#string">string</a>, remoteServer <a href="/pkg/builtin/#string">string</a>, port <a href="/pkg/builtin/#string">string</a>, defaultTimeout <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#int">int</a></pre>
 			<p>
 Connect to a pshell server in another process, note that this does
@@ -349,7 +358,7 @@ Returns:
 		
 			
 			
-			<h2 id="DisconnectAllServers">func <a href="/target/PshellControl.go?s=10963:10990#L293">DisconnectAllServers</a></h2>
+			<h2 id="DisconnectAllServers">func <a href="/target/PshellControl.go?s=10988:11015#L294">DisconnectAllServers</a></h2>
 			<pre>func DisconnectAllServers()</pre>
 			<p>
 Use this function to cleanup any resources for all connected servers, this
@@ -369,7 +378,7 @@ Returns:
 		
 			
 			
-			<h2 id="DisconnectServer">func <a href="/target/PshellControl.go?s=10474:10504#L276">DisconnectServer</a></h2>
+			<h2 id="DisconnectServer">func <a href="/target/PshellControl.go?s=10499:10529#L277">DisconnectServer</a></h2>
 			<pre>func DisconnectServer(sid <a href="/pkg/builtin/#int">int</a>)</pre>
 			<p>
 Cleanup any resources associated with the server connection, including
@@ -386,7 +395,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetResponseString">func <a href="/target/PshellControl.go?s=17076:17118#L461">GetResponseString</a></h2>
+			<h2 id="GetResponseString">func <a href="/target/PshellControl.go?s=17656:17698#L470">GetResponseString</a></h2>
 			<pre>func GetResponseString(retCode <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#string">string</a></pre>
 			<p>
 Returns the string value corresponding to a received response code
@@ -402,7 +411,7 @@ Returns:
 		
 			
 			
-			<h2 id="SendCommand1">func <a href="/target/PshellControl.go?s=13483:13552#L368">SendCommand1</a></h2>
+			<h2 id="SendCommand1">func <a href="/target/PshellControl.go?s=14063:14132#L377">SendCommand1</a></h2>
 			<pre>func SendCommand1(sid <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) <a href="/pkg/builtin/#int">int</a></pre>
 			<p>
 Send a command using the default timeout setup in the connectServer call,
@@ -429,7 +438,7 @@ Returns:
 		
 			
 			
-			<h2 id="SendCommand2">func <a href="/target/PshellControl.go?s=14415:14505#L393">SendCommand2</a></h2>
+			<h2 id="SendCommand2">func <a href="/target/PshellControl.go?s=14995:15085#L402">SendCommand2</a></h2>
 			<pre>func SendCommand2(sid <a href="/pkg/builtin/#int">int</a>, timeoutOverride <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) <a href="/pkg/builtin/#int">int</a></pre>
 			<p>
 Send a command overriding the default timeout, if the override timeout is 0,
@@ -457,7 +466,7 @@ Returns:
 		
 			
 			
-			<h2 id="SendCommand3">func <a href="/target/PshellControl.go?s=15513:15592#L420">SendCommand3</a></h2>
+			<h2 id="SendCommand3">func <a href="/target/PshellControl.go?s=16093:16172#L429">SendCommand3</a></h2>
 			<pre>func SendCommand3(sid <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) (<a href="/pkg/builtin/#int">int</a>, <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 Send a command using the default timeout setup in the connectServer call and
@@ -487,7 +496,7 @@ Returns:
 		
 			
 			
-			<h2 id="SendCommand4">func <a href="/target/PshellControl.go?s=16678:16778#L448">SendCommand4</a></h2>
+			<h2 id="SendCommand4">func <a href="/target/PshellControl.go?s=17258:17358#L457">SendCommand4</a></h2>
 			<pre>func SendCommand4(sid <a href="/pkg/builtin/#int">int</a>, timeoutOverride <a href="/pkg/builtin/#int">int</a>, format <a href="/pkg/builtin/#string">string</a>, command ...interface{}) (<a href="/pkg/builtin/#int">int</a>, <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 Send a command overriding the default timeout and return any results received
@@ -518,7 +527,7 @@ Returns:
 		
 			
 			
-			<h2 id="SendMulticast">func <a href="/target/PshellControl.go?s=12655:12712#L344">SendMulticast</a></h2>
+			<h2 id="SendMulticast">func <a href="/target/PshellControl.go?s=13235:13292#L353">SendMulticast</a></h2>
 			<pre>func SendMulticast(format <a href="/pkg/builtin/#string">string</a>, command ...interface{})</pre>
 			<p>
 This command will send a given command to all the registered multicast
@@ -539,7 +548,7 @@ Returns:
 		
 			
 			
-			<h2 id="SetDefaultTimeout">func <a href="/target/PshellControl.go?s=11374:11425#L308">SetDefaultTimeout</a></h2>
+			<h2 id="SetDefaultTimeout">func <a href="/target/PshellControl.go?s=11399:11450#L309">SetDefaultTimeout</a></h2>
 			<pre>func SetDefaultTimeout(sid <a href="/pkg/builtin/#int">int</a>, defaultTimeout <a href="/pkg/builtin/#int">int</a>)</pre>
 			<p>
 Set the default server response timeout that is used in the &#39;send&#39; commands
@@ -557,7 +566,7 @@ Returns:
 		
 			
 			
-			<h2 id="SetLogFunction">func <a href="/target/PshellControl.go?s=17877:17918#L498">SetLogFunction</a></h2>
+			<h2 id="SetLogFunction">func <a href="/target/PshellControl.go?s=18457:18498#L507">SetLogFunction</a></h2>
 			<pre>func SetLogFunction(function logFunction)</pre>
 			<p>
 Provide a user callback function to send the logs to, this allows an
@@ -576,7 +585,7 @@ Returns:
 		
 			
 			
-			<h2 id="SetLogLevel">func <a href="/target/PshellControl.go?s=17465:17492#L482">SetLogLevel</a></h2>
+			<h2 id="SetLogLevel">func <a href="/target/PshellControl.go?s=18045:18072#L491">SetLogLevel</a></h2>
 			<pre>func SetLogLevel(level <a href="/pkg/builtin/#int">int</a>)</pre>
 			<p>
 Set the internal log level, valid levels are:
