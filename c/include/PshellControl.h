@@ -184,19 +184,34 @@ void pshell_extractCommands(int sid_, char *results_, int size_);
  * pshell_addMulticast:
  *
  * this command will add a controlList of multicast receivers to a multicast
- * group, multicast groups are based either on the command's keyword, or if
- * the special argument PSHELL_MULTICAST_ALL is used, the given controlList
- * will receive all multicast commands, the format of the controlList is a
- * CSV formatted list of all the desired controlNames (as provided in the first
- * argument of the pshell_connectServer command) that will receive this multicast
- * command, e.g.
+ * group, multicast groups are based either on the command, or if the special
+ * argument PSHELL_MULTICAST_ALL is used, the given controlList will receive
+ * all multicast commands, the format of the controlList is a CSV formatted list
+ * of all the desired controlNames (as provided in the first argument of the
+ * pshell_connectServer command) that will receive this multicast command or
+ * if the PSHELL_MULTICAST_ALL is used then all control destinations will
+ * receive the given multicast command, see examples below
  *
- * pshell_addMulticast("command", "control1,control2,control3");
+ * ex 1: multicast command sent to receivers in CSV controlList
+ *
+ *   pshell_addMulticast("command", "control1,control2,control3");
+ *
+ * ex 2: all multicast commands sent to receivers in CSV controlList
+ *
+ *   pshell_addMulticast(PSHELL_MULTICAST_ALL, "control1,control2,control3");
+ *
+ * ex 3: multicast command sent to all receivers
+ *
+ *   pshell_addMulticast("command", PSHELL_MULTICAST_ALL);
+ *
+ * ex 4: all multicast commands sent to all receivers
+ *
+ *   pshell_addMulticast(PSHELL_MULTICAST_ALL, PSHELL_MULTICAST_ALL);
  *
  */
 #define PSHELL_MULTICAST_ALL "__multicast_all__"
 
-void pshell_addMulticast(const char *keyword_, const char *controlList_);
+void pshell_addMulticast(const char *command_, const char *controlList_);
 
 /*
  * pshell_sendMulticast:

@@ -108,7 +108,9 @@ call when using a UNIX domain server
 
 UNIX
 
-Specifies if the addMulticast should add the given sid to all commands
+Specifies if the addMulticast should add the given command to all specified
+multicast receivers or if all control destinations should receive the given
+multicast command
 
 MULTICAST_ALL
 
@@ -164,7 +166,8 @@ SOCKET_RECEIVE_FAILURE = 5
 SOCKET_TIMEOUT = 6
 SOCKET_NOT_CONNECTED = 7
 
-# specifies if the addMulticast should add the given sid to all commands
+# specifies if the addMulticast should add the given command to all
+# destinations or all commands to the specified destinations
 MULTICAST_ALL = "__multicast_all__"
 
 # used if we cannot connect to a local UNIX socket
@@ -294,31 +297,48 @@ def extractCommands(sid, includeName = True):
 
 #################################################################################
 #################################################################################
-def addMulticast(keyword, controlList):
+def addMulticast(command, controlList):
   """
   This command will add a controlList of multicast receivers to a multicast
-  group, multicast groups are based either on the command's keyword, or if
-  the special argument PshellControl.MULTICAST_ALL is used, the given controlList
-  will receive all multicast commands, the format of the controlList is a
-  CSV formatted list of all the desired controlNames (as provided in the first
-  argument of the PshellConrol.connectServer command) that will receive this
-  multicast command, e.g.
+  group, multicast groups are based either on the command, or if the special
+  argument PSHELL_MULTICAST_ALL is used, the given controlList will receive
+  all multicast commands, the format of the controlList is a CSV formatted list
+  of all the desired controlNames (as provided in the first argument of the
+  pshell_connectServer command) that will receive this multicast command or
+  if the PSHELL_MULTICAST_ALL is used then all control destinations will
+  receive the given multicast command, see examples below
 
-  PshellControl.addMulticast("command", "control1,control2,control3")
+  ex 1: multicast command sent to receivers in CSV controlList
+
+    PshellControl.addMulticast("command", "control1,control2,control3")
+
+  ex 2: all multicast commands sent to receivers in CSV controlList
+
+    PshellControl.addMulticast(PshellControl.MULTICAST_ALL, "control1,control2,control3")
+
+  ex 3: multicast command sent to all receivers
+
+    PshellControl.addMulticast("command", PshellControl.MULTICAST_ALL)
+
+  ex 4: all multicast commands sent to all receivers
+
+    PshellControl.addMulticast(PshellControl.MULTICAST_ALL, PshellControl.MULTICAST_ALL)
 
     Args:
-        keyword (str)     : The multicast keyword that will be distributed to the
+        command (str)     : The multicast command that will be distributed to the
                             following controlList, if the special MULTICAST_ALL
                             identifier is used, then the controlList will receive
                             all multicast initiated commands
         controlList (str) : A CSV formatted list of all the desired controlNames
                             (as provided in the first argument of the connectServer
-                            command) that will receive this multicast command
+                            command) that will receive this multicast command, if
+                            the special MULTICAST_ALL identifier is used, then
+                            all control destinations will receive the command
 
     Returns:
         none
   """
-  _addMulticast(keyword, controlList)
+  _addMulticast(command, controlList)
 
 ##################################################################################
 #################################################################################
@@ -686,6 +706,24 @@ def _extractPrompt(sid_):
 
 #################################################################################
 #################################################################################
+def _addMulticast(command_, controlList_):
+  global _gPshellControl
+  if controlList_ == MULTICAST_ALL:
+    # add the multicast command to all control destinations
+    for sid, control in enumerate(_gPshellControl):
+      _addMulticastControlName(command_, sid)
+  else:
+    # add the multicast command to the specified control destinations
+    controlNames = controlList_.split(",")
+    for controlName in controlNames:
+      sid = _getSid(controlName)
+      if sid != INVALID_SID:
+        _addMulticastSid(command_, sid)
+      else:
+        _printWarning("Control name: '{}' not found".format(controlName))
+
+#################################################################################
+#################################################################################
 def _getSid(controlName_):
   global _gPshellControl
   global _gPshellMulticast
@@ -696,39 +734,26 @@ def _getSid(controlName_):
 
 #################################################################################
 #################################################################################
-def _addMulticast(keyword_, controlList_):
-  controlNames = controlList_.split(",")
-  for controlName in controlNames:
-    controlSid = _getSid(controlName.strip())
-    if controlSid != INVALID_SID:
-      multicastFound = False
-      for multicast in _gPshellMulticast:
-        if (multicast["keyword"] == keyword_):
-          multicastFound = True
-          sidList = multicast["sidList"]
-          break
-      if not multicastFound:
-        # multicast entry not found for this keyword, add a new one
-        _gPshellMulticast.append({"keyword":keyword_, "sidList":[]})
-        sidList = _gPshellMulticast[-1]["sidList"]
-        _printInfo("Adding new multicast group keyword: '{}', numGroups: {}".format(keyword_, len(_gPshellMulticast)))
-      sidFound = False
-      for sid in sidList:
-        if sid == controlSid:
-          # make sure we don't add the same sid twice
-          sidFound = True
-          _printWarning("Control name: '{}', already added to multicast group: keyword: '{}'".format(controlName, keyword_))
-          break
-      if not sidFound:
-        # sid not found for this multicast group, add it for this group
-        sidList.append(controlSid)
-        _printInfo("Adding new multicast group: controlName: '{}', sid: {}, keyword: '{}', numGroups: {}, numSids: {}".format(controlName,
-                                                                                                                              controlSid,
-                                                                                                                              keyword_,
-                                                                                                                              len(_gPshellMulticast),
-                                                                                                                              len(sidList)))
-    else:
-      _printWarning("Control name: '{}' not found".format(controlName))
+def _addMulticastSid(command_, sid_):
+  multicastFound = False
+  for multicast in _gPshellMulticast:
+    if (multicast["command"] == command_):
+      multicastFound = True
+      sidList = multicast["sidList"]
+      break
+  if not multicastFound:
+    # multicast entry not found for this keyword, add a new one
+    _gPshellMulticast.append({"command":command_, "sidList":[]})
+    sidList = _gPshellMulticast[-1]["sidList"]
+  sidFound = False
+  for sid in sidList:
+    if sid == sid_:
+      # make sure we don't add the same sid twice
+      sidFound = True
+      break
+  if not sidFound:
+    # sid not found for this multicast group, add it for this group
+    sidList.append(sid_)
 
 #################################################################################
 #################################################################################
@@ -738,7 +763,7 @@ def _sendMulticast(command_):
   keywordFound = False
   for multicast in _gPshellMulticast:
     command = command_.split()[0]
-    if ((multicast["keyword"] == MULTICAST_ALL) or (command == multicast["keyword"][:len(command)])):
+    if ((multicast["command"] == MULTICAST_ALL) or (command == multicast["command"][:len(command)])):
       keywordFound = True
       for sid in multicast["sidList"]:
         control = _getControl(sid)

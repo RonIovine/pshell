@@ -101,7 +101,9 @@
 //
 //   UNIX
 //
-// Specifies if the addMulticast should add the given sid to all commands
+// Specifies if the AddMulticast should add the given command to all specified
+// multicast receivers or if all control destinations should receive the given
+// multicast command
 //
 //   MULTICAST_ALL
 //
@@ -158,7 +160,8 @@ const LOCALHOST = "localhost"
 // using a UNIX domain server
 const UNIX = "unix"
 
-// specifies if the addMulticast should add the given sid to all commands
+// specifies if the addMulticast should add the given command to all
+// destinations or all commands to the specified destinations
 const MULTICAST_ALL = "__multicast_all__"
 
 // This is returned on a failure of the ConnectServer function
@@ -212,7 +215,7 @@ type pshellControl struct {
 var _gControlList = []pshellControl{}
 
 type pshellMulticast struct {
-  keyword string
+  command string
   sidList []int
 }
 var _gMulticastList = []pshellMulticast{}
@@ -321,30 +324,47 @@ func SetDefaultTimeout(sid int, defaultTimeout int) {
 }
 
 //
-//  This command will add a controlList of multicast receivers to a multicast
-//  group, multicast groups are based either on the command's keyword, or if
-//  the special argument PshellControl.MULTICAST_ALL is used, the given controlList
-//  will receive all multicast commands, the format of the controlList is a
-//  CSV formatted list of all the desired controlNames (as provided in the first
-//  argument of the PshellConrol.connectServer command) that will receive this
-//  multicast command, e.g.
+// This command will add a controlList of multicast receivers to a multicast
+// group, multicast groups are based either on the command, or if the special
+// argument PshellControl.MULTICAST_ALL is used, the given controlList will receive
+// all multicast commands, the format of the controlList is a CSV formatted list
+// of all the desired controlNames (as provided in the first argument of the
+// PshellControl.ConnectServer command) that will receive this multicast command
+// or if the PshellControl.MULTICAST_ALL is used then all control destinations will
+// receive the given multicast command, see examples below
 //
-//  PshellControl.AddMulticast("command", "control1,control2,control3")
+// ex 1: multicast command sent to receivers in CSV controlList
+//
+//   PshellControl.AddMulticast("command", "control1,control2,control3")
+//
+// ex 2: all multicast commands sent to receivers in CSV controlList
+//
+//   PshellControl.AddMulticast(PshellControl.MULTICAST_ALL, "control1,control2,control3")
+//
+// ex 3: multicast command sent to all receivers
+//
+//   PshellControl.AddMulticast("command", PshellControl.MULTICAST_ALL)
+//
+// ex 4: all multicast commands sent to all receivers
+//
+//  PshellControl.AddMulticast(PshellControl.MULTICAST_ALL, PshellControl.MULTICAST_ALL)
 //
 //    Args:
-//        keyword (str)     : The multicast keyword that will be distributed to the
+//        command (str)     : The multicast command that will be distributed to the
 //                            following controlList, if the special MULTICAST_ALL
 //                            identifier is used, then the controlList will receive
 //                            all multicast initiated commands
 //        controlList (str) : A CSV formatted list of all the desired controlNames
 //                            (as provided in the first argument of the connectServer
-//                            command) that will receive this multicast command
+//                            command) that will receive this multicast command, if
+//                            the special MULTICAST_ALL identifier is used, then
+//                            all control destinations will receive the command
 //
 //    Returns:
 //        none
 //
-func AddMulticast(keyword string, controlList string) {
-  addMulticast(keyword, controlList)
+func AddMulticast(command string, controlList string) {
+  addMulticast(command, controlList)
 }
 
 //
@@ -647,6 +667,26 @@ func disconnectAllServers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func addMulticast(command_ string, controlList_ string) {
+  if (controlList_ == MULTICAST_ALL) {
+    for sid, _ := range(_gControlList) {
+      addMulticastSid(command_, sid)
+    }
+  } else {
+    controlNames := strings.Split(strings.TrimSpace(controlList_), ",")
+    for _, controlName := range(controlNames) {
+      sid := getSid(controlName)
+      if (sid != INVALID_SID) {
+        addMulticastSid(command_, sid)
+      } else {
+        printWarning("Control name: '%s' not found", controlName)
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func getSid(controlName_ string) int {
   for sid, control := range(_gControlList) {
     if (control.controlName == controlName_) {
@@ -658,46 +698,31 @@ func getSid(controlName_ string) int {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func addMulticast(keyword_ string, controlList_ string) {
+func addMulticastSid(command_ string, sid_ int) {
   var sidList []int
-  controlNames := strings.Split(strings.TrimSpace(controlList_), ",")
-  for _, controlName := range(controlNames) {
-    controlSid := getSid(controlName)
-    if (controlSid != INVALID_SID) {
-      multicastFound := false
-      for _, multicast := range(_gMulticastList) {
-        if (multicast.keyword == keyword_) {
-          multicastFound = true
-          sidList = multicast.sidList
-          break
-        }
-      }
-      if (multicastFound == false) {
-        // multicast entry not found for this keyword, add a new one
-        _gMulticastList = append(_gMulticastList, pshellMulticast{keyword_, []int{}})
-        sidList = _gMulticastList[len(_gMulticastList)-1].sidList
-        printInfo("Adding new multicast group keyword: '%s', numGroups: %d", keyword_, len(_gMulticastList))
-      }
-      sidFound := false
-      for _, sid := range(sidList) {
-        if (sid == controlSid) {
-          sidFound = true
-          printWarning("Control name: '%s', already added to multicast group: keyword: '%s'", controlName, keyword_)
-          break
-        }
-      }
-      if (sidFound == false) {
-        // sid not found for this multicast group, add it for this group
-        sidList = append(sidList, controlSid)
-        printInfo("Adding new multicast group: controlName: '%s', sid: %d, keyword: '%s', numGroups: %d, numSids: %d", controlName,
-                                                                                                                       controlSid,
-                                                                                                                       keyword_,
-                                                                                                                       len(_gMulticastList),
-                                                                                                                       len(sidList))
-      }
-    } else {
-      printWarning("Control name: '%s' not found", controlName)
+  multicastFound := false
+  for _, multicast := range(_gMulticastList) {
+    if (multicast.command == command_) {
+      multicastFound = true
+      sidList = multicast.sidList
+      break
     }
+  }
+  if (multicastFound == false) {
+    // multicast entry not found for this keyword, add a new one
+    _gMulticastList = append(_gMulticastList, pshellMulticast{command_, []int{}})
+    sidList = _gMulticastList[len(_gMulticastList)-1].sidList
+  }
+  sidFound := false
+  for _, sid := range(sidList) {
+    if (sid == sid_) {
+      sidFound = true
+      break
+    }
+  }
+  if (sidFound == false) {
+    // sid not found for this multicast group, add it for this group
+    sidList = append(sidList, sid_)
   }
 }
 
@@ -708,7 +733,7 @@ func sendMulticast(format_ string, command_ ...interface{}) {
   keyword := strings.Split(strings.TrimSpace(command), " ")[0]
   keywordFound := false
   for _, multicast := range(_gMulticastList) {
-    if ((multicast.keyword == MULTICAST_ALL) || (keyword == multicast.keyword)) {
+    if ((multicast.command == MULTICAST_ALL) || (keyword == multicast.command)) {
       keywordFound = true
       for _, sid := range(multicast.sidList) {
         if ((sid >= 0) && (sid < len(_gControlList))) {

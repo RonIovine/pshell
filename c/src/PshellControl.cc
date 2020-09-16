@@ -107,7 +107,7 @@ struct PshellMulticast
 {
   int numSids;
   int sidList[PSHELL_MAX_SERVERS];
-  char keyword[MAX_STRING_SIZE];
+  char command[MAX_STRING_SIZE];
 };
 
 struct PshellMulticastList
@@ -132,6 +132,7 @@ static const char *_lockFileExtension = ".lock";
 
 static PshellControl *getControl(int sid_);
 static int getSid(const char *controlName_);
+static void addMulticastSid(const char *command_, int sid_);
 static int createControl(void);
 static int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, unsigned timeoutOverride_);
 static bool sendPshellMsg(PshellControl *control_);
@@ -298,24 +299,24 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_addMulticast(const char *keyword_, const char *controlList_)
+void pshell_addMulticast(const char *command_, const char *controlList_)
 {
   pthread_mutex_lock(&_mutex);
   char *controlNames[MAX_TOKENS];
   char controlList[MAX_STRING_SIZE];
   unsigned numControlNames;
   int sid;
-  int groupIndex = _multicastList.numGroups;
-  for (int i = 0; i < _multicastList.numGroups; i++)
+  if (strcmp(controlList_, PSHELL_MULTICAST_ALL) == 0)
   {
-    if (strcmp(_multicastList.groups[i].keyword, keyword_) == 0)
+    for (sid = 0; sid < PSHELL_MAX_SERVERS; sid++)
     {
-      /* we found an existing multicast group, break out */
-      groupIndex = i;
-      break;
+      if (_control[sid] != NULL)
+      {
+        addMulticastSid(command_, sid);
+      }
     }
   }
-  if (groupIndex < MAX_MULTICAST_GROUPS)
+  else
   {
     strncpy(controlList, controlList_, MAX_STRING_SIZE);
     tokenize(controlList, ",", controlNames, MAX_TOKENS, &numControlNames);
@@ -323,56 +324,13 @@ void pshell_addMulticast(const char *keyword_, const char *controlList_)
     {
       if ((sid = getSid(controlNames[i])) != PSHELL_INVALID_SID)
       {
-        /* group found, now see if we have a new unique sid for this group */
-        int sidIndex = _multicastList.groups[groupIndex].numSids;
-        for (int j = 0; j < _multicastList.groups[groupIndex].numSids; j++)
-        {
-          if (_multicastList.groups[groupIndex].sidList[j] == sid)
-          {
-            sidIndex = j;
-            break;
-          }
-        }
-        if (sidIndex < PSHELL_MAX_SERVERS)
-        {
-          /* see if we have a new multicast group (keyword) */
-          if (groupIndex == _multicastList.numGroups)
-          {
-            /* new keyword (group), add the new entry */
-            strcpy(_multicastList.groups[_multicastList.numGroups++].keyword, keyword_);
-            PSHELL_INFO("Adding new multicast group keyword: '%s', numGroups: %d", keyword_, _multicastList.numGroups);
-          }
-          /* see if we have a new sid for this group */
-          if (sidIndex == _multicastList.groups[groupIndex].numSids)
-          {
-            /* new sid for this group, add it */
-            _multicastList.groups[groupIndex].sidList[_multicastList.groups[groupIndex].numSids++] = sid;
-            PSHELL_INFO("Adding new multicast group: controlName: '%s', sid: %d, keyword: '%s', numGroups: %d, numSids: %d",
-                        controlNames[i],
-                        sid,
-                        keyword_,
-                        _multicastList.numGroups,
-                        _multicastList.groups[groupIndex].numSids);
-          }
-          else
-          {
-            PSHELL_WARNING("Control name: '%s', already added to multicast group: keyword: '%s'", controlNames[i], keyword_);
-          }
-        }
-        else
-        {
-          PSHELL_ERROR("Max servers: %d exceeded for multicast group: '%s'", PSHELL_MAX_SERVERS, _multicastList.groups[groupIndex].keyword);
-        }
+        addMulticastSid(command_, sid);
       }
       else
       {
         PSHELL_WARNING("Control name: '%s' not found", controlNames[i]);
       }
     }
-  }
-  else
-  {
-    PSHELL_ERROR("Max multicast groups: %d exceeded", MAX_MULTICAST_GROUPS);
   }
   pthread_mutex_unlock(&_mutex);
 }
@@ -402,9 +360,9 @@ void pshell_sendMulticast(const char *command_, ...)
     }
     for (int group = 0; group < _multicastList.numGroups; group++)
     {
-      if ((strcmp(_multicastList.groups[group].keyword, PSHELL_MULTICAST_ALL) == 0) ||
-          (((keyword = strstr(_multicastList.groups[group].keyword, command)) != NULL) &&
-            (keyword == _multicastList.groups[group].keyword)))
+      if ((strcmp(_multicastList.groups[group].command, PSHELL_MULTICAST_ALL) == 0) ||
+          (((keyword = strstr(_multicastList.groups[group].command, command)) != NULL) &&
+            (keyword == _multicastList.groups[group].command)))
       {
         keywordFound = true;
         /* restore full command with along with any arguments */
@@ -988,6 +946,59 @@ static int getSid(const char *controlName_)
     }
   }
   return (PSHELL_INVALID_SID);
+}
+
+
+/******************************************************************************/
+/******************************************************************************/
+static void addMulticastSid(const char *command_, int sid_)
+{
+  int groupIndex = 0;
+  for (int i = 0; i < _multicastList.numGroups; i++)
+  {
+    if (strcmp(_multicastList.groups[i].command, command_) == 0)
+    {
+      /* we found an existing multicast group, break out */
+      groupIndex = i;
+      break;
+    }
+  }
+  if (groupIndex < MAX_MULTICAST_GROUPS)
+  {
+    /* group found, now see if we have a new unique sid for this group */
+    int sidIndex = _multicastList.groups[groupIndex].numSids;
+    for (int j = 0; j < _multicastList.groups[groupIndex].numSids; j++)
+    {
+      if (_multicastList.groups[groupIndex].sidList[j] == sid_)
+      {
+        sidIndex = j;
+        break;
+      }
+    }
+    if (sidIndex < PSHELL_MAX_SERVERS)
+    {
+      /* see if we have a new multicast group (keyword) */
+      if (groupIndex == _multicastList.numGroups)
+      {
+        /* new command (group), add the new entry */
+        strcpy(_multicastList.groups[_multicastList.numGroups++].command, command_);
+      }
+      /* see if we have a new sid for this group */
+      if (sidIndex == _multicastList.groups[groupIndex].numSids)
+      {
+        /* new sid for this group, add it */
+        _multicastList.groups[groupIndex].sidList[_multicastList.groups[groupIndex].numSids++] = sid_;
+      }
+    }
+    else
+    {
+      PSHELL_ERROR("Max servers: %d exceeded for multicast group: '%s'", PSHELL_MAX_SERVERS, _multicastList.groups[groupIndex].command);
+    }
+  }
+  else
+  {
+    PSHELL_ERROR("Max multicast groups: %d exceeded", MAX_MULTICAST_GROUPS);
+  }
 }
 
 /******************************************************************************/
