@@ -325,13 +325,13 @@ func SetDefaultTimeout(sid int, defaultTimeout int) {
 
 //
 // This command will add a controlList of multicast receivers to a multicast
-// group, multicast groups are based either on the command, or if the special
-// argument PshellControl.MULTICAST_ALL is used, the given controlList will receive
-// all multicast commands, the format of the controlList is a CSV formatted list
-// of all the desired controlNames (as provided in the first argument of the
-// PshellControl.ConnectServer command) that will receive this multicast command
-// or if the PshellControl.MULTICAST_ALL is used then all control destinations will
-// receive the given multicast command, see examples below
+// group, multicast groups are based either on a specified command, or if the
+// special argument PshellControl.MULTICAST_ALL is used, the given controlList
+// will receive all multicast commands, the format of the controlList is a CSV
+// formatted list of all the desired controlNames (as provided in the first argument
+// of the PshellControl.ConnectServer command) that will receive this multicast
+// command or if the PshellControl.MULTICAST_ALL is used then all control destinations
+// will receive the given multicast command, see examples below
 //
 // ex 1: multicast command sent to receivers in CSV controlList
 //

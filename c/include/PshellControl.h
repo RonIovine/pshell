@@ -181,16 +181,25 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
 void pshell_extractCommands(int sid_, char *results_, int size_);
 
 /*
+ * pshell_extractControlNames:
+ *
+ * this function will extract all the control names that were created
+ * via the pshell_connectServer command, this is used my the generic
+ * pshellAggregator.cc aggregator client
+ */
+void pshell_extractControlNames(char *names_[], unsigned maxNames_, unsigned *numNames_);
+
+/*
  * pshell_addMulticast:
  *
  * this command will add a controlList of multicast receivers to a multicast
- * group, multicast groups are based either on the command, or if the special
- * argument PSHELL_MULTICAST_ALL is used, the given controlList will receive
- * all multicast commands, the format of the controlList is a CSV formatted list
- * of all the desired controlNames (as provided in the first argument of the
- * pshell_connectServer command) that will receive this multicast command or
- * if the PSHELL_MULTICAST_ALL is used then all control destinations will
- * receive the given multicast command, see examples below
+ * group, multicast groups are based either on a specified command, or if the
+ * special argument PSHELL_MULTICAST_ALL is used, the given controlList will
+ * receive all multicast commands, the format of the controlList is a CSV formatted
+ * list of all the desired controlNames (as provided in the first argument of the
+ * pshell_connectServer command) that will receive this multicast command or if
+ * the PSHELL_MULTICAST_ALL is used then all control destinations will receive
+ * the given multicast command, see examples below
  *
  * ex 1: multicast command sent to receivers in CSV controlList
  *

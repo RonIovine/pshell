@@ -300,13 +300,13 @@ def extractCommands(sid, includeName = True):
 def addMulticast(command, controlList):
   """
   This command will add a controlList of multicast receivers to a multicast
-  group, multicast groups are based either on the command, or if the special
-  argument PSHELL_MULTICAST_ALL is used, the given controlList will receive
-  all multicast commands, the format of the controlList is a CSV formatted list
-  of all the desired controlNames (as provided in the first argument of the
-  pshell_connectServer command) that will receive this multicast command or
-  if the PSHELL_MULTICAST_ALL is used then all control destinations will
-  receive the given multicast command, see examples below
+  group, multicast groups are based either on a specified command, or if the
+  special argument PSHELL_MULTICAST_ALL is used, the given controlList will
+  receive all multicast commands, the format of the controlList is a CSV formatted
+  list of all the desired controlNames (as provided in the first argument of the
+  pshell_connectServer command) that will receive this multicast command or if the
+  PSHELL_MULTICAST_ALL is used then all control destinations will receive the given
+  multicast command, see examples below
 
   ex 1: multicast command sent to receivers in CSV controlList
 
@@ -703,6 +703,15 @@ def _extractPrompt(sid_):
     if (_sendCommand(control, _gMsgTypes["queryPrompt"], "query prompt", ONE_SEC*5) == COMMAND_SUCCESS):
       results = control["pshellMsg"]["payload"]
   return (results)
+
+#################################################################################
+#################################################################################
+def _extractControlNames():
+  global _gPshellControl
+  controlNames = []
+  for control in _gPshellControl:
+    controlNames.append(control["controlName"])
+  return controlNames
 
 #################################################################################
 #################################################################################

@@ -71,7 +71,7 @@ extern bool pshell_allowDuplicateFunction;
 
 struct Server
 {
-  char localName[MAX_STRING_SIZE];
+  char controlName[MAX_STRING_SIZE];
   char remoteServer[MAX_STRING_SIZE];
   int port;
   int sid;
@@ -81,19 +81,19 @@ unsigned numServers = 0;
 
 struct Multicast
 {
-  char keyword[MAX_STRING_SIZE];
+  char command[MAX_STRING_SIZE];
   struct Server *servers[MAX_SERVERS];
   unsigned numServers;
 };
 struct Multicast multicastGroups[MAX_MULTICAST];
 unsigned numMulticast = 0;
 
-const char *localNameLabel = "Local Server Name";
-const char *remoteNameLabel = "Remote Server";
-const char *keywordLabel = "Keyword";
-unsigned maxLocalName = strlen(localNameLabel);
-unsigned maxRemoteName = strlen(remoteNameLabel);
-unsigned maxMulticastKeyword = strlen(keywordLabel);
+const char *controlNameLabel = "Control Name";
+const char *serverNameLabel = "Remote Server";
+const char *commandLabel = "Command";
+unsigned maxControlName = strlen(controlNameLabel);
+unsigned maxServerName = strlen(serverNameLabel);
+unsigned maxMulticastCommand = strlen(commandLabel);
 
 /*
  * make sure the results array is big enough for any possible output,
@@ -103,11 +103,59 @@ char results[1024*64];
 
 /******************************************************************************/
 /******************************************************************************/
-Multicast *getMulticast(char *keyword)
+void stripWhitespace(char *string_)
+{
+  unsigned i;
+  char *str = string_;
+
+  for (i = 0; i < strlen(string_); i++)
+  {
+    if (!isspace(string_[i]))
+    {
+      str = &string_[i];
+      break;
+    }
+  }
+  if (string_ != str)
+  {
+    strcpy(string_, str);
+  }
+  /* now NULL terminate the string */
+  if (string_[strlen(string_)-1] == '\n')
+  {
+    string_[strlen(string_)-1] = 0;
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void tokenize(char *string_,
+              const char *delimeter_,
+              char *tokens_[],
+              unsigned maxTokens_,
+              unsigned *numTokens_)
+{
+  char *str;
+  *numTokens_ = 0;
+  if ((str = strtok(string_, delimeter_)) != NULL)
+  {
+    stripWhitespace(str);
+    tokens_[(*numTokens_)++] = str;
+    while (((str = strtok(NULL, delimeter_)) != NULL) && ((*numTokens_) < maxTokens_))
+    {
+      stripWhitespace(str);
+      tokens_[(*numTokens_)++] = str;
+    }
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+Multicast *getMulticast(char *command)
 {
   for (unsigned multicast = 0; multicast < numMulticast; multicast++)
   {
-    if (strcmp(multicastGroups[multicast].keyword, keyword) == 0)
+    if (strcmp(multicastGroups[multicast].command, command) == 0)
     {
       return (&multicastGroups[multicast]);
     }
@@ -117,11 +165,11 @@ Multicast *getMulticast(char *keyword)
 
 /******************************************************************************/
 /******************************************************************************/
-Server *getServer(char *localName)
+Server *getServer(char *controlName)
 {
   for (unsigned server = 0; server < numServers; server++)
   {
-    if (strncmp(localName, servers[server].localName, strlen(localName)) == 0)
+    if (strncmp(controlName, servers[server].controlName, strlen(controlName)) == 0)
     {
       return (&servers[server]);
     }
@@ -172,11 +220,11 @@ void controlServer(int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
-bool isDuplicate(char *localName, char *remoteServer, int port)
+bool isDuplicate(char *controlName, char *remoteServer, int port)
 {
   for (unsigned server = 0; server < numServers; server++)
   {
-    if ((strcmp(servers[server].localName, localName) == 0) ||
+    if ((strcmp(servers[server].controlName, controlName) == 0) ||
         ((strcmp(servers[server].remoteServer, remoteServer) == 0) &&
          (servers[server].port == port)))
     {
@@ -190,16 +238,22 @@ bool isDuplicate(char *localName, char *remoteServer, int port)
 /******************************************************************************/
 void add(int argc, char *argv[])
 {
+  char **controlNames;
+  char *names[MAX_SERVERS];
+  unsigned numControlNames;
   if (pshell_isHelp())
   {
     pshell_printf("\n");
     pshell_showUsage();
     pshell_printf("\n");
     pshell_printf("  where:\n");
-    pshell_printf("    <localName>    - Local logical name of the server, must be unique\n");
+    pshell_printf("    <controlName>  - Local logical control name of the server, must be unique\n");
     pshell_printf("    <remoteServer> - Hostname or IP address of UDP server or name of UNIX server\n");
     pshell_printf("    <port>         - UDP port number or 'unix' for UNIX server (can be omitted for UNIX)\n");
-    pshell_printf("    <keyword>      - Multicast group keyword, must be valid registered remote command\n");
+    pshell_printf("    <command>      - Multicast group command, must be valid registered remote command\n");
+    pshell_printf("    <controlList>  - CVS list formatted or space separated list of remote controlNames\n");
+    pshell_printf("    all            - Add all multicast commands to the controlList, or add the given\n");
+    pshell_printf("                     command to all control destination servers, or both\n");
     pshell_printf("\n");
   }
   else if (pshell_isSubString(argv[0], "server", 1))
@@ -214,15 +268,15 @@ void add(int argc, char *argv[])
     {
       if (numServers < MAX_SERVERS)
       {
-        if (strlen(argv[1]) > maxLocalName)
+        if (strlen(argv[1]) > maxControlName)
         {
-          maxLocalName = MAX(strlen(argv[1]), strlen(localNameLabel));
+          maxControlName = MAX(strlen(argv[1]), strlen(controlNameLabel));
         }
-        if (strlen(argv[2]) > maxRemoteName)
+        if (strlen(argv[2]) > maxServerName)
         {
-          maxRemoteName = MAX(strlen(argv[2]), strlen(remoteNameLabel));
+          maxServerName = MAX(strlen(argv[2]), strlen(serverNameLabel));
         }
-        strcpy(servers[numServers].localName, argv[1]);
+        strcpy(servers[numServers].controlName, argv[1]);
         strcpy(servers[numServers].remoteServer, argv[2]);
         servers[numServers].port = port;
         servers[numServers].sid = pshell_connectServer(argv[1],
@@ -257,31 +311,46 @@ void add(int argc, char *argv[])
     {
       if (numMulticast < MAX_MULTICAST)
       {
-        /* new keyword */
-        if (strlen(argv[1]) > maxMulticastKeyword)
+        /* new command */
+        if (strlen(argv[1]) > maxMulticastCommand)
         {
-          maxMulticastKeyword = MAX(strlen(argv[1]), strlen(keywordLabel));
+          maxMulticastCommand = MAX(strlen(argv[1]), strlen(commandLabel));
         }
-        strcpy(multicastGroups[numMulticast].keyword, argv[1]);
+        strcpy(multicastGroups[numMulticast].command, argv[1]);
         multicastGroups[numMulticast].numServers = 0;
         multicast = &multicastGroups[numMulticast];
         numMulticast++;
       }
       else
       {
-        pshell_printf("ERROR: Max multicast keywords: %d exceeded, keyword: %s not added\n", MAX_MULTICAST, argv[1]);
+        pshell_printf("ERROR: Max multicast commands: %d exceeded, command: %s not added\n", MAX_MULTICAST, argv[1]);
         return;
       }
     }
-    /* add servers to this keyword */
-    for (int localName = 2; localName < argc; localName++)
+    /* add remote servers to this command */
+    if ((argc == 3) && (strstr(argv[2], ",") != NULL))
     {
-      Server *server = getServer(argv[localName]);
+      tokenize(argv[2], ",", names, MAX_SERVERS, &numControlNames);
+      controlNames = names;
+    }
+    else if (strcmp(argv[2], "all") == 0)
+    {
+      pshell_extractControlNames(names, MAX_SERVERS, &numControlNames);
+      controlNames = names;
+    }
+    else
+    {
+      controlNames = &argv[2];
+      numControlNames = argc-2;
+    }
+    for (unsigned controlName = 0; controlName < numControlNames; controlName++)
+    {
+      Server *server = getServer(controlNames[controlName]);
       if (server != NULL)
       {
         if (multicast->numServers < MAX_SERVERS)
         {
-          pshell_addMulticast(argv[1], server->localName);
+          pshell_addMulticast(argv[1], server->controlName);
           multicast->servers[multicast->numServers] = server;
           multicast->numServers++;
         }
@@ -316,19 +385,19 @@ void show(int argc, char *argv[])
     pshell_printf("*           AGGREGATED REMOTE SERVERS           *\n");
     pshell_printf("*************************************************\n");
     pshell_printf("\n");
-    pshell_printf("%-*s    %-*s    Port\n", maxLocalName,
-                                            localNameLabel,
-                                            maxRemoteName,
-                                            remoteNameLabel);
-    strrpt(maxLocalName, "=");
+    pshell_printf("%-*s    %-*s    Port\n", maxControlName,
+                                            controlNameLabel,
+                                            maxServerName,
+                                            serverNameLabel);
+    strrpt(maxControlName, "=");
     pshell_printf("    ");
-    strrpt(maxRemoteName, "=");
+    strrpt(maxServerName, "=");
     pshell_printf("    ======\n");
     for (unsigned server = 0; server < numServers; server++)
     {
-      pshell_printf("%-*s    %-*s",  maxLocalName,
-                                     servers[server].localName,
-                                     maxRemoteName,
+      pshell_printf("%-*s    %-*s",  maxControlName,
+                                     servers[server].controlName,
+                                     maxServerName,
                                      servers[server].remoteServer);
       if (servers[server].port == 0)
       {
@@ -348,31 +417,31 @@ void show(int argc, char *argv[])
     pshell_printf("*            REGISTERED MULTICAST GROUPS            *\n");
     pshell_printf("*****************************************************\n");
     pshell_printf("\n");
-    pshell_printf("%-*s    %-*s    %-*s    Port\n", maxMulticastKeyword,
-                                                    keywordLabel,
-                                                    maxLocalName,
-                                                    localNameLabel,
-                                                    maxRemoteName,
-                                                    remoteNameLabel);
-    strrpt(maxMulticastKeyword, "=");
+    pshell_printf("%-*s    %-*s    %-*s    Port\n", maxMulticastCommand,
+                                                    commandLabel,
+                                                    maxControlName,
+                                                    controlNameLabel,
+                                                    maxServerName,
+                                                    serverNameLabel);
+    strrpt(maxMulticastCommand, "=");
     pshell_printf("    ");
-    strrpt(maxLocalName, "=");
+    strrpt(maxControlName, "=");
     pshell_printf("    ");
-    strrpt(maxRemoteName, "=");
+    strrpt(maxServerName, "=");
     pshell_printf("    ======\n");
     for (unsigned multicast = 0; multicast < numMulticast; multicast++)
     {
-      pshell_printf("%-*s    ", maxMulticastKeyword, multicastGroups[multicast].keyword);
+      pshell_printf("%-*s    ", maxMulticastCommand, multicastGroups[multicast].command);
       for (unsigned server = 0; server < multicastGroups[multicast].numServers; server++)
       {
         if (server > 0)
         {
-          strrpt(maxMulticastKeyword, " ");
+          strrpt(maxMulticastCommand, " ");
           pshell_printf("    ");
         }
-        pshell_printf("%-*s    %-*s",  maxLocalName,
-                                       multicastGroups[multicast].servers[server]->localName,
-                                       maxRemoteName,
+        pshell_printf("%-*s    %-*s",  maxControlName,
+                                       multicastGroups[multicast].servers[server]->controlName,
+                                       maxServerName,
                                        multicastGroups[multicast].servers[server]->remoteServer);
         if (multicastGroups[multicast].servers[server]->port == 0)
         {
@@ -478,7 +547,7 @@ int main (int argc, char *argv[])
   pshell_addCommand(add,
                     "add",
                     "add a new remote server or multicast group entry",
-                    "{server <localName> <remoteServer> [<port>]} | {multicast <keyword> <localName1> [<localName2>...<localNameN>]}",
+                    "{server <controlName> <remoteServer> [<port>]} |\n           {multicast {<command> | all} {<controlList> | all}}",
                     3,
                     30,
                     false);

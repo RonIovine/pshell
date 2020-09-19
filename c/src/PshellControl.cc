@@ -271,7 +271,6 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_)
 /******************************************************************************/
 void pshell_extractCommands(int sid_, char *results_, int size_)
 {
-  pthread_mutex_lock(&_mutex);
   PshellControl *control;
   int retCode;
   results_[0] = 0;
@@ -294,7 +293,20 @@ void pshell_extractCommands(int sid_, char *results_, int size_)
       extractResults(control, &results_[strlen(results_)], (size_-strlen(results_)));
     }
   }
-  pthread_mutex_unlock(&_mutex);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void pshell_extractControlNames(char *names_[], unsigned maxNames_, unsigned *numNames_)
+{
+  *numNames_ = 0;
+  for (int sid = 0; sid < PSHELL_MAX_SERVERS; sid++)
+  {
+    if ((_control[sid] != NULL) && (*numNames_ < maxNames_))
+    {
+      names_[(*numNames_)++] = _control[sid]->controlName;
+    }
+  }
 }
 
 /******************************************************************************/
