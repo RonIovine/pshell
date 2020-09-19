@@ -119,10 +119,18 @@ def _controlServer(argv):
 
 #################################################################################
 #################################################################################
-def _isDuplicate(controlName_, remoteServer_, port_):
+def _isDuplicateServer(controlName_, remoteServer_, port_):
   global _gPshellServers
   for server in _gPshellServers:
     if ((controlName_ == server["controlName"]) or ((remoteServer_ == server["remoteServer"]) and (port_ == server["port"]))):
+      return (True)
+  return (False)
+
+#################################################################################
+#################################################################################
+def _isDuplicateMulticast(multicast, controlName_):
+  for server in multicast["servers"]:
+    if (controlName_ == server["controlName"]):
       return (True)
   return (False)
 
@@ -155,7 +163,7 @@ def _add(argv):
     port = PshellServer.UNIX
     if (len(argv) == 5):
       port = argv[4]
-    if (not _isDuplicate(argv[2], argv[3], port)):
+    if (not _isDuplicateServer(argv[2], argv[3], port)):
       if (len(argv[2]) > _gMaxControlName):
         _gMaxControlName = max(len(argv[2]), len(_gControlNameLabel))
       if (len(argv[3]) > _gMaxServerName):
@@ -194,7 +202,7 @@ def _add(argv):
       controlNames = argv[3:]
     for controlName in controlNames:
       server = _getServer(controlName)
-      if (server != None):
+      if server != None and not _isDuplicateMulticast(multicast, controlName):
         if argv[2] == "all":
           PshellControl.addMulticast(PshellControl.MULTICAST_ALL, server["controlName"])
         else:

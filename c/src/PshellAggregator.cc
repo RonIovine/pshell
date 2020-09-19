@@ -220,13 +220,27 @@ void controlServer(int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
-bool isDuplicate(char *controlName, char *remoteServer, int port)
+bool isDuplicateServer(char *controlName, char *remoteServer, int port)
 {
   for (unsigned server = 0; server < numServers; server++)
   {
     if ((strcmp(servers[server].controlName, controlName) == 0) ||
         ((strcmp(servers[server].remoteServer, remoteServer) == 0) &&
          (servers[server].port == port)))
+    {
+      return (true);
+    }
+  }
+  return (false);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool isDuplicateMulticast(Multicast *multicast, char *controlName)
+{
+  for (unsigned server = 0; server < multicast->numServers; server++)
+  {
+    if (strcmp(multicast->servers[server]->controlName, controlName) == 0)
     {
       return (true);
     }
@@ -264,7 +278,7 @@ void add(int argc, char *argv[])
     {
       port = atoi(argv[3]);
     }
-    if (!isDuplicate(argv[1], argv[2], port))
+    if (!isDuplicateServer(argv[1], argv[2], port))
     {
       if (numServers < MAX_SERVERS)
       {
@@ -346,13 +360,12 @@ void add(int argc, char *argv[])
     for (unsigned controlName = 0; controlName < numControlNames; controlName++)
     {
       Server *server = getServer(controlNames[controlName]);
-      if (server != NULL)
+      if ((server != NULL) && (!isDuplicateMulticast(multicast, controlNames[controlName])))
       {
         if (multicast->numServers < MAX_SERVERS)
         {
           pshell_addMulticast(argv[1], server->controlName);
-          multicast->servers[multicast->numServers] = server;
-          multicast->numServers++;
+          multicast->servers[multicast->numServers++] = server;
         }
         else
         {
