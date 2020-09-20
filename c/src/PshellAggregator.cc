@@ -278,7 +278,7 @@ void add(int argc, char *argv[])
     pshell_printf("    <remoteServer> - Hostname or IP address of UDP server or name of UNIX server\n");
     pshell_printf("    <port>         - UDP port number or 'unix' for UNIX server (can be omitted for UNIX)\n");
     pshell_printf("    <command>      - Multicast group command, must be valid registered remote command\n");
-    pshell_printf("    <controlList>  - CVS list formatted or space separated list of remote controlNames\n");
+    pshell_printf("    <controlList>  - CSV formatted list or space separated list of remote controlNames\n");
     pshell_printf("    all            - Add all multicast commands to the controlList, or add the given\n");
     pshell_printf("                     command to all control destination servers, or both\n");
     pshell_printf("\n");

@@ -163,7 +163,7 @@ def _add(argv):
     PshellServer.printf("    <remoteServer> - Hostname or IP address of UDP server or name of UNIX server")
     PshellServer.printf("    <port>         - UDP port number or 'unix' for UNIX server (can be omitted for UNIX)")
     PshellServer.printf("    <command>      - Multicast group command, must be valid registered remote command")
-    PshellServer.printf("    <controlList>  - CVS list formatted or space separated list of remote controlNames")
+    PshellServer.printf("    <controlList>  - CSV formatted list or space separated list of remote controlNames")
     PshellServer.printf("    all            - Add all multicast commands to the controlList, or add the given")
     PshellServer.printf("                     command to all control destination servers, or both")
     PshellServer.printf()
