@@ -220,13 +220,26 @@ void controlServer(int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
-bool isDuplicateServer(char *controlName, char *remoteServer, int port)
+bool isDuplicateServer(char *remoteServer, int port)
 {
   for (unsigned server = 0; server < numServers; server++)
   {
-    if ((strcmp(servers[server].controlName, controlName) == 0) ||
-        ((strcmp(servers[server].remoteServer, remoteServer) == 0) &&
-         (servers[server].port == port)))
+    if ((strcmp(servers[server].remoteServer, remoteServer) == 0) &&
+        (servers[server].port == port))
+    {
+      return (true);
+    }
+  }
+  return (false);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool isDuplicateControl(char *controlName)
+{
+  for (unsigned server = 0; server < numServers; server++)
+  {
+    if (strcmp(servers[server].controlName, controlName) == 0)
     {
       return (true);
     }
@@ -278,7 +291,15 @@ void add(int argc, char *argv[])
     {
       port = atoi(argv[3]);
     }
-    if (!isDuplicateServer(argv[1], argv[2], port))
+    if (isDuplicateServer(argv[2], port))
+    {
+      pshell_printf("ERROR: Remote server: %s, port: %s already exists\n", argv[2], argv[3]);
+    }
+    else if (isDuplicateControl(argv[1]))
+    {
+      pshell_printf("ERROR: Control name: %s already exists\n", argv[1]);
+    }
+    else
     {
       if (numServers < MAX_SERVERS)
       {
@@ -312,10 +333,6 @@ void add(int argc, char *argv[])
       {
         pshell_printf("ERROR: Max servers: %d exceeded, server local name: %s, remote server: %s, port: %s not added\n", MAX_SERVERS, argv[1], argv[2], argv[3]);
       }
-    }
-    else
-    {
-      pshell_printf("ERROR: Local name: %s, remote server: %s, port: %s already exists\n", argv[1], argv[2], argv[3]);
     }
   }
   else if (pshell_isSubString(argv[0], "multicast", 1))

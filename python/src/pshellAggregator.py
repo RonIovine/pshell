@@ -119,10 +119,19 @@ def _controlServer(argv):
 
 #################################################################################
 #################################################################################
-def _isDuplicateServer(controlName_, remoteServer_, port_):
+def _isDuplicateServer(remoteServer_, port_):
   global _gPshellServers
   for server in _gPshellServers:
-    if ((controlName_ == server["controlName"]) or ((remoteServer_ == server["remoteServer"]) and (port_ == server["port"]))):
+    if remoteServer_ == server["remoteServer"] and port_ == server["port"]:
+      return (True)
+  return (False)
+
+#################################################################################
+#################################################################################
+def _isDuplicateControl(controlName_):
+  global _gPshellServers
+  for server in _gPshellServers:
+    if controlName_ == server["controlName"]:
       return (True)
   return (False)
 
@@ -163,7 +172,11 @@ def _add(argv):
     port = PshellServer.UNIX
     if (len(argv) == 5):
       port = argv[4]
-    if (not _isDuplicateServer(argv[2], argv[3], port)):
+    if _isDuplicateServer(argv[3], port):
+      PshellServer.printf("ERROR: Remote server: %s, port: %s already exists" % (argv[3], port))
+    elif _isDuplicateControl(argv[2]):
+      PshellServer.printf("ERROR: Control name: %s already exists" % argv[2])
+    else:
       if (len(argv[2]) > _gMaxControlName):
         _gMaxControlName = max(len(argv[2]), len(_gControlNameLabel))
       if (len(argv[3]) > _gMaxServerName):
@@ -183,8 +196,6 @@ def _add(argv):
                               30,
                               False)
       PshellServer._addTabCompletions()
-    else:
-      PshellServer.printf("ERROR: Local name: %s, remote server: %s, port: %s already exists" % (argv[2], argv[3], argv[4]))
   elif (PshellServer.isSubString(argv[1], "multicast")):
     multicast = _getMulticast(argv[2])
     if (multicast == None):
