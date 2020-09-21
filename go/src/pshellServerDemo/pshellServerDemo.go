@@ -49,6 +49,15 @@ import "os/signal"
 import "math/rand"
 import "PshellServer"
 
+const (
+  MAX_YEAR   = 3000
+  MAX_MONTH  = 12
+  MAX_DAY    = 31
+  MAX_HOUR   = 23
+  MAX_MINUTE = 59
+  MAX_SECOND = 59
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // PSHELL user callback functions, the interface is similar to the "main" in
@@ -63,6 +72,7 @@ import "PshellServer"
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
+// simple helloWorld command that just prints out all the passed in arguments
 ////////////////////////////////////////////////////////////////////////////////
 func helloWorld(argv []string) {
   PshellServer.Printf("helloWorld command dispatched:\n")
@@ -72,66 +82,11 @@ func helloWorld(argv []string) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func enhancedUsage(argv []string) {
-  // see if the user asked for help
-  if (PshellServer.IsHelp()) {
-    // show standard usage
-    PshellServer.ShowUsage()
-    // give some enhanced usage
-    PshellServer.Printf("Enhanced usage here...\n")
-  } else {
-    // do normal function processing
-    PshellServer.Printf("enhancedUsage command dispatched:\n")
-    for index, arg := range argv {
-      PshellServer.Printf("  argv[%d]: '%s'\n", index, arg)
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func wildcardMatch(argv []string) {
-  if (PshellServer.IsHelp()) {
-    PshellServer.Printf("\n")
-    PshellServer.ShowUsage()
-    PshellServer.Printf("\n")
-    PshellServer.Printf("  where valid <args> are:\n")
-    PshellServer.Printf("    on\n")
-    PshellServer.Printf("    of*f\n")
-    PshellServer.Printf("    a*ll\n")
-    PshellServer.Printf("    sy*mbols\n")
-    PshellServer.Printf("    se*ttings\n")
-    PshellServer.Printf("    d*efault\n")
-    PshellServer.Printf("\n")
-  } else if (PshellServer.IsSubString(argv[0], "on", 2)) {
-    PshellServer.Printf("argv 'on' match\n")
-  } else if (PshellServer.IsSubString(argv[0], "off", 2)) {
-    PshellServer.Printf("argv 'off' match\n")
-  } else if (PshellServer.IsSubString(argv[0], "all", 1)) {
-    PshellServer.Printf("argv 'all' match\n")
-  } else if (PshellServer.IsSubString(argv[0], "symbols", 2)) {
-    PshellServer.Printf("argv 'symbols' match\n")
-  } else if (PshellServer.IsSubString(argv[0], "settings", 2)) {
-    PshellServer.Printf("argv 'settings' match\n")
-  } else if (PshellServer.IsSubString(argv[0], "default", 1)) {
-    PshellServer.Printf("argv 'default' match\n")
-  } else {
-    PshellServer.Printf("\n")
-    PshellServer.ShowUsage()
-    PshellServer.Printf("\n")
-    PshellServer.Printf("  where valid <args> are:\n")
-    PshellServer.Printf("    on\n")
-    PshellServer.Printf("    of*f\n")
-    PshellServer.Printf("    a*ll\n")
-    PshellServer.Printf("    sy*mbols\n")
-    PshellServer.Printf("    se*ttings\n")
-    PshellServer.Printf("    d*efault\n")
-    PshellServer.Printf("\n")
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
+// this command shows an example client keep alive, the PSHELL UDP client has
+// a default 5 second timeout, if a command will be known to take longer than
+// 5 seconds, it must give some kind of output back to the client, this shows
+// the two helper functions created the assist in this, the TCP client does not
+// need a keep alive since the TCP protocol itself handles that
 ////////////////////////////////////////////////////////////////////////////////
 func keepAlive(argv []string) {
   if (PshellServer.IsHelp()) {
@@ -178,18 +133,121 @@ func keepAlive(argv []string) {
   PshellServer.Printf("\n")
 }
 
-// function to show advanced command line parsing using the pshell_tokenize function
-
-const (
-  MAX_YEAR   = 3000
-   MAX_MONTH  = 12
-   MAX_DAY    = 31
-   MAX_HOUR   = 23
-   MAX_MINUTE = 59
-   MAX_SECOND = 59
-)
+////////////////////////////////////////////////////////////////////////////////
+// this command shows matching the passed command arguments based on substring
+// matching rather than matching on the complete exact string, the minimum
+// number of characters that must be matched is the last argument to the
+// PshellServer.IsSubString function, this must be the minimum number of
+// characters necessary to uniquely identify the argument from the complete
+// argument list
+//
+// NOTE: This technique could have been used in the previous example for the
+//       "wheel" and "dots" arguments to provide for wildcarding of those
+//       arguments.  In the above example, as written, the entire string of
+//       "dots" or "wheel" must be enter to be accepted.
+////////////////////////////////////////////////////////////////////////////////
+func wildcardMatch(argv []string) {
+  if (PshellServer.IsHelp()) {
+    PshellServer.Printf("\n")
+    PshellServer.ShowUsage()
+    PshellServer.Printf("\n")
+    PshellServer.Printf("  where valid <args> are:\n")
+    PshellServer.Printf("    on\n")
+    PshellServer.Printf("    of*f\n")
+    PshellServer.Printf("    a*ll\n")
+    PshellServer.Printf("    sy*mbols\n")
+    PshellServer.Printf("    se*ttings\n")
+    PshellServer.Printf("    d*efault\n")
+    PshellServer.Printf("\n")
+  } else if (PshellServer.IsSubString(argv[0], "on", 2)) {
+    PshellServer.Printf("argv 'on' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "off", 2)) {
+    PshellServer.Printf("argv 'off' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "all", 1)) {
+    PshellServer.Printf("argv 'all' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "symbols", 2)) {
+    PshellServer.Printf("argv 'symbols' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "settings", 2)) {
+    PshellServer.Printf("argv 'settings' match\n")
+  } else if (PshellServer.IsSubString(argv[0], "default", 1)) {
+    PshellServer.Printf("argv 'default' match\n")
+  } else {
+    PshellServer.Printf("\n")
+    PshellServer.ShowUsage()
+    PshellServer.Printf("\n")
+    PshellServer.Printf("  where valid <args> are:\n")
+    PshellServer.Printf("    on\n")
+    PshellServer.Printf("    of*f\n")
+    PshellServer.Printf("    a*ll\n")
+    PshellServer.Printf("    sy*mbols\n")
+    PshellServer.Printf("    se*ttings\n")
+    PshellServer.Printf("    d*efault\n")
+    PshellServer.Printf("\n")
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
+// this command shows a command that is registered with the "showUsage" flag
+// set to "false", the PshellServer will invoke the command when the user types
+// a "?" or "-h" rather than automatically giving the registered usage, the
+// callback command can then see if the user asked for help (i.e. typed a "?"
+// or "-h") by calling PshellServer.IsHelp, the user can then display the
+// standard registered usage with the PshellServer.ShowUsage call and then
+// give some optional enhanced usage with the PshellServer.Printf call
+////////////////////////////////////////////////////////////////////////////////
+func enhancedUsage(argv []string) {
+  // see if the user asked for help
+  if (PshellServer.IsHelp()) {
+    // show standard usage
+    PshellServer.ShowUsage()
+    // give some enhanced usage
+    PshellServer.Printf("Enhanced usage here...\n")
+  } else {
+    // do normal function processing
+    PshellServer.Printf("enhancedUsage command dispatched:\n")
+    for index, arg := range argv {
+      PshellServer.Printf("  argv[%d]: '%s'\n", index, arg)
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// this function demonstrates the various helper functions that assist in the
+// interpretation and conversion of command line arguments
+////////////////////////////////////////////////////////////////////////////////
+func formatChecking(argv []string) {
+
+  PshellServer.Printf("formatChecking command dispatched:\n")
+  if (PshellServer.IsIpv4Addr(argv[0])) {
+    PshellServer.Printf("IPv4 address entered: '%s' entered\n", argv[0])
+  } else if (PshellServer.IsIpv4AddrWithNetmask(argv[0])) {
+    PshellServer.Printf("IPv4 address/netmask entered: '%s' entered\n", argv[0])
+  } else if (PshellServer.IsDec(argv[0])) {
+    PshellServer.Printf("Decimal arg: %d entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, false))
+  } else if (PshellServer.IsHex(argv[0], true)) {
+    PshellServer.Printf("Hex arg: 0x%x entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, true))
+  } else if (PshellServer.IsAlpha(argv[0])) {
+    if (PshellServer.IsEqual(argv[0], "myarg")) {
+      PshellServer.Printf("Alphabetic arg: '%s' equal to 'myarg'\n", argv[0])
+    } else {
+      PshellServer.Printf("Alphabetic arg: '%s' not equal to 'myarg'\n", argv[0])
+    }
+  } else if (PshellServer.IsAlphaNumeric(argv[0])) {
+    if (PshellServer.IsEqual(argv[0], "myarg1")) {
+      PshellServer.Printf("Alpha numeric arg: '%s' equal to 'myarg1'\n", argv[0])
+    } else {
+      PshellServer.Printf("Alpha numeric arg: '%s' not equal to 'myarg1'\n", argv[0])
+    }
+  } else if (PshellServer.IsFloat(argv[0])) {
+    PshellServer.Printf("Float arg: %.2f entered\n", PshellServer.GetFloat(argv[0]))
+  } else {
+    PshellServer.Printf("Unknown arg format: '%s'\n", argv[0])
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// function to show advanced command line parsing using the
+// PshellServer.Tokenize function
 ////////////////////////////////////////////////////////////////////////////////
 func advancedParsing(argv []string) {
 
@@ -239,13 +297,12 @@ func advancedParsing(argv []string) {
   }
 }
 
-// function to show output value that change frequently, this is used to illustrate
-// the command line mode with a repeated rate and an optional clear screen between
-// iterations, using command line mode in thie way along with a function with
-// dynamically changing output information will produce a display similar to the
-// familiar "top" display command output
-
 ////////////////////////////////////////////////////////////////////////////////
+// function to show output value that change frequently, this is used to
+// illustrate the command line mode with a repeated rate and an optional clear
+// screen between iterations, using command line mode in thie way along with a
+// function with dynamically changing output information will produce a display
+// similar to the familiar "top" display command output
 ////////////////////////////////////////////////////////////////////////////////
 func dynamicOutput(argv []string) {
   currTime := time.Now()
@@ -253,44 +310,23 @@ func dynamicOutput(argv []string) {
   PshellServer.Printf("DYNAMICALLY CHANGING OUTPUT\n")
   PshellServer.Printf("===========================\n")
   PshellServer.Printf("\n")
-  PshellServer.Printf("Timestamp ......: %02d:%02d:%02d.%d\n", currTime.Hour(), currTime.Minute(), currTime.Second(), currTime.Nanosecond()/1000)
+  PshellServer.Printf("Timestamp ......: %02d:%02d:%02d.%d\n", currTime.Hour(),
+                                                               currTime.Minute(),
+                                                               currTime.Second(),
+                                                               currTime.Nanosecond()/1000)
   PshellServer.Printf("Random Value ...: %d\n", rand.Uint32())
   PshellServer.Printf("\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-func formatChecking(argv []string) {
-
-  PshellServer.Printf("formatChecking command dispatched:\n")
-  if (PshellServer.IsIpv4Addr(argv[0])) {
-    PshellServer.Printf("IPv4 address entered: '%s' entered\n", argv[0])
-  } else if (PshellServer.IsIpv4AddrWithNetmask(argv[0])) {
-    PshellServer.Printf("IPv4 address/netmask entered: '%s' entered\n", argv[0])
-  } else if (PshellServer.IsDec(argv[0])) {
-    PshellServer.Printf("Decimal arg: %d entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, false))
-  } else if (PshellServer.IsHex(argv[0], true)) {
-    PshellServer.Printf("Hex arg: 0x%x entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, true))
-  } else if (PshellServer.IsAlpha(argv[0])) {
-    if (PshellServer.IsEqual(argv[0], "myarg")) {
-      PshellServer.Printf("Alphabetic arg: '%s' equal to 'myarg'\n", argv[0])
-    } else {
-      PshellServer.Printf("Alphabetic arg: '%s' not equal to 'myarg'\n", argv[0])
-    }
-  } else if (PshellServer.IsAlphaNumeric(argv[0])) {
-    if (PshellServer.IsEqual(argv[0], "myarg1")) {
-      PshellServer.Printf("Alpha numeric arg: '%s' equal to 'myarg1'\n", argv[0])
-    } else {
-      PshellServer.Printf("Alpha numeric arg: '%s' not equal to 'myarg1'\n", argv[0])
-    }
-  } else if (PshellServer.IsFloat(argv[0])) {
-    PshellServer.Printf("Float arg: %.2f entered\n", PshellServer.GetFloat(argv[0]))
-  } else {
-    PshellServer.Printf("Unknown arg format: '%s'\n", argv[0])
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
+// function that shows the extraction of arg options using the
+// PshellServer.GetOption function,the format of the options are either
+// -<option><value> where <option> is a single character option (e.g. -t10),
+// or <option>=<value> where <option> is any length character string (e.g.
+// timeout=10), if the 'strlen(option)' == 0, all option names & values will
+// be extracted and returned in the 'option' and 'value' parameters, if the
+// 'strlen(option)' > 0, the 'value' will only be extracted if the option
+// matches the requested option name
 ////////////////////////////////////////////////////////////////////////////////
 func getOptions(argv []string) {
   if (PshellServer.IsHelp()) {

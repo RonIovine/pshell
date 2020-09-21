@@ -48,6 +48,13 @@ import datetime
 import random
 import PshellServer
 
+MAX_YEAR   = 3000
+MAX_MONTH  = 12
+MAX_DAY    = 31
+MAX_HOUR   = 23
+MAX_MINUTE = 59
+MAX_SECOND = 59
+
 #################################################################################
 #
 # PSHELL user callback functions, the interface is similar to the "main" in C
@@ -62,6 +69,7 @@ import PshellServer
 #################################################################################
 
 #################################################################################
+# simple helloWorld command that just prints out all the passed in arguments
 #################################################################################
 def helloWorld(argv):
   PshellServer.printf("helloWorld command dispatched:")
@@ -69,88 +77,11 @@ def helloWorld(argv):
     PshellServer.printf("  argv[%d]: '%s'" % (index, arg))
 
 #################################################################################
-#################################################################################
-def enhancedUsage(argv):
-  # see if the user asked for help
-  if (PshellServer.isHelp()):
-    # show standard usage
-    PshellServer.showUsage()
-    # give some enhanced usage
-    PshellServer.printf("Enhanced usage here...")
-  else:
-    # do normal function processing
-    PshellServer.printf("enhancedUsage command dispatched:")
-    for index, arg in enumerate(argv):
-      PshellServer.printf("  argv[%d]: '%s'" % (index, arg))
-
-#################################################################################
-#################################################################################
-def formatChecking(argv):
-  PshellServer.printf("formatChecking command dispatched:")
-  if PshellServer.isIpv4Addr(argv[0]):
-    PshellServer.printf("IPv4 address entered: '%s' entered" % argv[0])
-  elif PshellServer.isIpv4AddrWithNetmask(argv[0]):
-    PshellServer.printf("IPv4 address/netmask entered: '%s' entered" % argv[0])
-  elif PshellServer.isDec(argv[0]):
-    PshellServer.printf("Decimal arg: %d entered" % PshellServer.getInt(argv[0]))
-  elif PshellServer.isHex(argv[0]):
-    PshellServer.printf("Hex arg: 0x%x entered" % PshellServer.getInt(argv[0]))
-  elif PshellServer.isAlpha(argv[0]):
-    if PshellServer.isEqual(argv[0], "myarg"):
-      PshellServer.printf("Alphabetic arg: '%s' equal to 'myarg'" % argv[0])
-    else:
-      PshellServer.printf("Alphabetic arg: '%s' not equal to 'myarg'" % argv[0])
-  elif PshellServer.isAlphaNumeric(argv[0]):
-    if PshellServer.isEqual(argv[0], "myarg1"):
-      PshellServer.printf("Alpha numeric arg: '%s' equal to 'myarg1'" % argv[0])
-    else:
-      PshellServer.printf("Alpha numeric arg: '%s' not equal to 'myarg1'" % argv[0])
-  elif PshellServer.isFloat(argv[0]):
-    PshellServer.printf("Float arg: %.2f entered" % PshellServer.getFloat(argv[0]))
-  else:
-    PshellServer.printf("Unknown arg format: '%s'" % argv[0])
-
-#################################################################################
-#################################################################################
-def wildcardMatch(argv):
-  if (PshellServer.isHelp()):
-    PshellServer.printf()
-    PshellServer.showUsage()
-    PshellServer.printf()
-    PshellServer.printf("  where valid <args> are:")
-    PshellServer.printf("    on")
-    PshellServer.printf("    of*f")
-    PshellServer.printf("    a*ll")
-    PshellServer.printf("    sy*mbols")
-    PshellServer.printf("    se*ttings")
-    PshellServer.printf("    d*efault")
-    PshellServer.printf()
-  elif (PshellServer.isSubString(argv[0], "on", 2)):
-    PshellServer.printf("argv 'on' match")
-  elif (PshellServer.isSubString(argv[0], "off", 2)):
-    PshellServer.printf("argv 'off' match")
-  elif (PshellServer.isSubString(argv[0], "all", 1)):
-    PshellServer.printf("argv 'all' match")
-  elif (PshellServer.isSubString(argv[0], "symbols", 2)):
-    PshellServer.printf("argv 'symbols' match")
-  elif (PshellServer.isSubString(argv[0], "settings", 2)):
-    PshellServer.printf("argv 'settings' match")
-  elif (PshellServer.isSubString(argv[0], "default", 1)):
-    PshellServer.printf("argv 'default' match")
-  else:
-    PshellServer.printf()
-    PshellServer.showUsage()
-    PshellServer.printf()
-    PshellServer.printf("  where valid <args> are:")
-    PshellServer.printf("    on")
-    PshellServer.printf("    of*f")
-    PshellServer.printf("    a*ll")
-    PshellServer.printf("    sy*mbols")
-    PshellServer.printf("    se*ttings")
-    PshellServer.printf("    d*efault")
-    PshellServer.printf()
-
-#################################################################################
+# this command shows an example client keep alive, the PSHELL UDP client has
+# a default 5 second timeout, if a command will be known to take longer than
+# 5 seconds, it must give some kind of output back to the client, this shows
+# the two helper functions created the assist in this, the TCP client does not
+# need a keep alive since the TCP protocol itself handles that
 #################################################################################
 def keepAlive(argv):
   if (PshellServer.isHelp()):
@@ -191,16 +122,113 @@ def keepAlive(argv):
     return
   PshellServer.printf()
 
-# function to show advanced command line parsing using the PshellServer.tokenize function
-
-MAX_YEAR   = 3000
-MAX_MONTH  = 12
-MAX_DAY    = 31
-MAX_HOUR   = 23
-MAX_MINUTE = 59
-MAX_SECOND = 59
+#################################################################################
+# this command shows matching the passed command arguments based on substring
+# matching rather than matching on the complete exact string, the minimum
+# number of characters that must be matched is the last argument to the
+# PshellServer.isSubString function, this must be the minimum number of
+# characters necessary to uniquely identify the argument from the complete
+# argument list
+#
+# NOTE: This technique could have been used in the previous example for the
+#       "wheel" and "dots" arguments to provide for wildcarding of those
+#       arguments.  In the above example, as written, the entire string of
+#       "dots" or "wheel" must be enter to be accepted.
+#################################################################################
+def wildcardMatch(argv):
+  if (PshellServer.isHelp()):
+    PshellServer.printf()
+    PshellServer.showUsage()
+    PshellServer.printf()
+    PshellServer.printf("  where valid <args> are:")
+    PshellServer.printf("    on")
+    PshellServer.printf("    of*f")
+    PshellServer.printf("    a*ll")
+    PshellServer.printf("    sy*mbols")
+    PshellServer.printf("    se*ttings")
+    PshellServer.printf("    d*efault")
+    PshellServer.printf()
+  elif (PshellServer.isSubString(argv[0], "on", 2)):
+    PshellServer.printf("argv 'on' match")
+  elif (PshellServer.isSubString(argv[0], "off", 2)):
+    PshellServer.printf("argv 'off' match")
+  elif (PshellServer.isSubString(argv[0], "all", 1)):
+    PshellServer.printf("argv 'all' match")
+  elif (PshellServer.isSubString(argv[0], "symbols", 2)):
+    PshellServer.printf("argv 'symbols' match")
+  elif (PshellServer.isSubString(argv[0], "settings", 2)):
+    PshellServer.printf("argv 'settings' match")
+  elif (PshellServer.isSubString(argv[0], "default", 1)):
+    PshellServer.printf("argv 'default' match")
+  else:
+    PshellServer.printf()
+    PshellServer.showUsage()
+    PshellServer.printf()
+    PshellServer.printf("  where valid <args> are:")
+    PshellServer.printf("    on")
+    PshellServer.printf("    of*f")
+    PshellServer.printf("    a*ll")
+    PshellServer.printf("    sy*mbols")
+    PshellServer.printf("    se*ttings")
+    PshellServer.printf("    d*efault")
+    PshellServer.printf()
 
 #################################################################################
+# this command shows a command that is registered with the "showUsage" flag
+# set to "false", the PshellServer will invoke the command when the user types
+# a "?" or "-h" rather than automatically giving the registered usage, the
+# callback command can then see if the user asked for help (i.e. typed a "?"
+# or "-h") by calling PshellServer.isHelp, the user can then display the
+# standard registered usage with the PshellServer.showUsage call and then give
+# some optional enhanced usage with the PshellServer.printf call
+#################################################################################
+def enhancedUsage(argv):
+  # see if the user asked for help
+  if (PshellServer.isHelp()):
+    # show standard usage
+    PshellServer.showUsage()
+    # give some enhanced usage
+    PshellServer.printf("Enhanced usage here...")
+  else:
+    # do normal function processing
+    PshellServer.printf("enhancedUsage command dispatched:")
+    for index, arg in enumerate(argv):
+      PshellServer.printf("  argv[%d]: '%s'" % (index, arg))
+
+#################################################################################
+# this function demonstrates the various helper functions that assist in the
+# interpretation and conversion of command line arguments
+#################################################################################
+def formatChecking(argv):
+  PshellServer.printf("formatChecking command dispatched:")
+  if PshellServer.isIpv4Addr(argv[0]):
+    PshellServer.printf("IPv4 address entered: '%s' entered" % argv[0])
+  elif PshellServer.isIpv4AddrWithNetmask(argv[0]):
+    PshellServer.printf("IPv4 address/netmask entered: '%s' entered" % argv[0])
+  elif PshellServer.isDec(argv[0]):
+    PshellServer.printf("Decimal arg: %d entered" % PshellServer.getInt(argv[0]))
+  elif PshellServer.isHex(argv[0]):
+    PshellServer.printf("Hex arg: 0x%x entered" % PshellServer.getInt(argv[0]))
+  elif PshellServer.isAlpha(argv[0]):
+    if PshellServer.isEqual(argv[0], "myarg"):
+      PshellServer.printf("Alphabetic arg: '%s' equal to 'myarg'" % argv[0])
+    else:
+      PshellServer.printf("Alphabetic arg: '%s' not equal to 'myarg'" % argv[0])
+  elif PshellServer.isAlphaNumeric(argv[0]):
+    if PshellServer.isEqual(argv[0], "myarg1"):
+      PshellServer.printf("Alpha numeric arg: '%s' equal to 'myarg1'" % argv[0])
+    else:
+      PshellServer.printf("Alpha numeric arg: '%s' not equal to 'myarg1'" % argv[0])
+  elif PshellServer.isFloat(argv[0]):
+    PshellServer.printf("Float arg: %.2f entered" % PshellServer.getFloat(argv[0]))
+  else:
+    PshellServer.printf("Unknown arg format: '%s'" % argv[0])
+
+# function to show advanced command line parsing using the PshellServer.tokenize function
+
+#################################################################################
+# function to show advanced command line parsing using the
+# PshellServer.tokenize function
 #################################################################################
 def advancedParsing(argv):
 
@@ -242,13 +270,12 @@ def advancedParsing(argv):
     PshellServer.printf("Minute : %s" % time[1])
     PshellServer.printf("Second : %s" % time[2])
 
-# function to show output value that change frequently, this is used to illustrate
-# the command line mode with a repeated rate and an optional clear screen between
-# iterations, using command line mode in thie way along with a function with
-# dynamically changing output information will produce a display similar to the
-# familiar "top" display command output
-
 #################################################################################
+# function to show output value that change frequently, this is used to
+# illustrate the command line mode with a repeated rate and an optional clear
+# screen between iterations, using command line mode in thie way along with a
+# function with dynamically changing output information will produce a display
+# similar to the familiar "top" display command output
 #################################################################################
 def dynamicOutput(argv):
   # get timestamp
@@ -261,6 +288,14 @@ def dynamicOutput(argv):
   PshellServer.printf()
 
 #################################################################################
+# function that shows the extraction of arg options using the
+# PshellServer.GetOption function,the format of the options are either
+# -<option><value> where <option> is a single character option (e.g. -t10),
+# or <option>=<value> where <option> is any length character string (e.g.
+# timeout=10), if the 'strlen(option)' == 0, all option names & values will
+# be extracted and returned in the 'option' and 'value' parameters, if the
+# 'strlen(option)' > 0, the 'value' will only be extracted if the option
+# matches the requested option name
 #################################################################################
 def getOptions(argv):
   if (PshellServer.isHelp()):
