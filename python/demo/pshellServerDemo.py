@@ -44,6 +44,8 @@
 import sys
 import signal
 import time
+import datetime
+import random
 import PshellServer
 
 #################################################################################
@@ -202,42 +204,61 @@ MAX_SECOND = 59
 #################################################################################
 def advancedParsing(argv):
 
-  numTokens, timestamp = PshellServer.tokenize(argv[0], ":")
+  numDateTokens, date = PshellServer.tokenize(argv[0], "/")
+  numTimeTokens, time = PshellServer.tokenize(argv[1], ":")
 
-  if (numTokens != 6):
+  if numDateTokens != 3 or numTimeTokens != 3:
     PshellServer.printf("ERROR: Improper timestamp format!!")
     PshellServer.showUsage()
-  elif (not PshellServer.isDec(timestamp[0]) or
-        PshellServer.getInt(timestamp[0]) > MAX_YEAR):
-    PshellServer.printf("ERROR: Invalid year: %s, must be numeric value <= %d" %
-                       (timestamp[0], MAX_YEAR))
-  elif (not PshellServer.isDec(timestamp[1]) or
-        PshellServer.getInt(timestamp[1]) > MAX_MONTH):
+  elif (not PshellServer.isDec(date[0]) or
+        PshellServer.getInt(date[0]) > MAX_MONTH):
     PshellServer.printf("ERROR: Invalid month: %s, must be numeric value <= %d" %
-                        (timestamp[1], MAX_MONTH))
-  elif (not PshellServer.isDec(timestamp[2]) or
-        PshellServer.getInt(timestamp[2]) > MAX_DAY):
+                        (date[0], MAX_MONTH))
+  elif (not PshellServer.isDec(date[1]) or
+        PshellServer.getInt(date[1]) > MAX_DAY):
     PshellServer.printf("ERROR: Invalid day: %s, must be numeric value <= %d" %
-                        (timestamp[2], MAX_DAY))
-  elif (not PshellServer.isDec(timestamp[3]) or
-        PshellServer.getInt(timestamp[3]) > MAX_HOUR):
+                        (date[1], MAX_DAY))
+  elif (not PshellServer.isDec(date[2]) or
+        PshellServer.getInt(date[2]) > MAX_YEAR):
+    PshellServer.printf("ERROR: Invalid year: %s, must be numeric value <= %d" %
+                       (date[2], MAX_YEAR))
+  elif (not PshellServer.isDec(time[0]) or
+        PshellServer.getInt(time[0]) > MAX_HOUR):
     PshellServer.printf("ERROR: Invalid hour: %s, must be numeric value <= %d" %
-                        (timestamp[3], MAX_HOUR))
-  elif (not PshellServer.isDec(timestamp[4]) or
-        PshellServer.getInt(timestamp[4]) > MAX_MINUTE):
+                        (time[0], MAX_HOUR))
+  elif (not PshellServer.isDec(time[1]) or
+        PshellServer.getInt(time[1]) > MAX_MINUTE):
     PshellServer.printf("ERROR: Invalid minute: %s, must be numeric value <= %d" %
-                        (timestamp[4], MAX_MINUTE))
-  elif (not PshellServer.isDec(timestamp[5]) or
-        PshellServer.getInt(timestamp[5]) > MAX_SECOND):
+                        (time[1], MAX_MINUTE))
+  elif (not PshellServer.isDec(time[2]) or
+        PshellServer.getInt(time[2]) > MAX_SECOND):
     PshellServer.printf("ERROR: Invalid second: %s, must be numeric value <= %d" %
-                        (timestamp[5], MAX_SECOND))
+                        (time[2], MAX_SECOND))
   else:
-    PshellServer.printf("Year   : %s" % timestamp[0])
-    PshellServer.printf("Month  : %s" % timestamp[1])
-    PshellServer.printf("Day    : %s" % timestamp[2])
-    PshellServer.printf("Hour   : %s" % timestamp[3])
-    PshellServer.printf("Minute : %s" % timestamp[4])
-    PshellServer.printf("Second : %s" % timestamp[5])
+    PshellServer.printf("Month  : %s" % date[0])
+    PshellServer.printf("Day    : %s" % date[1])
+    PshellServer.printf("Year   : %s" % date[2])
+    PshellServer.printf("Hour   : %s" % time[0])
+    PshellServer.printf("Minute : %s" % time[1])
+    PshellServer.printf("Second : %s" % time[2])
+
+# function to show output value that change frequently, this is used to illustrate
+# the command line mode with a repeated rate and an optional clear screen between
+# iterations, using command line mode in thie way along with a function with
+# dynamically changing output information will produce a display similar to the
+# familiar "top" display command output
+
+#################################################################################
+#################################################################################
+def dynamicOutput(argv):
+  # get timestamp
+  PshellServer.printf()
+  PshellServer.printf("DYNAMICALLY CHANGING OUTPUT")
+  PshellServer.printf("=================\=========")
+  PshellServer.printf()
+  PshellServer.printf("Timestamp ......: %s" % datetime.datetime.now().strftime("%T.%f"))
+  PshellServer.printf("Random Value ...: %d" % random.randint(0, 2**32))
+  PshellServer.printf()
 
 #################################################################################
 #################################################################################
@@ -367,8 +388,12 @@ if (__name__ == '__main__'):
   PshellServer.addCommand(function    = advancedParsing,
                           command     = "advancedParsing",
                           description = "command with advanced command line parsing",
-                          usage       = "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",
-                          minArgs     = 1)
+                          usage       = "<mm>/<dd>/<yyyy> <hh>:<mm>:<ss>",
+                          minArgs     = 2)
+
+  PshellServer.addCommand(function    = dynamicOutput,
+                          command     = "dynamicOutput",
+                          description = "command with dynamic output for command line mode")
 
   PshellServer.addCommand(function    = getOptions,
                           command     = "getOptions",

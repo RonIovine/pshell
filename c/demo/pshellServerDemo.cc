@@ -45,6 +45,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include <PshellServer.h>
 
@@ -324,64 +326,95 @@ void formatChecking(int argc, char *argv[])
 /******************************************************************************/
 void advancedParsing(int argc, char *argv[])
 {
-  PshellTokens *timestamp = pshell_tokenize(argv[0], ":");
+  PshellTokens *date = pshell_tokenize(argv[0], "/");
+  PshellTokens *time = pshell_tokenize(argv[1], ":");
 
-  if (timestamp->numTokens != 6)
+  if ((date->numTokens != 3) || (time->numTokens != 3))
   {
     pshell_printf("ERROR: Improper timestamp format!!\n");
     pshell_showUsage();
   }
-  else if (!pshell_isDec(timestamp->tokens[0]) ||
-           (pshell_getInt(timestamp->tokens[0]) > MAX_YEAR))
-  {
-    pshell_printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[0],
-                  MAX_YEAR);
-  }
-  else if (!pshell_isDec(timestamp->tokens[1]) ||
-           (pshell_getInt(timestamp->tokens[1]) > MAX_MONTH))
+  else if (!pshell_isDec(date->tokens[0]) ||
+      (pshell_getInt(date->tokens[0]) > MAX_MONTH))
   {
     pshell_printf("ERROR: Invalid month: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[1],
+                  date->tokens[0],
                   MAX_MONTH);
   }
-  else if (!pshell_isDec(timestamp->tokens[2]) ||
-           (pshell_getInt(timestamp->tokens[2]) > MAX_DAY))
+  else if (!pshell_isDec(date->tokens[1]) ||
+           (pshell_getInt(date->tokens[1]) > MAX_DAY))
   {
     pshell_printf("ERROR: Invalid day: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[2],
+                  date->tokens[1],
                   MAX_DAY);
   }
-  else if (!pshell_isDec(timestamp->tokens[3]) ||
-           (pshell_getInt(timestamp->tokens[3]) > MAX_HOUR))
+  else if (!pshell_isDec(date->tokens[2]) ||
+           (pshell_getInt(date->tokens[2]) > MAX_YEAR))
+  {
+    pshell_printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
+                  date->tokens[2],
+                  MAX_YEAR);
+  }
+  else if (!pshell_isDec(time->tokens[0]) ||
+           (pshell_getInt(time->tokens[0]) > MAX_HOUR))
   {
     pshell_printf("ERROR: Invalid hour: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[3],
+                  time->tokens[0],
                   MAX_HOUR);
   }
-  else if (!pshell_isDec(timestamp->tokens[4]) ||
-           (pshell_getInt(timestamp->tokens[4]) > MAX_MINUTE))
+  else if (!pshell_isDec(time->tokens[1]) ||
+           (pshell_getInt(time->tokens[1]) > MAX_MINUTE))
   {
     pshell_printf("ERROR: Invalid minute: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[4],
+                  time->tokens[1],
                   MAX_MINUTE);
   }
-  else if (!pshell_isDec(timestamp->tokens[5]) ||
-           (pshell_getInt(timestamp->tokens[5]) > MAX_SECOND))
+  else if (!pshell_isDec(time->tokens[2]) ||
+           (pshell_getInt(time->tokens[2]) > MAX_SECOND))
   {
     pshell_printf("ERROR: Invalid second: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[5],
+                  time->tokens[2],
                   MAX_SECOND);
   }
   else
   {
-    pshell_printf("Year   : %s\n", timestamp->tokens[0]);
-    pshell_printf("Month  : %s\n", timestamp->tokens[1]);
-    pshell_printf("Day    : %s\n", timestamp->tokens[2]);
-    pshell_printf("Hour   : %s\n", timestamp->tokens[3]);
-    pshell_printf("Minute : %s\n", timestamp->tokens[4]);
-    pshell_printf("Second : %s\n", timestamp->tokens[5]);
+    pshell_printf("Month  : %s\n", date->tokens[0]);
+    pshell_printf("Day    : %s\n", date->tokens[1]);
+    pshell_printf("Year   : %s\n", date->tokens[2]);
+    pshell_printf("Hour   : %s\n", time->tokens[0]);
+    pshell_printf("Minute : %s\n", time->tokens[1]);
+    pshell_printf("Second : %s\n", time->tokens[2]);
   }
+}
+
+/*
+ * function to show output value that change frequently, this is used to illustrate
+ * the command line mode with a repeated rate and an optional clear screen between
+ * iterations, using command line mode in thie way along with a function with
+ * dynamically changing output information will produce a display similar to the
+ * familiar "top" display command output
+ */
+
+/******************************************************************************/
+/******************************************************************************/
+void dynamicOutput(int argc, char *argv[])
+{
+  char timestamp[80];
+  struct timeval tv;
+  struct tm tm;
+
+  // get timestamp
+  gettimeofday(&tv, NULL);
+  localtime_r(&tv.tv_sec, &tm);
+  strftime(timestamp, sizeof(timestamp), "%T", &tm);
+  sprintf(timestamp, "%s.%-6ld", timestamp, (long)tv.tv_usec);
+  pshell_printf("\n");
+  pshell_printf("DYNAMICALLY CHANGING OUTPUT\n");
+  pshell_printf("===========================\n");
+  pshell_printf("\n");
+  pshell_printf("Timestamp ......: %s\n", timestamp);
+  pshell_printf("Random Value ...: %d\n", rand());
+  pshell_printf("\n");
 }
 
 /*
@@ -591,10 +624,18 @@ int main(int argc, char *argv[])
   pshell_addCommand(advancedParsing,                                /* function */
                     "advancedParsing",                              /* command */
                     "command with advanced command line parsing",   /* description */
-                    "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",              /* usage */
-                    1,                                              /* minArgs */
-                    1,                                              /* maxArgs */
+                    "<mm>/<dd>/<yyyy> <hh>:<mm>:<ss>",              /* usage */
+                    2,                                              /* minArgs */
+                    2,                                              /* maxArgs */
                     true);                                          /* showUsage on "?" */
+
+  pshell_addCommand(dynamicOutput,                                         /* function */
+                    "dynamicOutput",                                       /* command */
+                    "command with dynamic output for command line mode",   /* description */
+                    NULL,                                                  /* usage */
+                    0,                                                     /* minArgs */
+                    0,                                                     /* maxArgs */
+                    true);                                                 /* showUsage on "?" */
 
   pshell_addCommand(getOptions,                                  /* function */
                     "getOptions",                                /* command */

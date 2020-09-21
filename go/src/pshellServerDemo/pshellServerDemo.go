@@ -46,6 +46,7 @@ import "fmt"
 import "syscall"
 import "time"
 import "os/signal"
+import "math/rand"
 import "PshellServer"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -192,49 +193,69 @@ const (
 ////////////////////////////////////////////////////////////////////////////////
 func advancedParsing(argv []string) {
 
-  numTokens, timestamp := PshellServer.Tokenize(argv[0], ":")
+  numDateTokens, date := PshellServer.Tokenize(argv[0], "/")
+  numTimeTokens, time := PshellServer.Tokenize(argv[1], ":")
 
-  if (numTokens != 6) {
+  if ((numDateTokens != 3) || (numTimeTokens != 3)) {
     PshellServer.Printf("ERROR: Improper timestamp format!!\n")
     PshellServer.ShowUsage()
-  } else if (!PshellServer.IsDec(timestamp[0]) ||
-             (PshellServer.GetInt(timestamp[0], PshellServer.RADIX_ANY, false) > MAX_YEAR)) {
-    PshellServer.Printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
-                        timestamp[0],
-                        MAX_YEAR)
-  } else if (!PshellServer.IsDec(timestamp[1]) ||
-             (PshellServer.GetInt(timestamp[1], PshellServer.RADIX_ANY, false) > MAX_MONTH)) {
+  } else if (!PshellServer.IsDec(date[0]) ||
+             (PshellServer.GetInt(date[0], PshellServer.RADIX_ANY, false) > MAX_MONTH)) {
     PshellServer.Printf("ERROR: Invalid month: %s, must be numeric value <= %d\n",
-                        timestamp[1],
+                        date[0],
                         MAX_MONTH)
-  } else if (!PshellServer.IsDec(timestamp[2]) ||
-             (PshellServer.GetInt(timestamp[2], PshellServer.RADIX_ANY, false) > MAX_DAY)) {
+  } else if (!PshellServer.IsDec(date[1]) ||
+             (PshellServer.GetInt(date[1], PshellServer.RADIX_ANY, false) > MAX_DAY)) {
     PshellServer.Printf("ERROR: Invalid day: %s, must be numeric value <= %d\n",
-                        timestamp[2],
+                        date[1],
                         MAX_DAY)
-  } else if (!PshellServer.IsDec(timestamp[3]) ||
-             (PshellServer.GetInt(timestamp[3], PshellServer.RADIX_ANY, false) > MAX_HOUR)) {
+  } else if (!PshellServer.IsDec(date[2]) ||
+             (PshellServer.GetInt(date[2], PshellServer.RADIX_ANY, false) > MAX_YEAR)) {
+    PshellServer.Printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
+                        date[2],
+                        MAX_YEAR)
+  } else if (!PshellServer.IsDec(time[0]) ||
+             (PshellServer.GetInt(time[0], PshellServer.RADIX_ANY, false) > MAX_HOUR)) {
     PshellServer.Printf("ERROR: Invalid hour: %s, must be numeric value <= %d\n",
-                        timestamp[3],
+                        time[0],
                         MAX_HOUR)
-  } else if (!PshellServer.IsDec(timestamp[4]) ||
-             (PshellServer.GetInt(timestamp[4], PshellServer.RADIX_ANY, false) > MAX_MINUTE)) {
+  } else if (!PshellServer.IsDec(time[1]) ||
+             (PshellServer.GetInt(time[1], PshellServer.RADIX_ANY, false) > MAX_MINUTE)) {
     PshellServer.Printf("ERROR: Invalid minute: %s, must be numeric value <= %d\n",
-                        timestamp[4],
+                        time[1],
                         MAX_MINUTE)
-  } else if (!PshellServer.IsDec(timestamp[5]) ||
-             (PshellServer.GetInt(timestamp[5], PshellServer.RADIX_ANY, false) > MAX_SECOND)) {
+  } else if (!PshellServer.IsDec(time[2]) ||
+             (PshellServer.GetInt(time[2], PshellServer.RADIX_ANY, false) > MAX_SECOND)) {
     PshellServer.Printf("ERROR: Invalid second: %s, must be numeric value <= %d\n",
-                        timestamp[5],
+                        time[2],
                         MAX_SECOND)
   } else {
-    PshellServer.Printf("Year   : %s\n", timestamp[0])
-    PshellServer.Printf("Month  : %s\n", timestamp[1])
-    PshellServer.Printf("Day    : %s\n", timestamp[2])
-    PshellServer.Printf("Hour   : %s\n", timestamp[3])
-    PshellServer.Printf("Minute : %s\n", timestamp[4])
-    PshellServer.Printf("Second : %s\n", timestamp[5])
+    PshellServer.Printf("Month  : %s\n", date[0])
+    PshellServer.Printf("Day    : %s\n", date[1])
+    PshellServer.Printf("Year   : %s\n", date[2])
+    PshellServer.Printf("Hour   : %s\n", time[0])
+    PshellServer.Printf("Minute : %s\n", time[1])
+    PshellServer.Printf("Second : %s\n", time[2])
   }
+}
+
+// function to show output value that change frequently, this is used to illustrate
+// the command line mode with a repeated rate and an optional clear screen between
+// iterations, using command line mode in thie way along with a function with
+// dynamically changing output information will produce a display similar to the
+// familiar "top" display command output
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func dynamicOutput(argv []string) {
+  currTime := time.Now()
+  PshellServer.Printf("\n")
+  PshellServer.Printf("DYNAMICALLY CHANGING OUTPUT\n")
+  PshellServer.Printf("===========================\n")
+  PshellServer.Printf("\n")
+  PshellServer.Printf("Timestamp ......: %02d:%02d:%02d.%d\n", currTime.Hour(), currTime.Minute(), currTime.Second(), currTime.Nanosecond()/1000)
+  PshellServer.Printf("Random Value ...: %d\n", rand.Uint32())
+  PshellServer.Printf("\n")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -418,10 +439,18 @@ func main() {
   PshellServer.AddCommand(advancedParsing,                                // function
                           "advancedParsing",                              // command
                           "command with advanced command line parsing",   // description
-                          "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",              // usage
-                          1,                                              // minArgs
-                          1,                                              // maxArgs
+                          "<mm>/<dd>/<yyyy> <hh>:<mm>:<ss>",              // usage
+                          2,                                              // minArgs
+                          2,                                              // maxArgs
                           true)                                           // showUsage on "?"
+
+  PshellServer.AddCommand(dynamicOutput,                                         // function
+                          "dynamicOutput",                                       // command
+                          "command with dynamic output for command line mode",   // description
+                          "",                                                    // usage
+                          0,                                                     // minArgs
+                          0,                                                     // maxArgs
+                          true)                                                  // showUsage on "?"
 
   PshellServer.AddCommand(getOptions,                                  // function
                           "getOptions",                                // command

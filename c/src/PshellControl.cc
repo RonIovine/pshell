@@ -398,7 +398,6 @@ void pshell_sendMulticast(const char *command_, ...)
             control->pshellMsg.header.dataNeeded = false;
             control->pshellMsg.header.respNeeded = false;
             sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, PSHELL_NO_WAIT);
-            PSHELL_INFO("Sending multicast command: '%s' to sid: %d", command, _multicastList.groups[group].sidList[sid]);
           }
         }
       }
@@ -853,7 +852,6 @@ static int sendPshellCommand(PshellControl *control_,
   }
   else
   {
-    PSHELL_INFO("Remote pshell command: '%s', %s", command_, pshell_getResponseString(retCode));
     retCode = PSHELL_COMMAND_SUCCESS;
   }
 
