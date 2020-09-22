@@ -56,12 +56,16 @@
  */
 #define PSHELL_DEMO_PORT 6001
 
+/* constants used for the advanved parsing date/time stamp range checking */
 #define MAX_YEAR   3000
 #define MAX_MONTH  12
 #define MAX_DAY    31
 #define MAX_HOUR   23
 #define MAX_MINUTE 59
 #define MAX_SECOND 59
+
+/* dynamic value used for the dunamicOutput function */
+char dynamicValue[80] = {"0"};
 
 /******************************************************************************
  *
@@ -382,18 +386,26 @@ void dynamicOutput(int argc, char *argv[])
   struct timeval tv;
   struct tm tm;
 
-  // get timestamp
-  gettimeofday(&tv, NULL);
-  localtime_r(&tv.tv_sec, &tm);
-  strftime(timestamp, sizeof(timestamp), "%T", &tm);
-  sprintf(timestamp, "%s.%-6ld", timestamp, (long)tv.tv_usec);
-  pshell_printf("\n");
-  pshell_printf("DYNAMICALLY CHANGING OUTPUT\n");
-  pshell_printf("===========================\n");
-  pshell_printf("\n");
-  pshell_printf("Timestamp ......: %s\n", timestamp);
-  pshell_printf("Random Value ...: %d\n", rand());
-  pshell_printf("\n");
+  if (pshell_isEqual(argv[0], "show"))
+  {
+    // get timestamp
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &tm);
+    strftime(timestamp, sizeof(timestamp), "%T", &tm);
+    sprintf(timestamp, "%s.%-6ld", timestamp, (long)tv.tv_usec);
+    pshell_printf("\n");
+    pshell_printf("DYNAMICALLY CHANGING OUTPUT\n");
+    pshell_printf("===========================\n");
+    pshell_printf("\n");
+    pshell_printf("Timestamp ........: %s\n", timestamp);
+    pshell_printf("Random Value .....: %d\n", rand());
+    pshell_printf("Input Value ......: %s\n", dynamicValue);
+    pshell_printf("\n");
+  }
+  else
+  {
+    strcpy(dynamicValue, argv[0]);
+  }
 }
 
 /******************************************************************************
@@ -608,9 +620,9 @@ int main(int argc, char *argv[])
   pshell_addCommand(dynamicOutput,                                         /* function */
                     "dynamicOutput",                                       /* command */
                     "command with dynamic output for command line mode",   /* description */
-                    NULL,                                                  /* usage */
-                    0,                                                     /* minArgs */
-                    0,                                                     /* maxArgs */
+                    "show | <value>",                                      /* usage */
+                    1,                                                     /* minArgs */
+                    1,                                                     /* maxArgs */
                     true);                                                 /* showUsage on "?" */
 
   pshell_addCommand(getOptions,                                  /* function */

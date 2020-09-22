@@ -49,6 +49,7 @@ import "os/signal"
 import "math/rand"
 import "PshellServer"
 
+// constants used for the advanved parsing date/time stamp range checking
 const (
   MAX_YEAR   = 3000
   MAX_MONTH  = 12
@@ -57,6 +58,9 @@ const (
   MAX_MINUTE = 59
   MAX_SECOND = 59
 )
+
+// dynamic value used for the dunamicOutput function
+var dynamicValue string = "0"
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -305,17 +309,22 @@ func advancedParsing(argv []string) {
 // similar to the familiar "top" display command output
 ////////////////////////////////////////////////////////////////////////////////
 func dynamicOutput(argv []string) {
-  currTime := time.Now()
-  PshellServer.Printf("\n")
-  PshellServer.Printf("DYNAMICALLY CHANGING OUTPUT\n")
-  PshellServer.Printf("===========================\n")
-  PshellServer.Printf("\n")
-  PshellServer.Printf("Timestamp ......: %02d:%02d:%02d.%d\n", currTime.Hour(),
-                                                               currTime.Minute(),
-                                                               currTime.Second(),
-                                                               currTime.Nanosecond()/1000)
-  PshellServer.Printf("Random Value ...: %d\n", rand.Uint32())
-  PshellServer.Printf("\n")
+  if (PshellServer.IsEqual(argv[0], "show")) {
+    currTime := time.Now()
+    PshellServer.Printf("\n")
+    PshellServer.Printf("DYNAMICALLY CHANGING OUTPUT\n")
+    PshellServer.Printf("===========================\n")
+    PshellServer.Printf("\n")
+    PshellServer.Printf("Timestamp ........: %02d:%02d:%02d.%d\n", currTime.Hour(),
+                                                                   currTime.Minute(),
+                                                                   currTime.Second(),
+                                                                   currTime.Nanosecond()/1000)
+    PshellServer.Printf("Random Value ..  .: %d\n", rand.Uint32())
+    PshellServer.Printf("Input Value ......: %s\n", dynamicValue)
+    PshellServer.Printf("\n")
+  } else {
+    dynamicValue = argv[0];
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -323,10 +332,7 @@ func dynamicOutput(argv []string) {
 // PshellServer.GetOption function,the format of the options are either
 // -<option><value> where <option> is a single character option (e.g. -t10),
 // or <option>=<value> where <option> is any length character string (e.g.
-// timeout=10), if the 'strlen(option)' == 0, all option names & values will
-// be extracted and returned in the 'option' and 'value' parameters, if the
-// 'strlen(option)' > 0, the 'value' will only be extracted if the option
-// matches the requested option name
+// timeout=10)
 ////////////////////////////////////////////////////////////////////////////////
 func getOptions(argv []string) {
   if (PshellServer.IsHelp()) {
@@ -483,9 +489,9 @@ func main() {
   PshellServer.AddCommand(dynamicOutput,                                         // function
                           "dynamicOutput",                                       // command
                           "command with dynamic output for command line mode",   // description
-                          "",                                                    // usage
-                          0,                                                     // minArgs
-                          0,                                                     // maxArgs
+                          "show | <value>",                                      // usage
+                          1,                                                     // minArgs
+                          1,                                                     // maxArgs
                           true)                                                  // showUsage on "?"
 
   PshellServer.AddCommand(getOptions,                                  // function

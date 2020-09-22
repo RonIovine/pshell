@@ -48,12 +48,16 @@ import datetime
 import random
 import PshellServer
 
+# constants used for the advanved parsing date/time stamp range checking
 MAX_YEAR   = 3000
 MAX_MONTH  = 12
 MAX_DAY    = 31
 MAX_HOUR   = 23
 MAX_MINUTE = 59
 MAX_SECOND = 59
+
+# dynamic value used for the dunamicOutput function
+dynamicValue = "0"
 
 #################################################################################
 #
@@ -278,24 +282,26 @@ def advancedParsing(argv):
 # similar to the familiar "top" display command output
 #################################################################################
 def dynamicOutput(argv):
-  # get timestamp
-  PshellServer.printf()
-  PshellServer.printf("DYNAMICALLY CHANGING OUTPUT")
-  PshellServer.printf("=================\=========")
-  PshellServer.printf()
-  PshellServer.printf("Timestamp ......: %s" % datetime.datetime.now().strftime("%T.%f"))
-  PshellServer.printf("Random Value ...: %d" % random.randint(0, 2**32))
-  PshellServer.printf()
+  global dynamicValue
+  if PshellServer.isEqual(argv[0], "show"):
+    # get timestamp
+    PshellServer.printf()
+    PshellServer.printf("DYNAMICALLY CHANGING OUTPUT")
+    PshellServer.printf("=================\=========")
+    PshellServer.printf()
+    PshellServer.printf("Timestamp ........: %s" % datetime.datetime.now().strftime("%T.%f"))
+    PshellServer.printf("Random Value .....: %d" % random.randint(0, 2**32))
+    PshellServer.printf("Input Value ......: %s" % dynamicValue)
+    PshellServer.printf()
+  else:
+    dynamicValue = argv[0]
 
 #################################################################################
 # function that shows the extraction of arg options using the
 # PshellServer.GetOption function,the format of the options are either
 # -<option><value> where <option> is a single character option (e.g. -t10),
 # or <option>=<value> where <option> is any length character string (e.g.
-# timeout=10), if the 'strlen(option)' == 0, all option names & values will
-# be extracted and returned in the 'option' and 'value' parameters, if the
-# 'strlen(option)' > 0, the 'value' will only be extracted if the option
-# matches the requested option name
+# timeout=10)
 #################################################################################
 def getOptions(argv):
   if (PshellServer.isHelp()):
@@ -428,7 +434,9 @@ if (__name__ == '__main__'):
 
   PshellServer.addCommand(function    = dynamicOutput,
                           command     = "dynamicOutput",
-                          description = "command with dynamic output for command line mode")
+                          description = "command with dynamic output for command line mode",
+                          usage       = "show | <value>",
+                          minArgs     = 1)
 
   PshellServer.addCommand(function    = getOptions,
                           command     = "getOptions",
