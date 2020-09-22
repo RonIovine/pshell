@@ -319,8 +319,8 @@ func dynamicOutput(argv []string) {
                                                                    currTime.Minute(),
                                                                    currTime.Second(),
                                                                    currTime.Nanosecond()/1000)
-    PshellServer.Printf("Random Value ..  .: %d\n", rand.Uint32())
-    PshellServer.Printf("Input Value ......: %s\n", dynamicValue)
+    PshellServer.Printf("Random Value .....: %d\n", rand.Uint32())
+    PshellServer.Printf("Dynamic Value ....: %s\n", dynamicValue)
     PshellServer.Printf("\n")
   } else {
     dynamicValue = argv[0];

@@ -291,7 +291,7 @@ def dynamicOutput(argv):
     PshellServer.printf()
     PshellServer.printf("Timestamp ........: %s" % datetime.datetime.now().strftime("%T.%f"))
     PshellServer.printf("Random Value .....: %d" % random.randint(0, 2**32))
-    PshellServer.printf("Input Value ......: %s" % dynamicValue)
+    PshellServer.printf("Dynamic Value ....: %s" % dynamicValue)
     PshellServer.printf()
   else:
     dynamicValue = argv[0]

@@ -399,7 +399,7 @@ void dynamicOutput(int argc, char *argv[])
     pshell_printf("\n");
     pshell_printf("Timestamp ........: %s\n", timestamp);
     pshell_printf("Random Value .....: %d\n", rand());
-    pshell_printf("Input Value ......: %s\n", dynamicValue);
+    pshell_printf("Dynamic Value ....: %s\n", dynamicValue);
     pshell_printf("\n");
   }
   else
