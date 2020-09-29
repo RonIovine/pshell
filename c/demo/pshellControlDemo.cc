@@ -110,7 +110,8 @@ int main (int argc, char *argv[])
   int logLevel = PSHELL_CONTROL_LOG_LEVEL_ALL;
   bool extract = false;
   int retCode;
-  int sid;
+  const char *controlName;
+  const char *server;
 
   if ((argc < 3) || (argc > 6))
   {
@@ -145,7 +146,10 @@ int main (int argc, char *argv[])
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
 
-  if ((sid = pshell_connectServer(argv[0], argv[1], port, PSHELL_ONE_MSEC*timeout)) != PSHELL_INVALID_SID)
+  controlName = argv[0];
+  server = argv[1];
+
+  if (pshell_connectServer(controlName, server, port, PSHELL_ONE_MSEC*timeout))
   {
     // set our debug level
     pshell_setControlLogLevel(logLevel);
@@ -154,7 +158,7 @@ int main (int argc, char *argv[])
     {
       if (extract)
       {
-        retCode = pshell_sendCommand3(sid, results, sizeof(results), input);
+        retCode = pshell_sendCommand3(controlName, results, sizeof(results), input);
         if (retCode == PSHELL_COMMAND_SUCCESS)
         {
           printf("%d bytes extracted, results:\n", (int)strlen(results));
@@ -164,11 +168,11 @@ int main (int argc, char *argv[])
       }
       else
       {
-        retCode = pshell_sendCommand1(sid, input);
+        retCode = pshell_sendCommand1(controlName, input);
         printf("retCode: %s\n",pshell_getResponseString(retCode));
       }
     }
-    pshell_disconnectServer(sid);
+    pshell_disconnectServer(controlName);
   }
 
 }

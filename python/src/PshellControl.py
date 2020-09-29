@@ -304,9 +304,9 @@ def addMulticast(command, controlList):
   special argument PSHELL_MULTICAST_ALL is used, the given controlList will
   receive all multicast commands, the format of the controlList is a CSV formatted
   list of all the desired controlNames (as provided in the first argument of the
-  pshell_connectServer command) that will receive this multicast command or if the
-  PSHELL_MULTICAST_ALL is used then all control destinations will receive the given
-  multicast command, see examples below
+  PshellControl.connectServer command) that will receive this multicast command
+  or if the PSHELL_MULTICAST_ALL is used then all control destinations will receive
+  the given multicast command, see examples below
 
   ex 1: multicast command sent to receivers in CSV controlList
 

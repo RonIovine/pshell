@@ -200,14 +200,14 @@ void controlServer(int argc, char *argv[])
   {
     if ((argc == 0) || pshell_isHelp() || pshell_isEqual(argv[0], "help"))
     {
-      pshell_extractCommands(server->sid, results, sizeof(results));
+      pshell_extractCommands(server->controlName, results, sizeof(results));
       pshell_printf("%s", results);
     }
     else
     {
       /* this contains the re-constituted command */
       char command[MAX_COMMAND_SIZE];
-      if ((pshell_sendCommand3(server->sid,
+      if ((pshell_sendCommand3(server->controlName,
                                results,
                                sizeof(results),
                                buildCommand(command, sizeof(command), argc, argv)) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))

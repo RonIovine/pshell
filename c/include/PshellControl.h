@@ -122,13 +122,7 @@ const char *pshell_getResponseString(int results_);
  * destination port must be provided, for a UNIX server, only a valid server
  * name must be provided along with the identifier PSHELL_UNIX_CONTROL (i.e. 0)
  * for the 'port' parameter
- *
- * this function returns a Server ID (sid) handle which must be saved and
- * used for all subsequent calls into this library, if the function fails
- * to allocate the necessary resources and connect to a server,
- * PSHELL_INVALID_SID is returned
  */
-#define PSHELL_INVALID_SID -1
 #define PSHELL_UNIX_CONTROL 0
 #define PSHELL_NO_WAIT      0
 #define PSHELL_ONE_MSEC     1
@@ -137,10 +131,10 @@ const char *pshell_getResponseString(int results_);
 #define PSHELL_ONE_HOUR     PSHELL_ONE_MINUTE*60
 #define PSHELL_LOCALHOST    "localhost"
 
-int pshell_connectServer(const char *controlName_,
-                         const char *remoteServer_,
-                         unsigned port_ = PSHELL_UNIX_CONTROL,
-                         unsigned defaultTimeout_ = PSHELL_NO_WAIT);
+bool pshell_connectServer(const char *controlName_,
+                          const char *remoteServer_,
+                          unsigned port_ = PSHELL_UNIX_CONTROL,
+                          unsigned defaultTimeout_ = PSHELL_NO_WAIT);
 
 /*
  * pshell_disconnectServer:
@@ -149,7 +143,7 @@ int pshell_connectServer(const char *controlName_,
  * including releasing any dynamically allocated memory, closing
  * any local socket handles etc.
  */
-void pshell_disconnectServer(int sid_);
+void pshell_disconnectServer(const char *controlName_);
 
 /*
  * pshell_disconnectAllServers:
@@ -168,7 +162,7 @@ void pshell_disconnectAllServers(void);
  * set the default server response timeout that is used in the
  * 'send' commands that don't take a timeout override
  */
-void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
+void pshell_setDefaultTimeout(const char *controlName_, unsigned defaultTimeout_);
 
 /*
  * pshell_extractCommands:
@@ -178,7 +172,7 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_);
  * when writing a multi server control aggregator, see the demo program
  * pshellAggregatorDemo in the demo directory for examples
  */
-void pshell_extractCommands(int sid_, char *results_, int size_);
+void pshell_extractCommands(const char *controlName_, char *results_, int size_);
 
 /*
  * pshell_extractControlNames:
@@ -226,11 +220,11 @@ void pshell_addMulticast(const char *command_, const char *controlList_);
  * pshell_sendMulticast:
  *
  * this command will send a given command to all the registered multicast
- * receivers (i.e. sids) for this multicast group, multicast groups are
- * based on the command's keyword, this function will issue the command as
- * a best effort fire-and-forget command to each receiver in the multicast
- * group, no results will be requested or expected, and no response will be
- * requested or expected
+ * receivers for this multicast group, multicast groups are based on the
+ * command's keyword, this function will issue the command as a best effort
+ * fire-and-forget command to each receiver in the multicast group, no
+ * results will be requested or expected, and no response will be requested
+ * or expected
  */
 void pshell_sendMulticast(const char *command_, ...);
 
@@ -249,8 +243,8 @@ void pshell_sendMulticast(const char *command_, ...);
  *
  * the return of the following 4 functions is one of the PshellControlResponse enums
  */
-int pshell_sendCommand1(int sid_, const char *command_, ...);
-int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...);
+int pshell_sendCommand1(const char *controlName_, const char *command_, ...);
+int pshell_sendCommand2(const char *controlName_, unsigned timeoutOverride_, const char *command_, ...);
 
 /*
  * the following two commands will issue the remote command and extract any
@@ -260,8 +254,8 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
  * it is the responsibility of the calling application to parse & understand
  * the results
  */
-int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command_, ...);
-int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...);
+int pshell_sendCommand3(const char *controlName_, char *results_, int size_, const char *command_, ...);
+int pshell_sendCommand4(const char *controlName_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...);
 
 #ifdef __cplusplus
 }

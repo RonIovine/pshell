@@ -119,18 +119,18 @@ char results[1024*64];
 
 /******************************************************************************/
 /******************************************************************************/
-void controlServer(int sid, int argc, char *argv[])
+void controlServer(const char *controlName, int argc, char *argv[])
 {
   if ((argc == 0) || pshell_isHelp() || pshell_isEqual(argv[0], "help"))
   {
-    pshell_extractCommands(sid, results, sizeof(results));
+    pshell_extractCommands(controlName, results, sizeof(results));
     pshell_printf("%s", results);
   }
   else
   {
     /* this contains the re-constituted command */
     char command[300];
-    if ((pshell_sendCommand3(sid,
+    if ((pshell_sendCommand3(controlName,
                              results,
                              sizeof(results),
                              buildCommand(command, sizeof(command), argc, argv)) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
@@ -139,13 +139,6 @@ void controlServer(int sid, int argc, char *argv[])
     }
   }
 }
-
-/*
- * the SIDs of all the remote pshell servers we are aggregating, add more SID
- * identifiers for each external server being controlled/aggregated
- */
-int pshellServerDemoSid;
-int traceFilterDemoSid;
 
 /*
  * the following two functions are the control specific functions that interface
@@ -161,14 +154,14 @@ int traceFilterDemoSid;
 /******************************************************************************/
 void pshellServerDemo(int argc, char *argv[])
 {
-  controlServer(pshellServerDemoSid, argc, argv);
+  controlServer("pshellServerDemo", argc, argv);
 }
 
 /******************************************************************************/
 /******************************************************************************/
 void traceFilterDemo(int argc, char *argv[])
 {
-  controlServer(traceFilterDemoSid, argc, argv);
+  controlServer("traceFilterDemo", argc, argv);
 }
 
 /*
@@ -180,14 +173,14 @@ void traceFilterDemo(int argc, char *argv[])
 /******************************************************************************/
 void meta(int argc, char *argv[])
 {
-    if ((pshell_sendCommand3(pshellServerDemoSid,
+    if ((pshell_sendCommand3("pshellServerDemo",
                              results,
                              sizeof(results),
                              "hello %s %s", argv[0], argv[1]) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
   {
     pshell_printf("%s", results);
   }
-  pshell_sendCommand1(traceFilterDemoSid, "set callback %s", argv[2]);
+  pshell_sendCommand1("traceFilterDemo", "set callback %s", argv[2]);
 }
 
 /*
@@ -236,19 +229,19 @@ int main (int argc, char *argv[])
    * and timeout values can be overridden via the pshell-control.conf
    * file
    */
-  if ((pshellServerDemoSid = pshell_connectServer("pshellServerDemo",
-                                                  argv[1],
-                                                  pshellServerDemoPort,
-                                                  PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
+  if (!pshell_connectServer("pshellServerDemo",
+                            argv[1],
+                            pshellServerDemoPort,
+                            PSHELL_ONE_SEC*5))
   {
     printf("ERROR: Could not connect to remote pshell server: pshellServerControl\n");
     exit(0);
   }
 
-  if ((traceFilterDemoSid = pshell_connectServer("traceFilterDemo",
-                                                 argv[1],
-                                                 traceFilterDemoPort,
-                                                 PSHELL_ONE_SEC*5)) == PSHELL_INVALID_SID)
+  if (!pshell_connectServer("traceFilterDemo",
+                            argv[1],
+                            traceFilterDemoPort,
+                            PSHELL_ONE_SEC*5))
   {
     printf("ERROR: Could not connect to remote pshell server traceFilterControl\n");
     exit(0);

@@ -18,13 +18,13 @@ int pshell_connectServer(const char *controlName_,
 
 /* release resources for this connection */
 
-void pshell_disconnectServer(int sid_);
+void pshell_disconnectServer(const char *controlName_);
 
 /* issue remote command, function returns status of command */
 
-int pshell_sendCommand1(int sid_, const char *command_, ...);
+int pshell_sendCommand1(const char *controlName_, const char *command_, ...);
 .br
-int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...);
+int pshell_sendCommand2(const char *controlName_, unsigned timeoutOverride_, const char *command_, ...);
 
 /*
 .br
@@ -36,9 +36,9 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
 .br
  */
 
-int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command_, ...);
+int pshell_sendCommand3(const char *controlName_, char *results_, int size_, const char *command_, ...);
 .br
-int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...);
+int pshell_sendCommand4(const char *controlName_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...);
 
 The above synposis is just a summary of the most relevant part of the API,
 to see the full API refer to the include file 'PshellControl.h'

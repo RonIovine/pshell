@@ -71,6 +71,8 @@
 
 #define MAX_TOKENS 64
 
+#define INVALID_SID -1
+
 /* enums */
 
 enum ServerType
@@ -103,6 +105,12 @@ struct PshellControl
   char remoteServer[MAX_STRING_SIZE];
 };
 
+struct PshellControlList
+{
+  int numServers;
+  PshellControl *servers[PSHELL_MAX_SERVERS];
+};
+
 struct PshellMulticast
 {
   int numSids;
@@ -116,9 +124,8 @@ struct PshellMulticastList
   PshellMulticast groups[MAX_MULTICAST_GROUPS];
 };
 
+static PshellControlList _controlList = {0};
 static PshellMulticastList _multicastList = {0};
-
-static PshellControl *_control[PSHELL_MAX_SERVERS] = {0};
 static PshellLogFunction _logFunction = NULL;
 static unsigned _logLevel = PSHELL_CONTROL_LOG_LEVEL_DEFAULT;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -130,10 +137,10 @@ static const char *_lockFileExtension = ".lock";
  * private "member" function prototypes
  ******************************************/
 
-static PshellControl *getControl(int sid_);
+static PshellControl *getControl(const char *controlName_);
 static int getSid(const char *controlName_);
-static void addMulticastSid(const char *command_, int sid_);
-static int createControl(void);
+static void addMulticast(const char *command_, int sid_);
+static PshellControl *createControl(void);
 static int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, unsigned timeoutOverride_);
 static bool sendPshellMsg(PshellControl *control_);
 static int extractResults(PshellControl *control_, char *results_, int size_);
@@ -177,39 +184,41 @@ void pshell_registerControlLogFunction(PshellLogFunction logFunction_)
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_connectServer(const char *controlName_,
-                         const char *remoteServer_ ,
-                         unsigned port_,
-                         unsigned defaultTimeout_)
+bool pshell_connectServer(const char *controlName_,
+                          const char *remoteServer_ ,
+                          unsigned port_,
+                          unsigned defaultTimeout_)
 {
   pthread_mutex_lock(&_mutex);
-  int sid = PSHELL_INVALID_SID;
+  PshellControl *control;
   char remoteServer[MAX_STRING_SIZE];
   unsigned port = port_;
   unsigned defaultTimeout = defaultTimeout_;
-  if (getSid(controlName_) == PSHELL_INVALID_SID)
+  bool controlCreated = false;
+  if (getControl(controlName_) == NULL)
   {
-    if ((sid = createControl()) != PSHELL_INVALID_SID)
+    /* controlName does not already exist, ok to create it */
+    if ((control = createControl()) != NULL)
     {
       strcpy(remoteServer, remoteServer_);
       loadConfigFile(controlName_, remoteServer, port, defaultTimeout);
-      if (!connectServer(_control[sid], remoteServer, port, defaultTimeout))
+      if (!connectServer(control, remoteServer, port, defaultTimeout))
       {
-        free(_control[sid]);
-        _control[sid] = NULL;
-        sid = PSHELL_INVALID_SID;
+        free(control);
+        _controlList.servers[_controlList.numServers--] = NULL;
       }
       else
       {
-        if (_control[sid]->serverType == UNIX)
+        if (control->serverType == UNIX)
         {
-          sprintf(_control[sid]->remoteServer,  "%s[unix]", controlName_);
+          sprintf(control->remoteServer,  "%s[unix]", controlName_);
         }
         else
         {
-          sprintf(_control[sid]->remoteServer,  "%s[%s]", controlName_, remoteServer);
+          sprintf(control->remoteServer,  "%s[%s]", controlName_, remoteServer);
         }
-        sprintf(_control[sid]->controlName,  "%s", controlName_);
+        sprintf(control->controlName,  "%s", controlName_);
+        controlCreated = true;
       }
     }
   }
@@ -218,18 +227,20 @@ int pshell_connectServer(const char *controlName_,
     PSHELL_WARNING("Control name: '%s' already exists, must use unique control name", controlName_);
   }
   pthread_mutex_unlock(&_mutex);
-  return (sid);
+  return (controlCreated);
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_disconnectServer(int sid_)
+void pshell_disconnectServer(const char *controlName_)
 {
   pthread_mutex_lock(&_mutex);
   char unixLockFile[MAX_STRING_SIZE];
   PshellControl *control;
-  if ((control = getControl(sid_)) != NULL)
+  int sid;
+  if ((sid = getSid(controlName_)) != INVALID_SID)
   {
+    control = _controlList.servers[sid];
     if (control->serverType == UNIX)
     {
       sprintf(unixLockFile, "%s%s", control->sourceUnixAddress.sun_path, _lockFileExtension);
@@ -238,7 +249,7 @@ void pshell_disconnectServer(int sid_)
     }
     close(control->socketFd);
     free(control);
-    _control[sid_] = NULL;
+    _controlList.servers[sid] = NULL;
   }
   cleanupUnixResources();
   pthread_mutex_unlock(&_mutex);
@@ -248,19 +259,20 @@ void pshell_disconnectServer(int sid_)
 /******************************************************************************/
 void pshell_disconnectAllServers(void)
 {
-  for (int sid = 0; sid < PSHELL_MAX_SERVERS; sid++)
+  for (int sid = 0; sid < _controlList.numServers; sid++)
   {
-    pshell_disconnectServer(sid);
+    pshell_disconnectServer(_controlList.servers[sid]->controlName);
   }
+  _controlList.numServers = 0;
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_)
+void pshell_setDefaultTimeout(const char *controlName_, unsigned defaultTimeout_)
 {
   pthread_mutex_lock(&_mutex);
   PshellControl *control;
-  if ((control = getControl(sid_)) != NULL)
+  if ((control = getControl(controlName_)) != NULL)
   {
     control->defaultTimeout = defaultTimeout_;
   }
@@ -269,13 +281,13 @@ void pshell_setDefaultTimeout(int sid_, unsigned defaultTimeout_)
 
 /******************************************************************************/
 /******************************************************************************/
-void pshell_extractCommands(int sid_, char *results_, int size_)
+void pshell_extractCommands(const char *controlName_, char *results_, int size_)
 {
   pthread_mutex_lock(&_mutex);
   PshellControl *control;
   int retCode;
   results_[0] = 0;
-  if ((results_ != NULL) && (control = getControl(sid_)) != NULL)
+  if ((results_ != NULL) && (control = getControl(controlName_)) != NULL)
   {
     control->pshellMsg.header.msgType =  PSHELL_QUERY_COMMANDS1;
     control->pshellMsg.header.dataNeeded = true;
@@ -303,11 +315,11 @@ void pshell_extractControlNames(char *names_[], unsigned maxNames_, unsigned *nu
 {
   pthread_mutex_lock(&_mutex);
   *numNames_ = 0;
-  for (int sid = 0; sid < PSHELL_MAX_SERVERS; sid++)
+  for (int sid = 0; sid < _controlList.numServers; sid++)
   {
-    if ((_control[sid] != NULL) && (*numNames_ < maxNames_))
+    if ((_controlList.servers[sid] != NULL) && (*numNames_ < maxNames_))
     {
-      names_[(*numNames_)++] = _control[sid]->controlName;
+      names_[(*numNames_)++] = _controlList.servers[sid]->controlName;
     }
   }
   pthread_mutex_unlock(&_mutex);
@@ -324,12 +336,9 @@ void pshell_addMulticast(const char *command_, const char *controlList_)
   int sid;
   if (strcmp(controlList_, PSHELL_MULTICAST_ALL) == 0)
   {
-    for (sid = 0; sid < PSHELL_MAX_SERVERS; sid++)
+    for (sid = 0; sid < _controlList.numServers; sid++)
     {
-      if (_control[sid] != NULL)
-      {
-        addMulticastSid(command_, sid);
-      }
+      addMulticast(command_, sid);
     }
   }
   else
@@ -338,9 +347,9 @@ void pshell_addMulticast(const char *command_, const char *controlList_)
     tokenize(controlList, ",", controlNames, MAX_TOKENS, &numControlNames);
     for (unsigned i = 0; i < numControlNames; i++)
     {
-      if ((sid = getSid(controlNames[i])) != PSHELL_INVALID_SID)
+      if ((sid = getSid(controlNames[i])) != INVALID_SID)
       {
-        addMulticastSid(command_, sid);
+        addMulticast(command_, sid);
       }
       else
       {
@@ -389,16 +398,14 @@ void pshell_sendMulticast(const char *command_, ...)
         /* we found a match, send command to all of our sids */
         for (int sid = 0; sid < _multicastList.groups[group].numSids; sid++)
         {
-          if ((control = getControl(_multicastList.groups[group].sidList[sid])) != NULL)
-          {
-            /*
-             * since we are sending to multiple servers, we don't want any data
-             * back and we don't even want any response, we just do fire-and-forget
-             */
-            control->pshellMsg.header.dataNeeded = false;
-            control->pshellMsg.header.respNeeded = false;
-            sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, PSHELL_NO_WAIT);
-          }
+          control = _controlList.servers[_multicastList.groups[group].sidList[sid]];
+          /*
+           * since we are sending to multiple servers, we don't want any data
+           * back and we don't even want any response, we just do fire-and-forget
+           */
+          control->pshellMsg.header.dataNeeded = false;
+          control->pshellMsg.header.respNeeded = false;
+          sendPshellCommand(control, PSHELL_CONTROL_COMMAND, command, PSHELL_NO_WAIT);
         }
       }
     }
@@ -416,7 +423,7 @@ void pshell_sendMulticast(const char *command_, ...)
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_sendCommand1(int sid_, const char *command_, ...)
+int pshell_sendCommand1(const char *controlName_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int retCode = PSHELL_SOCKET_NOT_CONNECTED;
@@ -424,7 +431,7 @@ int pshell_sendCommand1(int sid_, const char *command_, ...)
   char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
-  if ((control = getControl(sid_)) != NULL)
+  if ((control = getControl(controlName_)) != NULL)
   {
     va_start(args, command_);
     bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
@@ -445,7 +452,7 @@ int pshell_sendCommand1(int sid_, const char *command_, ...)
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command_, ...)
+int pshell_sendCommand2(const char *controlName_, unsigned timeoutOverride_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int retCode = PSHELL_SOCKET_NOT_CONNECTED;
@@ -453,7 +460,7 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
   char command[MAX_STRING_SIZE];
   PshellControl *control;
   va_list args;
-  if ((control = getControl(sid_)) != NULL)
+  if ((control = getControl(controlName_)) != NULL)
   {
     va_start(args, command_);
     bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
@@ -474,7 +481,7 @@ int pshell_sendCommand2(int sid_, unsigned timeoutOverride_, const char *command
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command_, ...)
+int pshell_sendCommand3(const char *controlName_, char *results_, int size_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int retCode = PSHELL_SOCKET_NOT_CONNECTED;
@@ -486,7 +493,7 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
   {
     results_[0] = 0;
   }
-  if ((control = getControl(sid_)) != NULL)
+  if ((control = getControl(controlName_)) != NULL)
   {
     va_start(args, command_);
     bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
@@ -514,7 +521,7 @@ int pshell_sendCommand3(int sid_, char *results_, int size_, const char *command
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...)
+int pshell_sendCommand4(const char *controlName_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int retCode = PSHELL_SOCKET_NOT_CONNECTED;
@@ -526,7 +533,7 @@ int pshell_sendCommand4(int sid_, char *results_, int size_, unsigned timeoutOve
   {
     results_[0] = 0;
   }
-  if ((control = getControl(sid_)) != NULL)
+  if ((control = getControl(controlName_)) != NULL)
   {
     va_start(args, command_);
     bytesFormatted = vsnprintf(command, sizeof(command), command_, args);
@@ -906,66 +913,56 @@ static int extractResults(PshellControl *control_, char *results_, int size_)
 
 /******************************************************************************/
 /******************************************************************************/
-static int createControl(void)
-{
-  int sid = PSHELL_INVALID_SID;
-  int tmpSid;
-
-  /* try to find an open slot in our control array */
-  for (unsigned i = 0; i < PSHELL_MAX_SERVERS; i++)
-  {
-    tmpSid = rand()%PSHELL_MAX_SERVERS;
-    if (_control[tmpSid] == NULL)
-    {
-      sid = tmpSid;
-      break;
-    }
-  }
-  if (sid != PSHELL_INVALID_SID)
-  {
-    if ((_control[sid] = (PshellControl *)calloc(1, sizeof(PshellControl))) == NULL)
-    {
-      PSHELL_ERROR("Could not allocate memory for new PshellControl entry");
-      sid = PSHELL_INVALID_SID;
-    }
-  }
-  return (sid);
-}
-
-/******************************************************************************/
-/******************************************************************************/
-static PshellControl *getControl(int sid_)
+static PshellControl *createControl(void)
 {
   PshellControl *control = NULL;
-  if ((sid_ >= 0) && (sid_ < PSHELL_MAX_SERVERS))
+
+  if (_controlList.numServers < PSHELL_MAX_SERVERS)
   {
-    control = _control[sid_];
-  }
-  else
-  {
-    PSHELL_ERROR("Out of range sid: %d, valid range: 0-%d", sid_, PSHELL_MAX_SERVERS-1);
+    if ((control = (PshellControl *)calloc(1, sizeof(PshellControl))) == NULL)
+    {
+      PSHELL_ERROR("Could not allocate memory for new PshellControl entry");
+    }
+    else
+    {
+      _controlList.servers[_controlList.numServers++] = control;
+    }
   }
   return (control);
 }
 
 /******************************************************************************/
 /******************************************************************************/
-static int getSid(const char *controlName_)
+static PshellControl *getControl(const char *controlName_)
 {
-  for (int i = 0; i < PSHELL_MAX_SERVERS; i++)
+  for (int i = 0; i < _controlList.numServers; i++)
   {
-    if ((_control[i] != NULL) && (strcmp(_control[i]->controlName, controlName_) == 0))
+    if ((_controlList.servers[i] != NULL) && (strcmp(_controlList.servers[i]->controlName, controlName_) == 0))
     {
-      return (i);
+      return (_controlList.servers[i]);
     }
   }
-  return (PSHELL_INVALID_SID);
+  return (NULL);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static int getSid(const char *controlName_)
+{
+  for (int sid = 0; sid < _controlList.numServers; sid++)
+  {
+    if ((_controlList.servers[sid] != NULL) && (strcmp(_controlList.servers[sid]->controlName, controlName_) == 0))
+    {
+      return (sid);
+    }
+  }
+  return (INVALID_SID);
 }
 
 
 /******************************************************************************/
 /******************************************************************************/
-static void addMulticastSid(const char *command_, int sid_)
+static void addMulticast(const char *command_, int sid_)
 {
   int groupIndex = 0;
   for (int i = 0; i < _multicastList.numGroups; i++)

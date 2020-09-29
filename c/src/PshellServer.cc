@@ -242,7 +242,7 @@ struct PshellCmd
  * token management
  */
 
-struct PshellTokens_c
+struct Tokens
 {
   PshellTokens _public;  /* returned to the caller of "pshell_tokenize" */
   unsigned maxTokens;    /* used for internal token management */
@@ -266,14 +266,6 @@ static struct sockaddr_un _fromUnixAddress;
 static const char *_wheel = "|/-\\";
 static unsigned _wheelPos = 0;
 static bool _isControlCommand = false;
-
-#define PSHELL_MAX_TOKENS 64
-struct Tokens
-{
-  char *tokens[PSHELL_MAX_TOKENS];
-  int numTokens;
-};
-
 static int _connectFd;
 static bool _quit = false;
 static char _interactivePrompt[PSHELL_RL_MAX_COMMAND_SIZE];
@@ -330,7 +322,7 @@ static unsigned _numCommands = 0;
 static unsigned _maxCommandLength = 0;
 
 static PshellTokens _dummyTokens;
-static PshellTokens_c *_tokenList = NULL;
+static Tokens *_tokenList = NULL;
 static unsigned _maxTokenLists = 0;
 static unsigned _numTokenLists = 0;
 static int _argc;
@@ -1164,13 +1156,13 @@ PshellTokens *pshell_tokenize(const char *string_, const char *delimeter_)
     if (_numTokenLists >= _maxTokenLists)
     {
       /* we need a new token list */
-      if ((ptr = realloc(_tokenList, (_maxTokenLists+PSHELL_TOKEN_LIST_CHUNK)*sizeof(PshellTokens_c))) == NULL)
+      if ((ptr = realloc(_tokenList, (_maxTokenLists+PSHELL_TOKEN_LIST_CHUNK)*sizeof(Tokens))) == NULL)
       {
         PSHELL_ERROR("Could not allocate memory to expand token list, size: %d",
                      (int)((_maxTokenLists+1)*sizeof(PshellTokens)));
         return (&_dummyTokens);
       }
-      _tokenList = (PshellTokens_c*)ptr;
+      _tokenList = (Tokens*)ptr;
       _maxTokenLists += PSHELL_TOKEN_LIST_CHUNK;
     }
 
