@@ -74,10 +74,6 @@
 //   SOCKET_TIMEOUT
 //   SOCKET_NOT_CONNECTED
 //
-// Used if we cannot connect to the local source socket
-//
-//   INVALID_SID
-//
 // Constants to let the host program set the internal debug log level,
 // if the user of this API does not want to see any internal message
 // printed out, set the debug log level to LOG_LEVEL_NONE, the default
@@ -271,9 +267,9 @@ const (
 //        defaultTimeout (int) : The default timeout (in msec) for the remote server response
 //
 //    Returns:
-//        int: The ServerId (sid) handle of the connected server or INVALID_SID on failure
+//        bool: Indicates if the local source endpoint is successfully created
 //
-func ConnectServer(controlName string, remoteServer string, port string, defaultTimeout int) int {
+func ConnectServer(controlName string, remoteServer string, port string, defaultTimeout int) bool {
   return (connectServer(controlName, remoteServer, port, defaultTimeout))
 }
 
@@ -282,13 +278,13 @@ func ConnectServer(controlName string, remoteServer string, port string, default
 //  releasing any temp file handles, closing any local socket handles etc.
 //
 //    Args:
-//        sid (int) : The ServerId as returned from the connectServer call
+//        controlName (string) : The control name used in the ConnectServer call
 //
 //    Returns:
 //        none
 //
-func DisconnectServer(sid int) {
-  disconnectServer(sid)
+func DisconnectServer(controlName string) {
+  disconnectServer(controlName)
 }
 
 //
@@ -313,14 +309,14 @@ func DisconnectAllServers() {
 //  that don't take a timeout override
 //
 //    Args:
-//        sid (int)            : The ServerId as returned from the connectServer call
+//        controlName (string) : The control name used in the ConnectServer call
 //        defaultTimeout (int) : The default timeout (in msec) for the remote server response
 //
 //    Returns:
 //        none
 //
-func SetDefaultTimeout(sid int, defaultTimeout int) {
-  setDefaultTimeout(sid, defaultTimeout)
+func SetDefaultTimeout(controlName string, defaultTimeout int) {
+  setDefaultTimeout(controlName, defaultTimeout)
 }
 
 //
@@ -391,8 +387,8 @@ func SendMulticast(format string, command ...interface{}) {
 //  this function will not wait for one
 //
 //    Args:
-//        sid (int)     : The ServerId as returned from the connectServer call
-//        command (str) : The command to send to the remote server
+//        controlName (string) : The control name used in the ConnectServer call
+//        command (str)        : The command to send to the remote server
 //
 //    Returns:
 //        int: Return code result of the command:
@@ -405,8 +401,8 @@ func SendMulticast(format string, command ...interface{}) {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand1(sid int, format string, command ...interface{}) int {
-  return (sendCommand1(sid, format, command...))
+func SendCommand1(controlName string, format string, command ...interface{}) int {
+  return (sendCommand1(controlName, format, command...))
 }
 
 //
@@ -415,7 +411,7 @@ func SendCommand1(sid int, format string, command ...interface{}) int {
 //  one
 //
 //    Args:
-//        sid (int)             : The ServerId as returned from the connectServer call
+//        controlName (string)  : The control name used in the ConnectServer call
 //        timeoutOverride (int) : The server timeout override (in msec) for this command
 //        command (str)         : The command to send to the remote server
 //
@@ -430,8 +426,8 @@ func SendCommand1(sid int, format string, command ...interface{}) int {
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand2(sid int, timeoutOverride int, format string, command ...interface{}) int {
-  return (sendCommand2(sid, timeoutOverride, format, command...))
+func SendCommand2(controlName string, timeoutOverride int, format string, command ...interface{}) int {
+  return (sendCommand2(controlName, timeoutOverride, format, command...))
 }
 
 //
@@ -441,8 +437,8 @@ func SendCommand2(sid int, timeoutOverride int, format string, command ...interf
 //  and no results will be extracted
 //
 //    Args:
-//        sid (int)     : The ServerId as returned from the connectServer call
-//        command (str) : The command to send to the remote server
+//        controlName (string) : The control name used in the ConnectServer call
+//        command (str)        : The command to send to the remote server
 //
 //    Returns:
 //        str: The human readable results of the command response or NULL
@@ -457,8 +453,8 @@ func SendCommand2(sid int, timeoutOverride int, format string, command ...interf
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand3(sid int, format string, command ...interface{}) (int, string) {
-  return (sendCommand3(sid, format, command...))
+func SendCommand3(controlName string, format string, command ...interface{}) (int, string) {
+  return (sendCommand3(controlName, format, command...))
 }
 
 //
@@ -468,7 +464,7 @@ func SendCommand3(sid int, format string, command ...interface{}) (int, string) 
 //  results will be extracted
 //
 //    Args:
-//        sid (int)             : The ServerId as returned from the connectServer call
+//        controlName (string)  : The control name used in the ConnectServer call
 //        timeoutOverride (int) : The server timeout override (in msec) for this command
 //        command (str)         : The command to send to the remote server
 //
@@ -485,8 +481,8 @@ func SendCommand3(sid int, format string, command ...interface{}) (int, string) 
 //               SOCKET_TIMEOUT
 //               SOCKET_NOT_CONNECTED
 //
-func SendCommand4(sid int, timeoutOverride int, format string, command ...interface{}) (int, string) {
-  return (sendCommand4(sid, timeoutOverride, format, command...))
+func SendCommand4(controlName string, timeoutOverride int, format string, command ...interface{}) (int, string) {
+  return (sendCommand4(controlName, timeoutOverride, format, command...))
 }
 
 //
@@ -547,15 +543,14 @@ func SetLogFunction(function logFunction) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func connectServer(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) int {
+func connectServer(controlName_ string, remoteServer_ string, port_ string, defaultTimeout_ int) bool {
   // setup our destination socket
   var err error
   var socket net.Conn
   var sourceAddress string
   var unixLockFd *os.File
   cleanupUnixResources()
-  sid := getSid(controlName_)
-  if (sid == INVALID_SID) {
+  if (getControl(controlName_) == nil) {
     remoteServer_, port_, defaultTimeout_ = loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
     if (port_ == UNIX) {
       // UNIX domain socket
@@ -587,7 +582,7 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
                                            0,                               // recvSize
                                            controlName_,
                                            strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
-      sid = len(_gControlList)-1
+      return (true)
     } else {
       // IP (UDP) domain socket
       remoteAddr, _ := net.ResolveUDPAddr("udp", strings.Join([]string{remoteServer_, ":", port_,}, ""))
@@ -605,13 +600,16 @@ func connectServer(controlName_ string, remoteServer_ string, port_ string, defa
                                              controlName_,
                                              strings.Join([]string{controlName_, "[", remoteServer_, "]"}, "")})
 
-        sid = len(_gControlList)-1
+        return (true)
+      } else {
+        printWarning("Control name: %s could not connect to UDP socket: server: %s, port: %d", controlName_, remoteServer_, port_)
+        return (false)
       }
     }
   } else {
     printWarning("Control name: '%s' already exists, must use unique control name", controlName_)
+    return (false)
   }
-  return (sid)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -645,13 +643,14 @@ func cleanupUnixResources() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func disconnectServer(sid_ int) {
-  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
-    control := _gControlList[sid_]
+func disconnectServer(controlName_ string) {
+  control := getControl(controlName_)
+  if (control != nil) {
     if (control.serverType == UNIX) {
       os.Remove(control.sourceAddress)
       os.Remove(control.sourceAddress+_LOCK_FILE_EXTENSION)
     }
+    control.controlName = ""
   }
   cleanupUnixResources()
 }
@@ -659,8 +658,8 @@ func disconnectServer(sid_ int) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func disconnectAllServers() {
-  for sid, _ := range(_gControlList) {
-    disconnectServer(sid)
+  for _, control := range(_gControlList) {
+    disconnectServer(control.controlName)
   }
   _gControlList = []pshellControl{}
 }
@@ -683,6 +682,17 @@ func addMulticast(command_ string, controlList_ string) {
       }
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getControl(controlName_ string) *pshellControl {
+  for _, control := range(_gControlList) {
+    if (control.controlName == controlName_) {
+      return (&control)
+    }
+  }
+  return (nil)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -750,9 +760,9 @@ func sendMulticast(format_ string, command_ ...interface{}) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func setDefaultTimeout(sid_ int, defaultTimeout_ int) {
-  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
-    control := _gControlList[sid_]
+func setDefaultTimeout(controlName_ string, defaultTimeout_ int) {
+  control := getControl(controlName_)
+  if (control != nil) {
     control.defaultTimeout = defaultTimeout_
   }
 }
@@ -769,51 +779,51 @@ func getResponseString(retCode_ int) string {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand1(sid_ int, format_ string, command_ ...interface{}) int {
-  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
-    control := _gControlList[sid_]
-    return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _NO_DATA_NEEDED)
+func sendCommand1(controlName_ string, format_ string, command_ ...interface{}) int {
+  control := getControl(controlName_)
+  if (control != nil) {
+    return sendCommand(control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _NO_DATA_NEEDED)
   } else {
-    printError("No control defined for sid: %d", sid_)
-    return INVALID_SID
+    printError("Control name: %s not found", controlName_)
+    return SOCKET_NOT_CONNECTED
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand2(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) int {
-  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
-    control := _gControlList[sid_]
-    return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _NO_DATA_NEEDED)
+func sendCommand2(controlName_ string, timeoutOverride_ int, format_ string, command_ ...interface{}) int {
+  control := getControl(controlName_)
+  if (control != nil) {
+    return sendCommand(control, fmt.Sprintf(format_, command_...), timeoutOverride_, _NO_DATA_NEEDED)
   } else {
-    printError("No control defined for sid: %d", sid_)
-    return INVALID_SID
+    printError("Control name: %s not found", controlName_)
+    return SOCKET_NOT_CONNECTED
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand3(sid_ int, format_ string, command_ ...interface{}) (int, string) {
-  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
-    control := _gControlList[sid_]
-    return sendCommand(&control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _DATA_NEEDED),
+func sendCommand3(controlName_ string, format_ string, command_ ...interface{}) (int, string) {
+  control := getControl(controlName_)
+  if (control != nil) {
+    return sendCommand(control, fmt.Sprintf(format_, command_...), control.defaultTimeout, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
-    printError("No control defined for sid: %d", sid_)
-    return INVALID_SID, ""
+    printError("Control name: %s not found", controlName_)
+    return SOCKET_NOT_CONNECTED, ""
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func sendCommand4(sid_ int, timeoutOverride_ int, format_ string, command_ ...interface{}) (int, string) {
-  if ((sid_ >= 0) && (sid_ < len(_gControlList))) {
-    control := _gControlList[sid_]
-    return sendCommand(&control, fmt.Sprintf(format_, command_...), timeoutOverride_, _DATA_NEEDED),
+func sendCommand4(controlName_ string, timeoutOverride_ int, format_ string, command_ ...interface{}) (int, string) {
+  control := getControl(controlName_)
+  if (control != nil) {
+    return sendCommand(control, fmt.Sprintf(format_, command_...), timeoutOverride_, _DATA_NEEDED),
            getPayload(control.recvMsg, control.recvSize)
   } else {
-    printError("No control defined for sid: %d", sid_)
-    return INVALID_SID, ""
+    printError("Control name: %s not found", controlName_)
+    return SOCKET_NOT_CONNECTED, ""
   }
 }
 

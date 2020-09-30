@@ -53,6 +53,9 @@
 #include <PshellServer.h>
 #include <PshellControl.h>
 
+#define PSHELL_SERVER_DEMO "pshellControlDemo"
+#define TRACE_FILTER_DEMO "traceFilterDemo"
+
 /******************************************************************************/
 /******************************************************************************/
 void signalHandler(int signal_)
@@ -154,14 +157,14 @@ void controlServer(const char *controlName, int argc, char *argv[])
 /******************************************************************************/
 void pshellServerDemo(int argc, char *argv[])
 {
-  controlServer("pshellServerDemo", argc, argv);
+  controlServer(PSHELL_SERVER_DEMO, argc, argv);
 }
 
 /******************************************************************************/
 /******************************************************************************/
 void traceFilterDemo(int argc, char *argv[])
 {
-  controlServer("traceFilterDemo", argc, argv);
+  controlServer(TRACE_FILTER_DEMO, argc, argv);
 }
 
 /*
@@ -173,14 +176,14 @@ void traceFilterDemo(int argc, char *argv[])
 /******************************************************************************/
 void meta(int argc, char *argv[])
 {
-    if ((pshell_sendCommand3("pshellServerDemo",
+    if ((pshell_sendCommand3(PSHELL_SERVER_DEMO,
                              results,
                              sizeof(results),
                              "hello %s %s", argv[0], argv[1]) == PSHELL_COMMAND_SUCCESS) && (strlen(results) > 0))
   {
     pshell_printf("%s", results);
   }
-  pshell_sendCommand1("traceFilterDemo", "set callback %s", argv[2]);
+  pshell_sendCommand1(TRACE_FILTER_DEMO, "set callback %s", argv[2]);
 }
 
 /*
@@ -229,7 +232,7 @@ int main (int argc, char *argv[])
    * and timeout values can be overridden via the pshell-control.conf
    * file
    */
-  if (!pshell_connectServer("pshellServerDemo",
+  if (!pshell_connectServer(PSHELL_SERVER_DEMO,
                             argv[1],
                             pshellServerDemoPort,
                             PSHELL_ONE_SEC*5))
@@ -238,7 +241,7 @@ int main (int argc, char *argv[])
     exit(0);
   }
 
-  if (!pshell_connectServer("traceFilterDemo",
+  if (!pshell_connectServer(TRACE_FILTER_DEMO,
                             argv[1],
                             traceFilterDemoPort,
                             PSHELL_ONE_SEC*5))
@@ -254,14 +257,14 @@ int main (int argc, char *argv[])
    * should be provided in the form of a CSV list of
    * controlNames as shown below
    */
-  pshell_addMulticast("trace", "pshellServerDemo,traceFilterDemo");
-  pshell_addMulticast("test", "pshellServerDemo,traceFilterDemo");
+  pshell_addMulticast("trace", PSHELL_SERVER_DEMO","TRACE_FILTER_DEMO);
+  pshell_addMulticast("test", PSHELL_SERVER_DEMO","TRACE_FILTER_DEMO);
 
   /* register our local pshell commands */
 
   /* these will aggregrate the commands from the two separate servers we are connected to */
   pshell_addCommand(pshellServerDemo,                               /* function */
-                    "pshellServerDemo",                             /* command */
+                    PSHELL_SERVER_DEMO,                             /* command */
                     "control the remote pshellServerDemo process",  /* description */
                     "[<command> | ? | -h]",                         /* usage */
                     0,                                              /* minArgs */
@@ -269,7 +272,7 @@ int main (int argc, char *argv[])
                     false);                                         /* showUsage on "?" */
 
   pshell_addCommand(traceFilterDemo,                               /* function */
-                    "traceFilterDemo",                             /* command */
+                    TRACE_FILTER_DEMO,                             /* command */
                     "control the remote traceFilterDemo process",  /* description */
                     "[<command> | ? | -h]",                        /* usage */
                     0,                                             /* minArgs */

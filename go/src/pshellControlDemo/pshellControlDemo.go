@@ -48,6 +48,8 @@ import "syscall"
 import "os/signal"
 import "PshellControl"
 
+const PSHELL_CONTROL_DEMO = "pshellControlDemo"
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func signalHandler(signalChan chan os.Signal) {
@@ -125,9 +127,7 @@ func main() {
   // register signal handlers so we can do a graceful termination and cleanup any system resources
   registerSignalHandlers()
 
-  sid := PshellControl.ConnectServer("pshellControlDemo", os.Args[1], os.Args[2], PshellControl.ONE_MSEC*timeout)
-
-  if (sid != PshellControl.INVALID_SID) {
+  if (PshellControl.ConnectServer(PSHELL_CONTROL_DEMO, os.Args[1], os.Args[2], PshellControl.ONE_MSEC*timeout)) {
     command := ""
     scanner := bufio.NewScanner(os.Stdin)
     fmt.Printf("Enter command or 'q' to quit\n");
@@ -137,19 +137,19 @@ func main() {
       command = scanner.Text()
       if ((len(command) > 0) && !strings.HasPrefix("quit", command)) {
         if (extract == true) {
-          retCode, results := PshellControl.SendCommand3(sid, command)
+          retCode, results := PshellControl.SendCommand3(PSHELL_CONTROL_DEMO, command)
           if (retCode == PshellControl.COMMAND_SUCCESS) {
             fmt.Printf("%d bytes extracted, results:\n", len(results))
             fmt.Printf("%s", results)
           }
           fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
         } else {
-          retCode := PshellControl.SendCommand1(sid, command)
+          retCode := PshellControl.SendCommand1("pshellControlDemo", command)
           fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
         }
       }
     }
-    PshellControl.DisconnectServer(sid)
+    PshellControl.DisconnectServer(PSHELL_CONTROL_DEMO)
   }
 
 }
