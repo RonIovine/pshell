@@ -44,7 +44,10 @@ import signal
 import PshellReadline
 import PshellControl
 
-# local control name
+# define constant for local control name, the quoted string can be used directly,
+# however if the quoted string is ever 'fat-fingered' in any location, it will
+# result in a run-time error, whereas if the constant is fat-fingered, it will
+# produce a compile-time error
 PSHELL_CONTROL_DEMO = "pshellControlDemo"
 
 #####################################################

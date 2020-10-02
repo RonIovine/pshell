@@ -51,7 +51,10 @@ import sys
 import PshellServer
 import PshellControl
 
-# define our local control names
+# define constants for local control names, the quoted string can be used directly,
+# however if the quoted string is ever 'fat-fingered' in any location, it will
+# result in a run-time error, whereas if the constant is fat-fingered, it will
+# produce a compile-time error
 PSHELL_SERVER_DEMO = "pshellServerDemo"
 TRACE_FILTER_DEMO = "traceFilterDemo"
 
@@ -156,8 +159,9 @@ if (__name__ == '__main__'):
   # the controlNames that receive the multicast keyword
   # should be provided in the form of a CSV list of
   # controlNames as shown below
-  PshellControl.addMulticast("trace", "pshellServerDemo,traceFilterDemo")
-  PshellControl.addMulticast("test", "pshellServerDemo,traceFilterDemo")
+  PshellControl.addMulticast("trace", PSHELL_SERVER_DEMO+","+TRACE_FILTER_DEMO)
+  PshellControl.addMulticast("test", PSHELL_SERVER_DEMO+","+TRACE_FILTER_DEMO)
+  PshellControl.addMulticast("hello", PSHELL_SERVER_DEMO)
 
   # register our callback commands
   PshellServer.addCommand(pshellServerDemo,

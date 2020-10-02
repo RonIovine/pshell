@@ -160,9 +160,6 @@ const UNIX = "unix"
 // destinations or all commands to the specified destinations
 const MULTICAST_ALL = "__multicast_all__"
 
-// This is returned on a failure of the ConnectServer function
-const INVALID_SID = -1
-
 // constants to let the host program set the internal debug log level,
 // if the user of this API does not want to see any internal message
 // printed out, set the debug log level to LOG_LEVEL_NONE (0)
@@ -181,6 +178,7 @@ const (
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+const _INVALID_SID = -1
 const _UNIX_SOCKET_PATH = "/tmp/.pshell/"
 const _LOCK_FILE_EXTENSION = ".lock"
 const _NO_RESP_NEEDED = 0
@@ -217,7 +215,6 @@ type pshellMulticast struct {
 var _gMulticastList = []pshellMulticast{}
 
 var _gPshellControlResponse = map[int]string {
-  INVALID_SID:"PSHELL_INVALID_SID",
   COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
   COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
   COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT",
@@ -672,7 +669,7 @@ func addMulticast(command_ string, controlList_ string) {
     controlNames := strings.Split(strings.TrimSpace(controlList_), ",")
     for _, controlName := range(controlNames) {
       sid := getSid(controlName)
-      if (sid != INVALID_SID) {
+      if (sid != _INVALID_SID) {
         addMulticastSid(command_, sid)
       } else {
         printWarning("Control name: '%s' not found", controlName)
@@ -700,7 +697,7 @@ func getSid(controlName_ string) int {
       return (sid)
     }
   }
-  return (INVALID_SID)
+  return (_INVALID_SID)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

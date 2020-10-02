@@ -53,7 +53,12 @@
 #include <PshellServer.h>
 #include <PshellControl.h>
 
-/* define our local control names */
+/*
+ * define constants for local control names, the quoted string can be used directly,
+ * however if the quoted string is ever 'fat-fingered' in any location, it will
+ * result in a run-time error, whereas if the constant is fat-fingered, it will
+ * produce a compile-time error
+ */
 #define PSHELL_SERVER_DEMO "pshellServerDemo"
 #define TRACE_FILTER_DEMO "traceFilterDemo"
 
@@ -260,6 +265,7 @@ int main (int argc, char *argv[])
    */
   pshell_addMulticast("trace", PSHELL_SERVER_DEMO","TRACE_FILTER_DEMO);
   pshell_addMulticast("test", PSHELL_SERVER_DEMO","TRACE_FILTER_DEMO);
+  pshell_addMulticast("hello", PSHELL_SERVER_DEMO);
 
   /* register our local pshell commands */
 

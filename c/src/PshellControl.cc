@@ -964,7 +964,7 @@ static int getSid(const char *controlName_)
 /******************************************************************************/
 static void addMulticast(const char *command_, int sid_)
 {
-  int groupIndex = 0;
+  int groupIndex = _multicastList.numGroups;
   for (int i = 0; i < _multicastList.numGroups; i++)
   {
     if (strcmp(_multicastList.groups[i].command, command_) == 0)
