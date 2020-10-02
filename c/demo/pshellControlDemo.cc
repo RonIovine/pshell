@@ -45,6 +45,9 @@
 #include <PshellReadline.h>
 #include <PshellControl.h>
 
+/* local control name */
+#define PSHELL_CONTROL_DEMO "pshellControlDemo"
+
 /******************************************************************************/
 /******************************************************************************/
 void showUsage(void)
@@ -110,7 +113,6 @@ int main (int argc, char *argv[])
   int logLevel = PSHELL_CONTROL_LOG_LEVEL_ALL;
   bool extract = false;
   int retCode;
-  const char *controlName;
   const char *server;
 
   if ((argc < 3) || (argc > 6))
@@ -146,10 +148,9 @@ int main (int argc, char *argv[])
   /* register signal handlers so we can do a graceful termination and cleanup any system resources */
   registerSignalHandlers();
 
-  controlName = argv[0];
   server = argv[1];
 
-  if (pshell_connectServer(controlName, server, port, PSHELL_ONE_MSEC*timeout))
+  if (pshell_connectServer(PSHELL_CONTROL_DEMO, server, port, PSHELL_ONE_MSEC*timeout))
   {
     // set our debug level
     pshell_setControlLogLevel(logLevel);
@@ -158,7 +159,7 @@ int main (int argc, char *argv[])
     {
       if (extract)
       {
-        retCode = pshell_sendCommand3(controlName, results, sizeof(results), input);
+        retCode = pshell_sendCommand3(PSHELL_CONTROL_DEMO, results, sizeof(results), input);
         if (retCode == PSHELL_COMMAND_SUCCESS)
         {
           printf("%d bytes extracted, results:\n", (int)strlen(results));
@@ -168,11 +169,11 @@ int main (int argc, char *argv[])
       }
       else
       {
-        retCode = pshell_sendCommand1(controlName, input);
+        retCode = pshell_sendCommand1(PSHELL_CONTROL_DEMO, input);
         printf("retCode: %s\n",pshell_getResponseString(retCode));
       }
     }
-    pshell_disconnectServer(controlName);
+    pshell_disconnectServer(PSHELL_CONTROL_DEMO);
   }
 
 }

@@ -53,7 +53,8 @@
 #include <PshellServer.h>
 #include <PshellControl.h>
 
-#define PSHELL_SERVER_DEMO "pshellControlDemo"
+/* define our local control names */
+#define PSHELL_SERVER_DEMO "pshellServerDemo"
 #define TRACE_FILTER_DEMO "traceFilterDemo"
 
 /******************************************************************************/
@@ -110,8 +111,8 @@ char *buildCommand(char *command, unsigned size, int argc, char *argv[])
 
 /*
  * this function is the common generic function to control any server
- * based on only the SID and entered command, it should be called from
- * every control specific callback for this aggregator
+ * based on only the controlName and entered command, it should be called
+ * from every control specific callback for this aggregator
  */
 
 /*
@@ -145,12 +146,12 @@ void controlServer(const char *controlName, int argc, char *argv[])
 
 /*
  * the following two functions are the control specific functions that interface
- * directly to a given remote server via the control API for a give SID, this is
- * how multiple remote pshell servers can be aggregated into a single local pshell
- * server, each separate SID for each remote server needs it's own dedicated
- * callback that is registered to the local pshell server, the only thing these
- * local pshell functions need to do is call the common 'controlServer' function
- * with the passed in argc, argv, and their unique SID identifier
+ * directly to a given remote server via the control API for a given controlName,
+ * this is how multiple remote pshell servers can be aggregated into a single local
+ * pshell server, each separate controlname for each remote server needs it's own
+ * dedicated callback that is registered to the local pshell server, the only thing
+ * these local pshell functions need to do is call the common 'controlServer'
+ * function with the passed in argc, argv, and their unique controlName identifier
  */
 
 /******************************************************************************/
@@ -237,7 +238,7 @@ int main (int argc, char *argv[])
                             pshellServerDemoPort,
                             PSHELL_ONE_SEC*5))
   {
-    printf("ERROR: Could not connect to remote pshell server: pshellServerControl\n");
+    printf("ERROR: Could not connect to remote pshell server: %s\n", PSHELL_SERVER_DEMO);
     exit(0);
   }
 
@@ -246,7 +247,7 @@ int main (int argc, char *argv[])
                             traceFilterDemoPort,
                             PSHELL_ONE_SEC*5))
   {
-    printf("ERROR: Could not connect to remote pshell server traceFilterControl\n");
+    printf("ERROR: Could not connect to remote pshell server %s\n", TRACE_FILTER_DEMO);
     exit(0);
   }
 

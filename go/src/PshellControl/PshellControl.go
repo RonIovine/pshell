@@ -257,9 +257,6 @@ const (
 //  a valid server name must be provided along with the identifier
 //  PshellControl.UNIX for the 'port' parameter
 //
-//  This function returns a Server ID (sid) handle which must be saved and
-//  used for all subsequent calls into this module
-//
 //    Args:
 //        controlName (str)    : The logical name of the control server
 //        remoteServer (str)   : The server name (UNIX) or hostname/IP address (UDP) of the remote server

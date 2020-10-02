@@ -80,10 +80,6 @@ SOCKET_RECEIVE_FAILURE
 SOCKET_TIMEOUT
 SOCKET_NOT_CONNECTED
 
-Used if we cannot connect to the local source socket
-
-INVALID_SID
-
 Constants to let the host program set the internal debug log level,
 if the user of this API does not want to see any internal message
 printed out, set the debug log level to LOG_LEVEL_NONE, the default
@@ -170,9 +166,6 @@ SOCKET_NOT_CONNECTED = 7
 # destinations or all commands to the specified destinations
 MULTICAST_ALL = "__multicast_all__"
 
-# used if we cannot connect to a local UNIX socket
-INVALID_SID = -1
-
 # constants to let the host program set the internal debug log level,
 # if the user of this API does not want to see any internal message
 # printed out, set the debug log level to LOG_LEVEL_NONE (0)
@@ -214,9 +207,6 @@ def connectServer(controlName, remoteServer, port, defaultTimeout):
   a valid server name must be provided along with the identifier
   PshellControl.UNIX for the 'port' parameter
 
-  This function returns a Server ID (sid) handle which must be saved and
-  used for all subsequent calls into this module
-
     Args:
         controlName (str)    : The logical name of the control server
         remoteServer (str)   : The server name (UNIX) or hostname/IP address (UDP) of the remote server
@@ -224,24 +214,24 @@ def connectServer(controlName, remoteServer, port, defaultTimeout):
         defaultTimeout (int) : The default timeout (in msec) for the remote server response
 
     Returns:
-        int: The ServerId (sid) handle of the connected server or INVALID_SID on failure
+        bool: Indicates if the local source endpoint is successfully created
   """
   return (_connectServer(controlName, remoteServer, port, defaultTimeout))
 
 #################################################################################
 #################################################################################
-def disconnectServer(sid):
+def disconnectServer(controlName):
   """
   Cleanup any resources associated with the server connection, including
   releasing any temp file handles, closing any local socket handles etc.
 
     Args:
-        sid (int) : The ServerId as returned from the connectServer call
+        controlName (string) : The control name used in the ConnectServer call
 
     Returns:
         none
   """
-  _disconnectServer(sid)
+  _disconnectServer(controlName)
 
 #################################################################################
 #################################################################################
@@ -263,23 +253,23 @@ def disconnectAllServers():
 
 #################################################################################
 #################################################################################
-def setDefaultTimeout(sid, defaultTimeout):
+def setDefaultTimeout(controlName, defaultTimeout):
   """
   Set the default server response timeout that is used in the 'send' commands
   that don't take a timeout override
 
     Args:
-        sid (int)            : The ServerId as returned from the connectServer call
+        controlName (string) : The control name used in the ConnectServer call
         defaultTimeout (int) : The default timeout (in msec) for the remote server response
 
     Returns:
         none
   """
-  _setDefaultTimeout(sid, defaultTimeout)
+  _setDefaultTimeout(controlName, defaultTimeout)
 
 #################################################################################
 #################################################################################
-def extractCommands(sid, includeName = True):
+def extractCommands(controlName, includeName = True):
   """
   This function will extract all the commands of a remote pshell server and
   present them in a human readable form, this is useful when writing a multi
@@ -287,13 +277,13 @@ def extractCommands(sid, includeName = True):
   the demo directory for examples
 
     Args:
-        sid (int)          : The ServerId as returned from the connectServer call
-        includeName (bool) : Include server name in banner
+        controlName (string) : The control name used in the ConnectServer call
+        includeName (bool)   : Include server name in banner
 
     Returns:
         str : The remote server's command list in human readable form
   """
-  return (_extractCommands(sid, includeName))
+  return (_extractCommands(controlName, includeName))
 
 #################################################################################
 #################################################################################
@@ -345,11 +335,11 @@ def addMulticast(command, controlList):
 def sendMulticast(command):
   """
   This command will send a given command to all the registered multicast
-  receivers (i.e. sids) for this multicast group, multicast groups are
-  based on the command's keyword, this function will issue the command as
-  a best effort fire-and-forget command to each receiver in the multicast
-  group, no results will be requested or expected, and no response will be
-  requested or expected
+  receivers for this multicast group, multicast groups are based on the
+  command's keyword, this function will issue the command as a best effort
+  fire-and-forget command to each receiver in the multicast group, no
+  results will be requested or expected, and no response will be requested
+  or expected
 
     Args:
         command (str) : The command to send to the remote server
@@ -361,15 +351,15 @@ def sendMulticast(command):
 
 #################################################################################
 #################################################################################
-def sendCommand1(sid, command):
+def sendCommand1(controlName, command):
   """
   Send a command using the default timeout setup in the connectServer call,
   if the default timeout is 0, the server will not reply with a response and
   this function will not wait for one
 
     Args:
-        sid (int)     : The ServerId as returned from the connectServer call
-        command (str) : The command to send to the remote server
+        controlName (string) : The control name used in the ConnectServer call
+        command (str)        : The command to send to the remote server
 
     Returns:
         int: Return code result of the command:
@@ -382,18 +372,18 @@ def sendCommand1(sid, command):
                SOCKET_TIMEOUT
                SOCKET_NOT_CONNECTED
   """
-  return (_sendCommand1(sid, command))
+  return (_sendCommand1(controlName, command))
 
 #################################################################################
 #################################################################################
-def sendCommand2(sid, timeoutOverride, command):
+def sendCommand2(controlName, timeoutOverride, command):
   """
   Send a command overriding the default timeout, if the override timeout is 0,
   the server will not reply with a response and this function will not wait for
   one
 
     Args:
-        sid (int)             : The ServerId as returned from the connectServer call
+        controlName (string)  : The control name used in the ConnectServer call
         timeoutOverride (int) : The server timeout override (in msec) for this command
         command (str)         : The command to send to the remote server
 
@@ -408,11 +398,11 @@ def sendCommand2(sid, timeoutOverride, command):
                SOCKET_TIMEOUT
                SOCKET_NOT_CONNECTED
   """
-  return (_sendCommand2(sid, timeoutOverride, command))
+  return (_sendCommand2(controlName, timeoutOverride, command))
 
 #################################################################################
 #################################################################################
-def sendCommand3(sid, command):
+def sendCommand3(controlName, command):
   """
   Send a command using the default timeout setup in the connectServer call and
   return any results received in the payload, if the default timeout is 0, the
@@ -420,8 +410,8 @@ def sendCommand3(sid, command):
   and no results will be extracted
 
     Args:
-        sid (int)     : The ServerId as returned from the connectServer call
-        command (str) : The command to send to the remote server
+        controlName (string) : The control name used in the ConnectServer call
+        command (str)        : The command to send to the remote server
 
     Returns:
         str: The human readable results of the command response or NULL
@@ -436,11 +426,11 @@ def sendCommand3(sid, command):
                SOCKET_TIMEOUT
                SOCKET_NOT_CONNECTED
   """
-  return (_sendCommand3(sid, command))
+  return (_sendCommand3(controlName, command))
 
 #################################################################################
 #################################################################################
-def sendCommand4(sid, timeoutOverride, command):
+def sendCommand4(controlName, timeoutOverride, command):
   """
   Send a command overriding the default timeout and return any results received
   in the payload, if the timeout override default timeout is 0, the server will
@@ -448,7 +438,7 @@ def sendCommand4(sid, timeoutOverride, command):
   results will be extracted
 
     Args:
-        sid (int)             : The ServerId as returned from the connectServer call
+        controlName (string)  : The control name used in the ConnectServer call
         timeoutOverride (int) : The server timeout override (in msec) for this command
         command (str)         : The command to send to the remote server
 
@@ -465,7 +455,7 @@ def sendCommand4(sid, timeoutOverride, command):
                SOCKET_TIMEOUT
                SOCKET_NOT_CONNECTED
   """
-  return (_sendCommand4(sid, timeoutOverride, command))
+  return (_sendCommand4(controlName, timeoutOverride, command))
 
 #################################################################################
 #################################################################################
@@ -474,8 +464,8 @@ def getResponseString(retCode):
   Return the human readable form of one of the command response return codes
 
     Args:
-        retCode (int)  :  One of the return codes from the above sendCommand
-                          functions
+        retCode (int) : One of the return codes from the above sendCommand
+                        functions
 
     Returns:
         str: The human readable results of the command response
@@ -540,8 +530,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
   global _gPshellMsgPayloadLength
   isBroadcastAddress = False
   _cleanupUnixResources()
-  sid = _getSid(controlName_)
-  if sid == INVALID_SID:
+  if _getControl(controlName_) == None:
     (remoteServer_, port_, defaultTimeout_) = _loadConfigFile(controlName_, remoteServer_, port_, defaultTimeout_)
     if (port_.lower() == "unix"):
       # UNIX domain socket
@@ -574,8 +563,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                                                        ("pad",0),
                                                        ("seqNum",0),
                                                        ("payload","")])})
-      # return the newly appended list entry as the SID
-      sid = len(_gPshellControl)-1
+      return True
     else:
       # IP domain socket
       socketFd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -603,16 +591,15 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
                                                        ("pad",0),
                                                        ("seqNum",0),
                                                        ("payload","")])})
-      # return the newly appended list entry as the SID
-      sid = len(_gPshellControl)-1
+      return True
   else:
     _printWarning("Control name: '{}' already exists, must use unique control name".format(controlName_))
-  return (sid)
+    return False
 
 #################################################################################
 #################################################################################
-def _disconnectServer(sid_):
-  control = _getControl(sid_)
+def _disconnectServer(controlName_):
+  control = _getControl(controlName_)
   if (control != None):
     _removeControl(control)
 
@@ -626,17 +613,17 @@ def _disconnectAllServers():
 
 #################################################################################
 #################################################################################
-def _setDefaultTimeout(sid_, defaultTimeout_):
-  control = _getControl(sid_)
+def _setDefaultTimeout(controlName_, defaultTimeout_):
+  control = _getControl(controlName_)
   if (control != None):
     control["timeout"] = defaultTimeout_
 
 #################################################################################
 #################################################################################
-def _extractCommands(sid_, includeName_):
+def _extractCommands(controlName_, includeName_):
   global _gMsgTypes
   results = ""
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryCommands"], "query commands", ONE_SEC*5) == COMMAND_SUCCESS):
@@ -658,10 +645,10 @@ def _extractCommands(sid_, includeName_):
 
 #################################################################################
 #################################################################################
-def _extractName(sid_):
+def _extractName(controlName_):
   global _gMsgTypes
   results = ""
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryName"], "query name", ONE_SEC*5) == COMMAND_SUCCESS):
@@ -670,10 +657,10 @@ def _extractName(sid_):
 
 #################################################################################
 #################################################################################
-def _extractTitle(sid_):
+def _extractTitle(controlName_):
   global _gMsgTypes
   results = ""
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryTitle"], "query title", ONE_SEC*5) == COMMAND_SUCCESS):
@@ -682,10 +669,10 @@ def _extractTitle(sid_):
 
 #################################################################################
 #################################################################################
-def _extractBanner(sid_):
+def _extractBanner(controlName_):
   global _gMsgTypes
   results = ""
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryBanner"], "query banner", ONE_SEC*5) == COMMAND_SUCCESS):
@@ -694,10 +681,10 @@ def _extractBanner(sid_):
 
 #################################################################################
 #################################################################################
-def _extractPrompt(sid_):
+def _extractPrompt(controlName_):
   global _gMsgTypes
   results = ""
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = True
     if (_sendCommand(control, _gMsgTypes["queryPrompt"], "query prompt", ONE_SEC*5) == COMMAND_SUCCESS):
@@ -715,6 +702,15 @@ def _extractControlNames():
 
 #################################################################################
 #################################################################################
+def _getControl(controlName_):
+  global _gPshellControl
+  for control in _gPshellControl:
+    if control["controlName"] == controlName_:
+      return control
+  return None
+
+#################################################################################
+#################################################################################
 def _addMulticast(command_, controlList_):
   global _gPshellControl
   if controlList_ == MULTICAST_ALL:
@@ -726,7 +722,7 @@ def _addMulticast(command_, controlList_):
     controlNames = controlList_.split(",")
     for controlName in controlNames:
       sid = _getSid(controlName)
-      if sid != INVALID_SID:
+      if sid != _INVALID_SID:
         _addMulticastSid(command_, sid)
       else:
         _printWarning("Control name: '{}' not found".format(controlName))
@@ -735,11 +731,10 @@ def _addMulticast(command_, controlList_):
 #################################################################################
 def _getSid(controlName_):
   global _gPshellControl
-  global _gPshellMulticast
   for sid, control in enumerate(_gPshellControl):
     if control["controlName"] == controlName_:
       return sid
-  return INVALID_SID
+  return _INVALID_SID
 
 #################################################################################
 #################################################################################
@@ -768,6 +763,7 @@ def _addMulticastSid(command_, sid_):
 #################################################################################
 def _sendMulticast(command_):
   global _gPshellMulticast
+  global _gPshellControl
   global NO_WAIT
   keywordFound = False
   for multicast in _gPshellMulticast:
@@ -775,19 +771,18 @@ def _sendMulticast(command_):
     if ((multicast["command"] == MULTICAST_ALL) or (command == multicast["command"][:len(command)])):
       keywordFound = True
       for sid in multicast["sidList"]:
-        control = _getControl(sid)
-        if (control != None):
-          control["dataNeeded"] = False
-          _sendCommand(control, _gMsgTypes["controlCommand"], command_, NO_WAIT)
+        control = _gPshellControl[sid]
+        control["dataNeeded"] = False
+        _sendCommand(control, _gMsgTypes["controlCommand"], command_, NO_WAIT)
   if not keywordFound:
     _printError("Multicast command: '%s', not found" % command)
 
 #################################################################################
 #################################################################################
-def _sendCommand1(sid_, command_):
+def _sendCommand1(controlName_, command_):
   global _gMsgTypes
   retCode = SOCKET_NOT_CONNECTED
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = False
     retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, control["timeout"])
@@ -795,10 +790,10 @@ def _sendCommand1(sid_, command_):
 
 #################################################################################
 #################################################################################
-def _sendCommand2(sid_, timeoutOverride_, command_):
+def _sendCommand2(controlName_, timeoutOverride_, command_):
   global _gMsgTypes
   retCode = SOCKET_NOT_CONNECTED
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     control["pshellMsg"]["dataNeeded"] = False
     retCode = _sendCommand(control, _gMsgTypes["controlCommand"], command_, timeoutOverride_)
@@ -806,11 +801,11 @@ def _sendCommand2(sid_, timeoutOverride_, command_):
 
 #################################################################################
 #################################################################################
-def _sendCommand3(sid_, command_):
+def _sendCommand3(controlName_, command_):
   global NO_WAIT
   results = ""
   retCode = SOCKET_NOT_CONNECTED
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     # for a broadcast server,our default timeout will beforced to NO_WAIT,
     # so no need to force it here
@@ -826,11 +821,11 @@ def _sendCommand3(sid_, command_):
 
 #################################################################################
 #################################################################################
-def _sendCommand4(sid_, timeoutOverride_, command_):
+def _sendCommand4(controlName_, timeoutOverride_, command_):
   global NO_WAIT
   results = ""
   retCode = SOCKET_NOT_CONNECTED
-  control = _getControl(sid_)
+  control = _getControl(controlName_)
   if (control != None):
     if (control["isBroadcastAddress"] == True):
       # if talking to a broadcast address, force our wait time to 0
@@ -964,16 +959,6 @@ def _removeControl(control_):
       None
   _cleanupUnixResources()
   control_["socket"].close()
-
-#################################################################################
-#################################################################################
-def _getControl(sid_):
-  global _gPshellControl
-  if ((sid_ >= 0) and (sid_ < len(_gPshellControl))):
-    return (_gPshellControl[sid_])
-  else:
-    _printError("No control defined for sid: %d" % sid_)
-    return (None)
 
 #################################################################################
 #################################################################################
@@ -1114,3 +1099,5 @@ _gSupressInvalidArgCountMessage = False
 # log level and log print function
 _gLogLevel = LOG_LEVEL_DEFAULT
 _gLogFunction = None
+
+_INVALID_SID = -1

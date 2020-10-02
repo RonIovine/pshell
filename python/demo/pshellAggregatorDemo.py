@@ -51,9 +51,13 @@ import sys
 import PshellServer
 import PshellControl
 
+# define our local control names
+PSHELL_SERVER_DEMO = "pshellServerDemo"
+TRACE_FILTER_DEMO = "traceFilterDemo"
+
 # this function is the common generic function to control any server
-# based on only the SID and entered command, it should be called from
-# every control specific callback for this aggregator
+# based on only the controlName and entered command, it should be
+# called from every control specific callback for this aggregator
 
 #################################################################################
 #################################################################################
@@ -68,24 +72,22 @@ def controlServer(sid, argv):
       PshellServer.printf(results, newline=False)
 
 # the following two functions are the control specific functions that interface
-# directly to a given remote server via the control API for a give SID, this is
-# how multiple remote pshell servers can be aggregated into a single local pshell
-# server, each separate SID for each remote server needs it's own dedicated
-# callback that is registered to the local pshell server, the only thing these
-# local pshell functions need to do is call the common 'controlServer' function
-# with the passed in argc, argv, and their unique SID identifier
+# directly to a given remote server via the control API for a given controlName,
+# this is how multiple remote pshell servers can be aggregated into a single local
+# pshell server, each separate controlName for each remote server needs it's own
+# dedicated callback that is registered to the local pshell server, the only thing
+# these local pshell functions need to do is call the common 'controlServer'
+# function with the passed in argc, argv, and their unique controlName identifier
 
 #################################################################################
 #################################################################################
 def pshellServerDemo(argv):
-  global pshellServerDemoSid
-  controlServer(pshellServerDemoSid,  argv)
+  controlServer(PSHELL_SERVER_DEMO,  argv)
 
 #################################################################################
 #################################################################################
 def traceFilterDemo(argv):
-  global traceFilterDemoSid
-  controlServer(traceFilterDemoSid, argv)
+  controlServer(TRACE_FILTER_DEMO, argv)
 
 # example meta command that will call multiple discrete pshell commands from
 # multiple pshell servers
@@ -93,13 +95,11 @@ def traceFilterDemo(argv):
 #################################################################################
 #################################################################################
 def meta(argv):
-  global pshellServerDemoSid
-  global traceFilterDemoSid
-  (results, retCode) = PshellControl.sendCommand3(pshellServerDemoSid, "hello %s %s" % (argv[0], argv[1]))
+  (results, retCode) = PshellControl.sendCommand3(PSHELL_SERVER_DEMO, "hello %s %s" % (argv[0], argv[1]))
   if (retCode == PshellControl.COMMAND_SUCCESS):
     PshellServer.printf(results, newline=False)
 
-  PshellControl.sendCommand1(traceFilterDemoSid, "set callback %s" % argv[2])
+  PshellControl.sendCommand1(TRACE_FILTER_DEMO, "set callback %s" % argv[2])
 
 # example multicast command, this will send a given command to all the registered
 # multicast receivers for that multicast group, multicast groups are based on
@@ -137,15 +137,19 @@ if (__name__ == '__main__'):
 
   # add PshellControl entries to our aggregator list, the hostname/ipAddress,
   # port and timeout values can be overridden via the pshell-control.conf file
-  pshellServerDemoSid = PshellControl.connectServer("pshellServerDemo",
-                                                    sys.argv[1],
-                                                    pshellServerDemoPort,
-                                                    PshellControl.ONE_SEC*5)
+  if not PshellControl.connectServer(PSHELL_SERVER_DEMO,
+                                     sys.argv[1],
+                                     pshellServerDemoPort,
+                                     PshellControl.ONE_SEC*5):
+    print("ERROR: Could not connect to remote pshell server: {}".format(PSHELL_SERVER_DEMO))
+    exit(0)
 
-  traceFilterDemoSid = PshellControl.connectServer("traceFilterDemo",
-                                                   sys.argv[1],
-                                                   traceFilterDemoPort,
-                                                   PshellControl.ONE_SEC*5)
+  if not PshellControl.connectServer(TRACE_FILTER_DEMO,
+                                     sys.argv[1],
+                                     traceFilterDemoPort,
+                                     PshellControl.ONE_SEC*5):
+    print("ERROR: Could not connect to remote pshell server: {}".format(TRACE_FILTER_DEMO))
+    exit(0)
 
   # add some multicast groups for our above controlNames,
   # a multicast group is based on the command's keyword,

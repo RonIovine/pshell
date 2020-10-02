@@ -61,10 +61,6 @@ SOCKET_RECEIVE_FAILURE<br>
 SOCKET_TIMEOUT<br>
 SOCKET_NOT_CONNECTED<br>
 &nbsp;<br>
-Used&nbsp;if&nbsp;we&nbsp;cannot&nbsp;connect&nbsp;to&nbsp;the&nbsp;local&nbsp;source&nbsp;socket<br>
-&nbsp;<br>
-INVALID_SID<br>
-&nbsp;<br>
 Constants&nbsp;to&nbsp;let&nbsp;the&nbsp;host&nbsp;program&nbsp;set&nbsp;the&nbsp;internal&nbsp;debug&nbsp;log&nbsp;level,<br>
 if&nbsp;the&nbsp;user&nbsp;of&nbsp;this&nbsp;API&nbsp;does&nbsp;not&nbsp;want&nbsp;to&nbsp;see&nbsp;any&nbsp;internal&nbsp;message<br>
 printed&nbsp;out,&nbsp;set&nbsp;the&nbsp;debug&nbsp;log&nbsp;level&nbsp;to&nbsp;LOG_LEVEL_NONE,&nbsp;the&nbsp;default<br>
@@ -125,9 +121,9 @@ group,&nbsp;multicast&nbsp;groups&nbsp;are&nbsp;based&nbsp;either&nbsp;on&nbsp;a
 special&nbsp;argument&nbsp;PSHELL_MULTICAST_ALL&nbsp;is&nbsp;used,&nbsp;the&nbsp;given&nbsp;controlList&nbsp;will<br>
 receive&nbsp;all&nbsp;multicast&nbsp;commands,&nbsp;the&nbsp;format&nbsp;of&nbsp;the&nbsp;controlList&nbsp;is&nbsp;a&nbsp;CSV&nbsp;formatted<br>
 list&nbsp;of&nbsp;all&nbsp;the&nbsp;desired&nbsp;controlNames&nbsp;(as&nbsp;provided&nbsp;in&nbsp;the&nbsp;first&nbsp;argument&nbsp;of&nbsp;the<br>
-pshell_connectServer&nbsp;command)&nbsp;that&nbsp;will&nbsp;receive&nbsp;this&nbsp;multicast&nbsp;command&nbsp;or&nbsp;if&nbsp;the<br>
-PSHELL_MULTICAST_ALL&nbsp;is&nbsp;used&nbsp;then&nbsp;all&nbsp;control&nbsp;destinations&nbsp;will&nbsp;receive&nbsp;the&nbsp;given<br>
-multicast&nbsp;command,&nbsp;see&nbsp;examples&nbsp;below<br>
+PshellControl.connectServer&nbsp;command)&nbsp;that&nbsp;will&nbsp;receive&nbsp;this&nbsp;multicast&nbsp;command<br>
+or&nbsp;if&nbsp;the&nbsp;PSHELL_MULTICAST_ALL&nbsp;is&nbsp;used&nbsp;then&nbsp;all&nbsp;control&nbsp;destinations&nbsp;will&nbsp;receive<br>
+the&nbsp;given&nbsp;multicast&nbsp;command,&nbsp;see&nbsp;examples&nbsp;below<br>
 &nbsp;<br>
 ex&nbsp;1:&nbsp;multicast&nbsp;command&nbsp;sent&nbsp;to&nbsp;receivers&nbsp;in&nbsp;CSV&nbsp;controlList<br>
 &nbsp;<br>
@@ -175,9 +171,6 @@ valid&nbsp;destination&nbsp;port&nbsp;must&nbsp;be&nbsp;provided,&nbsp;for&nbsp;
 a&nbsp;valid&nbsp;server&nbsp;name&nbsp;must&nbsp;be&nbsp;provided&nbsp;along&nbsp;with&nbsp;the&nbsp;identifier<br>
 PshellControl.UNIX&nbsp;for&nbsp;the&nbsp;'port'&nbsp;parameter<br>
 &nbsp;<br>
-This&nbsp;function&nbsp;returns&nbsp;a&nbsp;Server&nbsp;ID&nbsp;(sid)&nbsp;handle&nbsp;which&nbsp;must&nbsp;be&nbsp;saved&nbsp;and<br>
-used&nbsp;for&nbsp;all&nbsp;subsequent&nbsp;calls&nbsp;into&nbsp;this&nbsp;module<br>
-&nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;logical&nbsp;name&nbsp;of&nbsp;the&nbsp;control&nbsp;server<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;remoteServer&nbsp;(str)&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;server&nbsp;name&nbsp;(UNIX)&nbsp;or&nbsp;hostname/IP&nbsp;address&nbsp;(UDP)&nbsp;of&nbsp;the&nbsp;remote&nbsp;server<br>
@@ -185,7 +178,7 @@ used&nbsp;for&nbsp;all&nbsp;subsequent&nbsp;calls&nbsp;into&nbsp;this&nbsp;modul
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultTimeout&nbsp;(int)&nbsp;:&nbsp;The&nbsp;default&nbsp;timeout&nbsp;(in&nbsp;msec)&nbsp;for&nbsp;the&nbsp;remote&nbsp;server&nbsp;response<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int:&nbsp;The&nbsp;ServerId&nbsp;(sid)&nbsp;handle&nbsp;of&nbsp;the&nbsp;connected&nbsp;server&nbsp;or&nbsp;INVALID_SID&nbsp;on&nbsp;failure</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;Indicates&nbsp;if&nbsp;the&nbsp;local&nbsp;source&nbsp;endpoint&nbsp;is&nbsp;successfully&nbsp;created</tt></dd></dl>
  <dl><dt><a name="-disconnectAllServers"><strong>disconnectAllServers</strong></a>()</dt><dd><tt>Use&nbsp;this&nbsp;function&nbsp;to&nbsp;cleanup&nbsp;any&nbsp;resources&nbsp;for&nbsp;all&nbsp;connected&nbsp;servers,&nbsp;this<br>
 function&nbsp;should&nbsp;be&nbsp;called&nbsp;upon&nbsp;program&nbsp;termination,&nbsp;either&nbsp;in&nbsp;a&nbsp;graceful<br>
 termination&nbsp;or&nbsp;within&nbsp;an&nbsp;exception&nbsp;signal&nbsp;handler,&nbsp;it&nbsp;is&nbsp;especially&nbsp;important<br>
@@ -197,40 +190,40 @@ handles&nbsp;that&nbsp;need&nbsp;to&nbsp;be&nbsp;cleaned&nbsp;up<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-disconnectServer"><strong>disconnectServer</strong></a>(sid)</dt><dd><tt>Cleanup&nbsp;any&nbsp;resources&nbsp;associated&nbsp;with&nbsp;the&nbsp;server&nbsp;connection,&nbsp;including<br>
+ <dl><dt><a name="-disconnectServer"><strong>disconnectServer</strong></a>(controlName)</dt><dd><tt>Cleanup&nbsp;any&nbsp;resources&nbsp;associated&nbsp;with&nbsp;the&nbsp;server&nbsp;connection,&nbsp;including<br>
 releasing&nbsp;any&nbsp;temp&nbsp;file&nbsp;handles,&nbsp;closing&nbsp;any&nbsp;local&nbsp;socket&nbsp;handles&nbsp;etc.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(int)&nbsp;:&nbsp;The&nbsp;ServerId&nbsp;as&nbsp;returned&nbsp;from&nbsp;the&nbsp;connectServer&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(string)&nbsp;:&nbsp;The&nbsp;control&nbsp;name&nbsp;used&nbsp;in&nbsp;the&nbsp;ConnectServer&nbsp;call<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-extractCommands"><strong>extractCommands</strong></a>(sid, includeName<font color="#909090">=True</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;extract&nbsp;all&nbsp;the&nbsp;commands&nbsp;of&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server&nbsp;and<br>
+ <dl><dt><a name="-extractCommands"><strong>extractCommands</strong></a>(controlName, includeName<font color="#909090">=True</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;extract&nbsp;all&nbsp;the&nbsp;commands&nbsp;of&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server&nbsp;and<br>
 present&nbsp;them&nbsp;in&nbsp;a&nbsp;human&nbsp;readable&nbsp;form,&nbsp;this&nbsp;is&nbsp;useful&nbsp;when&nbsp;writing&nbsp;a&nbsp;multi<br>
 server&nbsp;control&nbsp;aggregator,&nbsp;see&nbsp;the&nbsp;demo&nbsp;program&nbsp;pshellAggregatorDemo.py&nbsp;in<br>
 the&nbsp;demo&nbsp;directory&nbsp;for&nbsp;examples<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;ServerId&nbsp;as&nbsp;returned&nbsp;from&nbsp;the&nbsp;connectServer&nbsp;call<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeName&nbsp;(bool)&nbsp;:&nbsp;Include&nbsp;server&nbsp;name&nbsp;in&nbsp;banner<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(string)&nbsp;:&nbsp;The&nbsp;control&nbsp;name&nbsp;used&nbsp;in&nbsp;the&nbsp;ConnectServer&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;includeName&nbsp;(bool)&nbsp;&nbsp;&nbsp;:&nbsp;Include&nbsp;server&nbsp;name&nbsp;in&nbsp;banner<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;:&nbsp;The&nbsp;remote&nbsp;server's&nbsp;command&nbsp;list&nbsp;in&nbsp;human&nbsp;readable&nbsp;form</tt></dd></dl>
  <dl><dt><a name="-getResponseString"><strong>getResponseString</strong></a>(retCode)</dt><dd><tt>Return&nbsp;the&nbsp;human&nbsp;readable&nbsp;form&nbsp;of&nbsp;one&nbsp;of&nbsp;the&nbsp;command&nbsp;response&nbsp;return&nbsp;codes<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;retCode&nbsp;(int)&nbsp;&nbsp;:&nbsp;&nbsp;One&nbsp;of&nbsp;the&nbsp;return&nbsp;codes&nbsp;from&nbsp;the&nbsp;above&nbsp;sendCommand<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;functions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;retCode&nbsp;(int)&nbsp;:&nbsp;One&nbsp;of&nbsp;the&nbsp;return&nbsp;codes&nbsp;from&nbsp;the&nbsp;above&nbsp;sendCommand<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;functions<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;The&nbsp;human&nbsp;readable&nbsp;results&nbsp;of&nbsp;the&nbsp;command&nbsp;response</tt></dd></dl>
- <dl><dt><a name="-sendCommand1"><strong>sendCommand1</strong></a>(sid, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call,<br>
+ <dl><dt><a name="-sendCommand1"><strong>sendCommand1</strong></a>(controlName, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call,<br>
 if&nbsp;the&nbsp;default&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;the&nbsp;server&nbsp;will&nbsp;not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and<br>
 this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;ServerId&nbsp;as&nbsp;returned&nbsp;from&nbsp;the&nbsp;connectServer&nbsp;call<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;:&nbsp;The&nbsp;command&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;remote&nbsp;server<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(string)&nbsp;:&nbsp;The&nbsp;control&nbsp;name&nbsp;used&nbsp;in&nbsp;the&nbsp;ConnectServer&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;command&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;remote&nbsp;server<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int:&nbsp;Return&nbsp;code&nbsp;result&nbsp;of&nbsp;the&nbsp;command:<br>
@@ -242,12 +235,12 @@ this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_RECEIVE_FAILURE<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_TIMEOUT<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_NOT_CONNECTED</tt></dd></dl>
- <dl><dt><a name="-sendCommand2"><strong>sendCommand2</strong></a>(sid, timeoutOverride, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout,&nbsp;if&nbsp;the&nbsp;override&nbsp;timeout&nbsp;is&nbsp;0,<br>
+ <dl><dt><a name="-sendCommand2"><strong>sendCommand2</strong></a>(controlName, timeoutOverride, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout,&nbsp;if&nbsp;the&nbsp;override&nbsp;timeout&nbsp;is&nbsp;0,<br>
 the&nbsp;server&nbsp;will&nbsp;not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and&nbsp;this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for<br>
 one<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;ServerId&nbsp;as&nbsp;returned&nbsp;from&nbsp;the&nbsp;connectServer&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(string)&nbsp;&nbsp;:&nbsp;The&nbsp;control&nbsp;name&nbsp;used&nbsp;in&nbsp;the&nbsp;ConnectServer&nbsp;call<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeoutOverride&nbsp;(int)&nbsp;:&nbsp;The&nbsp;server&nbsp;timeout&nbsp;override&nbsp;(in&nbsp;msec)&nbsp;for&nbsp;this&nbsp;command<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;command&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;remote&nbsp;server<br>
 &nbsp;<br>
@@ -261,14 +254,14 @@ one<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_RECEIVE_FAILURE<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_TIMEOUT<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_NOT_CONNECTED</tt></dd></dl>
- <dl><dt><a name="-sendCommand3"><strong>sendCommand3</strong></a>(sid, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call&nbsp;and<br>
+ <dl><dt><a name="-sendCommand3"><strong>sendCommand3</strong></a>(controlName, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;using&nbsp;the&nbsp;default&nbsp;timeout&nbsp;setup&nbsp;in&nbsp;the&nbsp;connectServer&nbsp;call&nbsp;and<br>
 return&nbsp;any&nbsp;results&nbsp;received&nbsp;in&nbsp;the&nbsp;payload,&nbsp;if&nbsp;the&nbsp;default&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;the<br>
 server&nbsp;will&nbsp;not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and&nbsp;this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one,<br>
 and&nbsp;no&nbsp;results&nbsp;will&nbsp;be&nbsp;extracted<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;ServerId&nbsp;as&nbsp;returned&nbsp;from&nbsp;the&nbsp;connectServer&nbsp;call<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;:&nbsp;The&nbsp;command&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;remote&nbsp;server<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(string)&nbsp;:&nbsp;The&nbsp;control&nbsp;name&nbsp;used&nbsp;in&nbsp;the&nbsp;ConnectServer&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;command&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;remote&nbsp;server<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;The&nbsp;human&nbsp;readable&nbsp;results&nbsp;of&nbsp;the&nbsp;command&nbsp;response&nbsp;or&nbsp;NULL<br>
@@ -282,13 +275,13 @@ and&nbsp;no&nbsp;results&nbsp;will&nbsp;be&nbsp;extracted<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_RECEIVE_FAILURE<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_TIMEOUT<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_NOT_CONNECTED</tt></dd></dl>
- <dl><dt><a name="-sendCommand4"><strong>sendCommand4</strong></a>(sid, timeoutOverride, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout&nbsp;and&nbsp;return&nbsp;any&nbsp;results&nbsp;received<br>
+ <dl><dt><a name="-sendCommand4"><strong>sendCommand4</strong></a>(controlName, timeoutOverride, command)</dt><dd><tt>Send&nbsp;a&nbsp;command&nbsp;overriding&nbsp;the&nbsp;default&nbsp;timeout&nbsp;and&nbsp;return&nbsp;any&nbsp;results&nbsp;received<br>
 in&nbsp;the&nbsp;payload,&nbsp;if&nbsp;the&nbsp;timeout&nbsp;override&nbsp;default&nbsp;timeout&nbsp;is&nbsp;0,&nbsp;the&nbsp;server&nbsp;will<br>
 not&nbsp;reply&nbsp;with&nbsp;a&nbsp;response&nbsp;and&nbsp;this&nbsp;function&nbsp;will&nbsp;not&nbsp;wait&nbsp;for&nbsp;one,&nbsp;and&nbsp;no<br>
 results&nbsp;will&nbsp;be&nbsp;extracted<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;ServerId&nbsp;as&nbsp;returned&nbsp;from&nbsp;the&nbsp;connectServer&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(string)&nbsp;&nbsp;:&nbsp;The&nbsp;control&nbsp;name&nbsp;used&nbsp;in&nbsp;the&nbsp;ConnectServer&nbsp;call<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeoutOverride&nbsp;(int)&nbsp;:&nbsp;The&nbsp;server&nbsp;timeout&nbsp;override&nbsp;(in&nbsp;msec)&nbsp;for&nbsp;this&nbsp;command<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;command&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;remote&nbsp;server<br>
 &nbsp;<br>
@@ -305,22 +298,22 @@ results&nbsp;will&nbsp;be&nbsp;extracted<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_TIMEOUT<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOCKET_NOT_CONNECTED</tt></dd></dl>
  <dl><dt><a name="-sendMulticast"><strong>sendMulticast</strong></a>(command)</dt><dd><tt>This&nbsp;command&nbsp;will&nbsp;send&nbsp;a&nbsp;given&nbsp;command&nbsp;to&nbsp;all&nbsp;the&nbsp;registered&nbsp;multicast<br>
-receivers&nbsp;(i.e.&nbsp;sids)&nbsp;for&nbsp;this&nbsp;multicast&nbsp;group,&nbsp;multicast&nbsp;groups&nbsp;are<br>
-based&nbsp;on&nbsp;the&nbsp;command's&nbsp;keyword,&nbsp;this&nbsp;function&nbsp;will&nbsp;issue&nbsp;the&nbsp;command&nbsp;as<br>
-a&nbsp;best&nbsp;effort&nbsp;fire-and-forget&nbsp;command&nbsp;to&nbsp;each&nbsp;receiver&nbsp;in&nbsp;the&nbsp;multicast<br>
-group,&nbsp;no&nbsp;results&nbsp;will&nbsp;be&nbsp;requested&nbsp;or&nbsp;expected,&nbsp;and&nbsp;no&nbsp;response&nbsp;will&nbsp;be<br>
-requested&nbsp;or&nbsp;expected<br>
+receivers&nbsp;for&nbsp;this&nbsp;multicast&nbsp;group,&nbsp;multicast&nbsp;groups&nbsp;are&nbsp;based&nbsp;on&nbsp;the<br>
+command's&nbsp;keyword,&nbsp;this&nbsp;function&nbsp;will&nbsp;issue&nbsp;the&nbsp;command&nbsp;as&nbsp;a&nbsp;best&nbsp;effort<br>
+fire-and-forget&nbsp;command&nbsp;to&nbsp;each&nbsp;receiver&nbsp;in&nbsp;the&nbsp;multicast&nbsp;group,&nbsp;no<br>
+results&nbsp;will&nbsp;be&nbsp;requested&nbsp;or&nbsp;expected,&nbsp;and&nbsp;no&nbsp;response&nbsp;will&nbsp;be&nbsp;requested<br>
+or&nbsp;expected<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command&nbsp;(str)&nbsp;:&nbsp;The&nbsp;command&nbsp;to&nbsp;send&nbsp;to&nbsp;the&nbsp;remote&nbsp;server<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-setDefaultTimeout"><strong>setDefaultTimeout</strong></a>(sid, defaultTimeout)</dt><dd><tt>Set&nbsp;the&nbsp;default&nbsp;server&nbsp;response&nbsp;timeout&nbsp;that&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;'send'&nbsp;commands<br>
+ <dl><dt><a name="-setDefaultTimeout"><strong>setDefaultTimeout</strong></a>(controlName, defaultTimeout)</dt><dd><tt>Set&nbsp;the&nbsp;default&nbsp;server&nbsp;response&nbsp;timeout&nbsp;that&nbsp;is&nbsp;used&nbsp;in&nbsp;the&nbsp;'send'&nbsp;commands<br>
 that&nbsp;don't&nbsp;take&nbsp;a&nbsp;timeout&nbsp;override<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sid&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;ServerId&nbsp;as&nbsp;returned&nbsp;from&nbsp;the&nbsp;connectServer&nbsp;call<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;controlName&nbsp;(string)&nbsp;:&nbsp;The&nbsp;control&nbsp;name&nbsp;used&nbsp;in&nbsp;the&nbsp;ConnectServer&nbsp;call<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultTimeout&nbsp;(int)&nbsp;:&nbsp;The&nbsp;default&nbsp;timeout&nbsp;(in&nbsp;msec)&nbsp;for&nbsp;the&nbsp;remote&nbsp;server&nbsp;response<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
@@ -360,10 +353,9 @@ Where&nbsp;the&nbsp;default&nbsp;is&nbsp;LOG_LEVEL_ALL<br>
 <td width="100%"><strong>COMMAND_INVALID_ARG_COUNT</strong> = 2<br>
 <strong>COMMAND_NOT_FOUND</strong> = 1<br>
 <strong>COMMAND_SUCCESS</strong> = 0<br>
-<strong>INVALID_SID</strong> = -1<br>
 <strong>LOCALHOST</strong> = 'localhost'<br>
 <strong>LOG_LEVEL_ALL</strong> = 3<br>
-<strong>LOG_LEVEL_DEFAULT</strong> = 2<br>
+<strong>LOG_LEVEL_DEFAULT</strong> = 3<br>
 <strong>LOG_LEVEL_ERROR</strong> = 1<br>
 <strong>LOG_LEVEL_INFO</strong> = 3<br>
 <strong>LOG_LEVEL_NONE</strong> = 0<br>

@@ -48,6 +48,7 @@ import "syscall"
 import "os/signal"
 import "PshellControl"
 
+// local control name
 const PSHELL_CONTROL_DEMO = "pshellControlDemo"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +145,7 @@ func main() {
           }
           fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
         } else {
-          retCode := PshellControl.SendCommand1("pshellControlDemo", command)
+          retCode := PshellControl.SendCommand1(PSHELL_CONTROL_DEMO, command)
           fmt.Printf("retCode: %s\n", PshellControl.GetResponseString(retCode))
         }
       }

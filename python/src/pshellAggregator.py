@@ -106,13 +106,13 @@ def _controlServer(argv):
         (argv[1] == "--help") or
         (argv[1] == "?")):
       # user asked for help, display all the registered commands of the remote server
-      PshellServer.printf(PshellControl.extractCommands(server["sid"]), newline=False)
+      PshellServer.printf(PshellControl.extractCommands(server["controlName"]), newline=False)
     elif timeout == 0:
       print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
-      PshellControl.sendCommand1(server["sid"], ' '.join(argv[1:]))
+      PshellControl.sendCommand1(server["controlName"], ' '.join(argv[1:]))
     else:
       # reconstitute and dispatch original command to remote server minus the first keyword
-      (results, retCode) = PshellControl.sendCommand4(server["sid"], timeout, ' '.join(argv[1:]))
+      (results, retCode) = PshellControl.sendCommand4(server["controlName"], timeout, ' '.join(argv[1:]))
       # good return, display results back to user
       if (retCode == PshellControl.COMMAND_SUCCESS):
         PshellServer.printf(results, newline=False)
@@ -176,18 +176,14 @@ def _add(argv):
       PshellServer.printf("ERROR: Remote server: %s, port: %s already exists" % (argv[3], port))
     elif _isDuplicateControl(argv[2]):
       PshellServer.printf("ERROR: Control name: %s already exists" % argv[2])
-    else:
+    elif PshellControl.connectServer(argv[2], argv[3], port, PshellControl.ONE_SEC*5):
       if (len(argv[2]) > _gMaxControlName):
         _gMaxControlName = max(len(argv[2]), len(_gControlNameLabel))
       if (len(argv[3]) > _gMaxServerName):
         _gMaxServerName = max(len(argv[3]), len(_gServerNameLabel))
       _gPshellServers.append({"controlName":argv[2],
                               "remoteServer":argv[3],
-                              "port":port,
-                              "sid":PshellControl.connectServer(argv[2],
-                                                                argv[3],
-                                                                port,
-                                                                PshellControl.ONE_SEC*5)})
+                              "port":port})
       PshellServer.addCommand(_controlServer,
                               argv[2],
                               "control the remote " + argv[2] + " process",

@@ -44,6 +44,9 @@ import signal
 import PshellReadline
 import PshellControl
 
+# local control name
+PSHELL_CONTROL_DEMO = "pshellControlDemo"
+
 #####################################################
 #####################################################
 def showUsage():
@@ -113,23 +116,21 @@ if (__name__ == '__main__'):
   # register signal handlers so we can do a graceful termination and cleanup any system resources
   registerSignalHandlers()
 
-  sid = PshellControl.connectServer("pshellControlDemo", sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout)
-
-  if (sid != PshellControl.INVALID_SID):
+  if PshellControl.connectServer(PSHELL_CONTROL_DEMO, sys.argv[1], sys.argv[2], PshellControl.ONE_MSEC*timeout):
     command = ""
     print("Enter command or 'q' to quit");
     while (not PshellReadline.isSubString(command, "quit")):
       (command, idleSession) = PshellReadline.getInput("pshellControlCmd> ")
       if (not PshellReadline.isSubString(command, "quit")):
         if ((command.split()[0] == "?") or (command.split()[0] == "help")):
-          PshellReadline.writeOutput(PshellControl.extractCommands(sid))
+          PshellReadline.writeOutput(PshellControl.extractCommands(PSHELL_CONTROL_DEMO))
         elif (extract):
-          (results, retCode) = PshellControl.sendCommand3(sid, command)
+          (results, retCode) = PshellControl.sendCommand3(PSHELL_CONTROL_DEMO, command)
           PshellReadline.writeOutput("%d bytes extracted, results:\n" % len(results))
           PshellReadline.writeOutput("%s" % results)
           PshellReadline.writeOutput("retCode: %s\n" % PshellControl.getResponseString(retCode))
         else:
-          retCode = PshellControl.sendCommand1(sid, command)
+          retCode = PshellControl.sendCommand1(PSHELL_CONTROL_DEMO, command)
           PshellReadline.writeOutput("retCode: %s\n" % PshellControl.getResponseString(retCode))
 
-    PshellControl.disconnectServer(sid)
+    PshellControl.disconnectServer(PSHELL_CONTROL_DEMO)

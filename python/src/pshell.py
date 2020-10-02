@@ -106,7 +106,7 @@ import PshellControl
 import PshellServer
 import PshellReadline
 
-_gSid = None
+_gControlName = "pshellClient"
 _gHelp = ('?', '-h', '--h', '-help', '--help', 'help')
 
 _gFileSystemPath = "/tmp/.pshell/"
@@ -172,16 +172,16 @@ def _showHelp():
 #################################################################################
 #################################################################################
 def _processCommand(command_):
-  global _gSid
+  global _gControlName
   if ((command_.split()[0] == "?") or (PshellReadline.isSubString(command_.split()[0], "help"))):
     _showHelp()
   else:
-    PshellControl.sendCommand1(_gSid, command_)
+    PshellControl.sendCommand1(_gControlName, command_)
 
 #################################################################################
 #################################################################################
 def _comandDispatcher(args_):
-  global _gSid
+  global _gControlName
   global _gHelp
   global _gInteractive
   global _gTimeout
@@ -192,18 +192,18 @@ def _comandDispatcher(args_):
       timeout = int(PshellServer._gClientTimeoutOverride[2:])
   command = ' '.join(args_)
   if args_[0] in _gHelp:
-    results = PshellControl.extractCommands(_gSid, includeName=False)
+    results = PshellControl.extractCommands(_gControlName, includeName=False)
   elif timeout == 0:
     # if they asked for command help, go ahead and dispatch the command and
     # extract the results, otherwise, just send command with no extraction
     # or display
     if len(args_) == 2 and args_[1] in _gHelp:
-      (results, retCode) = PshellControl.sendCommand4(_gSid, PshellControl.ONE_SEC*5, command)
+      (results, retCode) = PshellControl.sendCommand4(_gControlName, PshellControl.ONE_SEC*5, command)
     else:
       print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
-      PshellControl.sendCommand1(_gSid, command)
+      PshellControl.sendCommand1(_gControlName, command)
   else:
-    (results, retCode) = PshellControl.sendCommand4(_gSid, timeout, command)
+    (results, retCode) = PshellControl.sendCommand4(_gControlName, timeout, command)
   if results != None:
     if _gInteractive == True:
       PshellServer.printf(results, newline=False)
@@ -324,7 +324,7 @@ def _processBatchFile():
 #################################################################################
 #################################################################################
 def _configureLocalServer():
-  global _gSid
+  global _gControlName
   global _gRemoteServer
   global _gTimeout
   global _gPort
@@ -346,19 +346,19 @@ def _configureLocalServer():
   # "private" control API so we can feed the info to our local
   # pshell server to make it look like a remote server
 
-  prompt = PshellControl._extractPrompt(_gSid)
+  prompt = PshellControl._extractPrompt(_gControlName)
   if (len(prompt) > 0):
     PshellServer._gPromptOverride = prompt
 
-  title = PshellControl._extractTitle(_gSid)
+  title = PshellControl._extractTitle(_gControlName)
   if (len(title) > 0):
     PshellServer._gTitleOverride = title
 
-  serverName = PshellControl._extractName(_gSid)
+  serverName = PshellControl._extractName(_gControlName)
   if (len(serverName) > 0):
     PshellServer._gServerNameOverride = serverName
 
-  banner = PshellControl._extractBanner(_gSid)
+  banner = PshellControl._extractBanner(_gControlName)
   if (len(banner) > 0):
     PshellServer._gBannerOverride = banner
 
@@ -769,9 +769,9 @@ if (__name__ == '__main__'):
   _gIsBroadcastAddr = ((len(_gRemoteServer.split(".")) == 4) and (_gRemoteServer.split(".")[3] == "255"))
 
   # connect to our remote server via the control client
-  _gSid = PshellControl.connectServer("pshellClient", _gRemoteServer, _gPort, PshellControl.ONE_SEC*_gTimeout)
-  _gServerName = PshellControl._extractName(_gSid)
-  _gTitle = PshellControl._extractTitle(_gSid)
+  PshellControl.connectServer(_gControlName, _gRemoteServer, _gPort, PshellControl.ONE_SEC*_gTimeout)
+  _gServerName = PshellControl._extractName(_gControlName)
+  _gTitle = PshellControl._extractTitle(_gControlName)
 
   if (_gCommand != None):
     # command line mode, execute command
@@ -788,7 +788,7 @@ if (__name__ == '__main__'):
 
       # if not a broadcast server address, extract all the commands from
       # our unicast remote server and add them to our local server
-      commandList = PshellControl.extractCommands(_gSid)
+      commandList = PshellControl.extractCommands(_gControlName)
       if (len(commandList) > 0):
         commandList = commandList.split("\n")
         for command in commandList:
