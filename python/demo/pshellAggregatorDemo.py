@@ -54,7 +54,7 @@ import PshellControl
 # define constants for local control names, the quoted string can be used directly,
 # however if the quoted string is ever 'fat-fingered' in any location, it will
 # result in a run-time error, whereas if the constant is fat-fingered, it will
-# produce a compile-time error
+# produce a python traceback error
 PSHELL_SERVER_DEMO = "pshellServerDemo"
 TRACE_FILTER_DEMO = "traceFilterDemo"
 
