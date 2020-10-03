@@ -582,9 +582,9 @@ def _showNamedServers():
   global _gServerList
   global _gMaxNamedServerLength
   print("")
-  print("****************************************")
-  print("*         Named PSHELL Servers         *")
-  print("****************************************")
+  print("******************************************")
+  print("*     Available Named PSHELL Servers     *")
+  print("******************************************")
   print("")
   print("%s  Port Number  Response Timeout" % "Server Name".ljust(_gMaxNamedServerLength))
   print("%s  ===========  ================" % ("="*_gMaxNamedServerLength))

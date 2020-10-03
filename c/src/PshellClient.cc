@@ -1643,9 +1643,9 @@ void showNamedServers(void)
   unsigned fieldWidth = 0;
 
   printf("\n");
-  printf("**************************************\n");
-  printf("*      Available PSHELL Servers      *\n");
-  printf("**************************************\n");
+  printf("******************************************\n");
+  printf("*     Available Named PSHELL Servers     *\n");
+  printf("******************************************\n");
   printf("\n");
 
   strlen(banner) > _maxNamedServerLength ? fieldWidth = strlen(banner) : fieldWidth = _maxNamedServerLength;

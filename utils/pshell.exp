@@ -144,9 +144,9 @@ proc showServers {} {
   variable serverList
   variable maxServerNameLength
   puts ""
-  puts "**************************************"
-  puts "*      Available PSHELL Servers      *"
-  puts "**************************************"
+  puts "******************************************"
+  puts "*     Available Named PSHELL Servers     *"
+  puts "******************************************"
   puts ""
   puts -nonewline "Server Name"
   for {set count 11} {$count < $maxServerNameLength} {incr count 1} {

@@ -146,8 +146,8 @@ The simplest install is a local install, from the top level pshell directory run
 `$ ./install.sh -local`
 
 This will create an environment file, `.pshellrc` that should be sourced in your system's local command
-line shell (e.g. `bash`), it should also be added to your shell env file, i.e. `.bashrc`.  This will
-setup several softlinks and environment variables that will allow access to the various parts of the
+line shell (e.g. `bash`), it should also be sourced in your host's shell env file, i.e. `.bashrc`.  This
+will setup several softlinks and environment variables that will allow access to the various parts of the
 framework.
 
 <a name="building"></a>
