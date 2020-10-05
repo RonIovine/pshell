@@ -48,19 +48,29 @@
 
 #include <PshellServer.h>
 
-/*
- * PSHELL user callback functions, the interface is identical to the "main"
- * in C, with the argc being the argument count (excluding the actual
- * command itself), and argv[] being the argument list (again, excluding
- * the command).
+/* constants used for the advanved parsing date/time stamp range checking */
+#define MAX_YEAR   3000
+#define MAX_MONTH  12
+#define MAX_DAY    31
+#define MAX_HOUR   23
+#define MAX_MINUTE 59
+#define MAX_SECOND 59
+
+/******************************************************************************
+ *
+ * PSHELL user callback functions, the interface is identical to the "main" in
+ * C, with the argc being the argument count (excluding the actual command
+ * itself), and argv[] being the argument list (again, excluding the command).
  *
  * Use the special 'pshell_printf' function call to display data back to the
- * remote client.  The interface to this function is exactly the same as
- * the standard 'printf' function.
- */
+ * remote client.  The interface to this function is exactly the same as the
+ * standard 'printf' function.
+ *
+ ******************************************************************************/
 
-/******************************************************************************/
-/******************************************************************************/
+/******************************************************************************
+ * simple helloWorld command that just prints out all the passed in arguments
+ ******************************************************************************/
 void helloWorld(int argc, char *argv[])
 {
   pshell_printf("helloWorld command dispatched:\n");
@@ -71,8 +81,18 @@ void helloWorld(int argc, char *argv[])
   }
 }
 
-/******************************************************************************/
-/******************************************************************************/
+/******************************************************************************
+ * this command shows matching the passed command arguments based on substring
+ * matching rather than matching on the complete exact string, the minimum
+ * number of characters that must be matched is the last argument to the
+ * pshell_isSubString function, this must be the minimum number of characters
+ * necessary to uniquely identify the argument from the complete argument list
+ *
+ * NOTE: This technique could have been used in the previous example for the
+ *       "wheel" and "dots" arguments to provide for wildcarding of those
+ *       arguments.  In the above example, as written, the entire string of
+ *       "dots" or "wheel" must be enter to be accepted.
+ ******************************************************************************/
 void wildcardMatch(int argc, char *argv[])
 {
   if (pshell_isHelp())
@@ -129,18 +149,15 @@ void wildcardMatch(int argc, char *argv[])
   }
 }
 
-/*
- * if a command is registered with the "showUsage" flag set to "false"
- * the PshellServer will invoke the command when the user types a "?" or
- * "-h" rather than automatically giving the registered usage, the callback
- * command can then see if the user asked for help (i.e. typed a "?" or
- * "-h") by calling pshell_isHelp, the user can then display the standard
- * registered usage with the pshell_showUsage call and then give some
- * optional enhanced usage with the pshell_printf call
- */
-
-/******************************************************************************/
-/******************************************************************************/
+/******************************************************************************
+ * this command shows a command that is registered with the "showUsage" flag
+ * set to "false", the PshellServer will invoke the command when the user types
+ * a "?" or "-h" rather than automatically giving the registered usage, the
+ * callback command can then see if the user asked for help (i.e. typed a "?"
+ * or "-h") by calling pshell_isHelp, the user can then display the standard
+ * registered usage with the pshell_showUsage call and then give some optional
+ * enhanced usage with the pshell_printf call
+ ******************************************************************************/
 void enhancedUsage(int argc, char *argv[])
 {
 
@@ -163,19 +180,24 @@ void enhancedUsage(int argc, char *argv[])
   }
 }
 
-/*
- * this function demonstrates the various helper functions that assist
- * in the interpretation and conversion of command line arguments
- */
-
-/******************************************************************************/
-/******************************************************************************/
+/******************************************************************************
+ * this function demonstrates the various helper functions that assist in the
+ * interpretation and conversion of command line arguments
+ ******************************************************************************/
 void formatChecking(int argc, char *argv[])
 {
 
   pshell_printf("formatChecking command dispatched:\n");
 
-  if (pshell_isDec(argv[0]))
+  if (pshell_isIpv4Addr(argv[0]))
+  {
+    pshell_printf("IPv4 address entered: '%s' entered\n", argv[0]);
+  }
+  else if (pshell_isIpv4AddrWithNetmask(argv[0]))
+  {
+    pshell_printf("IPv4 address/netmask entered: '%s' entered\n", argv[0]);
+  }
+  else if (pshell_isDec(argv[0]))
   {
     pshell_printf("Decimal arg: %d entered\n", pshell_getUnsigned(argv[0]));
   }
@@ -205,92 +227,83 @@ void formatChecking(int argc, char *argv[])
   }
 }
 
-/* function to show advanced command line parsing using the pshell_tokenize function */
-
-#define MAX_YEAR   3000
-#define MAX_MONTH  12
-#define MAX_DAY    31
-#define MAX_HOUR   23
-#define MAX_MINUTE 59
-#define MAX_SECOND 59
-
-/******************************************************************************/
-/******************************************************************************/
+/******************************************************************************
+ * function to show advanced command line parsing using the pshell_tokenize
+ * function
+ ******************************************************************************/
 void advancedParsing(int argc, char *argv[])
 {
-  PshellTokens *timestamp = pshell_tokenize(argv[0], ":");
+  PshellTokens *date = pshell_tokenize(argv[0], "/");
+  PshellTokens *time = pshell_tokenize(argv[1], ":");
 
-  if (timestamp->numTokens != 6)
+  if ((date->numTokens != 3) || (time->numTokens != 3))
   {
     pshell_printf("ERROR: Improper timestamp format!!\n");
     pshell_showUsage();
   }
-  else if (!pshell_isDec(timestamp->tokens[0]) ||
-           (pshell_getInt(timestamp->tokens[0]) > MAX_YEAR))
-  {
-    pshell_printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[0],
-                  MAX_YEAR);
-  }
-  else if (!pshell_isDec(timestamp->tokens[1]) ||
-           (pshell_getInt(timestamp->tokens[1]) > MAX_MONTH))
+  else if (!pshell_isDec(date->tokens[0]) ||
+      (pshell_getInt(date->tokens[0]) > MAX_MONTH))
   {
     pshell_printf("ERROR: Invalid month: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[1],
+                  date->tokens[0],
                   MAX_MONTH);
   }
-  else if (!pshell_isDec(timestamp->tokens[2]) ||
-           (pshell_getInt(timestamp->tokens[2]) > MAX_DAY))
+  else if (!pshell_isDec(date->tokens[1]) ||
+           (pshell_getInt(date->tokens[1]) > MAX_DAY))
   {
     pshell_printf("ERROR: Invalid day: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[2],
+                  date->tokens[1],
                   MAX_DAY);
   }
-  else if (!pshell_isDec(timestamp->tokens[3]) ||
-           (pshell_getInt(timestamp->tokens[3]) > MAX_HOUR))
+  else if (!pshell_isDec(date->tokens[2]) ||
+           (pshell_getInt(date->tokens[2]) > MAX_YEAR))
+  {
+    pshell_printf("ERROR: Invalid year: %s, must be numeric value <= %d\n",
+                  date->tokens[2],
+                  MAX_YEAR);
+  }
+  else if (!pshell_isDec(time->tokens[0]) ||
+           (pshell_getInt(time->tokens[0]) > MAX_HOUR))
   {
     pshell_printf("ERROR: Invalid hour: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[3],
+                  time->tokens[0],
                   MAX_HOUR);
   }
-  else if (!pshell_isDec(timestamp->tokens[4]) ||
-           (pshell_getInt(timestamp->tokens[4]) > MAX_MINUTE))
+  else if (!pshell_isDec(time->tokens[1]) ||
+           (pshell_getInt(time->tokens[1]) > MAX_MINUTE))
   {
     pshell_printf("ERROR: Invalid minute: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[4],
+                  time->tokens[1],
                   MAX_MINUTE);
   }
-  else if (!pshell_isDec(timestamp->tokens[5]) ||
-           (pshell_getInt(timestamp->tokens[5]) > MAX_SECOND))
+  else if (!pshell_isDec(time->tokens[2]) ||
+           (pshell_getInt(time->tokens[2]) > MAX_SECOND))
   {
     pshell_printf("ERROR: Invalid second: %s, must be numeric value <= %d\n",
-                  timestamp->tokens[5],
+                  time->tokens[2],
                   MAX_SECOND);
   }
   else
   {
-    pshell_printf("Year   : %s\n", timestamp->tokens[0]);
-    pshell_printf("Month  : %s\n", timestamp->tokens[1]);
-    pshell_printf("Day    : %s\n", timestamp->tokens[2]);
-    pshell_printf("Hour   : %s\n", timestamp->tokens[3]);
-    pshell_printf("Minute : %s\n", timestamp->tokens[4]);
-    pshell_printf("Second : %s\n", timestamp->tokens[5]);
+    pshell_printf("Month  : %s\n", date->tokens[0]);
+    pshell_printf("Day    : %s\n", date->tokens[1]);
+    pshell_printf("Year   : %s\n", date->tokens[2]);
+    pshell_printf("Hour   : %s\n", time->tokens[0]);
+    pshell_printf("Minute : %s\n", time->tokens[1]);
+    pshell_printf("Second : %s\n", time->tokens[2]);
   }
 }
 
-/*
+/******************************************************************************
  * function that shows the extraction of arg options using the pshell_getOption
- * function,the fromat of the options are either -<option><value> where <option>
+ * function,the format of the options are either -<option><value> where <option>
  * is a single character option (e.g. -t10), or <option>=<value> where <option>
- * is any length character string (e.g. timeout=10), if the 'strlen(option_)'
- * is == 0, all option names & values will be extracted and returned in the
- * 'option_' and 'value_' parameters, if the 'strlen(option_)' is > 0, the
- * 'value_' will only be extracted if the option matches the requested option_
- * name,
- */
-
-/******************************************************************************/
-/******************************************************************************/
+ * is any length character string (e.g. timeout=10), if the 'strlen(option)'
+ *  == 0, all option names & values will be extracted and returned in the
+ * 'option' and 'value' parameters, if the 'strlen(option)' is > 0, the
+ * 'value' will only be extracted if the option matches the requested option
+ * name
+ ******************************************************************************/
 void getOptions(int argc, char *argv[])
 {
   char returnedOption[40];
@@ -386,9 +399,9 @@ int main(int argc, char *argv[])
   pshell_addCommand(advancedParsing,                                /* function */
                     "advancedParsing",                              /* command */
                     "command with advanced command line parsing",   /* description */
-                    "<yyyy>:<mm>:<dd>:<hh>:<mm>:<ss>",              /* usage */
-                    1,                                              /* minArgs */
-                    1,                                              /* maxArgs */
+                    "<mm>/<dd>/<yyyy> <hh>:<mm>:<ss>",              /* usage */
+                    2,                                              /* minArgs */
+                    2,                                              /* maxArgs */
                     true);                                          /* showUsage on "?" */
 
   pshell_addCommand(getOptions,                                  /* function */

@@ -376,7 +376,7 @@ void advancedParsing(int argc, char *argv[])
 /******************************************************************************
  * function to show output value that change frequently, this is used to
  * illustrate the command line mode with a repeated rate and an optional clear
- * screen between iterations, using command line mode in thie way along with a
+ * screen between iterations, using command line mode in this way along with a
  * function with dynamically changing output information will produce a display
  * similar to the familiar "top" display command output
  ******************************************************************************/
