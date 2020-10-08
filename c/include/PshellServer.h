@@ -263,7 +263,8 @@ void pshell_flush(void);
 
 /*
  * these helper commands are used to keep the UDP/UNIX client alive with output
- * if a command is known to take longer than the 5 second client timeout
+ * if a command is known to take longer than the 5 second client timeout or to
+ * show general command progress
  */
 void pshell_wheel(const char *string_ = NULL);  /* spinning ascii wheel, user string is optional */
 void pshell_march(const char *string_);         /* march a string or character across the screen */

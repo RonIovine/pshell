@@ -89,15 +89,15 @@ a PSHELL callback function
 
 printf()    -- display a message from a pshell callback function to the client
 flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
-wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive
-march()     -- marching ascii character to keep UDP/UNIX client alive
+wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive or show progress
+march()     -- marching ascii character to keep UDP/UNIX client alive or show progress
 showUsage() -- show the usage the command is registered with
 isHelp()    -- checks if the user has requested help on this command
 getOption() -- parses arg of format -<key><value> or <key>=<value>
 
 Integer constants:
 
-These are the identifiers for the serverMode.  BLOCKING wil never return
+These are the identifiers for the serverMode.  BLOCKING will never return
 control to the caller of startServer, NON_BLOCKING will spawn a thread to
 run the server and will return control to the caller of startServer
 
@@ -179,7 +179,7 @@ TCP = "tcp"
 UNIX = "unix"
 LOCAL = "local"
 
-# These are the identifiers for the serverMode.  BLOCKING wil never return
+# These are the identifiers for the serverMode.  BLOCKING will never return
 # control to the caller of startServer, NON_BLOCKING will spawn a thread to
 # run the server and will return control to the caller of startServer
 BLOCKING = 0

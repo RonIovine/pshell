@@ -56,7 +56,7 @@ const (
   LOCAL = "local"
 )
 
-// These are the identifiers for the serverMode.  BLOCKING wil never return
+// These are the identifiers for the serverMode.  BLOCKING will never return
 // control to the caller of startServer, NON_BLOCKING will spawn a thread to
 // run the server and will return control to the caller of startServer
 const (

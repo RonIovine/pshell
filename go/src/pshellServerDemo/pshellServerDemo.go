@@ -90,7 +90,8 @@ func helloWorld(argv []string) {
 // a default 5 second timeout, if a command will be known to take longer than
 // 5 seconds, it must give some kind of output back to the client, this shows
 // the two helper functions created the assist in this, the TCP client does not
-// need a keep alive since the TCP protocol itself handles that
+// need a keep alive since the TCP protocol itself handles that, but it can be
+// handy to show general command progress for commands that take a long time
 ////////////////////////////////////////////////////////////////////////////////
 func keepAlive(argv []string) {
   if (PshellServer.IsHelp()) {
@@ -442,17 +443,13 @@ func main() {
                           20,                                    // maxArgs
                           true)                                  // showUsage on '?'
 
-  // TCP or LOCAL servers don't need a keep-alive, so only add
-  // this command for connectionless datagram type servers
-  if ((serverType == PshellServer.UDP) || (serverType == PshellServer.UNIX)) {
-    PshellServer.AddCommand(keepAlive,                                               // function
-                            "keepAlive",                                             // command
-                            "command to show client keep-alive ('C' client only)",   // description
-                            "dots | bang | pound | wheel",                           // usage
-                            1,                                                       // minArgs
-                            1,                                                       // maxArgs
-                            false)                                                   // showUsage on '?'
-  }
+  PshellServer.AddCommand(keepAlive,                                               // function
+                          "keepAlive",                                             // command
+                          "command to show client keep-alive ('C' client only)",   // description
+                          "dots | bang | pound | wheel",                           // usage
+                          1,                                                       // minArgs
+                          1,                                                       // maxArgs
+                          false)                                                   // showUsage on '?'
 
   PshellServer.AddCommand(wildcardMatch,                            // function
                           "wildcardMatch",                          // command

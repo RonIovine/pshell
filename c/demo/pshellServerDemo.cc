@@ -97,7 +97,8 @@ void helloWorld(int argc, char *argv[])
  * a default 5 second timeout, if a command will be known to take longer than
  * 5 seconds, it must give some kind of output back to the client, this shows
  * the two helper functions created the assist in this, the TCP client does not
- * need a keep alive since the TCP protocol itself handles that
+ * need a keep alive since the TCP protocol itself handles that, but it can be
+* handy to show general command progress for commands that take a long time
  ******************************************************************************/
 void keepAlive(int argc, char *argv[])
 {
@@ -574,16 +575,13 @@ int main(int argc, char *argv[])
                     20,                                   /* maxArgs */
                     true);                                /* showUsage on "?" */
 
-  if ((serverType == PSHELL_UDP_SERVER) || (serverType == PSHELL_UNIX_SERVER))
-  {
-    pshell_addCommand(keepAlive,                                              /* function */
-                      "keepAlive",                                            /* command */
-                      "command to show client keep-alive ('C' client only)",  /* description */
-                      "dots | bang | pound | wheel",                          /* usage */
-                      1,                                                      /* minArgs */
-                      1,                                                      /* maxArgs */
-                      false);                                                 /* showUsage on "?" */
-  }
+  pshell_addCommand(keepAlive,                                              /* function */
+                    "keepAlive",                                            /* command */
+                    "command to show client keep-alive ('C' client only)",  /* description */
+                    "dots | bang | pound | wheel",                          /* usage */
+                    1,                                                      /* minArgs */
+                    1,                                                      /* maxArgs */
+                    false);                                                 /* showUsage on "?" */
 
   pshell_addCommand(wildcardMatch,                            /* function */
                     "wildcardMatch",                          /* command */

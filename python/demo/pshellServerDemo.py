@@ -85,7 +85,8 @@ def helloWorld(argv):
 # a default 5 second timeout, if a command will be known to take longer than
 # 5 seconds, it must give some kind of output back to the client, this shows
 # the two helper functions created the assist in this, the TCP client does not
-# need a keep alive since the TCP protocol itself handles that
+# need a keep alive since the TCP protocol itself handles that, but it can be
+# handy to show general command progress for commands that take a long time
 #################################################################################
 def keepAlive(argv):
   if (PshellServer.isHelp()):
@@ -396,15 +397,12 @@ if (__name__ == '__main__'):
                           minArgs     = 0,
                           maxArgs     = 20)
 
-  # TCP or LOCAL servers don't need a keep-alive, so only add
-  # this command for connectionless datagram type servers
-  if ((serverType == PshellServer.UDP) or (serverType == PshellServer.UNIX)):
-    PshellServer.addCommand(function    = keepAlive,
-                            command     = "keepAlive",
-                            description = "command to show client keep-alive ('C' client only)",
-                            usage       = "dots | bang | pound | wheel",
-                            minArgs     = 1,
-                            showUsage   = False)
+  PshellServer.addCommand(function    = keepAlive,
+                          command     = "keepAlive",
+                          description = "command to show client keep-alive ('C' client only)",
+                          usage       = "dots | bang | pound | wheel",
+                          minArgs     = 1,
+                          showUsage   = False)
 
   PshellServer.addCommand(function    = wildcardMatch,
                           command     = "wildcardMatch",
