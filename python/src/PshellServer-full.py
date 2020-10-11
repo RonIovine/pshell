@@ -1648,7 +1648,7 @@ def _showWelcome():
     printf("#  The default timeout for all commands can be changed")
     printf("#  by using the -t<timeout> option with no command, to")
     printf("#  display the current default timeout, just use -t")
-  printf("#")
+    printf("#")
   printf("#  Type '?' or 'help' at prompt for command summary")
   printf("#  Type '?' or '-h' after command for command usage")
   printf("#")
