@@ -80,7 +80,11 @@ char dynamicValue[80] = {"0"};
  ******************************************************************************/
 
 /******************************************************************************
- * simple helloWorld command that just prints out all the passed in arguments
+ *
+ * helloWorld:
+ *
+ * Simple helloWorld command that just prints out all the passed in arguments
+ *
  ******************************************************************************/
 void helloWorld(int argc, char *argv[])
 {
@@ -93,12 +97,16 @@ void helloWorld(int argc, char *argv[])
 }
 
 /******************************************************************************
- * this command shows an example client keep alive, the PSHELL UDP client has
+ *
+ * keepAlive:
+ *
+ * This command shows an example client keep alive, the PSHELL UDP client has
  * a default 5 second timeout, if a command will be known to take longer than
  * 5 seconds, it must give some kind of output back to the client, this shows
  * the two helper functions created the assist in this, the TCP client does not
  * need a keep alive since the TCP protocol itself handles that, but it can be
-* handy to show general command progress for commands that take a long time
+ * handy to show general command progress for commands that take a long time
+ *
  ******************************************************************************/
 void keepAlive(int argc, char *argv[])
 {
@@ -162,7 +170,10 @@ void keepAlive(int argc, char *argv[])
 }
 
 /******************************************************************************
- * this command shows matching the passed command arguments based on substring
+ *
+ * wildcardMatch:
+ *
+ * This command shows matching the passed command arguments based on substring
  * matching rather than matching on the complete exact string, the minimum
  * number of characters that must be matched is the last argument to the
  * pshell_isSubString function, this must be the minimum number of characters
@@ -172,6 +183,7 @@ void keepAlive(int argc, char *argv[])
  *       "wheel" and "dots" arguments to provide for wildcarding of those
  *       arguments.  In the above example, as written, the entire string of
  *       "dots" or "wheel" must be enter to be accepted.
+ *
  ******************************************************************************/
 void wildcardMatch(int argc, char *argv[])
 {
@@ -230,13 +242,17 @@ void wildcardMatch(int argc, char *argv[])
 }
 
 /******************************************************************************
- * this command shows a command that is registered with the "showUsage" flag
+ *
+ * enhancedUsage:
+ *
+ * This command shows a command that is registered with the "showUsage" flag
  * set to "false", the PshellServer will invoke the command when the user types
  * a "?" or "-h" rather than automatically giving the registered usage, the
  * callback command can then see if the user asked for help (i.e. typed a "?"
  * or "-h") by calling pshell_isHelp, the user can then display the standard
  * registered usage with the pshell_showUsage call and then give some optional
  * enhanced usage with the pshell_printf call
+ *
  ******************************************************************************/
 void enhancedUsage(int argc, char *argv[])
 {
@@ -261,8 +277,12 @@ void enhancedUsage(int argc, char *argv[])
 }
 
 /******************************************************************************
- * this function demonstrates the various helper functions that assist in the
+ *
+ * formatChecking:
+ *
+ * This function demonstrates the various helper functions that assist in the
  * interpretation and conversion of command line arguments
+ *
  ******************************************************************************/
 void formatChecking(int argc, char *argv[])
 {
@@ -308,8 +328,12 @@ void formatChecking(int argc, char *argv[])
 }
 
 /******************************************************************************
- * function to show advanced command line parsing using the pshell_tokenize
+ *
+ * advancedParsing:
+ *
+ * This function shows advanced command line parsing using the pshell_tokenize
  * function
+ *
  ******************************************************************************/
 void advancedParsing(int argc, char *argv[])
 {
@@ -375,11 +399,15 @@ void advancedParsing(int argc, char *argv[])
 }
 
 /******************************************************************************
- * function to show output value that change frequently, this is used to
+ *
+ * dynamicOutput:
+ *
+ * This function showas an output value that change frequently, this is used to
  * illustrate the command line mode with a repeated rate and an optional clear
  * screen between iterations, using command line mode in this way along with a
  * function with dynamically changing output information will produce a display
  * similar to the familiar "top" display command output
+ *
  ******************************************************************************/
 void dynamicOutput(int argc, char *argv[])
 {
@@ -410,7 +438,10 @@ void dynamicOutput(int argc, char *argv[])
 }
 
 /******************************************************************************
- * function that shows the extraction of arg options using the pshell_getOption
+ *
+ * getOptions:
+ *
+ * This function shows the extraction of arg options using the pshell_getOption
  * function,the format of the options are either -<option><value> where <option>
  * is a single character option (e.g. -t10), or <option>=<value> where <option>
  * is any length character string (e.g. timeout=10), if the 'strlen(option)'
@@ -418,6 +449,7 @@ void dynamicOutput(int argc, char *argv[])
  * 'option' and 'value' parameters, if the 'strlen(option)' is > 0, the
  * 'value' will only be extracted if the option matches the requested option
  * name
+ *
  ******************************************************************************/
 void getOptions(int argc, char *argv[])
 {
