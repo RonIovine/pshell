@@ -151,7 +151,7 @@ gProfilesDelta = []
 #####################################################
 def showUsage():
   print("")
-  print("Usage: logProfiler [<logfile1>[:<appId>] [<logfile2>[:<appId>]...<logfileN>[:<appId>]]]")
+  print("Usage: logProfiler [<logfile1>[:<appId>] <logfile2>[:<appId>]...<logfileN>[:<appId>]]")
   print("")
   print("  where:")
   print("    <appId> : Specify an app filter (process name or pid)")
