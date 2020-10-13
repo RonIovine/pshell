@@ -496,6 +496,18 @@ def updateProfile(profiles, prevLine, currLine):
 
 #####################################################
 #
+# see if a profile already exists for the requested logfile
+#
+#####################################################
+def profileExists(logfile):
+  global gProfiles
+  for profile in gProfiles:
+    if profile["logfile"] == logfile:
+      return True
+  return False
+
+#####################################################
+#
 # creates the specified profile
 #
 #####################################################
@@ -514,15 +526,20 @@ def createProfile(logfile):
   else:
     logfile1 = logfile
     appFilter = gNoFilter
-  if (os.path.isfile(logfile)):
-    # create a new profile  for this logfile
+  if profileExists(logfile1):
+    print("ERROR: profile already exists for logfile: '%s'" % logfile)
+    return (False)
+  elif not os.path.isfile(logfile):
+    print("ERROR: logfile: '%s' not found" % logfile)
+    return (False)
+  else:
+    # ok to create a new profile  for this logfile
     profile = {"logfile":logfile1,
                "appFilter":appFilter,
                "contents":open(logfile, 'r').readlines(),
                "totTime":datetime.timedelta(0),
                "profiledTime":datetime.timedelta(0),
                "profile":[]}
-    print("")
     sys.stdout.write("Creating run time profile from logfile: %s, please wait...processing line: " % logfile)
     numLines = 0
     currLine = None
@@ -543,11 +560,8 @@ def createProfile(logfile):
     calculateStdDeviation(profile["profile"])
     # add new profile to our profile list
     gProfiles.append(profile)
-    return (True)
-  else:
     print("")
-    print("ERROR: logfile: '%s' not found..." % logfile)
-    return (False)
+    return (True)
 
 #####################################################
 #
@@ -1110,9 +1124,9 @@ def getInput():
         print("    <appId> : Specify an app filter (process name or pid)")
         print("")
       else:
+        print("")
         for logfile in args[1:]:
           createProfile(logfile)
-        print("")
         print("")
     elif (PshellReadline.isSubString(args[0], "show")):
       outfile = "none"
@@ -1300,6 +1314,5 @@ if (__name__ == '__main__'):
     if len(sys.argv) > 1:
       for logfile in sys.argv[1:]:
         createProfile(logfile)
-      print("")
       print("")
     getInput()
