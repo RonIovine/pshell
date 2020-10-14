@@ -611,7 +611,7 @@ def getCountDisplay(count, labelLength):
 # shows the current profile
 #
 #####################################################
-def showProfile(profiles, outfile, option, count, fileFilter, functionFilter):
+def showProfile(profiles, outfile, sort, direction, count, fileFilter, functionFilter):
   global gBanner
   global gBannerLength
 
@@ -660,20 +660,20 @@ def showProfile(profiles, outfile, option, count, fileFilter, functionFilter):
     gClearStatusUpdate = "\n"
 
   # see if we need to sort our profile
-  if (option == "max"):
-    profiles["profile"].sort(key=operator.itemgetter('max'), reverse=True)
-  elif (option == "min"):
-    profiles["profile"].sort(key=operator.itemgetter('min'), reverse=True)
-  elif (option == "avg"):
-    profiles["profile"].sort(key=operator.itemgetter('avg'), reverse=True)
-  elif (option == "med"):
-    profiles["profile"].sort(key=operator.itemgetter('med'), reverse=True)
-  elif (option == "std"):
-    profiles["profile"].sort(key=operator.itemgetter('stdDev'), reverse=True)
-  elif (option == "tot"):
-    profiles["profile"].sort(key=operator.itemgetter('tot'), reverse=True)
-  elif (option == "count"):
-    profiles["profile"].sort(key=operator.itemgetter('count'), reverse=True)
+  if (sort == "max"):
+    profiles["profile"].sort(key=operator.itemgetter('max'), reverse=direction)
+  elif (sort == "min"):
+    profiles["profile"].sort(key=operator.itemgetter('min'), reverse=direction)
+  elif (sort == "avg"):
+    profiles["profile"].sort(key=operator.itemgetter('avg'), reverse=direction)
+  elif (sort == "med"):
+    profiles["profile"].sort(key=operator.itemgetter('med'), reverse=direction)
+  elif (sort == "std"):
+    profiles["profile"].sort(key=operator.itemgetter('stdDev'), reverse=direction)
+  elif (sort == "tot"):
+    profiles["profile"].sort(key=operator.itemgetter('tot'), reverse=direction)
+  elif (sort == "count"):
+    profiles["profile"].sort(key=operator.itemgetter('count'), reverse=direction)
 
   maxAreaWidth1 = gMinArea1Width
   maxAreaWidth2 = gMinArea2Width
@@ -1145,7 +1145,7 @@ def getInput():
       idList = []
       if len(args) == 1 or isHelp(args[1]):
         print("")
-        print("Usage: show {profiles | {[profiles=<idList>] [sort=<sortType>] [disp=<count>] [file=<name>] [func=<name>] [out=<outfile>] [delta=<time>] [diff=<type>]}}")
+        print("Usage: show {profiles | {[profiles=<idList>] [sort=<sortType>] [dir=<sortDir>] [disp=<count>] [file=<name>] [func=<name>] [out=<outfile>] [delta=<time>] [diff=<type>]}}")
         print("")
         print("  where:")
         print("    profiles   : Show a list of all profiled logfiles or specify profile <idList>")
@@ -1156,15 +1156,18 @@ def getInput():
         print("    out        : Specify an output file to write the results")
         print("    diff       : Compute diff between two profiles")
         print("    delta      : Show all areas that are >= specified time")
-        print("    <idList>   : List of profile IDs to process (default=1)")
+        print("    <idList>   : CSV list of profile IDs to process (default=1)")
         print("    <sortType> : Desired sort type")
-        print("      tot      : Sort highest to lowest total time")
-        print("      min      : Sort highest to lowest minimum time")
-        print("      max      : Sort highest to lowest maximum time")
-        print("      avg      : Sort highest to lowest average time")
-        print("      med      : Sort highest to lowest median time")
-        print("      std      : Sort highest to lowest standard deviation time")
-        print("      count    : Sort highest to lowest occurance count")
+        print("      tot      : Sort on total time in <sortDir>")
+        print("      min      : Sort on minimum time in <sortDir>")
+        print("      max      : Sort on maximum time in <sortDir>")
+        print("      avg      : Sort on average time in <sortDir>")
+        print("      med      : Sort on median time in <sortDir>")
+        print("      std      : Sort on standard deviation in <sortDir>")
+        print("      count    : Sort on occurance count in <sortDir>")
+        print("    <sortDir>  : Desired sort direction")
+        print("      high     : Sort highest to lowest (default)")
+        print("      low      : Sort lowest to highest")
         print("    <count>    : The number of entries to display")
         print("    <name>     : Name (or substring) of file/function display filter")
         print("    <type>     : The desired diff type, valid values are 'percent' and 'time'")
@@ -1184,6 +1187,7 @@ def getInput():
         continue
       else:
         validInput = True
+        direction = "high"
         for arg in args[1:]:
           option = arg.split("=")
           if (len(option) == 2):
@@ -1221,6 +1225,13 @@ def getInput():
             elif (PshellReadline.isSubString(option[0], "delta", 2)):
               maxTimeDelta = option[1]
               deltaRequested = True
+            elif (PshellReadline.isSubString(option[0], "dir", 3)):
+              if option[1] == "low" or option[1] == "high":
+                direction = option[1]
+              else:
+                print("ERROR: Invalid sort direction: '%s'" % option[1])
+                validInput = False
+                break
             elif (PshellReadline.isSubString(option[0], "diff", 3)):
               gDiffRequested = True
               if (option[1] in gValidDiffs):
@@ -1253,12 +1264,12 @@ def getInput():
         elif (gDiffRequested):
           if (len(idList) == 2):
             diffProfiles(gProfiles[idList[0]], gProfiles[idList[1]])
-            showProfile(gProfilesDiff, outfile, sort, count, fileFilter, functionFilter)
+            showProfile(gProfilesDiff, outfile, sort, (direction == "high"), count, fileFilter, functionFilter)
           else:
             print("ERROR: Diff must supply exactly two profile IDs")
         elif (len(gProfiles) > 0):
           for id in idList:
-            showProfile(gProfiles[id], outfile, sort, count, fileFilter, functionFilter)
+            showProfile(gProfiles[id], outfile, sort, (direction == "high"), count, fileFilter, functionFilter)
 
 ##################################
 #
