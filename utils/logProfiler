@@ -985,15 +985,11 @@ def createDelta(profile, maxTimeDelta):
 # show all areas whose time delta is >= specified time
 #
 #######################################################
-def showDelta(outfile, option, count):
+def showDelta(outfile, direction, count):
   global gNoFilter
   global gProfilesDelta
 
-  # see if we need to sort our profile
-  if (option == "max"):
-    gProfilesDelta["delta"].sort(key=operator.itemgetter('delta'), reverse=True)
-  elif (option == "min"):
-    gProfilesDelta["delta"].sort(key=operator.itemgetter('delta'), reverse=False)
+  gProfilesDelta["delta"].sort(key=operator.itemgetter('delta'), reverse=direction)
   maxTimeDeltaDiff = 0.0
   minTimeDeltaDiff = sys.float_info.max
   if (outfile == "none"):
@@ -1145,7 +1141,7 @@ def getInput():
       idList = []
       if len(args) == 1 or isHelp(args[1]):
         print("")
-        print("Usage: show {profiles | {[profiles=<idList>] [sort=<sortType>] [dir=<sortDir>] [disp=<count>] [file=<name>] [func=<name>] [out=<outfile>] [delta=<time>] [diff=<type>]}}")
+        print("Usage: show {profiles | {[profiles=<idList>] [sort=<sortType>] [dir=<sortDir>] [disp=<count>] [file=<name>] [func=<name>] [out=<file>] [delta=<time>] [diff=<diffType>]}}")
         print("")
         print("  where:")
         print("    profiles   : Show a list of all profiled logfiles or specify profile <idList>")
@@ -1154,8 +1150,8 @@ def getInput():
         print("    file       : Specify a file name display filter")
         print("    func       : Specify a function name display filter")
         print("    out        : Specify an output file to write the results")
-        print("    diff       : Compute diff between two profiles")
         print("    delta      : Show all areas that are >= specified time")
+        print("    diff       : Compute diff between two profiles")
         print("    <idList>   : CSV list of profile IDs to process (default=1)")
         print("    <sortType> : Desired sort type")
         print("      tot      : Sort on total time in <sortDir>")
@@ -1170,16 +1166,18 @@ def getInput():
         print("      low      : Sort lowest to highest")
         print("    <count>    : The number of entries to display")
         print("    <name>     : Name (or substring) of file/function display filter")
-        print("    <type>     : The desired diff type, valid values are 'percent' and 'time'")
         print("    <time>     : The time delta in seconds (float)")
-        print("    <outfile>  : Name of the output file to write the results")
+        print("    <file>     : Name of the output file to write the results")
+        print("    <diffType> : The desired diff type")
+        print("      percent  : Show the diff in terms of percent")
+        print("      time     : Show the diff in terms of time (usec)")
         print("")
         print("  NOTES:")
         print("")
         print("    If doing a non-diff profile, as many profile IDs can be given as desired,")
         print("    for a 'diff' based profile, exactly two profile IDs must be given, for a")
         print("    time 'delta' based analysis, only one profile ID should be provided and")
-        print("    the only sort optoins are 'min' and 'max'")
+        print("    the only sort options are 'high' and 'low'")
         print("")
         continue
       elif (PshellReadline.isSubString(args[1], "profiles")):
@@ -1260,7 +1258,7 @@ def getInput():
             print("ERROR: Sort option: %s not allowed for delta, only min, or max allowed" % sort)
           else:
             createDelta(gProfiles[idList[0]], float(maxTimeDelta))
-            showDelta(outfile, sort, count)
+            showDelta(outfile, (direction == "high"), count)
         elif (gDiffRequested):
           if (len(idList) == 2):
             diffProfiles(gProfiles[idList[0]], gProfiles[idList[1]])
