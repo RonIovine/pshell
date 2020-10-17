@@ -978,7 +978,7 @@ def createDelta(profile, maxTimeDelta):
                                             "lineNum2":currLineNum,
                                             "line2":currLine.strip(),
                                             "delta":timestampDiff})
-  sys.stdout.write("\n")
+  sys.stdout.write("\n\n")
 
 #######################################################
 #
@@ -993,8 +993,12 @@ def showDelta(outfile, direction, count):
   maxTimeDeltaDiff = 0.0
   minTimeDeltaDiff = sys.float_info.max
   if (outfile == "none"):
+    highlight = gHighlight
+    normal = gNormal
     outfile = sys.stdout
   else:
+    highlight = ""
+    normal = ""
     outfile = open(outfile, "w+")
   numDisplayed = 0
   outfile.write("\n")
@@ -1007,8 +1011,8 @@ def showDelta(outfile, direction, count):
       outfile.write("\n")
       outfile.write("Time Delta (sec): %f\n" % profile["delta"])
       outfile.write("===============================\n")
-      outfile.write("%s%d:%s %s\n" % (gHighlight, profile["lineNum1"], gNormal, profile["line1"]))
-      outfile.write("%s%d:%s %s\n" % (gHighlight, profile["lineNum2"], gNormal, profile["line2"]))
+      outfile.write("%s%d:%s %s\n" % (highlight, profile["lineNum1"], normal, profile["line1"]))
+      outfile.write("%s%d:%s %s\n" % (highlight, profile["lineNum2"], normal, profile["line2"]))
       numDisplayed += 1
       if (profile["delta"] > maxTimeDeltaDiff):
         maxTimeDeltaDiff = profile["delta"]
