@@ -64,7 +64,7 @@
 #define MAX_MINUTE 59
 #define MAX_SECOND 59
 
-/* dynamic value used for the dunamicOutput function */
+/* dynamic value used for the dynamicOutput function */
 char dynamicValue[80] = {"0"};
 
 /******************************************************************************
@@ -291,11 +291,11 @@ void formatChecking(int argc, char *argv[])
 
   if (pshell_isIpv4Addr(argv[0]))
   {
-    pshell_printf("IPv4 address entered: '%s' entered\n", argv[0]);
+    pshell_printf("IPv4 address: '%s' entered\n", argv[0]);
   }
   else if (pshell_isIpv4AddrWithNetmask(argv[0]))
   {
-    pshell_printf("IPv4 address/netmask entered: '%s' entered\n", argv[0]);
+    pshell_printf("IPv4 address/netmask: '%s' entered\n", argv[0]);
   }
   else if (pshell_isDec(argv[0]))
   {
@@ -402,7 +402,7 @@ void advancedParsing(int argc, char *argv[])
  *
  * dynamicOutput:
  *
- * This function showas an output value that change frequently, this is used to
+ * This function shows an output value that changes frequently, this is used to
  * illustrate the command line mode with a repeated rate and an optional clear
  * screen between iterations, using command line mode in this way along with a
  * function with dynamically changing output information will produce a display

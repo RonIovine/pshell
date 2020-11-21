@@ -56,7 +56,7 @@ MAX_HOUR   = 23
 MAX_MINUTE = 59
 MAX_SECOND = 59
 
-# dynamic value used for the dunamicOutput function
+# dynamic value used for the dynamicOutput function
 dynamicValue = "0"
 
 #################################################################################
@@ -227,9 +227,9 @@ def enhancedUsage(argv):
 def formatChecking(argv):
   PshellServer.printf("formatChecking command dispatched:")
   if PshellServer.isIpv4Addr(argv[0]):
-    PshellServer.printf("IPv4 address entered: '%s' entered" % argv[0])
+    PshellServer.printf("IPv4 address: '%s' entered" % argv[0])
   elif PshellServer.isIpv4AddrWithNetmask(argv[0]):
-    PshellServer.printf("IPv4 address/netmask entered: '%s' entered" % argv[0])
+    PshellServer.printf("IPv4 address/netmask: '%s' entered" % argv[0])
   elif PshellServer.isDec(argv[0]):
     PshellServer.printf("Decimal arg: %d entered" % PshellServer.getInt(argv[0]))
   elif PshellServer.isHex(argv[0]):
@@ -301,7 +301,7 @@ def advancedParsing(argv):
 #
 # dynamicOutput:
 #
-# This function show an output value that change frequently, this is used to
+# This function show an output value that changes frequently, this is used to
 # illustrate the command line mode with a repeated rate and an optional clear
 # screen between iterations, using command line mode in this way along with a
 # function with dynamically changing output information will produce a display
