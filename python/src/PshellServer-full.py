@@ -45,55 +45,58 @@ module can be controlled via the pshell UDP/UNIX stand-alone 'C' client program
 or via the PshellControl.h/libpshell-control, PshellControl.py control mechanism
 or the PshellControl.go module and API.
 
+A complete example of the usage of the API can be found in the included
+demo program pshellServerDemo.py.
+
 Functions:
 
 The main API calls to register PSHELL commands and start the server
 
-addCommand()       -- register a pshell command with the server
-startServer()      -- start the pshell server
-cleanupResources() -- release all resources claimed by the server
+  addCommand()       -- register a pshell command with the server
+  startServer()      -- start the pshell server
+  cleanupResources() -- release all resources claimed by the server
 
 Function to allow a parent application to call it's own PSHELL function
 
-runCommand() -- run a registered command from the parent (i.e. registering) program
+  runCommand() -- run a registered command from the parent (i.e. registering) program
 
 Functions to allow extraction of internal log messages from parent application
 
-setLogLevel()    -- set the internal log level for this module
-setLogFunction() -- register a user function to receive all logs
+  setLogLevel()    -- set the internal log level for this module
+  setLogFunction() -- register a user function to receive all logs
 
 Functions to help in argument parsing/extraction, even though many of these
 operations can easily be done with native Python constructs, they are provided
 here for consistency of the API across all language implementations
 
-tokenize()              -- parse a string based on token delimeters
-getLength()             -- return the string length
-isEqual()               -- compare two strings for equality, case sensitive
-isEqualNoCase()         -- compare two strings for equality, case insensitive
-isSubString()           -- checks for string1 substring of string2 at position 0, case sensitive
-isSubStringNoCase()     -- checks for string1 substring of string2 at position 0, case insensitive
-isFloat()               -- returns True if string is floating point
-isDec()                 -- returns True if string is dec
-isHex()                 -- returns True if string is hex, with or without the preceeding 0x
-isAlpha()               -- returns True if string is alphabetic
-isNumeric()             -- returns True if string isDec or isHex
-isAlphaNumeric()        -- returns True if string is alpha-numeric
-isIpv4Addr()            -- returns True if string is valid ipv4 address format
-isIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
-getBool()               -- returns True if string is 'true', 'yes', 'on'
-getInt()                -- return the integer value from the string
-getFloat()              -- return the float value from the string
+  tokenize()              -- parse a string based on token delimeters
+  getLength()             -- return the string length
+  isEqual()               -- compare two strings for equality, case sensitive
+  isEqualNoCase()         -- compare two strings for equality, case insensitive
+  isSubString()           -- checks for string1 substring of string2 at position 0, case sensitive
+  isSubStringNoCase()     -- checks for string1 substring of string2 at position 0, case insensitive
+  isFloat()               -- returns True if string is floating point
+  isDec()                 -- returns True if string is dec
+  isHex()                 -- returns True if string is hex, with or without the preceeding 0x
+  isAlpha()               -- returns True if string is alphabetic
+  isNumeric()             -- returns True if string isDec or isHex
+  isAlphaNumeric()        -- returns True if string is alpha-numeric
+  isIpv4Addr()            -- returns True if string is valid ipv4 address format
+  isIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+  getBool()               -- returns True if string is 'true', 'yes', 'on'
+  getInt()                -- return the integer value from the string
+  getFloat()              -- return the float value from the string
 
 The following commands should only be called from within the context of
 a PSHELL callback function
 
-printf()    -- display a message from a pshell callback function to the client
-flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
-wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive or show progress
-march()     -- marching ascii character to keep UDP/UNIX client alive or show progress
-showUsage() -- show the usage the command is registered with
-isHelp()    -- checks if the user has requested help on this command
-getOption() -- parses arg of format -<key><value> or <key>=<value>
+  printf()    -- display a message from a pshell callback function to the client
+  flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
+  wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive or show progress
+  march()     -- marching ascii character to keep UDP/UNIX client alive or show progress
+  showUsage() -- show the usage the command is registered with
+  isHelp()    -- checks if the user has requested help on this command
+  getOption() -- parses arg of format -<key><value> or <key>=<value>
 
 Integer constants:
 
@@ -101,26 +104,26 @@ These are the identifiers for the serverMode.  BLOCKING will never return
 control to the caller of startServer, NON_BLOCKING will spawn a thread to
 run the server and will return control to the caller of startServer
 
-BLOCKING
-NON_BLOCKING
+  BLOCKING
+  NON_BLOCKING
 
 Constants to let the host program set the internal debug log level,
 if the user of this API does not want to see any internal message
 printed out, set the debug log level to LOG_LEVEL_NONE, the default
 log level is LOG_LEVEL_ALL
 
-LOG_LEVEL_NONE
-LOG_LEVEL_ERROR
-LOG_LEVEL_WARNING
-LOG_LEVEL_INFO
-LOG_LEVEL_ALL
-LOG_LEVEL_DEFAULT
+  LOG_LEVEL_NONE
+  LOG_LEVEL_ERROR
+  LOG_LEVEL_WARNING
+  LOG_LEVEL_INFO
+  LOG_LEVEL_ALL
+  LOG_LEVEL_DEFAULT
 
 Used to specify the radix extraction format for the getInt() function
 
-RADIX_DEC
-RADIX_HEX
-RADIX_ANY
+  RADIX_DEC
+  RADIX_HEX
+  RADIX_ANY
 
 String constants:
 
@@ -129,10 +132,10 @@ client programs, TCP servers require a 'telnet' client, local servers
 require no client (all user interaction done directly with server running
 in the parent host program)
 
-UDP
-TCP
-UNIX
-LOCAL
+  UDP
+  TCP
+  UNIX
+  LOCAL
 
 These three identifiers that can be used for the hostnameOrIpAddr argument
 of the startServer call.  PshellServer.ANYHOST will bind the server socket
@@ -141,12 +144,9 @@ to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
 the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
 it also supported, e.g. x.y.z.255
 
-ANYHOST
-ANYBCAST
-LOCALHOST
-
-A complete example of the usage of the API can be found in the included
-demo program pshellServerDemo.py.
+  ANYHOST
+  ANYBCAST
+  LOCALHOST
 """
 
 # import all our necessary modules

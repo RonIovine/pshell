@@ -41,6 +41,7 @@ extern "C" {
  * This API provides the Process Specific Embedded Command Line Shell (PSHELL)
  * user API functionality.  It provides the ability for a client program to
  * register functions that can be invoked via a command line user interface.
+ *
  * The functions are similar to the prototype of the 'main' in 'C', i.e.
  * 'int myFunc(int argc, char *argv[]), there are several ways to invoke these
  * embedded functions based on how the pshell server is configured, which is
@@ -48,6 +49,116 @@ extern "C" {
  *
  * A complete example of the usage of the API can be found in the included
  * demo program file pshellServerDemo.cc
+ *
+ * Functions:
+ *
+ * The main API calls to register PSHELL commands and start the server
+ *
+ *   pshell_addCommand()       -- register a pshell command with the server
+ *   pshell_startServer()      -- start the pshell server
+ *   pshell_cleanupResources() -- release all resources claimed by the server
+ *
+ * Function to run application as a multi-call binary application similar to Busybox
+ *
+ *   pshell_noServer() -- run in multi-call binary (i.e. Busybox) mode
+ *
+ * Function to allow a parent application to call it's own PSHELL function
+ *
+ *   pshell_runCommand() -- run a registered command from the parent (i.e. registering) program
+ *
+ * Functions to allow extraction of internal log messages from parent application
+ *
+ *   pshell_setServerLogLevel()    -- set the internal log level for this module
+ *   pshell_setServerLogFunction() -- register a user function to receive all logs
+ *
+ * Functions to help in argument parsing/extraction
+ *
+ *   pshell_tokenize()              -- parse a string based on token delimeters
+ *   pshell_getLength()             -- return the string length
+ *   pshell_isEqual()               -- compare two strings for equality, case sensitive
+ *   pshell_isEqualNoCase()         -- compare two strings for equality, case insensitive
+ *   pshell_isSubString()           -- checks for string1 substring of string2 at position 0, case sensitive
+ *   pshell_isSubStringNoCase()     -- checks for string1 substring of string2 at position 0, case insensitive
+ *   pshell_isFloat()               -- returns True if string is floating point
+ *   pshell_isDec()                 -- returns True if string is dec
+ *   pshell_isHex()                 -- returns True if string is hex, with or without the preceeding 0x
+ *   pshell_isAlpha()               -- returns True if string is alphabetic
+ *   pshell_isNumeric()             -- returns True if string isDec or isHex
+ *   pshell_isAlphaNumeric()        -- returns True if string is alpha-numeric
+ *   pshell_isIpv4Addr()            -- returns True if string is valid ipv4 address format
+ *   pshell_isIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+ *   pshell_getAddress()            -- return address from string value
+ *   pshell_getBool()               -- returns True if string is 'true', 'yes', 'on'
+ *   pshell_getInt()                -- return the signed integer value from the string
+ *   pshell_getShort()              -- return the signed short integer value from the string
+ *   pshell_getChar()               -- return the signed char integer value from the string
+ *   pshell_getUnsigned()           -- return the unsigned integer value from the string
+ *   pshell_getUnsignedLong()       -- return the unsigned long integer value from the string
+ *   pshell_getUnsignedShort()      -- return the unsigned short integer value from the string
+ *   pshell_getUnsignedChar()       -- return the unsigned char integer value from the string
+ *   pshell_getDouble()             -- return the double precision float value from the string
+ *   pshell_getFloat()              -- return the float value from the string
+ *
+ * The following commands should only be called from within the context of
+ * a PSHELL callback function
+ *
+ *   pshell_printf()    -- display a message from a pshell callback function to the client
+ *   pshell_flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
+ *   pshell_wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive or show progress
+ *   pshell_march()     -- marching ascii character to keep UDP/UNIX client alive or show progress
+ *   pshell_showUsage() -- show the usage the command is registered with
+ *   pshell_isHelp()    -- checks if the user has requested help on this command
+ *   pshell_getOption() -- parses arg of format -<key><value> or <key>=<value>
+ *
+ * Integer constants:
+ *
+ * These are the identifiers for the serverMode.  BLOCKING will never return
+ * control to the caller of StartServer, NON_BLOCKING will spawn a thread to
+ * run the server and will return control to the caller of StartServer
+ *
+ *   PSHELL_BLOCKING
+ *   PSHELL_NON_BLOCKING
+ *
+ * Constants to let the host program set the internal debug log level,
+ * if the user of this API does not want to see any internal message
+ * printed out, set the debug log level to PSHELL_SERVER_LOG_LEVEL_NONE,
+ * the default log level is PSHELL_SERVER_LOG_LEVEL_ALL
+ *
+ *   PSHELL_SERVER_LOG_LEVEL_NONE
+ *   PSHELL_SERVER_LOG_LEVEL_ERROR
+ *   PSHELL_SERVER_LOG_LEVEL_WARNING
+ *   PSHELL_SERVER_LOG_LEVEL_INFO
+ *   PSHELL_SERVER_LOG_LEVEL_ALL
+ *   PSHELL_SERVER_LOG_LEVEL_DEFAULT
+ *
+ * Used to specify the radix extraction format for the getInt() function
+ *
+ *   PSHELL_RADIX_DEC
+ *   PSHELL_RADIX_HEX
+ *   PSHELL_RADIX_ANY
+ *
+ * String constants:
+ *
+ * Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
+ * client programs, TCP servers require a 'telnet' client, local servers
+ * require no client (all user interaction done directly with server running
+ * in the parent host program)
+ *
+ *   PSHELL_UDP
+ *   PSHELL_TCP
+ *   PSHELL_UNIX
+ *   PSHELL_LOCAL
+ *
+ * These three identifiers that can be used for the hostnameOrIpAddr argument
+ * of the StartServer call.  PshellServer.ANYHOST will bind the server socket
+ * to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
+ * 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+ * the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
+ * it also supported, e.g. x.y.z.255
+ *
+ *   PSHELL_ANYHOST
+ *   PSHELL_ANYBCAST
+ *   PSHELL_LOCALHOST
  *
  *******************************************************************************/
 

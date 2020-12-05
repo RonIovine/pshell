@@ -46,6 +46,33 @@ extern "C" {
  * the converse it not true (i.e. this module can be omitted in the build
  * of the pshell library if this functionality is not desired).
  *
+ * The following is a summary of the public API, a complete example of the
+ * usage of the API can be found in the included demo programs traceFilterDemo.cc
+ *
+ * Functions:
+ *
+ *   tf_registerLogFunction() -- register user defined log output function for WATCH and CALLBACK
+ *   tf_addLevel()            -- add user defined level for filtering
+ *   tf_init(void)            -- initialize the trace filter service
+ *   tf_registerThread()      -- register thread name for thread based filtering
+ *   tf_isFilterPassed()      -- evaluated current filter based on settings
+ *
+ * Macros:
+ *
+ * These macros are use to trigger on various conditions:
+ *
+ *   TF_WATCH    -- watch a memory location for a change in value at every trace
+ *   TF_CALLBACK -- execute the registered callback function at every trace
+ *
+ * Integer constants:
+ *
+ * These constants are used to control the operation of the two above 'trigger'
+ * macros, TF_WATCH and TF_CALLBACK
+ *
+ *   TF_ONCE       -- stop evaluating trigger on first successful occurance
+ *   TF_CONTINUOUS -- always evaluate trigger at every trace
+ *   TF_ABORT      -- termitate program on first successful evaluation occurance
+ *
  *******************************************************************************/
 
 /*

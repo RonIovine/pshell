@@ -37,6 +37,9 @@
 // This module provides the same functionality as the PshellControl.h API and
 // the libpshell-control linkable 'C' library, but implemented as a Go module.
 //
+// A complete example of the usage of the API can be found in the included
+// demo program pshellControlDemo.go
+//
 // Functions:
 //
 //   ConnectServer()        -- connect to a remote pshell server
@@ -102,9 +105,6 @@
 // multicast command
 //
 //   MULTICAST_ALL
-//
-// A complete example of the usage of the API can be found in the included
-// demo program pshellControlDemo.go
 //
 package PshellControl
 

@@ -42,76 +42,76 @@ This module provides the same functionality as the PshellControl.h API and
 the libpshell-control linkable 'C' library, but implemented as a Python
 module.
 
+A complete example of the usage of the API can be found in the included
+demo programs pshellControlDemo.py and pshellAggregatorDemo.py
+
 Functions:
 
-connectServer()        -- connect to a remote pshell server
-disconnectServer()     -- disconnect from a remote pshell server
-disconnectAllServers() -- disconnect from all connected remote pshell servers
-setDefaultTimeout()    -- set the default server response timeout
-extractCommands()      -- extract all commands from remote server
-addMulticast()         -- add a command keyword to a multicast group
-sendMulticast()        -- send a command to a multicast group
-sendCommand1()         -- send command to server using default timeout, no results extracted
-sendCommand2()         -- send command to server using timeout override, no results extracted
-sendCommand3()         -- send command to server using default timeout, results extracted
-sendCommand4()         -- send command to server using timeout override, results extracted
-getResponseString()    -- return the human readable form of one of the command response return codes
-setLogLevel()          -- set the internal log level for this module
-setLogFunction()       -- register a user function to receive all logs
+  connectServer()        -- connect to a remote pshell server
+  disconnectServer()     -- disconnect from a remote pshell server
+  disconnectAllServers() -- disconnect from all connected remote pshell servers
+  setDefaultTimeout()    -- set the default server response timeout
+  extractCommands()      -- extract all commands from remote server
+  addMulticast()         -- add a command keyword to a multicast group
+  sendMulticast()        -- send a command to a multicast group
+  sendCommand1()         -- send command to server using default timeout, no results extracted
+  sendCommand2()         -- send command to server using timeout override, no results extracted
+  sendCommand3()         -- send command to server using default timeout, results extracted
+  sendCommand4()         -- send command to server using timeout override, results extracted
+  getResponseString()    -- return the human readable form of one of the command response return codes
+  setLogLevel()          -- set the internal log level for this module
+  setLogFunction()       -- register a user function to receive all logs
 
 Integer constants:
 
 Helpful items used for the server response timeout values
 
-NO_WAIT
-ONE_MSEC
-ONE_SEC
-ONE_MINUTE
-ONE_HOUR
+  NO_WAIT
+  ONE_MSEC
+  ONE_SEC
+  ONE_MINUTE
+  ONE_HOUR
 
 These are returned from the sendCommandN functions
 
-COMMAND_SUCCESS
-COMMAND_NOT_FOUND
-COMMAND_INVALID_ARG_COUNT
-SOCKET_SEND_FAILURE
-SOCKET_SELECT_FAILURE
-SOCKET_RECEIVE_FAILURE
-SOCKET_TIMEOUT
-SOCKET_NOT_CONNECTED
+  COMMAND_SUCCESS
+  COMMAND_NOT_FOUND
+  COMMAND_INVALID_ARG_COUNT
+  SOCKET_SEND_FAILURE
+  SOCKET_SELECT_FAILURE
+  SOCKET_RECEIVE_FAILURE
+  SOCKET_TIMEOUT
+  SOCKET_NOT_CONNECTED
 
 Constants to let the host program set the internal debug log level,
 if the user of this API does not want to see any internal message
 printed out, set the debug log level to LOG_LEVEL_NONE, the default
 log level is LOG_LEVEL_ALL
 
-LOG_LEVEL_NONE
-LOG_LEVEL_ERROR
-LOG_LEVEL_WARNING
-LOG_LEVEL_INFO
-LOG_LEVEL_ALL
-LOG_LEVEL_DEFAULT
+  LOG_LEVEL_NONE
+  LOG_LEVEL_ERROR
+  LOG_LEVEL_WARNING
+  LOG_LEVEL_INFO
+  LOG_LEVEL_ALL
+  LOG_LEVEL_DEFAULT
 
 String constants:
 
 This is used for the host when connecting to a server running
 at the loopback localhost address
 
-LOCALHOST
+  LOCALHOST
 
 Use this as the "port" identifier for the connectServer
 call when using a UNIX domain server
 
-UNIX
+  UNIX
 
 Specifies if the addMulticast should add the given command to all specified
 multicast receivers or if all control destinations should receive the given
 multicast command
 
-MULTICAST_ALL
-
-A complete example of the usage of the API can be found in the included
-demo programs pshellControlDemo.py and pshellAggregatorDemo.py
+  MULTICAST_ALL
 """
 
 # import all our necessary modules

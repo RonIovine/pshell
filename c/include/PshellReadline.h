@@ -43,6 +43,9 @@ extern "C" {
  * will provide up-arrow command history recall, command line editing, and TAB
  * completion of registered keywords.
  *
+ * A complete example of the usage of the API can be found in the included demo
+ * program pshellReadlineDemo.cc
+ *
  * Functions:
  *
  * pshell_rl_setFileDescriptors() -- set the input/output file descriptors
@@ -76,9 +79,6 @@ extern "C" {
  * Fast tabbing, i.e. initiated via single tabbing, this is the default
  *
  * PSHELL_RL_FAST_TAB
- *
- * A complete example of the usage of the API can be found in the included demo
- * program pshellReadlineDemo.cc
  *
  *******************************************************************************/
 

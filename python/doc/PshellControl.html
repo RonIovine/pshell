@@ -23,76 +23,76 @@ This&nbsp;module&nbsp;provides&nbsp;the&nbsp;same&nbsp;functionality&nbsp;as&nbs
 the&nbsp;libpshell-control&nbsp;linkable&nbsp;'C'&nbsp;library,&nbsp;but&nbsp;implemented&nbsp;as&nbsp;a&nbsp;Python<br>
 module.<br>
 &nbsp;<br>
+A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included<br>
+demo&nbsp;programs&nbsp;pshellControlDemo.py&nbsp;and&nbsp;pshellAggregatorDemo.py<br>
+&nbsp;<br>
 Functions:<br>
 &nbsp;<br>
-<a href="#-connectServer">connectServer</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;connect&nbsp;to&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server<br>
-<a href="#-disconnectServer">disconnectServer</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;disconnect&nbsp;from&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server<br>
-<a href="#-disconnectAllServers">disconnectAllServers</a>()&nbsp;--&nbsp;disconnect&nbsp;from&nbsp;all&nbsp;connected&nbsp;remote&nbsp;pshell&nbsp;servers<br>
-<a href="#-setDefaultTimeout">setDefaultTimeout</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;default&nbsp;server&nbsp;response&nbsp;timeout<br>
-<a href="#-extractCommands">extractCommands</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;extract&nbsp;all&nbsp;commands&nbsp;from&nbsp;remote&nbsp;server<br>
-<a href="#-addMulticast">addMulticast</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;add&nbsp;a&nbsp;command&nbsp;keyword&nbsp;to&nbsp;a&nbsp;multicast&nbsp;group<br>
-<a href="#-sendMulticast">sendMulticast</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;a&nbsp;command&nbsp;to&nbsp;a&nbsp;multicast&nbsp;group<br>
-<a href="#-sendCommand1">sendCommand1</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;default&nbsp;timeout,&nbsp;no&nbsp;results&nbsp;extracted<br>
-<a href="#-sendCommand2">sendCommand2</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;timeout&nbsp;override,&nbsp;no&nbsp;results&nbsp;extracted<br>
-<a href="#-sendCommand3">sendCommand3</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;default&nbsp;timeout,&nbsp;results&nbsp;extracted<br>
-<a href="#-sendCommand4">sendCommand4</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;timeout&nbsp;override,&nbsp;results&nbsp;extracted<br>
-<a href="#-getResponseString">getResponseString</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;human&nbsp;readable&nbsp;form&nbsp;of&nbsp;one&nbsp;of&nbsp;the&nbsp;command&nbsp;response&nbsp;return&nbsp;codes<br>
-<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;internal&nbsp;log&nbsp;level&nbsp;for&nbsp;this&nbsp;module<br>
-<a href="#-setLogFunction">setLogFunction</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;register&nbsp;a&nbsp;user&nbsp;function&nbsp;to&nbsp;receive&nbsp;all&nbsp;logs<br>
+&nbsp;&nbsp;<a href="#-connectServer">connectServer</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;connect&nbsp;to&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server<br>
+&nbsp;&nbsp;<a href="#-disconnectServer">disconnectServer</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;disconnect&nbsp;from&nbsp;a&nbsp;remote&nbsp;pshell&nbsp;server<br>
+&nbsp;&nbsp;<a href="#-disconnectAllServers">disconnectAllServers</a>()&nbsp;--&nbsp;disconnect&nbsp;from&nbsp;all&nbsp;connected&nbsp;remote&nbsp;pshell&nbsp;servers<br>
+&nbsp;&nbsp;<a href="#-setDefaultTimeout">setDefaultTimeout</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;default&nbsp;server&nbsp;response&nbsp;timeout<br>
+&nbsp;&nbsp;<a href="#-extractCommands">extractCommands</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;extract&nbsp;all&nbsp;commands&nbsp;from&nbsp;remote&nbsp;server<br>
+&nbsp;&nbsp;<a href="#-addMulticast">addMulticast</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;add&nbsp;a&nbsp;command&nbsp;keyword&nbsp;to&nbsp;a&nbsp;multicast&nbsp;group<br>
+&nbsp;&nbsp;<a href="#-sendMulticast">sendMulticast</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;a&nbsp;command&nbsp;to&nbsp;a&nbsp;multicast&nbsp;group<br>
+&nbsp;&nbsp;<a href="#-sendCommand1">sendCommand1</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;default&nbsp;timeout,&nbsp;no&nbsp;results&nbsp;extracted<br>
+&nbsp;&nbsp;<a href="#-sendCommand2">sendCommand2</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;timeout&nbsp;override,&nbsp;no&nbsp;results&nbsp;extracted<br>
+&nbsp;&nbsp;<a href="#-sendCommand3">sendCommand3</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;default&nbsp;timeout,&nbsp;results&nbsp;extracted<br>
+&nbsp;&nbsp;<a href="#-sendCommand4">sendCommand4</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;send&nbsp;command&nbsp;to&nbsp;server&nbsp;using&nbsp;timeout&nbsp;override,&nbsp;results&nbsp;extracted<br>
+&nbsp;&nbsp;<a href="#-getResponseString">getResponseString</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;human&nbsp;readable&nbsp;form&nbsp;of&nbsp;one&nbsp;of&nbsp;the&nbsp;command&nbsp;response&nbsp;return&nbsp;codes<br>
+&nbsp;&nbsp;<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;internal&nbsp;log&nbsp;level&nbsp;for&nbsp;this&nbsp;module<br>
+&nbsp;&nbsp;<a href="#-setLogFunction">setLogFunction</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;register&nbsp;a&nbsp;user&nbsp;function&nbsp;to&nbsp;receive&nbsp;all&nbsp;logs<br>
 &nbsp;<br>
 Integer&nbsp;constants:<br>
 &nbsp;<br>
 Helpful&nbsp;items&nbsp;used&nbsp;for&nbsp;the&nbsp;server&nbsp;response&nbsp;timeout&nbsp;values<br>
 &nbsp;<br>
-NO_WAIT<br>
-ONE_MSEC<br>
-ONE_SEC<br>
-ONE_MINUTE<br>
-ONE_HOUR<br>
+&nbsp;&nbsp;NO_WAIT<br>
+&nbsp;&nbsp;ONE_MSEC<br>
+&nbsp;&nbsp;ONE_SEC<br>
+&nbsp;&nbsp;ONE_MINUTE<br>
+&nbsp;&nbsp;ONE_HOUR<br>
 &nbsp;<br>
 These&nbsp;are&nbsp;returned&nbsp;from&nbsp;the&nbsp;sendCommandN&nbsp;functions<br>
 &nbsp;<br>
-COMMAND_SUCCESS<br>
-COMMAND_NOT_FOUND<br>
-COMMAND_INVALID_ARG_COUNT<br>
-SOCKET_SEND_FAILURE<br>
-SOCKET_SELECT_FAILURE<br>
-SOCKET_RECEIVE_FAILURE<br>
-SOCKET_TIMEOUT<br>
-SOCKET_NOT_CONNECTED<br>
+&nbsp;&nbsp;COMMAND_SUCCESS<br>
+&nbsp;&nbsp;COMMAND_NOT_FOUND<br>
+&nbsp;&nbsp;COMMAND_INVALID_ARG_COUNT<br>
+&nbsp;&nbsp;SOCKET_SEND_FAILURE<br>
+&nbsp;&nbsp;SOCKET_SELECT_FAILURE<br>
+&nbsp;&nbsp;SOCKET_RECEIVE_FAILURE<br>
+&nbsp;&nbsp;SOCKET_TIMEOUT<br>
+&nbsp;&nbsp;SOCKET_NOT_CONNECTED<br>
 &nbsp;<br>
 Constants&nbsp;to&nbsp;let&nbsp;the&nbsp;host&nbsp;program&nbsp;set&nbsp;the&nbsp;internal&nbsp;debug&nbsp;log&nbsp;level,<br>
 if&nbsp;the&nbsp;user&nbsp;of&nbsp;this&nbsp;API&nbsp;does&nbsp;not&nbsp;want&nbsp;to&nbsp;see&nbsp;any&nbsp;internal&nbsp;message<br>
 printed&nbsp;out,&nbsp;set&nbsp;the&nbsp;debug&nbsp;log&nbsp;level&nbsp;to&nbsp;LOG_LEVEL_NONE,&nbsp;the&nbsp;default<br>
 log&nbsp;level&nbsp;is&nbsp;LOG_LEVEL_ALL<br>
 &nbsp;<br>
-LOG_LEVEL_NONE<br>
-LOG_LEVEL_ERROR<br>
-LOG_LEVEL_WARNING<br>
-LOG_LEVEL_INFO<br>
-LOG_LEVEL_ALL<br>
-LOG_LEVEL_DEFAULT<br>
+&nbsp;&nbsp;LOG_LEVEL_NONE<br>
+&nbsp;&nbsp;LOG_LEVEL_ERROR<br>
+&nbsp;&nbsp;LOG_LEVEL_WARNING<br>
+&nbsp;&nbsp;LOG_LEVEL_INFO<br>
+&nbsp;&nbsp;LOG_LEVEL_ALL<br>
+&nbsp;&nbsp;LOG_LEVEL_DEFAULT<br>
 &nbsp;<br>
 String&nbsp;constants:<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;used&nbsp;for&nbsp;the&nbsp;host&nbsp;when&nbsp;connecting&nbsp;to&nbsp;a&nbsp;server&nbsp;running<br>
 at&nbsp;the&nbsp;loopback&nbsp;localhost&nbsp;address<br>
 &nbsp;<br>
-LOCALHOST<br>
+&nbsp;&nbsp;LOCALHOST<br>
 &nbsp;<br>
 Use&nbsp;this&nbsp;as&nbsp;the&nbsp;"port"&nbsp;identifier&nbsp;for&nbsp;the&nbsp;connectServer<br>
 call&nbsp;when&nbsp;using&nbsp;a&nbsp;UNIX&nbsp;domain&nbsp;server<br>
 &nbsp;<br>
-UNIX<br>
+&nbsp;&nbsp;UNIX<br>
 &nbsp;<br>
 Specifies&nbsp;if&nbsp;the&nbsp;addMulticast&nbsp;should&nbsp;add&nbsp;the&nbsp;given&nbsp;command&nbsp;to&nbsp;all&nbsp;specified<br>
 multicast&nbsp;receivers&nbsp;or&nbsp;if&nbsp;all&nbsp;control&nbsp;destinations&nbsp;should&nbsp;receive&nbsp;the&nbsp;given<br>
 multicast&nbsp;command<br>
 &nbsp;<br>
-MULTICAST_ALL<br>
-&nbsp;<br>
-A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included<br>
-demo&nbsp;programs&nbsp;pshellControlDemo.py&nbsp;and&nbsp;pshellAggregatorDemo.py</tt></p>
+&nbsp;&nbsp;MULTICAST_ALL</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">

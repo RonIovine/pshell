@@ -38,6 +38,9 @@
 // functions based on how the pshell server is configured, which is described
 // in documentation further down in this file.
 //
+// A complete example of the usage of the API can be found in the included
+// demo program pshellServerDemo.go
+//
 // Functions:
 //
 // The main API calls to register PSHELL commands and start the server
@@ -120,7 +123,7 @@
 //   LOG_LEVEL_ALL
 //   LOG_LEVEL_DEFAULT
 //
-// Used to specify the radix extraction format for the getInt() function
+// Used to specify the radix extraction format for the GetInt() function
 //
 //   RADIX_DEC
 //   RADIX_HEX
@@ -148,9 +151,6 @@
 //   ANYHOST
 //   ANYBCAST
 //   LOCALHOST
-//
-// A complete example of the usage of the API can be found in the included
-// demo program pshellServerDemo.go
 //
 package PshellServer
 

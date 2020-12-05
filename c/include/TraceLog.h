@@ -43,7 +43,55 @@ extern "C" {
  * This file and API are an example trace logging service to show how to
  * integrate the trace filtering mechanism into an already existing trace
  * logging service that uses the __FILE__, __LINE__, __FUNCTION__, level
- * paradigm
+ * paradigm.  This logging service is macro based and uses a 'printf' style
+ * interface for user messages rather than an ostream style interface.
+ *
+ * Note, this logging service is just a front end log formatting system, it
+ * will not place the formatted log into any file, it defaults to printing
+ * them to stdout.  The user of this package can register a callback function
+ * to receive the formatted log messages to then be output to wherever the
+ * parent application wants, i.e. /var/syslog, /var/messages, a custom logfile
+ * etc.  It is up to the patrent to setup the final log message destination
+ * and do any logfile rolling etc as necessary.
+ *
+ * The following is a summary of the public API, a complete example of the
+ * usage of the API can be found in the included demo programs traceLogDemo.cc
+ *
+ * Functions:
+ *
+ *   trace_registerOutputFunction() -- register a custom log output callback function
+ *   trace_registerFormatFunction() -- register a custom log formatting callback function
+ *   trace_setTimestampFormat()     -- set a custom timestamp format string
+ *   trace_setLogName()             -- set the log name (typically the program/process name)
+ *   trace_getLogName()             -- return the registered log name
+ *   trace_registerLevels()         -- register the built in log levels, should be done at program init
+ *   trace_addUserLevel()           -- add a user defined level, should be done after built in levels registered
+ *   trace_setLogLevel()            -- set the current display output level
+ *   trace_getLogLevel()            -- return the currently set display output level
+ *   trace_enableLocation()         -- enable the file/function/line location formatting
+ *   trace_isLocationEnabled()      -- return if location formatting is enabled
+ *   trace_enablePath()             -- enable any preceeding path for the 'file' part of the location
+ *   trace_isPathEnabled()          -- return if the file path is enabled
+ *   trace_enableTimestamp()        -- enable formatting of the timestamp
+ *   trace_isTimestampEnabled()     -- return if the timestamp formatting is enabled
+ *   trace_enableLogName()          -- enable the formatting of the registered log name
+ *   trace_isLogNameEnabled()       -- return if the log name formatting is enabled
+ *
+ * Macros:
+ *
+ *   TRACE_FORCE   -- unmaskable trace level, this is always printed out
+ *   TRACE_ERROR   -- program error condition indication
+ *   TRACE_WARNING -- program warning condition indication
+ *   TRACE_FAILURE -- program failure condition indication
+ *   TRACE_INFO    -- general program information
+ *   TRACE_DEBUG   -- detailed program debug information
+ *   TRACE_ENTER   -- function enter indication
+ *   TRACE_EXIT    -- function exit indication
+ *   TRACE_DUMP    -- hex dump of memory
+ *
+ * Integer constants:
+ *
+ *   TL_MAX_LEVELS -- start all user defined levels after this value
  *
  *******************************************************************************/
 

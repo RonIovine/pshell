@@ -37,23 +37,26 @@ keyboard input over a serial tty, or over a TCP/telnet connection.  This module
 will provide up-arrow command history recall, command line editing, and TAB
 completion of registered keywords.
 
+A complete example of the usage of the API can be found in the included demo
+program pshellReadlineDemo.py
+
 Functions:
 
-setFileDescriptors() -- set the input/output file descriptors
-setIdleTimeout()     -- set the idle session timeout
-addTabCompletion()   -- add a keyword to the TAB completion list
-setTabStyle()        -- sets the tab behavour style ("fast" or bash)
-getInput()           -- get a line of user input from our input file descriptor
-writeOutput()        -- write a string to our output file descriptor
-isSubString()        -- checks for string1 substring of string2 at position 0
+  setFileDescriptors() -- set the input/output file descriptors
+  setIdleTimeout()     -- set the idle session timeout
+  addTabCompletion()   -- add a keyword to the TAB completion list
+  setTabStyle()        -- sets the tab behavour style ("fast" or bash)
+  getInput()           -- get a line of user input from our input file descriptor
+  writeOutput()        -- write a string to our output file descriptor
+  isSubString()        -- checks for string1 substring of string2 at position 0
 
 Integer constants:
 
 Use for the timeout value when setting the idleSessionTimeout, default=none
 
-IDLE_TIMEOUT_NONE
-ONE_SECOND
-ONE_MINUTE
+  IDLE_TIMEOUT_NONE
+  ONE_SECOND
+  ONE_MINUTE
 
 String constants:
 
@@ -61,21 +64,18 @@ Valid serial types, TTY is for serial terminal control and defaults to
 stdin and stdout, SOCKET uses a serial TCP socket placed in 'telnet'
 mode for control via a telnet client, default=tty with stdin/stdout
 
-TTY
-SOCKET
+  TTY
+  SOCKET
 
 Valid TAB style identifiers
 
 Standard bash/readline tabbing method, i.e. initiate via double tabbing
 
-BASH_TAB
+  BASH_TAB
 
 Fast tabbing, i.e. initiated via single tabbing, this is the default
 
-FAST_TAB
-
-A complete example of the usage of the API can be found in the included demo
-program pshellReadlineDemo.py
+  FAST_TAB
 """
 
 # import all our necessary modules

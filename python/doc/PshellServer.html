@@ -26,55 +26,58 @@ module&nbsp;can&nbsp;be&nbsp;controlled&nbsp;via&nbsp;the&nbsp;pshell&nbsp;UDP/U
 or&nbsp;via&nbsp;the&nbsp;PshellControl.h/libpshell-control,&nbsp;PshellControl.py&nbsp;control&nbsp;mechanism<br>
 or&nbsp;the&nbsp;PshellControl.go&nbsp;module&nbsp;and&nbsp;API.<br>
 &nbsp;<br>
+A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included<br>
+demo&nbsp;program&nbsp;pshellServerDemo.py.<br>
+&nbsp;<br>
 Functions:<br>
 &nbsp;<br>
 The&nbsp;main&nbsp;API&nbsp;calls&nbsp;to&nbsp;register&nbsp;PSHELL&nbsp;commands&nbsp;and&nbsp;start&nbsp;the&nbsp;server<br>
 &nbsp;<br>
-<a href="#-addCommand">addCommand</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;register&nbsp;a&nbsp;pshell&nbsp;command&nbsp;with&nbsp;the&nbsp;server<br>
-<a href="#-startServer">startServer</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;start&nbsp;the&nbsp;pshell&nbsp;server<br>
-<a href="#-cleanupResources">cleanupResources</a>()&nbsp;--&nbsp;release&nbsp;all&nbsp;resources&nbsp;claimed&nbsp;by&nbsp;the&nbsp;server<br>
+&nbsp;&nbsp;<a href="#-addCommand">addCommand</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;register&nbsp;a&nbsp;pshell&nbsp;command&nbsp;with&nbsp;the&nbsp;server<br>
+&nbsp;&nbsp;<a href="#-startServer">startServer</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;start&nbsp;the&nbsp;pshell&nbsp;server<br>
+&nbsp;&nbsp;<a href="#-cleanupResources">cleanupResources</a>()&nbsp;--&nbsp;release&nbsp;all&nbsp;resources&nbsp;claimed&nbsp;by&nbsp;the&nbsp;server<br>
 &nbsp;<br>
 Function&nbsp;to&nbsp;allow&nbsp;a&nbsp;parent&nbsp;application&nbsp;to&nbsp;call&nbsp;it's&nbsp;own&nbsp;PSHELL&nbsp;function<br>
 &nbsp;<br>
-<a href="#-runCommand">runCommand</a>()&nbsp;--&nbsp;run&nbsp;a&nbsp;registered&nbsp;command&nbsp;from&nbsp;the&nbsp;parent&nbsp;(i.e.&nbsp;registering)&nbsp;program<br>
+&nbsp;&nbsp;<a href="#-runCommand">runCommand</a>()&nbsp;--&nbsp;run&nbsp;a&nbsp;registered&nbsp;command&nbsp;from&nbsp;the&nbsp;parent&nbsp;(i.e.&nbsp;registering)&nbsp;program<br>
 &nbsp;<br>
 Functions&nbsp;to&nbsp;allow&nbsp;extraction&nbsp;of&nbsp;internal&nbsp;log&nbsp;messages&nbsp;from&nbsp;parent&nbsp;application<br>
 &nbsp;<br>
-<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;internal&nbsp;log&nbsp;level&nbsp;for&nbsp;this&nbsp;module<br>
-<a href="#-setLogFunction">setLogFunction</a>()&nbsp;--&nbsp;register&nbsp;a&nbsp;user&nbsp;function&nbsp;to&nbsp;receive&nbsp;all&nbsp;logs<br>
+&nbsp;&nbsp;<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;set&nbsp;the&nbsp;internal&nbsp;log&nbsp;level&nbsp;for&nbsp;this&nbsp;module<br>
+&nbsp;&nbsp;<a href="#-setLogFunction">setLogFunction</a>()&nbsp;--&nbsp;register&nbsp;a&nbsp;user&nbsp;function&nbsp;to&nbsp;receive&nbsp;all&nbsp;logs<br>
 &nbsp;<br>
 Functions&nbsp;to&nbsp;help&nbsp;in&nbsp;argument&nbsp;parsing/extraction,&nbsp;even&nbsp;though&nbsp;many&nbsp;of&nbsp;these<br>
 operations&nbsp;can&nbsp;easily&nbsp;be&nbsp;done&nbsp;with&nbsp;native&nbsp;Python&nbsp;constructs,&nbsp;they&nbsp;are&nbsp;provided<br>
 here&nbsp;for&nbsp;consistency&nbsp;of&nbsp;the&nbsp;API&nbsp;across&nbsp;all&nbsp;language&nbsp;implementations<br>
 &nbsp;<br>
-<a href="#-tokenize">tokenize</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;parse&nbsp;a&nbsp;string&nbsp;based&nbsp;on&nbsp;token&nbsp;delimeters<br>
-<a href="#-getLength">getLength</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;string&nbsp;length<br>
-<a href="#-isEqual">isEqual</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;sensitive<br>
-<a href="#-isEqualNoCase">isEqualNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;insensitive<br>
-<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;sensitive<br>
-<a href="#-isSubStringNoCase">isSubStringNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;insensitive<br>
-<a href="#-isFloat">isFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;floating&nbsp;point<br>
-<a href="#-isDec">isDec</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;dec<br>
-<a href="#-isHex">isHex</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;hex,&nbsp;with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
-<a href="#-isAlpha">isAlpha</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alphabetic<br>
-<a href="#-isNumeric">isNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;isDec&nbsp;or&nbsp;isHex<br>
-<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alpha-numeric<br>
-<a href="#-isIpv4Addr">isIpv4Addr</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format<br>
-<a href="#-isIpv4AddrWithNetmask">isIpv4AddrWithNetmask</a>()&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format<br>
-<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
-<a href="#-getInt">getInt</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;integer&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
-<a href="#-getFloat">getFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;float&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
+&nbsp;&nbsp;<a href="#-tokenize">tokenize</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;parse&nbsp;a&nbsp;string&nbsp;based&nbsp;on&nbsp;token&nbsp;delimeters<br>
+&nbsp;&nbsp;<a href="#-getLength">getLength</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;string&nbsp;length<br>
+&nbsp;&nbsp;<a href="#-isEqual">isEqual</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;sensitive<br>
+&nbsp;&nbsp;<a href="#-isEqualNoCase">isEqualNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;compare&nbsp;two&nbsp;strings&nbsp;for&nbsp;equality,&nbsp;case&nbsp;insensitive<br>
+&nbsp;&nbsp;<a href="#-isSubString">isSubString</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;sensitive<br>
+&nbsp;&nbsp;<a href="#-isSubStringNoCase">isSubStringNoCase</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;for&nbsp;string1&nbsp;substring&nbsp;of&nbsp;string2&nbsp;at&nbsp;position&nbsp;0,&nbsp;case&nbsp;insensitive<br>
+&nbsp;&nbsp;<a href="#-isFloat">isFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;floating&nbsp;point<br>
+&nbsp;&nbsp;<a href="#-isDec">isDec</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;dec<br>
+&nbsp;&nbsp;<a href="#-isHex">isHex</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;hex,&nbsp;with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
+&nbsp;&nbsp;<a href="#-isAlpha">isAlpha</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alphabetic<br>
+&nbsp;&nbsp;<a href="#-isNumeric">isNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;isDec&nbsp;or&nbsp;isHex<br>
+&nbsp;&nbsp;<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alpha-numeric<br>
+&nbsp;&nbsp;<a href="#-isIpv4Addr">isIpv4Addr</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format<br>
+&nbsp;&nbsp;<a href="#-isIpv4AddrWithNetmask">isIpv4AddrWithNetmask</a>()&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format<br>
+&nbsp;&nbsp;<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
+&nbsp;&nbsp;<a href="#-getInt">getInt</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;integer&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
+&nbsp;&nbsp;<a href="#-getFloat">getFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;float&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
 &nbsp;<br>
 The&nbsp;following&nbsp;commands&nbsp;should&nbsp;only&nbsp;be&nbsp;called&nbsp;from&nbsp;within&nbsp;the&nbsp;context&nbsp;of<br>
 a&nbsp;PSHELL&nbsp;callback&nbsp;function<br>
 &nbsp;<br>
-<a href="#-printf">printf</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;display&nbsp;a&nbsp;message&nbsp;from&nbsp;a&nbsp;pshell&nbsp;callback&nbsp;function&nbsp;to&nbsp;the&nbsp;client<br>
-<a href="#-flush">flush</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;flush&nbsp;the&nbsp;transfer&nbsp;buffer&nbsp;to&nbsp;the&nbsp;client&nbsp;(UDP/UNIX&nbsp;servers&nbsp;only)<br>
-<a href="#-wheel">wheel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;spinning&nbsp;ascii&nbsp;wheel&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive&nbsp;or&nbsp;show&nbsp;progress<br>
-<a href="#-march">march</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;marching&nbsp;ascii&nbsp;character&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive&nbsp;or&nbsp;show&nbsp;progress<br>
-<a href="#-showUsage">showUsage</a>()&nbsp;--&nbsp;show&nbsp;the&nbsp;usage&nbsp;the&nbsp;command&nbsp;is&nbsp;registered&nbsp;with<br>
-<a href="#-isHelp">isHelp</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;requested&nbsp;help&nbsp;on&nbsp;this&nbsp;command<br>
-<a href="#-getOption">getOption</a>()&nbsp;--&nbsp;parses&nbsp;arg&nbsp;of&nbsp;format&nbsp;-&lt;key&gt;&lt;value&gt;&nbsp;or&nbsp;&lt;key&gt;=&lt;value&gt;<br>
+&nbsp;&nbsp;<a href="#-printf">printf</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;display&nbsp;a&nbsp;message&nbsp;from&nbsp;a&nbsp;pshell&nbsp;callback&nbsp;function&nbsp;to&nbsp;the&nbsp;client<br>
+&nbsp;&nbsp;<a href="#-flush">flush</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;flush&nbsp;the&nbsp;transfer&nbsp;buffer&nbsp;to&nbsp;the&nbsp;client&nbsp;(UDP/UNIX&nbsp;servers&nbsp;only)<br>
+&nbsp;&nbsp;<a href="#-wheel">wheel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;spinning&nbsp;ascii&nbsp;wheel&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive&nbsp;or&nbsp;show&nbsp;progress<br>
+&nbsp;&nbsp;<a href="#-march">march</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;marching&nbsp;ascii&nbsp;character&nbsp;to&nbsp;keep&nbsp;UDP/UNIX&nbsp;client&nbsp;alive&nbsp;or&nbsp;show&nbsp;progress<br>
+&nbsp;&nbsp;<a href="#-showUsage">showUsage</a>()&nbsp;--&nbsp;show&nbsp;the&nbsp;usage&nbsp;the&nbsp;command&nbsp;is&nbsp;registered&nbsp;with<br>
+&nbsp;&nbsp;<a href="#-isHelp">isHelp</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;checks&nbsp;if&nbsp;the&nbsp;user&nbsp;has&nbsp;requested&nbsp;help&nbsp;on&nbsp;this&nbsp;command<br>
+&nbsp;&nbsp;<a href="#-getOption">getOption</a>()&nbsp;--&nbsp;parses&nbsp;arg&nbsp;of&nbsp;format&nbsp;-&lt;key&gt;&lt;value&gt;&nbsp;or&nbsp;&lt;key&gt;=&lt;value&gt;<br>
 &nbsp;<br>
 Integer&nbsp;constants:<br>
 &nbsp;<br>
@@ -82,26 +85,26 @@ These&nbsp;are&nbsp;the&nbsp;identifiers&nbsp;for&nbsp;the&nbsp;serverMode.&nbsp
 control&nbsp;to&nbsp;the&nbsp;caller&nbsp;of&nbsp;startServer,&nbsp;NON_BLOCKING&nbsp;will&nbsp;spawn&nbsp;a&nbsp;thread&nbsp;to<br>
 run&nbsp;the&nbsp;server&nbsp;and&nbsp;will&nbsp;return&nbsp;control&nbsp;to&nbsp;the&nbsp;caller&nbsp;of&nbsp;startServer<br>
 &nbsp;<br>
-BLOCKING<br>
-NON_BLOCKING<br>
+&nbsp;&nbsp;BLOCKING<br>
+&nbsp;&nbsp;NON_BLOCKING<br>
 &nbsp;<br>
 Constants&nbsp;to&nbsp;let&nbsp;the&nbsp;host&nbsp;program&nbsp;set&nbsp;the&nbsp;internal&nbsp;debug&nbsp;log&nbsp;level,<br>
 if&nbsp;the&nbsp;user&nbsp;of&nbsp;this&nbsp;API&nbsp;does&nbsp;not&nbsp;want&nbsp;to&nbsp;see&nbsp;any&nbsp;internal&nbsp;message<br>
 printed&nbsp;out,&nbsp;set&nbsp;the&nbsp;debug&nbsp;log&nbsp;level&nbsp;to&nbsp;LOG_LEVEL_NONE,&nbsp;the&nbsp;default<br>
 log&nbsp;level&nbsp;is&nbsp;LOG_LEVEL_ALL<br>
 &nbsp;<br>
-LOG_LEVEL_NONE<br>
-LOG_LEVEL_ERROR<br>
-LOG_LEVEL_WARNING<br>
-LOG_LEVEL_INFO<br>
-LOG_LEVEL_ALL<br>
-LOG_LEVEL_DEFAULT<br>
+&nbsp;&nbsp;LOG_LEVEL_NONE<br>
+&nbsp;&nbsp;LOG_LEVEL_ERROR<br>
+&nbsp;&nbsp;LOG_LEVEL_WARNING<br>
+&nbsp;&nbsp;LOG_LEVEL_INFO<br>
+&nbsp;&nbsp;LOG_LEVEL_ALL<br>
+&nbsp;&nbsp;LOG_LEVEL_DEFAULT<br>
 &nbsp;<br>
 Used&nbsp;to&nbsp;specify&nbsp;the&nbsp;radix&nbsp;extraction&nbsp;format&nbsp;for&nbsp;the&nbsp;<a href="#-getInt">getInt</a>()&nbsp;function<br>
 &nbsp;<br>
-RADIX_DEC<br>
-RADIX_HEX<br>
-RADIX_ANY<br>
+&nbsp;&nbsp;RADIX_DEC<br>
+&nbsp;&nbsp;RADIX_HEX<br>
+&nbsp;&nbsp;RADIX_ANY<br>
 &nbsp;<br>
 String&nbsp;constants:<br>
 &nbsp;<br>
@@ -110,10 +113,10 @@ client&nbsp;programs,&nbsp;TCP&nbsp;servers&nbsp;require&nbsp;a&nbsp;'telnet'&nb
 require&nbsp;no&nbsp;client&nbsp;(all&nbsp;user&nbsp;interaction&nbsp;done&nbsp;directly&nbsp;with&nbsp;server&nbsp;running<br>
 in&nbsp;the&nbsp;parent&nbsp;host&nbsp;program)<br>
 &nbsp;<br>
-UDP<br>
-TCP<br>
-UNIX<br>
-LOCAL<br>
+&nbsp;&nbsp;UDP<br>
+&nbsp;&nbsp;TCP<br>
+&nbsp;&nbsp;UNIX<br>
+&nbsp;&nbsp;LOCAL<br>
 &nbsp;<br>
 These&nbsp;three&nbsp;identifiers&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;hostnameOrIpAddr&nbsp;argument<br>
 of&nbsp;the&nbsp;startServer&nbsp;call.&nbsp;&nbsp;PshellServer.ANYHOST&nbsp;will&nbsp;bind&nbsp;the&nbsp;server&nbsp;socket<br>
@@ -122,12 +125,9 @@ to&nbsp;all&nbsp;interfaces&nbsp;of&nbsp;a&nbsp;multi-homed&nbsp;host,&nbsp;Pshe
 the&nbsp;local&nbsp;loopback&nbsp;address&nbsp;(i.e.&nbsp;127.0.0.1),&nbsp;note&nbsp;that&nbsp;subnet&nbsp;broadcast<br>
 it&nbsp;also&nbsp;supported,&nbsp;e.g.&nbsp;x.y.z.255<br>
 &nbsp;<br>
-ANYHOST<br>
-ANYBCAST<br>
-LOCALHOST<br>
-&nbsp;<br>
-A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included<br>
-demo&nbsp;program&nbsp;pshellServerDemo.py.</tt></p>
+&nbsp;&nbsp;ANYHOST<br>
+&nbsp;&nbsp;ANYBCAST<br>
+&nbsp;&nbsp;LOCALHOST</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">

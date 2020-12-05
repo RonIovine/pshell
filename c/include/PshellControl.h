@@ -47,6 +47,75 @@ extern "C" {
  * A complete example of the usage of the API can be found in the included
  * demo programs pshellControlDemo.cc and pshellAggregatorDemo.cc
  *
+ * Functions:
+ *
+ *   pshell_connectServer()         -- connect to a remote pshell server
+ *   pshell_disconnectServer()      -- disconnect from a remote pshell server
+ *   pshell_disconnectAllServers()  -- disconnect from all connected remote pshell servers
+ *   pshell_setDefaultTimeout()     -- set the default server response timeout
+ *   pshell_extractCommands()       -- extract all commands from remote server
+ *   pshell_extractControlNames()   -- extract all registered control names
+ *   pshell_addMulticast()          -- add a command keyword to a multicast group
+ *   pshell_sendMulticast()         -- send a command to a multicast group
+ *   pshell_sendCommand1()          -- send command to server using default timeout, no results extracted
+ *   pshell_sendCommand2()          -- send command to server using timeout override, no results extracted
+ *   pshell_sendCommand3()          -- send command to server using default timeout, results extracted
+ *   pshell_sendCommand4()          -- send command to server using timeout override, results extracted
+ *   pshell_getResponseString()     -- return the human readable form of one of the command response return codes
+ *   pshell_setControlLogLevel()    -- set the internal log level for this module
+ *   pshell_setControlLogFunction() -- register a user function to receive all logs
+ *
+ * Integer constants:
+ *
+ * Helpful items used for the server response timeout values
+ *
+ *   PSHELL_NO_WAIT
+ *   PSHELL_ONE_MSEC
+ *   PSHELL_ONE_SEC
+ *   PSHELL_ONE_MINUTE
+ *   PSHELL_ONE_HOUR
+ *
+ * These are returned from the sendCommandN functions
+ *
+ *   PSHELL_COMMAND_SUCCESS
+ *   PSHELL_COMMAND_NOT_FOUND
+ *   PSHELL_COMMAND_INVALID_ARG_COUNT
+ *   PSHELL_SOCKET_SEND_FAILURE
+ *   PSHELL_SOCKET_SELECT_FAILURE
+ *   PSHELL_SOCKET_RECEIVE_FAILURE
+ *   PSHELL_SOCKET_TIMEOUT
+ *   PSHELL_SOCKET_NOT_CONNECTED
+ *
+ * Constants to let the host program set the internal debug log level,
+ * if the user of this API does not want to see any internal message
+ * printed out, set the debug log level to PSHELL_CONTROL_LOG_LEVEL_NONE,
+ * the default log level is PSHELL_CONTROL_LOG_LEVEL_ALL
+ *
+ *   PSHELL_CONTROL_LOG_LEVEL_NONE
+ *   PSHELL_CONTROL_LOG_LEVEL_ERROR
+ *   PSHELL_CONTROL_LOG_LEVEL_WARNING
+ *   PSHELL_CONTROL_LOG_LEVEL_INFO
+ *   PSHELL_CONTROL_LOG_LEVEL_ALL
+ *   PSHELL_CONTROL_LOG_LEVEL_DEFAULT
+ *
+ * String constants:
+ *
+ * This is used for the host when connecting to a server running
+ * at the loopback localhost address
+ *
+ *   PSHELL_LOCALHOST
+ *
+ * Use this as the "port" identifier for the connectServer
+ * call when using a UNIX domain server
+ *
+ *   PSHELL_UNIX_CONTROL
+ *
+ * Specifies if the addMulticast should add the given command to all specified
+ * multicast receivers or if all control destinations should receive the given
+ * multicast command
+ *
+ *   PSHELL_MULTICAST_ALL
+ *
  *******************************************************************************/
 
 /*
