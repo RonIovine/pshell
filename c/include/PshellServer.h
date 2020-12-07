@@ -112,6 +112,16 @@ extern "C" {
  *
  * Integer constants:
  *
+ * Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
+ * client programs, TCP servers require a 'telnet' client, local servers
+ * require no client (all user interaction done directly with server running
+ * in the parent host program)
+ *
+ *   PSHELL_UDP_SERVER
+ *   PSHELL_TCP_SERVER
+ *   PSHELL_UNIX_SERVER
+ *   PSHELL_LOCAL_SERVER
+ *
  * These are the identifiers for the serverMode.  BLOCKING will never return
  * control to the caller of StartServer, NON_BLOCKING will spawn a thread to
  * run the server and will return control to the caller of StartServer
@@ -138,16 +148,6 @@ extern "C" {
  *   PSHELL_RADIX_ANY
  *
  * String constants:
- *
- * Valid server types, UDP/UNIX servers require the 'pshell' or 'pshell.py'
- * client programs, TCP servers require a 'telnet' client, local servers
- * require no client (all user interaction done directly with server running
- * in the parent host program)
- *
- *   PSHELL_UDP
- *   PSHELL_TCP
- *   PSHELL_UNIX
- *   PSHELL_LOCAL
  *
  * These three identifiers that can be used for the hostnameOrIpAddr argument
  * of the StartServer call.  PshellServer.ANYHOST will bind the server socket

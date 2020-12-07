@@ -116,7 +116,7 @@ void sampleFormatFunction(const char *level_,
   /*
    * this sample format function is registered with the TraceLog
    * 'trace_registerFormatFunction' call to show a client supplied
-   * formatting function, the formating myst be done into the outputString_
+   * formatting function, the formating must be done into the outputString_
    * variable, the user can check to see if the various formatting items
    * are enabled, or they can just use a fixed format
    */
