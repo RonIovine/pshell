@@ -36,14 +36,13 @@ user API functionality.  It provides the ability for a program to register
 functions that can be invoked via a command line user interface.  There are
 several ways to invoke these embedded functions based on how the pshell server
 is configured, which is described in documentation further down in this file.
+This is the Python implementation, there are also corresponding C/C++ and Golang
+implementations.
 
-This module provides the same functionality as the PshellServer.h API and
-the libpshell-server linkable 'C' library, but implemented as a Python module.
-It supports all the server types as the corresponding 'C' impelmentation, TCP,
-UDP, UNIX and LOCAL server types are all supported.  Applications using this
-module can be controlled via the pshell UDP/UNIX stand-alone 'C' client program
-or via the PshellControl.h/libpshell-control, PshellControl.py control mechanism
-or the PshellControl.go module and API.
+The functions are similar to the prototype of the 'main' in 'python', i.e.
+'def myFunc(string)', there are several ways to invoke these embedded
+functions based on how the pshell server is configured, which is described
+in documentation further down in this file.
 
 A complete example of the usage of the API can be found in the included
 demo program pshellServerDemo.py.

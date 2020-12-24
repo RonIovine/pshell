@@ -272,11 +272,11 @@ void pshell_extractControlNames(char *names_[], unsigned maxNames_, unsigned *nu
  *
  *   pshell_addMulticast(PSHELL_MULTICAST_ALL, "control1,control2,control3");
  *
- * ex 3: multicast command sent to all receivers
+ * ex 3: multicast command sent to all control receivers
  *
  *   pshell_addMulticast("command", PSHELL_MULTICAST_ALL);
  *
- * ex 4: all multicast commands sent to all receivers
+ * ex 4: all multicast commands sent to all control receivers
  *
  *   pshell_addMulticast(PSHELL_MULTICAST_ALL, PSHELL_MULTICAST_ALL);
  *
@@ -292,8 +292,7 @@ void pshell_addMulticast(const char *command_, const char *controlList_);
  * receivers for this multicast group, multicast groups are based on the
  * command's keyword, this function will issue the command as a best effort
  * fire-and-forget command to each receiver in the multicast group, no
- * results will be requested or expected, and no response will be requested
- * or expected
+ * results/response will be requested or expected
  */
 void pshell_sendMulticast(const char *command_, ...);
 

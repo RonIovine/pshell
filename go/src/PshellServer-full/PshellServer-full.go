@@ -30,11 +30,11 @@
 // This API provides the Process Specific Embedded Command Line Shell (PSHELL)
 // user API functionality.  It provides the ability for a client program to
 // register functions that can be invoked via a command line user interface.
-// This is the 'go' implementation, there are also corresponding C/C++ and
+// This is the Golang implementation, there are also corresponding C/C++ and
 // Python implementations.
 //
 // The functions are similar to the prototype of the 'main' in 'go', i.e.
-// 'func myFunc([]string), there are several ways to invoke these embedded
+// 'func myFunc([]string)', there are several ways to invoke these embedded
 // functions based on how the pshell server is configured, which is described
 // in documentation further down in this file.
 //

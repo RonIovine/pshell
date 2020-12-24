@@ -43,9 +43,10 @@ extern "C" {
  * register functions that can be invoked via a command line user interface.
  *
  * The functions are similar to the prototype of the 'main' in 'C', i.e.
- * 'int myFunc(int argc, char *argv[]), there are several ways to invoke these
+ * 'void myFunc(int argc, char *argv[])', there are several ways to invoke these
  * embedded functions based on how the pshell server is configured, which is
- * described in documentation further down in this file.
+ * described in documentation further down in this file.  This is the C/C++
+ * implementation, there are also corresponding Golang and Python implementations.
  *
  * A complete example of the usage of the API can be found in the included
  * demo program file pshellServerDemo.cc
@@ -123,8 +124,8 @@ extern "C" {
  *   PSHELL_LOCAL_SERVER
  *
  * These are the identifiers for the serverMode.  BLOCKING will never return
- * control to the caller of StartServer, NON_BLOCKING will spawn a thread to
- * run the server and will return control to the caller of StartServer
+ * control to the caller of pshell_startServer, NON_BLOCKING will spawn a thread
+ * to run the server and will return control to the caller of StartServer
  *
  *   PSHELL_BLOCKING
  *   PSHELL_NON_BLOCKING
