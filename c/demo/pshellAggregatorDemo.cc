@@ -263,8 +263,8 @@ int main (int argc, char *argv[])
    * should be provided in the form of a CSV list of
    * controlNames as shown below
    */
-  pshell_addMulticast("trace", PSHELL_SERVER_DEMO","TRACE_FILTER_DEMO);
-  pshell_addMulticast("test", PSHELL_SERVER_DEMO","TRACE_FILTER_DEMO);
+  pshell_addMulticast("trace", PSHELL_SERVER_DEMO "," TRACE_FILTER_DEMO);
+  pshell_addMulticast("test", PSHELL_SERVER_DEMO "," TRACE_FILTER_DEMO);
   pshell_addMulticast("hello", PSHELL_SERVER_DEMO);
 
   /* register our local pshell commands */
