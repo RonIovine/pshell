@@ -167,10 +167,17 @@ import "bufio"
 import "time"
 import "unicode"
 
+/////////////////////////////////////////////////////////////////////////////////
+//
+// public API functions and data
+//
+// Users of this module should only interface via the public API
+//
+/////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////
 //
-// global "public" data, these are used for various parts of the public API
+// global public data, these are used for various parts of the public API
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -226,127 +233,13 @@ const (
 
 /////////////////////////////////////////////////////////////////////////////////
 //
-// global "private" data
+// public API functions
+//
+// Users of this module should only access functionality via these public
+// methods.  This is broken up into public and private sections for
+// readability and to not expose the implementation in the API definition
 //
 /////////////////////////////////////////////////////////////////////////////////
-
-// the following enum values are returned by the pshell server
-// response to a command request from a control client
-const (
-  _COMMAND_SUCCESS = 0
-  _COMMAND_NOT_FOUND = 1
-  _COMMAND_INVALID_ARG_COUNT = 2
-)
-
-// msgType codes between interactive client and server
-const (
-  _QUERY_VERSION = 1
-  _QUERY_PAYLOAD_SIZE = 2
-  _QUERY_NAME = 3
-  _QUERY_COMMANDS1 = 4
-  _QUERY_COMMANDS2 = 5
-  _UPDATE_PAYLOAD_SIZE = 6
-  _USER_COMMAND = 7
-  _COMMAND_COMPLETE = 8
-  _QUERY_BANNER = 9
-  _QUERY_TITLE = 10
-  _QUERY_PROMPT = 11
-  _CONTROL_COMMAND = 12
-)
-
-// ascii keystroke codes
-const (
-  _BS = 8
-  _TAB = 9
-  _LF = 10
-  _CR = 13
-  _ESC = 27
-  _SPACE = 32
-  _DEL = 127
-)
-
-type pshellFunction func([]string)
-
-type pshellCmd struct {
-  command string
-  usage string
-  description string
-  function pshellFunction
-  minArgs int
-  maxArgs int
-  showUsage bool
-}
-
-const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
-const _PSHELL_STARTUP_DIR = "/etc/pshell/startup"
-const _PSHELL_BATCH_DIR = "/etc/pshell/batch"
-const _PSHELL_CONFIG_FILE = "pshell-server.conf"
-
-var _gPrompt = "PSHELL> "
-var _gTitle = "PSHELL"
-var _gTcpTitle = "PSHELL"
-var _gTcpPrompt = ""
-var _gQuitTcp = false
-var _gQuitLocal = false
-var _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
-var _gServerVersion = "1"
-var _gPshellMsgPayloadLength = 1024*64  // 64k buffer size
-var _gPshellMsgHeaderLength = 8
-var _gServerType = UDP
-var _gServerName = "None"
-var _gServerMode = BLOCKING
-var _gHostnameOrIpAddr = "None"
-var _gPort = "0"
-var _gTcpTimeout = 10  // minutes
-var _gTcpConnectSockName = ""
-var _gRunning = false
-var _gCommandDispatched = false
-var _gCommandInteractive = true
-var _gArgs []string
-var _gFoundCommand pshellCmd
-
-const _MAX_BIND_ATTEMPTS = 1000
-
-var _gCommandList = []pshellCmd{}
-var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
-var _gPshellSendPayload = ""
-var _gUdpSocket *net.UDPConn
-var _gUnixSocket *net.UnixConn
-var _gUnixSourceAddress string
-var _gTcpSocket *net.TCPListener
-var _gConnectFd *net.TCPConn
-var _gTcpNegotiate = []byte{0xFF, 0xFB, 0x03, 0xFF, 0xFB, 0x01, 0xFF, 0xFD, 0x03, 0xFF, 0xFD, 0x01}
-var _gRecvAddr net.Addr
-var _gMaxLength = 0
-var _gWheelPos = 0
-var _gWheel = "|/-\\"
-
-const _TAB_SPACING = 5
-const _TAB_COLUMNS = 80
-
-var _gTabCompletions []string
-var _gMaxTabCompletionKeywordLength = 0
-var _gMaxCompletionsPerLine = 0
-var _gMaxMatchPerLine = 0
-var _gMaxMatchKeywordLength = 0
-var _gCommandHistory []string
-var _gCommandHistoryPos = 0
-
-type logFunction func(string)
-var _gLogLevel = LOG_LEVEL_DEFAULT
-var _gLogFunction logFunction
-
-var _gLockFile string
-var _gLockFd *os.File
-const _FILE_SYSTEM_PATH = "/tmp/.pshell/"
-const _LOCK_FILE_EXTENSION = ".lock"
-const _UNIX_LOCK_FILE_ID = "unix.lock"
-
-/////////////////////////////////
-//
-// Public functions
-//
-/////////////////////////////////
 
 //
 //  Register callback commands to our PSHELL server.  If the command takes
@@ -980,11 +873,142 @@ func GetOption(arg string) (bool, string, string) {
   return (getOption(arg))
 }
 
-/////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 //
-// Private functions
+// private functions and data
 //
-/////////////////////////////////
+// Users of this module should never access any of these private items directly,
+// these are meant to hide the implementation from the presentation of the public
+// API above
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global private data
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+// the following enum values are returned by the pshell server
+// response to a command request from a control client
+const (
+  _COMMAND_SUCCESS = 0
+  _COMMAND_NOT_FOUND = 1
+  _COMMAND_INVALID_ARG_COUNT = 2
+)
+
+// msgType codes between interactive client and server
+const (
+  _QUERY_VERSION = 1
+  _QUERY_PAYLOAD_SIZE = 2
+  _QUERY_NAME = 3
+  _QUERY_COMMANDS1 = 4
+  _QUERY_COMMANDS2 = 5
+  _UPDATE_PAYLOAD_SIZE = 6
+  _USER_COMMAND = 7
+  _COMMAND_COMPLETE = 8
+  _QUERY_BANNER = 9
+  _QUERY_TITLE = 10
+  _QUERY_PROMPT = 11
+  _CONTROL_COMMAND = 12
+)
+
+// ascii keystroke codes
+const (
+  _BS = 8
+  _TAB = 9
+  _LF = 10
+  _CR = 13
+  _ESC = 27
+  _SPACE = 32
+  _DEL = 127
+)
+
+// callback function prototype
+type pshellFunction func([]string)
+
+// command table entry
+type pshellCmd struct {
+  command string
+  usage string
+  description string
+  function pshellFunction
+  minArgs int
+  maxArgs int
+  showUsage bool
+}
+
+// default config, startup, and batch directories
+const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
+const _PSHELL_STARTUP_DIR = "/etc/pshell/startup"
+const _PSHELL_BATCH_DIR = "/etc/pshell/batch"
+const _PSHELL_CONFIG_FILE = "pshell-server.conf"
+
+var _gPrompt = "PSHELL> "
+var _gTitle = "PSHELL"
+var _gTcpTitle = "PSHELL"
+var _gTcpPrompt = ""
+var _gQuitTcp = false
+var _gQuitLocal = false
+var _gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
+var _gServerVersion = "1"
+var _gPshellMsgPayloadLength = 1024*64  // 64k buffer size
+var _gPshellMsgHeaderLength = 8
+var _gServerType = UDP
+var _gServerName = "None"
+var _gServerMode = BLOCKING
+var _gHostnameOrIpAddr = "None"
+var _gPort = "0"
+var _gTcpTimeout = 10  // minutes
+var _gTcpConnectSockName = ""
+var _gRunning = false
+var _gCommandDispatched = false
+var _gCommandInteractive = true
+var _gArgs []string
+var _gFoundCommand pshellCmd
+
+const _MAX_BIND_ATTEMPTS = 1000
+
+var _gCommandList = []pshellCmd{}
+var _gPshellRcvMsg = make([]byte, _gPshellMsgPayloadLength)
+var _gPshellSendPayload = ""
+var _gUdpSocket *net.UDPConn
+var _gUnixSocket *net.UnixConn
+var _gUnixSourceAddress string
+var _gTcpSocket *net.TCPListener
+var _gConnectFd *net.TCPConn
+var _gTcpNegotiate = []byte{0xFF, 0xFB, 0x03, 0xFF, 0xFB, 0x01, 0xFF, 0xFD, 0x03, 0xFF, 0xFD, 0x01}
+var _gRecvAddr net.Addr
+var _gMaxLength = 0
+var _gWheelPos = 0
+var _gWheel = "|/-\\"
+
+const _TAB_SPACING = 5
+const _TAB_COLUMNS = 80
+
+var _gTabCompletions []string
+var _gMaxTabCompletionKeywordLength = 0
+var _gMaxCompletionsPerLine = 0
+var _gMaxMatchPerLine = 0
+var _gMaxMatchKeywordLength = 0
+var _gCommandHistory []string
+var _gCommandHistoryPos = 0
+
+type logFunction func(string)
+var _gLogLevel = LOG_LEVEL_DEFAULT
+var _gLogFunction logFunction
+
+var _gLockFile string
+var _gLockFd *os.File
+const _FILE_SYSTEM_PATH = "/tmp/.pshell/"
+const _LOCK_FILE_EXTENSION = ".lock"
+const _UNIX_LOCK_FILE_ID = "unix.lock"
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global private functions
+//
+/////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -2649,4 +2673,3 @@ func createMessage(msgType_ byte,
   message = append(message, []byte(command_)...)
   return (message)
 }
-

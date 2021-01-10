@@ -165,6 +165,14 @@ import PshellReadline
 
 #################################################################################
 #
+# "public" API functions and data
+#
+# Users of this module should only interface via the "public" API
+#
+#################################################################################
+
+#################################################################################
+#
 # global "public" data, these are used for various parts of the public API
 #
 #################################################################################
@@ -720,6 +728,123 @@ def getFloat(string):
 # Users of this module should never access any of these "private" items directly,
 # these are meant to hide the implementation from the presentation of the public
 # API above
+#
+#################################################################################
+
+#################################################################################
+#
+# global "private" data
+#
+#################################################################################
+
+_gCommandHelp = ('?', '-h', '--h', '-help', '--help')
+_gListHelp = ('?', 'help')
+_gCommandList = []
+_gMaxLength = 0
+
+_gServerVersion = "1"
+_gServerName = None
+_gServerType = None
+_gServerMode = None
+_gHostnameOrIpAddr = None
+_gPort = None
+_gPrompt = "PSHELL> "
+_gTitle = "PSHELL"
+_gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
+_gSocketFd = None
+_gConnectFd = None
+_gFromAddr = None
+_gFileSystemPath = "/tmp/.pshell/"
+_gArgs = None
+_gFoundCommand = None
+_gUnixSourceAddress = None
+_gLockFile = None
+_gLockFileExtension = ".lock"
+_gUnixLockFileId = "unix"+_gLockFileExtension
+_gLockFd = None
+_gRunning = False
+_gCommandDispatched = False
+_gCommandInteractive = True
+
+# dislay override setting used by the pshell.py client program
+_gPromptOverride = None
+_gTitleOverride = None
+_gServerNameOverride = None
+_gServerTypeOverride = None
+_gBannerOverride = None
+
+# these are the valid types we recognize in the msgType field of the pshellMsg
+#  structure,that structure is the message passed between the pshell client and
+# server, these values must match their corresponding #define definitions in
+# the C file PshellCommon.h
+_gMsgTypes = {"commandSuccess": 0,
+              "queryVersion":1,
+              "commandNotFound":1,
+              "queryPayloadSize":2,
+              "invalidArgCount":2,
+              "queryName":3,
+              "queryCommands1":4,
+              "queryCommands2":5,
+              "updatePayloadSize":6,
+              "userCommand":7,
+              "commandComplete":8,
+              "queryBanner":9,
+              "queryTitle":10,
+              "queryPrompt":11,
+              "controlCommand":12}
+
+# fields of PshellMsg, we use this definition to unpack the received PshellMsg
+# response from the server into a corresponding OrderedDict in the PshellControl
+# entry
+_PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum payload')
+
+# format of PshellMsg header, 4 bytes and 1 (4 byte) integer, we use this for
+# packing/unpacking the PshellMessage to/from an OrderedDict into a packed binary
+# structure that can be transmitted over-the-wire via a socket
+_gPshellMsgHeaderFormat = "4BI"
+
+# default PshellMsg payload length, used to receive responses
+_gPshellMsgPayloadLength = 1024*64
+
+_gPshellMsg =  OrderedDict([("msgType",0),
+                            ("respNeeded",True),
+                            ("dataNeeded",True),
+                            ("pad",0),
+                            ("seqNum",0),
+                            ("payload","")])
+
+_PSHELL_CONFIG_DIR = "/etc/pshell/config"
+_PSHELL_STARTUP_DIR = "/etc/pshell/startup"
+_PSHELL_BATCH_DIR = "/etc/pshell/batch"
+_PSHELL_CONFIG_FILE = "pshell-server.conf"
+
+_gFirstArgPos = 1
+_gHelpPos = 0
+_gHelpLength = 1
+
+_gWheelPos = 0
+_gWheel = "|/-\\"
+
+_gQuitLocal = False
+_gQuitTcp = False
+_gTcpTimeout = 10  # minutes
+_gPshellClientTimeout = 5  # seconds
+_gTcpConnectSockName = None
+_gTcpPrompt = None
+_gTcpTitle = None
+# flag to indicate thespecial pshell.py client
+_gPshellClient = False
+_gClientTimeoutOverride = None
+
+# log level and log print function
+_gLogLevel = LOG_LEVEL_DEFAULT
+_gLogFunction = None
+
+_MAX_BIND_ATTEMPTS = 1000
+
+#################################################################################
+#
+# global "private" functions
 #
 #################################################################################
 
@@ -1919,121 +2044,9 @@ def _printLog(message_):
 
 #################################################################################
 #
-# global "private" data
-#
-#################################################################################
-
-_gCommandHelp = ('?', '-h', '--h', '-help', '--help')
-_gListHelp = ('?', 'help')
-_gCommandList = []
-_gMaxLength = 0
-
-_gServerVersion = "1"
-_gServerName = None
-_gServerType = None
-_gServerMode = None
-_gHostnameOrIpAddr = None
-_gPort = None
-_gPrompt = "PSHELL> "
-_gTitle = "PSHELL"
-_gBanner = "PSHELL: Process Specific Embedded Command Line Shell"
-_gSocketFd = None
-_gConnectFd = None
-_gFromAddr = None
-_gFileSystemPath = "/tmp/.pshell/"
-_gArgs = None
-_gFoundCommand = None
-_gUnixSourceAddress = None
-_gLockFile = None
-_gLockFileExtension = ".lock"
-_gUnixLockFileId = "unix"+_gLockFileExtension
-_gLockFd = None
-_gRunning = False
-_gCommandDispatched = False
-_gCommandInteractive = True
-
-# dislay override setting used by the pshell.py client program
-_gPromptOverride = None
-_gTitleOverride = None
-_gServerNameOverride = None
-_gServerTypeOverride = None
-_gBannerOverride = None
-
-# these are the valid types we recognize in the msgType field of the pshellMsg
-#  structure,that structure is the message passed between the pshell client and
-# server, these values must match their corresponding #define definitions in
-# the C file PshellCommon.h
-_gMsgTypes = {"commandSuccess": 0,
-              "queryVersion":1,
-              "commandNotFound":1,
-              "queryPayloadSize":2,
-              "invalidArgCount":2,
-              "queryName":3,
-              "queryCommands1":4,
-              "queryCommands2":5,
-              "updatePayloadSize":6,
-              "userCommand":7,
-              "commandComplete":8,
-              "queryBanner":9,
-              "queryTitle":10,
-              "queryPrompt":11,
-              "controlCommand":12}
-
-# fields of PshellMsg, we use this definition to unpack the received PshellMsg
-# response from the server into a corresponding OrderedDict in the PshellControl
-# entry
-_PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum payload')
-
-# format of PshellMsg header, 4 bytes and 1 (4 byte) integer, we use this for
-# packing/unpacking the PshellMessage to/from an OrderedDict into a packed binary
-# structure that can be transmitted over-the-wire via a socket
-_gPshellMsgHeaderFormat = "4BI"
-
-# default PshellMsg payload length, used to receive responses
-_gPshellMsgPayloadLength = 1024*64
-
-_gPshellMsg =  OrderedDict([("msgType",0),
-                            ("respNeeded",True),
-                            ("dataNeeded",True),
-                            ("pad",0),
-                            ("seqNum",0),
-                            ("payload","")])
-
-_PSHELL_CONFIG_DIR = "/etc/pshell/config"
-_PSHELL_STARTUP_DIR = "/etc/pshell/startup"
-_PSHELL_BATCH_DIR = "/etc/pshell/batch"
-_PSHELL_CONFIG_FILE = "pshell-server.conf"
-
-_gFirstArgPos = 1
-_gHelpPos = 0
-_gHelpLength = 1
-
-_gWheelPos = 0
-_gWheel = "|/-\\"
-
-_gQuitLocal = False
-_gQuitTcp = False
-_gTcpTimeout = 10  # minutes
-_gPshellClientTimeout = 5  # seconds
-_gTcpConnectSockName = None
-_gTcpPrompt = None
-_gTcpTitle = None
-# flag to indicate thespecial pshell.py client
-_gPshellClient = False
-_gClientTimeoutOverride = None
-
-# log level and log print function
-_gLogLevel = LOG_LEVEL_DEFAULT
-_gLogFunction = None
-
-_MAX_BIND_ATTEMPTS = 1000
-
-##############################
-#
 # start of main program
 #
-##############################
-
+#################################################################################
 if (__name__ == '__main__'):
   # just print out a message identifying this as the 'full' module
   print("PSHELL_INFO: PshellServer FULL Module")

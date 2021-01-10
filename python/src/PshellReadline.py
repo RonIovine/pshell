@@ -88,6 +88,14 @@ import signal
 
 #################################################################################
 #
+# "public" API functions and data
+#
+# Users of this module should only interface via the "public" API
+#
+#################################################################################
+
+#################################################################################
+#
 # global "public" data, these are used for various parts of the public API
 #
 #################################################################################
@@ -258,6 +266,34 @@ def isSubString(string1, string2, minMatchLength = 0):
 # Users of this module should never access any of these "private" items directly,
 # these are meant to hide the implementation from the presentation of the public
 # API above
+#
+#################################################################################
+
+#################################################################################
+#
+# global "private" data
+#
+#################################################################################
+
+_gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
+_gIdleTimeout = IDLE_TIMEOUT_NONE
+_gSerialType = TTY
+_gInFd = sys.stdin
+_gOutFd = sys.stdout
+_gTabCompletions = []
+_gMaxTabCompletionKeywordLength = 0
+_gMaxCompletionsPerLine = 0
+_gMaxMatchKeywordLength = 0
+_gMaxMatchCompletionsPerLine = 0
+_gCommandHistory = []
+_gCommandHistoryPos = 0
+_gTabStyle = FAST_TAB
+_gTabSpacing = 5
+_gTabColumns = 80
+
+#################################################################################
+#
+# global "private" functions
 #
 #################################################################################
 
@@ -715,25 +751,3 @@ def _getChar():
       char = _gInFd.recv(1)
   # return char, no idle timeout
   return (char, False)
-
-#################################################################################
-#
-# global "private" data
-#
-#################################################################################
-
-_gTcpNegotiate = 'FFFB03FFFB01FFFD03FFFD01'.decode('hex')
-_gIdleTimeout = IDLE_TIMEOUT_NONE
-_gSerialType = TTY
-_gInFd = sys.stdin
-_gOutFd = sys.stdout
-_gTabCompletions = []
-_gMaxTabCompletionKeywordLength = 0
-_gMaxCompletionsPerLine = 0
-_gMaxMatchKeywordLength = 0
-_gMaxMatchCompletionsPerLine = 0
-_gCommandHistory = []
-_gCommandHistoryPos = 0
-_gTabStyle = FAST_TAB
-_gTabSpacing = 5
-_gTabColumns = 80

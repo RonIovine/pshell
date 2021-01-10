@@ -129,6 +129,14 @@ from collections import namedtuple
 
 #################################################################################
 #
+# "public" API functions and data
+#
+# Users of this module should only interface via the "public" API
+#
+#################################################################################
+
+#################################################################################
+#
 # global "public" data, these are used for various parts of the public API
 #
 #################################################################################
@@ -518,6 +526,69 @@ def setLogFunction(function):
 # Users of this module should never access any of these "private" items directly,
 # these are meant to hide the implementation from the presentation of the public
 # API above
+#
+#################################################################################
+
+#################################################################################
+#
+# global "private" data
+#
+#################################################################################
+
+# list of dictionaries that contains a control structure for each control client
+_gPshellControl = []
+
+# list of dictionaries that contains multicast group information
+_gPshellMulticast = []
+
+# path of unix domain socket handle for client sockets
+_gUnixSocketPath = "/tmp/.pshell/"
+_gLockFileExtension = ".lock"
+_PSHELL_CONFIG_DIR = "/etc/pshell/config"
+_PSHELL_CONFIG_FILE = "pshell-control.conf"
+
+# these are the valid types we recognize in the msgType field of the pshellMsg structure,
+# that structure is the message passed between the pshell client and server, these values
+# must match their corresponding #define definitions in the C file PshellCommon.h
+_gMsgTypes = {"queryName":3, "queryCommands":4, "commandComplete":8, "queryBanner":9, "queryTitle":10, "queryPrompt":11, "controlCommand":12}
+
+# fields of PshellMsg, we use this definition to unpack the received PshellMsg response
+# from the server into a corresponding OrderedDict in the PshellControl entry
+_PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum payload')
+
+# format of PshellMsg header, 4 bytes and 1 (4 byte) integer, we use this for packing/unpacking
+# the PshellMessage to/from an OrderedDict into a packed binary structure that can be transmitted
+# over-the-wire via a socket
+_gPshellMsgHeaderFormat = "4BI"
+
+# default PshellMsg payload length, used to receive responses,
+# set to the max UDP datagram size, 64k
+_gPshellMsgPayloadLength = 1024*64
+
+# mapping of above definitions to strings so we can display text in error messages
+_gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
+                           COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
+                           COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT",
+                           SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE",
+                           SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE",
+                           SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE",
+                           SOCKET_TIMEOUT:"PSHELL_SOCKET_TIMEOUT",
+                           SOCKET_NOT_CONNECTED:"PSHELL_SOCKET_NOT_CONNECTED"}
+
+# the suppress flag is used as a backdoor for the pshell.py client to allow
+# a remote server to pass the command usage back to the local server that
+# is run by the client
+_gSupressInvalidArgCountMessage = False
+
+# log level and log print function
+_gLogLevel = LOG_LEVEL_DEFAULT
+_gLogFunction = None
+
+_INVALID_SID = -1
+
+#################################################################################
+#
+# global "private" functions
 #
 #################################################################################
 
@@ -1044,60 +1115,3 @@ def _printLog(message_):
     _gLogFunction(message_)
   else:
     print(message_)
-
-#################################################################################
-#
-# global "private" data
-#
-#################################################################################
-
-# list of dictionaries that contains a control structure for each control client
-_gPshellControl = []
-
-# list of dictionaries that contains multicast group information
-_gPshellMulticast = []
-
-# path of unix domain socket handle for client sockets
-_gUnixSocketPath = "/tmp/.pshell/"
-_gLockFileExtension = ".lock"
-_PSHELL_CONFIG_DIR = "/etc/pshell/config"
-_PSHELL_CONFIG_FILE = "pshell-control.conf"
-
-# these are the valid types we recognize in the msgType field of the pshellMsg structure,
-# that structure is the message passed between the pshell client and server, these values
-# must match their corresponding #define definitions in the C file PshellCommon.h
-_gMsgTypes = {"queryName":3, "queryCommands":4, "commandComplete":8, "queryBanner":9, "queryTitle":10, "queryPrompt":11, "controlCommand":12}
-
-# fields of PshellMsg, we use this definition to unpack the received PshellMsg response
-# from the server into a corresponding OrderedDict in the PshellControl entry
-_PshellMsg = namedtuple('PshellMsg', 'msgType respNeeded dataNeeded pad seqNum payload')
-
-# format of PshellMsg header, 4 bytes and 1 (4 byte) integer, we use this for packing/unpacking
-# the PshellMessage to/from an OrderedDict into a packed binary structure that can be transmitted
-# over-the-wire via a socket
-_gPshellMsgHeaderFormat = "4BI"
-
-# default PshellMsg payload length, used to receive responses,
-# set to the max UDP datagram size, 64k
-_gPshellMsgPayloadLength = 1024*64
-
-# mapping of above definitions to strings so we can display text in error messages
-_gPshellControlResponse = {COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
-                           COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
-                           COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT",
-                           SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE",
-                           SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE",
-                           SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE",
-                           SOCKET_TIMEOUT:"PSHELL_SOCKET_TIMEOUT",
-                           SOCKET_NOT_CONNECTED:"PSHELL_SOCKET_NOT_CONNECTED"}
-
-# the suppress flag is used as a backdoor for the pshell.py client to allow
-# a remote server to pass the command usage back to the local server that
-# is run by the client
-_gSupressInvalidArgCountMessage = False
-
-# log level and log print function
-_gLogLevel = LOG_LEVEL_DEFAULT
-_gLogFunction = None
-
-_INVALID_SID = -1

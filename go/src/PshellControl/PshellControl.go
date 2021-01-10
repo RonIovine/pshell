@@ -121,7 +121,15 @@ import "fmt"
 
 /////////////////////////////////////////////////////////////////////////////////
 //
-// global "public" data, these are used for various parts of the public API
+// public API functions and data
+//
+// Users of this module should only interface via the public API
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global public data, these are used for various parts of the public API
 //
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -174,67 +182,13 @@ const (
 
 /////////////////////////////////////////////////////////////////////////////////
 //
-// global "private" data
+// public API functions
+//
+// Users of this module should only access functionality via these public
+// methods.  This is broken up into public and private sections for
+// readability and to not expose the implementation in the API definition
 //
 /////////////////////////////////////////////////////////////////////////////////
-
-const _INVALID_SID = -1
-const _UNIX_SOCKET_PATH = "/tmp/.pshell/"
-const _LOCK_FILE_EXTENSION = ".lock"
-const _NO_RESP_NEEDED = 0
-const _NO_DATA_NEEDED = 0
-const _RESP_NEEDED = 1
-const _DATA_NEEDED = 1
-const _RCV_BUFFER_SIZE = 1024*64  // 64k buffer size
-
-const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
-const _PSHELL_CONFIG_FILE = "pshell-control.conf"
-
-type logFunction func(string)
-var _logLevel = LOG_LEVEL_DEFAULT
-var _logFunction logFunction
-
-type pshellControl struct {
-  socket net.Conn
-  defaultTimeout int
-  serverType string
-  unixLockFd *os.File
-  sourceAddress string
-  sendMsg []byte
-  recvMsg []byte
-  recvSize int
-  controlName string
-  remoteServer string
-}
-var _gControlList = []pshellControl{}
-
-type pshellMulticast struct {
-  command string
-  sidList []int
-}
-var _gMulticastList = []pshellMulticast{}
-
-var _gPshellControlResponse = map[int]string {
-  COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
-  COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
-  COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT",
-  SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE",
-  SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE",
-  SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE",
-  SOCKET_TIMEOUT:"PSHELL_SOCKET_TIMEOUT",
-  SOCKET_NOT_CONNECTED:"PSHELL_SOCKET_NOT_CONNECTED",
-}
-
-const (
-  _COMMAND_COMPLETE = 8
-  _CONTROL_COMMAND = 12
-)
-
-/////////////////////////////////
-//
-// Public functions
-//
-/////////////////////////////////
 
 //
 //  Connect to a pshell server in another process, note that this does
@@ -529,11 +483,79 @@ func SetLogFunction(function logFunction) {
   setLogFunction(function)
 }
 
-/////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 //
-// Private functions
+// private functions and data
 //
-/////////////////////////////////
+// Users of this module should never access any of these private items directly,
+// these are meant to hide the implementation from the presentation of the public
+// API above
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global private data
+//
+/////////////////////////////////////////////////////////////////////////////////
+
+const _INVALID_SID = -1
+const _UNIX_SOCKET_PATH = "/tmp/.pshell/"
+const _LOCK_FILE_EXTENSION = ".lock"
+const _NO_RESP_NEEDED = 0
+const _NO_DATA_NEEDED = 0
+const _RESP_NEEDED = 1
+const _DATA_NEEDED = 1
+const _RCV_BUFFER_SIZE = 1024*64  // 64k buffer size
+
+const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
+const _PSHELL_CONFIG_FILE = "pshell-control.conf"
+
+type logFunction func(string)
+var _logLevel = LOG_LEVEL_DEFAULT
+var _logFunction logFunction
+
+type pshellControl struct {
+  socket net.Conn
+  defaultTimeout int
+  serverType string
+  unixLockFd *os.File
+  sourceAddress string
+  sendMsg []byte
+  recvMsg []byte
+  recvSize int
+  controlName string
+  remoteServer string
+}
+var _gControlList = []pshellControl{}
+
+type pshellMulticast struct {
+  command string
+  sidList []int
+}
+var _gMulticastList = []pshellMulticast{}
+
+var _gPshellControlResponse = map[int]string {
+  COMMAND_SUCCESS:"PSHELL_COMMAND_SUCCESS",
+  COMMAND_NOT_FOUND:"PSHELL_COMMAND_NOT_FOUND",
+  COMMAND_INVALID_ARG_COUNT:"PSHELL_COMMAND_INVALID_ARG_COUNT",
+  SOCKET_SEND_FAILURE:"PSHELL_SOCKET_SEND_FAILURE",
+  SOCKET_SELECT_FAILURE:"PSHELL_SOCKET_SELECT_FAILURE",
+  SOCKET_RECEIVE_FAILURE:"PSHELL_SOCKET_RECEIVE_FAILURE",
+  SOCKET_TIMEOUT:"PSHELL_SOCKET_TIMEOUT",
+  SOCKET_NOT_CONNECTED:"PSHELL_SOCKET_NOT_CONNECTED",
+}
+
+const (
+  _COMMAND_COMPLETE = 8
+  _CONTROL_COMMAND = 12
+)
+
+/////////////////////////////////////////////////////////////////////////////////
+//
+// global private functions
+//
+/////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
