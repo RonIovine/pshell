@@ -241,14 +241,14 @@ for access to a single datagram server called `pshell`, and a client for access 
 servers called `pshellAggregator`.  The datagram based servers support multiple client sessions with
 no idle session timeout.
 
-There are 2 versions of each datagram client program, `pshell/pshellAggregator`, which are compiled 'C' implementations,
-and `pshell.py/pshellAggregator.py`, which are Python implementations.  Any of those can interface to any of the
+There are 2 versions of each datagram client program, [pshell](https://github.com/RonIovine/pshell/tree/master/c/src/PshellClient.cc)/[pshellAggregator](https://github.com/RonIovine/pshell/tree/master/c/src/PshellAggregator.cc), which are compiled 'C' implementations,
+and [pshell.py](https://github.com/RonIovine/pshell/tree/master/python/src/pshell.py)/[pshellAggregator.py](https://github.com/RonIovine/pshell/tree/master/python/src/pshellAggregator.py), which are Python implementations.  Any of those can interface to any of the
 [pshellServerDemo](#pshellServerDemo) programs for all 3 languages as well as the [traceFilterDemo](#traceFilterDemo) program
 
 <a name="pshell-client"></a>
 ##### pshell UDP/Unix client
 The pshell client programs are used to access a specific datagram pshell server.  Both the compiled
-'C' version (`pshell`) and Python version (`pshell.py`) have the same usage as follows:
+'C' version ([pshell](https://github.com/RonIovine/pshell/tree/master/c/src/PshellClient.cc)) and Python version ([pshell.py](https://github.com/RonIovine/pshell/tree/master/python/src/pshell.py)) have the same usage as follows:
 ```
 $ pshell -h
 
@@ -297,7 +297,7 @@ useful to consolidate the functionality of several pshell servers into one compr
 user session.  This is the generic aggregator client that can be used to aggregate any datagram based
 pshell server.  This is different than the custom aggregator ([pshellAggregatorDemo](#pshellAggregatorDemo))
 that typically will only aggregate specific hardcoded pshell servers.  Both the compiled 'C' version
-(`pshellAggregator`) and Python version (`pshellAggregator.py`) have the same usage as follows:
+([pshellAggregator](https://github.com/RonIovine/pshell/tree/master/c/src/PshellAggregator.cc)) and Python version ([pshellAggregator.py](https://github.com/RonIovine/pshell/tree/master/python/src/pshellAggregator.py)) have the same usage as follows:
 ```
 $ pshellAggregator -h
 
@@ -315,7 +315,7 @@ Usage: pshellAggregator
 The TCP based servers just use a standard `telnet` client for interactive access.  The TCP based
 servers support only a single client session with a default 10 minute idle session timeout/disconnect.
 
-There is also an `expect` wrapper script, `pshell.exp`, that will wrap `telnet` to provide functionality
+There is also an `expect` wrapper script, [pshell.exp](https://github.com/RonIovine/pshell/tree/master/utils/pshell.exp), that will wrap `telnet` to provide functionality
 similar to the above `pshell` datagram clients for things like command mode single-shot commands, file
 based commands, command/file repeat etc but for TCP based pshell servers.  The `expect` scripting package
 must be installed on your host.  The following is the usage of the expect script.
