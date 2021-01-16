@@ -201,7 +201,7 @@ features and capabilities of the framework.
 
 There is also documentation for the C API in the form of manpages in the [c/man](https://github.com/RonIovine/pshell/tree/master/c/man) directory.
 The following manpages are provided:
-```
+
 [pshell(1)](https://github.com/RonIovine/pshell/tree/master/c/man/man1/pshell.1)
 [pshellAggregator(1)](https://github.com/RonIovine/pshell/tree/master/c/man/man1/pshellAggregator.1)
 [PshellServer(3)](https://github.com/RonIovine/pshell/tree/master/c/man/man3/PshellServer.3)
@@ -209,24 +209,23 @@ The following manpages are provided:
 [PshellReadline(3)](https://github.com/RonIovine/pshell/tree/master/c/man/man3/PshellReadline.3)
 [TraceFilter(3)](https://github.com/RonIovine/pshell/tree/master/c/man/man3/TraceFilter.3)
 [TraceLog(3)](https://github.com/RonIovine/pshell/tree/master/c/man/man3/TraceLog.3)
-```
+
 The following HTML 'pydoc' generated documentation is available in the
 [python/doc](https://github.com/RonIovine/pshell/tree/master/python/doc) directory, the user can also use the command line 'pydoc' to
 see the embedded documentation on all the corresponding python modules.
-```
+
 [pshell.html](https://github.com/RonIovine/pshell/tree/master/python/doc/pshell.html)
 [pshellAggregator.html](https://github.com/RonIovine/pshell/tree/master/python/doc/pshell.html)
 [PshellServer.html](https://github.com/RonIovine/pshell/tree/master/python/doc/pshellAggregator.html)
 [PshellControl.html](https://github.com/RonIovine/pshell/tree/master/python/doc/PshellControl.html)
 [PshellReadline.html](https://github.com/RonIovine/pshell/tree/master/python/doc/PshellReadline.html)
-```
+
 The following HTML 'godoc' generated documentation is available in the
 [go/doc](https://github.com/RonIovine/pshell/tree/master/go/doc) directory, the user can also use the command line 'godoc' to see
 the embedded documentation on all the corresponding Go modules.
-```
+
 [PshellServer.html](https://github.com/RonIovine/pshell/tree/master/go/doc/PshellServer.html)
 [PshellControl.html](https://github.com/RonIovine/pshell/tree/master/go/doc/PshellControl.html)
-```
 
 <a name="interactive-clients"></a>
 ### Interactive clients
