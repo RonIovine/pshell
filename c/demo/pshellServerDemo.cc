@@ -56,7 +56,7 @@
  */
 #define PSHELL_DEMO_PORT 6001
 
-/* constants used for the advanved parsing date/time stamp range checking */
+/* constants used for the advanced parsing date/time stamp range checking */
 #define MAX_YEAR   3000
 #define MAX_MONTH  12
 #define MAX_DAY    31
@@ -346,7 +346,7 @@ void advancedParsing(int argc, char *argv[])
     pshell_showUsage();
   }
   else if (!pshell_isDec(date->tokens[0]) ||
-      (pshell_getInt(date->tokens[0]) > MAX_MONTH))
+           (pshell_getInt(date->tokens[0]) > MAX_MONTH))
   {
     pshell_printf("ERROR: Invalid month: %s, must be numeric value <= %d\n",
                   date->tokens[0],

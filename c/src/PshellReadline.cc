@@ -99,16 +99,23 @@ static void killLine(unsigned &cursorPos_, char *command_);
 static void killEndOfLine(unsigned cursorPos_, char *command_);
 static void deleteUnderCursor(unsigned cursorPos_, char *command_);
 static void backspaceDelete(unsigned &cursorPos_, char *command_);
-static void addChar(unsigned &cursorPos_, char *command_, char ch_);
+static void addChar(unsigned &cursorPos_, char *command_, char char_);
 static void upArrow(unsigned &cursorPos_, char *command_);
 static void downArrow(unsigned &cursorPos_, char *command_);
 static void leftArrow(unsigned &cursorPos_);
 static void rightArrow(unsigned &cursorPos_, char *command_);
 static unsigned showCommand(char *outCommand_, const char* format_, ...);
 static void addHistory(char *command_);
-static void showHistory(void);
-static bool getChar(char &ch);
+static bool getChar(char &char_);
 static bool isNumeric(const char *string_);
+
+/*
+ * we make this function visible outside this module but not part of the
+ * 'official' API as specified in the PshellReadline.h file, this function
+ * is only used by thge pshell interactive client and the PshellServer
+ * module, they link to it via an 'extern' declaration
+ */
+void pshell_rl_showHistory(void);
 
 /**************************************
  * public API "member" function bodies
@@ -294,7 +301,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
           // add input_ to our command history
           addHistory(input_);
           // we process the history internally
-          showHistory();
+          pshell_rl_showHistory();
           input_[0] = 0;
           cursorPos = 0;
           tabCount = 0;
@@ -313,7 +320,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
               addHistory(input_);
               if (strcmp(_history[index], "history") == 0)
               {
-                showHistory();
+                pshell_rl_showHistory();
                 input_[0] = 0;
                 cursorPos = 0;
                 tabCount = 0;
@@ -346,7 +353,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
                 addHistory(input_);
                 if (strcmp(_history[index-1], "history") == 0)
                 {
-                  showHistory();
+                  pshell_rl_showHistory();
                   input_[0] = 0;
                   cursorPos = 0;
                   tabCount = 0;
@@ -809,11 +816,11 @@ static void backspaceDelete(unsigned &cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void addChar(unsigned &cursorPos_, char *command_, char ch_)
+static void addChar(unsigned &cursorPos_, char *command_, char char_)
 {
   char newCommand[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   snprintf(newCommand, cursorPos_+1, "%s", command_);
-  sprintf(&newCommand[cursorPos_], "%c%s", ch_, &command_[cursorPos_]);
+  sprintf(&newCommand[cursorPos_], "%c%s", char_, &command_[cursorPos_]);
   strcpy(command_, newCommand);
   pshell_rl_writeOutput(&command_[cursorPos_]);
   backspace(strlen(&command_[cursorPos_])-1);
@@ -929,7 +936,7 @@ static void addHistory(char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void showHistory(void)
+void pshell_rl_showHistory(void)
 {
   for (unsigned i = 0; i < _numHistory; i++)
   {
@@ -939,14 +946,14 @@ static void showHistory(void)
 
 /******************************************************************************/
 /******************************************************************************/
-static bool getChar(char &ch)
+static bool getChar(char &char_)
 {
   unsigned retCode;
   fd_set readFd;
   bool idleSession = false;
   struct timeval idleTimeout;
   struct termios old = {0};
-  ch = 0;
+  char_ = 0;
   idleTimeout.tv_sec = _idleTimeout;
   idleTimeout.tv_usec = 0;
   FD_ZERO(&readFd);
@@ -968,12 +975,12 @@ static bool getChar(char &ch)
       }
       else if (retCode > 0)
       {
-        read(_inFd, &ch, 1);
+        read(_inFd, &char_, 1);
       }
     }
     else
     {
-      read(_inFd, &ch, 1);
+      read(_inFd, &char_, 1);
     }
     old.c_lflag |= ICANON;
     old.c_lflag |= ECHO;
@@ -989,12 +996,12 @@ static bool getChar(char &ch)
         pshell_rl_writeOutput("\nIdle session timeout\n");
         idleSession = true;
       }
-      else if ((retCode > 0) && (read(_inFd, &ch, 1) != 1))
+      else if ((retCode > 0) && (read(_inFd, &char_, 1) != 1))
       {
         idleSession = true;
       }
     }
-    else if (read(_inFd, &ch, 1) != 1)
+    else if (read(_inFd, &char_, 1) != 1)
     {
       idleSession = true;
     }

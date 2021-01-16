@@ -1034,7 +1034,7 @@ def _addCommand(function_,
     return
 
   # if they provided no usage for a function with arguments
-  if (((maxArgs_ > 0) or (minArgs_ > 0)) and (command_ != "quit") and ((usage_ == None) or (len(usage_) == 0))):
+  if (((maxArgs_ > 0) or (minArgs_ > 0)) and (command_ != "quit") and (command_ != "history") and ((usage_ == None) or (len(usage_) == 0))):
     _printError("NULL usage for command that takes arguments, command: '%s' not added" % command_)
     return
 
@@ -1395,6 +1395,14 @@ def _addNativeCommands():
                 2,
                 True,
                 True)
+    _addCommand(_history,
+                "history",
+                "show history list of all entered commands",
+                "",
+                0,
+                1,
+                True,
+                True)
     _addCommand(_help,
                 "help",
                 "show all available commands",
@@ -1680,6 +1688,11 @@ def _batch(command_):
     if ((len(line) > 0) and (line[0] != "#")):
       _processCommand(line)
   file.close()
+
+#################################################################################
+#################################################################################
+def _history(command_):
+  PshellReadline._showHistory()
 
 #################################################################################
 #################################################################################

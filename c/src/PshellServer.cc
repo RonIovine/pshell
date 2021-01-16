@@ -329,6 +329,7 @@ static int _argc;
 static char **_argv;
 static PshellCmd _helpCmd;
 static PshellCmd _quitCmd;
+static PshellCmd _historyCmd;
 static PshellCmd _batchCmd;
 static PshellCmd _setupCmd;
 
@@ -402,6 +403,7 @@ static void setup(int argc, char *argv[]);
 
 static void help(int argc, char *argv[]);
 static void quit(int argc, char *argv[]);
+static void history(int argc, char *argv[]);
 
 /* native callback commands (LOCAL server only) */
 
@@ -415,6 +417,13 @@ static void _printf(const char *format_, ...);
 #define PSHELL_ERROR(format_, ...) if (_logLevel >= PSHELL_SERVER_LOG_LEVEL_ERROR) {_printf("PSHELL_ERROR: " format_, ##__VA_ARGS__);_printf("\n");}
 #define PSHELL_WARNING(format_, ...) if (_logLevel >= PSHELL_SERVER_LOG_LEVEL_WARNING) {_printf("PSHELL_WARNING: " format_, ##__VA_ARGS__);_printf("\n");}
 #define PSHELL_INFO(format_, ...) if (_logLevel >= PSHELL_SERVER_LOG_LEVEL_INFO) {_printf("PSHELL_INFO: " format_, ##__VA_ARGS__);_printf("\n");}
+
+/*
+ * we access this funciton via a 'backdoor' linking via the PshellReadline
+ * library, since this function is not of the 'official' published API as
+ * specified in the PshellReadline.h file
+ */
+extern void pshell_rl_showHistory(void);
 
 /**************************************
  * public API "member" function bodies
@@ -2121,6 +2130,13 @@ static void help(int argc, char *argv[])
 
 /******************************************************************************/
 /******************************************************************************/
+static void history(int argc, char *argv[])
+{
+  pshell_rl_showHistory();
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static void batch(int argc, char *argv[])
 {
   unsigned rate = 0;
@@ -2383,6 +2399,13 @@ static void addNativeCommands(void)
                         0,
                         0,
                         true);
+      _quitCmd.function = _commandTable[_numCommands-1].function;
+      _quitCmd.command = _commandTable[_numCommands-1].command;
+      _quitCmd.usage = _commandTable[_numCommands-1].usage;
+      _quitCmd.description = _commandTable[_numCommands-1].description;
+      _quitCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+      _quitCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+      _quitCmd.showUsage = _commandTable[_numCommands-1].showUsage;
       numNativeCommands += 1;
     }
 
@@ -2393,6 +2416,13 @@ static void addNativeCommands(void)
                       0,
                       0,
                       true);
+    _helpCmd.function = _commandTable[_numCommands-1].function;
+    _helpCmd.command = _commandTable[_numCommands-1].command;
+    _helpCmd.usage = _commandTable[_numCommands-1].usage;
+    _helpCmd.description = _commandTable[_numCommands-1].description;
+    _helpCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+    _helpCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+    _helpCmd.showUsage = _commandTable[_numCommands-1].showUsage;
     numNativeCommands += 1;
 
     if (_serverType == PSHELL_NO_SERVER)
@@ -2405,9 +2435,36 @@ static void addNativeCommands(void)
                         1,
                         4,
                         false);
+
+      /* save off the command info */
+      _batchCmd.function = _commandTable[_numCommands-1].function;
+      _batchCmd.command = _commandTable[_numCommands-1].command;
+      _batchCmd.usage = _commandTable[_numCommands-1].usage;
+      _batchCmd.description = _commandTable[_numCommands-1].description;
+      _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+      _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+      _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      numNativeCommands += 1;
     }
     else
     {
+      pshell_addCommand(history,
+                        "history",
+                        "show history list of all entered commands",
+                        NULL,
+                        0,
+                        0,
+                        true);
+      /* save off the command info */
+      _historyCmd.function = _commandTable[_numCommands-1].function;
+      _historyCmd.command = _commandTable[_numCommands-1].command;
+      _historyCmd.usage = _commandTable[_numCommands-1].usage;
+      _historyCmd.description = _commandTable[_numCommands-1].description;
+      _historyCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+      _historyCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+      _historyCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      numNativeCommands += 1;
+
       pshell_addCommand(batch,
                         "batch",
                         "run commands from a batch file",
@@ -2415,51 +2472,20 @@ static void addNativeCommands(void)
                         1,
                         1,
                         true);
+      /* save off the command info */
+      _batchCmd.function = _commandTable[_numCommands-1].function;
+      _batchCmd.command = _commandTable[_numCommands-1].command;
+      _batchCmd.usage = _commandTable[_numCommands-1].usage;
+      _batchCmd.description = _commandTable[_numCommands-1].description;
+      _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
+      _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
+      _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      numNativeCommands += 1;
     }
-
-    numNativeCommands += 1;
-
-    /* save off the command info */
-    _batchCmd.function = _commandTable[_numCommands-1].function;
-    _batchCmd.command = _commandTable[_numCommands-1].command;
-    _batchCmd.usage = _commandTable[_numCommands-1].usage;
-    _batchCmd.description = _commandTable[_numCommands-1].description;
-    _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
-    _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
-    _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
 
   }
 
   /* move these commands to be first in the command list */
-
-  if (numNativeCommands == 3)
-  {
-    _helpCmd.function = _commandTable[_numCommands-2].function;
-    _helpCmd.command = _commandTable[_numCommands-2].command;
-    _helpCmd.usage = _commandTable[_numCommands-2].usage;
-    _helpCmd.description = _commandTable[_numCommands-2].description;
-    _helpCmd.minArgs = _commandTable[_numCommands-2].minArgs;
-    _helpCmd.maxArgs = _commandTable[_numCommands-2].maxArgs;
-    _helpCmd.showUsage = _commandTable[_numCommands-2].showUsage;
-
-    _quitCmd.function = _commandTable[_numCommands-3].function;
-    _quitCmd.command = _commandTable[_numCommands-3].command;
-    _quitCmd.usage = _commandTable[_numCommands-3].usage;
-    _quitCmd.description = _commandTable[_numCommands-3].description;
-    _quitCmd.minArgs = _commandTable[_numCommands-3].minArgs;
-    _quitCmd.maxArgs = _commandTable[_numCommands-3].maxArgs;
-    _quitCmd.showUsage = _commandTable[_numCommands-3].showUsage;
-  }
-  else if (numNativeCommands == 2)
-  {
-    _helpCmd.function = _commandTable[_numCommands-2].function;
-    _helpCmd.command = _commandTable[_numCommands-2].command;
-    _helpCmd.usage = _commandTable[_numCommands-2].usage;
-    _helpCmd.description = _commandTable[_numCommands-2].description;
-    _helpCmd.minArgs = _commandTable[_numCommands-2].minArgs;
-    _helpCmd.maxArgs = _commandTable[_numCommands-2].maxArgs;
-    _helpCmd.showUsage = _commandTable[_numCommands-2].showUsage;
-  }
 
   /* move all the other commands down in the command list */
   for (i = (int)(_numCommands-(numNativeCommands+1)); i >= 0; i--)
@@ -2474,7 +2500,7 @@ static void addNativeCommands(void)
   }
 
   /* restore the saved native command info to be first in the command list */
-  if (numNativeCommands == 3)
+  if (numNativeCommands == 4)
   {
     _commandTable[0].function = _quitCmd.function;
     _commandTable[0].command = _quitCmd.command;
@@ -2492,15 +2518,23 @@ static void addNativeCommands(void)
     _commandTable[1].maxArgs = _helpCmd.maxArgs;
     _commandTable[1].showUsage = _helpCmd.showUsage;
 
-    _commandTable[2].function = _batchCmd.function;
-    _commandTable[2].command = _batchCmd.command;
-    _commandTable[2].usage = _batchCmd.usage;
-    _commandTable[2].description = _batchCmd.description;
-    _commandTable[2].minArgs = _batchCmd.minArgs;
-    _commandTable[2].maxArgs = _batchCmd.maxArgs;
-    _commandTable[2].showUsage = _batchCmd.showUsage;
+    _commandTable[2].function = _historyCmd.function;
+    _commandTable[2].command = _historyCmd.command;
+    _commandTable[2].usage = _historyCmd.usage;
+    _commandTable[2].description = _historyCmd.description;
+    _commandTable[2].minArgs = _historyCmd.minArgs;
+    _commandTable[2].maxArgs = _historyCmd.maxArgs;
+    _commandTable[2].showUsage = _historyCmd.showUsage;
+
+    _commandTable[3].function = _batchCmd.function;
+    _commandTable[3].command = _batchCmd.command;
+    _commandTable[3].usage = _batchCmd.usage;
+    _commandTable[3].description = _batchCmd.description;
+    _commandTable[3].minArgs = _batchCmd.minArgs;
+    _commandTable[3].maxArgs = _batchCmd.maxArgs;
+    _commandTable[3].showUsage = _batchCmd.showUsage;
   }
-  else if (numNativeCommands == 2)
+  else if (numNativeCommands == 3)
   {
     _commandTable[0].function = _helpCmd.function;
     _commandTable[0].command = _helpCmd.command;
@@ -2510,13 +2544,21 @@ static void addNativeCommands(void)
     _commandTable[0].maxArgs = _helpCmd.maxArgs;
     _commandTable[0].showUsage = _helpCmd.showUsage;
 
-    _commandTable[1].function = _batchCmd.function;
-    _commandTable[1].command = _batchCmd.command;
-    _commandTable[1].usage = _batchCmd.usage;
-    _commandTable[1].description = _batchCmd.description;
-    _commandTable[1].minArgs = _batchCmd.minArgs;
-    _commandTable[1].maxArgs = _batchCmd.maxArgs;
-    _commandTable[1].showUsage = _batchCmd.showUsage;
+    _commandTable[1].function = _historyCmd.function;
+    _commandTable[1].command = _historyCmd.command;
+    _commandTable[1].usage = _historyCmd.usage;
+    _commandTable[1].description = _historyCmd.description;
+    _commandTable[1].minArgs = _historyCmd.minArgs;
+    _commandTable[1].maxArgs = _historyCmd.maxArgs;
+    _commandTable[1].showUsage = _historyCmd.showUsage;
+
+    _commandTable[2].function = _batchCmd.function;
+    _commandTable[2].command = _batchCmd.command;
+    _commandTable[2].usage = _batchCmd.usage;
+    _commandTable[2].description = _batchCmd.description;
+    _commandTable[2].minArgs = _batchCmd.minArgs;
+    _commandTable[2].maxArgs = _batchCmd.maxArgs;
+    _commandTable[2].showUsage = _batchCmd.showUsage;
   }
 
   _setupCmd.function = setup;

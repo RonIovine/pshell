@@ -163,20 +163,23 @@ const char *_host;
 const char *_server;
 unsigned _version;
 Mode _mode;
-unsigned _maxCommandLength = strlen("batch");
+unsigned _maxCommandLength = strlen("history");
 const char *_nativeInteractiveCommands [] =
 {
   "quit",
   "help",
+  "history",
   "batch"
 };
 #define QUIT_INDEX 0
 #define HELP_INDEX 1
-#define BATCH_INDEX 2
+#define HISTORY_INDEX 2
+#define BATCH_INDEX 3
 const char *_nativeInteractiveCommandDescriptions [] =
 {
   "exit interactive mode",
   "show all available commands",
+  "show history list of all entered commands",
   "run commands from a batch file"
 };
 unsigned _numNativeInteractiveCommands = sizeof(_nativeInteractiveCommands)/sizeof(char*);
@@ -257,6 +260,13 @@ void registerSignalHandlers(void);
 void parseCommandLine(int *argc, char *argv[], char *host, char *port);
 unsigned findCommand(char *command_);
 bool isSubString(const char *string1_, const char *string2_, unsigned minChars_);
+
+/*
+ * we access this funciton via a 'backdoor' linking via the PshellReadline
+ * library, since this function is not of the 'official' published API as
+ * specified in the PshellReadline.h file
+ */
+extern void pshell_rl_showHistory(void);
 
 /******************************************************************************/
 /******************************************************************************/
@@ -1309,6 +1319,25 @@ void processInteractiveMode(void)
         else
         {
           printf("Usage: batch <filename>\n");
+        }
+      }
+      else if (strstr(_nativeInteractiveCommands[HISTORY_INDEX], tokens[0]) ==
+               _nativeInteractiveCommands[HISTORY_INDEX])
+      {
+        if (numTokens == 1)
+        {
+          if (findCommand(tokens[0]) > 2)
+          {
+            printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", tokens[0]);
+          }
+          else
+          {
+            pshell_rl_showHistory();
+          }
+        }
+        else
+        {
+          printf("Usage: history\n");
         }
       }
       else

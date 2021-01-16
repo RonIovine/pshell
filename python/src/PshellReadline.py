@@ -546,7 +546,7 @@ def _getInput(prompt_):
       # carriage return
       _writeOutput("\n")
       if (len(command) > 0):
-        if (command == "history"):
+        if (command.strip() == "history"):
           # add command to our command history
           _addHistory(command)
           # we process the history internally

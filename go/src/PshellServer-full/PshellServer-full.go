@@ -1685,6 +1685,12 @@ func help(argv_ []string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func history(argv_ []string) {
+  showHistory()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func exit(argv_ []string) {
   if (_gServerType == LOCAL) {
     _gQuitLocal = true
@@ -1756,6 +1762,18 @@ func addNativeCommands() {
                2,
                true,
                true)
+    // we don't do command history for LOCAL servers because we don't use our
+    // internal ReadLine like functionality
+    if (_gServerType != LOCAL) {
+      addCommand(history,
+                 "history",
+                 "show history list of all entered commands",
+                 "",
+                 0,
+                 0,
+                 true,
+                 true)
+    }
     addCommand(help,
                "help",
                "show all available commands",
@@ -2386,7 +2404,7 @@ func receiveTCP() {
                           tabCount,
                           _gTcpPrompt)
       if ((_gQuitTcp == false) && (fullCommand == true)) {
-        if (command == "history") {
+        if (strings.TrimSpace(command) == "history") {
           showHistory()
         } else if ((len(command) >= 2) && (command[0] == '!')) {
           if index, err := strconv.Atoi(command[1:]); err == nil {
