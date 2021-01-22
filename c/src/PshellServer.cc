@@ -2560,6 +2560,24 @@ static void addNativeCommands(void)
     _commandTable[2].maxArgs = _batchCmd.maxArgs;
     _commandTable[2].showUsage = _batchCmd.showUsage;
   }
+  else if (numNativeCommands == 2)
+  {
+    _commandTable[0].function = _helpCmd.function;
+    _commandTable[0].command = _helpCmd.command;
+    _commandTable[0].usage = _helpCmd.usage;
+    _commandTable[0].description = _helpCmd.description;
+    _commandTable[0].minArgs = _helpCmd.minArgs;
+    _commandTable[0].maxArgs = _helpCmd.maxArgs;
+    _commandTable[0].showUsage = _helpCmd.showUsage;
+
+    _commandTable[1].function = _batchCmd.function;
+    _commandTable[1].command = _batchCmd.command;
+    _commandTable[1].usage = _batchCmd.usage;
+    _commandTable[1].description = _batchCmd.description;
+    _commandTable[1].minArgs = _batchCmd.minArgs;
+    _commandTable[1].maxArgs = _batchCmd.maxArgs;
+    _commandTable[1].showUsage = _batchCmd.showUsage;
+  }
 
   _setupCmd.function = setup;
   _setupCmd.command = "--setup";
