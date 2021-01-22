@@ -667,7 +667,7 @@ void pshell_addCommand(PshellFunction function_,
   _numCommands++;
 
   /* see if they are adding commands after the server is started, if so, add it here,
-   * otherwise, they will all be added to the TAB completion in theaddNaticeCommands function
+   * otherwise, they will all be added to the TAB completion in the addNativeCommands function
    */
   if (_isRunning)
   {

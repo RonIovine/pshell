@@ -146,7 +146,8 @@ the 'expect' package to be installed.
                                 UDP/UNIX pshell client when using the TCP server with a telnet client
   - archivePshell            -- Shell script to create a pshell-vX.Y.tar.gz archive
   - setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
-  - showPshelllLib           -- Shell script to show the current libpshell-server.so softlink setting
+  - showPshellLib            -- Shell script to show the current libpshell-server.so softlink setting
+  - logProfiler              -- Python script to profile logfiles
   - pshellServerDemo         -- Demo application using the pshell server library features (C and Go)
   - pshellServerDemo.py      -- Demo application using the pshell server Python module features
   - pshellNoServerDemo       -- Demo application using non-server option of the pshell library (C only)
