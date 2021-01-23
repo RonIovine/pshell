@@ -241,7 +241,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
         }
         else if (ch == '1')
         {
-          printf("home2");
+          //printf("home2");
           beginningOfLine(cursorPos, input_);
         }
         else if (ch == '3')
@@ -257,7 +257,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
         }
         else if (ch == '4')
         {
-          printf("end2");
+          //printf("end2");
           endOfLine(cursorPos, input_);
         }
       }
