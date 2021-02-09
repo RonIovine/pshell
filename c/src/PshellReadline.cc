@@ -112,7 +112,7 @@ static bool isNumeric(const char *string_);
 /*
  * we make this function visible outside this module but not part of the
  * 'official' API as specified in the PshellReadline.h file, this function
- * is only used by thge pshell interactive client and the PshellServer
+ * is only used by the pshell interactive client and the PshellServer
  * module, they link to it via an 'extern' declaration
  */
 void pshell_rl_showHistory(void);
