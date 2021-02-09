@@ -1162,169 +1162,170 @@ def getInput():
   while (not isSubString(command, "quit")):
     (command, idleSession) = _getInput("logProfiler> ")
     args = command.split()
-    if (isSubString(args[0], "help", 2) or isHelp(args[0])):
-      showCommands()
-    elif (isSubString(args[0], "load")):
-      if len(args) == 1 or isHelp(args[1]):
-        print("")
-        print("Usage: load <logfile1>[:<appId>] [<logfile2>[:<appId>]...<logfileN>[:<appId>]]")
-        print("")
-        print("  where:")
-        print("    <appId> : Specify an app filter (process name or pid)")
-        print("")
-      else:
-        print("")
-        for logfile in args[1:]:
-          createProfile(logfile)
-        print("")
-    elif (isSubString(args[0], "history", 2) and gUsePshellReadline):
-      PshellReadline._showHistory()
-    elif (isSubString(args[0], "show")):
-      outfile = "none"
-      filter = "none"
-      sort = gNoSort
-      count = gDisplayAll
-      fileFilter = gNoFilter
-      functionFilter = gNoFilter
-      gCountSuffix = ""
-      gLabelSuffix = ""
-      gTimeSuffix = ""
-      gTimeWidthAdjust = 0
-      gCountWidthAdjust = 0
-      gDiffRequested = False
-      deltaRequested = False
-      idList = []
-      if len(args) == 1 or isHelp(args[1]):
-        print("")
-        print("Usage: show {profiles | {[profiles=<idList>] [sort=<sortType>] [dir=<sortDir>] [disp=<count>] [file=<name>] [func=<name>] [out=<file>] [delta=<time>] [diff=<diffType>]}}")
-        print("")
-        print("  where:")
-        print("    profiles   : Show a list of all profiled logfiles or specify profile <idList>")
-        print("    sort       : Sort results based on specified <sortType>")
-        print("    disp       : Specify number of entries to display")
-        print("    file       : Specify a file name display filter")
-        print("    func       : Specify a function name display filter")
-        print("    out        : Specify an output file to write the results")
-        print("    delta      : Show all areas that are >= specified time")
-        print("    diff       : Compute diff between two profiles")
-        print("    <idList>   : CSV list of profile IDs to process (default=1)")
-        print("    <sortType> : Desired sort type")
-        print("      tot      : Sort on total time in <sortDir>")
-        print("      min      : Sort on minimum time in <sortDir>")
-        print("      max      : Sort on maximum time in <sortDir>")
-        print("      avg      : Sort on average time in <sortDir>")
-        print("      med      : Sort on median time in <sortDir>")
-        print("      std      : Sort on standard deviation in <sortDir>")
-        print("      count    : Sort on occurance count in <sortDir>")
-        print("    <sortDir>  : Desired sort direction")
-        print("      high     : Sort highest to lowest (default)")
-        print("      low      : Sort lowest to highest")
-        print("    <count>    : The number of entries to display")
-        print("    <name>     : Name (or substring) of file/function display filter")
-        print("    <time>     : The time delta in seconds (float)")
-        print("    <file>     : Name of the output file to write the results")
-        print("    <diffType> : The desired diff type")
-        print("      percent  : Show the diff in terms of percent")
-        print("      time     : Show the diff in terms of time (usec)")
-        print("")
-        print("  NOTES:")
-        print("")
-        print("    If doing a non-diff profile, as many profile IDs can be given as desired,")
-        print("    for a 'diff' based profile, exactly two profile IDs must be given, for a")
-        print("    time 'delta' based analysis, only one profile ID should be provided and")
-        print("    the only sort options are 'high' and 'low'")
-        print("")
-        continue
-      elif (isSubString(args[1], "profiles")):
-        showProfiles()
-        continue
-      else:
-        validInput = True
-        direction = "high"
-        for arg in args[1:]:
-          option = arg.split("=")
-          if (len(option) == 2):
-            option[0] = option[0].strip()
-            option[1] = option[1].strip()
-            if (isSubString(option[0], "profiles")):
-              profileIds = option[1].split(",")
-              for id in profileIds:
-                intId = int(id)-1
-                if (intId in idList):
-                  print("ERROR: ID: %d already in idList" % (intId+1))
-                  validInput = False
-                  break
-                elif (intId >= len(gProfiles)):
-                  print("ERROR: ID: %d out of profile ID range, 1-%d" % (intId+1, len(gProfiles)))
-                  validInput = False
-                  break
+    if len(args) > 0:
+      if (isSubString(args[0], "help", 2) or isHelp(args[0])):
+        showCommands()
+      elif (isSubString(args[0], "load")):
+        if len(args) == 1 or isHelp(args[1]):
+          print("")
+          print("Usage: load <logfile1>[:<appId>] [<logfile2>[:<appId>]...<logfileN>[:<appId>]]")
+          print("")
+          print("  where:")
+          print("    <appId> : Specify an app filter (process name or pid)")
+          print("")
+        else:
+          print("")
+          for logfile in args[1:]:
+            createProfile(logfile)
+          print("")
+      elif (isSubString(args[0], "history", 2) and gUsePshellReadline):
+        PshellReadline._showHistory()
+      elif (isSubString(args[0], "show")):
+        outfile = "none"
+        filter = "none"
+        sort = gNoSort
+        count = gDisplayAll
+        fileFilter = gNoFilter
+        functionFilter = gNoFilter
+        gCountSuffix = ""
+        gLabelSuffix = ""
+        gTimeSuffix = ""
+        gTimeWidthAdjust = 0
+        gCountWidthAdjust = 0
+        gDiffRequested = False
+        deltaRequested = False
+        idList = []
+        if len(args) == 1 or isHelp(args[1]):
+          print("")
+          print("Usage: show {profiles | {[profiles=<idList>] [sort=<sortType>] [dir=<sortDir>] [disp=<count>] [file=<name>] [func=<name>] [out=<file>] [delta=<time>] [diff=<diffType>]}}")
+          print("")
+          print("  where:")
+          print("    profiles   : Show a list of all profiled logfiles or specify profile <idList>")
+          print("    sort       : Sort results based on specified <sortType>")
+          print("    disp       : Specify number of entries to display")
+          print("    file       : Specify a file name display filter")
+          print("    func       : Specify a function name display filter")
+          print("    out        : Specify an output file to write the results")
+          print("    delta      : Show all areas that are >= specified time")
+          print("    diff       : Compute diff between two profiles")
+          print("    <idList>   : CSV list of profile IDs to process (default=1)")
+          print("    <sortType> : Desired sort type")
+          print("      tot      : Sort on total time in <sortDir>")
+          print("      min      : Sort on minimum time in <sortDir>")
+          print("      max      : Sort on maximum time in <sortDir>")
+          print("      avg      : Sort on average time in <sortDir>")
+          print("      med      : Sort on median time in <sortDir>")
+          print("      std      : Sort on standard deviation in <sortDir>")
+          print("      count    : Sort on occurance count in <sortDir>")
+          print("    <sortDir>  : Desired sort direction")
+          print("      high     : Sort highest to lowest (default)")
+          print("      low      : Sort lowest to highest")
+          print("    <count>    : The number of entries to display")
+          print("    <name>     : Name (or substring) of file/function display filter")
+          print("    <time>     : The time delta in seconds (float)")
+          print("    <file>     : Name of the output file to write the results")
+          print("    <diffType> : The desired diff type")
+          print("      percent  : Show the diff in terms of percent")
+          print("      time     : Show the diff in terms of time (usec)")
+          print("")
+          print("  NOTES:")
+          print("")
+          print("    If doing a non-diff profile, as many profile IDs can be given as desired,")
+          print("    for a 'diff' based profile, exactly two profile IDs must be given, for a")
+          print("    time 'delta' based analysis, only one profile ID should be provided and")
+          print("    the only sort options are 'high' and 'low'")
+          print("")
+          continue
+        elif (isSubString(args[1], "profiles")):
+          showProfiles()
+          continue
+        else:
+          validInput = True
+          direction = "high"
+          for arg in args[1:]:
+            option = arg.split("=")
+            if (len(option) == 2):
+              option[0] = option[0].strip()
+              option[1] = option[1].strip()
+              if (isSubString(option[0], "profiles")):
+                profileIds = option[1].split(",")
+                for id in profileIds:
+                  intId = int(id)-1
+                  if (intId in idList):
+                    print("ERROR: ID: %d already in idList" % (intId+1))
+                    validInput = False
+                    break
+                  elif (intId >= len(gProfiles)):
+                    print("ERROR: ID: %d out of profile ID range, 1-%d" % (intId+1, len(gProfiles)))
+                    validInput = False
+                    break
+                  else:
+                    idList.append(intId)
+              elif (isSubString(option[0], "sort")):
+                if (option[1] in gValidSort):
+                  sort = option[1]
                 else:
-                  idList.append(intId)
-            elif (isSubString(option[0], "sort")):
-              if (option[1] in gValidSort):
-                sort = option[1]
+                  print("ERROR: Invalid sort specifier: '%s'" % option[1])
+                  validInput = False
+                  break
+              elif (isSubString(option[0], "disp", 3)):
+                count = option[1]
+              elif (isSubString(option[0], "file", 2)):
+                fileFilter = option[1]
+              elif (isSubString(option[0], "func", 2)):
+                functionFilter = option[1]
+              elif (isSubString(option[0], "out")):
+                outfile = option[1]
+              elif (isSubString(option[0], "delta", 2)):
+                maxTimeDelta = option[1]
+                deltaRequested = True
+              elif (isSubString(option[0], "dir", 3)):
+                if option[1] == "low" or option[1] == "high":
+                  direction = option[1]
+                else:
+                  print("ERROR: Invalid sort direction: '%s'" % option[1])
+                  validInput = False
+                  break
+              elif (isSubString(option[0], "diff", 3)):
+                gDiffRequested = True
+                if (option[1] in gValidDiffs):
+                  gDiffType = option[1]
+                else:
+                  print("ERROR: Invalid diff type: '%s'" % option[1])
+                  validInput = False
+                  break
               else:
-                print("ERROR: Invalid sort specifier: '%s'" % option[1])
-                validInput = False
-                break
-            elif (isSubString(option[0], "disp", 3)):
-              count = option[1]
-            elif (isSubString(option[0], "file", 2)):
-              fileFilter = option[1]
-            elif (isSubString(option[0], "func", 2)):
-              functionFilter = option[1]
-            elif (isSubString(option[0], "out")):
-              outfile = option[1]
-            elif (isSubString(option[0], "delta", 2)):
-              maxTimeDelta = option[1]
-              deltaRequested = True
-            elif (isSubString(option[0], "dir", 3)):
-              if option[1] == "low" or option[1] == "high":
-                direction = option[1]
-              else:
-                print("ERROR: Invalid sort direction: '%s'" % option[1])
-                validInput = False
-                break
-            elif (isSubString(option[0], "diff", 3)):
-              gDiffRequested = True
-              if (option[1] in gValidDiffs):
-                gDiffType = option[1]
-              else:
-                print("ERROR: Invalid diff type: '%s'" % option[1])
+                print("ERROR: Invalid option: '%s'" % option[0])
                 validInput = False
                 break
             else:
-              print("ERROR: Invalid option: '%s'" % option[0])
+              print("ERROR: Invalid arg: '%s'" % arg)
               validInput = False
               break
-          else:
-            print("ERROR: Invalid arg: '%s'" % arg)
-            validInput = False
-            break
-      if (validInput):
-        # process command line selections
-        # if not idList populated, default to 0
-        if (len(idList) == 0):
-          idList = [0]
-        if (deltaRequested):
-          if (len(idList) != 1):
-            print("ERROR: Can only supply one profile ID for time delta")
-          elif sort != gNoSort and sort != "min" and sort != "max":
-            print("ERROR: Sort option: %s not allowed for delta, only min, or max allowed" % sort)
-          else:
-            createDelta(gProfiles[idList[0]], float(maxTimeDelta))
-            showDelta(outfile, (direction == "high"), count)
-        elif (gDiffRequested):
-          if (len(idList) == 2):
-            diffProfiles(gProfiles[idList[0]], gProfiles[idList[1]])
-            showProfile(gProfilesDiff, outfile, sort, (direction == "high"), count, fileFilter, functionFilter)
-          else:
-            print("ERROR: Diff must supply exactly two profile IDs")
-        elif (len(gProfiles) > 0):
-          for id in idList:
-            showProfile(gProfiles[id], outfile, sort, (direction == "high"), count, fileFilter, functionFilter)
-    else:
-      print("Command: '{}' not found".format(args[0]))
+        if (validInput):
+          # process command line selections
+          # if not idList populated, default to 0
+          if (len(idList) == 0):
+            idList = [0]
+          if (deltaRequested):
+            if (len(idList) != 1):
+              print("ERROR: Can only supply one profile ID for time delta")
+            elif sort != gNoSort and sort != "min" and sort != "max":
+              print("ERROR: Sort option: %s not allowed for delta, only min, or max allowed" % sort)
+            else:
+              createDelta(gProfiles[idList[0]], float(maxTimeDelta))
+              showDelta(outfile, (direction == "high"), count)
+          elif (gDiffRequested):
+            if (len(idList) == 2):
+              diffProfiles(gProfiles[idList[0]], gProfiles[idList[1]])
+              showProfile(gProfilesDiff, outfile, sort, (direction == "high"), count, fileFilter, functionFilter)
+            else:
+              print("ERROR: Diff must supply exactly two profile IDs")
+          elif (len(gProfiles) > 0):
+            for id in idList:
+              showProfile(gProfiles[id], outfile, sort, (direction == "high"), count, fileFilter, functionFilter)
+      elif not isSubString(command, "quit"):
+        print("Command: '{}' not found".format(args[0]))
 
 ##################################
 #
