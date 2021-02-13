@@ -740,7 +740,7 @@ def getFloat(string):
 _gCommandHelp = ('?', '-h', '--h', '-help', '--help')
 _gListHelp = ('?', 'help')
 _gCommandList = []
-_gMaxLength = 0
+_gMaxLength = len("history")
 
 _gServerVersion = "1"
 _gServerName = None

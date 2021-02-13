@@ -979,7 +979,7 @@ var _gTcpSocket *net.TCPListener
 var _gConnectFd *net.TCPConn
 var _gTcpNegotiate = []byte{0xFF, 0xFB, 0x03, 0xFF, 0xFB, 0x01, 0xFF, 0xFD, 0x03, 0xFF, 0xFD, 0x01}
 var _gRecvAddr net.Addr
-var _gMaxLength = 0
+var _gMaxLength = len("history")
 var _gWheelPos = 0
 var _gWheel = "|/-\\"
 

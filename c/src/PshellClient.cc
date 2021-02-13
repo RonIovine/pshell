@@ -693,6 +693,12 @@ bool init(const char *destination_, const char *server_)
     _pshellSendMsg.header.respNeeded = false;
     _pshellSendMsg.header.dataNeeded = false;
     strcpy(_serverName, "broadcastServer");
+    sprintf(_serverDisplay, "%s[%s:%d]", _serverName, _ipAddress, _destPort);
+    _numNativeInteractiveCommands--;
+    for (unsigned i = 0; i < _numNativeInteractiveCommands; i++)
+    {
+      pshell_rl_addTabCompletion(_nativeInteractiveCommands[i]);
+    }
     return (true);
   }
   else
@@ -1265,7 +1271,9 @@ void processInteractiveMode(void)
       {
         if (numTokens == 1)
         {
-          if ((findCommand(tokens[0]) == 2) || (strcmp(tokens[0], "?") == 0))
+          if ((findCommand(tokens[0]) == 2) ||
+              (strcmp(tokens[0], "?") == 0) ||
+              (strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) == _nativeInteractiveCommands[HELP_INDEX]))
           {
             showCommands();
           }
@@ -1298,8 +1306,8 @@ void processInteractiveMode(void)
           printf("Usage: quit\n");
         }
       }
-      else if (strstr(_nativeInteractiveCommands[BATCH_INDEX], tokens[0]) ==
-               _nativeInteractiveCommands[BATCH_INDEX])
+      else if ((strstr(_nativeInteractiveCommands[BATCH_INDEX], tokens[0]) ==
+                _nativeInteractiveCommands[BATCH_INDEX]) && !_isBroadcastServer)
       {
         if (numTokens == 2)
         {

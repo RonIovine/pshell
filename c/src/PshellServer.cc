@@ -319,7 +319,7 @@ static PshellCmd *_commandTable = NULL;
 static PshellCmd *_foundCommand;
 static unsigned _commandTableSize = 0;
 static unsigned _numCommands = 0;
-static unsigned _maxCommandLength = 0;
+static unsigned _maxCommandLength = strlen("history");
 
 static PshellTokens _dummyTokens;
 static Tokens *_tokenList = NULL;

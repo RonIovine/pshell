@@ -160,8 +160,9 @@ def _showHelp():
   print("*             COMMAND LIST             *")
   print("****************************************")
   print("")
-  print("quit   -  exit interactive mode")
-  print("help   -  show all available commands")
+  print("quit     -  exit interactive mode")
+  print("help     -  show all available commands")
+  print("history  -  show history list of all entered commands")
   print("")
   print("NOTE: Connected to a broadcast address, all remote server")
   print("      commands are 'invisible' to this client application")
@@ -173,8 +174,10 @@ def _showHelp():
 #################################################################################
 def _processCommand(command_):
   global _gControlName
-  if ((command_.split()[0] == "?") or (PshellReadline.isSubString(command_.split()[0], "help"))):
+  if ((command_.split()[0] == "?") or (PshellReadline.isSubString(command_.split()[0], "help", 2))):
     _showHelp()
+  elif PshellReadline.isSubString(command_.split()[0], "history", 2):
+    PshellReadline._showHistory()
   else:
     PshellControl.sendCommand1(_gControlName, command_)
 
@@ -811,19 +814,17 @@ if (__name__ == '__main__'):
 
     else:
 
-      _gServerName = "broadcastAddr"
+      _gServerName = "broadcastServer"
 
       # add some TAB completors
       PshellReadline.addTabCompletion("quit")
       PshellReadline.addTabCompletion("help")
+      PshellReadline.addTabCompletion("history")
 
       _showWelcome()
 
       command = ""
-      if _gPort == PshellServer.UNIX:
-        prompt = "%s[%s]:PSHELL> " % (_gServerName, _gRemoteServer)
-      else:
-        prompt = "%s[%s:%s]:PSHELL> " % (_gServerName, _gRemoteServer, str(_gPort))
+      prompt = "%s[%s:%s]:PSHELL> " % (_gServerName, _gRemoteServer, str(_gPort))
       while (not PshellReadline.isSubString(command, "quit")):
         (command, idleSession) = PshellReadline.getInput(prompt)
         if (not PshellReadline.isSubString(command, "quit")):
