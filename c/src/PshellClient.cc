@@ -164,25 +164,23 @@ const char *_server;
 unsigned _version;
 Mode _mode;
 unsigned _maxCommandLength = strlen("history");
-const char *_nativeInteractiveCommands [] =
+struct Command
 {
-  "quit",
-  "help",
-  "history",
-  "batch"
+  const char *name;
+  const char *description;
 };
 #define QUIT_INDEX 0
 #define HELP_INDEX 1
 #define HISTORY_INDEX 2
 #define BATCH_INDEX 3
-const char *_nativeInteractiveCommandDescriptions [] =
+const Command _nativeInteractiveCommands [] =
 {
-  "exit interactive mode",
-  "show all available commands",
-  "show history list of all entered commands",
-  "run commands from a batch file"
+  {"quit",    "exit interactive mode"},
+  {"help",    "show all available commands"},
+  {"history", "show history list of all entered commands"},
+  {"batch",   "run commands from a batch file"}
 };
-unsigned _numNativeInteractiveCommands = sizeof(_nativeInteractiveCommands)/sizeof(char*);
+unsigned _numNativeInteractiveCommands = sizeof(_nativeInteractiveCommands)/sizeof(Command);
 
 /*
  * the initial message buffer is just used for the initial
@@ -697,7 +695,7 @@ bool init(const char *destination_, const char *server_)
     _numNativeInteractiveCommands--;
     for (unsigned i = 0; i < _numNativeInteractiveCommands; i++)
     {
-      pshell_rl_addTabCompletion(_nativeInteractiveCommands[i]);
+      pshell_rl_addTabCompletion(_nativeInteractiveCommands[i].name);
     }
     return (true);
   }
@@ -864,7 +862,7 @@ unsigned findCommand(char *command_)
   unsigned numFound = 0;
   for (index = 0; index < _numNativeInteractiveCommands; index++)
   {
-    if (isSubString(command_, _nativeInteractiveCommands[index], strlen(command_)))
+    if (isSubString(command_, _nativeInteractiveCommands[index].name, strlen(command_)))
     {
       numFound++;
     }
@@ -1039,7 +1037,7 @@ bool isDuplicate(char *command_)
   unsigned i;
   for (i = 0; i < _numNativeInteractiveCommands; i++)
   {
-    if (strcmp(_nativeInteractiveCommands[i], command_) == 0)
+    if (strcmp(_nativeInteractiveCommands[i].name, command_) == 0)
     {
       printf("PSHELL_WARNING: Server command: '%s', is duplicate of a native interactive client command,\n", command_);
       printf("                server command will be available in command line mode only\n");
@@ -1059,7 +1057,7 @@ void buildCommandList(void)
   _pshellCommandList = (const char**)malloc((_maxPshellCommands+_numNativeInteractiveCommands)*sizeof(char*));
   for (i = 0; i < _numNativeInteractiveCommands; i++)
   {
-    _pshellCommandList[_numPshellCommands++] = _nativeInteractiveCommands[i];
+    _pshellCommandList[_numPshellCommands++] = _nativeInteractiveCommands[i].name;
   }
   if ((str = strtok(_pshellRcvMsg->payload, PSHELL_COMMAND_DELIMETER)) != NULL)
   {
@@ -1266,14 +1264,14 @@ void processInteractiveMode(void)
       pshell_rl_getInput(_interactivePrompt, _interactiveCommand);
       strcpy(command, _interactiveCommand);
       tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
-      if ((strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) == _nativeInteractiveCommands[HELP_INDEX]) ||
+      if ((strstr(_nativeInteractiveCommands[HELP_INDEX].name, tokens[0]) == _nativeInteractiveCommands[HELP_INDEX].name) ||
           (strcmp(tokens[0], "?") == 0))
       {
         if (numTokens == 1)
         {
           if ((findCommand(tokens[0]) == 2) ||
               (strcmp(tokens[0], "?") == 0) ||
-              (strstr(_nativeInteractiveCommands[HELP_INDEX], tokens[0]) == _nativeInteractiveCommands[HELP_INDEX]))
+              (strstr(_nativeInteractiveCommands[HELP_INDEX].name, tokens[0]) == _nativeInteractiveCommands[HELP_INDEX].name))
           {
             showCommands();
           }
@@ -1287,8 +1285,8 @@ void processInteractiveMode(void)
           printf("Usage: help\n");
         }
       }
-      else if (strstr(_nativeInteractiveCommands[QUIT_INDEX], tokens[0]) ==
-               _nativeInteractiveCommands[QUIT_INDEX])
+      else if (strstr(_nativeInteractiveCommands[QUIT_INDEX].name, tokens[0]) ==
+               _nativeInteractiveCommands[QUIT_INDEX].name)
       {
         if (numTokens == 1)
         {
@@ -1306,8 +1304,8 @@ void processInteractiveMode(void)
           printf("Usage: quit\n");
         }
       }
-      else if ((strstr(_nativeInteractiveCommands[BATCH_INDEX], tokens[0]) ==
-                _nativeInteractiveCommands[BATCH_INDEX]) && !_isBroadcastServer)
+      else if ((strstr(_nativeInteractiveCommands[BATCH_INDEX].name, tokens[0]) ==
+                _nativeInteractiveCommands[BATCH_INDEX].name) && !_isBroadcastServer)
       {
         if (numTokens == 2)
         {
@@ -1329,8 +1327,8 @@ void processInteractiveMode(void)
           printf("Usage: batch <filename>\n");
         }
       }
-      else if (strstr(_nativeInteractiveCommands[HISTORY_INDEX], tokens[0]) ==
-               _nativeInteractiveCommands[HISTORY_INDEX])
+      else if (strstr(_nativeInteractiveCommands[HISTORY_INDEX].name, tokens[0]) ==
+               _nativeInteractiveCommands[HISTORY_INDEX].name)
       {
         if (numTokens == 1)
         {
@@ -1728,9 +1726,9 @@ void showCommands(void)
   {
     for (i = 0; i < _numNativeInteractiveCommands; i++)
     {
-      printf("%s", _nativeInteractiveCommands[i]);
-      for (pad = strlen(_nativeInteractiveCommands[i]); pad < _maxCommandLength; pad++) printf(" ");
-      printf("  -  %s\n", _nativeInteractiveCommandDescriptions[i]);
+      printf("%s", _nativeInteractiveCommands[i].name);
+      for (pad = strlen(_nativeInteractiveCommands[i].name); pad < _maxCommandLength; pad++) printf(" ");
+      printf("  -  %s\n", _nativeInteractiveCommands[i].description);
     }
   }
   if (!_isBroadcastServer)
