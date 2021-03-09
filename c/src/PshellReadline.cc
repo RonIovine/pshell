@@ -186,6 +186,7 @@ void pshell_rl_printf(const char* format_, ...)
 bool pshell_rl_getInput(const char *prompt_, char *input_)
 {
   bool inEsc = false;
+  bool inDelete = false;
   char esc = '\0';
   unsigned cursorPos = 0;
   unsigned tabCount = 0;
@@ -197,6 +198,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
   while (true)
   {
     idleSession = getChar(ch);
+    //printf("char: %c (%d)\n", ch, int(ch));
     // check for idleSession timeout
     if (idleSession == true)
     {
@@ -239,26 +241,44 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
           inEsc = false;
           esc = '\0';
         }
+        else if (ch == 'H')
+        {
+          // home key, go to beginning of line
+          beginningOfLine(cursorPos, input_);
+          inEsc = false;
+          esc = '\0';
+        }
+        else if (ch == 'F')
+        {
+          // home key, go to beginning of line
+          endOfLine(cursorPos, input_);
+          inEsc = false;
+          esc = '\0';
+        }
         else if (ch == '1')
         {
-          //printf("home2");
           beginningOfLine(cursorPos, input_);
         }
         else if (ch == '3')
         {
-          //printf("delete");
+          inDelete = true;
         }
         else if (ch == '~')
         {
           // delete key, delete under cursor
-          deleteUnderCursor(cursorPos, input_);
+          if (inDelete)
+          {
+            deleteUnderCursor(cursorPos, input_);
+            inDelete = false;
+          }
           inEsc = false;
           esc = '\0';
         }
         else if (ch == '4')
         {
-          //printf("end2");
           endOfLine(cursorPos, input_);
+          inEsc = false;
+          esc = '\0';
         }
       }
       else if (esc == 'O')
@@ -483,7 +503,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
         }
       }
     }
-    else if (ch == 127)
+    else if ((ch == 127) || (ch == 8))
     {
       // backspace delete
       backspaceDelete(cursorPos, input_);
