@@ -2121,10 +2121,10 @@ func clearLine(cursorPos_ int, command_ string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-func beginningOfLine(cursorPos_ int, command_ string) int {
+func beginningOfLine(cursorPos_ int) int {
   if (cursorPos_ > 0) {
+    printf(strings.Repeat("\b", cursorPos_))
     cursorPos_ = 0
-    printf(strings.Repeat("\b", len(command_)))
   }
   return (cursorPos_)
 }
@@ -2191,6 +2191,7 @@ func getInput(command_ string,
     tabCount_ = 0
   } else {
     inEsc := false
+    inDelete := false
     var esc byte = 0
     // non-printable character or escape sequence, process it
     for index := 0; index < length_; index++ {
@@ -2242,30 +2243,41 @@ func getInput(command_ string,
             }
             inEsc = false
             esc = 0
+          } else if (char == 'H') {
+            // home key, go to beginning of line
+            beginningOfLine(cursorPos_);
+            inEsc = false;
+            esc = 0;
+          } else if (char == 'F') {
+            // home key, go to beginning of line
+            endOfLine(cursorPos_, command_);
+            inEsc = false;
+            esc = 0;
           } else if (char == '1') {
-            printf("home2")
-            cursorPos_ = beginningOfLine(cursorPos_, command_)
-          //} else if (char == '3') {
-          //  printf("delete\n")
+            cursorPos_ = beginningOfLine(cursorPos_)
+          } else if (char == '3') {
+            inDelete = true
+          } else if (char == '4') {
+            cursorPos_ = endOfLine(cursorPos_, command_)
+            inEsc = false;
+            esc = 0;
           } else if (char == '~') {
             // delete key, delete under cursor
-            if (cursorPos_ < len(command_)) {
+            if ((cursorPos_ < len(command_)) && (inDelete)) {
               printf("%s%s%s",
                      command_[cursorPos_+1:],
                      " ",
                      strings.Repeat("\b", len(command_[cursorPos_:])))
               command_ = command_[:cursorPos_] + command_[cursorPos_+1:]
+              inDelete = false
             }
             inEsc = false
             esc = 0
-          } else if (char == '4') {
-            printf("end2\n")
-            cursorPos_ = endOfLine(cursorPos_, command_)
           }
         } else if (esc == 'O') {
           if (char == 'H') {
             // home key, go to beginning of line
-            cursorPos_ = beginningOfLine(cursorPos_, command_)
+            cursorPos_ = beginningOfLine(cursorPos_)
           } else if (char == 'F') {
             // end key, go to end of line
             cursorPos_ = endOfLine(cursorPos_, command_)
@@ -2319,7 +2331,7 @@ func getInput(command_ string,
             }
           }
         }
-      } else if (char == _DEL) {
+      } else if ((char == _DEL) || (char == _BS)) {
         // backspace delete
         if ((len(command_) > 0) && (cursorPos_ > 0)) {
           printf("%s%s%s%s",
@@ -2332,7 +2344,7 @@ func getInput(command_ string,
         }
       } else if (char == 1) {
         // home, go to beginning of line
-        cursorPos_ = beginningOfLine(cursorPos_, command_)
+        cursorPos_ = beginningOfLine(cursorPos_)
       } else if ((char == 3) && (_gServerType == LOCAL)) {
         // ctrl-c, raise signal SIGINT to our own process
         //os.kill(os.getpid(), signal.SIGINT)

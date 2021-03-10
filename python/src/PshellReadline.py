@@ -416,10 +416,10 @@ def _clearLine(cursorPos_, command_):
 
 #################################################################################
 #################################################################################
-def _beginningOfLine(cursorPos_, command_):
+def _beginningOfLine(cursorPos_):
   if (cursorPos_ > 0):
+    _writeOutput("\b"*cursorPos_)
     cursorPos_ = 0
-    _writeOutput("\b"*len(command_))
   return (cursorPos_)
 
 #################################################################################
@@ -457,6 +457,7 @@ def _getInput(prompt_):
   global _gTabStyle
   global _gOutFd
   inEsc = False
+  inDelete = False
   esc = ""
   command = ""
   cursorPos = 0
@@ -509,25 +510,36 @@ def _getInput(prompt_):
             _writeOutput("\b")
           inEsc = False
           esc = ""
-        elif (char == '1'):
-          print("home2")
-          cursorPos = _beginningOfLine(cursorPos, command)
-        #elif (char == '3'):
-        #  print("delete")
-        elif (char == '~'):
-          # delete key, delete under cursor
-          if (cursorPos < len(command)):
-            _writeOutput(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
-            command = command[:cursorPos] + command[cursorPos+1:]
+        elif (char == 'H'):
+          # home key, go to beginning of line
+          cursorPos = _beginningOfLine(cursorPos)
           inEsc = False
           esc = ""
-        elif (char == '4'):
-          print("end2")
+        elif (char == 'F'):
+          # end key, go to end of line
           cursorPos = _endOfLine(cursorPos, command)
+          inEsc = False
+          esc = ""
+        elif (char == '1'):
+          cursorPos = _beginningOfLine(cursorPos)
+        elif (char == '3'):
+          inDelete = True
+        elif (char == '4'):
+          cursorPos = _endOfLine(cursorPos, command)
+          inEsc = False
+          esc = ""
+        elif (char == '~'):
+          # delete key, delete under cursor
+          if ((cursorPos < len(command)) and (inDelete == True)):
+            _writeOutput(command[cursorPos+1:] + " " + "\b"*(len(command[cursorPos:])))
+            command = command[:cursorPos] + command[cursorPos+1:]
+            inDelete = False
+          inEsc = False
+          esc = ""
       elif (esc == 'O'):
         if (char == 'H'):
           # home key, go to beginning of line
-          cursorPos = _beginningOfLine(cursorPos, command)
+          cursorPos = _beginningOfLine(cursorPos)
         elif (char == 'F'):
           # end key, go to end of line
           cursorPos = _endOfLine(cursorPos, command)
@@ -663,7 +675,7 @@ def _getInput(prompt_):
             # multiple completions, find the longest match and show up to that
             _clearLine(cursorPos, command)
             (cursorPos, command) = _showCommand(_findLongestMatch(matchList, command))
-    elif (ord(char) == 127):
+    elif ((ord(char) == 127) or (ord(char) == 8)):
       # backspace delete
       if ((len(command) > 0) and (cursorPos > 0)):
         _writeOutput("\b" + command[cursorPos:] + " " + "\b"*(len(command[cursorPos:])+1))
@@ -671,7 +683,7 @@ def _getInput(prompt_):
         cursorPos -= 1
     elif (ord(char) == 1):
       # home, go to beginning of line
-      cursorPos = _beginningOfLine(cursorPos, command)
+      cursorPos = _beginningOfLine(cursorPos)
     elif ((ord(char) == 3) and (_gSerialType == TTY)):
       # ctrl-c, raise signal SIGINT to our own process
       os.kill(os.getpid(), signal.SIGINT)

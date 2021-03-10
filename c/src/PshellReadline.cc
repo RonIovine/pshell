@@ -93,7 +93,7 @@ static void showTabCompletions(char *completionList_[],
                                unsigned maxCompletionLength_,
                                const char* format_, ...);
 static void clearLine(unsigned cursorPos_, char *command_);
-static void beginningOfLine(unsigned &cursorPos_, const char *command_);
+static void beginningOfLine(unsigned &cursorPos_);
 static void endOfLine(unsigned &cursorPos_, const char *command_);
 static void killLine(unsigned &cursorPos_, char *command_);
 static void killEndOfLine(unsigned cursorPos_, char *command_);
@@ -244,7 +244,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
         else if (ch == 'H')
         {
           // home key, go to beginning of line
-          beginningOfLine(cursorPos, input_);
+          beginningOfLine(cursorPos);
           inEsc = false;
           esc = '\0';
         }
@@ -257,11 +257,17 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
         }
         else if (ch == '1')
         {
-          beginningOfLine(cursorPos, input_);
+          beginningOfLine(cursorPos);
         }
         else if (ch == '3')
         {
           inDelete = true;
+        }
+        else if (ch == '4')
+        {
+          endOfLine(cursorPos, input_);
+          inEsc = false;
+          esc = '\0';
         }
         else if (ch == '~')
         {
@@ -274,19 +280,13 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
           inEsc = false;
           esc = '\0';
         }
-        else if (ch == '4')
-        {
-          endOfLine(cursorPos, input_);
-          inEsc = false;
-          esc = '\0';
-        }
       }
       else if (esc == 'O')
       {
         if (ch == 'H')
         {
           // home key, go to beginning of line
-          beginningOfLine(cursorPos, input_);
+          beginningOfLine(cursorPos);
         }
         else if (ch == 'F')
         {
@@ -511,7 +511,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
     else if (ch == 1)
     {
       // home, go to beginning of line
-      beginningOfLine(cursorPos, input_);
+      beginningOfLine(cursorPos);
     }
     else if (ch == 5)
     {
@@ -769,12 +769,12 @@ static void clearLine(unsigned cursorPos_, char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-static void beginningOfLine(unsigned &cursorPos_, const char *command_)
+static void beginningOfLine(unsigned &cursorPos_)
 {
   if (cursorPos_ > 0)
   {
+    backspace(cursorPos_);
     cursorPos_ = 0;
-    backspace(strlen(command_));
   }
 }
 
