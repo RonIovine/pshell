@@ -103,6 +103,8 @@ like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet
 broadcast address, e.g. x.y.z.255).
 
+![Diagram](./PSHELL-Framework.png)
+
 See the full [README](https://github.com/RonIovine/pshell/blob/master/README) file for a complete description
 of all the components, installation, building, and usage.
 
