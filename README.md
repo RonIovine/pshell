@@ -103,6 +103,9 @@ like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet
 broadcast address, e.g. x.y.z.255).
 
+The following block diagram shows the various server types along with their associated
+remote client access methods.
+
 ![Diagram](./PSHELL-Framework.png)
 
 See the full [README](https://github.com/RonIovine/pshell/blob/master/README) file for a complete description
@@ -155,7 +158,7 @@ framework.
 <a name="building"></a>
 ### Building
 For targets other than Linux x86_64, the C and Go code will need to be built from source.  This
-framework has been successfully built and run on Raspbian/ARM Linux, MAC OSX, and Windows Cygwin.
+framework has been successfully built and run on Raspbian/Kali ARM Linux, MAC OSX, and Windows Cygwin.
 To build the C and Go source, a makefile is provided along with a default make config file, `defconfig`.
 
 To see the make options, type:
@@ -231,7 +234,7 @@ the embedded documentation on all the corresponding Go modules.
 
 <a name="interactive-clients"></a>
 ### Interactive clients
-As described above, a pshell server can be accesses remotely via an interactive client.  These clients are
+As described above, a pshell server can be accessed remotely via an interactive client.  These clients are
 generic and are server agnostic.  A custom client never needs to be created unless the user want's to
 create a custom server aggregator client.  See the below section for the [pshellAggregatorDemo](#pshellAggregatorDemo) demo programs
 for more information on creating custom aggregators.

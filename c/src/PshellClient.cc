@@ -147,7 +147,6 @@ struct ActiveServer
   const char *port;
 };
 int _numActiveServers = 0;
-//char *_activeServers[MAX_ACTIVE_SERVERS];
 ActiveServer _activeServers[MAX_ACTIVE_SERVERS] = {};
 
 char _unixLocalSocketName[256];
