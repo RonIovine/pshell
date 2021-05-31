@@ -88,6 +88,7 @@ extern "C" {
  *   pshell_isAlphaNumeric()        -- returns True if string is alpha-numeric
  *   pshell_isIpv4Addr()            -- returns True if string is valid ipv4 address format
  *   pshell_isIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+ *   pshell_isMacAddr()             -- returns True is string is valid MAC address format
  *   pshell_getAddress()            -- return address from string value
  *   pshell_getBool()               -- returns True if string is 'true', 'yes', 'on'
  *   pshell_getInt()                -- return the signed integer value from the string
@@ -160,6 +161,14 @@ extern "C" {
  *   PSHELL_ANYHOST
  *   PSHELL_ANYBCAST
  *   PSHELL_LOCALHOST
+ *
+ * Typedefs:
+ *
+ * These typedefs/prototypes are used for the main pshell function callback
+ * function and the log function callback functions respectively
+ *
+ *   typedef void (*PshellFunction)(int argc_, char *argv_[]);
+ *   typedef void (*PshellLogFunction)(const char *outputString_);
  *
  *******************************************************************************/
 
@@ -451,6 +460,7 @@ bool pshell_isNumeric(const char *string_, bool needHexPrefix_ = true);  /* isDe
 bool pshell_isFloat(const char *string_);
 bool pshell_isIpv4Addr(const char *string_);
 bool pshell_isIpv4AddrWithNetmask(const char *string_);
+bool pshell_isMacAddr(const char *string_);
 
 /*
  * various data extraction functions:

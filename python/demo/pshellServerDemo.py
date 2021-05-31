@@ -230,6 +230,8 @@ def formatChecking(argv):
     PshellServer.printf("IPv4 address: '%s' entered" % argv[0])
   elif PshellServer.isIpv4AddrWithNetmask(argv[0]):
     PshellServer.printf("IPv4 address/netmask: '%s' entered" % argv[0])
+  elif PshellServer.isMacAddr(argv[0]):
+    PshellServer.printf("MAC address: '%s' entered" % argv[0])
   elif PshellServer.isDec(argv[0]):
     PshellServer.printf("Decimal arg: %d entered" % PshellServer.getInt(argv[0]))
   elif PshellServer.isHex(argv[0]):

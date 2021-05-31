@@ -247,6 +247,8 @@ func formatChecking(argv []string) {
     PshellServer.Printf("IPv4 address: '%s' entered\n", argv[0])
   } else if (PshellServer.IsIpv4AddrWithNetmask(argv[0])) {
     PshellServer.Printf("IPv4 address/netmask: '%s' entered\n", argv[0])
+  } else if (PshellServer.IsMacAddr(argv[0])) {
+    PshellServer.Printf("MAC address: '%s' entered\n", argv[0])
   } else if (PshellServer.IsDec(argv[0])) {
     PshellServer.Printf("Decimal arg: %d entered\n", PshellServer.GetInt(argv[0], PshellServer.RADIX_ANY, false))
   } else if (PshellServer.IsHex(argv[0], true)) {

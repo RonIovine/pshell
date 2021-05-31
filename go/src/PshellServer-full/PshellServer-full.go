@@ -76,6 +76,7 @@
 //   IsAlphaNumeric()        -- returns True if string is alpha-numeric
 //   IsIpv4Addr()            -- returns True if string is valid ipv4 address format
 //   IsIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+//   IsMacAddr()             -- returns True if string is valid MAC address format
 //   GetBool()               -- returns True if string is 'true', 'yes', 'on'
 //   GetInt()                -- return the signed integer (64 bit) value from the string
 //   GetInt64()              -- return the 64 bit signed integer value from the string
@@ -152,6 +153,14 @@
 //   ANYBCAST
 //   LOCALHOST
 //
+// Typedefs:
+//
+// These typedefs/prototypes are used for the main pshell function callback
+// function and the log function callback functions respectively
+//
+//   type pshellFunction func([]string)
+//   type logFunction func(string)
+//
 package PshellServer
 
 import "encoding/binary"
@@ -202,8 +211,8 @@ const (
 
 // These three identifiers that can be used for the hostnameOrIpAddr argument
 // of the StartServer call.  PshellServer.ANYHOST will bind the server socket
-// to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
-// 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+// to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind
+// to 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
 // the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
 // it also supported, e.g. x.y.z.255
 const (
@@ -230,6 +239,12 @@ const (
   RADIX_HEX = 1
   RADIX_ANY = 2
 )
+
+// pshell function callback function prototype
+type pshellFunction func([]string)
+
+// log function callback function prototype
+type logFunction func(string)
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -660,6 +675,20 @@ func IsIpv4AddrWithNetmask(string string) bool {
 }
 
 //
+// This function will parse a string to see if it is in valid MAC address
+// format
+//
+//   Args:
+//       string (str) : The string to parse
+//
+//   Returns:
+//       bool : True if valid MAC address format
+//
+func IsMacAddr(string string) bool {
+  return (isMacAddr(string))
+}
+
+//
 // This function will parse a string to see if it 'true', 'yes', or 'on'
 //
 //   Args:
@@ -924,9 +953,6 @@ const (
   _DEL = 127
 )
 
-// callback function prototype
-type pshellFunction func([]string)
-
 // command table entry
 type pshellCmd struct {
   command string
@@ -994,7 +1020,6 @@ var _gMaxMatchKeywordLength = 0
 var _gCommandHistory []string
 var _gCommandHistoryPos = 0
 
-type logFunction func(string)
 var _gLogLevel = LOG_LEVEL_DEFAULT
 var _gLogFunction logFunction
 
@@ -1389,6 +1414,30 @@ func isIpv4AddrWithNetmask(string_ string) bool {
           getInt(addr[1], RADIX_DEC, false) <= 32)
 }
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func isMacAddr(string_ string) bool {
+  addr := strings.Split(string_, ":")
+  return (len(addr) == 6 &&
+          isHex(addr[0], false) &&
+          getInt(addr[0], RADIX_HEX, false) >= 0 &&
+          getInt(addr[0], RADIX_HEX, false) <= 0xFF &&
+          isHex(addr[1], false) &&
+          getInt(addr[1], RADIX_HEX, false) >= 0 &&
+          getInt(addr[1], RADIX_HEX, false) <= 0xFF &&
+          isHex(addr[2], false) &&
+          getInt(addr[2], RADIX_HEX, false) >= 0 &&
+          getInt(addr[2], RADIX_HEX, false) <= 0xFF &&
+          isHex(addr[3], false) &&
+          getInt(addr[3], RADIX_HEX, false) >= 0 &&
+          getInt(addr[3], RADIX_HEX, false) <= 0xFF &&
+          isHex(addr[4], false) &&
+          getInt(addr[4], RADIX_HEX, false) >= 0 &&
+          getInt(addr[4], RADIX_HEX, false) <= 0xFF &&
+          isHex(addr[5], false) &&
+          getInt(addr[5], RADIX_HEX, false) >= 0 &&
+          getInt(addr[5], RADIX_HEX, false) <= 0xFF)
+}
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func getBool(string_ string) bool {

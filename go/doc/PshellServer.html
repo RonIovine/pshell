@@ -34,12 +34,12 @@
 This API provides the Process Specific Embedded Command Line Shell (PSHELL)
 user API functionality.  It provides the ability for a client program to
 register functions that can be invoked via a command line user interface.
-This is the &#39;go&#39; implementation, there are also corresponding C/C++ and
+This is the Golang implementation, there are also corresponding C/C++ and
 Python implementations.
 </p>
 <p>
 The functions are similar to the prototype of the &#39;main&#39; in &#39;go&#39;, i.e.
-&#39;func myFunc([]string), there are several ways to invoke these embedded
+&#39;func myFunc([]string)&#39;, there are several ways to invoke these embedded
 functions based on how the pshell server is configured, which is described
 in documentation further down in this file.
 </p>
@@ -87,6 +87,7 @@ IsNumeric()             -- returns True if string isDec or isHex
 IsAlphaNumeric()        -- returns True if string is alpha-numeric
 IsIpv4Addr()            -- returns True if string is valid ipv4 address format
 IsIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+IsMacAddr()             -- returns True if string is valid MAC address format
 GetBool()               -- returns True if string is &#39;true&#39;, &#39;yes&#39;, &#39;on&#39;
 GetInt()                -- return the signed integer (64 bit) value from the string
 GetInt64()              -- return the 64 bit signed integer value from the string
@@ -170,6 +171,16 @@ it also supported, e.g. x.y.z.255
 <pre>ANYHOST
 ANYBCAST
 LOCALHOST
+</pre>
+<p>
+Typedefs:
+</p>
+<p>
+These typedefs/prototypes are used for the main pshell function callback
+function and the log function callback functions respectively
+</p>
+<pre>type pshellFunction func([]string)
+type logFunction func(string)
 </pre>
 
 			</div>
@@ -282,6 +293,9 @@ LOCALHOST
 				<dd><a href="#IsIpv4AddrWithNetmask">func IsIpv4AddrWithNetmask(string string) bool</a></dd>
 			
 				
+				<dd><a href="#IsMacAddr">func IsMacAddr(string string) bool</a></dd>
+			
+				
 				<dd><a href="#IsNumeric">func IsNumeric(string string, needHexPrefix bool) bool</a></dd>
 			
 				
@@ -373,8 +387,8 @@ run the server and will return control to the caller of StartServer
 				<p>
 These three identifiers that can be used for the hostnameOrIpAddr argument
 of the StartServer call.  PshellServer.ANYHOST will bind the server socket
-to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
-255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
+to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind
+to 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
 the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
 it also supported, e.g. x.y.z.255
 </p>
@@ -410,7 +424,7 @@ Used to specify the radix extraction format for the getInt function
 		
 			
 			
-			<h2 id="AddCommand">func <a href="/target/PshellServer.go?s=14040:14172#L362">AddCommand</a></h2>
+			<h2 id="AddCommand">func <a href="/target/PshellServer.go?s=12202:12334#L270">AddCommand</a></h2>
 			<pre>func AddCommand(function pshellFunction, command <a href="/pkg/builtin/#string">string</a>, description <a href="/pkg/builtin/#string">string</a>, usage <a href="/pkg/builtin/#string">string</a>, minArgs <a href="/pkg/builtin/#int">int</a>, maxArgs <a href="/pkg/builtin/#int">int</a>, showUsage <a href="/pkg/builtin/#bool">bool</a>)</pre>
 			<p>
 Register callback commands to our PSHELL server.  If the command takes
@@ -438,7 +452,7 @@ Returns:
 		
 			
 			
-			<h2 id="CleanupResources">func <a href="/target/PshellServer.go?s=15774:15797#L410">CleanupResources</a></h2>
+			<h2 id="CleanupResources">func <a href="/target/PshellServer.go?s=13936:13959#L318">CleanupResources</a></h2>
 			<pre>func CleanupResources()</pre>
 			<p>
 Cleanup and release any system resources claimed by this module.  This includes
@@ -457,7 +471,7 @@ Returns:
 		
 			
 			
-			<h2 id="Flush">func <a href="/target/PshellServer.go?s=17536:17548#L493">Flush</a></h2>
+			<h2 id="Flush">func <a href="/target/PshellServer.go?s=15698:15710#L401">Flush</a></h2>
 			<pre>func Flush()</pre>
 			<p>
 Flush the reply (i.e. display) buffer back to the remote client
@@ -473,7 +487,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetBool">func <a href="/target/PshellServer.go?s=24372:24404#L768">GetBool</a></h2>
+			<h2 id="GetBool">func <a href="/target/PshellServer.go?s=22817:22849#L690">GetBool</a></h2>
 			<pre>func GetBool(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it &#39;true&#39;, &#39;yes&#39;, or &#39;on&#39;
@@ -489,7 +503,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetDouble">func <a href="/target/PshellServer.go?s=27986:28023#L911">GetDouble</a></h2>
+			<h2 id="GetDouble">func <a href="/target/PshellServer.go?s=26431:26468#L833">GetDouble</a></h2>
 			<pre>func GetDouble(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Returns the double precision float value of the corresponding string
@@ -505,7 +519,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetFloat">func <a href="/target/PshellServer.go?s=28575:28611#L937">GetFloat</a></h2>
+			<h2 id="GetFloat">func <a href="/target/PshellServer.go?s=27020:27056#L859">GetFloat</a></h2>
 			<pre>func GetFloat(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float32">float32</a></pre>
 			<p>
 Returns the single precision float value of the corresponding string
@@ -521,7 +535,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetFloat32">func <a href="/target/PshellServer.go?s=28877:28915#L950">GetFloat32</a></h2>
+			<h2 id="GetFloat32">func <a href="/target/PshellServer.go?s=27322:27360#L872">GetFloat32</a></h2>
 			<pre>func GetFloat32(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float32">float32</a></pre>
 			<p>
 Returns the single precision float value of the corresponding string
@@ -537,7 +551,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetFloat64">func <a href="/target/PshellServer.go?s=28280:28318#L924">GetFloat64</a></h2>
+			<h2 id="GetFloat64">func <a href="/target/PshellServer.go?s=26725:26763#L846">GetFloat64</a></h2>
 			<pre>func GetFloat64(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Returns the double precision float value of the corresponding string
@@ -553,7 +567,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt">func <a href="/target/PshellServer.go?s=24635:24698#L781">GetInt</a></h2>
+			<h2 id="GetInt">func <a href="/target/PshellServer.go?s=23080:23143#L703">GetInt</a></h2>
 			<pre>func GetInt(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int64">int64</a></pre>
 			<p>
 Returns the integer value of the corresponding string
@@ -569,7 +583,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt16">func <a href="/target/PshellServer.go?s=25598:25663#L820">GetInt16</a></h2>
+			<h2 id="GetInt16">func <a href="/target/PshellServer.go?s=24043:24108#L742">GetInt16</a></h2>
 			<pre>func GetInt16(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int16">int16</a></pre>
 			<p>
 Returns the integer value of the corresponding string
@@ -585,7 +599,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt32">func <a href="/target/PshellServer.go?s=25274:25339#L807">GetInt32</a></h2>
+			<h2 id="GetInt32">func <a href="/target/PshellServer.go?s=23719:23784#L729">GetInt32</a></h2>
 			<pre>func GetInt32(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int32">int32</a></pre>
 			<p>
 Returns the integer value of the corresponding string
@@ -601,7 +615,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt64">func <a href="/target/PshellServer.go?s=24950:25015#L794">GetInt64</a></h2>
+			<h2 id="GetInt64">func <a href="/target/PshellServer.go?s=23395:23460#L716">GetInt64</a></h2>
 			<pre>func GetInt64(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int64">int64</a></pre>
 			<p>
 Returns the integer value of the corresponding string
@@ -617,7 +631,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt8">func <a href="/target/PshellServer.go?s=25921:25984#L833">GetInt8</a></h2>
+			<h2 id="GetInt8">func <a href="/target/PshellServer.go?s=24366:24429#L755">GetInt8</a></h2>
 			<pre>func GetInt8(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int8">int8</a></pre>
 			<p>
 Returns the integer value of the corresponding string
@@ -633,7 +647,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetLength">func <a href="/target/PshellServer.go?s=19077:19110#L575">GetLength</a></h2>
+			<h2 id="GetLength">func <a href="/target/PshellServer.go?s=17239:17272#L483">GetLength</a></h2>
 			<pre>func GetLength(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#int">int</a></pre>
 			<p>
 This will return the length of the passed in string
@@ -649,7 +663,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetOption">func <a href="/target/PshellServer.go?s=29600:29649#L969">GetOption</a></h2>
+			<h2 id="GetOption">func <a href="/target/PshellServer.go?s=28045:28094#L891">GetOption</a></h2>
 			<pre>func GetOption(arg <a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/builtin/#bool">bool</a>, <a href="/pkg/builtin/#string">string</a>, <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 This function will parse an argument string of the formats -&lt;key&gt;&lt;value&gt; where
@@ -673,7 +687,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint">func <a href="/target/PshellServer.go?s=26260:26325#L846">GetUint</a></h2>
+			<h2 id="GetUint">func <a href="/target/PshellServer.go?s=24705:24770#L768">GetUint</a></h2>
 			<pre>func GetUint(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint64">uint64</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
@@ -689,7 +703,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint16">func <a href="/target/PshellServer.go?s=27293:27360#L885">GetUint16</a></h2>
+			<h2 id="GetUint16">func <a href="/target/PshellServer.go?s=25738:25805#L807">GetUint16</a></h2>
 			<pre>func GetUint16(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint16">uint16</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
@@ -705,7 +719,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint32">func <a href="/target/PshellServer.go?s=26948:27015#L872">GetUint32</a></h2>
+			<h2 id="GetUint32">func <a href="/target/PshellServer.go?s=25393:25460#L794">GetUint32</a></h2>
 			<pre>func GetUint32(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint32">uint32</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
@@ -721,7 +735,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint64">func <a href="/target/PshellServer.go?s=26603:26670#L859">GetUint64</a></h2>
+			<h2 id="GetUint64">func <a href="/target/PshellServer.go?s=25048:25115#L781">GetUint64</a></h2>
 			<pre>func GetUint64(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint64">uint64</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
@@ -737,7 +751,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint8">func <a href="/target/PshellServer.go?s=27637:27702#L898">GetUint8</a></h2>
+			<h2 id="GetUint8">func <a href="/target/PshellServer.go?s=26082:26147#L820">GetUint8</a></h2>
 			<pre>func GetUint8(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint8">uint8</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
@@ -753,7 +767,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsAlpha">func <a href="/target/PshellServer.go?s=22888:22920#L700">IsAlpha</a></h2>
+			<h2 id="IsAlpha">func <a href="/target/PshellServer.go?s=21050:21082#L608">IsAlpha</a></h2>
 			<pre>func IsAlpha(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid alphatebetic format
@@ -769,7 +783,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsAlphaNumeric">func <a href="/target/PshellServer.go?s=23491:23530#L727">IsAlphaNumeric</a></h2>
+			<h2 id="IsAlphaNumeric">func <a href="/target/PshellServer.go?s=21653:21692#L635">IsAlphaNumeric</a></h2>
 			<pre>func IsAlphaNumeric(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid alphanumeric format
@@ -785,7 +799,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsDec">func <a href="/target/PshellServer.go?s=22271:22301#L673">IsDec</a></h2>
+			<h2 id="IsDec">func <a href="/target/PshellServer.go?s=20433:20463#L581">IsDec</a></h2>
 			<pre>func IsDec(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid decimal format
@@ -801,7 +815,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsEqual">func <a href="/target/PshellServer.go?s=19387:19436#L589">IsEqual</a></h2>
+			<h2 id="IsEqual">func <a href="/target/PshellServer.go?s=17549:17598#L497">IsEqual</a></h2>
 			<pre>func IsEqual(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This will do a case sensitive compare for string equality
@@ -818,7 +832,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsEqualNoCase">func <a href="/target/PshellServer.go?s=19723:19778#L603">IsEqualNoCase</a></h2>
+			<h2 id="IsEqualNoCase">func <a href="/target/PshellServer.go?s=17885:17940#L511">IsEqualNoCase</a></h2>
 			<pre>func IsEqualNoCase(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This will do a case insensitive compare for string equality
@@ -835,7 +849,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsFloat">func <a href="/target/PshellServer.go?s=21996:22028#L660">IsFloat</a></h2>
+			<h2 id="IsFloat">func <a href="/target/PshellServer.go?s=20158:20190#L568">IsFloat</a></h2>
 			<pre>func IsFloat(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid floating point format
@@ -851,7 +865,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsHelp">func <a href="/target/PshellServer.go?s=18284:18302#L533">IsHelp</a></h2>
+			<h2 id="IsHelp">func <a href="/target/PshellServer.go?s=16446:16464#L441">IsHelp</a></h2>
 			<pre>func IsHelp() <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 Check if the user has asked for help on this command.  Command must be
@@ -868,7 +882,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsHex">func <a href="/target/PshellServer.go?s=22581:22631#L687">IsHex</a></h2>
+			<h2 id="IsHex">func <a href="/target/PshellServer.go?s=20743:20793#L595">IsHex</a></h2>
 			<pre>func IsHex(string <a href="/pkg/builtin/#string">string</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid hexidecimal format,
@@ -885,7 +899,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsIpv4Addr">func <a href="/target/PshellServer.go?s=23786:23821#L741">IsIpv4Addr</a></h2>
+			<h2 id="IsIpv4Addr">func <a href="/target/PshellServer.go?s=21948:21983#L649">IsIpv4Addr</a></h2>
 			<pre>func IsIpv4Addr(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid ipv4 address
@@ -902,7 +916,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsIpv4AddrWithNetmask">func <a href="/target/PshellServer.go?s=24081:24127#L755">IsIpv4AddrWithNetmask</a></h2>
+			<h2 id="IsIpv4AddrWithNetmask">func <a href="/target/PshellServer.go?s=22243:22289#L663">IsIpv4AddrWithNetmask</a></h2>
 			<pre>func IsIpv4AddrWithNetmask(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid ipv4
@@ -919,7 +933,24 @@ Returns:
 		
 			
 			
-			<h2 id="IsNumeric">func <a href="/target/PshellServer.go?s=23174:23228#L714">IsNumeric</a></h2>
+			<h2 id="IsMacAddr">func <a href="/target/PshellServer.go?s=22550:22584#L677">IsMacAddr</a></h2>
+			<pre>func IsMacAddr(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+			<p>
+This function will parse a string to see if it is in valid MAC address
+format
+</p>
+<pre>Args:
+    string (str) : The string to parse
+
+Returns:
+    bool : True if valid MAC address format
+</pre>
+
+			
+		
+			
+			
+			<h2 id="IsNumeric">func <a href="/target/PshellServer.go?s=21336:21390#L622">IsNumeric</a></h2>
 			<pre>func IsNumeric(string <a href="/pkg/builtin/#string">string</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid numerc format,
@@ -936,7 +967,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsSubString">func <a href="/target/PshellServer.go?s=20659:20732#L625">IsSubString</a></h2>
+			<h2 id="IsSubString">func <a href="/target/PshellServer.go?s=18821:18894#L533">IsSubString</a></h2>
 			<pre>func IsSubString(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>, minMatchLength <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will return True if string1 is a substring of string2 at
@@ -961,7 +992,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsSubStringNoCase">func <a href="/target/PshellServer.go?s=21631:21710#L647">IsSubStringNoCase</a></h2>
+			<h2 id="IsSubStringNoCase">func <a href="/target/PshellServer.go?s=19793:19872#L555">IsSubStringNoCase</a></h2>
 			<pre>func IsSubStringNoCase(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>, minMatchLength <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will return True if string1 is a substring of string2 at
@@ -986,7 +1017,7 @@ Returns:
 		
 			
 			
-			<h2 id="March">func <a href="/target/PshellServer.go?s=17982:18008#L519">March</a></h2>
+			<h2 id="March">func <a href="/target/PshellServer.go?s=16144:16170#L427">March</a></h2>
 			<pre>func March(message <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 March a message or character keep alive across the screen
@@ -1002,7 +1033,7 @@ Returns:
 		
 			
 			
-			<h2 id="Printf">func <a href="/target/PshellServer.go?s=17314:17364#L480">Printf</a></h2>
+			<h2 id="Printf">func <a href="/target/PshellServer.go?s=15476:15526#L388">Printf</a></h2>
 			<pre>func Printf(format <a href="/pkg/builtin/#string">string</a>, message ...interface{})</pre>
 			<p>
 Display data back to the remote client
@@ -1018,7 +1049,7 @@ Returns:
 		
 			
 			
-			<h2 id="RunCommand">func <a href="/target/PshellServer.go?s=15999:16053#L423">RunCommand</a></h2>
+			<h2 id="RunCommand">func <a href="/target/PshellServer.go?s=14161:14215#L331">RunCommand</a></h2>
 			<pre>func RunCommand(format <a href="/pkg/builtin/#string">string</a>, command ...interface{})</pre>
 			<p>
 Run a registered command from within its parent process
@@ -1034,7 +1065,7 @@ Returns:
 		
 			
 			
-			<h2 id="SetLogFunction">func <a href="/target/PshellServer.go?s=16807:16848#L460">SetLogFunction</a></h2>
+			<h2 id="SetLogFunction">func <a href="/target/PshellServer.go?s=14969:15010#L368">SetLogFunction</a></h2>
 			<pre>func SetLogFunction(function logFunction)</pre>
 			<p>
 Provide a user callback function to send the logs to, this allows an
@@ -1053,7 +1084,7 @@ Returns:
 		
 			
 			
-			<h2 id="SetLogLevel">func <a href="/target/PshellServer.go?s=16395:16422#L444">SetLogLevel</a></h2>
+			<h2 id="SetLogLevel">func <a href="/target/PshellServer.go?s=14557:14584#L352">SetLogLevel</a></h2>
 			<pre>func SetLogLevel(level <a href="/pkg/builtin/#int">int</a>)</pre>
 			<p>
 Set the internal log level, valid levels are:
@@ -1079,7 +1110,7 @@ Returns:
 		
 			
 			
-			<h2 id="ShowUsage">func <a href="/target/PshellServer.go?s=18437:18453#L546">ShowUsage</a></h2>
+			<h2 id="ShowUsage">func <a href="/target/PshellServer.go?s=16599:16615#L454">ShowUsage</a></h2>
 			<pre>func ShowUsage()</pre>
 			<p>
 Show the command&#39;s registered usage
@@ -1095,7 +1126,7 @@ Returns:
 		
 			
 			
-			<h2 id="StartServer">func <a href="/target/PshellServer.go?s=15176:15284#L390">StartServer</a></h2>
+			<h2 id="StartServer">func <a href="/target/PshellServer.go?s=13338:13446#L298">StartServer</a></h2>
 			<pre>func StartServer(serverName <a href="/pkg/builtin/#string">string</a>, serverType <a href="/pkg/builtin/#string">string</a>, serverMode <a href="/pkg/builtin/#int">int</a>, hostnameOrIpAddr <a href="/pkg/builtin/#string">string</a>, port <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 Start our PSHELL server, if serverType is UNIX or LOCAL, the hostnameOrIpAddr
@@ -1119,7 +1150,7 @@ Returns:
 		
 			
 			
-			<h2 id="Tokenize">func <a href="/target/PshellServer.go?s=18787:18849#L562">Tokenize</a></h2>
+			<h2 id="Tokenize">func <a href="/target/PshellServer.go?s=16949:17011#L470">Tokenize</a></h2>
 			<pre>func Tokenize(string <a href="/pkg/builtin/#string">string</a>, delimiter <a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/builtin/#int">int</a>, []<a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 This will parse a string based on a delimiter and return the parsed
@@ -1138,7 +1169,7 @@ Returns:
 		
 			
 			
-			<h2 id="Wheel">func <a href="/target/PshellServer.go?s=17749:17775#L506">Wheel</a></h2>
+			<h2 id="Wheel">func <a href="/target/PshellServer.go?s=15911:15937#L414">Wheel</a></h2>
 			<pre>func Wheel(message <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 Spinning ascii wheel keep alive, user string is optional

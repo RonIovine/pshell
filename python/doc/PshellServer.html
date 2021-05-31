@@ -17,14 +17,13 @@ user&nbsp;API&nbsp;functionality.&nbsp;&nbsp;It&nbsp;provides&nbsp;the&nbsp;abil
 functions&nbsp;that&nbsp;can&nbsp;be&nbsp;invoked&nbsp;via&nbsp;a&nbsp;command&nbsp;line&nbsp;user&nbsp;interface.&nbsp;&nbsp;There&nbsp;are<br>
 several&nbsp;ways&nbsp;to&nbsp;invoke&nbsp;these&nbsp;embedded&nbsp;functions&nbsp;based&nbsp;on&nbsp;how&nbsp;the&nbsp;pshell&nbsp;server<br>
 is&nbsp;configured,&nbsp;which&nbsp;is&nbsp;described&nbsp;in&nbsp;documentation&nbsp;further&nbsp;down&nbsp;in&nbsp;this&nbsp;file.<br>
+This&nbsp;is&nbsp;the&nbsp;Python&nbsp;implementation,&nbsp;there&nbsp;are&nbsp;also&nbsp;corresponding&nbsp;C/C++&nbsp;and&nbsp;Golang<br>
+implementations.<br>
 &nbsp;<br>
-This&nbsp;module&nbsp;provides&nbsp;the&nbsp;same&nbsp;functionality&nbsp;as&nbsp;the&nbsp;PshellServer.h&nbsp;API&nbsp;and<br>
-the&nbsp;libpshell-server&nbsp;linkable&nbsp;'C'&nbsp;library,&nbsp;but&nbsp;implemented&nbsp;as&nbsp;a&nbsp;Python&nbsp;module.<br>
-It&nbsp;supports&nbsp;all&nbsp;the&nbsp;server&nbsp;types&nbsp;as&nbsp;the&nbsp;corresponding&nbsp;'C'&nbsp;impelmentation,&nbsp;TCP,<br>
-UDP,&nbsp;UNIX&nbsp;and&nbsp;LOCAL&nbsp;server&nbsp;types&nbsp;are&nbsp;all&nbsp;supported.&nbsp;&nbsp;Applications&nbsp;using&nbsp;this<br>
-module&nbsp;can&nbsp;be&nbsp;controlled&nbsp;via&nbsp;the&nbsp;pshell&nbsp;UDP/UNIX&nbsp;stand-alone&nbsp;'C'&nbsp;client&nbsp;program<br>
-or&nbsp;via&nbsp;the&nbsp;PshellControl.h/libpshell-control,&nbsp;PshellControl.py&nbsp;control&nbsp;mechanism<br>
-or&nbsp;the&nbsp;PshellControl.go&nbsp;module&nbsp;and&nbsp;API.<br>
+The&nbsp;functions&nbsp;are&nbsp;similar&nbsp;to&nbsp;the&nbsp;prototype&nbsp;of&nbsp;the&nbsp;'main'&nbsp;in&nbsp;'python',&nbsp;i.e.<br>
+'def&nbsp;myFunc(string)',&nbsp;there&nbsp;are&nbsp;several&nbsp;ways&nbsp;to&nbsp;invoke&nbsp;these&nbsp;embedded<br>
+functions&nbsp;based&nbsp;on&nbsp;how&nbsp;the&nbsp;pshell&nbsp;server&nbsp;is&nbsp;configured,&nbsp;which&nbsp;is&nbsp;described<br>
+in&nbsp;documentation&nbsp;further&nbsp;down&nbsp;in&nbsp;this&nbsp;file.<br>
 &nbsp;<br>
 A&nbsp;complete&nbsp;example&nbsp;of&nbsp;the&nbsp;usage&nbsp;of&nbsp;the&nbsp;API&nbsp;can&nbsp;be&nbsp;found&nbsp;in&nbsp;the&nbsp;included<br>
 demo&nbsp;program&nbsp;pshellServerDemo.py.<br>
@@ -64,6 +63,7 @@ here&nbsp;for&nbsp;consistency&nbsp;of&nbsp;the&nbsp;API&nbsp;across&nbsp;all&nb
 &nbsp;&nbsp;<a href="#-isAlphaNumeric">isAlphaNumeric</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;alpha-numeric<br>
 &nbsp;&nbsp;<a href="#-isIpv4Addr">isIpv4Addr</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address&nbsp;format<br>
 &nbsp;&nbsp;<a href="#-isIpv4AddrWithNetmask">isIpv4AddrWithNetmask</a>()&nbsp;--&nbsp;returns&nbsp;True&nbsp;is&nbsp;string&nbsp;is&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format<br>
+&nbsp;&nbsp;<a href="#-isMacAddr">isMacAddr</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;valid&nbsp;MAC&nbsp;address&nbsp;format<br>
 &nbsp;&nbsp;<a href="#-getBool">getBool</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;returns&nbsp;True&nbsp;if&nbsp;string&nbsp;is&nbsp;'true',&nbsp;'yes',&nbsp;'on'<br>
 &nbsp;&nbsp;<a href="#-getInt">getInt</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;integer&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
 &nbsp;&nbsp;<a href="#-getFloat">getFloat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;return&nbsp;the&nbsp;float&nbsp;value&nbsp;from&nbsp;the&nbsp;string<br>
@@ -127,7 +127,15 @@ it&nbsp;also&nbsp;supported,&nbsp;e.g.&nbsp;x.y.z.255<br>
 &nbsp;<br>
 &nbsp;&nbsp;ANYHOST<br>
 &nbsp;&nbsp;ANYBCAST<br>
-&nbsp;&nbsp;LOCALHOST</tt></p>
+&nbsp;&nbsp;LOCALHOST<br>
+&nbsp;<br>
+Typedefs:<br>
+&nbsp;<br>
+These&nbsp;typedefs/prototypes&nbsp;are&nbsp;used&nbsp;for&nbsp;the&nbsp;main&nbsp;pshell&nbsp;function&nbsp;callback<br>
+function&nbsp;and&nbsp;the&nbsp;log&nbsp;function&nbsp;callback&nbsp;functions&nbsp;respectively<br>
+&nbsp;<br>
+&nbsp;&nbsp;def&nbsp;pshellFunction&nbsp;func(args)<br>
+&nbsp;&nbsp;def&nbsp;logFunction&nbsp;func(string)</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -303,6 +311,13 @@ address/netmask&nbsp;format<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;ipv4&nbsp;address/netmask&nbsp;format</tt></dd></dl>
+ <dl><dt><a name="-isMacAddr"><strong>isMacAddr</strong></a>(string)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;string&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;MAC&nbsp;address&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;MAC&nbsp;address&nbsp;format</tt></dd></dl>
  <dl><dt><a name="-isNumeric"><strong>isNumeric</strong></a>(string, needHexPrefix<font color="#909090">=True</font>)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;a&nbsp;string&nbsp;to&nbsp;see&nbsp;if&nbsp;it&nbsp;is&nbsp;in&nbsp;valid&nbsp;numerc&nbsp;format,<br>
 hex&nbsp;or&nbsp;decimal<br>
 &nbsp;<br>

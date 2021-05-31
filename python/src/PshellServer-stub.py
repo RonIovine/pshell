@@ -268,6 +268,14 @@ def isIpv4AddrWithNetmask(string):
 
 #################################################################################
 #################################################################################
+def isMacAddr(string):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  return (True)
+
+#################################################################################
+#################################################################################
 def getBool(string):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality

@@ -82,6 +82,7 @@ here for consistency of the API across all language implementations
   isAlphaNumeric()        -- returns True if string is alpha-numeric
   isIpv4Addr()            -- returns True if string is valid ipv4 address format
   isIpv4AddrWithNetmask() -- returns True is string is valid ipv4 address/netmask format
+  isMacAddr()             -- returns True if string is valid MAC address format
   getBool()               -- returns True if string is 'true', 'yes', 'on'
   getInt()                -- return the integer value from the string
   getFloat()              -- return the float value from the string
@@ -146,6 +147,14 @@ it also supported, e.g. x.y.z.255
   ANYHOST
   ANYBCAST
   LOCALHOST
+
+Typedefs:
+
+These typedefs/prototypes are used for the main pshell function callback
+function and the log function callback functions respectively
+
+  def pshellFunction func(args)
+  def logFunction func(string)
 """
 
 # import all our necessary modules
@@ -681,6 +690,20 @@ def isIpv4AddrWithNetmask(string):
 
 #################################################################################
 #################################################################################
+def isMacAddr(string):
+  """
+  This function will parse a string to see if it is in valid MAC address format
+
+    Args:
+        string (str) : The string to parse
+
+    Returns:
+        bool : True if valid MAC address format
+  """
+  return _isMacAddr(string)
+
+#################################################################################
+#################################################################################
 def getBool(string):
   """
   This function will parse a string to see if it 'true', 'yes', or 'on'
@@ -915,7 +938,7 @@ def _isDec(string_):
 def _isHex(string_, needHexPrefix_):
   string = str(string_)
   if needHexPrefix_ and (len(string) < 3 or string[0:2].lower() != "0x"):
-      return False
+    return False
   try:
     int(string, 16)
     return True
@@ -964,6 +987,30 @@ def _isIpv4AddrWithNetmask(string_):
           isDec(addr[1]) and
           getInt(addr[1]) >= 0 and
           getInt(addr[1]) <= 32)
+
+#################################################################################
+#################################################################################
+def _isMacAddr(string_):
+  addr = string_.split(":")
+  return (len(addr) == 6 and
+          isHex(addr[0], False) and
+          getInt(addr[0], RADIX_HEX, False) >= 0 and
+          getInt(addr[0], RADIX_HEX, False) <= 0xFF and
+          isHex(addr[1], False) and
+          getInt(addr[1], RADIX_HEX, False) >= 0 and
+          getInt(addr[1], RADIX_HEX, False) <= 0xFF and
+          isHex(addr[2], False) and
+          getInt(addr[2], RADIX_HEX, False) >= 0 and
+          getInt(addr[2], RADIX_HEX, False) <= 0xFF and
+          isHex(addr[3], False) and
+          getInt(addr[3], RADIX_HEX, False) >= 0 and
+          getInt(addr[3], RADIX_HEX, False) <= 0xFF and
+          isHex(addr[4], False) and
+          getInt(addr[4], RADIX_HEX, False) >= 0 and
+          getInt(addr[4], RADIX_HEX, False) <= 0xFF and
+          isHex(addr[5], False) and
+          getInt(addr[5], RADIX_HEX, False) >= 0 and
+          getInt(addr[5], RADIX_HEX, False) <= 0xFF)
 
 #################################################################################
 #################################################################################

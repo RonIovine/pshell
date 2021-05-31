@@ -297,6 +297,10 @@ void formatChecking(int argc, char *argv[])
   {
     pshell_printf("IPv4 address/netmask: '%s' entered\n", argv[0]);
   }
+  else if (pshell_isMacAddr(argv[0]))
+  {
+    pshell_printf("MAC address: '%s' entered\n", argv[0]);
+  }
   else if (pshell_isDec(argv[0]))
   {
     pshell_printf("Decimal arg: %d entered\n", pshell_getUnsigned(argv[0]));

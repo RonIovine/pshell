@@ -1485,6 +1485,33 @@ bool pshell_isIpv4AddrWithNetmask(const char *string_)
           pshell_getInt(addr->tokens[1]) <= 32);
 }
 
+/******************************************************************************/
+/******************************************************************************/
+bool pshell_isMacAddr(const char *string_)\
+{
+  PshellTokens *addr;
+  addr = pshell_tokenize(string_, ":");
+  return (addr->numTokens == 6 &&
+          pshell_isHex(addr->tokens[0], false) &&
+          pshell_getInt(addr->tokens[0], PSHELL_RADIX_HEX, false) >= 0 &&
+          pshell_getInt(addr->tokens[0], PSHELL_RADIX_HEX, false) <= 0xFF &&
+          pshell_isHex(addr->tokens[1], false) &&
+          pshell_getInt(addr->tokens[1], PSHELL_RADIX_HEX, false) >= 0 &&
+          pshell_getInt(addr->tokens[1], PSHELL_RADIX_HEX, false) <= 0xFF &&
+          pshell_isHex(addr->tokens[2], false) &&
+          pshell_getInt(addr->tokens[2], PSHELL_RADIX_HEX, false) >= 0 &&
+          pshell_getInt(addr->tokens[2], PSHELL_RADIX_HEX, false) <= 0xFF &&
+          pshell_isHex(addr->tokens[3], false) &&
+          pshell_getInt(addr->tokens[3], PSHELL_RADIX_HEX, false) >= 0 &&
+          pshell_getInt(addr->tokens[3], PSHELL_RADIX_HEX, false) <= 0xFF &&
+          pshell_isHex(addr->tokens[4], false) &&
+          pshell_getInt(addr->tokens[4], PSHELL_RADIX_HEX, false) >= 0 &&
+          pshell_getInt(addr->tokens[4], PSHELL_RADIX_HEX, false) <= 0xFF &&
+          pshell_isHex(addr->tokens[5], false) &&
+          pshell_getInt(addr->tokens[5], PSHELL_RADIX_HEX, false) >= 0 &&
+          pshell_getInt(addr->tokens[5], PSHELL_RADIX_HEX, false) <= 0xFF);
+}
+
 /**********************************************
  * command line agrument conversion functions
  **********************************************/

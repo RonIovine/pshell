@@ -288,6 +288,13 @@ func IsIpv4AddrWithNetmask(string1 string) bool {
 //
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
+func IsMacAddr(string1 string) bool {
+  return (true)
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
 func GetBool(string string) bool {
   return (true)
 }
