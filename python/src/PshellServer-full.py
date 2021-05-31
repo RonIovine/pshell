@@ -937,8 +937,15 @@ def _isDec(string_):
 #################################################################################
 def _isHex(string_, needHexPrefix_):
   string = str(string_)
-  if needHexPrefix_ and (len(string) < 3 or string[0:2].lower() != "0x"):
-    return False
+  if needHexPrefix_:
+    # hex prefix requested, make sure they provided one
+    if len(string) < 3 or string[0:2].lower() != "0x":
+      return False
+  else:
+    # no prefix requested, make sure the did not provide one, since the
+    # following 'int' call for base 16 will work either way
+    if "0x" in string:
+      return False
   try:
     int(string, 16)
     return True
