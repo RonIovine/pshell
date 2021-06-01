@@ -1000,24 +1000,12 @@ def _isIpv4AddrWithNetmask(string_):
 def _isMacAddr(string_):
   addr = string_.split(":")
   return (len(addr) == 6 and
-          isHex(addr[0], False) and
-          getInt(addr[0], RADIX_HEX, False) >= 0 and
-          getInt(addr[0], RADIX_HEX, False) <= 0xFF and
-          isHex(addr[1], False) and
-          getInt(addr[1], RADIX_HEX, False) >= 0 and
-          getInt(addr[1], RADIX_HEX, False) <= 0xFF and
-          isHex(addr[2], False) and
-          getInt(addr[2], RADIX_HEX, False) >= 0 and
-          getInt(addr[2], RADIX_HEX, False) <= 0xFF and
-          isHex(addr[3], False) and
-          getInt(addr[3], RADIX_HEX, False) >= 0 and
-          getInt(addr[3], RADIX_HEX, False) <= 0xFF and
-          isHex(addr[4], False) and
-          getInt(addr[4], RADIX_HEX, False) >= 0 and
-          getInt(addr[4], RADIX_HEX, False) <= 0xFF and
-          isHex(addr[5], False) and
-          getInt(addr[5], RADIX_HEX, False) >= 0 and
-          getInt(addr[5], RADIX_HEX, False) <= 0xFF)
+          isHex(addr[0], False) and len(addr[0]) == 2 and
+          isHex(addr[1], False) and len(addr[1]) == 2 and
+          isHex(addr[2], False) and len(addr[2]) == 2 and
+          isHex(addr[3], False) and len(addr[3]) == 2 and
+          isHex(addr[4], False) and len(addr[4]) == 2 and
+          isHex(addr[5], False) and len(addr[5]) == 2)
 
 #################################################################################
 #################################################################################

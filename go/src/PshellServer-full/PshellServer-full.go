@@ -1419,24 +1419,12 @@ func isIpv4AddrWithNetmask(string_ string) bool {
 func isMacAddr(string_ string) bool {
   addr := strings.Split(string_, ":")
   return (len(addr) == 6 &&
-          isHex(addr[0], false) &&
-          getInt(addr[0], RADIX_HEX, false) >= 0 &&
-          getInt(addr[0], RADIX_HEX, false) <= 0xFF &&
-          isHex(addr[1], false) &&
-          getInt(addr[1], RADIX_HEX, false) >= 0 &&
-          getInt(addr[1], RADIX_HEX, false) <= 0xFF &&
-          isHex(addr[2], false) &&
-          getInt(addr[2], RADIX_HEX, false) >= 0 &&
-          getInt(addr[2], RADIX_HEX, false) <= 0xFF &&
-          isHex(addr[3], false) &&
-          getInt(addr[3], RADIX_HEX, false) >= 0 &&
-          getInt(addr[3], RADIX_HEX, false) <= 0xFF &&
-          isHex(addr[4], false) &&
-          getInt(addr[4], RADIX_HEX, false) >= 0 &&
-          getInt(addr[4], RADIX_HEX, false) <= 0xFF &&
-          isHex(addr[5], false) &&
-          getInt(addr[5], RADIX_HEX, false) >= 0 &&
-          getInt(addr[5], RADIX_HEX, false) <= 0xFF)
+          isHex(addr[0], false) && len(addr[0]) == 2 &&
+          isHex(addr[1], false) && len(addr[1]) == 2 &&
+          isHex(addr[2], false) && len(addr[2]) == 2 &&
+          isHex(addr[3], false) && len(addr[3]) == 2 &&
+          isHex(addr[4], false) && len(addr[4]) == 2 &&
+          isHex(addr[5], false) && len(addr[5]) == 2)
 }
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
