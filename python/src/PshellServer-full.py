@@ -1614,7 +1614,15 @@ def _processCommand(command_):
     if (numMatches == 0):
       printf("PSHELL_ERROR: Command: '%s' not found" % command_)
     elif (numMatches > 1):
-      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'" % command_)
+      # if we have multiple matches for the substring match, see if we have an exact match
+      numMatches = 0
+      for command in _gCommandList:
+        if (isEqual(command_, command["name"])):
+          _gFoundCommand = command
+          numMatches += 1
+      # did not find an exact match, our original command must have been ambiguous
+      if (numMatches == 0):
+        printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'" % command_)
     else:
       if (isHelp()):
         if (_gFoundCommand["showUsage"] == True):

@@ -257,6 +257,7 @@ void registerSignalHandlers(void);
 void parseCommandLine(int *argc, char *argv[], char *host, char *port);
 unsigned findCommand(char *command_);
 bool isSubString(const char *string1_, const char *string2_, unsigned minChars_);
+bool isEqual(const char *string1_, const char *string2_);
 
 /*
  * we access this funciton via a 'backdoor' linking via the PshellReadline
@@ -855,6 +856,24 @@ bool isSubString(const char *string1_, const char *string2_, unsigned minChars_)
 
 /******************************************************************************/
 /******************************************************************************/
+bool isEqual(const char *string1_, const char *string2_)
+{
+  if ((string1_ == NULL) && (string2_ == NULL))
+  {
+    return (true);
+  }
+  else if ((string1_ != NULL) && (string2_ != NULL))
+  {
+    return (strcmp(string1_, string2_) == 0);
+  }
+  else
+  {
+    return (false);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 unsigned findCommand(char *command_)
 {
   unsigned index;
@@ -866,6 +885,7 @@ unsigned findCommand(char *command_)
       numFound++;
     }
   }
+  /* see if we have a substring match */
   for (index = 0; index < _numPshellCommands; index++)
   {
     if (isSubString(command_, _pshellCommandList[index], strlen(command_)))
@@ -873,6 +893,28 @@ unsigned findCommand(char *command_)
       numFound++;
     }
   }
+
+  /* if we have multiple matches in the substring, look for an exact match */
+  if (numFound > 1)
+  {
+    numFound = 0;
+    for (index = 0; index < _numPshellCommands; index++)
+    {
+      if (isEqual(command_, _pshellCommandList[index]))
+      {
+        numFound++;
+      }
+    }
+    /*
+     * if we did not find an exact match, that means the user entered an ambiguous command
+     * abbreviation, set the numFound to something > 1 so we can get the correct error message
+     */
+     if (numFound == 0)
+     {
+       numFound = 2;
+     }
+  }
+
   return (numFound);
 }
 

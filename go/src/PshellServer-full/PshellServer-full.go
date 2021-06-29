@@ -2604,7 +2604,18 @@ func processCommand(command_ string) {
     if (numMatches == 0) {
       printf("PSHELL_ERROR: Command: '%s' not found\n", command_)
     } else if (numMatches > 1) {
-      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command_)
+      // if we have multiple matches for the substring match, see if we have an exact match
+      numMatches = 0
+      for _, entry := range _gCommandList {
+        if (isEqual(command_, entry.command)) {
+          _gFoundCommand = entry
+          numMatches += 1
+        }
+      }
+      // did not find an exact match, our original command must have been ambiguous
+      if (numMatches == 0) {
+        printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command_)
+      }
     } else {
       if (IsHelp()) {
         if (_gFoundCommand.showUsage == true) {

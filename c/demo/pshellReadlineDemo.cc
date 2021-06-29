@@ -129,6 +129,9 @@ int main(int argc, char *argv[])
   pshell_rl_addTabCompletion("myCommand123");
   pshell_rl_addTabCompletion("myCommand456");
   pshell_rl_addTabCompletion("myCommand789");
+  pshell_rl_addTabCompletion("cd");
+  pshell_rl_addTabCompletion("connect");
+  pshell_rl_addTabCompletion("create");
 
   if (serialType == PSHELL_RL_SOCKET)
   {

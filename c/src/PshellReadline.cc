@@ -687,7 +687,7 @@ static void findTabCompletions(const char *keyword_)
     if (pshell_rl_isSubString(keyword_, _tabCompletions[i]))
     {
       _tabMatches[_numTabMatches++] = _tabCompletions[i];
-      if (strlen(_tabCompletions[i]) > _maxMatchKeywordLength)
+      if (strlen(_tabCompletions[i])+TAB_SPACING > _maxMatchKeywordLength)
       {
         _maxMatchKeywordLength = strlen(_tabCompletions[i])+TAB_SPACING;
         _maxMatchCompletionsPerLine = TAB_COLUMNS/_maxMatchKeywordLength;

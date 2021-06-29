@@ -2035,18 +2035,9 @@ static void showWelcome(void)
   pshell_printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
-  if (_serverType == PSHELL_TCP_SERVER)
-  {
-    pshell_printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
-    pshell_printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
-    pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
-  }
-  else  /* local server built with readline library */
-  {
-    pshell_printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
-    pshell_printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
-    pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
-  }
+  pshell_printf("%s  Full <TAB> completion, command history, command\n", PSHELL_WELCOME_BORDER);
+  pshell_printf("%s  line editing, and command abbreviation supported\n", PSHELL_WELCOME_BORDER);
+  pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   PSHELL_PRINT_WELCOME_BORDER(pshell_printf, maxLength);
   pshell_printf("\n");
 }
@@ -3185,6 +3176,29 @@ static unsigned findCommand(char *command_)
         _foundCommand = &_commandTable[entry];
         numMatches++;
       }
+    }
+    /* if we have multiple matches in the substring, look for an exact match */
+    if (numMatches > 1)
+    {
+      numMatches = 0;
+      for (entry = 0; entry < _numCommands; entry++)
+      {
+        /* see if we have an exact match */
+        if (pshell_isEqual(command_, _commandTable[entry].command))
+        {
+          /* set our _foundCommand pointer */
+          _foundCommand = &_commandTable[entry];
+          numMatches++;
+        }
+      }
+      /*
+       * if we did not find an exact match, that means the user entered an ambiguous command
+       * abbreviation, set the numMatches to something > 1 so we can get the correct error message
+       */
+       if (numMatches == 0)
+       {
+         numMatches = 2;
+       }
     }
   }
   return (numMatches);
