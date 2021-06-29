@@ -102,6 +102,9 @@ if (__name__ == '__main__'):
   PshellReadline.addTabCompletion("myCommand123")
   PshellReadline.addTabCompletion("myCommand456")
   PshellReadline.addTabCompletion("myCommand789")
+  PshellReadline.addTabCompletion("cd")
+  PshellReadline.addTabCompletion("connect")
+  PshellReadline.addTabCompletion("create")
 
   # socket serial type requested, setup our TCP server socket
   # and pass the connected file descriptors to our PshellReadline

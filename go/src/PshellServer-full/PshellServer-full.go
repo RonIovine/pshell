@@ -2096,7 +2096,7 @@ func findTabCompletions(keyword_ string) []string {
   _gMaxMatchPerLine = 0
   for _, keyword := range(_gTabCompletions) {
     if (isSubString(keyword_, keyword, len(keyword_))) {
-      if (len(keyword) > _gMaxMatchKeywordLength) {
+      if (len(keyword)+_TAB_SPACING > _gMaxMatchKeywordLength) {
         _gMaxMatchKeywordLength = len(keyword)+_TAB_SPACING
         _gMaxMatchPerLine = _TAB_COLUMNS/_gMaxMatchKeywordLength
       }

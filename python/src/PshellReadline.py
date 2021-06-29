@@ -365,7 +365,7 @@ def _findTabCompletions(keyword_):
   _gMaxMatchCompletionsPerLine = 0
   for keyword in _gTabCompletions:
     if (isSubString(keyword_, keyword)):
-      if (len(keyword) > _gMaxMatchKeywordLength):
+      if (len(keyword)+_gTabSpacing > _gMaxMatchKeywordLength):
         _gMaxMatchKeywordLength = len(keyword)+_gTabSpacing
         _gMaxMatchCompletionsPerLine = _gTabColumns/_gMaxMatchKeywordLength
       matchList.append(keyword)
