@@ -962,6 +962,7 @@ type pshellCmd struct {
   minArgs int
   maxArgs int
   showUsage bool
+  length int
 }
 
 // default config, startup, and batch directories
@@ -1104,7 +1105,8 @@ func addCommand(function_ pshellFunction,
                                         function_,
                                         minArgs_,
                                         maxArgs_,
-                                        showUsage_}},
+                                        showUsage_,
+                                        len(command_)}},
                            _gCommandList...)
   } else {
     _gCommandList = append(_gCommandList,
@@ -1114,7 +1116,8 @@ func addCommand(function_ pshellFunction,
                                      function_,
                                      minArgs_,
                                      maxArgs_,
-                                     showUsage_})
+                                     showUsage_,
+                                     len(command_)})
   }
 }
 
@@ -2594,28 +2597,24 @@ func processCommand(command_ string) {
       _gCommandDispatched = false
       return
     } else {
+      length := len(command_)
       for _, entry := range _gCommandList {
+        // do an initial substring match for command abbreviation support
         if (isSubString(command_, entry.command, len(command_))) {
           _gFoundCommand = entry
           numMatches += 1
+          // if we have an exact match, take it and break out
+          if (_gFoundCommand.length == length) {
+            numMatches = 1
+            break
+          }
         }
       }
     }
     if (numMatches == 0) {
       printf("PSHELL_ERROR: Command: '%s' not found\n", command_)
     } else if (numMatches > 1) {
-      // if we have multiple matches for the substring match, see if we have an exact match
-      numMatches = 0
-      for _, entry := range _gCommandList {
-        if (isEqual(command_, entry.command)) {
-          _gFoundCommand = entry
-          numMatches += 1
-        }
-      }
-      // did not find an exact match, our original command must have been ambiguous
-      if (numMatches == 0) {
-        printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command_)
-      }
+      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'\n", command_)
     } else {
       if (IsHelp()) {
         if (_gFoundCommand.showUsage == true) {

@@ -1117,7 +1117,8 @@ def _addCommand(function_,
                              "usage":usage_,
                              "minArgs":minArgs_,
                              "maxArgs":maxArgs,
-                             "showUsage":showUsage_})
+                             "showUsage":showUsage_,
+                             "length":len(command_)})
   else:
     _gCommandList.append({"function":function_,
                           "name":command_,
@@ -1125,7 +1126,8 @@ def _addCommand(function_,
                           "usage":usage_,
                           "minArgs":minArgs_,
                           "maxArgs":maxArgs,
-                          "showUsage":showUsage_})
+                          "showUsage":showUsage_,
+                          "length":len(command_)})
 
 #################################################################################
 #################################################################################
@@ -1607,22 +1609,20 @@ def _processCommand(command_):
       _gCommandDispatched = False
       return
     else:
+      length = len(command_)
       for command in _gCommandList:
+        # do an initial substring match for command abbreviation support
         if (isSubString(command_, command["name"], len(command_))):
           _gFoundCommand = command
           numMatches += 1
+          # if we have an exact match, take it and break out
+          if _gFoundCommand["length"] == length:
+            numMatches = 1
+            break
     if (numMatches == 0):
       printf("PSHELL_ERROR: Command: '%s' not found" % command_)
     elif (numMatches > 1):
-      # if we have multiple matches for the substring match, see if we have an exact match
-      numMatches = 0
-      for command in _gCommandList:
-        if (isEqual(command_, command["name"])):
-          _gFoundCommand = command
-          numMatches += 1
-      # did not find an exact match, our original command must have been ambiguous
-      if (numMatches == 0):
-        printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'" % command_)
+      printf("PSHELL_ERROR: Ambiguous command abbreviation: '%s'" % command_)
     else:
       if (isHelp()):
         if (_gFoundCommand["showUsage"] == True):

@@ -232,6 +232,7 @@ struct PshellCmd
   unsigned char minArgs;
   unsigned char maxArgs;
   unsigned char showUsage;
+  unsigned length;  /* strlen of the command, used for substring matching */
 };
 
 /*
@@ -664,6 +665,7 @@ void pshell_addCommand(PshellFunction function_,
     _commandTable[_numCommands].maxArgs = minArgs_;
   }
   _commandTable[_numCommands].showUsage = showUsage_;
+  _commandTable[_numCommands].length = strlen(command_);
   _numCommands++;
 
   /* see if they are adding commands after the server is started, if so, add it here,
@@ -2412,6 +2414,7 @@ static void addNativeCommands(void)
       _quitCmd.minArgs = _commandTable[_numCommands-1].minArgs;
       _quitCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
       _quitCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      _quitCmd.length = _commandTable[_numCommands-1].length;
       numNativeCommands += 1;
     }
 
@@ -2429,6 +2432,7 @@ static void addNativeCommands(void)
     _helpCmd.minArgs = _commandTable[_numCommands-1].minArgs;
     _helpCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
     _helpCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+    _helpCmd.length = _commandTable[_numCommands-1].length;
     numNativeCommands += 1;
 
     if (_serverType == PSHELL_NO_SERVER)
@@ -2450,6 +2454,7 @@ static void addNativeCommands(void)
       _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
       _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
       _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      _batchCmd.length = _commandTable[_numCommands-1].length;
       numNativeCommands += 1;
     }
     else
@@ -2469,6 +2474,7 @@ static void addNativeCommands(void)
       _historyCmd.minArgs = _commandTable[_numCommands-1].minArgs;
       _historyCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
       _historyCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      _historyCmd.length = _commandTable[_numCommands-1].length;
       numNativeCommands += 1;
 
       pshell_addCommand(batch,
@@ -2486,6 +2492,7 @@ static void addNativeCommands(void)
       _batchCmd.minArgs = _commandTable[_numCommands-1].minArgs;
       _batchCmd.maxArgs = _commandTable[_numCommands-1].maxArgs;
       _batchCmd.showUsage = _commandTable[_numCommands-1].showUsage;
+      _batchCmd.length = _commandTable[_numCommands-1].length;
       numNativeCommands += 1;
     }
 
@@ -2503,6 +2510,7 @@ static void addNativeCommands(void)
     _commandTable[i+numNativeCommands].minArgs = _commandTable[i].minArgs;
     _commandTable[i+numNativeCommands].maxArgs = _commandTable[i].maxArgs;
     _commandTable[i+numNativeCommands].showUsage = _commandTable[i].showUsage;
+    _commandTable[i+numNativeCommands].length = _commandTable[i].length;
   }
 
   /* restore the saved native command info to be first in the command list */
@@ -2515,6 +2523,7 @@ static void addNativeCommands(void)
     _commandTable[0].minArgs = _quitCmd.minArgs;
     _commandTable[0].maxArgs = _quitCmd.maxArgs;
     _commandTable[0].showUsage = _quitCmd.showUsage;
+    _commandTable[0].length = _quitCmd.length;
 
     _commandTable[1].function = _helpCmd.function;
     _commandTable[1].command = _helpCmd.command;
@@ -2523,6 +2532,7 @@ static void addNativeCommands(void)
     _commandTable[1].minArgs = _helpCmd.minArgs;
     _commandTable[1].maxArgs = _helpCmd.maxArgs;
     _commandTable[1].showUsage = _helpCmd.showUsage;
+    _commandTable[1].length = _helpCmd.length;
 
     _commandTable[2].function = _historyCmd.function;
     _commandTable[2].command = _historyCmd.command;
@@ -2531,6 +2541,7 @@ static void addNativeCommands(void)
     _commandTable[2].minArgs = _historyCmd.minArgs;
     _commandTable[2].maxArgs = _historyCmd.maxArgs;
     _commandTable[2].showUsage = _historyCmd.showUsage;
+    _commandTable[2].length = _historyCmd.length;
 
     _commandTable[3].function = _batchCmd.function;
     _commandTable[3].command = _batchCmd.command;
@@ -2539,6 +2550,7 @@ static void addNativeCommands(void)
     _commandTable[3].minArgs = _batchCmd.minArgs;
     _commandTable[3].maxArgs = _batchCmd.maxArgs;
     _commandTable[3].showUsage = _batchCmd.showUsage;
+    _commandTable[3].length = _batchCmd.length;
   }
   else if (numNativeCommands == 3)
   {
@@ -2549,6 +2561,7 @@ static void addNativeCommands(void)
     _commandTable[0].minArgs = _helpCmd.minArgs;
     _commandTable[0].maxArgs = _helpCmd.maxArgs;
     _commandTable[0].showUsage = _helpCmd.showUsage;
+    _commandTable[0].length = _helpCmd.length;
 
     _commandTable[1].function = _historyCmd.function;
     _commandTable[1].command = _historyCmd.command;
@@ -2557,6 +2570,7 @@ static void addNativeCommands(void)
     _commandTable[1].minArgs = _historyCmd.minArgs;
     _commandTable[1].maxArgs = _historyCmd.maxArgs;
     _commandTable[1].showUsage = _historyCmd.showUsage;
+    _commandTable[1].length = _historyCmd.length;
 
     _commandTable[2].function = _batchCmd.function;
     _commandTable[2].command = _batchCmd.command;
@@ -2565,6 +2579,7 @@ static void addNativeCommands(void)
     _commandTable[2].minArgs = _batchCmd.minArgs;
     _commandTable[2].maxArgs = _batchCmd.maxArgs;
     _commandTable[2].showUsage = _batchCmd.showUsage;
+    _commandTable[2].length = _batchCmd.length;
   }
   else if (numNativeCommands == 2)
   {
@@ -2575,6 +2590,7 @@ static void addNativeCommands(void)
     _commandTable[0].minArgs = _helpCmd.minArgs;
     _commandTable[0].maxArgs = _helpCmd.maxArgs;
     _commandTable[0].showUsage = _helpCmd.showUsage;
+    _commandTable[0].length = _helpCmd.length;
 
     _commandTable[1].function = _batchCmd.function;
     _commandTable[1].command = _batchCmd.command;
@@ -2583,6 +2599,7 @@ static void addNativeCommands(void)
     _commandTable[1].minArgs = _batchCmd.minArgs;
     _commandTable[1].maxArgs = _batchCmd.maxArgs;
     _commandTable[1].showUsage = _batchCmd.showUsage;
+    _commandTable[1].length = _batchCmd.length;
   }
 
   _setupCmd.function = setup;
@@ -2592,6 +2609,7 @@ static void addNativeCommands(void)
   _setupCmd.minArgs = 0;
   _setupCmd.maxArgs = 0;
   _setupCmd.showUsage = false;
+  _setupCmd.length = strlen("--setup");
 
   /* add to our TAB completion list */
   for (unsigned i = 0; i < _numCommands; i++)
@@ -3146,6 +3164,7 @@ static unsigned findCommand(char *command_)
 {
   unsigned entry;
   unsigned numMatches = 0;
+  unsigned length = strlen(command_);
   _foundCommand = NULL;
   if (pshell_isEqual(command_, "?") ||
       pshell_isEqual(command_, "-h") ||
@@ -3169,36 +3188,19 @@ static unsigned findCommand(char *command_)
   {
     for (entry = 0; entry < _numCommands; entry++)
     {
-      /* see if we have a match */
+      /* see if we have a substring match, we do this for command abbreviation */
       if (pshell_isSubString(command_, _commandTable[entry].command, strlen(command_)))
       {
         /* set our _foundCommand pointer */
         _foundCommand = &_commandTable[entry];
         numMatches++;
-      }
-    }
-    /* if we have multiple matches in the substring, look for an exact match */
-    if (numMatches > 1)
-    {
-      numMatches = 0;
-      for (entry = 0; entry < _numCommands; entry++)
-      {
-        /* see if we have an exact match */
-        if (pshell_isEqual(command_, _commandTable[entry].command))
+        /* if we have an exact match, take it and break out */
+        if (_foundCommand->length == length)
         {
-          /* set our _foundCommand pointer */
-          _foundCommand = &_commandTable[entry];
-          numMatches++;
+          numMatches = 1;
+          break;
         }
       }
-      /*
-       * if we did not find an exact match, that means the user entered an ambiguous command
-       * abbreviation, set the numMatches to something > 1 so we can get the correct error message
-       */
-       if (numMatches == 0)
-       {
-         numMatches = 2;
-       }
     }
   }
   return (numMatches);
