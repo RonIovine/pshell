@@ -1193,29 +1193,26 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
   char *batchPath;
   unsigned iteration = 0;
 
-  if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
+  strcpy(batchFile, filename_);
+  /* try to open file as-is */
+  if ((fp = fopen(batchFile, "r")) == NULL)
   {
-    sprintf(batchFile, "%s/%s", batchPath, filename_);
-    if ((fp = fopen(batchFile, "r")) == NULL)
+    /* could not open filename as-is, look for it in env variable */
+    if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
     {
-      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+      sprintf(batchFile, "%s/%s", batchPath, filename_);
       if ((fp = fopen(batchFile, "r")) == NULL)
       {
-        strcpy(batchFile, filename_);
+        /* could not find it in batch path, look in default dir */
+        sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
         fp = fopen(batchFile, "r");
       }
     }
-  }
-  else
-  {
-    sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
-    if ((fp = fopen(batchFile, "r")) == NULL)
+    else
     {
-      if ((fp = fopen(batchFile, "r")) == NULL)
-      {
-        strcpy(batchFile, filename_);
-        fp = fopen(batchFile, "r");
-      }
+      /* could not find env variable, look in default batch dir */
+      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
+      fp = fopen(batchFile, "r");
     }
   }
 

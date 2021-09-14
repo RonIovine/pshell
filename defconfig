@@ -97,7 +97,7 @@
 # settings.  Refer to the example files in the 'config' directory of this
 # package for usage of these files.
 #
-#PSHELL_CONFIG_DIR="/etc/pshell/config"
+#CONFIG_PSHELL_CONFIG_DIR="/etc/pshell/config"
 
 #
 # This directory is used as the default directory for the startup files.
@@ -113,7 +113,7 @@
 # Note that the naming convention of <serverName>.startup must be adhered to
 # where <serverName> is the name that is used in the pshell_startServer call.
 #
-#PSHELL_STARTUP_DIR="/etc/pshell/startup"
+#CONFIG_PSHELL_STARTUP_DIR="/etc/pshell/startup"
 
 #
 # This directory is used as the default directory for the batch files.
@@ -126,7 +126,7 @@
 # will look in the default PSHELL_BATCH_DIR (i.e. /etc/pshell/batch), and if
 # still not found, will take the passed in batch file name verbatim.
 #
-#PSHELL_BATCH_DIR="/etc/pshell/batch"
+#CONFIG_PSHELL_BATCH_DIR="/etc/pshell/batch"
 
 #
 # Some older versions of the standard 'C' library do not support the

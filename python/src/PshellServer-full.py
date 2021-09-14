@@ -1707,13 +1707,12 @@ def _batch(command_):
     batchFile = command_[0]
   else:
     batchFile = command_[1]
-  batchFile1 = ""
+  batchFile1 = batchFile
+  batchFile2 = ""
   batchPath = os.getenv('PSHELL_BATCH_DIR')
   if (batchPath != None):
-    batchFile1 = batchPath+"/"+batchFile
-  batchFile2 = _PSHELL_BATCH_DIR+"/"+batchFile
-  batchFile3 = os.getcwd()+"/"+batchFile
-  batchFile4 = batchFile
+    batchFile2 = batchPath+"/"+batchFile
+  batchFile3 = _PSHELL_BATCH_DIR+"/"+batchFile
   if batchFile == "?" or batchFile == "-h":
     _showUsage()
     return
@@ -1723,8 +1722,6 @@ def _batch(command_):
     file = open(batchFile2, 'r')
   elif (os.path.isfile(batchFile3)):
     file = open(batchFile3, 'r')
-  elif (os.path.isfile(batchFile4)):
-    file = open(batchFile4, 'r')
   elif ((_gFirstArgPos == 0) and (batchFile in "batch")):
     _showUsage()
     return

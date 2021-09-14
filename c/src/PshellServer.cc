@@ -98,9 +98,8 @@ static int _defaultIdleTimeout = 10;
  * for its startup config file in the event that the environment variable of
  * the same name is not found
  */
-#ifdef PSHELL_CONFIG_DIR
-#undef PSHELL_CONFIG_DIR
-#define PSHELL_CONFIG_DIR STR(PSHELL_CONFIG_DIR)
+#ifdef CONFIG_PSHELL_CONFIG_DIR
+#define PSHELL_CONFIG_DIR STR(CONFIG_PSHELL_CONFIG_DIR)
 #else
 #define PSHELL_CONFIG_DIR "/etc/pshell/config"
 #endif
@@ -112,9 +111,8 @@ static int _defaultIdleTimeout = 10;
  * desired default location, the batch file can contain any commands that can be entered
  * to the server via the interacive command line
  */
-#ifdef PSHELL_BATCH_DIR
-#undef PSHELL_BATCH_DIR
-#define PSHELL_BATCH_DIR STR(PSHELL_BATCH_DIR)
+#ifdef CONFIG_PSHELL_BATCH_DIR
+#define PSHELL_BATCH_DIR STR(CONFIG_PSHELL_BATCH_DIR)
 #else
 #define PSHELL_BATCH_DIR "/etc/pshell/batch"
 #endif
@@ -127,9 +125,8 @@ static int _defaultIdleTimeout = 10;
  * the interacive command line, the startup file is executed during the startup
  * of the server, so it can serve as a program initialization file
  */
-#ifdef PSHELL_STARTUP_DIR
-#undef PSHELL_STARTUP_DIR
-#define PSHELL_STARTUP_DIR STR(PSHELL_STARTUP_DIR)
+#ifdef CONFIG_PSHELL_STARTUP_DIR
+#define PSHELL_STARTUP_DIR STR(CONFIG_PSHELL_STARTUP_DIR)
 #else
 #define PSHELL_STARTUP_DIR "/etc/pshell/startup"
 #endif
@@ -983,6 +980,8 @@ void pshell_startServer(const char *serverName_,
                         unsigned port_)
 {
   pthread_t pshellServerThreadTID;
+
+  printf("PSHELL_BATCH_DIR: '%s'\n", PSHELL_BATCH_DIR);
 
   cleanupFileSystemResources();
 
@@ -2301,10 +2300,6 @@ static bool loadCommandFile(const char *filename_, bool inteactive_)
     fclose(fp);
     retCode = true;
   }
-  else if (inteactive_)
-  {
-    pshell_printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
-  }
   return (retCode);
 }
 
@@ -2322,26 +2317,16 @@ static void loadStartupFile(void)
     /* look for file in path pointed to by env variable */
     if (loadCommandFile(startupFile, false) == false)
     {
-      /* look for file in current working directory */
-      sprintf(startupFile, "%s.startup", _serverName);
-      if (loadCommandFile(startupFile, false) == false)
-      {
-        /* look for file in default directory */
-        sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
-        loadCommandFile(startupFile, false);
-      }
+      /* not found in env variable, look for file in default directory */
+      sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
+      loadCommandFile(startupFile, false);
     }
   }
   else
   {
-    /* look for file in current working directory */
-    sprintf(startupFile, "%s.startup", _serverName);
-    if (loadCommandFile(startupFile, false) == false)
-    {
-      /* look for file in default directory */
-      sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
-      loadCommandFile(startupFile, false);
-    }
+    /* env variable not found, look for file in default directory */
+    sprintf(startupFile, "%s/%s.startup", PSHELL_STARTUP_DIR, _serverName);
+    loadCommandFile(startupFile, false);
   }
 
 }
@@ -2352,32 +2337,35 @@ static void loadBatchFile(const char *batchFile_)
 {
   char batchFile[180];
   char *batchPath;
+  bool fileLoaded;
 
   batchFile[0] = '\0';
-  if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
+  /* use the specified file as-is, it will either find it in the CWD
+   * or will use is as a fully qualified path */
+  if ((fileLoaded = loadCommandFile(batchFile_, true)) == false)
   {
-    /* look for file in path pointed to by env variable */
-    sprintf(batchFile, "%s/%s", batchPath, batchFile_);
-    if (loadCommandFile(batchFile, true) == false)
+    /* file not found, look in the en variable path */
+    if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
     {
-      /* look for file in current working directory */
-      if (loadCommandFile(batchFile_, true) == false)
+      /* batch dir env variable found, look for file in path pointed to by the env variable */
+      sprintf(batchFile, "%s/%s", batchPath, batchFile_);
+      if ((fileLoaded = loadCommandFile(batchFile, true)) == false)
       {
-        /* look for file in default directory */
+        /* file not found in dir specified in env variable, look for file in default directory */
         sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
-        loadCommandFile(batchFile, true);
+        fileLoaded = loadCommandFile(batchFile, true);
       }
     }
-  }
-  else
-  {
-    /* look for file in current working directory */
-    if (loadCommandFile(batchFile_, true) == false)
+    else
     {
-      /* look for file in default directory */
+      /* env variable not defined, look for file in default directory */
       sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, batchFile_);
-      loadCommandFile(batchFile, true);
+      fileLoaded = loadCommandFile(batchFile, true);
     }
+  }
+  if (!fileLoaded)
+  {
+    pshell_printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile_);
   }
 
 }

@@ -1679,24 +1679,20 @@ func loadStartupFile() {
 ////////////////////////////////////////////////////////////////////////////////
 func batch(argv_ []string) {
   var batchFile = argv_[0]
-  var batchFile1 = ""
+  var batchFile2 = ""
   var file []byte
+  batchFile1 := batchFile
   batchPath := os.Getenv("PSHELL_BATCH_DIR")
   if (batchPath != "") {
-    batchFile1 = batchPath+"/"+batchFile
+    batchFile2 = batchPath+"/"+batchFile
   }
-  batchFile2 := _PSHELL_BATCH_DIR+"/"+batchFile
-  cwd, _ := os.Getwd()
-  batchFile3 := cwd+"/"+batchFile
-  batchFile4 := batchFile
+  batchFile3 := _PSHELL_BATCH_DIR+"/"+batchFile
   if _, err := os.Stat(batchFile1); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(batchFile1)
   } else if _, err := os.Stat(batchFile2); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(batchFile2)
   } else if _, err := os.Stat(batchFile3); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(batchFile3)
-  } else if _, err := os.Stat(batchFile4); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(batchFile4)
   } else {
     // file not found, return
     printf("ERROR: Could not find batch file: '%s'\n", batchFile)
