@@ -1944,13 +1944,10 @@ def _loadConfigFile():
   if (configPath != None):
     configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
   configFile2 = _PSHELL_CONFIG_DIR+"/"+_PSHELL_CONFIG_FILE
-  configFile3 = os.getcwd()+"/"+_PSHELL_CONFIG_FILE
   if (os.path.isfile(configFile1)):
     file = open(configFile1, 'r')
   elif (os.path.isfile(configFile2)):
     file = open(configFile2, 'r')
-  elif (os.path.isfile(configFile3)):
-    file = open(configFile3, 'r')
   else:
     return
   # found a config file, process it

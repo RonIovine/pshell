@@ -981,8 +981,6 @@ void pshell_startServer(const char *serverName_,
 {
   pthread_t pshellServerThreadTID;
 
-  printf("PSHELL_BATCH_DIR: '%s'\n", PSHELL_BATCH_DIR);
-
   cleanupFileSystemResources();
 
   if ((serverType_ != PSHELL_UDP_SERVER) &&

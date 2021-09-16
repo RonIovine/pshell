@@ -1546,14 +1546,10 @@ func loadConfigFile() {
     configFile1 = configPath+"/"+_PSHELL_CONFIG_FILE
   }
   configFile2 := _PSHELL_CONFIG_DIR+"/"+_PSHELL_CONFIG_FILE
-  cwd, _ := os.Getwd()
-  configFile3 := cwd+"/"+_PSHELL_CONFIG_FILE
   if _, err := os.Stat(configFile1); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(configFile1)
   } else if _, err := os.Stat(configFile2); !os.IsNotExist(err) {
     file, _ = ioutil.ReadFile(configFile2)
-  } else if _, err := os.Stat(configFile3); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(configFile3)
   } else {
     return
   }
