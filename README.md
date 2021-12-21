@@ -14,8 +14,8 @@
 [Security](#security)<br>
 [Demo programs](#demo-programs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellServerDemo](#pshellServerDemo)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;[pshellControlDemo](#pshellControlDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[traceFilterDemo](#traceFilterDemo)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[pshellControlDemo](#pshellControlDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellNoServerDemo](#pshellNoServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregatorDemo](#pshellAggregatorDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellReadlineDemo](#pshellReadlineDemo)<br>
@@ -558,8 +558,26 @@ $ pshellServerDemo -local
 pshellServerDemo[local]:PSHELL>
 ```
 
+<a name="traceFilterDemo"></a>
+#### 2. traceFilterDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) only)
+This is an application that shows a possible real world use case for the PSHELL framework.  It shows the integration
+of a programmable trace filter mechanism with remote pshell server control.  It can be controlled by any of the [interactive clients](#interactive-clients)
+depending on how it is started.  It uses the following example [trace log](#traceLogDemo) implementation for the log
+formatting and output.  The following is the usage of this program:
+```
+$ traceFilterDemo -h
+
+Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
+
+  where:
+    -udp   - Multi-session UDP server
+    -tcp   - Single session TCP server
+    -unix  - Multi-session UNIX domain server
+    <port> - Desired UDP or TCP port, default: 6002
+```
+
 <a name="pshellControlDemo"></a>
-#### 2. pshellControlDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
+#### 3. pshellControlDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
 These demo programs show one process invoking pshell functions in another process using the control API.
 This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
 be used to connect to any of the previous [pshellServerDemo](#pshellServerDemo) or [traceFilterDemo](#traceFilterDemo) programs and invoke their functions.  The control demo programs will prompt the user
@@ -581,24 +599,6 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
     <timeout>        - wait timeout for response in mSec (default=100)
     <logLevel>       - log level of control library (0-3, default=3, i.e. all)
     extract          - extract data contents of response (must have non-0 wait timeout)
-```
-
-<a name="traceFilterDemo"></a>
-#### 3. traceFilterDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) only)
-This is an application that shows the integration of a programmable trace filter mechanism with remote
-pshell server control.  It can be controlled by any of the [interactive clients](#interactive-clients) depending
-on how it is started.  It uses the following example [trace log](#traceLogDemo) implementation for the log
-formatting and output.  The following is the usage of this program:
-```
-$ traceFilterDemo -h
-
-Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
-
-  where:
-    -udp   - Multi-session UDP server
-    -tcp   - Single session TCP server
-    -unix  - Multi-session UNIX domain server
-    <port> - Desired UDP or TCP port, default: 6002
 ```
 
 <a name="pshellNoServerDemo"></a>

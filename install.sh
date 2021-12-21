@@ -170,13 +170,7 @@ else
   localLibDir="c/lib"
   localMan1Dir="c/man/man1"
   localMan3Dir="c/man/man3"
-
-  if [ -d "/usr/lib64" ]
-  then
-    libDir="/usr/lib64"
-  else
-    libDir="/usr/lib"
-  fi
+  libDir="/usr/lib"
 
   echo "Installing pshell files..."
   echo "Installing libs..."
