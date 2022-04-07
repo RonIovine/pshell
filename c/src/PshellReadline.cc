@@ -106,6 +106,7 @@ static void leftArrow(unsigned &cursorPos_);
 static void rightArrow(unsigned &cursorPos_, char *command_);
 static unsigned showCommand(char *outCommand_, const char* format_, ...);
 static void addHistory(char *command_);
+static void clearHistory(void);
 static bool getChar(char &char_);
 static bool isNumeric(const char *string_);
 
@@ -129,6 +130,7 @@ void pshell_rl_setFileDescriptors(int inFd_, int outFd_, PshellSerialType serial
   _outFd = outFd_;
   _serialType = serialType_;
   pshell_rl_setIdleTimeout(idleTimeout_);
+  clearHistory();
   // if a socket serial device, setup for telnet client control
   if (_serialType == PSHELL_RL_SOCKET)
   {
@@ -310,9 +312,9 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
       // printable single character, add it to our input_
       addChar(cursorPos, input_, ch);
     }
-    else if ((ch == 13) || (ch == 10))
+    else if ((ch == 13) || ((_serialType == PSHELL_RL_TTY) && (ch == 10)))
     {
-      // carriage return or line feed
+      // carriage return or line feed (for type TTY only)
       newline();
       if (strlen(input_) > 0)
       {
@@ -952,6 +954,24 @@ static void addHistory(char *command_)
   _historyPos = _numHistory;
   _history[MAX_HISTORY-1] = strdup(command_);
 
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static void clearHistory(void)
+{
+  unsigned i;
+
+  for (i = 0; i < MAX_HISTORY; i++)
+  {
+    /* look for the first empty slot */
+    if (_history[i] != NULL)
+    {
+      free_z(_history[i]);
+    }
+  }
+  _historyPos = 0;
+  _numHistory = 0;
 }
 
 /******************************************************************************/
