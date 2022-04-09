@@ -316,6 +316,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
     {
       // carriage return or line feed (for type TTY only)
       newline();
+      stripWhitespace(input_);
       if (strlen(input_) > 0)
       {
         if (strcmp(input_, "history") == 0)
@@ -412,6 +413,9 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
       else
       {
         // just pressed CR with no input, just give prompt again
+        input_[0] = 0;
+        cursorPos = 0;
+        tabCount = 0;
         pshell_rl_writeOutput(prompt_);
       }
     }

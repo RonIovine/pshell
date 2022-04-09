@@ -2205,9 +2205,14 @@ func getInput(command_ string,
     // user typed CR, indicate the command is entered and return
     printf("\n")
     tabCount_ = 0
+    command_ = strings.TrimSpace(command_)
     if (len(command_) > 0) {
       fullCommand = true
       addHistory(command_)
+    } else {
+      length_ = 0
+      cursorPos_ = 0
+      tabCount_ = 0
     }
   } else if ((length_ == 1) &&
              (keystroke_[0] >= _SPACE) &&

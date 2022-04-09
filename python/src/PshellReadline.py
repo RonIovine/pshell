@@ -557,8 +557,9 @@ def _getInput(prompt_):
     elif (ord(char) == 13):
       # carriage return
       _writeOutput("\n")
-      if (len(command) > 0):
-        if (command.strip() == "history"):
+      if (len(command.strip()) > 0):
+        command = command.strip()
+        if (command == "history"):
           # add command to our command history
           _addHistory(command)
           # we process the history internally
@@ -582,7 +583,7 @@ def _getInput(prompt_):
                 tabCount = 0
                 _writeOutput(prompt_)
               else:
-                return (command.strip(), False)
+                return (command, False)
             else:
               command = ""
               cursorPos = 0
@@ -605,7 +606,7 @@ def _getInput(prompt_):
                   tabCount = 0
                   _writeOutput(prompt_)
                 else:
-                  return (command.strip(), False)
+                  return (command, False)
             if not found:
               _writeOutput("PSHELL_ERROR: Command (sub)string: '%s' not found in history\n" % command[1:])
               command = ""
@@ -616,7 +617,7 @@ def _getInput(prompt_):
           # add input_ to our command history
           _addHistory(command)
           # normal input, return no timeout
-          return (command.strip(), False)
+          return (command, False)
       else:
         _writeOutput(prompt_)
     elif (ord(char) == 11):
