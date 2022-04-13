@@ -252,7 +252,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
         }
         else if (ch == 'F')
         {
-          // home key, go to beginning of line
+          // end key, go to end of line
           endOfLine(cursorPos, input_);
           inEsc = false;
           esc = '\0';
@@ -492,7 +492,7 @@ bool pshell_rl_getInput(const char *prompt_, char *input_)
         else if ((tabCount == 1) && (strlen(input_) > 0))
         {
           // partial word typed, single TAB, fill out as much
-          //  as we can and show any possible other matches
+          // as we can and show any possible other matches
           findTabCompletions(input_);
           if (_numTabMatches == 1)
           {
@@ -968,7 +968,7 @@ static void clearHistory(void)
 
   for (i = 0; i < MAX_HISTORY; i++)
   {
-    /* look for the first empty slot */
+    /* release memory for all non-empty slots */
     if (_history[i] != NULL)
     {
       free_z(_history[i]);
