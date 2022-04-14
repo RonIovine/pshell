@@ -101,8 +101,8 @@ extern "C" {
  *   pshell_getDouble()             -- return the double precision float value from the string
  *   pshell_getFloat()              -- return the float value from the string
  *
- * The following commands should only be called from within the context of
- * a PSHELL callback function
+ * The following commands should only be called from within the context of a
+ * PSHELL callback function
  *
  *   pshell_printf()    -- display a message from a pshell callback function to the client
  *   pshell_flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
@@ -126,7 +126,7 @@ extern "C" {
  *
  * These are the identifiers for the serverMode.  BLOCKING will never return
  * control to the caller of pshell_startServer, NON_BLOCKING will spawn a thread
- * to run the server and will return control to the caller of StartServer
+ * to run the server and will return control to the caller of pshell_startServer
  *
  *   PSHELL_BLOCKING
  *   PSHELL_NON_BLOCKING
@@ -152,11 +152,11 @@ extern "C" {
  * String constants:
  *
  * These three identifiers that can be used for the hostnameOrIpAddr argument
- * of the StartServer call.  PshellServer.ANYHOST will bind the server socket
- * to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
- * 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
- * the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
- * it also supported, e.g. x.y.z.255
+ * of the pshell_startServer call.  PSHELL_ANYHOST will bind the server socket
+ * to all interfaces of a multi-homed host, PSHELL_ANYBCAST will bind to
+ * 255.255.255.255, PSHELL_LOCALHOST will bind the server socket to the local
+ * loopback address (i.e. 127.0.0.1), note that subnet broadcast it also supported,
+ * e.g. x.y.z.255
  *
  *   PSHELL_ANYHOST
  *   PSHELL_ANYBCAST

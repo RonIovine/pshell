@@ -92,8 +92,8 @@
 //   GetFloat()              -- return the 32 bit float value from the string
 //   GetFloat32()            -- return the 32 bit float value from the string
 //
-// The following commands should only be called from within the context of
-// a PSHELL callback function
+// The following commands should only be called from within the context of a
+// PSHELL callback function
 //
 //   Printf()    -- display a message from a pshell callback function to the client
 //   Flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
@@ -143,11 +143,10 @@
 //   LOCAL
 //
 // These three identifiers that can be used for the hostnameOrIpAddr argument
-// of the StartServer call.  PshellServer.ANYHOST will bind the server socket
-// to all interfaces of a multi-homed host, PshellServer.ANYBCAST will bind to
-// 255.255.255.255, PshellServer.LOCALHOST will bind the server socket to
-// the local loopback address (i.e. 127.0.0.1), note that subnet broadcast
-// it also supported, e.g. x.y.z.255
+// of the StartServer call.  ANYHOST will bind the server socket to all interfaces
+// of a multi-homed host, ANYBCAST will bind to 255.255.255.255, LOCALHOST will
+// bind the server socket to the local loopback address (i.e. 127.0.0.1), note
+// that subnet broadcast it also supported, e.g. x.y.z.255
 //
 //   ANYHOST
 //   ANYBCAST
