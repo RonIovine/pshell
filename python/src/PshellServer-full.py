@@ -849,7 +849,7 @@ _gWheel = "|/-\\"
 
 _gQuitLocal = False
 _gQuitTcp = False
-_gTcpTimeout = 10  # minutes
+_gIdleSessionTimeout = PshellReadline.IDLE_TIMEOUT_NONE
 _gPshellClientTimeout = 5  # seconds
 _gTcpConnectSockName = None
 _gTcpPrompt = None
@@ -1145,6 +1145,8 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
     _gServerMode = serverMode_
     _gHostnameOrIpAddr = hostnameOrIpAddr_
     _gPort = port_
+    if _gServerType == TCP:
+      _gIdleSessionTimeout = 10
     _loadConfigFile()
     _loadStartupFile()
     if _gPrompt[-1] != " ":
@@ -1369,7 +1371,7 @@ def _runTCPServer():
   global _gTcpPrompt
   global _gTcpTitle
   global _gTcpConnectSockName
-  global _gTcpTimeout
+  global _gIdleSessionTimeout
   socketCreated = True
   connectionAccepted = True
   initialStartup = True
@@ -1392,7 +1394,7 @@ def _runTCPServer():
         PshellReadline.setFileDescriptors(_gConnectFd,
                                           _gConnectFd,
                                           PshellReadline.SOCKET,
-                                          PshellReadline.ONE_MINUTE*_gTcpTimeout)
+                                          PshellReadline.ONE_MINUTE*_gIdleSessionTimeout)
         try:
           _gSocketFd.shutdown(socket.SHUT_RDWR)
         except:
@@ -1420,7 +1422,7 @@ def _runLocalServer():
   _gQuitLocal = False
   command = ""
   while (not _gQuitLocal):
-    (command, idleSession) = PshellReadline.getInput(_gPrompt)
+    (command, _gQuitLocal) = PshellReadline.getInput(_gPrompt)
     if (not _gQuitLocal):
       _processCommand(command)
 
@@ -1769,7 +1771,7 @@ def _showWelcome():
   global _gTitle
   global _gServerType
   global _gHostnameOrIpAddr
-  global _gTcpTimeout
+  global _gIdleSessionTimeout
   global _gServerName
   global _gTcpConnectSockName
   global _gTcpTitle
@@ -1806,10 +1808,10 @@ def _showWelcome():
   printf("#")
   printf(server)
   printf("#")
-  if (_gServerType == LOCAL):
+  if (_gIdleSessionTimeout == PshellReadline.IDLE_TIMEOUT_NONE):
     printf("#  Idle session timeout: NONE")
   else:
-    printf("#  Idle session timeout: %d minutes" % _gTcpTimeout)
+    printf("#  Idle session timeout: %d minutes" % _gIdleSessionTimeout)
   printf("#")
   if (_gPshellClient == True):
     if _gPshellClientTimeout > 0:
@@ -1937,7 +1939,7 @@ def _loadConfigFile():
   global _gPrompt
   global _gTitle
   global _gBanner
-  global _gTcpTimeout
+  global _gIdleSessionTimeout
   configFile1 = ""
   configPath = os.getenv('PSHELL_CONFIG_DIR')
   if (configPath != None):
@@ -1975,7 +1977,8 @@ def _loadConfigFile():
                 (value[1].lower() == LOCAL)):
               _gServerType = value[1].lower()
           elif ((option[1].lower() == "timeout") and (value[1].isdigit())):
-            _gTcpTimeout = int(value[1])
+            _gIdleSessionTimeout = int(value[1])
+            PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*_gIdleSessionTimeout)
   file.close()
   return
 

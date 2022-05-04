@@ -81,7 +81,6 @@ Fast tabbing, i.e. initiated via single tabbing, this is the default
 # import all our necessary modules
 import sys
 import os
-import tty
 import termios
 import select
 import signal
@@ -290,6 +289,10 @@ _gCommandHistoryPos = 0
 _gTabStyle = FAST_TAB
 _gTabSpacing = 5
 _gTabColumns = 80
+_VTIME = 5
+_VMIN = 6
+_LFLAG = 3
+_CC = 6
 
 #################################################################################
 #
@@ -319,6 +322,12 @@ def _setFileDescriptors(inFd_, outFd_, serialType_, idleTimeout_):
 #################################################################################
 def _setIdleTimeout(idleTimeout_):
   global _gIdleTimeout
+  global _gInFd
+  if (_gSerialType == TTY):
+    # if setting a timeout for TTY (stdin), reopen and set the buffering to 0,
+    # unbuffered, so the select.select call will work for the multi character
+    # arrow key sequences
+    _gInFd = os.fdopen(_gInFd.fileno(), 'rb', 0)
   _gIdleTimeout = idleTimeout_
 
 #################################################################################
@@ -554,7 +563,7 @@ def _getInput(prompt_):
       command = command[:cursorPos] + char + command[cursorPos:]
       _writeOutput(command[cursorPos:] + "\b"*(len(command[cursorPos:])-1))
       cursorPos += 1
-    elif (ord(char) == 13):
+    elif ((ord(char) == 13) or ((_gSerialType == TTY) and (ord(char) == 10))):
       # carriage return
       _writeOutput("\n")
       if (len(command.strip()) > 0):
@@ -737,9 +746,13 @@ def _getChar():
   char = ""
   if (_gSerialType == TTY):
     # serial terminal control
-    oldSettings = termios.tcgetattr(_gInFd)
     try:
-      tty.setraw(_gInFd, termios.TCSADRAIN)
+      attr = termios.tcgetattr(_gInFd)
+      attr[_LFLAG] &= ~termios.ICANON
+      attr[_LFLAG] &= ~termios.ECHO
+      attr[_CC][_VMIN] = 1
+      attr[_CC][_VTIME] = 0
+      termios.tcsetattr(_gInFd, termios.TCSANOW, attr)
       if (_gIdleTimeout > 0):
         inputready, outputready, exceptready = select.select([_gInFd], [], [], _gIdleTimeout)
         if (len(inputready) > 0):
@@ -750,7 +763,9 @@ def _getChar():
       else:
         char = _gInFd.read(1)
     finally:
-      termios.tcsetattr(_gInFd, termios.TCSADRAIN, oldSettings)
+      attr[_LFLAG] |= termios.ICANON
+      attr[_LFLAG] |= termios.ECHO
+      termios.tcsetattr(_gInFd, termios.TCSADRAIN, attr)
   else:
     # TCP socket with telnet client
     if (_gIdleTimeout > 0):

@@ -1006,6 +1006,11 @@ void pshell_startServer(const char *serverName_,
     if ((_pshellMsg = (PshellMsg*)malloc(_pshellPayloadSize+PSHELL_HEADER_SIZE)) != NULL)
     {
 
+      if (serverType_ == PSHELL_LOCAL_SERVER)
+      {
+        _defaultIdleTimeout = 0;
+      }
+
       /* initialize payload of transfer buffer */
       _pshellMsg->payload[0] = '\0';
 
@@ -2022,13 +2027,13 @@ static void showWelcome(void)
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s  %s\n", PSHELL_WELCOME_BORDER, sessionInfo);
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
-  if (_serverType == PSHELL_TCP_SERVER)
+  if (_defaultIdleTimeout == PSHELL_RL_IDLE_TIMEOUT_NONE)
   {
-    pshell_printf("%s  Idle session timeout: %d minutes\n", PSHELL_WELCOME_BORDER, _defaultIdleTimeout);
+    pshell_printf("%s  Idle session timeout: NONE\n", PSHELL_WELCOME_BORDER);
   }
   else
   {
-    pshell_printf("%s  Idle session timeout: NONE\n", PSHELL_WELCOME_BORDER);
+    pshell_printf("%s  Idle session timeout: %d minutes\n", PSHELL_WELCOME_BORDER, _defaultIdleTimeout);
   }
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
@@ -2679,6 +2684,7 @@ static void loadConfigFile(void)
                      pshell_isNumeric(config->tokens[1]))
             {
               _defaultIdleTimeout = pshell_getInt(config->tokens[1]);
+              pshell_rl_setIdleTimeout(_defaultIdleTimeout*PSHELL_RL_ONE_MINUTE);
             }
             else if (pshell_isEqual(item->tokens[1], "type"))
             {
