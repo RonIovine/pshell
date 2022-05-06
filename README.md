@@ -224,6 +224,7 @@ see the embedded documentation on all the corresponding python modules.
 [PshellServer.html](https://github.com/RonIovine/pshell/tree/master/python/doc/pshellAggregator.html)<br>
 [PshellControl.html](https://github.com/RonIovine/pshell/tree/master/python/doc/PshellControl.html)<br>
 [PshellReadline.html](https://github.com/RonIovine/pshell/tree/master/python/doc/PshellReadline.html)<br>
+[TraceLog.html](https://github.com/RonIovine/pshell/tree/master/python/doc/TraceLog.html)<br>
 
 The following HTML 'godoc' generated documentation is available in the
 [go/doc](https://github.com/RonIovine/pshell/tree/master/go/doc) directory, the user can also use the command line 'godoc' to see
@@ -673,7 +674,7 @@ Usage: pshellReadlineDemo {-tty | -socket} [-bash | -fast] [<idleTimeout>]
 ```
 
 <a name="traceLogDemo"></a>
-#### 7. traceLogDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) only)
+#### 7. traceLogDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/traceLogDemo.py))
 This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
 the trace logging front end that is used in the above [traceFilterDemo](#traceFilterDemo) program.  The following is the
 usage of this program:

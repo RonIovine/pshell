@@ -1,0 +1,235 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module TraceLog</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>TraceLog</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/riovine/tools/pshell/python/src/TraceLog.py">/home/riovine/tools/pshell/python/src/TraceLog.py</a></font></td></tr></table>
+    <p><tt>TraceLog&nbsp;Module<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;provides&nbsp;a&nbsp;simple&nbsp;API&nbsp;to&nbsp;output&nbsp;trace&nbsp;logs.&nbsp;&nbsp;The&nbsp;output&nbsp;can&nbsp;either<br>
+be&nbsp;directed&nbsp;to&nbsp;stdout&nbsp;ot&nbsp;a&nbsp;logfile&nbsp;or&nbsp;both.&nbsp;&nbsp;There&nbsp;are&nbsp;several&nbsp;levels&nbsp;setup&nbsp;in<br>
+a&nbsp;hierarchical&nbsp;manner.&nbsp;&nbsp;The&nbsp;various&nbsp;trace&nbsp;settings&nbsp;can&nbsp;be&nbsp;controlled&nbsp;interactively<br>
+via&nbsp;pshell.&nbsp;&nbsp;The&nbsp;process&nbsp;that&nbsp;uses&nbsp;the&nbsp;module&nbsp;but&nbsp;run&nbsp;a&nbsp;pshell&nbsp;server,&nbsp;the&nbsp;pshell<br>
+command&nbsp;to&nbsp;configure&nbsp;the&nbsp;trace&nbsp;settings&nbsp;is&nbsp;registered&nbsp;into&nbsp;the&nbsp;pshell&nbsp;server<br>
+framework&nbsp;automatically&nbsp;during&nbsp;the&nbsp;<a href="#-init">init</a>()&nbsp;call.&nbsp;&nbsp;That&nbsp;call&nbsp;must&nbsp;be&nbsp;before&nbsp;the&nbsp;call<br>
+to&nbsp;the&nbsp;pshell&nbsp;server&nbsp;startServer()&nbsp;call.<br>
+&nbsp;<br>
+Functions:<br>
+&nbsp;<br>
+&nbsp;&nbsp;<a href="#-init">init</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Initialize&nbsp;the&nbsp;trace&nbsp;logging&nbsp;subsystem<br>
+&nbsp;&nbsp;<a href="#-setLogFile">setLogFile</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;output&nbsp;logfile<br>
+&nbsp;&nbsp;<a href="#-setLogName">setLogName</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;current&nbsp;trace&nbsp;logger&nbsp;name<br>
+&nbsp;&nbsp;<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;current&nbsp;log&nbsp;level<br>
+&nbsp;&nbsp;<a href="#-setDefaultLogLevel">setDefaultLogLevel</a>()&nbsp;--&nbsp;Set&nbsp;the&nbsp;default&nbsp;log&nbsp;level<br>
+&nbsp;&nbsp;<a href="#-enableFormat">enableFormat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;log&nbsp;formatting&nbsp;or&nbsp;user-message&nbsp;only<br>
+&nbsp;&nbsp;<a href="#-enableLog">enableLog</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;overall&nbsp;output&nbsp;of&nbsp;the&nbsp;logs&nbsp;(except&nbsp;FORCE)<br>
+&nbsp;&nbsp;<a href="#-enableTimestamp">enableTimestamp</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enabledisable&nbsp;the&nbsp;timestamp&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
+&nbsp;&nbsp;<a href="#-enableLogName">enableLogName</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;displaying&nbsp;of&nbsp;the&nbsp;logger&nbsp;name&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
+&nbsp;&nbsp;<a href="#-enableFullDatetime">enableFullDatetime</a>()&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;full&nbsp;date/time&nbsp;timestamp&nbsp;format&nbsp;or&nbsp;disable&nbsp;(time&nbsp;only)<br>
+&nbsp;<br>
+Trace&nbsp;log&nbsp;commands:<br>
+&nbsp;<br>
+&nbsp;&nbsp;<a href="#-FORCE">FORCE</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Issue&nbsp;a&nbsp;FORCE&nbsp;trace&nbsp;log,&nbsp;cannot&nbsp;be&nbsp;masked&nbsp;or&nbsp;disabled<br>
+&nbsp;&nbsp;<a href="#-ERROR">ERROR</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Issue&nbsp;an&nbsp;ERROR&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;disabled,&nbsp;but&nbsp;not&nbsp;masked<br>
+&nbsp;&nbsp;<a href="#-FAILURE">FAILURE</a>()&nbsp;&nbsp;--&nbsp;Issue&nbsp;a&nbsp;FAILURE&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;both&nbsp;disabled&nbsp;and&nbsp;masked<br>
+&nbsp;&nbsp;<a href="#-WARNING">WARNING</a>()&nbsp;&nbsp;--&nbsp;Issue&nbsp;a&nbsp;WARNING&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;both&nbsp;disabled&nbsp;and&nbsp;masked<br>
+&nbsp;&nbsp;<a href="#-INFO">INFO</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Issue&nbsp;an&nbsp;INFO&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;both&nbsp;disabled&nbsp;and&nbsp;masked<br>
+&nbsp;&nbsp;<a href="#-DEBUG">DEBUG</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Issue&nbsp;a&nbsp;DEBUG&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;both&nbsp;disabled&nbsp;and&nbsp;masked<br>
+&nbsp;&nbsp;<a href="#-ENTER">ENTER</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Issue&nbsp;an&nbsp;ENTER&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;both&nbsp;disabled&nbsp;and&nbsp;masked<br>
+&nbsp;&nbsp;<a href="#-EXIT">EXIT</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Issue&nbsp;an&nbsp;EXIT&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;both&nbsp;disabled&nbsp;and&nbsp;masked<br>
+&nbsp;&nbsp;<a href="#-DUMP">DUMP</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Issue&nbsp;a&nbsp;hex&nbsp;DUMP&nbsp;trace&nbsp;log,&nbsp;can&nbsp;be&nbsp;both&nbsp;disabled&nbsp;and&nbsp;masked<br>
+&nbsp;<br>
+Trace&nbsp;log&nbsp;levels:<br>
+&nbsp;<br>
+&nbsp;&nbsp;Use&nbsp;these&nbsp;identifiers&nbsp;for&nbsp;the&nbsp;setting&nbsp;the&nbsp;log&nbsp;level&nbsp;in&nbsp;the&nbsp;<a href="#-setLogLevel">setLogLevel</a>()&nbsp;and<br>
+&nbsp;&nbsp;<a href="#-setDefaultLogLevel">setDefaultLogLevel</a>()&nbsp;function&nbsp;calls.<br>
+&nbsp;<br>
+&nbsp;&nbsp;TL_ERROR<br>
+&nbsp;&nbsp;TL_FAILURE<br>
+&nbsp;&nbsp;TL_WARNING<br>
+&nbsp;&nbsp;TL_INFO<br>
+&nbsp;&nbsp;TL_DEBUG<br>
+&nbsp;&nbsp;TL_ENTER<br>
+&nbsp;&nbsp;TL_EXIT<br>
+&nbsp;&nbsp;TL_DUMP<br>
+&nbsp;&nbsp;TL_ALL<br>
+&nbsp;&nbsp;TL_DEFAULT</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="PshellServer.html">PshellServer</a><br>
+<a href="datetime.html">datetime</a><br>
+</td><td width="25%" valign=top><a href="signal.html">signal</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="threading.html">threading</a><br>
+<a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-DEBUG"><strong>DEBUG</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;DEBUG&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-DUMP"><strong>DUMP</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;hex&nbsp;DUMP&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-ENTER"><strong>ENTER</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;ENTER&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-ERROR"><strong>ERROR</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;ERROR&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-EXIT"><strong>EXIT</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;EXIT&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-FAILURE"><strong>FAILURE</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;FAILURE&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-FORCE"><strong>FORCE</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;FORCE&nbsp;message,&nbsp;this&nbsp;is&nbsp;unconditional&nbsp;and&nbsp;cannot&nbsp;be&nbsp;disabled<br>
+or&nbsp;masked<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-INFO"><strong>INFO</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;INFO&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-WARNING"><strong>WARNING</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;WARNING&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-enableFormat"><strong>enableFormat</strong></a>(enable)</dt><dd><tt>Enable/disable&nbsp;log&nbsp;formatting&nbsp;or&nbsp;user-message&nbsp;only<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enable&nbsp;(bool)&nbsp;&nbsp;:&nbsp;Enable/disable&nbsp;the&nbsp;display&nbsp;of&nbsp;the&nbsp;log&nbsp;formatting<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-enableFullDatetime"><strong>enableFullDatetime</strong></a>(enable)</dt><dd><tt>Enable/disable&nbsp;the&nbsp;full&nbsp;date/time&nbsp;timestamp&nbsp;format&nbsp;or&nbsp;disable&nbsp;(time&nbsp;only)<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enable&nbsp;(bool)&nbsp;&nbsp;:&nbsp;Enable/disable&nbsp;full&nbsp;datetime&nbsp;format<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-enableLog"><strong>enableLog</strong></a>(enable)</dt><dd><tt>Enable/disable&nbsp;the&nbsp;overall&nbsp;output&nbsp;of&nbsp;the&nbsp;logs&nbsp;(except&nbsp;FORCE)<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enable&nbsp;(bool)&nbsp;&nbsp;:&nbsp;Enable/disable&nbsp;the&nbsp;output&nbsp;of&nbsp;all&nbsp;logs&nbsp;(except&nbsp;FORCE)<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-enableLogName"><strong>enableLogName</strong></a>(enable)</dt><dd><tt>Enable/disable&nbsp;the&nbsp;displaying&nbsp;of&nbsp;the&nbsp;logger&nbsp;name&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enable&nbsp;(bool)&nbsp;&nbsp;:&nbsp;Enable/disable&nbsp;logger&nbsp;namd&nbsp;in&nbsp;trace&nbsp;log&nbsp;messages<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-enableTimestamp"><strong>enableTimestamp</strong></a>(enable)</dt><dd><tt>Enabledisable&nbsp;the&nbsp;timestamp&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enable&nbsp;(bool)&nbsp;&nbsp;:&nbsp;Enable/disable&nbsp;display&nbsp;of&nbsp;timestamp&nbsp;in&nbsp;log&nbsp;messages<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-init"><strong>init</strong></a>(logname<font color="#909090">='Trace'</font>, logfile<font color="#909090">=None</font>, loglevel<font color="#909090">=2</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;trace&nbsp;logger&nbsp;subsystem<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logname&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;Name&nbsp;of&nbsp;the&nbsp;logger,&nbsp;deafault='Trace',&nbsp;usually&nbsp;set&nbsp;to&nbsp;process&nbsp;name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logfile&nbsp;(str)&nbsp;&nbsp;&nbsp;:&nbsp;Logfile&nbsp;for&nbsp;trace&nbsp;output,&nbsp;default=stdout<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loglevel&nbsp;(int)&nbsp;&nbsp;:&nbsp;Initial&nbsp;and&nbsp;default&nbsp;log&nbsp;level,&nbsp;default=TL_WARNING<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-setDefaultLogLevel"><strong>setDefaultLogLevel</strong></a>(defaultLevel)</dt><dd><tt>Set&nbsp;the&nbsp;default&nbsp;log&nbsp;level<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;defaultLevel&nbsp;(int)&nbsp;&nbsp;:&nbsp;Default&nbsp;log&nbsp;level<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-setLogFile"><strong>setLogFile</strong></a>(logfile)</dt><dd><tt>Set&nbsp;the&nbsp;output&nbsp;logfile<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logfile&nbsp;(str)&nbsp;&nbsp;&nbsp;:&nbsp;Logfile&nbsp;for&nbsp;trace&nbsp;output,&nbsp;default=stdout<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-setLogLevel"><strong>setLogLevel</strong></a>(loglevel)</dt><dd><tt>Set&nbsp;the&nbsp;current&nbsp;log&nbsp;level<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loglevel&nbsp;(int)&nbsp;&nbsp;:&nbsp;Current&nbsp;log&nbsp;level<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-setLogName"><strong>setLogName</strong></a>(logname)</dt><dd><tt>Set&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;trace&nbsp;logger<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logfile&nbsp;(str)&nbsp;&nbsp;&nbsp;:&nbsp;Name&nbsp;of&nbsp;the&nbsp;trace&nbsp;logger,&nbsp;default='Trace'<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>TL_ALL</strong> = 7<br>
+<strong>TL_DEBUG</strong> = 4<br>
+<strong>TL_DEFAULT</strong> = 2<br>
+<strong>TL_DUMP</strong> = 7<br>
+<strong>TL_ENTER</strong> = 5<br>
+<strong>TL_ERROR</strong> = 0<br>
+<strong>TL_EXIT</strong> = 6<br>
+<strong>TL_FAILURE</strong> = 1<br>
+<strong>TL_INFO</strong> = 3<br>
+<strong>TL_WARNING</strong> = 2</td></tr></table>
+</body></html>
