@@ -116,6 +116,15 @@ _gActiveServers = []
 
 #################################################################################
 #################################################################################
+def _isFloat(string):
+  try:
+    float(string)
+    return True
+  except:
+    return False;
+
+#################################################################################
+#################################################################################
 def _showWelcome():
   global _gServerName
   global _gRemoteServer
@@ -735,8 +744,8 @@ if (__name__ == '__main__'):
         _showNamedServers()
     elif "=" in arg:
       rateOrRepeat = arg.split("=")
-      if len(rateOrRepeat) == 2 and rateOrRepeat[0] == "rate" and rateOrRepeat[1].isdigit():
-        _gRate = int(rateOrRepeat[1])
+      if len(rateOrRepeat) == 2 and rateOrRepeat[0] == "rate" and _isFloat(rateOrRepeat[1]):
+        _gRate = float(rateOrRepeat[1])
       elif len(rateOrRepeat) == 2 and rateOrRepeat[0] == "repeat" and rateOrRepeat[1].isdigit():
         _gRepeat = int(rateOrRepeat[1])
       else:

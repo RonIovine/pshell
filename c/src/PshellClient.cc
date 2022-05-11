@@ -132,6 +132,8 @@ bool _isUnixConnected = false;
 
 #define MAX_UNIX_CLIENTS 1000
 
+#define USEC_PER_SECOND 1000000
+
 ServerType _serverType = UDP;
 
 #define MAX_ACTIVE_SERVERS 1000
@@ -1038,7 +1040,7 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
     {
       break;
     }
-    sleep(rate_);
+    usleep(rate_);
   } while (rate_ || repeat_);
 
   return (true);
@@ -1255,7 +1257,7 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
       {
         break;
       }
-      sleep(rate_);
+      usleep(rate_);
       rewind(fp);
     } while (rate_ || repeat_);
     fclose(fp);
@@ -2029,7 +2031,7 @@ int main(int argc, char *argv[])
           tokenize(argv[i], "=", rateOrRepeat, MAX_TOKENS, &numTokens);
           if ((numTokens == 2) && (strcmp(rateOrRepeat[0], "rate") == 0))
           {
-            rate = atoi(rateOrRepeat[1]);
+            rate = atof(rateOrRepeat[1])*USEC_PER_SECOND;
           }
           else if ((numTokens == 2) && (strcmp(rateOrRepeat[0], "repeat") == 0))
           {
