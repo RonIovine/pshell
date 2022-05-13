@@ -45,6 +45,61 @@ import TraceLog as Trace
 
 #################################################################################
 #################################################################################
+def sampleOutputFunction(outputString_):
+
+   # this sample log output function is registered with the TraceLog
+   # 'registerOutputFunction' call to show a client supplied
+   # log function, the string passed in is a fully formatted log
+   # string, it is up to the registering application to decide
+   # what to do with that string, i.e. write to stdout, write to
+   # a custom logfile, write to syslog etc
+
+   # write to stdout
+   print("CUSTOM OUTPUT - %s" % outputString_)
+
+   # write to syslog
+   #syslog(LOG_INFO, "%s", outputString_)
+
+#################################################################################
+#################################################################################
+def sampleFormatFunction(logname_, level_, timestamp_, message_):
+
+  # this sample format function is registered with the TraceLog
+  # 'registerFormatFunction' call to show a client supplied
+  #
+  # formatting function, the formating must be done into the outputString_
+  # variable, the user can check to see if the various formatting items
+  # are enabled, or they can just use a fixed format
+
+  # standard output format: name | level | timestamp | user-message
+  # custom format is: timestamp level:[name] - user-message
+
+  message = ""
+  if Trace.isFormatEnabled():
+    if Trace.isTimestampEnabled():
+      message = "%s " % timestamp_
+    message += "%-7s : " % level_
+    if Trace.isLogNameEnabled():
+      message += "[%s] - " % logname_
+    message += message_
+    return (message)
+  else:
+    return (message_)
+
+#################################################################################
+#################################################################################
+def showUsage():
+  print("")
+  print("Usage: traceLogDemo <level> [custom]")
+  print("")
+  print("  where:")
+  print("    <level>  - The desired log level value, 0-%d" % Trace.TL_ALL)
+  print("    custom   - Use a custom log format")
+  print("")
+  exit(0)
+
+#################################################################################
+#################################################################################
 def signalHandler(signal, frame):
   PshellServer.cleanupResources()
   print("")
@@ -80,7 +135,25 @@ if __name__ == '__main__':
 
   registerSignalHandlers()
 
-  Trace.init(logname = "DEMO", logfile = "/var/log/traceLogDemo.log", loglevel = Trace.TL_ALL)
+  logLevel = Trace.TL_ALL
+
+  # validate our command line arguments and get desired log level
+  if len(sys.argv) == 2 or len(sys.argv) == 3:
+    if sys.argv[1] == "-h":
+      showUsage()
+    if len(sys.argv) == 3:
+      if sys.argv[2] == "custom":
+        # register our custom format function
+        Trace.registerFormatFunction(sampleFormatFunction)
+        # set a custom timestamp format, add the date, the time must be last because the usec portion is appended to the time
+        Trace.setTimestampFormat("%Y-%m-%d %T")
+        # register our custom output function
+        Trace.registerOutputFunction(sampleOutputFunction)
+      else:
+        showUsage()
+    logLevel = int(sys.argv[1])
+
+  Trace.init("DEMO", "/var/log/traceLogDemo.log", logLevel)
 
   PshellServer.startServer("traceLogDemo", PshellServer.UDP, PshellServer.NON_BLOCKING, PshellServer.ANYHOST, 9292);
 

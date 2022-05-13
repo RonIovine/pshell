@@ -41,16 +41,23 @@ to the pshell server startServer() call.
 
 Functions:
 
-  init()               -- Initialize the trace logging subsystem
-  setLogFile()         -- Set the output logfile
-  setLogName()         -- Set the current trace logger name
-  setLogLevel()        -- Set the current log level
-  setDefaultLogLevel() -- Set the default log level
-  enableFormat()       -- Enable/disable log formatting or user-message only
-  enableLog()          -- Enable/disable the overall output of the logs (except FORCE)
-  enableTimestamp()    -- Enabledisable the timestamp in the trace output messages
-  enableLogName()      -- Enable/disable the displaying of the logger name in the trace output messages
-  enableFullDatetime() -- Enable/disable the full date/time timestamp format or disable (time only)
+  init()                   -- Initialize the trace logging subsystem
+  setLogFile()             -- Set the output logfile
+  setLogName()             -- Set the current trace logger name
+  isLogNameEnabled()       -- Return if the log name formatting is enabled
+  setLogLevel()            -- Set the current log level
+  setDefaultLogLevel()     -- Set the default log level
+  enableFormat()           -- Enable/disable log formatting or user-message only
+  enableLog()              -- Enable/disable the overall output of the logs (except FORCE)
+  setTimestampFormat()     -- Set a custom timestamp format string
+  isTimestampEnabled()     -- Return if the timestamp formatting is enabled
+  enableTimestamp()        -- Enabledisable the timestamp in the trace output messages
+  enableLogName()          -- Enable/disable the displaying of the logger name in the trace output messages
+  enableFullDatetime()     -- Enable/disable the full date/time timestamp format or disable (time only)
+  isFormatEnabled()        -- Return if the overall trace formatting is enabled
+  registerOutputFunction() -- Register a custom log output callback function
+  registerFormatFunction() -- Register a custom log formatting callback function
+
 
 Trace log commands:
 
@@ -131,6 +138,8 @@ _gLogEnabled = True
 _gFormatEnabled = True
 _gTimestampEnabled = True
 _gLogNameEnabled = True
+_gOutputFunction = None
+_gFormatFunction = None
 
 ##################################
 # 'public' functions
@@ -295,7 +304,7 @@ def enableTimestamp(enable):
         none
   """
   global _gTimestampEnabled
-  _gTimestampEnabled = enable_
+  _gTimestampEnabled = enable
 
 #################################################################################
 #################################################################################
@@ -333,6 +342,97 @@ def enableFullDatetime(enable):
   else:
     _gTimestampFormat = _gBriefTimestampFormat
     _gTimestampType = "time only"
+
+#################################################################################
+#################################################################################
+def registerOutputFunction(function):
+  """
+  Register a custom log output callback function
+
+    Args:
+        function (ptr)  : Callback log output function
+
+    Returns:
+        none
+  """
+  global _gOutputFunction
+  _gOutputFunction = function
+
+#################################################################################
+#################################################################################
+def registerFormatFunction(function):
+  """
+   Register a custom log formatting callback function
+
+    Args:
+        function (ptr)  : Callback log format function
+
+    Returns:
+        none
+  """
+  global _gFormatFunction
+  _gFormatFunction = function
+
+#################################################################################
+#################################################################################
+def setTimestampFormat(format):
+  """
+  Set a custom timestamp format string
+
+    Args:
+        timestampFormat (string)  : Timestamp format string
+
+    Returns:
+        none
+  """
+  global _gTimestampFormat
+  _gTimestampFormat = format
+
+
+#################################################################################
+#################################################################################
+def isLogNameEnabled():
+  """
+  Return if the log name formatting is enabled
+
+    Args:
+        none
+
+    Returns:
+        bool
+  """
+  global _gLogNameEnabled
+  return (_gLogNameEnabled)
+
+#################################################################################
+#################################################################################
+def isTimestampEnabled():
+  """
+  Return if the timestamp formatting is enabled
+
+    Args:
+        none
+
+    Returns:
+        bool
+  """
+  global _gTimestampEnabled
+  return (_gTimestampEnabled)
+
+#################################################################################
+#################################################################################
+def isFormatEnabled():
+  """
+  Return if the overall trace formatting is enabled
+
+    Args:
+        none
+
+    Returns:
+        bool
+  """
+  global _gFormatEnabled
+  return (_gFormatEnabled)
 
 #####################################
 # trace log commands/functions
@@ -698,12 +798,15 @@ def _formatTrace(level_, message_):
   global _gFormatEnabled
   global _gTimestampEnabled
   global _gLogNameEnabled
+  global _gFormatFunction
   message = ""
-  if _gFormatEnabled:
-    if _gLogNameEnabled:
+  if _gFormatFunction != None:
+    return (_gFormatFunction(_gLogName, level_, datetime.datetime.now().strftime(_gTimestampFormat), message_))
+  elif isFormatEnabled():
+    if isLogNameEnabled():
       message = "%s | " % _gLogName
     message += "%-7s | " % level_
-    if _gTimestampEnabled:
+    if isTimestampEnabled():
       message += "%s | " % datetime.datetime.now().strftime(_gTimestampFormat)
     message += message_
     return (message)
@@ -716,9 +819,12 @@ def _outputTrace(level_, message_):
   global _gLogFileFd
   global _gTraceOutput
   global _gMutex
+  global _gOutputFunction
   _gMutex.acquire()
   message = _formatTrace(level_, message_)
-  if _gTraceOutput == _TRACE_OUTPUT_STDOUT:
+  if _gOutputFunction != None:
+    _gOutputFunction(message)
+  elif _gTraceOutput == _TRACE_OUTPUT_STDOUT:
     print(message)
   elif _gTraceOutput == _TRACE_OUTPUT_FILE:
     message += "\n"
