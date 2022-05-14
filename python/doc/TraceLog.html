@@ -22,16 +22,23 @@ to&nbsp;the&nbsp;pshell&nbsp;server&nbsp;startServer()&nbsp;call.<br>
 &nbsp;<br>
 Functions:<br>
 &nbsp;<br>
-&nbsp;&nbsp;<a href="#-init">init</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Initialize&nbsp;the&nbsp;trace&nbsp;logging&nbsp;subsystem<br>
-&nbsp;&nbsp;<a href="#-setLogFile">setLogFile</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;output&nbsp;logfile<br>
-&nbsp;&nbsp;<a href="#-setLogName">setLogName</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;current&nbsp;trace&nbsp;logger&nbsp;name<br>
-&nbsp;&nbsp;<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;current&nbsp;log&nbsp;level<br>
-&nbsp;&nbsp;<a href="#-setDefaultLogLevel">setDefaultLogLevel</a>()&nbsp;--&nbsp;Set&nbsp;the&nbsp;default&nbsp;log&nbsp;level<br>
-&nbsp;&nbsp;<a href="#-enableFormat">enableFormat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;log&nbsp;formatting&nbsp;or&nbsp;user-message&nbsp;only<br>
-&nbsp;&nbsp;<a href="#-enableLog">enableLog</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;overall&nbsp;output&nbsp;of&nbsp;the&nbsp;logs&nbsp;(except&nbsp;FORCE)<br>
-&nbsp;&nbsp;<a href="#-enableTimestamp">enableTimestamp</a>()&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enabledisable&nbsp;the&nbsp;timestamp&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
-&nbsp;&nbsp;<a href="#-enableLogName">enableLogName</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;displaying&nbsp;of&nbsp;the&nbsp;logger&nbsp;name&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
-&nbsp;&nbsp;<a href="#-enableFullDatetime">enableFullDatetime</a>()&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;full&nbsp;date/time&nbsp;timestamp&nbsp;format&nbsp;or&nbsp;disable&nbsp;(time&nbsp;only)<br>
+&nbsp;&nbsp;<a href="#-init">init</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Initialize&nbsp;the&nbsp;trace&nbsp;logging&nbsp;subsystem<br>
+&nbsp;&nbsp;<a href="#-setLogFile">setLogFile</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;output&nbsp;logfile<br>
+&nbsp;&nbsp;<a href="#-setLogName">setLogName</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;current&nbsp;trace&nbsp;logger&nbsp;name<br>
+&nbsp;&nbsp;<a href="#-isLogNameEnabled">isLogNameEnabled</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Return&nbsp;if&nbsp;the&nbsp;log&nbsp;name&nbsp;formatting&nbsp;is&nbsp;enabled<br>
+&nbsp;&nbsp;<a href="#-setLogLevel">setLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;current&nbsp;log&nbsp;level<br>
+&nbsp;&nbsp;<a href="#-setDefaultLogLevel">setDefaultLogLevel</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;the&nbsp;default&nbsp;log&nbsp;level<br>
+&nbsp;&nbsp;<a href="#-enableFormat">enableFormat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;log&nbsp;formatting&nbsp;or&nbsp;user-message&nbsp;only<br>
+&nbsp;&nbsp;<a href="#-enableLog">enableLog</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;overall&nbsp;output&nbsp;of&nbsp;the&nbsp;logs&nbsp;(except&nbsp;FORCE)<br>
+&nbsp;&nbsp;<a href="#-setTimestampFormat">setTimestampFormat</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Set&nbsp;a&nbsp;custom&nbsp;timestamp&nbsp;format&nbsp;string<br>
+&nbsp;&nbsp;<a href="#-isTimestampEnabled">isTimestampEnabled</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Return&nbsp;if&nbsp;the&nbsp;timestamp&nbsp;formatting&nbsp;is&nbsp;enabled<br>
+&nbsp;&nbsp;<a href="#-enableTimestamp">enableTimestamp</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enabledisable&nbsp;the&nbsp;timestamp&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
+&nbsp;&nbsp;<a href="#-enableLogName">enableLogName</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;displaying&nbsp;of&nbsp;the&nbsp;logger&nbsp;name&nbsp;in&nbsp;the&nbsp;trace&nbsp;output&nbsp;messages<br>
+&nbsp;&nbsp;<a href="#-enableFullDatetime">enableFullDatetime</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Enable/disable&nbsp;the&nbsp;full&nbsp;date/time&nbsp;timestamp&nbsp;format&nbsp;or&nbsp;disable&nbsp;(time&nbsp;only)<br>
+&nbsp;&nbsp;<a href="#-isFormatEnabled">isFormatEnabled</a>()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Return&nbsp;if&nbsp;the&nbsp;overall&nbsp;trace&nbsp;formatting&nbsp;is&nbsp;enabled<br>
+&nbsp;&nbsp;<a href="#-registerOutputFunction">registerOutputFunction</a>()&nbsp;--&nbsp;Register&nbsp;a&nbsp;custom&nbsp;log&nbsp;output&nbsp;callback&nbsp;function<br>
+&nbsp;&nbsp;<a href="#-registerFormatFunction">registerFormatFunction</a>()&nbsp;--&nbsp;Register&nbsp;a&nbsp;custom&nbsp;log&nbsp;formatting&nbsp;callback&nbsp;function<br>
+&nbsp;<br>
 &nbsp;<br>
 Trace&nbsp;log&nbsp;commands:<br>
 &nbsp;<br>
@@ -187,6 +194,41 @@ or&nbsp;masked<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-isFormatEnabled"><strong>isFormatEnabled</strong></a>()</dt><dd><tt>Return&nbsp;if&nbsp;the&nbsp;overall&nbsp;trace&nbsp;formatting&nbsp;is&nbsp;enabled<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+ <dl><dt><a name="-isLogNameEnabled"><strong>isLogNameEnabled</strong></a>()</dt><dd><tt>Return&nbsp;if&nbsp;the&nbsp;log&nbsp;name&nbsp;formatting&nbsp;is&nbsp;enabled<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+ <dl><dt><a name="-isTimestampEnabled"><strong>isTimestampEnabled</strong></a>()</dt><dd><tt>Return&nbsp;if&nbsp;the&nbsp;timestamp&nbsp;formatting&nbsp;is&nbsp;enabled<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool</tt></dd></dl>
+ <dl><dt><a name="-registerFormatFunction"><strong>registerFormatFunction</strong></a>(function)</dt><dd><tt>Register&nbsp;a&nbsp;custom&nbsp;log&nbsp;formatting&nbsp;callback&nbsp;function<br>
+&nbsp;<br>
+&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;(ptr)&nbsp;&nbsp;:&nbsp;Callback&nbsp;log&nbsp;format&nbsp;function<br>
+&nbsp;<br>
+&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-registerOutputFunction"><strong>registerOutputFunction</strong></a>(function)</dt><dd><tt>Register&nbsp;a&nbsp;custom&nbsp;log&nbsp;output&nbsp;callback&nbsp;function<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;function&nbsp;(ptr)&nbsp;&nbsp;:&nbsp;Callback&nbsp;log&nbsp;output&nbsp;function<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
  <dl><dt><a name="-setDefaultLogLevel"><strong>setDefaultLogLevel</strong></a>(defaultLevel)</dt><dd><tt>Set&nbsp;the&nbsp;default&nbsp;log&nbsp;level<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
@@ -212,6 +254,13 @@ or&nbsp;masked<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logfile&nbsp;(str)&nbsp;&nbsp;&nbsp;:&nbsp;Name&nbsp;of&nbsp;the&nbsp;trace&nbsp;logger,&nbsp;default='Trace'<br>
+&nbsp;<br>
+&nbsp;&nbsp;Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
+ <dl><dt><a name="-setTimestampFormat"><strong>setTimestampFormat</strong></a>(format)</dt><dd><tt>Set&nbsp;a&nbsp;custom&nbsp;timestamp&nbsp;format&nbsp;string<br>
+&nbsp;<br>
+&nbsp;&nbsp;Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestampFormat&nbsp;(string)&nbsp;&nbsp;:&nbsp;Timestamp&nbsp;format&nbsp;string<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>

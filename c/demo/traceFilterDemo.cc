@@ -287,9 +287,9 @@ void registerSignalHandlers(void)
  */
 
 /* must start user defined levels after TL_MAX_LEVELS */
-#define TL_USER_LEVEL1   TL_MAX_LEVELS+1
-#define TL_USER_LEVEL2   TL_MAX_LEVELS+2
-#define TL_USER_LEVEL3   TL_MAX_LEVELS+3
+#define TL_USER_LEVEL1   TL_MAX+1
+#define TL_USER_LEVEL2   TL_MAX+2
+#define TL_USER_LEVEL3   TL_MAX+3
 
 /* define the string based names of the trace levels */
 #define TL_USER_LEVEL1_STRING "USER-LEVEL1"

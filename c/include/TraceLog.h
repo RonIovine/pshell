@@ -61,21 +61,40 @@ extern "C" {
  *
  *   trace_registerOutputFunction() -- register a custom log output callback function
  *   trace_registerFormatFunction() -- register a custom log formatting callback function
- *   trace_setTimestampFormat()     -- set a custom timestamp format string
+ *
+ *   trace_init()                   -- initialize the trace logger subsystem
+ *
  *   trace_setLogName()             -- set the log name (typically the program/process name)
  *   trace_getLogName()             -- return the registered log name
+ *
+ *   trace_setLogfile()             -- set the logfile name
+
  *   trace_registerLevels()         -- register the built in log levels, should be done at program init
  *   trace_addUserLevel()           -- add a user defined level, should be done after built in levels registered
  *   trace_setLogLevel()            -- set the current display output level
  *   trace_getLogLevel()            -- return the currently set display output level
+ *   trace_setDefaultLogLevel()     -- set the default log level
+ *
  *   trace_enableLocation()         -- enable the file/function/line location formatting
  *   trace_isLocationEnabled()      -- return if location formatting is enabled
+ *
+ *   trace_enableFormat()           -- enable/disable overall trace formatting
+ *   trace_isFormatEnabled()        -- return if formatting is enabled
+ *
+ *   trace_enableLog()              -- enable/disable all logginf (except for FORCE)
+ *   trace_isLogEnabled()           -- returns if the logger is enabled
+ *
  *   trace_enablePath()             -- enable any preceeding path for the 'file' part of the location
  *   trace_isPathEnabled()          -- return if the file path is enabled
+ *
+ *   trace_setTimestampFormat()     -- set a custom timestamp format string
  *   trace_enableTimestamp()        -- enable formatting of the timestamp
  *   trace_isTimestampEnabled()     -- return if the timestamp formatting is enabled
  *   trace_enableLogName()          -- enable the formatting of the registered log name
  *   trace_isLogNameEnabled()       -- return if the log name formatting is enabled
+ *
+ *   trace_enableFullDatetime()     -- enable/disable full datetime display in format
+ *   trace_isFullDatetimeEnabed()   -- returns is full datetime display is enabled
  *
  * Macros:
  *
@@ -91,7 +110,7 @@ extern "C" {
  *
  * Integer constants:
  *
- *   TL_MAX_LEVELS -- start all user defined levels after this value
+ *   TL_MAX -- start all user defined levels after this value
  *
  *******************************************************************************/
 
@@ -101,8 +120,8 @@ extern "C" {
  * in this example, all the levels are added in the function 'trace_registerLevels'
  */
 #define TL_ERROR      0
-#define TL_WARNING    1
-#define TL_FAILURE    2
+#define TL_FAILURE    1
+#define TL_WARNING    2
 #define TL_INFO       3
 #define TL_DEBUG      4
 #define TL_ENTER      5
@@ -110,20 +129,20 @@ extern "C" {
 #define TL_DUMP       7
 
 /* start all user defined levels after the MAX */
-#define TL_MAX_LEVELS TL_DUMP
-#define TL_ALL_LEVELS TL_MAX_LEVELS
-#define TL_DEFAULT_LEVEL TL_FAILURE
+#define TL_MAX      TL_DUMP
+#define TL_ALL      TL_MAX
+#define TL_DEFAULT  TL_WARNING
 
 /* define the string based names of the trace levels */
-#define TL_ERROR_STRING "ERROR"
-#define TL_WARNING_STRING "WARNING"
-#define TL_FAILURE_STRING "FAILURE"
-#define TL_INFO_STRING "INFO"
-#define TL_DEBUG_STRING "DEBUG"
-#define TL_ENTER_STRING "ENTER"
-#define TL_EXIT_STRING "EXIT"
-#define TL_DUMP_STRING "DUMP"
-#define TL_FORCE_STRING "FORCE"
+#define TL_ERROR_STRING    "ERROR"
+#define TL_WARNING_STRING  "WARNING"
+#define TL_FAILURE_STRING  "FAILURE"
+#define TL_INFO_STRING     "INFO"
+#define TL_DEBUG_STRING    "DEBUG"
+#define TL_ENTER_STRING    "ENTER"
+#define TL_EXIT_STRING     "EXIT"
+#define TL_DUMP_STRING     "DUMP"
+#define TL_FORCE_STRING    "FORCE"
 
 /*
  * the following are some example TRACE macros to illustrate integrating the
@@ -160,8 +179,6 @@ extern "C" {
 #define TRACE_DUMP(address, length, format, args...) __DUMP(address, length, TL_DUMP, TL_DUMP_STRING, format, ## args)
 
 /*
- * trace_registerOutputFunction:
- *
  * typedef and function to allow a client program to register a cusatom logging
  * function for message output logging, if no output function is registered
  * 'printf' will be used to print out the log messages
@@ -170,15 +187,14 @@ typedef void (*TraceOutputFunction)(const char *outputString_);
 void trace_registerOutputFunction(TraceOutputFunction outputFunction_);
 
 /*
- * trace_registerFormatFunction:
- *
  * typedef and function to allow a client program to register a custom format
  * function for formatting the trace output line, if no format function is
  * registered the default formatting will be used, e.g.
  *
  * name | level | timestamp | file(function):line | user-message
  */
-typedef void (*TraceFormatFunction)(const char *level_,
+typedef void (*TraceFormatFunction)(const char *name_,
+                                    const char *level_,
                                     const char *file_,
                                     const char *function_,
                                     int line_,
@@ -187,15 +203,7 @@ typedef void (*TraceFormatFunction)(const char *level_,
                                     char *outputString_);
 void trace_registerFormatFunction(TraceFormatFunction formatFunction_);
 
-/*
- * trace_setTimestampFormat:
- *
- * set the timestamp format for the strftime function, if the 'addUsec_' argument is
- * set to true, be sure to use a format where the sec is last since the usec will be
- * appended to that, if no format is specified, the default formatting will be used,
- * e.g. hh:mm:ss.usec in 24 hour local time
- */
-void trace_setTimestampFormat(const char *format_, bool addUsec_ = true);
+void trace_init(const char *logname_ = NULL, const char *logfile_ = NULL, unsigned loglevel_ = TL_DEFAULT);
 
 /*
  * trace_setLogName:
@@ -207,7 +215,7 @@ void trace_setTimestampFormat(const char *format_, bool addUsec_ = true);
  * type will have no prefix, e.g. just ERROR..., WARNING... etc.
  * this should typically be set to the program name
  */
-void trace_setLogName(const char *name_);
+void trace_setLogName(const char *logname_);
 
 /*
  * trace_getLogName:
@@ -215,6 +223,8 @@ void trace_setLogName(const char *name_);
  * returns the registred log name
  */
 const char *trace_getLogName(void);
+
+bool trace_setLogfile(const char *filename_);
 
 /*
  * trace_registerLevels:
@@ -235,19 +245,14 @@ void trace_registerLevels(void);
 void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_ = false, bool isMaskable_ = true);
 
 /*
- * if we are using a stand-alone traceLog system and not integrating it into the
- * traceFilter mechanism we need to provide an internal trace log level and a way
- * to set it
- */
-#ifndef DYNAMIC_TRACE_FILTER
-
-/*
  * trace_setLogLevel:
  *
  * this function is used to set the internal trace log level when this module
  * is built with the DYNAMIC_TRACE_FILTER flag NOT set (i.e. stand-alone mode)
  */
 void trace_setLogLevel(unsigned _logLevel);
+
+void trace_setDefaultLogLevel(unsigned level_);
 
 /*
  * trace_getLogLevel:
@@ -256,8 +261,6 @@ void trace_setLogLevel(unsigned _logLevel);
  * is built with the DYNAMIC_TRACE_FILTER flag NOT set (i.e. stand-alone mode)
  */
 unsigned trace_getLogLevel(void);
-
-#endif
 
 /*
  * trace_enableLocation:
@@ -273,6 +276,12 @@ void trace_enableLocation(bool enable_);
  */
 bool trace_isLocationEnabled(void);
 
+void trace_enableFormat(bool enable_);
+bool trace_isFormatEnabled(void);
+
+void trace_enableLog(bool enable_);
+bool trace_isLogEnabled(void);
+
 /*
  * trace_enablePath:
  *
@@ -286,6 +295,16 @@ void trace_enablePath(bool enable_);
  * returns whether we are stripping any preceeding path from the __FILE__ string
  */
 bool trace_isPathEnabled(void);
+
+/*
+ * trace_setTimestampFormat:
+ *
+ * set the timestamp format for the strftime function, if the 'addUsec_' argument is
+ * set to true, be sure to use a format where the sec is last since the usec will be
+ * appended to that, if no format is specified, the default formatting will be used,
+ * e.g. hh:mm:ss.usec in 24 hour local time
+ */
+void trace_setTimestampFormat(const char *format_, bool addUsec_ = true);
 
 /*
  * trace_enableTimestamp:
@@ -314,6 +333,9 @@ void trace_enableLogName(bool enable_);
  * returns if the trace log name is enabled
  */
 bool trace_isLogNameEnabled(void);
+
+void trace_enableFullDatetime(bool enable_);
+bool trace_isFullDatetimeEnabed(void);
 
 /****************************************************************************
  *
@@ -355,9 +377,10 @@ extern void trace_outputDump(void *address_, unsigned length_, const char *level
  * trace level against the configures trace level to determine if a given trace should be
  * printed out
  */
-extern unsigned _traceLogLevel;
-#define __TRACE(level, name, format, args...) if (_traceLogLevel >= level) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
-#define __DUMP(address, length, level, name, format, args...) if (_traceLogLevel >= level) {trace_outputDump(address, length, name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+extern unsigned trace_logLevel;
+extern bool trace_logEnabled;
+#define __TRACE(level, name, format, args...) if (trace_logEnabled && (trace_logLevel >= level)) {trace_outputLog(name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
+#define __DUMP(address, length, level, name, format, args...) if (trace_logEnabled && (trace_logLevel >= level)) {trace_outputDump(address, length, name, __FILE__, __FUNCTION__, __LINE__, format, ## args);}
 
 #endif  /* DYNAMIC_TRACE_FILTER */
 

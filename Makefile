@@ -105,6 +105,7 @@ PSHELL_SERVER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread
 PSHELL_CONTROL_DEMO_LIBS = -L$(LIB_DIR) -lpshell-control -lpshell-readline -lpthread
 PSHELL_READLINE_DEMO_LIBS = -L$(LIB_DIR) -lpshell-readline
 TRACE_FILTER_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread
+TRACE_LOG_DEMO_LIBS = -L$(LIB_DIR) -lpshell-server -lpthread
 
 VERBOSE = @
 LOCAL =
@@ -446,7 +447,8 @@ ifeq ($(TF_INTEGRATED_TRACE_LOG), y)
 endif
 
 	@echo "Building traceLogDemo program (C)..."
-	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) -o $(BIN_DIR)/traceLogDemo
+	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) $(TRACE_LOG_DEMO_LIBS) -o $(BIN_DIR)/traceLogDemo
+#	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) $(TRACE_LOG_DEMO_LIBS) -o $(BIN_DIR)/traceLogDemo
 
 ifeq ($(BUILD_GO), y)
 	@echo "Building pshellServerDemo program (go)..."

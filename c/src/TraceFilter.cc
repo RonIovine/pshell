@@ -201,9 +201,9 @@ static LevelFilter _levelFilters[TF_MAX_LEVELS] = {{NULL, 0, false, true},
                                                    {NULL, 0, false, true}};
 static unsigned _maxLevelNameLength = 0;
 static unsigned _globalLevel = 0;
-static unsigned TL_DEFAULT = 0;
-static unsigned TL_ALL = 0;
-static unsigned TL_UNMASKABLE = 0;
+static unsigned TF_DEFAULT = 0;
+static unsigned TF_ALL = 0;
+static unsigned TF_UNMASKABLE = 0;
 
 #ifndef TF_MAX_FILE_FILTERS
 #define TF_MAX_FILE_FILTERS 500
@@ -341,19 +341,19 @@ void tf_init(void)
       {
         _maxLevelNameLength = strlen(_levelFilters[i].name);
       }
-      TL_ALL |= _levelFilters[i].level;
+      TF_ALL |= _levelFilters[i].level;
       if (!_levelFilters[i].isMaskable)
       {
-        TL_UNMASKABLE |= _levelFilters[i].level;
-        TL_DEFAULT |= _levelFilters[i].level;
+        TF_UNMASKABLE |= _levelFilters[i].level;
+        TF_DEFAULT |= _levelFilters[i].level;
       }
       if (_levelFilters[i].isDefault)
       {
-        TL_DEFAULT |= _levelFilters[i].level;
+        TF_DEFAULT |= _levelFilters[i].level;
       }
     }
   }
-  _globalLevel = TL_DEFAULT;
+  _globalLevel = TF_DEFAULT;
   _hierarchicalLevel = _defaultHierarchicalLevel;
 
 #ifdef TF_FAST_FILENAME_LOOKUP
@@ -496,7 +496,7 @@ bool tf_isFilterPassed(const char *file_,
     /* filter not enabled, return legacy default hierarchical behavour */
     filterPassed = (_hierarchicalLevel >= level_);
   }
-  else if (level & TL_UNMASKABLE)
+  else if (level & TF_UNMASKABLE)
   {
     /* short circuit the evaluation if the level is one of our unmaskable levels */
     filterPassed = true;
@@ -924,7 +924,7 @@ void showConfig(void)
         }
         prefix2 = _prefix5;
       }
-      if (_fileFilters[i].level != TL_ALL)
+      if (_fileFilters[i].level != TF_ALL)
       {
         prefix2 = _prefix2;
         for (int j = 0; j < TF_MAX_LEVELS; j++)
@@ -953,7 +953,7 @@ void showConfig(void)
     for (int i = 0; i < _numFunctionFilters; i++)
     {
       pshell_printf("%s%s ", prefix1, _functionFilters[i]);
-      if (_functionFilters[i].level != TL_ALL)
+      if (_functionFilters[i].level != TF_ALL)
       {
         prefix2 = _prefix2;
         for (int j = 0; j < TF_MAX_LEVELS; j++)
@@ -982,7 +982,7 @@ void showConfig(void)
     for (int i = 0; i < _numThreadFilters; i++)
     {
       pshell_printf("%s%s ", prefix1, _threadFilters[i].threadName);
-      if (_threadFilters[i].level != TL_ALL)
+      if (_threadFilters[i].level != TF_ALL)
       {
         prefix2 = _prefix2;
         for (int j = 0; j < TF_MAX_LEVELS; j++)
@@ -1340,11 +1340,11 @@ void configureFilter(int argc, char *argv[])
     }
     else if (pshell_isSubString(argv[1], "all", 1) && (argc == 2))
     {
-      _globalLevel = TL_ALL;
+      _globalLevel = TF_ALL;
     }
     else if (pshell_isSubString(argv[1], "default", 3) && (argc == 2))
     {
-      _globalLevel = TL_DEFAULT;
+      _globalLevel = TF_DEFAULT;
     }
     else if (argv[1][0] == '+')
     {
@@ -1367,7 +1367,7 @@ void configureFilter(int argc, char *argv[])
     else
     {
       /* set level filters to specified list */
-      _globalLevel = TL_UNMASKABLE;
+      _globalLevel = TF_UNMASKABLE;
       for (int i = 1; i < argc; i++)
       {
         addLevelFilter(argv[i], _globalLevel);
@@ -1608,7 +1608,7 @@ void addLevelFilter(char *name_, unsigned &level_)
   }
   if (strncasecmp(name_, "default", 3) == 0)
   {
-    level_ |= TL_DEFAULT;
+    level_ |= TF_DEFAULT;
   }
 }
 
@@ -1820,10 +1820,10 @@ void addFileFilter(const char *file_, bool interactive_)
         }
         /* process the levelSpec */
         tokenize(tokens.tokens[2], levelSpec, ",");
-        filter->level = TL_UNMASKABLE;
+        filter->level = TF_UNMASKABLE;
         if ((levelSpec.numTokens == 1) && pshell_isSubString(levelSpec.tokens[0], "default", 3))
         {
-          filter->level = TL_DEFAULT;
+          filter->level = TF_DEFAULT;
         }
         else
         {
@@ -1844,10 +1844,10 @@ void addFileFilter(const char *file_, bool interactive_)
             *ptr = 0;
           }
           /* process the levelSpec */
-          filter->level = TL_UNMASKABLE;
+          filter->level = TF_UNMASKABLE;
           if ((levelOrLineSpec.numTokens == 1) && pshell_isSubString(levelOrLineSpec.tokens[0], "default", 3))
           {
-            filter->level = TL_DEFAULT;
+            filter->level = TF_DEFAULT;
           }
           else
           {
@@ -1859,7 +1859,7 @@ void addFileFilter(const char *file_, bool interactive_)
         }
         else
         {
-          filter->level = TL_ALL;
+          filter->level = TF_ALL;
           /* process the lineSpec */
           for (int i = 0; i < levelOrLineSpec.numTokens; i++)
           {
@@ -1897,7 +1897,7 @@ void addFileFilter(const char *file_, bool interactive_)
       }
       else if (tokens.numTokens == 1)
       {
-        filter->level = TL_ALL;
+        filter->level = TF_ALL;
       }
     }
     else if (interactive_)
@@ -1938,11 +1938,11 @@ void addFunctionFilter(const char *function_, bool interactive_)
     /* see if they specified any custom levels */
     if (tokens.numTokens > 1)
     {
-      filter->level = TL_UNMASKABLE;
+      filter->level = TF_UNMASKABLE;
       tokenize(tokens.tokens[1], levels, ",");
       if ((levels.numTokens == 1) && pshell_isSubString(levels.tokens[0], "default", 3))
       {
-        filter->level = TL_DEFAULT;
+        filter->level = TF_DEFAULT;
       }
       else
       {
@@ -1955,7 +1955,7 @@ void addFunctionFilter(const char *function_, bool interactive_)
     else
     {
       /* no custom levels specified, default fo ALL levels */
-      filter->level = TL_ALL;
+      filter->level = TF_ALL;
     }
     if (newFilter)
     {
@@ -1996,11 +1996,11 @@ void addThreadFilter(const char *thread_, bool interactive_)
       /* see if they specified any custom levels */
       if (tokens.numTokens > 1)
       {
-        filter->level = TL_UNMASKABLE;
+        filter->level = TF_UNMASKABLE;
         tokenize(tokens.tokens[1], levels, ",");
         if ((levels.numTokens == 1) && pshell_isSubString(levels.tokens[0], "default", 3))
         {
-          filter->level = TL_DEFAULT;
+          filter->level = TF_DEFAULT;
         }
         else
         {
@@ -2013,7 +2013,7 @@ void addThreadFilter(const char *thread_, bool interactive_)
       else
       {
         /* no custom levels specified, default fo ALL levels */
-        filter->level = TL_ALL;
+        filter->level = TF_ALL;
       }
       if (newFilter)
       {

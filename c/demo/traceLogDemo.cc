@@ -40,6 +40,7 @@
 #include <syslog.h>
 #include <stdlib.h>
 
+#include <PshellServer.h>
 #include <TraceLog.h>
 
 #define DUMP_BUFFER_SIZE 256
@@ -48,10 +49,10 @@
  * create some user defined levels and macros
  */
 
-/* must start user defined levels after TL_MAX_LEVELS */
-#define TL_USER_LEVEL1   TL_MAX_LEVELS+1
-#define TL_USER_LEVEL2   TL_MAX_LEVELS+2
-#define TL_USER_LEVEL3   TL_MAX_LEVELS+3
+/* must start user defined levels after TL_MAX */
+#define TL_USER_LEVEL1   TL_MAX+1
+#define TL_USER_LEVEL2   TL_MAX+2
+#define TL_USER_LEVEL3   TL_MAX+3
 
 /* define the string based names of the trace levels */
 #define TL_USER_LEVEL1_STRING "USER-LEVEL1"
@@ -105,7 +106,8 @@ void sampleOutputFunction(const char *outputString_)
 
 /******************************************************************************/
 /******************************************************************************/
-void sampleFormatFunction(const char *level_,
+void sampleFormatFunction(const char *name_,
+                          const char *level_,
                           const char *file_,
                           const char *function_,
                           int line_,
@@ -135,11 +137,11 @@ void sampleFormatFunction(const char *level_,
 
   if (trace_isLogNameEnabled() && trace_isLocationEnabled())
   {
-    sprintf(&outputString_[strlen(outputString_)], "[%s:%s:%d] ", trace_getLogName(), file_, line_);
+    sprintf(&outputString_[strlen(outputString_)], "[%s:%s:%d] ", name_, file_, line_);
   }
   else if (trace_isLogNameEnabled())
   {
-    sprintf(&outputString_[strlen(outputString_)], "[%s] ", trace_getLogName());
+    sprintf(&outputString_[strlen(outputString_)], "[%s] ", name_);
   }
   else if (trace_isLocationEnabled())
   {
@@ -185,10 +187,29 @@ int main (int argc, char *argv[])
     {
       if (strcmp(argv[2], "custom")  == 0)
       {
+
         /* register our custom format function */
         trace_registerFormatFunction(sampleFormatFunction);
+
         /* set a custom timestamp format, add the date, the time must be last because the usec portion is appended to the time */
         trace_setTimestampFormat("%Y-%m-%d %T");
+
+        /*
+         * register a custom client provided log function, this function will
+         * take a fully formatted log message string, it is up to the
+         * registering application to decide what to do with that string,
+         * i.e. write to stdout, write to custom logfile, write to syslog
+         * etc, this is optional, if no log function is registered, the
+         * trace logging service will just use 'printf' to output the
+         * log message
+         */
+
+        /* open syslog with our program name */
+        openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
+
+        /* register our log output function */
+        trace_registerOutputFunction(sampleOutputFunction);
+
       }
       else
       {
@@ -215,7 +236,7 @@ int main (int argc, char *argv[])
    * so our trace display can be formatted and aligned correctly
    */
 
-  trace_registerLevels();
+  trace_init("DEMO", NULL, logLevel);
 
   /*
    * register our program specific trace log levels with the trace log system
@@ -230,31 +251,8 @@ int main (int argc, char *argv[])
   trace_addUserLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2);
   trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3);
 
-  /* set our log level */
-  trace_setLogLevel(logLevel);
-
-  /*
-   * optionally set a log name prefix, if not set, 'TRACE' will be used,
-   * if set to 'NULL', no name prefix will be used
-   */
-
-  trace_setLogName("DEMO");
-
-  /*
-   * register a custom client provided log function, this function will
-   * take a fully formatted log message string, it is up to the
-   * registering application to decide what to do with that string,
-   * i.e. write to stdout, write to custom logfile, write to syslog
-   * etc, this is optional, if no log function is registered, the
-   * trace logging service will just use 'printf' to output the
-   * log message
-   */
-
-  /* open syslog with our program name */
-  openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
-
-  /* register our log output function */
-  trace_registerOutputFunction(sampleOutputFunction);
+  /* start our pshell server in NON_BLOCKING mode since this process has it's own control loop */
+  pshell_startServer("traceLogDemo", PSHELL_UDP_SERVER, PSHELL_NON_BLOCKING, PSHELL_LOCALHOST, 9191);
 
   /* go into an infinite loop issuing some traces so we can demonstrate dynamic trace filtering */
   for (;;)

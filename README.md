@@ -15,11 +15,11 @@
 [Demo programs](#demo-programs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellServerDemo](#pshellServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[traceFilterDemo](#traceFilterDemo)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[traceLogDemo](#traceLogDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellControlDemo](#pshellControlDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellNoServerDemo](#pshellNoServerDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellAggregatorDemo](#pshellAggregatorDemo)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;[pshellReadlineDemo](#pshellReadlineDemo)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;[traceLogDemo](#traceLogDemo)<br>
 
 <a name="overview"></a>
 ### Overview
@@ -577,8 +577,24 @@ Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
     <port> - Desired UDP or TCP port, default: 6002
 ```
 
+
+<a name="traceLogDemo"></a>
+#### 3. traceLogDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/traceLogDemo.py))
+This is an example of the trace logger without the extensive filtering capability as the [traceFilterDemo](#traceFilterDemo) example.  It has simple hierarichical levels that
+can be controlled interactively via an integrated PSHELL server.  The following is the
+usage of this program:
+```
+$ traceLogDemo -h
+
+Usage: traceLogDemo <level> [custom]
+
+  where:
+    <level>  - The desired log level value, 0-10
+    custom   - Use a custom log format
+```
+
 <a name="pshellControlDemo"></a>
-#### 3. pshellControlDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
+#### 4. pshellControlDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
 These demo programs show one process invoking pshell functions in another process using the control API.
 This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
 be used to connect to any of the previous [pshellServerDemo](#pshellServerDemo) or [traceFilterDemo](#traceFilterDemo) programs and invoke their functions.  The control demo programs will prompt the user
@@ -603,7 +619,7 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
 ```
 
 <a name="pshellNoServerDemo"></a>
-#### 4. pshellNoServerDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellNoServerDemo.cc) only)
+#### 5. pshellNoServerDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellNoServerDemo.cc) only)
 This is an implementation that allows the user to use this framework to create a multi-call binary
 similar to [Busybox](https://www.busybox.net).  This is not really used to retro-fit existing applications,
 but would be used when creating a new application by where there are multiple entry points that map
@@ -640,7 +656,7 @@ privlidges depending on the directory settings.
 ```
 
 <a name="pshellAggregatorDemo"></a>
-#### 5. pshellAggregatorDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
+#### 6. pshellAggregatorDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
 interactive session.  Note that this is different than the generic [pshellAggregator](#pshellAggregator-client)
 client program described above in that this is a custom aggregator by where the servers being aggregated are
@@ -654,7 +670,7 @@ Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <
 ```
 
 <a name="pshellReadlineDemo"></a>
-#### 6. pshellReadlineDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
+#### 7. pshellReadlineDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy
 stand-alone readline like implementation that can be used by any application to solicit user input.
 It will work with any raw serial character based I/O from either a TCP socket in telnet mode or over
@@ -671,19 +687,4 @@ Usage: pshellReadlineDemo {-tty | -socket} [-bash | -fast] [<idleTimeout>]
     -bash         - Use bash/readline style tabbing
     -fast         - Use "fast" style tabbing (default)
     <idleTimeout> - the idle session timeout in minutes (default=none)
-```
-
-<a name="traceLogDemo"></a>
-#### 7. traceLogDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/traceLogDemo.py))
-This is not part of pshell client/server paradigm, but rather is just a stand-alone implementation using
-the trace logging front end that is used in the above [traceFilterDemo](#traceFilterDemo) program.  The following is the
-usage of this program:
-```
-$ traceLogDemo -h
-
-Usage: traceLogDemo <level> [custom]
-
-  where:
-    <level>  - The desired log level value, 0-10
-    custom   - Use a custom log format
 ```
