@@ -85,10 +85,6 @@ bool trace_logEnabled = true;
  * private "member" data
  *************************/
 
-#define TRACE_OUTPUT_FILE   0
-#define TRACE_OUTPUT_STDOUT 1
-#define TRACE_OUTPUT_BOTH   2
-
 static TraceOutputFunction _outputFunction = NULL;
 static TraceFormatFunction _formatFunction = NULL;
 static char _logName[MAX_STRING_SIZE] = {"Trace"};
@@ -138,7 +134,7 @@ static bool isColorsEnabled(void);
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_init(const char *logname_, const char *logfile_, unsigned loglevel_)
+void trace_init(const char *logname_, const char *logfile_, unsigned loglevel_, bool traceFilter_)
 {
   trace_registerLevels();
   trace_setLogName(logname_);
@@ -149,22 +145,25 @@ void trace_init(const char *logname_, const char *logfile_, unsigned loglevel_)
     TRACE_ERROR("Could not open logfile: %s, reverting to: stdout", logfile_);
   }
   pshell_registerServerLogFunction(pshellLogFunction);
-  /* create PSHELL command to configure trace settings */
-  pshell_addCommand(configureTrace,
-                    "trace",
-                    "configure/display various trace logger settings",
-                    "on | off | show |\n"
-                    "             output {file | stdout | both | <filename>} |\n"
-                    "             level {all | default | <value>} |\n"
-                    "             default {all | <value>} |\n"
-                    "             format {on | off} |\n"
-                    "             name {on | off | default | <value>} |\n"
-                    "             location {on | off} |\n"
-                    "             timestamp {on | off | datetime | time} |\n"
-                    "             colors {on | off}",
-                    1,
-                    2,
-                    false);
+  if (!traceFilter_)
+  {
+    /* create PSHELL command to configure trace settings */
+    pshell_addCommand(configureTrace,
+                      "trace",
+                      "configure/display various trace logger settings",
+                      "on | off | show |\n"
+                      "             output {file | stdout | both | <filename>} |\n"
+                      "             level {all | default | <value>} |\n"
+                      "             default {all | <value>} |\n"
+                      "             format {on | off} |\n"
+                      "             name {on | off | default | <value>} |\n"
+                      "             location {on | off} |\n"
+                      "             timestamp {on | off | datetime | time} |\n"
+                      "             colors {on | off}",
+                      1,
+                      2,
+                      false);
+  }
 }
 
 /******************************************************************************/
@@ -205,6 +204,71 @@ bool trace_setLogfile(const char *filename_)
 
 /******************************************************************************/
 /******************************************************************************/
+char *trace_getLogfile(void)
+{
+  return (_logfileName);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+unsigned trace_getOutput(void)
+{
+  return (_traceOutput);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_setOutput(char *location_)
+{
+  if (_traceOutput == TRACE_OUTPUT_CUSTOM)
+  {
+    pshell_printf("ERROR: Cannot change output location when using a custom registered output function\n");
+  }
+  else if (pshell_isSubString(location_, "file", 2))
+  {
+    if (_logfileFd != NULL)
+    {
+      _traceOutput = TRACE_OUTPUT_FILE;
+    }
+    else
+    {
+      pshell_printf("ERROR: Need to set logfile before setting output to 'file', run 'trace output <filename>'\n");
+    }
+  }
+  else if (pshell_isSubString(location_, "stdout", 2))
+  {
+    _traceOutput = TRACE_OUTPUT_STDOUT;
+  }
+  else if (pshell_isSubString(location_, "both", 2))
+  {
+    if (_logfileFd != NULL)
+    {
+      _traceOutput = TRACE_OUTPUT_BOTH;
+    }
+    else
+    {
+      pshell_printf("WARNING: Need to set logfile before setting output to 'both', run 'trace output <filename>', setting to 'stdout' only\n");
+      _traceOutput = TRACE_OUTPUT_STDOUT;
+    }
+  }
+  else
+  {
+    if (!trace_setLogfile(location_))
+    {
+      if (_logfileFd != NULL)
+      {
+        pshell_printf("ERROR: Could not open logfile: %s, reverting to: %s\n", location_, _logfileName);
+      }
+      else
+      {
+        pshell_printf("ERROR: Could not open logfile: %s, reverting to: stdout\n", location_);
+      }
+    }
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void trace_setLogLevel(unsigned _logLevel)
 {
   trace_logLevel = _logLevel;
@@ -224,6 +288,7 @@ void trace_registerOutputFunction(TraceOutputFunction outputFunction_)
   if (outputFunction_ != NULL)
   {
     _outputFunction = outputFunction_;
+    _traceOutput = TRACE_OUTPUT_CUSTOM;
   }
   else
   {
@@ -377,7 +442,7 @@ void trace_setDefaultLogLevel(unsigned level_)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_)
+void trace_addUserLevel(const char *levelName_, unsigned levelValue_)
 {
   /*
    * call this function so we can keep track of our max level name string
@@ -387,9 +452,6 @@ void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDef
   {
     _maxLevelLength = strlen(levelName_);
   }
-#ifdef DYNAMIC_TRACE_FILTER
-  tf_addLevel(levelName_, levelValue_, isDefault_, isMaskable_);
-#endif
 }
 
 /******************************************************************************/
@@ -400,14 +462,24 @@ void trace_registerLevels(void)
    * register all our trace levels with the trace logger service
    * format of call is "name", level
    */
-  trace_addUserLevel(TL_ERROR_STRING, TL_ERROR, true, false);
-  trace_addUserLevel(TL_WARNING_STRING, TL_WARNING, true, true);
-  trace_addUserLevel(TL_FAILURE_STRING, TL_FAILURE, true, true);
-  trace_addUserLevel(TL_INFO_STRING, TL_INFO, false, true);
-  trace_addUserLevel(TL_DEBUG_STRING, TL_DEBUG, false, true);
-  trace_addUserLevel(TL_ENTER_STRING, TL_ENTER, false, true);
-  trace_addUserLevel(TL_EXIT_STRING, TL_EXIT, false, true);
-  trace_addUserLevel(TL_DUMP_STRING, TL_DUMP, false, true);
+  trace_addUserLevel(TL_ERROR_STRING, TL_ERROR);
+  trace_addUserLevel(TL_WARNING_STRING, TL_WARNING);
+  trace_addUserLevel(TL_FAILURE_STRING, TL_FAILURE);
+  trace_addUserLevel(TL_INFO_STRING, TL_INFO);
+  trace_addUserLevel(TL_DEBUG_STRING, TL_DEBUG);
+  trace_addUserLevel(TL_ENTER_STRING, TL_ENTER);
+  trace_addUserLevel(TL_EXIT_STRING, TL_EXIT);
+  trace_addUserLevel(TL_DUMP_STRING, TL_DUMP);
+#ifdef DYNAMIC_TRACE_FILTER
+  tf_addLevel(TL_ERROR_STRING, TL_ERROR, true, false);
+  tf_addLevel(TL_WARNING_STRING, TL_WARNING, true, true);
+  tf_addLevel(TL_FAILURE_STRING, TL_FAILURE, true, true);
+  tf_addLevel(TL_INFO_STRING, TL_INFO, false, true);
+  tf_addLevel(TL_DEBUG_STRING, TL_DEBUG, false, true);
+  tf_addLevel(TL_ENTER_STRING, TL_ENTER, false, true);
+  tf_addLevel(TL_EXIT_STRING, TL_EXIT, false, true);
+  tf_addLevel(TL_DUMP_STRING, TL_DUMP, false, true);
+#endif
 }
 
 /******************************************************************************/
@@ -743,18 +815,22 @@ void configureTrace(int argc_, char *argv_[])
       pshell_printf("**********************************\n");
       pshell_printf("\n");
       pshell_printf("Trace enabled.......: %s\n", (trace_isLogEnabled() ? ON : OFF));
-      if (_traceOutput == TRACE_OUTPUT_BOTH)
+      if (trace_getOutput() == TRACE_OUTPUT_CUSTOM)
       {
-        pshell_printf("Trace output........: %s\n", _logfileName);
+        pshell_printf("Trace output........: custom\n");
+      }
+      else if (trace_getOutput() == TRACE_OUTPUT_BOTH)
+      {
+        pshell_printf("Trace output........: %s\n", trace_getLogfile());
         pshell_printf("                    : stdout\n");
       }
-      else if (_traceOutput == TRACE_OUTPUT_STDOUT)
+      else if (trace_getOutput() == TRACE_OUTPUT_STDOUT)
       {
         pshell_printf("Trace output........: stdout\n");
       }
       else
       {
-        pshell_printf("Trace output........: %s\n", _logfileName);
+        pshell_printf("Trace output........: %s\n", trace_getLogfile());
       }
       pshell_printf("Trace format........: %s\n", (trace_isFormatEnabled() ? ON : OFF));
       pshell_printf("  Location..........: %s\n", (trace_isLocationEnabled() ? ON : OFF));
@@ -899,47 +975,7 @@ void configureTrace(int argc_, char *argv_[])
     }
     else if (pshell_isSubString(argv_[0], "output", 2))
     {
-      if (pshell_isSubString(argv_[1], "file", 2))
-      {
-        if (_logfileFd != NULL)
-        {
-          _traceOutput = TRACE_OUTPUT_FILE;
-        }
-        else
-        {
-          pshell_printf("ERROR: Need to set logfile before setting output to 'file', run 'trace output <filename>'\n");
-        }
-      }
-      else if (pshell_isSubString(argv_[1], "stdout", 2))
-      {
-        _traceOutput = TRACE_OUTPUT_STDOUT;
-      }
-      else if (pshell_isSubString(argv_[1], "both", 2))
-      {
-        if (_logfileFd != NULL)
-        {
-          _traceOutput = TRACE_OUTPUT_BOTH;
-        }
-        else
-        {
-          pshell_printf("WARNING: Need to set logfile before setting output to 'both', run 'trace output <filename>', setting to 'stdout' only\n");
-          _traceOutput = TRACE_OUTPUT_STDOUT;
-        }
-      }
-      else
-      {
-        if (!trace_setLogfile(argv_[1]))
-        {
-          if (_logfileFd != NULL)
-          {
-            pshell_printf("ERROR: Could not open logfile: %s, reverting to: %s\n", argv_[1], _logfileName);
-          }
-          else
-          {
-            pshell_printf("ERROR: Could not open logfile: %s, reverting to: stdout\n", argv_[1]);
-          }
-        }
-      }
+      trace_setOutput(argv_[1]);
     }
     else if (pshell_isSubString(argv_[0], "format", 1))
     {

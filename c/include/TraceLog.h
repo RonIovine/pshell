@@ -68,7 +68,9 @@ extern "C" {
  *   trace_getLogName()             -- return the registered log name
  *
  *   trace_setLogfile()             -- set the logfile name
-
+ *   trace_getLogfile()             -- get the logfile name
+ *   trace_getOutput()              -- get the output location
+ *
  *   trace_registerLevels()         -- register the built in log levels, should be done at program init
  *   trace_addUserLevel()           -- add a user defined level, should be done after built in levels registered
  *   trace_setLogLevel()            -- set the current display output level
@@ -203,7 +205,12 @@ typedef void (*TraceFormatFunction)(const char *name_,
                                     char *outputString_);
 void trace_registerFormatFunction(TraceFormatFunction formatFunction_);
 
-void trace_init(const char *logname_ = NULL, const char *logfile_ = NULL, unsigned loglevel_ = TL_DEFAULT);
+/*
+ * trace_init:
+ *
+ * initialize the overall trace logging subsystem
+ */
+void trace_init(const char *logname_ = NULL, const char *logfile_ = NULL, unsigned loglevel_ = TL_DEFAULT, bool traceFilter_ = false);
 
 /*
  * trace_setLogName:
@@ -220,11 +227,43 @@ void trace_setLogName(const char *logname_);
 /*
  * trace_getLogName:
  *
- * returns the registred log name
+ * returns the registered log name
  */
 const char *trace_getLogName(void);
 
+/*
+ * trace_setLogfile:
+ *
+ * set the trace output logfile
+ */
 bool trace_setLogfile(const char *filename_);
+
+/*
+ * trace_getLogfile:
+ *
+ * returns the registered log file
+ */
+char *trace_getLogfile(void);
+
+/*
+ * trace_getOutput:
+ *
+ * returns the output location
+ */
+
+#define TRACE_OUTPUT_FILE   0
+#define TRACE_OUTPUT_STDOUT 1
+#define TRACE_OUTPUT_BOTH   2
+#define TRACE_OUTPUT_CUSTOM 3
+
+unsigned trace_getOutput(void);
+
+/*
+ * trace_setOutput:
+ *
+ * set the output location
+ */
+void trace_setOutput(char *location_);
 
 /*
  * trace_registerLevels:
@@ -242,7 +281,7 @@ void trace_registerLevels(void);
  * our maximum trace type level string length so our display is formatted and aligned
  * correctly
  */
-void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDefault_ = false, bool isMaskable_ = true);
+void trace_addUserLevel(const char *levelName_, unsigned levelValue_);
 
 /*
  * trace_setLogLevel:
@@ -252,6 +291,11 @@ void trace_addUserLevel(const char *levelName_, unsigned levelValue_, bool isDef
  */
 void trace_setLogLevel(unsigned _logLevel);
 
+/*
+ * trace_setDefaultLogLevel:
+ *
+ * this function is used to set the default log level
+ */
 void trace_setDefaultLogLevel(unsigned level_);
 
 /*
@@ -276,10 +320,32 @@ void trace_enableLocation(bool enable_);
  */
 bool trace_isLocationEnabled(void);
 
+/*
+ * trace_enableFormat:
+ *
+ * enable/disable the displaying of full trace formatting, off=user-message only
+ */
 void trace_enableFormat(bool enable_);
+
+/*
+ * trace_isFormatEnabled:
+ *
+ * returns if trace formatting is enabled
+ */
 bool trace_isFormatEnabled(void);
 
+/*
+ * trace_enableLog:
+ *
+ * enable/disable the overall trace output logging
+ */
 void trace_enableLog(bool enable_);
+
+/*
+ * trace_isLogEnabled:
+ *
+ * returns if overall trace logging is enabled
+ */
 bool trace_isLogEnabled(void);
 
 /*
@@ -334,7 +400,18 @@ void trace_enableLogName(bool enable_);
  */
 bool trace_isLogNameEnabled(void);
 
+/*
+ * trace_enableFullDatetime:
+ *
+ * enable/disable the full datetime timestamp or time only
+ */
 void trace_enableFullDatetime(bool enable_);
+
+/*
+ * trace_isFullDatetimeEnabed:
+ *
+ * returns if the full datetime timestamp format is enabled
+ */
 bool trace_isFullDatetimeEnabed(void);
 
 /****************************************************************************

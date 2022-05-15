@@ -40,7 +40,6 @@
 #include <TraceLog.h>
 #endif
 
-
 /*
  ***********************************
  * "public" (i.e. global) data
@@ -329,8 +328,12 @@ static unsigned _defaultHierarchicalLevel = 0;
 
 /******************************************************************************/
 /******************************************************************************/
-void tf_init(void)
+void tf_init(const char *logname_, const char *logfile_, unsigned loglevel_)
 {
+
+#ifdef TF_INTEGRATED_TRACE_LOG
+  trace_init(logname_, logfile_, loglevel_, true);
+#endif
 
   /* setup trace level stuff */
   for (int i = 0; i < TF_MAX_LEVELS; i++)
@@ -379,6 +382,8 @@ void tf_init(void)
                     "             show {config | levels | threads [<thread>]} |\n"
 #endif
 #ifdef TF_INTEGRATED_TRACE_LOG
+                    "             output {file | stdout | both | <filename>} |\n"
+                    "             format {on | off} |\n"
                     "             location {on | off} |\n"
                     "             path {on | off} |\n"
                     "             prefix {on | off} |\n"
@@ -424,6 +429,9 @@ void tf_addLevel(const char *levelName_,
                  bool isDefault_,
                  bool isMaskable_)
 {
+#ifdef TF_INTEGRATED_TRACE_LOG
+  trace_addUserLevel(levelName_, levelValue_);
+#endif
   if (levelValue_ < TF_MAX_LEVELS)
   {
     if (levelValue_ < _minHierarchicalLevel)
@@ -735,7 +743,11 @@ void tf_callback(const char *file_,
 /******************************************************************************/
 void tf_registerLogFunction(tf_TraceLogFunction logFunction_)
 {
+#ifdef TF_INTEGRATED_TRACE_LOG
+  trace_registerOutputFunction(logFunction_);
+#else
   _logFunction = logFunction_;
+#endif
 }
 
 /************************************
@@ -817,10 +829,28 @@ void showConfig(void)
   pshell_printf("\n");
   pshell_printf("Trace enabled...........: %s\n", ((_traceEnabled) ? ON : OFF));
 #ifdef TF_INTEGRATED_TRACE_LOG
+  if (trace_getOutput() == TRACE_OUTPUT_CUSTOM)
+  {
+    pshell_printf("Trace output............: custom\n");
+  }
+  else if (trace_getOutput() == TRACE_OUTPUT_BOTH)
+  {
+    pshell_printf("Trace output............: %s\n", trace_getLogfile());
+    pshell_printf("                        : stdout\n");
+  }
+  else if (trace_getOutput() == TRACE_OUTPUT_STDOUT)
+  {
+    pshell_printf("Trace output............: stdout\n");
+  }
+  else
+  {
+    pshell_printf("Trace output............: %s\n", trace_getLogfile());
+  }
+  pshell_printf("Trace format............: %s\n", (trace_isFormatEnabled() ? ON : OFF));
   pshell_printf("Trace location..........: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
   pshell_printf("Trace path..............: %s\n", ((trace_isPathEnabled()) ? ON : OFF));
   pshell_printf("Trace name..............: %s\n", ((trace_isLogNameEnabled()) ? ON : OFF));
-  pshell_printf("Trace timestamp.........: %s\n", ((trace_isTimestampEnabled()) ? ON : OFF));
+  pshell_printf("Trace timestamp.........: %s (%s)\n", (trace_isTimestampEnabled() ? ON : OFF), (trace_isFullDatetimeEnabed() ? "date & time" : "time only"));
 #endif
   if (_breakpointLine != 0)
   {
@@ -1091,7 +1121,7 @@ void configureFilter(int argc, char *argv[])
     }
   }
 #ifdef TF_INTEGRATED_TRACE_LOG
-  else if (pshell_isSubString(argv[0], "location", 5) && (argc > 1))
+  else if (pshell_isSubString(argv[0], "location", 3) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "on", 2))
     {
@@ -1106,6 +1136,25 @@ void configureFilter(int argc, char *argv[])
       pshell_showUsage();
     }
   }
+  else if (pshell_isSubString(argv[0], "format", 1))
+  {
+    if (pshell_isSubString(argv[1], "on", 2))
+    {
+      trace_enableFormat(true);
+    }
+    else if (pshell_isSubString(argv[1], "off", 2))
+    {
+      trace_enableFormat(false);
+    }
+    else
+    {
+      pshell_showUsage();
+    }
+  }
+  else if (pshell_isSubString(argv[0], "output", 3) && (argc > 1))
+  {
+    trace_setOutput(argv[1]);
+  }
   else if (pshell_isSubString(argv[0], "timestamp", 4) && (argc > 1))
   {
     if (pshell_isSubString(argv[1], "on", 2))
@@ -1115,6 +1164,14 @@ void configureFilter(int argc, char *argv[])
     else if (pshell_isSubString(argv[1], "off", 2))
     {
       trace_enableTimestamp(false);
+    }
+    else if (pshell_isSubString(argv[1], "datetime", 1))
+    {
+      trace_enableFullDatetime(true);
+    }
+    else if (pshell_isSubString(argv[1], "time", 1))
+    {
+      trace_enableFullDatetime(false);
     }
     else
     {
@@ -1585,7 +1642,7 @@ bool getHierarchicalLevel(char *name_, unsigned &level_)
 {
   for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if ((_levelFilters[i].name != NULL) && (strcasecmp(name_, _levelFilters[i].name) == 0))
+    if ((_levelFilters[i].name != NULL) && (pshell_isSubStringNoCase(name_, _levelFilters[i].name, 4)))
     {
       level_ = i;
       return (true);
@@ -1600,7 +1657,7 @@ void addLevelFilter(char *name_, unsigned &level_)
 {
   for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if ((_levelFilters[i].name != NULL) && (strcasecmp(name_, _levelFilters[i].name) == 0))
+    if ((_levelFilters[i].name != NULL) && (pshell_isSubStringNoCase(name_, _levelFilters[i].name, 4)))
     {
       level_ |= _levelFilters[i].level;
       break;
@@ -1618,7 +1675,7 @@ void removeLevelFilter(char *name_, unsigned &level_)
 {
   for (int i = 0; i < TF_MAX_LEVELS; i++)
   {
-    if ((_levelFilters[i].name != NULL) && (strcasecmp(name_, _levelFilters[i].name) == 0))
+    if ((_levelFilters[i].name != NULL) && (pshell_isSubStringNoCase(name_, _levelFilters[i].name, 4)))
     {
       if (_levelFilters[i].isMaskable)
       {

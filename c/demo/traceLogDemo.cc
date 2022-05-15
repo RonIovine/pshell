@@ -232,17 +232,10 @@ int main (int argc, char *argv[])
 #endif
 
   /*
-   * register our standard trace levels with the trace log system
-   * so our trace display can be formatted and aligned correctly
-   */
-
-  trace_init("DEMO", NULL, logLevel);
-
-  /*
    * register our program specific trace log levels with the trace log system
-   * this must be done after registering our standard levels so we can keep
-   * track of our max level name string length so our trace display can be
-   * formatted and aligned correctly
+   * this must be done before the trace_init(0 call so we can keep track of our
+   * max level name string length so our trace display can be formatted and aligned
+   * correctly
    *
    * format of call is "name", level
    */
@@ -250,6 +243,13 @@ int main (int argc, char *argv[])
   trace_addUserLevel(TL_USER_LEVEL1_STRING, TL_USER_LEVEL1);
   trace_addUserLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2);
   trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3);
+
+  /*
+   * register our standard trace levels with the trace log system
+   * so our trace display can be formatted and aligned correctly
+   */
+
+  trace_init("DEMO", NULL, logLevel);
 
   /* start our pshell server in NON_BLOCKING mode since this process has it's own control loop */
   pshell_startServer("traceLogDemo", PSHELL_UDP_SERVER, PSHELL_NON_BLOCKING, PSHELL_LOCALHOST, 9191);

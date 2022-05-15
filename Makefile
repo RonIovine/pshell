@@ -448,7 +448,6 @@ endif
 
 	@echo "Building traceLogDemo program (C)..."
 	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) $(TRACE_LOG_DEMO_LIBS) -o $(BIN_DIR)/traceLogDemo
-#	$(VERBOSE)$(CC) $(INCLUDE) $(WARNINGS) $(TRACE_LOG_DEMO_FLAGS) $(SRC_DIR)/TraceLog.$(SRC_EXT) $(DEMO_DIR)/traceLogDemo.$(SRC_EXT) $(TRACE_LOG_DEMO_LIBS) -o $(BIN_DIR)/traceLogDemo
 
 ifeq ($(BUILD_GO), y)
 	@echo "Building pshellServerDemo program (go)..."

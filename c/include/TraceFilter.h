@@ -140,7 +140,7 @@ void tf_addLevel(const char *levelName_,
  * commands via the pshell_addCommand function and before the
  * pshell_startServer function
  */
-void tf_init(void);
+void tf_init(const char *logname_, const char *logfile_, unsigned loglevel_);
 
 /*
  * register a thread name for thread based trace filtering

@@ -356,34 +356,24 @@ int main (int argc, char *argv[])
 #endif
 
   /*
-   * register our standard trace levels with the trace filter
-   * mechanism, this must register our trace levels before
-   * calling 'tf_init'
-   */
-
-  trace_registerLevels();
-
-  /*
    * register our program specific trace log levels with the
-   * trace filter mechanism, this must be done after registering
-   * our standard levels and before calling 'tf_init', call this
-   * function instead of 'tf_addLevel' directly so we can keep
-   * track of our max level name string length so our trace display
-   * can be formatted and aligned correctly
+   * trace filter mechanism, this must be done before calling
+   * 'tf_init'
    *
    * format of call is "name", level, isDefault, isMaskable
    */
 
-  trace_addUserLevel(TL_USER_LEVEL1_STRING, TL_USER_LEVEL1, false, true);
-  trace_addUserLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2, false, true);
-  trace_addUserLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3, false, true);
+  tf_addLevel(TL_USER_LEVEL1_STRING, TL_USER_LEVEL1, false, true);
+  tf_addLevel(TL_USER_LEVEL2_STRING, TL_USER_LEVEL2, false, true);
+  tf_addLevel(TL_USER_LEVEL3_STRING, TL_USER_LEVEL3, false, true);
 
-  /*
-   * optionally set a log name prefix, if not set, 'TRACE' will be used,
-   * if set to 'NULL', no name prefix will be used
+  /* initialize our dynamic trace filtering feature, this should be done
+   * at the beginning of the program, right after the 'main' and before
+   * any registration of pshell user commands and before starting the
+   * pshell server
    */
 
-  trace_setLogName("DEMO");
+  tf_init("DEMO", "traceFilterDemo.log", TL_ALL);
 
   /*
    * register a custom client provided log function, this function will
@@ -399,7 +389,7 @@ int main (int argc, char *argv[])
   openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
 
   /* register our log function */
-  trace_registerOutputFunction(sampleOutputFunction);
+  tf_registerLogFunction(sampleOutputFunction);
 
   /*
    * add a trace thread name, this should be done in the initialization
@@ -408,14 +398,6 @@ int main (int argc, char *argv[])
    */
 
   tf_registerThread("main");
-
-  /* initialize our dynamic trace filtering feature, this should be done
-   * at the beginning of the program, right after the 'main' and before
-   * any registration of pshell user commands and before starting the
-   * pshell server
-   */
-
-  tf_init();
 
   /*
    * Register all our pshell callback commands here, after the 'tf_init'
