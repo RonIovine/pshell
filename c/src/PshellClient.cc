@@ -237,10 +237,10 @@ bool init(const char *destination_, const char *server_);
 bool send(void);
 bool receive(int serverResponseTimeout);
 void tokenize(char *string_, const char *delimeter_, char *tokens_[], unsigned maxTokens_, unsigned *numTokens_);
-bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_);
+bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, bool clear_, bool silent_);
 bool initInteractiveMode(void);
 void processInteractiveMode(void);
-void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
+void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_);
 void getNamedServers(void);
 void showNamedServers(void);
 void showActiveServers(void);
@@ -425,7 +425,7 @@ const char *findServerPort(const char *name_)
 /******************************************************************************/
 bool getVersion(void)
 {
-  if (processCommand(PSHELL_QUERY_VERSION, NULL, 0, 0, false, true))
+  if (processCommand(PSHELL_QUERY_VERSION, NULL, -1, 0, false, true))
   {
     _version = (unsigned)atoi(_pshellRcvMsg->payload);
     if ((_version < PSHELL_VERSION_1) || (_version > PSHELL_VERSION))
@@ -453,7 +453,7 @@ bool getVersion(void)
 bool getServerName(void)
 {
   /* query for our process name so we can setup our prompt and title bar */
-  if (processCommand(PSHELL_QUERY_NAME, NULL, 0, 0, false, true))
+  if (processCommand(PSHELL_QUERY_NAME, NULL, -1, 0, false, true))
   {
     strcpy(_serverName, _pshellRcvMsg->payload);
     return (true);
@@ -469,7 +469,7 @@ bool getServerName(void)
 /******************************************************************************/
 bool getTitle(void)
 {
-  if (processCommand(PSHELL_QUERY_TITLE, NULL, 0, 0, false, true))
+  if (processCommand(PSHELL_QUERY_TITLE, NULL, -1, 0, false, true))
   {
     strcpy(_title, _pshellRcvMsg->payload);
     return (true);
@@ -486,7 +486,7 @@ bool getTitle(void)
 bool getBanner(void)
 {
   /* query for our welcome banner message */
-  if (processCommand(PSHELL_QUERY_BANNER, NULL, 0, 0, false, true))
+  if (processCommand(PSHELL_QUERY_BANNER, NULL, -1, 0, false, true))
   {
     strcpy(_banner, _pshellRcvMsg->payload);
     return (true);
@@ -503,7 +503,7 @@ bool getBanner(void)
 bool getPrompt(void)
 {
   /* query for our prompt */
-  if (processCommand(PSHELL_QUERY_PROMPT, NULL, 0, 0, false, true))
+  if (processCommand(PSHELL_QUERY_PROMPT, NULL, -1, 0, false, true))
   {
     strcpy(_prompt, _pshellRcvMsg->payload);
     return (true);
@@ -519,7 +519,7 @@ bool getPrompt(void)
 /******************************************************************************/
 bool getPayloadSize(void)
 {
-  if (processCommand(PSHELL_QUERY_PAYLOAD_SIZE, NULL, 0, 0, false, true))
+  if (processCommand(PSHELL_QUERY_PAYLOAD_SIZE, NULL, -1, 0, false, true))
   {
     _pshellPayloadSize = atoi(_pshellRcvMsg->payload);
     _pshellRcvMsg = (PshellMsg*)malloc(_pshellPayloadSize+PSHELL_HEADER_SIZE);
@@ -922,7 +922,7 @@ unsigned findCommand(char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
-bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repeat_, bool clear_, bool silent_)
+bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, bool clear_, bool silent_)
 {
   unsigned iteration = 0;
   unsigned numTokens;
@@ -991,19 +991,32 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
     strncpy(_pshellSendMsg.payload, command_, PSHELL_RL_MAX_COMMAND_SIZE);
   }
 
-  do
+  while (true)
   {
     if (repeat_ > 0)
     {
       iteration++;
-      fprintf(stdout,
-              "\033]0;%s: %s, Mode: COMMAND LINE[%s], Rate: %d SEC, Iteration: %d of %d\007",
-              _title,
-              _serverDisplay,
-              command_,
-              rate_,
-              iteration,
-              repeat_);
+      if (rate_ >= 0)
+      {
+        fprintf(stdout,
+                "\033]0;%s: %s, Mode: COMMAND LINE[%s], Rate: %f SEC, Iteration: %d of %d\007",
+                _title,
+                _serverDisplay,
+                command_,
+                float(rate_)/float(USEC_PER_SECOND),
+                iteration,
+                repeat_);
+      }
+      else
+      {
+        fprintf(stdout,
+                "\033]0;%s: %s, Mode: COMMAND LINE[%s], Iteration: %d of %d\007",
+                _title,
+                _serverDisplay,
+                command_,
+                iteration,
+                repeat_);
+      }
       fflush(stdout);
     }
     if (clear_)
@@ -1036,12 +1049,20 @@ bool processCommand(char msgType_, char *command_, unsigned rate_, unsigned repe
     {
       return (false);
     }
+
     if ((repeat_ > 0) && (iteration == repeat_))
     {
       break;
     }
-    usleep(rate_);
-  } while (rate_ || repeat_);
+    else if (rate_ >= 0)
+    {
+      usleep(rate_);
+    }
+    else if (repeat_ == 0)
+    {
+      break;
+    }
+  }
 
   return (true);
 
@@ -1161,7 +1182,7 @@ bool initInteractiveMode(void)
    */
   if  (!_isBroadcastServer)
   {
-    if (!processCommand(PSHELL_QUERY_COMMANDS2, NULL, 0, 0, false, true))
+    if (!processCommand(PSHELL_QUERY_COMMANDS2, NULL, -1, 0, false, true))
     {
       return (false);
     }
@@ -1187,7 +1208,7 @@ bool initInteractiveMode(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_)
+void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_)
 {
   FILE *fp;
   char inputLine[180];
@@ -1220,19 +1241,32 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
 
   if (fp != NULL)
   {
-    do
+    while (true)
     {
       if (repeat_ > 0)
       {
         iteration++;
-        fprintf(stdout,
-                "\033]0;%s: %s, Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007",
-                _title,
-                _serverDisplay,
-                filename_,
-                rate_,
-                iteration,
-                repeat_);
+        if (rate_ >= 0)
+        {
+          fprintf(stdout,
+                  "\033]0;%s: %s, Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007",
+                  _title,
+                  _serverDisplay,
+                  filename_,
+                  rate_,
+                  iteration,
+                  repeat_);
+        }
+        else
+        {
+          fprintf(stdout,
+                  "\033]0;%s: %s, Mode: BATCH[%s], Iteration: %d of %d\007",
+                  _title,
+                  _serverDisplay,
+                  filename_,
+                  iteration,
+                  repeat_);
+        }
         fflush(stdout);
       }
       if (clear_)
@@ -1257,9 +1291,16 @@ void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool cl
       {
         break;
       }
-      usleep(rate_);
+      else if (rate_ >= 0)
+      {
+        usleep(rate_);
+      }
+      else if (repeat_ == 0)
+      {
+        break;
+      }
       rewind(fp);
-    } while (rate_ || repeat_);
+    }
     fclose(fp);
   }
   else
@@ -1355,7 +1396,7 @@ void processInteractiveMode(void)
           }
           else
           {
-            processBatchFile(tokens[1], 0, 0, false);
+            processBatchFile(tokens[1], -1, 0, false);
           }
         }
         else if (findCommand(tokens[0]) > 2)
@@ -1388,7 +1429,7 @@ void processInteractiveMode(void)
       }
       else
       {
-        processCommand(PSHELL_USER_COMMAND, _interactiveCommand, 0, 0, false, false);
+        processCommand(PSHELL_USER_COMMAND, _interactiveCommand, -1, 0, false, false);
       }
     }
   }
@@ -1773,7 +1814,7 @@ void showCommands(void)
   }
   if (!_isBroadcastServer)
   {
-    processCommand(PSHELL_QUERY_COMMANDS1, NULL, 0, 0, false, false);
+    processCommand(PSHELL_QUERY_COMMANDS1, NULL, -1, 0, false, false);
   }
   else
   {
@@ -1979,7 +2020,7 @@ void registerSignalHandlers(void)
 int main(int argc, char *argv[])
 {
 
-  unsigned rate = 0;
+  float rate = -1;
   unsigned repeat = 0;
   bool needFile = false;
   bool needCommand = false;
@@ -2099,14 +2140,14 @@ int main(int argc, char *argv[])
       * repeating the command, since it will be too quick to see
       * anyway
       */
-      if ((rate > 0) && (repeat == 0))
+      if ((rate >= 0) && (repeat == 0))
       {
         fprintf(stdout,
-                "\033]0;%s: %s, Mode: COMMAND LINE[%s], Rate: %d SEC\007",
+                "\033]0;%s: %s, Mode: COMMAND LINE[%s], Rate: %f SEC\007",
                 _title,
                 _serverDisplay,
                 command,
-                rate);
+                float(rate)/float(USEC_PER_SECOND));
         fflush(stdout);
       }
       processCommand(PSHELL_USER_COMMAND, command, rate, repeat, clear, false);
@@ -2118,14 +2159,14 @@ int main(int argc, char *argv[])
       * repeating the command, since it will be too quick to see
       * anyway
       */
-      if ((rate > 0) && (repeat == 0))
+      if ((rate >= 0) && (repeat == 0))
       {
         fprintf(stdout,
-                "\033]0;%s: %s, Mode: BATCH[%s], Rate: %d SEC\007",
+                "\033]0;%s: %s, Mode: BATCH[%s], Rate: %f SEC\007",
                 _title,
                 _serverDisplay,
                 filename,
-                rate);
+                float(rate)/float(USEC_PER_SECOND));
         fflush(stdout);
       }
       processBatchFile(filename, rate, repeat, clear);

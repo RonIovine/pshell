@@ -248,27 +248,34 @@ def _processCommandLine():
   global _gTimeout
   PshellServer._gPshellClientTimeout = _gTimeout
   command = _gCommand.split()
-  if _gRate > 0 and _gRepeat == 0:
-    sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gCommand, _gRate))
+  if _gRate >= 0 and _gRepeat == 0:
+    sys.stdout.write("\033]0;{}: {}[{}], Mode: COMMAND LINE[{}], Rate: {} SEC\007".format(_gTitle, _gServerName, _getIpAddress(), _gCommand, _gRate))
   while (True):
     if (_gRepeat > 0):
       _gIteration += 1
-      sys.stdout.write("\033]0;%s: %s[%s], Mode: COMMAND LINE[%s], Rate: %d SEC, Iteration: %d of %d\007" %
-                      (_gTitle,
-                       _gServerName,
-                       _getIpAddress(),
-                       _gCommand,
-                       _gRate,
-                       _gIteration,
-                       _gRepeat))
+      if _gRate >= 0:
+        sys.stdout.write("\033]0;{}: {}[{}], Mode: COMMAND LINE[{}], Rate: {} SEC, Iteration: {} of {}\007".format(_gTitle,
+                                                                                                                   _gServerName,
+                                                                                                                   _getIpAddress(),
+                                                                                                                   _gCommand,
+                                                                                                                   _gRate,
+                                                                                                                   _gIteration,
+                                                                                                                   _gRepeat))
+      else:
+        sys.stdout.write("\033]0;{}: {}[{}], Mode: COMMAND LINE[{}], Iteration: {} of {}\007".format(_gTitle,
+                                                                                                     _gServerName,
+                                                                                                     _getIpAddress(),
+                                                                                                     _gCommand,
+                                                                                                     _gIteration,
+                                                                                                     _gRepeat))
     if (_gClear != False):
       sys.stdout.write(_gClear)
     _comandDispatcher(command)
     if _gRepeat > 0 and _gIteration == _gRepeat:
       break
-    elif (_gRate > 0):
+    elif _gRate >= 0:
       time.sleep(_gRate)
-    elif (_gRepeat == 0):
+    elif _gRepeat == 0:
       break
 
 #################################################################################
@@ -300,22 +307,29 @@ def _processBatchFile():
     print("PSHELL_ERROR: Could not open file: '%s'" % _gFilename)
     return
   # we found a batch file, process it
-  if _gRate > 0 and _gRepeat == 0:
-    sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC\007" % (_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
+  if _gRate >= 0 and _gRepeat == 0:
+    sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Rate: {} SEC\007".format(_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
   while (True):
     if (_gClear != False):
       sys.stdout.write(_gClear)
     file.seek(0, 0)
     if (_gRepeat > 0):
       _gIteration += 1
-      sys.stdout.write("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007" %
-                      (_gTitle,
-                       _gServerName,
-                       _getIpAddress(),
-                       _gFilename,
-                       _gRate,
-                       _gIteration,
-                       _gRepeat))
+      if _gRate >= 0:
+        sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Rate: {} SEC, Iteration: {} of {}\007".format(_gTitle,
+                                                                                                            _gServerName,
+                                                                                                            _getIpAddress(),
+                                                                                                            _gFilename,
+                                                                                                            _gRate,
+                                                                                                            _gIteration,
+                                                                                                            _gRepeat))
+      else:
+        sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Iteration: {} of {}\007".format(_gTitle,
+                                                                                              _gServerName,
+                                                                                              _getIpAddress(),
+                                                                                              _gFilename,
+                                                                                              _gIteration,
+                                                                                              _gRepeat))
     for line in file:
       # skip comments
       line = line.strip()
@@ -324,9 +338,9 @@ def _processBatchFile():
         _comandDispatcher(command)
     if _gRepeat > 0 and _gIteration == _gRepeat:
       break
-    elif (_gRate > 0):
+    elif _gRate >= 0:
       time.sleep(_gRate)
-    elif (_gRepeat == 0):
+    elif _gRepeat == 0:
       break
   file.close()
 
@@ -697,7 +711,7 @@ if (__name__ == '__main__'):
 
   _gPort = PshellServer.UNIX
 
-  _gRate = 0
+  _gRate = -1
   _gRepeat = 0
   _gIteration = 0
   _gClear = False
