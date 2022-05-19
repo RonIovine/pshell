@@ -116,7 +116,7 @@ const char *tf_TraceSymbols::_symbolTable[TF_MAX_TRACE_SYMBOLS];
 
 void tf_registerLogFunction(tf_TraceLogFunction logFunction_){}
 void tf_addLevel(const char *levelName_, unsigned levelValue_, bool isDefault_, bool isMaskable_){}
-void tf_init(void){}
+void tf_init(const char *logname_, const char *logfile_, unsigned loglevel_){}
 void tf_registerThread(const char *threadName_){}
 bool tf_isFilterPassed(const char *file_, int line_, const char *function_, unsigned level_){return (true);}
 void tf_watch(const char *file_, int line_, const char *function_, const char *symbol_, void *address_, int width_, const char *format_, tf_TraceControl control_){}

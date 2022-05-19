@@ -1579,7 +1579,11 @@ func loadConfigFile() {
               _gServerType = value[1]
             }
           } else if (strings.ToLower(option[1]) == "timeout") {
-            _gTcpTimeout, _ = strconv.Atoi(value[1])
+            if (strings.ToLower(option[1]) == "none") {
+              _gTcpTimeout = 0
+            } else {
+              _gTcpTimeout, _ = strconv.Atoi(value[1])
+            }
           }
         }
       }
@@ -1617,7 +1621,7 @@ func showWelcome() {
   printf("#\n")
   printf(server)
   printf("#\n")
-  if (_gServerType == LOCAL) {
+  if (_gTcpTimeout == 0) {
     printf("#  Idle session timeout: NONE\n")
   } else {
     printf("#  Idle session timeout: %d minutes\n", _gTcpTimeout)
@@ -2438,7 +2442,9 @@ func receiveTCP() {
     if (command == "") {
       printf("\r%s", _gTcpPrompt)
     }
-    _gConnectFd.SetReadDeadline(time.Now().Add(time.Minute*time.Duration(_gTcpTimeout)))
+    if (_gTcpTimeout > 0) {
+      _gConnectFd.SetReadDeadline(time.Now().Add(time.Minute*time.Duration(_gTcpTimeout)))
+    }
     length, err = _gConnectFd.Read(_gPshellRcvMsg)
     if (err == nil) {
       command,

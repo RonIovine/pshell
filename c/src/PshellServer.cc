@@ -1966,6 +1966,7 @@ static void runLocalServer(void)
   strcpy(_ipAddress, "local");
   sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
   showWelcome();
+  pshell_rl_setIdleTimeout(PSHELL_RL_ONE_MINUTE*_defaultIdleTimeout);
   while (!_quit && ((idleSession = pshell_rl_getInput(_interactivePrompt, inputLine)) == false))
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
@@ -2680,10 +2681,16 @@ static void loadConfigFile(void)
             {
               _port = pshell_getUnsigned(config->tokens[1]);
             }
-            else if (pshell_isEqual(item->tokens[1], "timeout") &&
-                     pshell_isNumeric(config->tokens[1]))
+            else if (pshell_isEqual(item->tokens[1], "timeout"))
             {
-              _defaultIdleTimeout = pshell_getInt(config->tokens[1]);
+              if (pshell_isNumeric(config->tokens[1]))
+              {
+                _defaultIdleTimeout = pshell_getInt(config->tokens[1]);
+              }
+              else if (pshell_isEqualNoCase(config->tokens[1], "none"))
+              {
+                _defaultIdleTimeout = PSHELL_RL_IDLE_TIMEOUT_NONE;
+              }
               pshell_rl_setIdleTimeout(_defaultIdleTimeout*PSHELL_RL_ONE_MINUTE);
             }
             else if (pshell_isEqual(item->tokens[1], "type"))

@@ -1138,6 +1138,7 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
   global _gPort
   global _gRunning
   global _gPrompt
+  global _gIdleSessionTimeout
   _cleanupFileSystemResources()
   if (_gRunning == False):
     _gServerName = serverName_
@@ -1146,7 +1147,7 @@ def _startServer(serverName_, serverType_, serverMode_, hostnameOrIpAddr_, port_
     _gHostnameOrIpAddr = hostnameOrIpAddr_
     _gPort = port_
     if _gServerType == TCP:
-      _gIdleSessionTimeout = 10
+      _gIdleSessionTimeout = 10  # minutes
     _loadConfigFile()
     _loadStartupFile()
     if _gPrompt[-1] != " ":
@@ -1421,6 +1422,7 @@ def _runLocalServer():
   _showWelcome()
   _gQuitLocal = False
   command = ""
+  PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*_gIdleSessionTimeout)
   while (not _gQuitLocal):
     (command, _gQuitLocal) = PshellReadline.getInput(_gPrompt)
     if (not _gQuitLocal):
@@ -1976,9 +1978,11 @@ def _loadConfigFile():
                 (value[1].lower() == UNIX) or
                 (value[1].lower() == LOCAL)):
               _gServerType = value[1].lower()
-          elif ((option[1].lower() == "timeout") and (value[1].isdigit())):
-            _gIdleSessionTimeout = int(value[1])
-            PshellReadline.setIdleTimeout(PshellReadline.ONE_MINUTE*_gIdleSessionTimeout)
+          elif (option[1].lower() == "timeout"):
+            if (value[1].isdigit()):
+              _gIdleSessionTimeout = int(value[1])
+            elif (value[1].lower() == "none"):
+              _gIdleSessionTimeout = PshellReadline.IDLE_TIMEOUT_NONE
   file.close()
   return
 
