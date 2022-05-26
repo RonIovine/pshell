@@ -39,6 +39,13 @@
 /* constants */
 
 #define MAX_STRING_SIZE 512
+#define MAX_USER_MESSAGE_SIZE 4096
+#define MAX_OUTPUT_MESSAGE_SIZE MAX_USER_MESSAGE_SIZE+MAX_STRING_SIZE
+
+#define TRACE_OUTPUT_FILE   0x0001
+#define TRACE_OUTPUT_STDOUT 0x0002
+#define TRACE_OUTPUT_CUSTOM 0x0004
+#define TRACE_OUTPUT_ALL    (TRACE_OUTPUT_FILE | TRACE_OUTPUT_STDOUT | TRACE_OUTPUT_CUSTOM)
 
 #define TRACE_USE_COLORS
 #ifdef TRACE_USE_COLORS
@@ -90,10 +97,12 @@ static TraceFormatFunction _formatFunction = NULL;
 static char _logName[MAX_STRING_SIZE] = {"Trace"};
 static bool _logNameEnabled = true;
 static unsigned _traceOutput = TRACE_OUTPUT_STDOUT;
-static char _outputString[MAX_STRING_SIZE];
-static char _userMessage[MAX_STRING_SIZE];
+static char _outputString[MAX_OUTPUT_MESSAGE_SIZE];
+static char _userMessage[MAX_USER_MESSAGE_SIZE];
 static char _timestamp[MAX_STRING_SIZE];
 static const char *_timestampFormat = "%T";
+static const char *_defaultTimestampFormat = "%T";
+static const char *_customTimestampFormat = NULL;
 static bool _timestampAddUsec = true;
 static pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool _printLocation = true;
@@ -134,16 +143,22 @@ static bool isColorsEnabled(void);
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_init(const char *logname_, const char *logfile_, unsigned loglevel_, bool traceFilter_)
+void trace_init(const char *logname_,
+                const char *logfile_,
+                unsigned loglevel_,
+                TraceOutputFunction outputFunction_,
+                TraceFormatFunction formatFunction_,
+                const char *timestampFormat_,
+                bool traceFilter_)
 {
   trace_registerLevels();
   trace_setLogName(logname_);
   trace_setLogLevel(loglevel_);
   trace_setDefaultLogLevel(loglevel_);
-  if (!trace_setLogfile(logfile_))
-  {
-    TRACE_ERROR("Could not open logfile: %s, reverting to: stdout", logfile_);
-  }
+  trace_setTimestampFormat(timestampFormat_);
+  trace_setLogfile(logfile_);
+  trace_registerOutputFunction(outputFunction_);
+  trace_registerFormatFunction(formatFunction_);
   pshell_registerServerLogFunction(pshellLogFunction);
   if (!traceFilter_)
   {
@@ -152,16 +167,16 @@ void trace_init(const char *logname_, const char *logfile_, unsigned loglevel_, 
                       "trace",
                       "configure/display various trace logger settings",
                       "on | off | show |\n"
-                      "             output {file | stdout | both | <filename>} |\n"
+                      "             output {file | stdout | custom | all | <filename>} |\n"
                       "             level {all | default | <value>} |\n"
                       "             default {all | <value>} |\n"
                       "             format {on | off} |\n"
                       "             name {on | off | default | <value>} |\n"
                       "             location {on | off} |\n"
-                      "             timestamp {on | off | datetime | time} |\n"
+                      "             timestamp {on | off | datetime | time  | custom | default} |\n"
                       "             colors {on | off}",
                       1,
-                      2,
+                      3,
                       false);
   }
 }
@@ -186,18 +201,21 @@ bool trace_setLogfile(const char *filename_)
     }
     else if (_logfileFd != NULL)
     {
+      // could not open new logfile, but we already have a previous one,
+      // just stick with that one
       return (false);
     }
     else
     {
-      _traceOutput = TRACE_OUTPUT_STDOUT;
+      // could not open new logfile and no old one open, disable the output to a file
+      _traceOutput &= ~TRACE_OUTPUT_FILE;
       return (false);
     }
   }
   else
   {
     _logfileFd = NULL;
-    _traceOutput = TRACE_OUTPUT_STDOUT;
+    _traceOutput &= ~TRACE_OUTPUT_FILE;
     return (false);
   }
 }
@@ -211,44 +229,99 @@ char *trace_getLogfile(void)
 
 /******************************************************************************/
 /******************************************************************************/
-unsigned trace_getOutput(void)
+bool trace_isOutputStdout(void)
 {
-  return (_traceOutput);
+  return (_traceOutput & TRACE_OUTPUT_STDOUT);
 }
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_setOutput(char *location_)
+bool trace_isOutputFile(void)
 {
-  if (_traceOutput == TRACE_OUTPUT_CUSTOM)
+  return ((_traceOutput & TRACE_OUTPUT_FILE) && (_logfileFd != NULL));
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool trace_isOutputCustom(void)
+{
+  return ((_traceOutput & TRACE_OUTPUT_CUSTOM) && (_outputFunction != NULL));
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool trace_isOutputAll(void)
+{
+  return (trace_isOutputStdout() && trace_isOutputFile() && trace_isOutputCustom());
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_setOutput(char *location_, bool add_)
+{
+  if (pshell_isSubString(location_, "custom", 2))
   {
-    pshell_printf("ERROR: Cannot change output location when using a custom registered output function\n");
+    if (_outputFunction != NULL)
+    {
+      if (add_)
+      {
+        // add to existing output setting
+        _traceOutput |= TRACE_OUTPUT_CUSTOM;
+      }
+      else
+      {
+        // set to specified output setting
+        _traceOutput = TRACE_OUTPUT_CUSTOM;
+      }
+    }
+    else
+    {
+      pshell_printf("Cannot set custom log output, no custom log output function registered\n");
+    }
   }
   else if (pshell_isSubString(location_, "file", 2))
   {
     if (_logfileFd != NULL)
     {
-      _traceOutput = TRACE_OUTPUT_FILE;
+      if (add_)
+      {
+        // add to existing output setting
+        _traceOutput |= TRACE_OUTPUT_FILE;
+      }
+      else
+      {
+        // set to specified output setting
+        _traceOutput = TRACE_OUTPUT_FILE;
+      }
     }
     else
     {
-      pshell_printf("ERROR: Need to set logfile before setting output to 'file', run 'trace output <filename>'\n");
+      pshell_printf("Need to set logfile before setting output to 'file', run 'trace output <filename>'\n");
     }
   }
   else if (pshell_isSubString(location_, "stdout", 2))
   {
-    _traceOutput = TRACE_OUTPUT_STDOUT;
-  }
-  else if (pshell_isSubString(location_, "both", 2))
-  {
-    if (_logfileFd != NULL)
+    if (add_)
     {
-      _traceOutput = TRACE_OUTPUT_BOTH;
+      // add to existing output setting
+      _traceOutput |= TRACE_OUTPUT_STDOUT;
     }
     else
     {
-      pshell_printf("WARNING: Need to set logfile before setting output to 'both', run 'trace output <filename>', setting to 'stdout' only\n");
+      // set to specified output setting
       _traceOutput = TRACE_OUTPUT_STDOUT;
+    }
+  }
+  else if (pshell_isSubString(location_, "all", 2))
+  {
+    _traceOutput = TRACE_OUTPUT_ALL;
+    if (_logfileFd == NULL)
+    {
+      _traceOutput &= ~TRACE_OUTPUT_FILE;
+    }
+    else if (_outputFunction == NULL)
+    {
+      _traceOutput &= ~TRACE_OUTPUT_CUSTOM;
     }
   }
   else
@@ -257,11 +330,11 @@ void trace_setOutput(char *location_)
     {
       if (_logfileFd != NULL)
       {
-        pshell_printf("ERROR: Could not open logfile: %s, reverting to: %s\n", location_, _logfileName);
+        pshell_printf("Could not open logfile: %s, reverting to: %s\n", location_, _logfileName);
       }
       else
       {
-        pshell_printf("ERROR: Could not open logfile: %s, reverting to: stdout\n", location_);
+        pshell_printf("Could not open logfile: %s, reverting to: stdout\n", location_);
       }
     }
   }
@@ -269,9 +342,9 @@ void trace_setOutput(char *location_)
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_setLogLevel(unsigned _logLevel)
+void trace_setLogLevel(unsigned logLevel_)
 {
-  trace_logLevel = _logLevel;
+  trace_logLevel = logLevel_;
 }
 
 /******************************************************************************/
@@ -290,10 +363,6 @@ void trace_registerOutputFunction(TraceOutputFunction outputFunction_)
     _outputFunction = outputFunction_;
     _traceOutput = TRACE_OUTPUT_CUSTOM;
   }
-  else
-  {
-    TRACE_ERROR("NULL outputFunction, not registered");
-  }
 }
 
 /******************************************************************************/
@@ -303,10 +372,6 @@ void trace_registerFormatFunction(TraceFormatFunction formatFunction_)
   if (formatFunction_ != NULL)
   {
     _formatFunction = formatFunction_;
-  }
-  else
-  {
-    TRACE_ERROR("NULL formatFunction, not registered");
   }
 }
 
@@ -416,13 +481,16 @@ bool trace_isLogEnabled(void)
 /******************************************************************************/
 void trace_enableFullDatetime(bool enable_)
 {
-  if ((_fullDatetime = enable_) == true)
+  if (_customTimestampFormat == NULL)
   {
-    _timestampFormat = "%Y-%m-%d %T";
-  }
-  else
-  {
-    _timestampFormat = "%T";
+    if ((_fullDatetime = enable_) == true)
+    {
+      _timestampFormat = "%Y-%m-%d %T";
+    }
+    else
+    {
+      _timestampFormat = "%T";
+    }
   }
 }
 
@@ -486,8 +554,36 @@ void trace_registerLevels(void)
 /******************************************************************************/
 void trace_setTimestampFormat(const char *format_, bool addUsec_)
 {
-  _timestampFormat = format_;
-  _timestampAddUsec = addUsec_;
+  if (format_ != NULL)
+  {
+    _customTimestampFormat = format_;
+    _timestampFormat = _customTimestampFormat;
+    _timestampAddUsec = addUsec_;
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void trace_setCustomTimestamp(bool custom_)
+{
+  if (custom_)
+  {
+    if (_customTimestampFormat != NULL)
+    {
+      _timestampFormat = _customTimestampFormat;
+    }
+  }
+  else
+  {
+    _timestampFormat = _defaultTimestampFormat;
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool trace_isCustomTimestamp(void)
+{
+  return (_timestampFormat == _customTimestampFormat);
 }
 
 /******************************************************************************/
@@ -504,7 +600,7 @@ void trace_outputLog(const char *level_,
   _userMessage[0] = 0;
   va_list args;
   va_start(args, format_);
-  vsprintf(&_userMessage[strlen(_userMessage)], format_, args);
+  vsnprintf(_userMessage, sizeof(_userMessage), format_, args);
   va_end(args);
 
   // format the trace
@@ -518,7 +614,7 @@ void trace_outputLog(const char *level_,
 
 /******************************************************************************/
 /******************************************************************************/
-void trace_outputDump(void *address_,
+void trace_outputDump(const void *address_,
                       unsigned length_,
                       const char *level_,
                       const char *file_,
@@ -537,7 +633,7 @@ void trace_outputDump(void *address_,
   _userMessage[0] = 0;
   va_list args;
   va_start(args, format_);
-  vsprintf(&_userMessage[strlen(_userMessage)], format_, args);
+  vsnprintf(_userMessage, sizeof(_userMessage), format_, args);
   va_end(args);
 
   // format the trace
@@ -701,13 +797,13 @@ void formatTrace(const char *name_,
       }
 
       // add the user message
-      sprintf(&_outputString[strlen(_outputString)], "%s\n", userMessage_);
+      snprintf(&_outputString[strlen(_outputString)], sizeof(_outputString)-strlen(_outputString), "%s\n", userMessage_);
     }
   }
   else
   {
     // format not enabled, just add the user message
-    sprintf(&_outputString[strlen(_outputString)], "%s\n", userMessage_);
+    snprintf(&_outputString[strlen(_outputString)], sizeof(_outputString)-strlen(_outputString), "%s\n", userMessage_);
   }
 
 }
@@ -716,24 +812,18 @@ void formatTrace(const char *name_,
 /******************************************************************************/
 void printLine(char *line_)
 {
-  if (_outputFunction != NULL)
+  if (trace_isOutputCustom())
   {
     // custom output function registered, call it
     (*_outputFunction)(line_);
   }
-  else if (_traceOutput == TRACE_OUTPUT_FILE)
+  if (trace_isOutputFile())
   {
     fprintf(_logfileFd, "%s", line_);
     fflush(_logfileFd);
   }
-  else if (_traceOutput == TRACE_OUTPUT_STDOUT)
+  if (trace_isOutputStdout())
   {
-    printf("%s", line_);
-  }
-  else  /* both */
-  {
-    fprintf(_logfileFd, "%s", line_);
-    fflush(_logfileFd);
     printf("%s", line_);
   }
 }
@@ -815,27 +905,50 @@ void configureTrace(int argc_, char *argv_[])
       pshell_printf("**********************************\n");
       pshell_printf("\n");
       pshell_printf("Trace enabled.......: %s\n", (trace_isLogEnabled() ? ON : OFF));
-      if (trace_getOutput() == TRACE_OUTPUT_CUSTOM)
+      if (trace_isOutputAll())
+      {
+        pshell_printf("Trace output........: stdout\n");
+        pshell_printf("                    : custom\n");
+        pshell_printf("                    : %s\n", trace_getLogfile());
+      }
+      else if (trace_isOutputStdout() && trace_isOutputCustom())
+      {
+        pshell_printf("Trace output........: stdout\n");
+        pshell_printf("                    : custom\n");
+      }
+      else if (trace_isOutputStdout() && trace_isOutputFile())
+      {
+        pshell_printf("Trace output........: stdout\n");
+        pshell_printf("                    : %s\n", trace_getLogfile());
+      }
+      else if (trace_isOutputCustom() && trace_isOutputFile())
+      {
+        pshell_printf("Trace output........: custom\n");
+        pshell_printf("                    : %s\n", trace_getLogfile());
+      }
+      else if (trace_isOutputCustom())
       {
         pshell_printf("Trace output........: custom\n");
       }
-      else if (trace_getOutput() == TRACE_OUTPUT_BOTH)
-      {
-        pshell_printf("Trace output........: %s\n", trace_getLogfile());
-        pshell_printf("                    : stdout\n");
-      }
-      else if (trace_getOutput() == TRACE_OUTPUT_STDOUT)
+      else if (trace_isOutputStdout())
       {
         pshell_printf("Trace output........: stdout\n");
       }
-      else
+      else if (trace_isOutputFile())
       {
         pshell_printf("Trace output........: %s\n", trace_getLogfile());
       }
       pshell_printf("Trace format........: %s\n", (trace_isFormatEnabled() ? ON : OFF));
       pshell_printf("  Location..........: %s\n", (trace_isLocationEnabled() ? ON : OFF));
       pshell_printf("  Name..............: %s\n", (trace_isLogNameEnabled() ? ON : OFF));
-      pshell_printf("  Timestamp.........: %s (%s)\n", (trace_isTimestampEnabled() ? ON : OFF), (trace_isFullDatetimeEnabed() ? "date & time" : "time only"));
+      if (trace_isCustomTimestamp())
+      {
+        pshell_printf("  Timestamp.........: %s (custom)\n", (trace_isTimestampEnabled() ? ON : OFF));
+      }
+      else
+      {
+        pshell_printf("  Timestamp.........: %s (%s)\n", (trace_isTimestampEnabled() ? ON : OFF), (trace_isFullDatetimeEnabed() ? "date & time" : "time only"));
+      }
       pshell_printf("Trace level(s)......: %s%s*%s\n", GREEN, getLevelName(TL_ERROR), NORMAL);
       const char *defaultMarker = "";
       for (unsigned level = 1; level <= TL_MAX; level++)
@@ -866,7 +979,20 @@ void configureTrace(int argc_, char *argv_[])
       pshell_showUsage();
     }
   }
-  else /* argc == 2 */
+  else if (pshell_isSubString(argv_[0], "output", 2))
+  {
+    if (argc_ == 2)
+    {
+      trace_setOutput(argv_[1]);
+    }
+    else
+    {
+      _traceOutput = 0;
+      trace_setOutput(argv_[1], true);
+      trace_setOutput(argv_[2], true);
+    }
+  }
+  else if (argc_ == 2)
   {
     if (pshell_isSubString(argv_[0], "level", 2))
     {
@@ -973,10 +1099,6 @@ void configureTrace(int argc_, char *argv_[])
         pshell_showUsage();
       }
     }
-    else if (pshell_isSubString(argv_[0], "output", 2))
-    {
-      trace_setOutput(argv_[1]);
-    }
     else if (pshell_isSubString(argv_[0], "format", 1))
     {
       if (pshell_isSubString(argv_[1], "on", 2))
@@ -1038,11 +1160,40 @@ void configureTrace(int argc_, char *argv_[])
       }
       else if (pshell_isSubString(argv_[1], "datetime", 1))
       {
-        trace_enableFullDatetime(true);
+        if (_customTimestampFormat == NULL)
+        {
+          trace_enableFullDatetime(true);
+        }
+        else
+        {
+          pshell_printf("ERROR: Cannot change timestamp type of custom format\n");
+        }
       }
       else if (pshell_isSubString(argv_[1], "time", 1))
       {
-        trace_enableFullDatetime(false);
+        if (_customTimestampFormat == NULL)
+        {
+          trace_enableFullDatetime(false);
+        }
+        else
+        {
+          pshell_printf("ERROR: Cannot change timestamp type of custom format\n");
+        }
+      }
+      else if (pshell_isSubString(argv_[1], "custom", 2))
+      {
+        if (_customTimestampFormat != NULL)
+        {
+          trace_setCustomTimestamp(true);
+        }
+        else
+        {
+          pshell_printf("ERROR: Custom timestamp format not registered\n");
+        }
+      }
+      else if (pshell_isSubString(argv_[1], "default", 2))
+      {
+        trace_setCustomTimestamp(false);
       }
       else
       {
@@ -1053,6 +1204,10 @@ void configureTrace(int argc_, char *argv_[])
     {
       pshell_showUsage();
     }
+  }
+  else
+  {
+    pshell_showUsage();
   }
   pthread_mutex_unlock(&_mutex);
 }

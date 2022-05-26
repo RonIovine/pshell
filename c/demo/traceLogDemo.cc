@@ -98,10 +98,10 @@ void sampleOutputFunction(const char *outputString_)
    */
 
    /* write to stdout */
-   printf("%s", outputString_);
+   printf("CUSTOM OUTPUT - %s", outputString_);
 
    /* write to syslog */
-   syslog(LOG_INFO, "%s", outputString_);
+   syslog(LOG_INFO, "CUSTOM OUTPUT - %s", outputString_);
 }
 
 /******************************************************************************/
@@ -175,6 +175,9 @@ int main (int argc, char *argv[])
   char dumpBuffer[DUMP_BUFFER_SIZE];
 #endif
   unsigned logLevel = 0;
+  TraceOutputFunction outputFunction = NULL;
+  TraceFormatFunction formatFunction = NULL;
+  const char *timestampFormat = NULL;
 
   /* validate our command line arguments and get desired log level */
   if ((argc == 2) || (argc == 3))
@@ -187,12 +190,6 @@ int main (int argc, char *argv[])
     {
       if (strcmp(argv[2], "custom")  == 0)
       {
-
-        /* register our custom format function */
-        trace_registerFormatFunction(sampleFormatFunction);
-
-        /* set a custom timestamp format, add the date, the time must be last because the usec portion is appended to the time */
-        trace_setTimestampFormat("%Y-%m-%d %T");
 
         /*
          * register a custom client provided log function, this function will
@@ -208,7 +205,13 @@ int main (int argc, char *argv[])
         openlog(argv[0], (LOG_CONS | LOG_PID | LOG_NDELAY), LOG_USER);
 
         /* register our log output function */
-        trace_registerOutputFunction(sampleOutputFunction);
+        outputFunction = sampleOutputFunction;
+
+        /* register our custom format function */
+        formatFunction = sampleFormatFunction;
+
+        /* set a custom timestamp format, add the date, the time must be last because the usec portion is appended to the time */
+        timestampFormat = "%Y-%m-%d %T";
 
       }
       else
@@ -249,7 +252,7 @@ int main (int argc, char *argv[])
    * so our trace display can be formatted and aligned correctly
    */
 
-  trace_init("DEMO", NULL, logLevel);
+  trace_init("DEMO", NULL, logLevel, outputFunction, formatFunction, timestampFormat);
 
   /* start our pshell server in NON_BLOCKING mode since this process has it's own control loop */
   pshell_startServer("traceLogDemo", PSHELL_UDP_SERVER, PSHELL_NON_BLOCKING, PSHELL_LOCALHOST, 9191);

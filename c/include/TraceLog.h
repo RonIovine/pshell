@@ -69,7 +69,6 @@ extern "C" {
  *
  *   trace_setLogfile()             -- set the logfile name
  *   trace_getLogfile()             -- get the logfile name
- *   trace_getOutput()              -- get the output location
  *
  *   trace_registerLevels()         -- register the built in log levels, should be done at program init
  *   trace_addUserLevel()           -- add a user defined level, should be done after built in levels registered
@@ -210,7 +209,13 @@ void trace_registerFormatFunction(TraceFormatFunction formatFunction_);
  *
  * initialize the overall trace logging subsystem
  */
-void trace_init(const char *logname_ = NULL, const char *logfile_ = NULL, unsigned loglevel_ = TL_DEFAULT, bool traceFilter_ = false);
+void trace_init(const char *logname_ = NULL,
+                const char *logfile_ = NULL,
+                unsigned loglevel_ = TL_DEFAULT,
+                TraceOutputFunction outputFunction_ = NULL,
+                TraceFormatFunction formatFunction_ = NULL,
+                const char *timestampFormat_ = NULL,
+                bool traceFilter_ = false);
 
 /*
  * trace_setLogName:
@@ -246,24 +251,19 @@ bool trace_setLogfile(const char *filename_);
 char *trace_getLogfile(void);
 
 /*
- * trace_getOutput:
- *
- * returns the output location
- */
-
-#define TRACE_OUTPUT_FILE   0
-#define TRACE_OUTPUT_STDOUT 1
-#define TRACE_OUTPUT_BOTH   2
-#define TRACE_OUTPUT_CUSTOM 3
-
-unsigned trace_getOutput(void);
-
-/*
  * trace_setOutput:
  *
  * set the output location
  */
-void trace_setOutput(char *location_);
+void trace_setOutput(char *location_, bool add_ = false);
+
+/*
+ * the following functions returns the output location
+ */
+bool trace_isOutputStdout(void);
+bool trace_isOutputFile(void);
+bool trace_isOutputCustom(void);
+bool trace_isOutputAll(void);
 
 /*
  * trace_registerLevels:
@@ -371,6 +371,8 @@ bool trace_isPathEnabled(void);
  * e.g. hh:mm:ss.usec in 24 hour local time
  */
 void trace_setTimestampFormat(const char *format_, bool addUsec_ = true);
+void trace_setCustomTimestamp(bool custom_);
+bool trace_isCustomTimestamp(void);
 
 /*
  * trace_enableTimestamp:
@@ -428,7 +430,7 @@ bool trace_isFullDatetimeEnabed(void);
  * by client code
  */
 extern void trace_outputLog(const char *level_, const char *file_, const char *function_, int line_, const char *format_, ...);
-extern void trace_outputDump(void *address_, unsigned length_, const char *level_, const char *file_, const char *function_, int line_, const char *format_, ...);
+extern void trace_outputDump(const void *address_, unsigned length_, const char *level_, const char *file_, const char *function_, int line_, const char *format_, ...);
 
 #ifdef TRACE_LOG_DISABLED
 

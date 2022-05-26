@@ -332,7 +332,7 @@ void tf_init(const char *logname_, const char *logfile_, unsigned loglevel_)
 {
 
 #ifdef TF_INTEGRATED_TRACE_LOG
-  trace_init(logname_, logfile_, loglevel_, true);
+  trace_init(logname_, logfile_, loglevel_, NULL, NULL, NULL, true);
 #endif
 
   /* setup trace level stuff */
@@ -829,20 +829,36 @@ void showConfig(void)
   pshell_printf("\n");
   pshell_printf("Trace enabled...........: %s\n", ((_traceEnabled) ? ON : OFF));
 #ifdef TF_INTEGRATED_TRACE_LOG
-  if (trace_getOutput() == TRACE_OUTPUT_CUSTOM)
+  if (trace_isOutputAll())
+  {
+    pshell_printf("Trace output............: stdout\n");
+    pshell_printf("                        : custom\n");
+    pshell_printf("                        : %s\n", trace_getLogfile());
+  }
+  else if (trace_isOutputStdout() && trace_isOutputCustom())
+  {
+    pshell_printf("Trace output............: stdout\n");
+    pshell_printf("                        : custom\n");
+  }
+  else if (trace_isOutputStdout() && trace_isOutputFile())
+  {
+    pshell_printf("Trace output............: stdout\n");
+    pshell_printf("                        : %s\n", trace_getLogfile());
+  }
+  else if (trace_isOutputCustom() && trace_isOutputFile())
+  {
+    pshell_printf("Trace output............: custom\n");
+    pshell_printf("                        : %s\n", trace_getLogfile());
+  }
+  else if (trace_isOutputCustom())
   {
     pshell_printf("Trace output............: custom\n");
   }
-  else if (trace_getOutput() == TRACE_OUTPUT_BOTH)
-  {
-    pshell_printf("Trace output............: %s\n", trace_getLogfile());
-    pshell_printf("                        : stdout\n");
-  }
-  else if (trace_getOutput() == TRACE_OUTPUT_STDOUT)
+  else if (trace_isOutputStdout())
   {
     pshell_printf("Trace output............: stdout\n");
   }
-  else
+  else if (trace_isOutputFile())
   {
     pshell_printf("Trace output............: %s\n", trace_getLogfile());
   }
@@ -850,7 +866,14 @@ void showConfig(void)
   pshell_printf("Trace location..........: %s\n", ((trace_isLocationEnabled()) ? ON : OFF));
   pshell_printf("Trace path..............: %s\n", ((trace_isPathEnabled()) ? ON : OFF));
   pshell_printf("Trace name..............: %s\n", ((trace_isLogNameEnabled()) ? ON : OFF));
-  pshell_printf("Trace timestamp.........: %s (%s)\n", (trace_isTimestampEnabled() ? ON : OFF), (trace_isFullDatetimeEnabed() ? "date & time" : "time only"));
+  if (trace_isCustomTimestamp())
+  {
+    pshell_printf("Trace timestamp.........: %s (custom)\n", (trace_isTimestampEnabled() ? ON : OFF));
+  }
+  else
+  {
+    pshell_printf("Trace timestamp.........: %s (%s)\n", (trace_isTimestampEnabled() ? ON : OFF), (trace_isFullDatetimeEnabed() ? "date & time" : "time only"));
+  }
 #endif
   if (_breakpointLine != 0)
   {
