@@ -157,6 +157,10 @@ if __name__ == '__main__':
 
   PshellServer.startServer("traceLogDemo", PshellServer.UDP, PshellServer.NON_BLOCKING, PshellServer.ANYHOST, 9292);
 
+  data = []
+  for i in range(256):
+    data += chr(i)
+
   while True:
     Trace.FORCE("Force Message")
     time.sleep(1)
@@ -174,5 +178,5 @@ if __name__ == '__main__':
     time.sleep(1)
     Trace.EXIT("Exit Message")
     time.sleep(1)
-    Trace.DUMP("Dump Message")
+    Trace.DUMP(data, len(data), "Dump Message")
     time.sleep(1)

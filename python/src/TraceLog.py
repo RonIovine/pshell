@@ -111,9 +111,14 @@ TL_DEFAULT = TL_WARNING
 
 _gLogLevels = ("ERROR", "FAILURE", "WARNING", "INFO", "DEBUG", "ENTER", "EXIT", "DUMP")
 
-_TRACE_OUTPUT_FILE   = 0
-_TRACE_OUTPUT_STDOUT = 1
-_TRACE_OUTPUT_BOTH   = 2
+#_TRACE_OUTPUT_FILE   = 0
+#_TRACE_OUTPUT_STDOUT = 1
+#_TRACE_OUTPUT_BOTH   = 2
+
+_TRACE_OUTPUT_FILE   = 0x0001
+_TRACE_OUTPUT_STDOUT = 0x0002
+_TRACE_OUTPUT_CUSTOM = 0x0004
+_TRACE_OUTPUT_ALL    = _TRACE_OUTPUT_FILE | _TRACE_OUTPUT_STDOUT | _TRACE_OUTPUT_CUSTOM
 
 _RED    = "\33[1;31m"
 _GREEN  = "\33[1;32m"
@@ -130,9 +135,11 @@ _gLogLevel = _gLogDefault
 _gLogName = "Trace"
 _gLogFileName = None
 _gLogFileFd = None
+_gCustomTimestampFormat = None
 _gBriefTimestampFormat = "%H:%M:%S.%f"
 _gFullTimestampFormat = "%Y-%m-%d %H:%M:%S.%f"
-_gTimestampFormat = _gBriefTimestampFormat
+_gDefaultTimestampFormat = _gBriefTimestampFormat
+_gTimestampFormat = _gDefaultTimestampFormat
 _gTimestampType = "time only"
 _gLogEnabled = True
 _gFormatEnabled = True
@@ -140,6 +147,7 @@ _gTimestampEnabled = True
 _gLogNameEnabled = True
 _gOutputFunction = None
 _gFormatFunction = None
+_gCustomFormatEnabled = False
 
 ##################################
 # 'public' functions
@@ -147,14 +155,22 @@ _gFormatFunction = None
 
 #################################################################################
 #################################################################################
-def init(logname = "Trace", logfile = None, loglevel = TL_DEFAULT):
+def init(logname = "Trace",
+         logfile = None,
+         loglevel = TL_DEFAULT,
+         outputFunction = None,
+         formatFunction = None,
+         timestampFormat = None):
   """
   Initialize the trace logger subsystem
 
     Args:
-        logname (str)    Name of the logger, deafault='Trace', usually set to process name
-        logfile (str)   : Logfile for trace output, default=stdout
-        loglevel (int)  : Initial and default log level, default=TL_WARNING
+        logname (str)             : Name of the logger, deafault='Trace', usually set to process name
+        logfile (str)             : Logfile for trace output, default=stdout
+        loglevel (int)            : Initial and default log level, default=TL_WARNING
+        outputFunction (function) : User defined output function
+        formatFunction (function) : User defined format function
+        timestampFormat (str)     : User defined timestamp format
 
     Returns:
         none
@@ -162,23 +178,26 @@ def init(logname = "Trace", logfile = None, loglevel = TL_DEFAULT):
   setLogName(logname)
   setLogLevel(loglevel)
   setDefaultLogLevel(loglevel)
+  setTimestampFormat(timestampFormat)
+  registerOutputFunction(outputFunction)
+  registerFormatFunction(timestampFormat)
   if not setLogFile(logfile):
     ERROR("Could not open logfile: {}, reverting to: stdout".format(logfile))
-  PshellServer.setLogFunction(_pshellLogFunction);
+  PshellServer.setLogFunction(_pshellLogFunction)
   # create PSHELL command to configure trace settings
   PshellServer.addCommand(function    = _configureTrace,
                           command     = "trace",
                           description = "configure/display various trace logger settings",
                           usage       = "on | off | show |\n"
-                                        "             output {file | stdout | both | <filename>} |\n"
+                                        "             output {file | stdout | custom | all | <filename>} |\n"
                                         "             level {all | default | <value>} |\n"
                                         "             default {all | <value>} |\n"
-                                        "             format {on | off} |\n"
+                                        "             format {on | off | custom | default} |\n"
                                         "             name {on | off | default | <value>} |\n"
-                                        "             timestamp {on | off | datetime | time} |\n"
+                                        "             timestamp {on | off | datetime | time  | custom | default} |\n"
                                         "             colors {on | off}",
                           minArgs     = 1,
-                          maxArgs     = 2,
+                          maxArgs     = 3,
                           showUsage   = False)
 
 #################################################################################
@@ -222,13 +241,16 @@ def setLogFile(logfile):
       return True
     except:
       if _gLogFileFd != None:
+        # could not open new logfile, but we already have a previous one,
+        # just stick with that one
         return False
       else:
-        _gTraceOutput = _TRACE_OUTPUT_STDOUT
+        # could not open new logfile and no old one open, disable the output to a file
+        _gTraceOutput &= ~_TRACE_OUTPUT_FILE
         return False
   else:
     _gLogFileFd = None
-    _gTraceOutput = _TRACE_OUTPUT_STDOUT
+    _gTraceOutput &= ~_TRACE_OUTPUT_FILE
     return False
 
 #################################################################################
@@ -356,7 +378,10 @@ def registerOutputFunction(function):
         none
   """
   global _gOutputFunction
-  _gOutputFunction = function
+  global _gTraceOutput
+  if function != None:
+    _gOutputFunction = function
+    _gTraceOutput = _TRACE_OUTPUT_CUSTOM
 
 #################################################################################
 #################################################################################
@@ -371,7 +396,10 @@ def registerFormatFunction(function):
         none
   """
   global _gFormatFunction
-  _gFormatFunction = function
+  global _gCustomFormatEnabled
+  if function != None:
+    _gFormatFunction = function
+    _gCustomFormatEnabled = True
 
 #################################################################################
 #################################################################################
@@ -385,9 +413,13 @@ def setTimestampFormat(format):
     Returns:
         none
   """
+  global _gCustomTimestampFormat
   global _gTimestampFormat
-  _gTimestampFormat = format
-
+  global _gTimestampType
+  if format != None:
+    _gCustomTimestampFormat = format
+    _gTimestampFormat = _gCustomTimestampFormat
+    _gTimestampType = "custom"
 
 #################################################################################
 #################################################################################
@@ -560,18 +592,20 @@ def EXIT(message):
 
 #################################################################################
 #################################################################################
-def DUMP(message):
+def DUMP(data, length, message):
   """
   Output a trace hex DUMP message
 
     Args:
-        message (str)  : User log message
+        data    (array)  : Data buffer to do a hex dump on
+        length  (int)    : Length of the data buffer to dump
+        message (str)    : User log message
 
     Returns:
         none
   """
   if _gLogEnabled and _gLogLevel >= TL_DUMP:
-    _outputTrace(_gLogLevels[TL_DUMP], message)
+    _outputDump(data, length, _gLogLevels[TL_DUMP], message)
 
 ##################################
 # 'private' functions
@@ -652,15 +686,30 @@ def _configureTrace(argv_):
         PshellServer.printf("Trace enabled.......: %s" % _ON)
       else:
         PshellServer.printf("Trace enabled.......: %s" % _OFF)
-      if _gTraceOutput == _TRACE_OUTPUT_BOTH:
-        PshellServer.printf("Trace output........: %s" % _gLogFileName)
-        PshellServer.printf("                    : stdout")
-      elif _gTraceOutput == _TRACE_OUTPUT_STDOUT:
+      if _isOutputAll():
         PshellServer.printf("Trace output........: stdout")
-      else:
-        PshellServer.printf("Trace output........: %s" % _gLogFileName)
+        PshellServer.printf("                    : custom")
+        PshellServer.printf("                    : {}".format(_gLogFileName))
+      elif _isOutputStdout() and _isOutputCustom():
+        PshellServer.printf("Trace output........: stdout")
+        PshellServer.printf("                    : custom")
+      elif _isOutputStdout() and _isOutputFile():
+        PshellServer.printf("Trace output........: stdout")
+        PshellServer.printf("                    : {}".format(_gLogFileName))
+      elif _isOutputCustom() and _isOutputFile():
+        PshellServer.printf("Trace output........: custom")
+        PshellServer.printf("                    : {}".format(_gLogFileName))
+      elif _isOutputCustom():
+        PshellServer.printf("Trace output........: custom")
+      elif _isOutputStdout():
+        PshellServer.printf("Trace output........: stdout")
+      elif _isOutputFile():
+        PshellServer.printf("Trace output........: {}".format(_gLogFileName))
       if _gFormatEnabled:
-        PshellServer.printf("Trace format........: %s" % _ON)
+        if _gCustomFormatEnabled:
+          PshellServer.printf("Trace format........: %s (custom)" % _ON)
+        else:
+          PshellServer.printf("Trace format........: %s (default)" % _ON)
       else:
         PshellServer.printf("Trace format........: %s" % _OFF)
       if _gLogNameEnabled:
@@ -735,30 +784,24 @@ def _configureTrace(argv_):
       else:
         PshellServer.printf("ERROR: Invalid log level: %s, run 'trace show' to see available levels" % argv_[1])
     elif PshellServer.isSubString(argv_[0], "output", 2):
-      if PshellServer.isSubString(argv_[1], "file", 2):
-        if _gLogFileFd != None:
-          _gTraceOutput = _TRACE_OUTPUT_FILE
-        else:
-          PshellServer.printf("ERROR: Need to set logfile before setting output to 'file', run 'trace output <filename>'")
-      elif PshellServer.isSubString(argv_[1], "stdout", 2):
-        _gTraceOutput = _TRACE_OUTPUT_STDOUT
-      elif PshellServer.isSubString(argv_[1], "both", 2):
-        if _gLogFileFd != None:
-          _gTraceOutput = _TRACE_OUTPUT_BOTH
-        else:
-          PshellServer.printf("WARNING: Need to set logfile before setting output to 'both', run 'trace output <filename>', setting to 'stdout' only")
-          _gTraceOutput = _TRACE_OUTPUT_STDOUT
+      if len(argv_) == 2:
+        _setOutput(argv_[1])
       else:
-        if not setLogFile(argv_[1]):
-          if _gLogFileFd != None:
-            PshellServer.printf("ERROR: Could not open logfile: %s, reverting to: %s" % (argv_[1], _logfileName))
-          else:
-            PshellServer.printf("ERROR: Could not open logfile: %s, reverting to: stdout" % argv_[1])
+        _gTraceOutput = 0
+        _setOutput(argv_[1], True)
+        _setOutput(argv_[2], True)
     elif PshellServer.isSubString(argv_[0], "format", 1):
       if PshellServer.isSubString(argv_[1], "on", 2):
         enableFormat(True)
       elif PshellServer.isSubString(argv_[1], "off", 2):
         enableFormat(False)
+      elif PshellServer.isSubString(argv_[1], "custom", 2):
+        if _gFormatFunction != None:
+          _setCustomFormat(True)
+        else:
+          PshellServer.printf("ERROR: Custom format function not registered")
+      elif PshellServer.isSubString(argv_[1], "default", 2):
+        _setCustomFormat(False)
       else:
         PshellServer.showUsage()
     elif PshellServer.isSubString(argv_[0], "name", 1):
@@ -783,9 +826,22 @@ def _configureTrace(argv_):
       elif PshellServer.isSubString(argv_[1], "off", 2):
         enableTimestamp(False)
       elif PshellServer.isSubString(argv_[1], "datetime", 1):
-        enableFullDatetime(True)
+        if not _isCustomTimestamp():
+          enableFullDatetime(True)
+        else:
+          PshellServer.printf("ERROR: Cannot change timestamp type of custom format")
       elif PshellServer.isSubString(argv_[1], "time", 1):
-        enableFullDatetime(False)
+        if not _isCustomTimestamp():
+          enableFullDatetime(False)
+        else:
+          PshellServer.printf("ERROR: Cannot change timestamp type of custom format")
+      elif PshellServer.isSubString(argv_[1], "custom", 2):
+        if _gCustomTimestampFormat != None:
+          _setCustomTimestamp(True)
+        else:
+          PshellServer.printf("ERROR: Custom timestamp format not registered")
+      elif PshellServer.isSubString(argv_[1], "default", 2):
+        _setCustomTimestamp(False)
       else:
         PshellServer.showUsage()
     else:
@@ -794,16 +850,110 @@ def _configureTrace(argv_):
 
 #################################################################################
 #################################################################################
+def _isCustomTimestamp():
+  return (_gTimestampFormat == _gCustomTimestampFormat)
+
+#################################################################################
+#################################################################################
+def _setCustomTimestamp(custom_):
+  global _gTimestampFormat
+  global _gTimestampType
+  if custom_:
+    if _gCustomTimestampFormat != None:
+      _gTimestampFormat = _gCustomTimestampFormat
+  else:
+    _gTimestampFormat = _gDefaultTimestampFormat;
+    _gTimestampType = "time only"
+
+#################################################################################
+#################################################################################
+def _setCustomFormat(custom_):
+  global _gCustomFormatEnabled
+  if custom_:
+    if _gFormatFunction != None:
+      _gCustomFormatEnabled = True
+  else:
+    _gCustomFormatEnabled = False
+
+#################################################################################
+#################################################################################
+def _isOutputStdout():
+  return (_gTraceOutput & _TRACE_OUTPUT_STDOUT)
+
+#################################################################################
+#################################################################################
+def _isOutputFile():
+  return ((_gTraceOutput & _TRACE_OUTPUT_FILE) and (_gLogFileFd != None))
+
+#################################################################################
+#################################################################################
+def _isOutputCustom():
+  return ((_gTraceOutput & _TRACE_OUTPUT_CUSTOM) and (_gOutputFunction != None))
+
+#################################################################################
+#################################################################################
+def _isOutputAll():
+  return ((_isOutputStdout() and _isOutputFile() and _isOutputCustom()))
+
+#################################################################################
+#################################################################################
+def _setOutput(location_, add_ = False):
+  global _gLogFileFd
+  global _gOutputFunction
+  global _gTraceOutput
+  if PshellServer.isSubString(location_, "custom", 2):
+    if _gOutputFunction != None:
+      if add_:
+        # add to existing output setting
+        _gTraceOutput |= _TRACE_OUTPUT_CUSTOM
+      else:
+        # set to specified output setting
+        _gTraceOutput = _TRACE_OUTPUT_CUSTOM
+    else:
+      PshellServer.printf("Cannot set custom log output, no custom log output function registered")
+  elif PshellServer.isSubString(location_, "file", 2):
+    if _gLogFileFd != None:
+      if add_:
+        # add to existing output setting
+        _gTraceOutput |= _TRACE_OUTPUT_FILE
+      else:
+        # set to specified output setting
+        _gTraceOutput = _TRACE_OUTPUT_FILE
+    else:
+      PshellServer.printf("Need to set logfile before setting output to 'file', run 'trace output <filename>'")
+  elif PshellServer.isSubString(location_, "stdout", 2):
+    if add_:
+      # add to existing output setting
+      _gTraceOutput |= _TRACE_OUTPUT_STDOUT
+    else:
+      # set to specified output setting
+      _gTraceOutput = _TRACE_OUTPUT_STDOUT
+  elif PshellServer.isSubString(location_, "all", 2):
+    _gTraceOutput = _TRACE_OUTPUT_ALL
+    if _gLogFileFd == None:
+      _gTraceOutput &= ~_TRACE_OUTPUT_FILE
+    elif _gOutputFunction == None:
+      _gTraceOutput &= ~_TRACE_OUTPUT_CUSTOM
+  else:
+    if not setLogfile(location_):
+      if _gLogFileFd != None:
+        PshellServer.printf("Could not open logfile: {}, reverting to: {}".format(location_, _logfileName))
+      else:
+        PshellServer.printf("Could not open logfile: {}, reverting to: stdout".format(location_))
+
+#################################################################################
+#################################################################################
 def _formatTrace(level_, message_):
   global _gFormatEnabled
   global _gTimestampEnabled
   global _gLogNameEnabled
   global _gFormatFunction
+  global _gCustomFormatEnabled
   message = ""
-  if _gFormatFunction != None:
-    return (_gFormatFunction(_gLogName, level_, datetime.datetime.now().strftime(_gTimestampFormat), message_))
-  elif isFormatEnabled():
-    if isLogNameEnabled():
+  if isFormatEnabled():
+    if _gFormatFunction != None and _gCustomFormatEnabled:
+      return (_gFormatFunction(_gLogName, level_, datetime.datetime.now().strftime(_gTimestampFormat), message_))
+    elif isLogNameEnabled():
       message = "%s | " % _gLogName
     message += "%-7s | " % level_
     if isTimestampEnabled():
@@ -815,28 +965,51 @@ def _formatTrace(level_, message_):
 
 #################################################################################
 #################################################################################
-def _outputTrace(level_, message_):
-  global _gLogFileFd
-  global _gTraceOutput
+def _outputDump(data_, length_, level_, message_):
   global _gMutex
-  global _gOutputFunction
   _gMutex.acquire()
   message = _formatTrace(level_, message_)
-  if _gOutputFunction != None:
-    _gOutputFunction(message)
-  elif _gTraceOutput == _TRACE_OUTPUT_STDOUT:
-    print(message)
-  elif _gTraceOutput == _TRACE_OUTPUT_FILE:
-    message += "\n"
-    _gLogFileFd.write(message)
-    _gLogFileFd.flush()
-  else:
-    # output to both stdout & the specified file
-    print(message)
-    message += "\n"
-    _gLogFileFd.write(message)
-    _gLogFileFd.flush()
+  _printLine(message)
+  line = ""
+  asciiLine = ""
+  offset = 0
+  for index, value in enumerate(data_):
+    line += "%02x " % ord(value)
+    if ord(value) >= 32 and ord(value) <= 126:
+      # printable ascii character
+      asciiLine += value
+    else:
+      asciiLine += "."
+    if (index+1)%16 == 0 and index > 0:
+      _printLine("  %04x  %-48s  %s" % (offset, line, asciiLine))
+      line = ""
+      asciiLine = ""
+      offset += 16
+  if len(line) > 0:
+    _printLine("  %04x  %-48s  %s" % (offset, line, asciiLine))
   _gMutex.release()
+
+#################################################################################
+#################################################################################
+def _outputTrace(level_, message_):
+  global _gMutex
+  _gMutex.acquire()
+  message = _formatTrace(level_, message_)
+  _printLine(message)
+  _gMutex.release()
+
+#################################################################################
+#################################################################################
+def _printLine(message_):
+  if _isOutputCustom():
+    # custom output function registered, call it
+    _gOutputFunction(message_)
+  if _isOutputFile():
+    message += "\n"
+    _gLogFileFd.write(message_)
+    _gLogFileFd.flush()
+  if _isOutputStdout():
+    print(message_)
 
 #################################################################################
 #################################################################################

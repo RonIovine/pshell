@@ -94,10 +94,12 @@ Trace&nbsp;log&nbsp;levels:<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-DUMP"><strong>DUMP</strong></a>(message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;hex&nbsp;DUMP&nbsp;message<br>
+ <dl><dt><a name="-DUMP"><strong>DUMP</strong></a>(data, length, message)</dt><dd><tt>Output&nbsp;a&nbsp;trace&nbsp;hex&nbsp;DUMP&nbsp;message<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;&nbsp;&nbsp;&nbsp;(array)&nbsp;&nbsp;:&nbsp;Data&nbsp;buffer&nbsp;to&nbsp;do&nbsp;a&nbsp;hex&nbsp;dump&nbsp;on<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;length&nbsp;&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Length&nbsp;of&nbsp;the&nbsp;data&nbsp;buffer&nbsp;to&nbsp;dump<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;message&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;User&nbsp;log&nbsp;message<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
@@ -185,12 +187,15 @@ or&nbsp;masked<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>
- <dl><dt><a name="-init"><strong>init</strong></a>(logname<font color="#909090">='Trace'</font>, logfile<font color="#909090">=None</font>, loglevel<font color="#909090">=2</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;trace&nbsp;logger&nbsp;subsystem<br>
+ <dl><dt><a name="-init"><strong>init</strong></a>(logname<font color="#909090">='Trace'</font>, logfile<font color="#909090">=None</font>, loglevel<font color="#909090">=2</font>, outputFunction<font color="#909090">=None</font>, formatFunction<font color="#909090">=None</font>, timestampFormat<font color="#909090">=None</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;trace&nbsp;logger&nbsp;subsystem<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logname&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;Name&nbsp;of&nbsp;the&nbsp;logger,&nbsp;deafault='Trace',&nbsp;usually&nbsp;set&nbsp;to&nbsp;process&nbsp;name<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logfile&nbsp;(str)&nbsp;&nbsp;&nbsp;:&nbsp;Logfile&nbsp;for&nbsp;trace&nbsp;output,&nbsp;default=stdout<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loglevel&nbsp;(int)&nbsp;&nbsp;:&nbsp;Initial&nbsp;and&nbsp;default&nbsp;log&nbsp;level,&nbsp;default=TL_WARNING<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logname&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Name&nbsp;of&nbsp;the&nbsp;logger,&nbsp;deafault='Trace',&nbsp;usually&nbsp;set&nbsp;to&nbsp;process&nbsp;name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logfile&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Logfile&nbsp;for&nbsp;trace&nbsp;output,&nbsp;default=stdout<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loglevel&nbsp;(int)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Initial&nbsp;and&nbsp;default&nbsp;log&nbsp;level,&nbsp;default=TL_WARNING<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;outputFunction&nbsp;(function)&nbsp;:&nbsp;User&nbsp;defined&nbsp;output&nbsp;function<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;formatFunction&nbsp;(function)&nbsp;:&nbsp;User&nbsp;defined&nbsp;format&nbsp;function<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timestampFormat&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;User&nbsp;defined&nbsp;timestamp&nbsp;format<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;none</tt></dd></dl>

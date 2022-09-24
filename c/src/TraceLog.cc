@@ -94,6 +94,7 @@ bool trace_logEnabled = true;
 
 static TraceOutputFunction _outputFunction = NULL;
 static TraceFormatFunction _formatFunction = NULL;
+static bool _customFormatEnabled = false;
 static char _logName[MAX_STRING_SIZE] = {"Trace"};
 static bool _logNameEnabled = true;
 static unsigned _traceOutput = TRACE_OUTPUT_STDOUT;
@@ -170,7 +171,7 @@ void trace_init(const char *logname_,
                       "             output {file | stdout | custom | all | <filename>} |\n"
                       "             level {all | default | <value>} |\n"
                       "             default {all | <value>} |\n"
-                      "             format {on | off} |\n"
+                      "             format {on | off | default} |\n"
                       "             name {on | off | default | <value>} |\n"
                       "             location {on | off} |\n"
                       "             timestamp {on | off | datetime | time  | custom | default} |\n"

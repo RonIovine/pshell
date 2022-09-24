@@ -2027,10 +2027,16 @@ def _runCommand(command_):
     numMatches = 0
     _gArgs = command_.split()[_gFirstArgPos:]
     command_ = command_.split()[0]
+    length = len(command_)
     for command in _gCommandList:
-      if (command_ in command["name"]):
+      # do an initial substring match for command abbreviation support
+      if (isSubString(command_, command["name"], len(command_))):
         _gFoundCommand = command
         numMatches += 1
+        # if we have an exact match, take it and break out
+        if _gFoundCommand["length"] == length:
+          numMatches = 1
+          break
     if ((numMatches == 1) and _isValidArgCount() and not isHelp()):
       _gFoundCommand["function"](_gArgs)
     _gCommandDispatched = False
