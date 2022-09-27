@@ -167,6 +167,7 @@ import random
 import thread
 import fcntl
 import fnmatch
+import commands
 from collections import OrderedDict
 from collections import namedtuple
 import PshellReadline
@@ -1437,9 +1438,9 @@ def _addNativeCommands():
     _addCommand(_batch,
                 "batch",
                 "run commands from a batch file",
-                "<filename>",
+                "{<filename> [-show]} | -list",
                 1,
-                2,
+                3,
                 True,
                 True)
     _addCommand(_history,
@@ -1710,6 +1711,10 @@ def _batch(command_):
     batchFile = command_[0]
   else:
     batchFile = command_[1]
+  if command_[-1] == "-show":
+    showOnly = True
+  else:
+    showOnly = False
   batchFile1 = batchFile
   batchFile2 = ""
   batchPath = os.getenv('PSHELL_BATCH_DIR')
@@ -1718,6 +1723,24 @@ def _batch(command_):
   batchFile3 = _PSHELL_BATCH_DIR+"/"+batchFile
   if batchFile == "?" or batchFile == "-h":
     _showUsage()
+    return
+  elif batchFile == "-list":
+    availableBatchFiles = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR))
+    printf("")
+    printf("***************************************************")
+    printf("*   AVAILABLE BATCH FILES IN: {}   *".format(_PSHELL_BATCH_DIR))
+    printf("***************************************************")
+    printf("")
+    printf("{}".format(availableBatchFiles))
+    printf("")
+    if batchPath != None:
+      availableBatchFiles = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR))
+      printf("*"*(34+len(batchPath)))
+      printf("*   AVAILABLE BATCH FILES IN: {}   *".format(batchPath))
+      printf("*"*(34+len(batchPath)))
+      printf("")
+      printf("{}".format(availableBatchFiles))
+      printf("")
     return
   elif (os.path.isfile(batchFile1)):
     file = open(batchFile1, 'r')
@@ -1729,14 +1752,17 @@ def _batch(command_):
     _showUsage()
     return
   else:
-    printf("ERROR: Could not find batch file: '%s'" % batchFile)
+    printf("PSHELL_ERROR: Could not find batch file: '%s'" % batchFile)
     return
   # found a batch file, process it
   for line in file:
     # skip comments
     line = line.strip()
     if ((len(line) > 0) and (line[0] != "#")):
-      _processCommand(line)
+      if showOnly:
+        printf(line)
+      else:
+        _processCommand(line)
   file.close()
 
 #################################################################################

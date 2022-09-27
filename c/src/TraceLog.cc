@@ -137,6 +137,7 @@ static void configureTrace(int argc_, char *argv_[]);
 static void pshellLogFunction(const char *outputString_);
 static void enableColors(bool enable_);
 static bool isColorsEnabled(void);
+static void setCustomFormat(bool custom_);
 
 /**************************************
  * public API "member" function bodies
@@ -171,7 +172,7 @@ void trace_init(const char *logname_,
                       "             output {file | stdout | custom | all | <filename>} |\n"
                       "             level {all | default | <value>} |\n"
                       "             default {all | <value>} |\n"
-                      "             format {on | off | default} |\n"
+                      "             format {on | off | custom | default} |\n"
                       "             name {on | off | default | <value>} |\n"
                       "             location {on | off} |\n"
                       "             timestamp {on | off | datetime | time  | custom | default} |\n"
@@ -373,6 +374,7 @@ void trace_registerFormatFunction(TraceFormatFunction formatFunction_)
   if (formatFunction_ != NULL)
   {
     _formatFunction = formatFunction_;
+    _customFormatEnabled = true;
   }
 }
 
@@ -724,6 +726,23 @@ bool isColorsEnabled(void)
 
 /******************************************************************************/
 /******************************************************************************/
+void setCustomFormat(bool custom_)
+{
+  if (custom_)
+  {
+    if (_formatFunction != NULL)
+    {
+      _customFormatEnabled = true;
+    }
+  }
+  else
+  {
+    _customFormatEnabled = false;
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 const char *getTimestamp(void)
 {
   struct timeval tv;
@@ -767,7 +786,7 @@ void formatTrace(const char *name_,
       file = file_;
     }
 
-    if (_formatFunction != NULL)
+    if ((_formatFunction != NULL) && (_customFormatEnabled))
     {
       // custom format function registered, call it
       (*_formatFunction)(name_, level_, file, function_, line_, timestamp_, userMessage_, outputString_);
@@ -939,7 +958,7 @@ void configureTrace(int argc_, char *argv_[])
       {
         pshell_printf("Trace output........: %s\n", trace_getLogfile());
       }
-      pshell_printf("Trace format........: %s\n", (trace_isFormatEnabled() ? ON : OFF));
+      pshell_printf("Trace format........: %s (%s)\n", (trace_isFormatEnabled() ? ON : OFF), (_customFormatEnabled ? "custom" : "default"));
       pshell_printf("  Location..........: %s\n", (trace_isLocationEnabled() ? ON : OFF));
       pshell_printf("  Name..............: %s\n", (trace_isLogNameEnabled() ? ON : OFF));
       if (trace_isCustomTimestamp())
@@ -1109,6 +1128,21 @@ void configureTrace(int argc_, char *argv_[])
       else if (pshell_isSubString(argv_[1], "off", 2))
       {
         trace_enableFormat(false);
+      }
+      else if (pshell_isSubString(argv_[1], "custom", 2))
+      {
+        if (_formatFunction != NULL)
+        {
+          setCustomFormat(true);
+        }
+        else
+        {
+          pshell_printf("ERROR: Custom format function not registered\n");
+        }
+      }
+      else if (pshell_isSubString(argv_[1], "default", 2))
+      {
+        setCustomFormat(false);
       }
       else
       {
