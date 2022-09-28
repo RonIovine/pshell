@@ -1004,12 +1004,12 @@ def _printLine(message_):
   if _isOutputCustom():
     # custom output function registered, call it
     _gOutputFunction(message_)
-  if _isOutputFile():
-    message += "\n"
-    _gLogFileFd.write(message_)
-    _gLogFileFd.flush()
   if _isOutputStdout():
     print(message_)
+  if _isOutputFile():
+    message_ += "\n"
+    _gLogFileFd.write(message_)
+    _gLogFileFd.flush()
 
 #################################################################################
 #################################################################################

@@ -850,7 +850,7 @@ _gWheel = "|/-\\"
 
 _gQuitLocal = False
 _gQuitTcp = False
-_gIdleSessionTimeout = PshellReadline.IDLE_TIMEOUT_NONE
+_gIdleSessionTimeout = 10  # PshellReadline.IDLE_TIMEOUT_NONE
 _gPshellClientTimeout = 5  # seconds
 _gTcpConnectSockName = None
 _gTcpPrompt = None
@@ -1438,10 +1438,10 @@ def _addNativeCommands():
     _addCommand(_batch,
                 "batch",
                 "run commands from a batch file",
-                "{<filename> [-show]} | -list",
+                "{{<filename> | <index>} [-show]} | -list",
                 1,
                 3,
-                True,
+                False,
                 True)
     _addCommand(_history,
                 "history",
@@ -1707,40 +1707,61 @@ def _processQueryCommands2():
 #################################################################################
 def _batch(command_):
   global _gFirstArgPos
-  if (len(command_) == 1):
-    batchFile = command_[0]
-  else:
-    batchFile = command_[1]
+  if command_[0] == "batch":
+    command_ = command_[1:]
+  batchFile = command_[0]
   if command_[-1] == "-show":
     showOnly = True
   else:
     showOnly = False
+  batchPath = os.getenv('PSHELL_BATCH_DIR')
+  if isNumeric(batchFile):
+    availableBatchFiles = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR)).split()
+    if batchPath != None:
+      availableBatchFiles += commands.getoutput("ls {}".format(batchPath)).split()
+    if int(batchFile) > 0 and int(batchFile) <= len(availableBatchFiles):
+      batchFile = availableBatchFiles[int(batchFile)-1]
+    else:
+      printf("ERROR: Invalid batch fileindex: {}, valid values 1-{}".format(batchFile, len(availableBatchFiles)))
+      return
   batchFile1 = batchFile
   batchFile2 = ""
-  batchPath = os.getenv('PSHELL_BATCH_DIR')
   if (batchPath != None):
     batchFile2 = batchPath+"/"+batchFile
   batchFile3 = _PSHELL_BATCH_DIR+"/"+batchFile
   if batchFile == "?" or batchFile == "-h":
+    printf("")
     _showUsage()
+    printf("")
+    printf("  where:")
+    printf("    filename  - Filename of the batch file to execute")
+    printf("    index     - Index of the batch file to execute (from the -list option)")
+    printf("    -list     - List all the available batch files in {}".format(_PSHELL_BATCH_DIR))
+    printf("    -show     - Show the contents of the batch file without executing")
+    printf("")
     return
   elif batchFile == "-list":
-    availableBatchFiles = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR))
-    printf("")
-    printf("***************************************************")
-    printf("*   AVAILABLE BATCH FILES IN: {}   *".format(_PSHELL_BATCH_DIR))
-    printf("***************************************************")
-    printf("")
-    printf("{}".format(availableBatchFiles))
-    printf("")
+    availableBatchFiles1 = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR)).split()
     if batchPath != None:
-      availableBatchFiles = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR))
-      printf("*"*(34+len(batchPath)))
-      printf("*   AVAILABLE BATCH FILES IN: {}   *".format(batchPath))
-      printf("*"*(34+len(batchPath)))
-      printf("")
-      printf("{}".format(availableBatchFiles))
-      printf("")
+      availableBatchFiles2 = commands.getoutput("ls {}".format(batchPath)).split()
+    availableBatchFiles = availableBatchFiles1 + availableBatchFiles2
+    maxFilenameLength = 0
+    for file in availableBatchFiles:
+      maxFilenameLength = max(maxFilenameLength, len(file))
+    maxDirLength = max(len(_PSHELL_BATCH_DIR), len(batchPath))
+    printf("")
+    printf("***********************************************")
+    printf("*            AVAILABLE BATCH FILES            *")
+    printf("***********************************************")
+    printf("")
+    printf("%s   %-*s   %-*s" % ("Index", maxFilenameLength, "Filename", maxDirLength, "Directory"))
+    printf("%s   %s   %s" % ("=====", "="*maxFilenameLength, "="*maxDirLength))
+    for index, file in enumerate(availableBatchFiles):
+      if index < len(availableBatchFiles1):
+        printf("%-5d   %-*s   %-*s" % (index+1, maxFilenameLength, file, maxDirLength, _PSHELL_BATCH_DIR))
+      else:
+        printf("%-5d   %-*s   %-*s" % (index+1, maxFilenameLength, file, maxDirLength, batchPath))
+    printf("")
     return
   elif (os.path.isfile(batchFile1)):
     file = open(batchFile1, 'r')
