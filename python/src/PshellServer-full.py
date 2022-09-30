@@ -1710,20 +1710,38 @@ def _batch(command_):
   if command_[0] == "batch":
     command_ = command_[1:]
   batchFile = command_[0]
-  if command_[-1] == "-show":
+  if isSubString(command_[-1], "-show", 2):
     showOnly = True
   else:
     showOnly = False
   batchPath = os.getenv('PSHELL_BATCH_DIR')
+  # find all our available batch files
+  availableBatchFiles = []
+  maxDirLength = len(_PSHELL_BATCH_DIR)
+  maxFilenameLength = 10
+  # check default batch dir
+  if os.path.isdir(_PSHELL_BATCH_DIR):
+    fileList = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR)).split()
+    for file in fileList:
+      if os.path.isfile(_PSHELL_BATCH_DIR+"/"+file) or os.path.isfile(_PSHELL_BATCH_DIR+"/"+file):
+        availableBatchFiles.append({"file":file, "directory":_PSHELL_BATCH_DIR})
+        maxFilenameLength = max(maxFilenameLength, len(file))
+  # check the batch ath env variable
+  if batchPath != None and os.path.isdir(batchPath):
+    fileList = commands.getoutput("ls {}".format(batchPath)).split()
+    for file in fileList:
+      if os.path.isfile(batchPath+"/"+file) or os.path.isfile(batchPath+"/"+file):
+        availableBatchFiles.append({"file":file, "directory":batchPath})
+        maxFilenameLength = max(maxFilenameLength, len(file))
+        maxDirLength = max(maxDirLength, len(batchPath))
+  # see if they are requesting a batch file by an index or name
   if isNumeric(batchFile):
-    availableBatchFiles = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR)).split()
-    if batchPath != None:
-      availableBatchFiles += commands.getoutput("ls {}".format(batchPath)).split()
     if int(batchFile) > 0 and int(batchFile) <= len(availableBatchFiles):
-      batchFile = availableBatchFiles[int(batchFile)-1]
+      batchFile = availableBatchFiles[int(batchFile)-1]["file"]
     else:
       printf("ERROR: Invalid batch fileindex: {}, valid values 1-{}".format(batchFile, len(availableBatchFiles)))
       return
+  # create our batch file location optoins, default is CWD or fully qualified path, then env variable, then default path
   batchFile1 = batchFile
   batchFile2 = ""
   if (batchPath != None):
@@ -1740,27 +1758,17 @@ def _batch(command_):
     printf("    -show     - Show the contents of the batch file without executing")
     printf("")
     return
-  elif batchFile == "-list":
-    availableBatchFiles1 = commands.getoutput("ls {}".format(_PSHELL_BATCH_DIR)).split()
-    if batchPath != None:
-      availableBatchFiles2 = commands.getoutput("ls {}".format(batchPath)).split()
-    availableBatchFiles = availableBatchFiles1 + availableBatchFiles2
-    maxFilenameLength = 0
-    for file in availableBatchFiles:
-      maxFilenameLength = max(maxFilenameLength, len(file))
-    maxDirLength = max(len(_PSHELL_BATCH_DIR), len(batchPath))
+  elif isSubString(batchFile, "-list", 2):
     printf("")
     printf("***********************************************")
     printf("*            AVAILABLE BATCH FILES            *")
     printf("***********************************************")
     printf("")
+    availableBatchFiles1 = []
     printf("%s   %-*s   %-*s" % ("Index", maxFilenameLength, "Filename", maxDirLength, "Directory"))
     printf("%s   %s   %s" % ("=====", "="*maxFilenameLength, "="*maxDirLength))
-    for index, file in enumerate(availableBatchFiles):
-      if index < len(availableBatchFiles1):
-        printf("%-5d   %-*s   %-*s" % (index+1, maxFilenameLength, file, maxDirLength, _PSHELL_BATCH_DIR))
-      else:
-        printf("%-5d   %-*s   %-*s" % (index+1, maxFilenameLength, file, maxDirLength, batchPath))
+    for index, entry in enumerate(availableBatchFiles):
+      printf("%-5d   %-*s   %-*s" % (index+1, maxFilenameLength, entry["file"], maxDirLength, entry["directory"]))
     printf("")
     return
   elif (os.path.isfile(batchFile1)):
@@ -1773,8 +1781,23 @@ def _batch(command_):
     _showUsage()
     return
   else:
-    printf("PSHELL_ERROR: Could not find batch file: '%s'" % batchFile)
-    return
+    numMatches = 0
+    for entry in availableBatchFiles:
+      if isSubString(batchFile, entry["file"], len(batchFile)):
+        batchFile4 = entry["directory"] + "/" + entry["file"]
+        numMatches += 1
+    if numMatches == 0:
+      printf("PSHELL_ERROR: Could not find batch file: '%s'" % batchFile)
+      return
+    elif numMatches == 1:
+      if (os.path.isfile(batchFile4)):
+        file = open(batchFile4, 'r')
+      else:
+        printf("PSHELL_ERROR: Could not open batch file: '%s'" % batchFile)
+        return
+    else:
+      printf("PSHELL_ERROR: Ambiguous batch file abbreviation: '%s', use -list option to see available files" % batchFile)
+      return
   # found a batch file, process it
   for line in file:
     # skip comments
