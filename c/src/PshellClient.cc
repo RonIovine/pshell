@@ -236,6 +236,7 @@ struct File
 };
 
 #define MAX_BATCH_FILES 256
+char currentDir[PATH_MAX];
 
 struct FileList
 {
@@ -1279,7 +1280,10 @@ void findBatchFiles(const char *directory_)
       {
         file[strlen(file)-1] = '\0';
       }
-      if (isFile(directory_, file) && (_batchFiles.numFiles < MAX_BATCH_FILES))
+      /* check for the correct batch file extensions */
+      if (((strstr(file, ".psh") != NULL) ||
+          ((strstr(file, ".batch") != NULL))) &&
+          (_batchFiles.numFiles < MAX_BATCH_FILES))
       {
         strcpy(_batchFiles.files[_batchFiles.numFiles].directory, directory_);
         strcpy(_batchFiles.files[_batchFiles.numFiles].filename, file);
@@ -1330,57 +1334,35 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_,
   unsigned iteration = 0;
   char *batchPath = getenv("PSHELL_BATCH_DIR");
 
-  strcpy(batchFile, filename_);
+  getcwd(currentDir, sizeof(currentDir));
+
   _batchFiles.numFiles = 0;
   _batchFiles.maxDirectoryLength = 9;
   _batchFiles.maxFilenameLength = 8;
+
+  findBatchFiles(currentDir);
+  findBatchFiles(batchPath);
   findBatchFiles(PSHELL_BATCH_DIR);
-  if (batchPath != NULL)
-  {
-    findBatchFiles(batchPath);
-  }
-  if (isSubString(batchFile, "-list", 2))
+
+  if (isSubString(filename_, "-list", 2))
   {
     showBatchFiles();
     return;
   }
-  else if (isDec(batchFile))
+  else if (isDec(filename_))
   {
-    if (atoi(batchFile) > 0 && atoi(batchFile) <= _batchFiles.numFiles)
+    if (atoi(filename_) > 0 && atoi(filename_) <= _batchFiles.numFiles)
     {
-      sprintf(batchFile, "%s/%s", _batchFiles.files[atoi(batchFile)-1].directory, _batchFiles.files[atoi(batchFile)-1].filename);
+      sprintf(batchFile, "%s/%s", _batchFiles.files[atoi(filename_)-1].directory, _batchFiles.files[atoi(filename_)-1].filename);
     }
     else
     {
-      printf("ERROR: Invalid batch file index: %d, valid values 1-%d\n", batchFile, _batchFiles.numFiles);
+      printf("ERROR: Invalid batch file index: %d, valid values 1-%d\n", filename_, _batchFiles.numFiles);
       return;
     }
   }
-  /* try to open file as-is */
-  if ((fp = fopen(batchFile, "r")) == NULL)
+  else
   {
-    /* could not open filename as-is, look for it in env variable */
-    if (batchPath != NULL)
-    {
-      sprintf(batchFile, "%s/%s", batchPath, filename_);
-      if ((fp = fopen(batchFile, "r")) == NULL)
-      {
-        /* could not find it in batch path, look in default dir */
-        sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
-        fp = fopen(batchFile, "r");
-      }
-    }
-    else
-    {
-      /* could not find env variable, look in default batch dir */
-      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
-      fp = fopen(batchFile, "r");
-    }
-  }
-
-  if (fp == NULL)
-  {
-    /* could not find specific batch file, look for a substring match in the batch file list */
     int numMatches = 0;
     for (int i = 0; i < _batchFiles.numFiles; i++)
     {
@@ -1388,6 +1370,11 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_,
       {
         sprintf(batchFile, "%s/%s", _batchFiles.files[i].directory, _batchFiles.files[i].filename);
         numMatches += 1;
+        /* check for exact match, if so, take the first one in the list */
+        if (strlen(filename_) == strlen(_batchFiles.files[i].filename))
+        {
+          break;
+        }
       }
     }
     if (numMatches == 0)
@@ -1395,22 +1382,15 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_,
       printf("PSHELL_ERROR: Could not find batch file: '%s'\n", filename_);
       return;
     }
-    else if (numMatches == 1)
-    {
-      if ((fp = fopen(batchFile, "r")) == NULL)
-      {
-        printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
-        return;
-      }
-    }
-    else
+    else if (numMatches > 1)
     {
       printf("PSHELL_ERROR: Ambiguous batch file abbreviation: '%s', use -list option to see available files\n", filename_);
       return;
     }
   }
 
-  if (fp != NULL)
+  /* dropped through, found the batch file, try to open and process it */
+  if ((fp = fopen(batchFile, "r")) != NULL)
   {
     while (true)
     {
