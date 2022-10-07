@@ -1700,8 +1700,35 @@ func batch(argv_ []string) {
       showUsage()
       return
     }
-    batchFile1 := batchFile
     batchPath := os.Getenv("PSHELL_BATCH_DIR")
+    if (isSubString(argv_[0], "-list", 2)) {
+      batchDir, err := os.Open(_PSHELL_BATCH_DIR)
+      if (err == nil) {
+        files, err := batchDir.Readdir(0)
+        if (err == nil) {
+          for index := range(files) {
+            stat, _ := os.Lstat(_PSHELL_BATCH_DIR+"/"+files[index].Name())
+            if (stat.Mode().IsRegular()) {
+              printf("%s\n", files[index].Name())
+            }
+          }
+        }
+      }
+      batchDir, err = os.Open(batchPath)
+      if (err == nil) {
+        files, err := batchDir.Readdir(0)
+        if (err == nil) {
+          for index := range(files) {
+            stat, _ := os.Lstat(batchPath+"/"+files[index].Name())
+            if (stat.Mode().IsRegular()) {
+              printf("%s\n", files[index].Name())
+            }
+          }
+        }
+      }
+      return
+    }
+    batchFile1 := batchFile
     if (batchPath != "") {
       batchFile2 = batchPath+"/"+batchFile
     }
