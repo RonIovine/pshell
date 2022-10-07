@@ -410,6 +410,7 @@ static void loadConfigFile(void);
 static bool loadCommandFile(const char *filename_, bool interactive_, bool showOnly_);
 static void loadStartupFile(void);
 static void loadBatchFile(const char *filename_, bool showOnly_);
+static bool getBatchFile(const char *filename_, char *batchFile_);
 static bool checkForWhitespace(const char *string_);
 static char *createArgs(char *command_);
 static unsigned findCommand(char *command_);
@@ -1861,51 +1862,19 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
   FILE *fp;
   char inputLine[180];
   char batchFile[180];
-  char filename[80];
-  char cwd[180];
-  char *batchPath;
   unsigned count = 0;
 
-  strcpy(filename, filename_);
-  if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
-  {
-    /* look for batch file in env variable path */
-    sprintf(batchFile, "%s/%s", batchPath, filename_);
-    if ((fp = fopen(batchFile, "r")) == NULL)
-    {
-      /* look for batch file in local directory */
-      sprintf(batchFile, "%s", filename_);
-      if ((fp = fopen(batchFile, "r")) == NULL)
-      {
-        /* look for batch file in default directory */
-        sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
-        fp = fopen(batchFile, "r");
-      }
-    }
-  }
-  else
-  {
-    /* look for batch file in local directory */
-    sprintf(batchFile, "%s", filename_);
-    if ((fp = fopen(batchFile, "r")) == NULL)
-    {
-      /* look for batch file in default directory */
-      sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
-      fp = fopen(batchFile, "r");
-    }
-  }
-
-  if (fp != NULL)
+  if (getBatchFile(filename_, batchFile) && (fp = fopen(batchFile, "r")) != NULL)
   {
     while ((repeat_ == 0) || (count < repeat_))
     {
       if (repeat_ != 0)
       {
-        pshell_printf("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007", _title, _serverName, _ipAddress, filename, rate_, count+1, repeat_);
+        pshell_printf("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d of %d\007", _title, _serverName, _ipAddress, filename_, rate_, count+1, repeat_);
       }
       else
       {
-        pshell_printf("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d\007", _title, _serverName, _ipAddress, filename, rate_, count+1);
+        pshell_printf("\033]0;%s: %s[%s], Mode: BATCH[%s], Rate: %d SEC, Iteration: %d\007", _title, _serverName, _ipAddress, filename_, rate_, count+1);
       }
       if (clear_)
       {
@@ -1936,20 +1905,6 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
     fclose(fp);
     /* restore our terminal title bar */
     pshell_printf("\033]0;%s: %s[%s], Mode: INTERACTIVE\007", _title, _serverName, _ipAddress);
-  }
-  else
-  {
-    getcwd(cwd, sizeof(cwd));
-    PSHELL_ERROR("Could not open batch file: %s", filename_);
-    if (batchPath != NULL)
-    {
-      PSHELL_ERROR("Could not find file in local directory: %s, env directory: %s, or default directory: %s",
-                   cwd, batchPath, PSHELL_BATCH_DIR);
-    }
-    else
-    {
-      PSHELL_ERROR("Could not find file in local directory: %s, or default directory: %s", cwd, PSHELL_BATCH_DIR);
-    }
   }
 }
 
@@ -2459,9 +2414,8 @@ static void loadStartupFile(void)
 
 /******************************************************************************/
 /******************************************************************************/
-static void loadBatchFile(const char *filename_, bool showOnly_)
+static bool getBatchFile(const char *filename_, char *batchFile_)
 {
-  char batchFile[180];
   char *batchPath = getenv("PSHELL_BATCH_DIR");
 
   getcwd(_currentDir, sizeof(_currentDir));
@@ -2477,18 +2431,18 @@ static void loadBatchFile(const char *filename_, bool showOnly_)
   if (pshell_isSubString(filename_, "-list", 2))
   {
     showBatchFiles();
-    return;
+    return (false);
   }
   else if (pshell_isDec(filename_))
   {
     if (atoi(filename_) > 0 && atoi(filename_) <= _batchFiles.numFiles)
     {
-      sprintf(batchFile, "%s/%s", _batchFiles.files[atoi(filename_)-1].directory, _batchFiles.files[atoi(filename_)-1].filename);
+      sprintf(batchFile_, "%s/%s", _batchFiles.files[atoi(filename_)-1].directory, _batchFiles.files[atoi(filename_)-1].filename);
     }
     else
     {
       pshell_printf("ERROR: Invalid batch file index: %d, valid values 1-%d\n", filename_, _batchFiles.numFiles);
-      return;
+      return (false);
     }
   }
   else
@@ -2498,33 +2452,33 @@ static void loadBatchFile(const char *filename_, bool showOnly_)
     {
       if (pshell_isSubString(filename_, _batchFiles.files[i].filename, strlen(filename_)))
       {
-        sprintf(batchFile, "%s/%s", _batchFiles.files[i].directory, _batchFiles.files[i].filename);
-        numMatches += 1;
-        /* check for exact match, if so, take the first one in the list */
-        if (strlen(filename_) == strlen(_batchFiles.files[i].filename))
-        {
-          break;
-        }
+        sprintf(batchFile_, "%s/%s", _batchFiles.files[i].directory, _batchFiles.files[i].filename);
+        numMatches++;
       }
     }
     if (numMatches == 0)
     {
       pshell_printf("PSHELL_ERROR: Could not find batch file: '%s'\n", filename_);
-      return;
+      return (false);
     }
     else if (numMatches > 1)
     {
-      pshell_printf("PSHELL_ERROR: Ambiguous batch file abbreviation: '%s', use -list option to see available files\n", filename_);
-      return;
+      pshell_printf("PSHELL_ERROR: Ambiguous file: '%s', use -list option to see available files or <index> to select specific file\n", filename_);
+      return (false);
     }
   }
+  return (true);
+}
 
-  /* dropped through, found the batch file, try to open and process it */
-  if (!loadCommandFile(batchFile, true, showOnly_))
+/******************************************************************************/
+/******************************************************************************/
+static void loadBatchFile(const char *filename_, bool showOnly_)
+{
+  char batchFile[180];
+  if (getBatchFile(filename_, batchFile) && !loadCommandFile(batchFile, true, showOnly_))
   {
     pshell_printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
   }
-
 }
 
 /******************************************************************************/
@@ -2625,7 +2579,7 @@ static void addNativeCommands(void)
       pshell_addCommand(batch,
                         "batch",
                         "run commands from a batch file",
-                        "{<filename> [-show]} | -list",
+                        "{{<filename> | <index>} [-show]} | -list",
                         1,
                         2,
                         false);

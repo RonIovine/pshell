@@ -1844,7 +1844,7 @@ func addNativeCommands() {
     addCommand(batch,
                "batch",
                "run commands from a batch file",
-               "{<filename> [-show]} | -list",
+               "{{<filename> | <index>} [-show]} | -list",
                1,
                2,
                false,

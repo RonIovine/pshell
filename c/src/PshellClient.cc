@@ -1370,11 +1370,6 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_,
       {
         sprintf(batchFile, "%s/%s", _batchFiles.files[i].directory, _batchFiles.files[i].filename);
         numMatches += 1;
-        /* check for exact match, if so, take the first one in the list */
-        if (strlen(filename_) == strlen(_batchFiles.files[i].filename))
-        {
-          break;
-        }
       }
     }
     if (numMatches == 0)
@@ -1384,7 +1379,7 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_,
     }
     else if (numMatches > 1)
     {
-      printf("PSHELL_ERROR: Ambiguous batch file abbreviation: '%s', use -list option to see available files\n", filename_);
+      printf("PSHELL_ERROR: Ambiguous file: '%s', use -list option to see available files or <index> to select specific file\n", filename_);
       return;
     }
   }
