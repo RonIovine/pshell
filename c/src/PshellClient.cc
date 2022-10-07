@@ -30,6 +30,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/file.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -223,6 +224,29 @@ const char **_pshellCommandList;
 unsigned _numPshellCommands = 0;
 unsigned _maxPshellCommands = PSHELL_COMMAND_CHUNK;
 
+/*
+ * structures used to create a list of all the batch files found
+ * in the specified directories
+ */
+
+struct File
+{
+  char directory[256];
+  char filename[256];
+};
+
+#define MAX_BATCH_FILES 256
+
+struct FileList
+{
+  int numFiles;
+  int maxDirectoryLength;
+  int maxFilenameLength;
+  File files[MAX_BATCH_FILES];
+};
+
+FileList _batchFiles;
+
 /* function prototypes */
 
 bool isNumeric(const char *string_);
@@ -240,7 +264,7 @@ void tokenize(char *string_, const char *delimeter_, char *tokens_[], unsigned m
 bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, bool clear_, bool silent_);
 bool initInteractiveMode(void);
 void processInteractiveMode(void);
-void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_);
+void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_, bool showOnly_);
 void getNamedServers(void);
 void showNamedServers(void);
 void showActiveServers(void);
@@ -260,6 +284,10 @@ void parseCommandLine(int *argc, char *argv[], char *host, char *port);
 unsigned findCommand(char *command_);
 bool isSubString(const char *string1_, const char *string2_, unsigned minChars_);
 bool isEqual(const char *string1_, const char *string2_);
+bool isFile(const char *directory_, const char *file_);
+void findBatchFiles(const char *directory_);
+void showBatchFiles(void);
+bool isDec(const char *string_);
 
 /*
  * we access this funciton via a 'backdoor' linking via the PshellReadline
@@ -1208,20 +1236,131 @@ bool initInteractiveMode(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_)
+bool isDec(const char *string_)
+{
+  for (int i = 0; i < strlen(string_); i++)
+  {
+    if (!isdigit(string_[i]))
+    {
+      return (false);
+    }
+  }
+  return (true);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+bool isFile(const char *directory_, const char *file_)
+{
+  char path[256];
+  sprintf(path, "%s/%s", directory_, file_);
+  struct stat path_stat;
+  stat(path, &path_stat);
+  return S_ISREG(path_stat.st_mode);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void findBatchFiles(const char *directory_)
+{
+  FILE *fp;
+  char file[256];
+  char command[256];
+
+  sprintf(command, "/bin/ls %s", directory_);
+
+  /* Open the command for reading. */
+  if ((fp = popen(command, "r")) != NULL)
+  {
+    /* Read the output a line at a time - output it. */
+    while (fgets(file, sizeof(file), fp) != NULL)
+    {
+      if (file[strlen(file)-1] == '\n')
+      {
+        file[strlen(file)-1] = '\0';
+      }
+      if (isFile(directory_, file) && (_batchFiles.numFiles < MAX_BATCH_FILES))
+      {
+        strcpy(_batchFiles.files[_batchFiles.numFiles].directory, directory_);
+        strcpy(_batchFiles.files[_batchFiles.numFiles].filename, file);
+        _batchFiles.maxDirectoryLength = MAX(_batchFiles.maxDirectoryLength, strlen(directory_));
+        _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, strlen(file));
+        _batchFiles.numFiles++;
+      }
+    }
+    /* close */
+    pclose(fp);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void showBatchFiles(void)
+{
+  printf("\n");
+  printf("***********************************************\n");
+  printf("*            AVAILABLE BATCH FILES            *\n");
+  printf("***********************************************\n");
+  printf("\n");
+  printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Filename", _batchFiles.maxDirectoryLength, "Directory");
+  printf("%s   ", "=====");
+  for (int i = 0; i < _batchFiles.maxFilenameLength; i++) printf("=");
+  printf("   ");
+  for (int i = 0; i < _batchFiles.maxDirectoryLength; i++) printf("=");
+  printf("\n");
+  for (int i = 0; i < _batchFiles.numFiles; i++)
+  {
+    printf("%-5d   %-*s   %-*s\n",
+           i+1,
+           _batchFiles.maxFilenameLength,
+           _batchFiles.files[i].filename,
+           _batchFiles.maxDirectoryLength,
+           _batchFiles.files[i].directory);
+  }
+  printf("\n");
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_, bool showOnly_)
 {
   FILE *fp;
   char inputLine[180];
   char batchFile[180];
-  char *batchPath;
   unsigned iteration = 0;
+  char *batchPath = getenv("PSHELL_BATCH_DIR");
 
   strcpy(batchFile, filename_);
+  _batchFiles.numFiles = 0;
+  _batchFiles.maxDirectoryLength = 9;
+  _batchFiles.maxFilenameLength = 8;
+  findBatchFiles(PSHELL_BATCH_DIR);
+  if (batchPath != NULL)
+  {
+    findBatchFiles(batchPath);
+  }
+  if (isSubString(batchFile, "-list", 2))
+  {
+    showBatchFiles();
+    return;
+  }
+  else if (isDec(batchFile))
+  {
+    if (atoi(batchFile) > 0 && atoi(batchFile) <= _batchFiles.numFiles)
+    {
+      sprintf(batchFile, "%s/%s", _batchFiles.files[atoi(batchFile)-1].directory, _batchFiles.files[atoi(batchFile)-1].filename);
+    }
+    else
+    {
+      printf("ERROR: Invalid batch file index: %d, valid values 1-%d\n", batchFile, _batchFiles.numFiles);
+      return;
+    }
+  }
   /* try to open file as-is */
   if ((fp = fopen(batchFile, "r")) == NULL)
   {
     /* could not open filename as-is, look for it in env variable */
-    if ((batchPath = getenv("PSHELL_BATCH_DIR")) != NULL)
+    if (batchPath != NULL)
     {
       sprintf(batchFile, "%s/%s", batchPath, filename_);
       if ((fp = fopen(batchFile, "r")) == NULL)
@@ -1236,6 +1375,38 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_)
       /* could not find env variable, look in default batch dir */
       sprintf(batchFile, "%s/%s", PSHELL_BATCH_DIR, filename_);
       fp = fopen(batchFile, "r");
+    }
+  }
+
+  if (fp == NULL)
+  {
+    /* could not find specific batch file, look for a substring match in the batch file list */
+    int numMatches = 0;
+    for (int i = 0; i < _batchFiles.numFiles; i++)
+    {
+      if (isSubString(filename_, _batchFiles.files[i].filename, strlen(filename_)))
+      {
+        sprintf(batchFile, "%s/%s", _batchFiles.files[i].directory, _batchFiles.files[i].filename);
+        numMatches += 1;
+      }
+    }
+    if (numMatches == 0)
+    {
+      printf("PSHELL_ERROR: Could not find batch file: '%s'\n", filename_);
+      return;
+    }
+    else if (numMatches == 1)
+    {
+      if ((fp = fopen(batchFile, "r")) == NULL)
+      {
+        printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
+        return;
+      }
+    }
+    else
+    {
+      printf("PSHELL_ERROR: Ambiguous batch file abbreviation: '%s', use -list option to see available files\n", filename_);
+      return;
     }
   }
 
@@ -1283,7 +1454,14 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_)
           }
           if (strlen(inputLine) > 0)
           {
-            processCommand(PSHELL_USER_COMMAND, inputLine, 0, 0, false, false);
+            if (showOnly_)
+            {
+              printf("%s\n", inputLine);
+            }
+            else
+            {
+              processCommand(PSHELL_USER_COMMAND, inputLine, -1, 0, false, false);
+            }
           }
         }
       }
@@ -1305,7 +1483,7 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_)
   }
   else
   {
-    printf("PSHELL_ERROR: Could not open batch file: '%s'\n", batchFile);
+    printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
   }
 }
 
@@ -1390,14 +1568,26 @@ void processInteractiveMode(void)
       {
         if (numTokens == 2)
         {
-          if (strcmp(tokens[1], "?") == 0)
+          if ((strcmp(tokens[1], "?") == 0) || ((strcmp(tokens[1], "-h") == 0)))
           {
-            printf("Usage: batch <filename>\n");
+            printf("\n");
+            printf("Usage: batch {{<filename> | <index>} [-show]} | -list\n");
+            printf("\n");
+            printf("  where:\n");
+            printf("    filename  - Filename of the batch file to execute\n");
+            printf("    index     - Index of the batch file to execute (from the -list option)\n");
+            printf("    -list     - List all the available batch files in %s\n", PSHELL_BATCH_DIR);
+            printf("    -show     - Show the contents of the batch file without executing\n");
+            printf("\n");
           }
           else
           {
-            processBatchFile(tokens[1], -1, 0, false);
+            processBatchFile(tokens[1], -1, 0, false, false);
           }
+        }
+        else if ((numTokens == 3) && (isSubString(tokens[2], "-show", 2)))
+        {
+          processBatchFile(tokens[1], -1, 0, false, true);
         }
         else if (findCommand(tokens[0]) > 2)
         {
@@ -1405,7 +1595,7 @@ void processInteractiveMode(void)
         }
         else
         {
-          printf("Usage: batch <filename>\n");
+          printf("Usage: batch {{<filename> | <index>} [-show]} | -list\n");
         }
       }
       else if (strstr(_nativeInteractiveCommands[HISTORY_INDEX].name, tokens[0]) ==
@@ -2169,7 +2359,7 @@ int main(int argc, char *argv[])
                 float(rate)/float(USEC_PER_SECOND));
         fflush(stdout);
       }
-      processBatchFile(filename, rate, repeat, clear);
+      processBatchFile(filename, rate, repeat, clear, false);
     }
   }
   exitProgram(0);

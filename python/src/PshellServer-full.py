@@ -1709,7 +1709,11 @@ def _batch(command_):
   global _gFirstArgPos
   if command_[0] == "batch":
     command_ = command_[1:]
-  batchFile = command_[0]
+  if len(command_) > 0:
+    batchFile = command_[0]
+  else:
+    showUsage()
+    return
   if isSubString(command_[-1], "-show", 2):
     showOnly = True
   else:
@@ -1726,7 +1730,7 @@ def _batch(command_):
       if os.path.isfile(_PSHELL_BATCH_DIR+"/"+file) or os.path.isfile(_PSHELL_BATCH_DIR+"/"+file):
         availableBatchFiles.append({"file":file, "directory":_PSHELL_BATCH_DIR})
         maxFilenameLength = max(maxFilenameLength, len(file))
-  # check the batch ath env variable
+  # check the batch path env variable
   if batchPath != None and os.path.isdir(batchPath):
     fileList = commands.getoutput("ls {}".format(batchPath)).split()
     for file in fileList:
@@ -1739,7 +1743,7 @@ def _batch(command_):
     if int(batchFile) > 0 and int(batchFile) <= len(availableBatchFiles):
       batchFile = availableBatchFiles[int(batchFile)-1]["file"]
     else:
-      printf("ERROR: Invalid batch fileindex: {}, valid values 1-{}".format(batchFile, len(availableBatchFiles)))
+      printf("ERROR: Invalid batch file index: {}, valid values 1-{}".format(batchFile, len(availableBatchFiles)))
       return
   # create our batch file location optoins, default is CWD or fully qualified path, then env variable, then default path
   batchFile1 = batchFile
@@ -1764,7 +1768,6 @@ def _batch(command_):
     printf("*            AVAILABLE BATCH FILES            *")
     printf("***********************************************")
     printf("")
-    availableBatchFiles1 = []
     printf("%s   %-*s   %-*s" % ("Index", maxFilenameLength, "Filename", maxDirLength, "Directory"))
     printf("%s   %s   %s" % ("=====", "="*maxFilenameLength, "="*maxDirLength))
     for index, entry in enumerate(availableBatchFiles):
