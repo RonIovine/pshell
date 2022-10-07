@@ -1819,27 +1819,27 @@ void findBatchFiles(const char *directory_)
 /******************************************************************************/
 void showBatchFiles(void)
 {
-  printf("\n");
-  printf("***********************************************\n");
-  printf("*            AVAILABLE BATCH FILES            *\n");
-  printf("***********************************************\n");
-  printf("\n");
-  printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Filename", _batchFiles.maxDirectoryLength, "Directory");
-  printf("%s   ", "=====");
-  for (int i = 0; i < _batchFiles.maxFilenameLength; i++) printf("=");
-  printf("   ");
-  for (int i = 0; i < _batchFiles.maxDirectoryLength; i++) printf("=");
-  printf("\n");
+  pshell_printf("\n");
+  pshell_printf("***********************************************\n");
+  pshell_printf("*            AVAILABLE BATCH FILES            *\n");
+  pshell_printf("***********************************************\n");
+  pshell_printf("\n");
+  pshell_printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Filename", _batchFiles.maxDirectoryLength, "Directory");
+  pshell_printf("%s   ", "=====");
+  for (int i = 0; i < _batchFiles.maxFilenameLength; i++) pshell_printf("=");
+  pshell_printf("   ");
+  for (int i = 0; i < _batchFiles.maxDirectoryLength; i++) pshell_printf("=");
+  pshell_printf("\n");
   for (int i = 0; i < _batchFiles.numFiles; i++)
   {
-    printf("%-5d   %-*s   %-*s\n",
-           i+1,
-           _batchFiles.maxFilenameLength,
-           _batchFiles.files[i].filename,
-           _batchFiles.maxDirectoryLength,
-           _batchFiles.files[i].directory);
+    pshell_printf("%-5d   %-*s   %-*s\n",
+                  i+1,
+                  _batchFiles.maxFilenameLength,
+                  _batchFiles.files[i].filename,
+                  _batchFiles.maxDirectoryLength,
+                  _batchFiles.files[i].directory);
   }
-  printf("\n");
+  pshell_printf("\n");
 }
 
 /******************************************************************************/
