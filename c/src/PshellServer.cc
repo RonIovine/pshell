@@ -2256,12 +2256,12 @@ static void batch(int argc, char *argv[])
     pshell_showUsage();
     pshell_printf("\n");
     pshell_printf("  where:\n");
-    pshell_printf("    filename - name of batch file to run\n");
+    pshell_printf("    filename  - name of batch file to run\n");
     if (_serverType == PSHELL_NO_SERVER)
     {
-      pshell_printf("    rate     - rate in seconds to repeat batch file (default=0)\n");
-      pshell_printf("    repeat   - number of times to repeat command or 'forever' (default=1)\n");
-      pshell_printf("    clear    - clear the screen between batch file runs\n");
+      pshell_printf("    rate      - rate in seconds to repeat batch file (default=0)\n");
+      pshell_printf("    repeat    - number of times to repeat command or 'forever' (default=1)\n");
+      pshell_printf("    clear     - clear the screen between batch file runs\n");
     }
     else  // TCP or LOCAL server
     {

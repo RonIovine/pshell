@@ -1679,30 +1679,55 @@ func loadStartupFile() {
 func batch(argv_ []string) {
   var batchFile = argv_[0]
   var batchFile2 = ""
+  var showOnly = false
   var file []byte
-  batchFile1 := batchFile
-  batchPath := os.Getenv("PSHELL_BATCH_DIR")
-  if (batchPath != "") {
-    batchFile2 = batchPath+"/"+batchFile
-  }
-  batchFile3 := _PSHELL_BATCH_DIR+"/"+batchFile
-  if _, err := os.Stat(batchFile1); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(batchFile1)
-  } else if _, err := os.Stat(batchFile2); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(batchFile2)
-  } else if _, err := os.Stat(batchFile3); !os.IsNotExist(err) {
-    file, _ = ioutil.ReadFile(batchFile3)
+  if (isHelp()) {
+    printf("\n")
+    showUsage()
+    printf("\n")
+    printf("  where:\n")
+    printf("    filename  - name of batch file to run\n")
+    printf("    index     - Index of the batch file to execute (from the -list option)\n")
+    printf("    -list     - List all the available batch files in %s\n", _PSHELL_BATCH_DIR)
+    printf("    -show     - Show the contents of the batch file without executing\n")
+    printf("\n")
   } else {
-    // file not found, return
-    printf("ERROR: Could not find batch file: '%s'\n", batchFile)
-    return
-  }
-  // found a batch file, process it
-  lines := strings.Split(string(file), "\n")
-  for _, line := range lines {
-    // skip comments
-    if ((len(line) > 0) && (line[0] != '#')) {
-      processCommand(line)
+    if (len(argv_) == 1) {
+      showOnly = false
+    } else if (isSubString(argv_[1], "-show", 2)) {
+      showOnly = true
+    } else {
+      showUsage()
+      return
+    }
+    batchFile1 := batchFile
+    batchPath := os.Getenv("PSHELL_BATCH_DIR")
+    if (batchPath != "") {
+      batchFile2 = batchPath+"/"+batchFile
+    }
+    batchFile3 := _PSHELL_BATCH_DIR+"/"+batchFile
+    if _, err := os.Stat(batchFile1); !os.IsNotExist(err) {
+      file, _ = ioutil.ReadFile(batchFile1)
+    } else if _, err := os.Stat(batchFile2); !os.IsNotExist(err) {
+      file, _ = ioutil.ReadFile(batchFile2)
+    } else if _, err := os.Stat(batchFile3); !os.IsNotExist(err) {
+      file, _ = ioutil.ReadFile(batchFile3)
+    } else {
+      // file not found, return
+      printf("ERROR: Could not find batch file: '%s'\n", batchFile)
+      return
+    }
+    // found a batch file, process it
+    lines := strings.Split(string(file), "\n")
+    for _, line := range lines {
+      // skip comments
+      if ((len(line) > 0) && (line[0] != '#')) {
+        if (showOnly) {
+          printf("%s\n", line)
+        } else {
+          processCommand(line)
+        }
+      }
     }
   }
 }
@@ -1792,10 +1817,10 @@ func addNativeCommands() {
     addCommand(batch,
                "batch",
                "run commands from a batch file",
-               "<filename>",
+               "{<filename> [-show]} | -list",
                1,
                2,
-               true,
+               false,
                true)
     // we don't do command history for LOCAL servers because we don't use our
     // internal ReadLine like functionality
