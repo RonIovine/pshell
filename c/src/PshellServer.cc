@@ -2225,9 +2225,14 @@ static void batch(int argc, char *argv[])
     else  // TCP or LOCAL server
     {
       pshell_printf("    index     - Index of the batch file to execute (from the -list option)\n");
-      pshell_printf("    -list     - List all the available batch files in %s\n", PSHELL_BATCH_DIR);
-      pshell_printf("    -show     - Show the contents of the batch file without executing\n");
+      pshell_printf("    -list     - List all the available batch files\n");
+      pshell_printf("    -show     - Show the contents of batch file without executing\n");
     }
+    pshell_printf("\n");
+    pshell_printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch\n");
+    pshell_printf("        files will be searched in the following directories: CWD,\n");
+    pshell_printf("        $PSHELL_BATCH_DIR env variable, and the %s\n", PSHELL_BATCH_DIR);
+    pshell_printf("        default batch directory, in that order\n");
     pshell_printf("\n");
   }
   else if (_serverType == PSHELL_NO_SERVER)

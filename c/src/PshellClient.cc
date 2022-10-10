@@ -236,7 +236,7 @@ struct File
 };
 
 #define MAX_BATCH_FILES 256
-char currentDir[PATH_MAX];
+char _currentDir[PATH_MAX];
 
 struct FileList
 {
@@ -1326,39 +1326,35 @@ void showBatchFiles(void)
 
 /******************************************************************************/
 /******************************************************************************/
-void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_, bool showOnly_)
+static bool getBatchFile(const char *filename_, char *batchFile_)
 {
-  FILE *fp;
-  char inputLine[180];
-  char batchFile[180];
-  unsigned iteration = 0;
   char *batchPath = getenv("PSHELL_BATCH_DIR");
 
-  getcwd(currentDir, sizeof(currentDir));
+  getcwd(_currentDir, sizeof(_currentDir));
 
   _batchFiles.numFiles = 0;
   _batchFiles.maxDirectoryLength = 9;
   _batchFiles.maxFilenameLength = 8;
 
-  findBatchFiles(currentDir);
+  findBatchFiles(_currentDir);
   findBatchFiles(batchPath);
   findBatchFiles(PSHELL_BATCH_DIR);
 
   if (isSubString(filename_, "-list", 2))
   {
     showBatchFiles();
-    return;
+    return (false);
   }
   else if (isDec(filename_))
   {
     if (atoi(filename_) > 0 && atoi(filename_) <= _batchFiles.numFiles)
     {
-      sprintf(batchFile, "%s/%s", _batchFiles.files[atoi(filename_)-1].directory, _batchFiles.files[atoi(filename_)-1].filename);
+      sprintf(batchFile_, "%s/%s", _batchFiles.files[atoi(filename_)-1].directory, _batchFiles.files[atoi(filename_)-1].filename);
     }
     else
     {
       printf("ERROR: Invalid batch file index: %d, valid values 1-%d\n", filename_, _batchFiles.numFiles);
-      return;
+      return (false);
     }
   }
   else
@@ -1368,24 +1364,35 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_,
     {
       if (isSubString(filename_, _batchFiles.files[i].filename, strlen(filename_)))
       {
-        sprintf(batchFile, "%s/%s", _batchFiles.files[i].directory, _batchFiles.files[i].filename);
-        numMatches += 1;
+        sprintf(batchFile_, "%s/%s", _batchFiles.files[i].directory, _batchFiles.files[i].filename);
+        numMatches++;
       }
     }
     if (numMatches == 0)
     {
       printf("PSHELL_ERROR: Could not find batch file: '%s'\n", filename_);
-      return;
+      return (false);
     }
     else if (numMatches > 1)
     {
       printf("PSHELL_ERROR: Ambiguous file: '%s', use -list option to see available files or <index> to select specific file\n", filename_);
-      return;
+      return (false);
     }
   }
+  return (true);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_, bool showOnly_)
+{
+  FILE *fp;
+  char inputLine[180];
+  char batchFile[180];
+  unsigned iteration = 0;
 
   /* dropped through, found the batch file, try to open and process it */
-  if ((fp = fopen(batchFile, "r")) != NULL)
+  if (getBatchFile(filename_, batchFile) && (fp = fopen(batchFile, "r")) != NULL)
   {
     while (true)
     {
@@ -1551,8 +1558,13 @@ void processInteractiveMode(void)
             printf("  where:\n");
             printf("    filename  - Filename of the batch file to execute\n");
             printf("    index     - Index of the batch file to execute (from the -list option)\n");
-            printf("    -list     - List all the available batch files in %s\n", PSHELL_BATCH_DIR);
+            printf("    -list     - List all the available batch files\n");
             printf("    -show     - Show the contents of the batch file without executing\n");
+            printf("\n");
+            printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch\n");
+            printf("        files will be searched in the following directories: CWD,\n");
+            printf("        $PSHELL_BATCH_DIR env variable, and the %s\n", PSHELL_BATCH_DIR);
+            printf("        default batch directory, in that order\n");
             printf("\n");
           }
           else
