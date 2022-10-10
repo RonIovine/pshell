@@ -1779,7 +1779,7 @@ def getBatchFile(filename_):
         batchFile = entry["directory"] + "/" + entry["filename"]
         numMatches += 1
     if (numMatches == 0):
-      printf("PSHELL_ERROR: Could not find batch file: '{}'".format(filename_))
+      printf("PSHELL_ERROR: Could not find batch file: '{}', use -list option to see available files".format(filename_))
     elif (numMatches > 1):
       printf("PSHELL_ERROR: Ambiguous file: '{}', use -list option to see available files or <index> to select specific file".format(filename_))
       return (None)

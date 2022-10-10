@@ -2482,7 +2482,7 @@ static void loadBatchFile(const char *filename_, bool showOnly_)
   char batchFile[180];
   if (getBatchFile(filename_, batchFile) && !loadCommandFile(batchFile, true, showOnly_))
   {
-    pshell_printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
+    pshell_printf("PSHELL_ERROR: Could not open batch file: '%s', use -list option to see available files\n", filename_);
   }
 }
 

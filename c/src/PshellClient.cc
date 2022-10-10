@@ -1353,7 +1353,7 @@ static bool getBatchFile(const char *filename_, char *batchFile_)
     }
     else
     {
-      printf("ERROR: Invalid batch file index: %d, valid values 1-%d\n", filename_, _batchFiles.numFiles);
+      printf("ERROR: Invalid batch file index: %d, valid values 1-%d\n", atoi(filename_), _batchFiles.numFiles);
       return (false);
     }
   }
@@ -1370,7 +1370,7 @@ static bool getBatchFile(const char *filename_, char *batchFile_)
     }
     if (numMatches == 0)
     {
-      printf("PSHELL_ERROR: Could not find batch file: '%s'\n", filename_);
+      printf("PSHELL_ERROR: Could not find batch file: '%s', use -list option to see available files\n", filename_);
       return (false);
     }
     else if (numMatches > 1)
@@ -1462,10 +1462,6 @@ void processBatchFile(char *filename_, int rate_, unsigned repeat_, bool clear_,
       rewind(fp);
     }
     fclose(fp);
-  }
-  else
-  {
-    printf("PSHELL_ERROR: Could not open batch file: '%s'\n", filename_);
   }
 }
 
