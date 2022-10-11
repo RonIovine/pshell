@@ -1709,7 +1709,7 @@ def _processQueryCommands2():
 #################################################################################
 def findBatchFiles(directory_):
   global _gBatchFiles
-  if os.path.isdir(directory_):
+  if directory_ != None and os.path.isdir(directory_):
     fileList = commands.getoutput("ls {}".format(directory_)).split()
     for filename in fileList:
       if ".psh" in filename or ".batch" in filename:
@@ -1759,9 +1759,11 @@ def getBatchFile(filename_):
     printf("    -show     - Show the contents of the batch file without executing")
     printf("")
     printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch")
-    printf("        files will be searched in the following directories: CWD,")
-    printf("        $PSHELL_BATCH_DIR env variable, and the %s".format(_PSHELL_BATCH_DIR))
-    printf("        default batch directory, in that order")
+    printf("        files will be searched in the following directory order:")
+    printf("")
+    printf("        current directory - {}".format(os.getcwd()))
+    printf("        $PSHELL_BATCH_DIR - {}".format(os.getenv('PSHELL_BATCH_DIR')))
+    printf("        default directory - {}".format(_PSHELL_BATCH_DIR))
     printf("")
   elif ((_gFirstArgPos == 0) and (filename_ in "batch")):
     _showUsage()

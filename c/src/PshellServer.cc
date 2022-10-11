@@ -1791,32 +1791,36 @@ void findBatchFiles(const char *directory_)
   char file[256];
   char command[256];
 
-  sprintf(command, "/bin/ls %s", directory_);
-
-  /* Open the command for reading. */
-  if ((fp = popen(command, "r")) != NULL)
+  if (directory_ != NULL)
   {
-    /* Read the output a line at a time - output it. */
-    while (fgets(file, sizeof(file), fp) != NULL)
+
+    sprintf(command, "/bin/ls %s", directory_);
+
+    /* Open the command for reading. */
+    if ((fp = popen(command, "r")) != NULL)
     {
-      if (file[strlen(file)-1] == '\n')
+      /* Read the output a line at a time - output it. */
+      while (fgets(file, sizeof(file), fp) != NULL)
       {
-        file[strlen(file)-1] = '\0';
+        if (file[strlen(file)-1] == '\n')
+        {
+          file[strlen(file)-1] = '\0';
+        }
+        /* check for the correct batch file extensions */
+        if (((strstr(file, ".psh") != NULL) ||
+            ((strstr(file, ".batch") != NULL))) &&
+            (_batchFiles.numFiles < MAX_BATCH_FILES))
+        {
+          strcpy(_batchFiles.files[_batchFiles.numFiles].directory, directory_);
+          strcpy(_batchFiles.files[_batchFiles.numFiles].filename, file);
+          _batchFiles.maxDirectoryLength = MAX(_batchFiles.maxDirectoryLength, strlen(directory_));
+          _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, strlen(file));
+          _batchFiles.numFiles++;
+        }
       }
-      /* check for the correct batch file extensions */
-      if (((strstr(file, ".psh") != NULL) ||
-          ((strstr(file, ".batch") != NULL))) &&
-          (_batchFiles.numFiles < MAX_BATCH_FILES))
-      {
-        strcpy(_batchFiles.files[_batchFiles.numFiles].directory, directory_);
-        strcpy(_batchFiles.files[_batchFiles.numFiles].filename, file);
-        _batchFiles.maxDirectoryLength = MAX(_batchFiles.maxDirectoryLength, strlen(directory_));
-        _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, strlen(file));
-        _batchFiles.numFiles++;
-      }
+      /* close */
+      pclose(fp);
     }
-    /* close */
-    pclose(fp);
   }
 }
 
@@ -2211,6 +2215,7 @@ static void batch(int argc, char *argv[])
   PshellTokens *argAndValue;
   if (pshell_isHelp())
   {
+    getcwd(_currentDir, sizeof(_currentDir));
     pshell_printf("\n");
     pshell_showUsage();
     pshell_printf("\n");
@@ -2230,9 +2235,11 @@ static void batch(int argc, char *argv[])
     }
     pshell_printf("\n");
     pshell_printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch\n");
-    pshell_printf("        files will be searched in the following directories: CWD,\n");
-    pshell_printf("        $PSHELL_BATCH_DIR env variable, and the %s\n", PSHELL_BATCH_DIR);
-    pshell_printf("        default batch directory, in that order\n");
+    pshell_printf("        files will be searched in the following directory order:\n");
+    pshell_printf("\n");
+    pshell_printf("        current directory - %s\n", _currentDir);
+    pshell_printf("        $PSHELL_BATCH_DIR - %s\n", getenv("PSHELL_BATCH_DIR"));
+    pshell_printf("        default directory - %s\n", PSHELL_BATCH_DIR);
     pshell_printf("\n");
   }
   else if (_serverType == PSHELL_NO_SERVER)
