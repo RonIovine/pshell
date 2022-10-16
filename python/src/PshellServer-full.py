@@ -1716,7 +1716,6 @@ def findBatchFiles(directory_):
         _gBatchFiles["files"].append({"filename":filename, "directory":directory_})
         _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(filename))
         _gBatchFiles["maxDirectoryLength"] = max(_gBatchFiles["maxDirectoryLength"], len(directory_))
-  #printf("{}".format(_gBatchFiles))
 
 #################################################################################
 #################################################################################

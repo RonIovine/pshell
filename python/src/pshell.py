@@ -102,6 +102,7 @@ import fcntl
 import sys
 import signal
 import time
+import commands
 import PshellControl
 import PshellServer
 import PshellReadline
@@ -113,6 +114,7 @@ _gFileSystemPath = "/tmp/.pshell/"
 _gLockFileExtension = ".lock"
 _gUnixLockFileId = "unix"+_gLockFileExtension
 _gActiveServers = []
+_gBatchFiles = {"maxFilenameLength":8, "maxDirectoryLength":9, "files":[]}
 
 #################################################################################
 #################################################################################
@@ -280,6 +282,88 @@ def _processCommandLine():
 
 #################################################################################
 #################################################################################
+def findBatchFiles(directory_):
+  global _gBatchFiles
+  if directory_ != None and os.path.isdir(directory_):
+    fileList = commands.getoutput("ls {}".format(directory_)).split()
+    for filename in fileList:
+      if ".psh" in filename or ".batch" in filename:
+        _gBatchFiles["files"].append({"filename":filename, "directory":directory_})
+        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(filename))
+        _gBatchFiles["maxDirectoryLength"] = max(_gBatchFiles["maxDirectoryLength"], len(directory_))
+
+#################################################################################
+#################################################################################
+def showBatchFiles():
+  global _gBatchFiles
+  print("")
+  print("***********************************************")
+  print("*            AVAILABLE BATCH FILES            *")
+  print("***********************************************")
+  print("")
+  print("%s   %-*s   %-*s" % ("Index", _gBatchFiles["maxFilenameLength"], "Filename", _gBatchFiles["maxDirectoryLength"], "Directory"))
+  print("%s   %s   %s" % ("=====", "="*_gBatchFiles["maxFilenameLength"], "="*_gBatchFiles["maxDirectoryLength"]))
+  for index, entry in enumerate(_gBatchFiles["files"]):
+    print("%-5d   %-*s   %-*s" % (index+1, _gBatchFiles["maxFilenameLength"], entry["filename"], _gBatchFiles["maxDirectoryLength"], entry["directory"]))
+  print("")
+
+#################################################################################
+#################################################################################
+def getBatchFile(filename_):
+  global _gBatchFiles
+  global _gDefaultBatchDir
+
+  batchFile = None
+
+  _gBatchFiles["files"] = []
+  _gBatchFiles["maxDirectoryLength"] = 9
+  _gBatchFiles["maxFilenameLength"] = 8
+
+  findBatchFiles(os.getcwd())
+  findBatchFiles(os.getenv('PSHELL_BATCH_DIR'))
+  findBatchFiles(_gDefaultBatchDir)
+
+  if filename_ == "?" or filename_ == "-h":
+    print("")
+    _showUsage()
+    print("")
+    print("  where:")
+    print("    filename  - Filename of the batch file to execute")
+    print("    index     - Index of the batch file to execute (from the -list option)")
+    print("    -list     - List all the available batch files")
+    print("    -show     - Show the contents of the batch file without executing")
+    print("")
+    print("  NOTE: Batch files must have a .psh or .batch extension.  Batch")
+    print("        files will be searched in the following directory order:")
+    print("")
+    print("        current directory - {}".format(os.getcwd()))
+    print("        $PSHELL_BATCH_DIR - {}".format(os.getenv('PSHELL_BATCH_DIR')))
+    print("        default directory - {}".format(_gDefaultBatchDir))
+    print("")
+  elif (filename_ in "batch"):
+    _showUsage()
+  elif (PshellServer.isSubString(filename_, "-list", 2)):
+    showBatchFiles()
+  elif (PshellServer.isDec(filename_)):
+    if (int(filename_) > 0 and int(filename_) <= len(_gBatchFiles["files"])):
+      batchFile = _gBatchFiles["files"][int(filename_)-1]["directory"] + "/" + _gBatchFiles["files"][int(filename_)-1]["filename"]
+    else:
+      print("ERROR: Invalid batch file index: {}, valid values 1-{}".format(filename_, len(_gBatchFiles["files"])))
+  else:
+    numMatches = 0
+    for index, entry in enumerate(_gBatchFiles["files"]):
+      if (PshellServer.isSubString(filename_, entry["filename"], len(filename_))):
+        batchFile = entry["directory"] + "/" + entry["filename"]
+        numMatches += 1
+    if (numMatches == 0):
+      print("PSHELL_ERROR: Could not find batch file: '{}', use -list option to see available files".format(filename_))
+    elif (numMatches > 1):
+      print("PSHELL_ERROR: Ambiguous file: '{}', use -list option to see available files or <index> to select specific file".format(filename_))
+      return (None)
+  return (batchFile)
+
+#################################################################################
+#################################################################################
 def _processBatchFile():
   global _gRate
   global _gClear
@@ -291,58 +375,61 @@ def _processBatchFile():
   global _gDefaultBatchDir
   global _gTimeout
   PshellServer._gPshellClientTimeout = _gTimeout
-  batchFile1 = _gFilename
-  batchFile2 = ""
-  batchPath = os.getenv('PSHELL_BATCH_DIR')
-  if (batchPath != None):
-    batchFile2 = batchPath+"/"+_gFilename
-  batchFile3 = _gDefaultBatchDir+"/"+_gFilename
-  if (os.path.isfile(batchFile1)):
-    file = open(batchFile1, 'r')
-  elif (os.path.isfile(batchFile2)):
-    file = open(batchFile2, 'r')
-  elif (os.path.isfile(batchFile3)):
-    file = open(batchFile3, 'r')
-  else:
-    print("PSHELL_ERROR: Could not open file: '%s'" % _gFilename)
-    return
-  # we found a batch file, process it
-  if _gRate >= 0 and _gRepeat == 0:
-    sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Rate: {} SEC\007".format(_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
-  while (True):
-    if (_gClear != False):
-      sys.stdout.write(_gClear)
-    file.seek(0, 0)
-    if (_gRepeat > 0):
-      _gIteration += 1
-      if _gRate >= 0:
-        sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Rate: {} SEC, Iteration: {} of {}\007".format(_gTitle,
-                                                                                                            _gServerName,
-                                                                                                            _getIpAddress(),
-                                                                                                            _gFilename,
-                                                                                                            _gRate,
-                                                                                                            _gIteration,
-                                                                                                            _gRepeat))
-      else:
-        sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Iteration: {} of {}\007".format(_gTitle,
-                                                                                              _gServerName,
-                                                                                              _getIpAddress(),
-                                                                                              _gFilename,
-                                                                                              _gIteration,
-                                                                                              _gRepeat))
-    for line in file:
-      # skip comments
-      line = line.strip()
-      if ((len(line) > 0) and (line[0] != "#")):
-        command = line.split()
-        _comandDispatcher(command)
-    if _gRepeat > 0 and _gIteration == _gRepeat:
-      break
-    elif _gRate >= 0:
-      time.sleep(_gRate)
-    elif _gRepeat == 0:
-      break
-  file.close()
+  #batchFile1 = _gFilename
+  #batchFile2 = ""
+  #batchPath = os.getenv('PSHELL_BATCH_DIR')
+  #if (batchPath != None):
+  #  batchFile2 = batchPath+"/"+_gFilename
+  #batchFile3 = _gDefaultBatchDir+"/"+_gFilename
+  #if (os.path.isfile(batchFile1)):
+  #  file = open(batchFile1, 'r')
+  #elif (os.path.isfile(batchFile2)):
+  #  file = open(batchFile2, 'r')
+  #elif (os.path.isfile(batchFile3)):
+  #  file = open(batchFile3, 'r')
+  #else:
+  #  print("PSHELL_ERROR: Could not open file: '%s'" % _gFilename)
+  #  return
+  batchFile = getBatchFile(_gFilename)
+  if (batchFile != None and os.path.isfile(batchFile)):
+    # we found a batch file, process it
+    file = open(batchFile, 'r')
+    if _gRate >= 0 and _gRepeat == 0:
+      sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Rate: {} SEC\007".format(_gTitle, _gServerName, _getIpAddress(), _gFilename, _gRate))
+    while (True):
+      if (_gClear != False):
+        sys.stdout.write(_gClear)
+      file.seek(0, 0)
+      if (_gRepeat > 0):
+        _gIteration += 1
+        if _gRate >= 0:
+          sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Rate: {} SEC, Iteration: {} of {}\007".format(_gTitle,
+                                                                                                              _gServerName,
+                                                                                                              _getIpAddress(),
+                                                                                                              _gFilename,
+                                                                                                              _gRate,
+                                                                                                              _gIteration,
+                                                                                                              _gRepeat))
+        else:
+          sys.stdout.write("\033]0;{}: {}[{}], Mode: BATCH[{}], Iteration: {} of {}\007".format(_gTitle,
+                                                                                                _gServerName,
+                                                                                                _getIpAddress(),
+                                                                                                _gFilename,
+                                                                                                _gIteration,
+                                                                                                _gRepeat))
+      for line in file:
+        # skip comments
+        line = line.strip()
+        if ((len(line) > 0) and (line[0] != "#")):
+          command = line.split()
+          _comandDispatcher(command)
+      if _gRepeat > 0 and _gIteration == _gRepeat:
+        break
+      elif _gRate >= 0:
+        time.sleep(_gRate)
+      elif _gRepeat == 0:
+        break
+    file.close()
 
 #################################################################################
 #################################################################################
@@ -767,11 +854,8 @@ if (__name__ == '__main__'):
     elif (arg == "clear"):
       _gClear = "\033[H\033[J"
     elif (needFile == True):
-      if (not arg.isdigit()):
-        _gFilename = arg
-        needFile = False
-      else:
-        _showUsage()
+      _gFilename = arg
+      needFile = False
     elif (needCommand == True):
       if (not arg.isdigit()):
         _gCommand = arg
