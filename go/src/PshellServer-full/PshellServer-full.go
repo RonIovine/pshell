@@ -964,6 +964,17 @@ type pshellCmd struct {
   length int
 }
 
+type file struct {
+  directory string
+  filename string
+}
+
+type fileList struct {
+  maxDirectoryLength int
+  maxFilenameLength int
+  files []file
+}
+
 // default config, startup, and batch directories
 const _PSHELL_CONFIG_DIR = "/etc/pshell/config"
 const _PSHELL_STARTUP_DIR = "/etc/pshell/startup"
@@ -1028,6 +1039,8 @@ var _gLockFd *os.File
 const _FILE_SYSTEM_PATH = "/tmp/.pshell/"
 const _LOCK_FILE_EXTENSION = ".lock"
 const _UNIX_LOCK_FILE_ID = "unix.lock"
+
+var _gBatchFiles fileList
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -1676,20 +1689,115 @@ func loadStartupFile() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func findBatchFiles(directory_ string) {
+  if (directory_ != "") {
+    batchDir, err := os.Open(directory_)
+    if (err == nil) {
+      files, err := batchDir.Readdir(0)
+      if (err == nil) {
+        for index := range(files) {
+          if (strings.Contains(files[index].Name(), ".psh") || strings.Contains(files[index].Name(), ".batch")) {
+            _gBatchFiles.files = append(_gBatchFiles.files, file{directory_, files[index].Name()})
+            _gBatchFiles.maxDirectoryLength = int(math.Max(float64(_gBatchFiles.maxDirectoryLength), float64(len(directory_))))
+            _gBatchFiles.maxFilenameLength = int(math.Max(float64(_gBatchFiles.maxFilenameLength), float64(len(files[index].Name()))))
+          }
+        }
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func showBatchFiles() {
+  printf("\n")
+  printf("***********************************************\n")
+  printf("*            AVAILABLE BATCH FILES            *\n")
+  printf("***********************************************\n")
+  printf("\n")
+  printf("%s   %-*s   %-*s\n", "Index", _gBatchFiles.maxFilenameLength, "Filename", _gBatchFiles.maxDirectoryLength, "Directory")
+  printf("%s   ", "=====")
+  printf(strings.Repeat("=", _gBatchFiles.maxFilenameLength))
+  printf("   ")
+  printf(strings.Repeat("=",  _gBatchFiles.maxDirectoryLength))
+  printf("\n")
+  for index, file := range(_gBatchFiles.files) {
+    printf("%-5d   %-*s   %-*s\n",
+           index+1,
+           _gBatchFiles.maxFilenameLength,
+           file.filename,
+           _gBatchFiles.maxDirectoryLength,
+           file.directory)
+  }
+  printf("\n")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func getBatchFile(filename_ string) string {
+
+  var batchFile = ""
+  var batchPath = os.Getenv("PSHELL_BATCH_DIR")
+
+  var currentDir, _ = os.Getwd()
+
+  _gBatchFiles.files = []file{}
+  _gBatchFiles.maxDirectoryLength = 9
+  _gBatchFiles.maxFilenameLength = 8
+
+  findBatchFiles(currentDir);
+  findBatchFiles(batchPath);
+  findBatchFiles(_PSHELL_BATCH_DIR);
+
+  if (isSubString(filename_, "-list", 2)) {
+    showBatchFiles()
+  } else if (isDec(filename_)) {
+    index := getInt(filename_, RADIX_DEC, false)
+    if (int(index) > 0 && int(index) <= len(_gBatchFiles.files)) {
+      batchFile = _gBatchFiles.files[index-1].directory + "/" + _gBatchFiles.files[index-1].filename
+    } else {
+      printf("ERROR: Invalid batch file index: %s, valid values 1-%d\n", filename_, len(_gBatchFiles.files))
+    }
+  } else {
+    var numMatches = 0
+    for _, file := range(_gBatchFiles.files) {
+      if (isSubString(filename_, file.filename, len(filename_))) {
+        batchFile = file.directory + "/" + file.filename
+        numMatches++
+      }
+    }
+    if (numMatches == 0) {
+      printf("PSHELL_ERROR: Could not find batch file: '%s'\n", filename_)
+    } else if (numMatches > 1) {
+      printf("PSHELL_ERROR: Ambiguous file: '%s', use -list option to see available files or <index> to select specific file\n", filename_)
+    }
+  }
+  return batchFile
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func batch(argv_ []string) {
   var batchFile = argv_[0]
-  var batchFile2 = ""
   var showOnly = false
   var file []byte
   if (isHelp()) {
+    var currentDir, _ = os.Getwd()
     printf("\n")
     showUsage()
     printf("\n")
     printf("  where:\n")
-    printf("    filename  - name of batch file to run\n")
+    printf("    filename  - Filename of the batch file to execute\n")
     printf("    index     - Index of the batch file to execute (from the -list option)\n")
-    printf("    -list     - List all the available batch files in %s\n", _PSHELL_BATCH_DIR)
+    printf("    -list     - List all the available batch files\n")
     printf("    -show     - Show the contents of the batch file without executing\n")
+    printf("\n")
+    printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch\n")
+    printf("        files will be searched in the following directory order:\n")
+    printf("\n")
+    printf("        current directory - %s\n", currentDir)
+    printf("        $PSHELL_BATCH_DIR - %s\n", os.Getenv("PSHELL_BATCH_DIR"))
+    printf("        default directory - %s\n", _PSHELL_BATCH_DIR)
     printf("\n")
   } else {
     if (len(argv_) == 1) {
@@ -1700,59 +1808,19 @@ func batch(argv_ []string) {
       showUsage()
       return
     }
-    batchPath := os.Getenv("PSHELL_BATCH_DIR")
-    if (isSubString(argv_[0], "-list", 2)) {
-      batchDir, err := os.Open(_PSHELL_BATCH_DIR)
-      if (err == nil) {
-        files, err := batchDir.Readdir(0)
-        if (err == nil) {
-          for index := range(files) {
-            stat, _ := os.Lstat(_PSHELL_BATCH_DIR+"/"+files[index].Name())
-            if (stat.Mode().IsRegular()) {
-              printf("%s\n", files[index].Name())
-            }
+    batchFile = getBatchFile(batchFile)
+    if (batchFile != "") {
+      file, _ = ioutil.ReadFile(batchFile)
+      // found a batch file, process it
+      lines := strings.Split(string(file), "\n")
+      for _, line := range lines {
+        // skip comments
+        if ((len(line) > 0) && (line[0] != '#')) {
+          if (showOnly) {
+            printf("%s\n", line)
+          } else {
+            processCommand(line)
           }
-        }
-      }
-      batchDir, err = os.Open(batchPath)
-      if (err == nil) {
-        files, err := batchDir.Readdir(0)
-        if (err == nil) {
-          for index := range(files) {
-            stat, _ := os.Lstat(batchPath+"/"+files[index].Name())
-            if (stat.Mode().IsRegular()) {
-              printf("%s\n", files[index].Name())
-            }
-          }
-        }
-      }
-      return
-    }
-    batchFile1 := batchFile
-    if (batchPath != "") {
-      batchFile2 = batchPath+"/"+batchFile
-    }
-    batchFile3 := _PSHELL_BATCH_DIR+"/"+batchFile
-    if _, err := os.Stat(batchFile1); !os.IsNotExist(err) {
-      file, _ = ioutil.ReadFile(batchFile1)
-    } else if _, err := os.Stat(batchFile2); !os.IsNotExist(err) {
-      file, _ = ioutil.ReadFile(batchFile2)
-    } else if _, err := os.Stat(batchFile3); !os.IsNotExist(err) {
-      file, _ = ioutil.ReadFile(batchFile3)
-    } else {
-      // file not found, return
-      printf("ERROR: Could not find batch file: '%s'\n", batchFile)
-      return
-    }
-    // found a batch file, process it
-    lines := strings.Split(string(file), "\n")
-    for _, line := range lines {
-      // skip comments
-      if ((len(line) > 0) && (line[0] != '#')) {
-        if (showOnly) {
-          printf("%s\n", line)
-        } else {
-          processCommand(line)
         }
       }
     }

@@ -1568,7 +1568,6 @@ void processInteractiveMode(void)
             printf("        $PSHELL_BATCH_DIR - %s\n", getenv("PSHELL_BATCH_DIR"));
             printf("        default directory - %s\n", PSHELL_BATCH_DIR);
             printf("\n");
-            printf("\n");
           }
           else
           {
