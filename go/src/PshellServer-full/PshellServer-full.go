@@ -1770,6 +1770,7 @@ func getBatchFile(filename_ string) string {
       printf("PSHELL_ERROR: Could not find batch file: '%s'\n", filename_)
     } else if (numMatches > 1) {
       printf("PSHELL_ERROR: Ambiguous file: '%s', use -list option to see available files or <index> to select specific file\n", filename_)
+      batchFile = ""
     }
   }
   return batchFile
