@@ -1797,7 +1797,12 @@ func batch(argv_ []string) {
     printf("        files will be searched in the following directory order:\n")
     printf("\n")
     printf("        current directory - %s\n", currentDir)
-    printf("        $PSHELL_BATCH_DIR - %s\n", os.Getenv("PSHELL_BATCH_DIR"))
+    var batchDir = os.Getenv("PSHELL_BATCH_DIR")
+    if (batchDir == "") {
+      printf("        $PSHELL_BATCH_DIR - None\n")
+    } else {
+      printf("        $PSHELL_BATCH_DIR - %s\n", batchDir)
+    }
     printf("        default directory - %s\n", _PSHELL_BATCH_DIR)
     printf("\n")
   } else {
