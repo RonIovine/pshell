@@ -262,9 +262,9 @@ struct File
 
 struct FileList
 {
-  int numFiles;
-  int maxDirectoryLength;
-  int maxFilenameLength;
+  unsigned numFiles;
+  unsigned maxDirectoryLength;
+  unsigned maxFilenameLength;
   File files[MAX_BATCH_FILES];
 };
 
@@ -391,7 +391,6 @@ static void receiveTCP(void);
 /* common functions (TCP and LOCAL servers) */
 
 static void showWelcome(void);
-static bool isFile(const char *directory_, const char *file_);
 static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_);
 static void findBatchFiles(const char *directory_);
 static void showBatchFiles(void);
@@ -1774,17 +1773,6 @@ unsigned char pshell_getUnsignedChar(const char *string_, PshellRadix radix_, bo
 
 /******************************************************************************/
 /******************************************************************************/
-static bool isFile(const char *directory_, const char *file_)
-{
-  char path[256];
-  sprintf(path, "%s/%s", directory_, file_);
-  struct stat path_stat;
-  stat(path, &path_stat);
-  return S_ISREG(path_stat.st_mode);
-}
-
-/******************************************************************************/
-/******************************************************************************/
 void findBatchFiles(const char *directory_)
 {
   FILE *fp;
@@ -1835,11 +1823,11 @@ void showBatchFiles(void)
   pshell_printf("\n");
   pshell_printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Filename", _batchFiles.maxDirectoryLength, "Directory");
   pshell_printf("%s   ", "=====");
-  for (int i = 0; i < _batchFiles.maxFilenameLength; i++) pshell_printf("=");
+  for (unsigned i = 0; i < _batchFiles.maxFilenameLength; i++) pshell_printf("=");
   pshell_printf("   ");
-  for (int i = 0; i < _batchFiles.maxDirectoryLength; i++) pshell_printf("=");
+  for (unsigned i = 0; i < _batchFiles.maxDirectoryLength; i++) pshell_printf("=");
   pshell_printf("\n");
-  for (int i = 0; i < _batchFiles.numFiles; i++)
+  for (unsigned i = 0; i < _batchFiles.numFiles; i++)
   {
     pshell_printf("%-5d   %-*s   %-*s\n",
                   i+1,
@@ -2211,7 +2199,6 @@ static void batch(int argc, char *argv[])
   unsigned rate = 0;
   unsigned repeat = 0;
   bool clear = false;
-  bool showOnly;
   PshellTokens *argAndValue;
   if (pshell_isHelp())
   {
@@ -2447,7 +2434,7 @@ static bool getBatchFile(const char *filename_, char *batchFile_)
   }
   else if (pshell_isDec(filename_))
   {
-    if (atoi(filename_) > 0 && atoi(filename_) <= _batchFiles.numFiles)
+    if (atoi(filename_) > 0 && atoi(filename_) <= (int)_batchFiles.numFiles)
     {
       sprintf(batchFile_, "%s/%s", _batchFiles.files[atoi(filename_)-1].directory, _batchFiles.files[atoi(filename_)-1].filename);
     }
@@ -2460,7 +2447,7 @@ static bool getBatchFile(const char *filename_, char *batchFile_)
   else
   {
     int numMatches = 0;
-    for (int i = 0; i < _batchFiles.numFiles; i++)
+    for (unsigned i = 0; i < _batchFiles.numFiles; i++)
     {
       if (pshell_isSubString(filename_, _batchFiles.files[i].filename, strlen(filename_)))
       {
