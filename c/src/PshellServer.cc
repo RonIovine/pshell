@@ -170,7 +170,7 @@ static int _defaultIdleTimeout = 10;
 
 #ifndef PSHELL_VSNPRINTF
 #ifndef PSHELL_PAYLOAD_GUARDBAND
-#define PSHELL_PAYLOAD_GUARDBAND 400   /* bytes */
+#define PSHELL_PAYLOAD_GUARDBAND 1024*64   /* 64k UDP/Unix max datagram size in bytes */
 #endif
 #endif
 
