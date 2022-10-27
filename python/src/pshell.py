@@ -215,7 +215,7 @@ def _comandDispatcher(args_):
       (results, retCode) = PshellControl.sendCommand4(_gControlName, PshellControl.ONE_SEC*5, command)
     else:
       print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
-      PshellControl.sendCommand1(_gControlName, command)
+      PshellControl.sendCommand2(_gControlName, PshellControl.NO_WAIT, command)
   else:
     (results, retCode) = PshellControl.sendCommand4(_gControlName, PshellControl.ONE_SEC*timeout, command)
   if results != None:
