@@ -109,7 +109,7 @@ def _controlServer(argv):
       PshellServer.printf(PshellControl.extractCommands(server["controlName"]), newline=False)
     elif timeout == 0:
       print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
-      PshellControl.sendCommand1(server["controlName"], ' '.join(argv[1:]))
+      PshellControl.sendCommand2(server["controlName"], PshellControl.NO_WAIT, ' '.join(argv[1:]))
     else:
       # reconstitute and dispatch original command to remote server minus the first keyword
       (results, retCode) = PshellControl.sendCommand4(server["controlName"], PshellControl.ONE_SEC*timeout, ' '.join(argv[1:]))
@@ -341,7 +341,7 @@ if (__name__ == '__main__'):
 
   # we tell the local server we are the special UDP/UNIX command
   # line client so it can process commands correctly and display
-  # the correct banner  information
+  # the correct banner information
   PshellServer._gPshellClient = True
 
   # supress the automatic invalid arg count message from the PshellControl.py
