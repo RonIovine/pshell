@@ -106,12 +106,10 @@ func keepAlive(argv []string) {
     PshellServer.Printf("\n")
     PshellServer.ShowUsage()
     PshellServer.Printf("\n")
-    PshellServer.Printf("Note, this function demonstrates intermediate flushes in a\n")
-    PshellServer.Printf("callback command to keep the UDP/UNIX interactive client from\n" )
-    PshellServer.Printf("timing out for commands that take longer than the response\n")
-    PshellServer.Printf("timeout (default=5 sec).  This is only supported in the 'C'\n")
-    PshellServer.Printf("version of the pshell interactive client, the Python version\n")
-    PshellServer.Printf("of the interactive client does not support intermediate flushes.\n")
+    PshellServer.Printf("  NOTE: This function demonstrates intermediate flushes in a\n")
+    PshellServer.Printf("        callback command to keep the UDP/UNIX interactive client\n" )
+    PshellServer.Printf("        from timing out for commands that take longer than the\n")
+    PshellServer.Printf("        response timeout (default=5 sec).\n")
     PshellServer.Printf("\n")
     return
   } else if (argv[0] == "dots") {

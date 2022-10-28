@@ -550,7 +550,7 @@ _PSHELL_CONFIG_FILE = "pshell-control.conf"
 # these are the valid types we recognize in the msgType field of the pshellMsg structure,
 # that structure is the message passed between the pshell client and server, these values
 # must match their corresponding #define definitions in the C file PshellCommon.h
-_gMsgTypes = {"queryName":3, "queryCommands":4, "commandComplete":8, "queryBanner":9, "queryTitle":10, "queryPrompt":11, "controlCommand":12}
+_gMsgTypes = {"queryName":3, "queryCommands":4, "userCommand":7, "commandComplete":8, "queryBanner":9, "queryTitle":10, "queryPrompt":11, "controlCommand":12}
 
 # fields of PshellMsg, we use this definition to unpack the received PshellMsg response
 # from the server into a corresponding OrderedDict in the PshellControl entry
@@ -585,6 +585,7 @@ _gLogLevel = LOG_LEVEL_DEFAULT
 _gLogFunction = None
 
 _INVALID_SID = -1
+_COMMAND_COMPLETE = 8
 
 #################################################################################
 #
@@ -914,7 +915,39 @@ def _sendCommand4(controlName_, timeoutOverride_, command_):
 
 #################################################################################
 #################################################################################
-def _sendCommand(control_, commandType_, command_, timeout_):
+def _sendUserCommand(controlName_, timeoutOverride_, command_):
+  global NO_WAIT
+  results = ""
+  retCode = SOCKET_NOT_CONNECTED
+  control = _getControl(controlName_)
+  if (control != None):
+    if (control["isBroadcastAddress"] == True):
+      # if talking to a broadcast address, force our wait time to 0
+      # because we do not request or expecet a response
+      timeoutOverride_ = NO_WAIT
+    control["pshellMsg"]["dataNeeded"] = (timeoutOverride_ > NO_WAIT)
+    retCode = _sendCommand(control, _gMsgTypes["userCommand"], command_, timeoutOverride_, False)
+  return retCode
+
+#################################################################################
+#################################################################################
+def _receiveUserCommand(controlName_, timeout_):
+  control_ = _getControl(controlName_)
+  try:
+    inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
+  except:
+    inputready = []
+  if (len(inputready) > 0):
+    control_["pshellMsg"], addr = control_["socket"].recvfrom(_gPshellMsgPayloadLength)
+    control_["pshellMsg"] = _PshellMsg._asdict(_PshellMsg._make(struct.unpack(_gPshellMsgHeaderFormat+str(len(control_["pshellMsg"])-struct.calcsize(_gPshellMsgHeaderFormat))+"s", control_["pshellMsg"])))
+    return (control_["pshellMsg"]["payload"], control_["pshellMsg"]["msgType"])
+  else:
+    return (None, SOCKET_TIMEOUT)
+
+
+#################################################################################
+#################################################################################
+def _sendCommand(control_, commandType_, command_, timeout_, receive_ = True):
   global _gMsgTypes
   global _gPshellControlResponse
   global _gSupressInvalidArgCountMessage
@@ -938,7 +971,7 @@ def _sendCommand(control_, commandType_, command_, timeout_):
       sentSize = 0
     if (sentSize == 0):
       retCode = SOCKET_SEND_FAILURE
-    elif (timeout_ > NO_WAIT):
+    elif (timeout_ > NO_WAIT and receive_):
       while (True):
         try:
           inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))

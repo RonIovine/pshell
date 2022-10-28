@@ -112,10 +112,12 @@ def _controlServer(argv):
       PshellControl.sendCommand2(server["controlName"], PshellControl.NO_WAIT, ' '.join(argv[1:]))
     else:
       # reconstitute and dispatch original command to remote server minus the first keyword
-      (results, retCode) = PshellControl.sendCommand4(server["controlName"], PshellControl.ONE_SEC*timeout, ' '.join(argv[1:]))
+      retCode = PshellControl._sendUserCommand(server["controlName"], PshellControl.ONE_SEC*timeout, ' '.join(argv[1:]))
       # good return, display results back to user
-      if (retCode == PshellControl.COMMAND_SUCCESS):
-        PshellServer.printf(results, newline=False)
+      while retCode != PshellControl._COMMAND_COMPLETE:
+        results, retCode = PshellControl._receiveUserCommand(server["controlName"], PshellControl.ONE_SEC*timeout)
+        if results != None:
+          PshellServer.printf(results, newline=False)
 
 #################################################################################
 #################################################################################

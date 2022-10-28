@@ -101,12 +101,10 @@ def keepAlive(argv):
     PshellServer.printf()
     PshellServer.showUsage()
     PshellServer.printf()
-    PshellServer.printf("Note, this function demonstrates intermediate flushes in a")
-    PshellServer.printf("callback command to keep the UDP/UNIX interactive client from" )
-    PshellServer.printf("timing out for commands that take longer than the response")
-    PshellServer.printf("timeout (default=5 sec).  This is only supported in the 'C'")
-    PshellServer.printf("version of the pshell interactive client, the Python version")
-    PshellServer.printf("of the interactive client does not support intermediate flushes.")
+    PshellServer.printf("  NOTE: This function demonstrates intermediate flushes in a")
+    PshellServer.printf("        callback command to keep the UDP/UNIX interactive client" )
+    PshellServer.printf("        from timing out for commands that take longer than the")
+    PshellServer.printf("        response timeout (default=5 sec).")
     PshellServer.printf()
     return
   elif (argv[0] == "dots"):

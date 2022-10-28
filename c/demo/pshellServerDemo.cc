@@ -115,12 +115,10 @@ void keepAlive(int argc, char *argv[])
     pshell_printf("\n");
     pshell_showUsage();
     pshell_printf("\n");
-    pshell_printf("Note, this function demonstrates intermediate flushes in a\n");
-    pshell_printf("callback command to keep the UDP/UNIX interactive client from\n" );
-    pshell_printf("timing out for commands that take longer than the response\n");
-    pshell_printf("timeout (default=5 sec).  This is only supported in the 'C'\n");
-    pshell_printf("version of the pshell interactive client, the Python version\n");
-    pshell_printf("of the interactive client does not support intermediate flushes.\n");
+    pshell_printf("  NOTE: This function demonstrates intermediate flushes in a\n");
+    pshell_printf("        callback command to keep the UDP/UNIX interactive client\n");
+    pshell_printf("        from timing out for commands that take longer than the\n");
+    pshell_printf("        response timeout (default=5 sec).\n");
     pshell_printf("\n");
     return;
   }
@@ -154,7 +152,7 @@ void keepAlive(int argc, char *argv[])
   else if (pshell_isEqual(argv[0], "wheel"))
   {
     pshell_printf("spinning wheel keep alive:\n");
-    for (unsigned i = 0; i < 100; i++)
+    for (unsigned i = 0; i < 10; i++)
     {
       /* string is optional, use NULL to omit */
       pshell_wheel("optional string: ");

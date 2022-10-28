@@ -212,18 +212,22 @@ def _comandDispatcher(args_):
     # extract the results, otherwise, just send command with no extraction
     # or display
     if len(args_) == 2 and args_[1] in _gHelp:
-      (results, retCode) = PshellControl.sendCommand4(_gControlName, PshellControl.ONE_SEC*5, command)
+      retCode = PshellControl._sendUserCommand(_gControlName, PshellControl.ONE_SEC*5, command)
     else:
       print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
       PshellControl.sendCommand2(_gControlName, PshellControl.NO_WAIT, command)
+      return
   else:
-    (results, retCode) = PshellControl.sendCommand4(_gControlName, PshellControl.ONE_SEC*timeout, command)
-  if results != None:
-    if _gInteractive == True:
-      PshellServer.printf(results, newline=False)
-    else:
-      # command line mode
-      sys.stdout.write(results)
+    # normal user command
+    retCode = PshellControl._sendUserCommand(_gControlName, PshellControl.ONE_SEC*timeout, command)
+  while retCode != PshellControl._COMMAND_COMPLETE:
+    results, retCode = PshellControl._receiveUserCommand(_gControlName, PshellControl.ONE_SEC*timeout)
+    if results != None:
+      if _gInteractive == True:
+        PshellServer.printf(results, newline=False)
+      else:
+        # command line mode
+        sys.stdout.write(results)
 
 #################################################################################
 #################################################################################
