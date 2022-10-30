@@ -109,24 +109,30 @@ def keepAlive(argv):
     return
   elif (argv[0] == "dots"):
     PshellServer.printf("marching dots keep alive:")
-    for i in range(1,10):
+    for i in range(0,10):
       PshellServer.march(".")
       time.sleep(1)
   elif (argv[0] == "bang"):
     PshellServer.printf("marching 'bang' keep alive:")
-    for i in range(1,10):
+    for i in range(0,10):
       PshellServer.march("!")
       time.sleep(1)
   elif (argv[0] == "pound"):
     PshellServer.printf("marching pound keep alive:")
-    for i in range(1,10):
+    for i in range(0,10):
       PshellServer.march("#")
       time.sleep(1)
   elif (argv[0] == "wheel"):
     PshellServer.printf("spinning wheel keep alive:")
-    for i in range(1,10):
-      # string is optional, use NULL to omit
+    for i in range(0,10):
+      # string is optional, leave empty or use None to omit
       PshellServer.wheel("optional string: ")
+      time.sleep(1)
+  elif (argv[0] == "clock"):
+    PshellServer.printf("elapsed time keep alive in hh:mm:ss format:")
+    for i in range(0,10):
+      # string is optional, leave empty or use None to omit
+      PshellServer.clock("optional string: ")
       time.sleep(1)
   else:
     PshellServer.showUsage()
@@ -429,8 +435,8 @@ if (__name__ == '__main__'):
 
   PshellServer.addCommand(function    = keepAlive,
                           command     = "keepAlive",
-                          description = "command to show client keep-alive ('C' client only)",
-                          usage       = "dots | bang | pound | wheel",
+                          description = "command to show UDP/UNIX client keep-alive",
+                          usage       = "dots | bang | pound | wheel | clock",
                           minArgs     = 1,
                           showUsage   = False)
 

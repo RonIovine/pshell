@@ -154,8 +154,18 @@ void keepAlive(int argc, char *argv[])
     pshell_printf("spinning wheel keep alive:\n");
     for (unsigned i = 0; i < 10; i++)
     {
-      /* string is optional, use NULL to omit */
+      /* string is optional, leave empty or use NULL to omit */
       pshell_wheel("optional string: ");
+      sleep(1);
+    }
+  }
+  else if (pshell_isEqual(argv[0], "clock"))
+  {
+    pshell_printf("elapsed time keep alive in hh:mm:ss format:\n");
+    for (unsigned i = 0; i < 10; i++)
+    {
+      /* string is optional, leave empty or use NULL to omit */
+      pshell_clock("optional string: ");
       sleep(1);
     }
   }
@@ -609,13 +619,13 @@ int main(int argc, char *argv[])
                     20,                                   /* maxArgs */
                     true);                                /* showUsage on "?" */
 
-  pshell_addCommand(keepAlive,                                              /* function */
-                    "keepAlive",                                            /* command */
-                    "command to show client keep-alive ('C' client only)",  /* description */
-                    "dots | bang | pound | wheel",                          /* usage */
-                    1,                                                      /* minArgs */
-                    1,                                                      /* maxArgs */
-                    false);                                                 /* showUsage on "?" */
+  pshell_addCommand(keepAlive,                                        /* function */
+                    "keepAlive",                                      /* command */
+                    "command to show UDP/UNIX client keep-alive",     /* description */
+                    "dots | bang | pound | wheel | clock",            /* usage */
+                    1,                                                /* minArgs */
+                    1,                                                /* maxArgs */
+                    false);                                           /* showUsage on "?" */
 
   pshell_addCommand(wildcardMatch,                            /* function */
                     "wildcardMatch",                          /* command */

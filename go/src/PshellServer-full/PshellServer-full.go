@@ -98,6 +98,7 @@
 //   Printf()    -- display a message from a pshell callback function to the client
 //   Flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
 //   Wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive or show progress
+//   Clock()     -- hh:mm:ss elapsed time clock to keep UDP/UNIX client alive or show progress
 //   March()     -- marching ascii character to keep UDP/UNIX client alive or show progress
 //   ShowUsage() -- show the usage the command is registered with
 //   IsHelp()    -- checks if the user has requested help on this command
@@ -422,6 +423,19 @@ func Flush() {
 //
 func Wheel(message string) {
   wheel(message)
+}
+
+//
+//  hh:mm:ss elapsed time keep alive, user string is optional
+//
+//    Args:
+//        message (str) : String to display before the clock
+//
+//    Returns:
+//        none
+//
+func Clock(message string) {
+  clock(message)
 }
 
 //
@@ -1042,6 +1056,9 @@ const _UNIX_LOCK_FILE_ID = "unix.lock"
 
 var _gBatchFiles fileList
 
+var _gStartTime time.Time
+var _gCurrTime time.Time
+
 /////////////////////////////////////////////////////////////////////////////////
 //
 // global private functions
@@ -1264,6 +1281,19 @@ func wheel(message_ string) {
     printf("\r%s%c", message_, _gWheel[(_gWheelPos)%4])
   } else {
     printf("\r%c", _gWheel[(_gWheelPos)%4])
+  }
+  flush()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+func clock(message_ string) {
+  _gCurrTime = time.Now()
+  elapsedTime := int(_gCurrTime.Sub(_gStartTime).Seconds())
+  if (message_ != "") {
+    printf("\r%s%02d:%02d:%02d", message_, elapsedTime/3600, (elapsedTime%3600)/60, elapsedTime%60)
+  } else {
+    printf("\r%02d:%02d:%02d", elapsedTime/3600, (elapsedTime%3600)/60, elapsedTime%60)
   }
   flush()
 }
@@ -2748,12 +2778,16 @@ func processCommand(command_ string) {
         if (_gFoundCommand.showUsage == true) {
           ShowUsage()
         } else {
+          _gStartTime = time.Now()
           _gFoundCommand.function(_gArgs)
+          _gCurrTime = time.Now()
         }
       } else if (!isValidArgCount()) {
         ShowUsage()
       } else {
+        _gStartTime = time.Now()
         _gFoundCommand.function(_gArgs)
+        _gCurrTime = time.Now()
       }
     }
   }

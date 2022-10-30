@@ -220,7 +220,7 @@ def _comandDispatcher(args_):
   else:
     # normal user command
     retCode = PshellControl._sendUserCommand(_gControlName, PshellControl.ONE_SEC*timeout, command)
-  while retCode != PshellControl._COMMAND_COMPLETE:
+  while retCode != PshellControl._COMMAND_COMPLETE and retCode != PshellControl.SOCKET_TIMEOUT:
     results, retCode = PshellControl._receiveUserCommand(_gControlName, PshellControl.ONE_SEC*timeout)
     if results != None:
       if _gInteractive == True:
@@ -228,6 +228,8 @@ def _comandDispatcher(args_):
       else:
         # command line mode
         sys.stdout.write(results)
+  if retCode == PshellControl.SOCKET_TIMEOUT:
+    PshellServer.printf("PSHELL_ERROR: Response timeout from remote pshellServer")
 
 #################################################################################
 #################################################################################

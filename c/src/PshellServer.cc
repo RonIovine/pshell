@@ -355,6 +355,10 @@ static PshellCmd _setupCmd;
 static FileList _batchFiles;
 static char _currentDir[PATH_MAX];
 
+/* to time elapsed time for pshell_clock keep-alive function */
+static time_t _startTime;
+static time_t _currTime;
+
 /****************************************
  * private "member" function prototypes
  ****************************************/
@@ -785,6 +789,20 @@ void pshell_wheel(const char *string_)
   (string_ != NULL) ?
     pshell_printf("\r%s%c", string_, _wheel[(_wheelPos++)%4]) :
     pshell_printf("\r%c", _wheel[(_wheelPos++)%4]);
+  pshell_flush();
+}
+
+/******************************************************************************/
+/******************************************************************************/
+void pshell_clock(const char *string_)
+{
+  int timeDiff;
+  time(&_currTime);
+  timeDiff = difftime(_currTime, _startTime);
+  /* format the elapsed time in hh:mm:ss format */
+  (string_ != NULL) ?
+    pshell_printf("\r%s%02d:%02d:%02d", string_, timeDiff/3600, (timeDiff%3600)/60, timeDiff%60) :
+    pshell_printf("\r%02d:%02d:%02d", timeDiff/3600, (timeDiff%3600)/60, timeDiff%60);
   pshell_flush();
 }
 
@@ -3360,7 +3378,9 @@ static void processCommand(char *command_)
          * function pointer because the validation in the addCommand
          * function will catch that and not add the command
          */
+        time(&_startTime);
         _foundCommand->function(_argc, _argv);
+        time(&_currTime);
       }
       else
       {

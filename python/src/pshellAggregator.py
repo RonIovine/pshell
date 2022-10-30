@@ -114,10 +114,12 @@ def _controlServer(argv):
       # reconstitute and dispatch original command to remote server minus the first keyword
       retCode = PshellControl._sendUserCommand(server["controlName"], PshellControl.ONE_SEC*timeout, ' '.join(argv[1:]))
       # good return, display results back to user
-      while retCode != PshellControl._COMMAND_COMPLETE:
+      while retCode != PshellControl._COMMAND_COMPLETE and retCode != PshellControl.SOCKET_TIMEOUT:
         results, retCode = PshellControl._receiveUserCommand(server["controlName"], PshellControl.ONE_SEC*timeout)
         if results != None:
           PshellServer.printf(results, newline=False)
+      if retCode == PshellControl.SOCKET_TIMEOUT:
+        PshellServer.printf("PSHELL_ERROR: Response timeout from remote pshellServer")
 
 #################################################################################
 #################################################################################

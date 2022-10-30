@@ -133,8 +133,15 @@ func keepAlive(argv []string) {
   } else if (argv[0] == "wheel") {
     PshellServer.Printf("spinning wheel keep alive:\n")
     for i := 0; i < 10; i++ {
-      // string is optional, use NULL to omit
+      // string is optional, use NULL ("") to omit
       PshellServer.Wheel("optional string: ")
+      time.Sleep(time.Second)
+    }
+  } else if (argv[0] == "clock") {
+    PshellServer.Printf("elapsed time keep alive in hh:mm:ss format:\n")
+    for i := 0; i < 10; i++ {
+      // string is optional, use NULL ("") to omit
+      PshellServer.Clock("optional string: ")
       time.Sleep(time.Second)
     }
   } else {
@@ -475,13 +482,13 @@ func main() {
                           20,                                    // maxArgs
                           true)                                  // showUsage on '?'
 
-  PshellServer.AddCommand(keepAlive,                                               // function
-                          "keepAlive",                                             // command
-                          "command to show client keep-alive ('C' client only)",   // description
-                          "dots | bang | pound | wheel",                           // usage
-                          1,                                                       // minArgs
-                          1,                                                       // maxArgs
-                          false)                                                   // showUsage on '?'
+  PshellServer.AddCommand(keepAlive,                                      // function
+                          "keepAlive",                                    // command
+                          "command to show UDP/UNIX client keep-alive",   // description
+                          "dots | bang | pound | wheel | clock",          // usage
+                          1,                                              // minArgs
+                          2,                                              // maxArgs
+                          false)                                          // showUsage on '?'
 
   PshellServer.AddCommand(wildcardMatch,                            // function
                           "wildcardMatch",                          // command

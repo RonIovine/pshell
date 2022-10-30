@@ -93,6 +93,7 @@ PSHELL callback function
   printf()    -- display a message from a pshell callback function to the client
   flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
   wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive or show progress
+  clock()     -- hh:mm:ss elapsed time clock to keep UDP/UNIX client alive or show progress
   march()     -- marching ascii character to keep UDP/UNIX client alive or show progress
   showUsage() -- show the usage the command is registered with
   isHelp()    -- checks if the user has requested help on this command
@@ -402,6 +403,20 @@ def wheel(string = None):
         none
   """
   _wheel(string)
+
+#################################################################################
+#################################################################################
+def clock(string = None):
+  """
+  hh:mm:ss elapsed time keep alive, user string is optional
+
+    Args:
+        string (str) : String to display before the clock
+
+    Returns:
+        none
+  """
+  _clock(string)
 
 #################################################################################
 #################################################################################
@@ -866,6 +881,9 @@ _gLogFunction = None
 _MAX_BIND_ATTEMPTS = 1000
 
 _gBatchFiles = {"maxFilenameLength":8, "maxDirectoryLength":9, "files":[]}
+
+_gStartTime = None
+_gCurrTime = None
 
 #################################################################################
 #
@@ -1562,6 +1580,8 @@ def _receiveTCP():
 #################################################################################
 #################################################################################
 def _processCommand(command_):
+  global _gCurrTime
+  global _gStartTime
   global _gCommandList
   global _gMaxLength
   global _gCommandHelp
@@ -1634,11 +1654,17 @@ def _processCommand(command_):
         if (_gFoundCommand["showUsage"] == True):
           showUsage()
         else:
+          # dispatch command
+          _gStartTime = time.time()
           _gFoundCommand["function"](_gArgs)
+          _gCurrTime = time.time()
       elif (not _isValidArgCount()):
         showUsage()
       else:
+        # dispatch command
+        _gStartTime = time.time()
         _gFoundCommand["function"](_gArgs)
+        _gCurrTime = time.time()
   _gCommandDispatched = False
   _gPshellMsg["msgType"] = _gMsgTypes["commandComplete"]
   _reply()
@@ -2123,10 +2149,23 @@ def _wheel(string_):
   global _gWheel
   global _gWheelPos
   _gWheelPos += 1
-  if (string_ != ""):
+  if (string_ != None and string_ != ""):
     _printf("\r%s%c" % (string_, _gWheel[(_gWheelPos)%4]), newline_=False)
   else:
     _printf("\r%c" % _gWheel[(_gWheelPos)%4], newline_=False)
+  _flush()
+
+#################################################################################
+#################################################################################
+def _clock(string_):
+  global _gStartTime
+  global _gCurrTime
+  timeDiff = time.time() - _gStartTime
+  # format the elapsed time in hh:mm:ss format
+  if (string_ != None and string_ != ""):
+    _printf("\r%s%02d:%02d:%02d" % (string_, timeDiff/3600, (timeDiff%3600)/60, timeDiff%60), newline_=False)
+  else:
+    _printf("\r%02d:%02d:%02d" % (timeDiff/3600, (timeDiff%3600)/60, timeDiff%60), newline_=False)
   _flush()
 
 #################################################################################

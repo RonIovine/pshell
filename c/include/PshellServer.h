@@ -107,6 +107,7 @@ extern "C" {
  *   pshell_printf()    -- display a message from a pshell callback function to the client
  *   pshell_flush()     -- flush the transfer buffer to the client (UDP/UNIX servers only)
  *   pshell_wheel()     -- spinning ascii wheel to keep UDP/UNIX client alive or show progress
+ *   pshell_clock()     -- hh:mm:ss elapsed time clock to keep UDP/UNIX client alive or show progress
  *   pshell_march()     -- marching ascii character to keep UDP/UNIX client alive or show progress
  *   pshell_showUsage() -- show the usage the command is registered with
  *   pshell_isHelp()    -- checks if the user has requested help on this command
@@ -388,6 +389,7 @@ void pshell_flush(void);
  * show general command progress
  */
 void pshell_wheel(const char *string_ = NULL);  /* spinning ascii wheel, user string is optional */
+void pshell_clock(const char *string_ = NULL);  /* hh:mm:ss elapsed time clock, user string is optional */
 void pshell_march(const char *string_);         /* march a string or character across the screen */
 
 /*
