@@ -2113,6 +2113,8 @@ static void showWelcome(void)
     pshell_printf("%s  Idle session timeout: %d minutes\n", PSHELL_WELCOME_BORDER, _defaultIdleTimeout);
   }
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
+  pshell_printf("%s  To show command elapsed execution time, use -t <command>\n", PSHELL_WELCOME_BORDER);
+  pshell_printf("%s\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);
   pshell_printf("%s\n", PSHELL_WELCOME_BORDER);

@@ -1057,7 +1057,7 @@ const _UNIX_LOCK_FILE_ID = "unix.lock"
 var _gBatchFiles fileList
 
 var _gStartTime time.Time
-var _gCurrTime time.Time
+var _gShowElapsedTime = false
 
 /////////////////////////////////////////////////////////////////////////////////
 //
@@ -1288,8 +1288,7 @@ func wheel(message_ string) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func clock(message_ string) {
-  _gCurrTime = time.Now()
-  elapsedTime := int(_gCurrTime.Sub(_gStartTime).Seconds())
+  elapsedTime := int(time.Now().Sub(_gStartTime).Seconds())
   if (message_ != "") {
     printf("\r%s%02d:%02d:%02d", message_, elapsedTime/3600, (elapsedTime%3600)/60, elapsedTime%60)
   } else {
@@ -1669,6 +1668,8 @@ func showWelcome() {
   } else {
     printf("#  Idle session timeout: %d minutes\n", _gTcpTimeout)
   }
+  printf("#\n")
+  printf("#  To show command elapsed execution time, use -t <command>\n")
   printf("#\n")
   printf("#  Type '?' or 'help' at prompt for command summary\n")
   printf("#  Type '?' or '-h' after command for command usage\n")
@@ -2723,6 +2724,23 @@ func processQueryCommands2() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func dispatchCommand(command_ string) {
+  _gStartTime = time.Now()
+  _gFoundCommand.function(_gArgs)
+  if (_gShowElapsedTime) {
+    //elapsedTime := int(time.Now().Sub(_gStartTime).Seconds())
+    elapsedTime := time.Now().Sub(_gStartTime)
+    printf("PSHELL_INFO: Command: '%s', elapsed time: %02d:%02d:%02d.%06d\n",
+           command_,
+           int(elapsedTime.Seconds())/3600,
+           (int(elapsedTime.Seconds())%3600)/60,
+           int(elapsedTime.Seconds())%60,
+           (int(elapsedTime.Nanoseconds())/1000)%1000)
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func processCommand(command_ string) {
   if (getMsgType(_gPshellRcvMsg) == _QUERY_VERSION) {
     processQueryVersion()
@@ -2743,7 +2761,14 @@ func processCommand(command_ string) {
   } else {
     _gCommandDispatched = true
     _gArgs = strings.Split(strings.TrimSpace(command_), " ")
-    command_ := _gArgs[0]
+    if (_gArgs[0] == "-t") {
+      command_ = _gArgs[1]
+      _gArgs = _gArgs[1:]
+      _gShowElapsedTime = true
+    } else {
+      _gShowElapsedTime = false
+      command_ = _gArgs[0]
+    }
     if (len(_gArgs) > 1) {
       _gArgs = _gArgs[1:]
     } else {
@@ -2778,16 +2803,12 @@ func processCommand(command_ string) {
         if (_gFoundCommand.showUsage == true) {
           ShowUsage()
         } else {
-          _gStartTime = time.Now()
-          _gFoundCommand.function(_gArgs)
-          _gCurrTime = time.Now()
+          dispatchCommand(command_)
         }
       } else if (!isValidArgCount()) {
         ShowUsage()
       } else {
-        _gStartTime = time.Now()
-        _gFoundCommand.function(_gArgs)
-        _gCurrTime = time.Now()
+        dispatchCommand(command_)
       }
     }
   }

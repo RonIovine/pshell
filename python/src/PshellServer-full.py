@@ -884,7 +884,6 @@ _MAX_BIND_ATTEMPTS = 1000
 _gBatchFiles = {"maxFilenameLength":8, "maxDirectoryLength":9, "files":[]}
 
 _gStartTime = None
-_gElapsedTime = None
 _gShowElapsedTime = False
 
 #################################################################################
@@ -1581,28 +1580,20 @@ def _receiveTCP():
 
 #################################################################################
 #################################################################################
-def _getElapsedTime():
-  global _gStartTime
-  global _gElapsedTime
-  _gElapsedTime = datetime.datetime.now() - _gStartTime
-
-#################################################################################
-#################################################################################
 def _dispatchCommand(command_):
   global _gStartTime
-  global _gElapsedTime
   global _gFoundCommand
   global _gShowElapsedTime
   global _gArgs
   _gStartTime = datetime.datetime.now()
   _gFoundCommand["function"](_gArgs)
   if _gShowElapsedTime:
-    _getElapsedTime()
+    elapsedTime = datetime.datetime.now() - _gStartTime
     printf("PSHELL_INFO: Command: '%s', elapsed time: %02d:%02d:%02d.%06d" % (command_,
-                                                                              _gElapsedTime.seconds/3600,
-                                                                              (_gElapsedTime.seconds%3600)/60,
-                                                                              _gElapsedTime.seconds,
-                                                                              _gElapsedTime.microseconds))
+                                                                              elapsedTime.seconds/3600,
+                                                                              (elapsedTime.seconds%3600)/60,
+                                                                              elapsedTime.seconds,
+                                                                              elapsedTime.microseconds))
 
 #################################################################################
 #################################################################################
@@ -1960,12 +1951,15 @@ def _showWelcome():
     printf("#  per-command basis by preceeding the command with")
     printf("#  option -t<timeout> (use -t0 for no response)")
     printf("#")
-    printf("#  e.g. -t10 command")
+    printf("#  e.g. -t10 <command>")
     printf("#")
     printf("#  The default timeout for all commands can be changed")
     printf("#  by using the -t<timeout> option with no command, to")
-    printf("#  display the current default timeout, just use -t")
+    printf("#  display the current default timeout, just use -t with")
+    printf("#  no command")
     printf("#")
+  printf("#  To show command elapsed execution time, use -t <command>")
+  printf("#")
   printf("#  Type '?' or 'help' at prompt for command summary")
   printf("#  Type '?' or '-h' after command for command usage")
   printf("#")
@@ -2187,19 +2181,18 @@ def _wheel(string_):
 #################################################################################
 #################################################################################
 def _clock(string_):
-  global _elapsedTime
-  _getElapsedTime()
+  elapsedTime = datetime.datetime.now() - _gStartTime
   # format the elapsed time in hh:mm:ss format
   if (string_ != None and string_ != ""):
     _printf("\r%s%02d:%02d:%02d" % (string_,
-                                    _gElapsedTime.total_seconds()/3600,
-                                    (_gElapsedTime.total_seconds()%3600)/60,
-                                    _gElapsedTime.total_seconds()%60),
+                                    elapsedTime.total_seconds()/3600,
+                                    (elapsedTime.total_seconds()%3600)/60,
+                                    elapsedTime.total_seconds()%60),
                                     newline_=False)
   else:
-    _printf("\r%02d:%02d:%02d" % (_gElapsedTime.total_seconds()/3600,
-                                  (_gElapsedTime.total_seconds()%3600)/60,
-                                  _gElapsedTime.total_seconds()%60),
+    _printf("\r%02d:%02d:%02d" % (elapsedTime.total_seconds()/3600,
+                                  (elapsedTime.total_seconds()%3600)/60,
+                                  elapsedTime.total_seconds()%60),
                                   newline_=False)
   _flush()
 

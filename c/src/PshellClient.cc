@@ -344,12 +344,14 @@ void showWelcome(void)
     printf("%s  per-command basis by preceeding the command with\n", PSHELL_WELCOME_BORDER);
     printf("%s  option -t<timeout> (use -t0 for no response)\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
-    printf("%s  e.g. -t10 command\n", PSHELL_WELCOME_BORDER);
+    printf("%s  e.g. -t10 <command>\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  The default timeout for all commands can be changed\n", PSHELL_WELCOME_BORDER);
     printf("%s  by using the -t<timeout> option with no command, to\n", PSHELL_WELCOME_BORDER);
     printf("%s  display the current default timeout, just use -t\n", PSHELL_WELCOME_BORDER);
   }
+  printf("%s\n", PSHELL_WELCOME_BORDER);
+  printf("%s  To show command elapsed execution time, use -t <command>\n", PSHELL_WELCOME_BORDER);
   printf("%s\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or 'help' at prompt for command summary\n", PSHELL_WELCOME_BORDER);
   printf("%s  Type '?' or '-h' after command for command usage\n", PSHELL_WELCOME_BORDER);
