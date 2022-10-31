@@ -3434,7 +3434,7 @@ static void processCommand(char *command_)
          * function pointer because the validation in the addCommand
          * function will catch that and not add the command
          */
-        dispatchCommand(command_);
+        dispatchCommand(savedCommand);
       }
       else
       {
@@ -3473,7 +3473,7 @@ static void processCommand(char *command_)
          * function pointer because the validation in the addCommand
          * function will catch that and not add the command
          */
-        dispatchCommand(command_);
+        dispatchCommand(savedCommand);
       }
       else
       {

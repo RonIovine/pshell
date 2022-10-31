@@ -967,7 +967,11 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
   {
     strcpy(command, command_);
     tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
-    if (isSubString("-t", tokens[0], 2))
+    if (isEqual("-t", tokens[0]))
+    {
+      commandPos = 1;
+    }
+    else if (isSubString("-t", tokens[0], 2))
     {
       if (numTokens == 1)
       {
@@ -998,6 +1002,7 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
       }
       else if (!findCommand(tokens[commandPos]) && _mode == INTERACTIVE)
       {
+        printf("here-3\n");
         printf("PSHELL_ERROR: Command: '%s' not found\n", tokens[commandPos]);
         return (true);
       }
