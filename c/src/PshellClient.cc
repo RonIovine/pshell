@@ -967,12 +967,9 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
   {
     strcpy(command, command_);
     tokenize(command, " ", tokens, MAX_TOKENS, &numTokens);
-    if (isEqual("-t", tokens[0]))
+    if (isSubString("-t", tokens[0], 2))
     {
-      commandPos = 1;
-    }
-    else if (isSubString("-t", tokens[0], 2))
-    {
+      /* they are doing a response timeout override or are requesting the elapsed time */
       if (numTokens == 1)
       {
          if (strlen(tokens[0]) > 2)
@@ -988,10 +985,11 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
       }
       else if (strlen(tokens[0]) > 2)
       {
+        /* they are requesting a timeout override, start the commands after the -t<timeout> */
         serverResponseTimeout = atoi(&tokens[0][2]);
+        command_ = &command_[strlen(tokens[0])+1];
       }
       commandPos = 1;
-      command_ = &command_[strlen(tokens[0])+1];
     }
     if (serverResponseTimeout == 0)
     {
@@ -1002,7 +1000,6 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
       }
       else if (!findCommand(tokens[commandPos]) && _mode == INTERACTIVE)
       {
-        printf("here-3\n");
         printf("PSHELL_ERROR: Command: '%s' not found\n", tokens[commandPos]);
         return (true);
       }
