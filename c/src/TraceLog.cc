@@ -755,7 +755,7 @@ const char *getTimestamp(void)
   // add the microseconds if requested
   if (_timestampAddUsec)
   {
-    sprintf(_timestamp, "%s.%-6ld", _timestamp, (long)tv.tv_usec);
+    sprintf(_timestamp, "%s.%06ld", _timestamp, (long)tv.tv_usec);
   }
   return (_timestamp);
 }

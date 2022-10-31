@@ -45,6 +45,7 @@
 #include <cstdio>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <sys/time.h>
 
 #include <PshellCommon.h>
 #include <PshellReadline.h>
@@ -356,8 +357,12 @@ static FileList _batchFiles;
 static char _currentDir[PATH_MAX];
 
 /* to time elapsed time for pshell_clock keep-alive function */
-static time_t _startTime;
-static time_t _currTime;
+//static time_t _startTime;
+//static time_t _currTime;
+static bool _showElapsedTime;
+static struct timeval _startTime;
+static struct timeval _currTime;
+static struct timeval _elapsedTime;
 
 /****************************************
  * private "member" function prototypes
@@ -422,6 +427,8 @@ static bool allocateTokens(void);
 static void cleanupTokens(void);
 static void *serverThread(void*);
 static void runServer(void);
+static void dispatchCommand(char command_);
+static void getElapsedTime(void);
 
 /* command that is run in no-server mode to setup busybox like
  * softlinks to all of the commands
@@ -796,13 +803,18 @@ void pshell_wheel(const char *string_)
 /******************************************************************************/
 void pshell_clock(const char *string_)
 {
-  int timeDiff;
-  time(&_currTime);
-  timeDiff = difftime(_currTime, _startTime);
+  getElapsedTime();
   /* format the elapsed time in hh:mm:ss format */
   (string_ != NULL) ?
-    pshell_printf("\r%s%02d:%02d:%02d", string_, timeDiff/3600, (timeDiff%3600)/60, timeDiff%60) :
-    pshell_printf("\r%02d:%02d:%02d", timeDiff/3600, (timeDiff%3600)/60, timeDiff%60);
+    pshell_printf("\r%s%02d:%02d:%02d",
+                  string_,
+                  _elapsedTime.tv_sec/3600,
+                  (_elapsedTime.tv_sec%3600)/60,
+                  _elapsedTime.tv_sec%60) :
+    pshell_printf("\r%02d:%02d:%02d",
+                  _elapsedTime.tv_sec/3600,
+                  (_elapsedTime.tv_sec%3600)/60,
+                  _elapsedTime.tv_sec%60);
   pshell_flush();
 }
 
@@ -3235,13 +3247,25 @@ static char *createArgs(char *command_)
   char *command = NULL;
   PshellTokens *args = pshell_tokenize(command_, " ");
 
+  _showElapsedTime = pshell_isEqual(args->tokens[0], "-t");
   _argc = 0;
   if (args->numTokens > 0)
   {
-    command = args->tokens[0];
-    pshell_origCommandKeyword = command;
-    _argc = args->numTokens-PSHELL_BASE_ARG_OFFSET;
-    _argv = &args->tokens[PSHELL_BASE_ARG_OFFSET];
+    if (_showElapsedTime && (args->numTokens > 1))
+    {
+      args->numTokens--;
+      command = args->tokens[1];
+      pshell_origCommandKeyword = command;
+      _argc = args->numTokens-PSHELL_BASE_ARG_OFFSET;
+      _argv = &args->tokens[PSHELL_BASE_ARG_OFFSET+1];
+    }
+    else
+    {
+      command = args->tokens[0];
+      pshell_origCommandKeyword = command;
+      _argc = args->numTokens-PSHELL_BASE_ARG_OFFSET;
+      _argv = &args->tokens[PSHELL_BASE_ARG_OFFSET];
+    }
   }
   return (command);
 }
@@ -3331,6 +3355,36 @@ static unsigned findCommand(char *command_)
 
 /******************************************************************************/
 /******************************************************************************/
+static void getElapsedTime(void)
+{
+  uint64_t elapsedTimeUsec;
+  gettimeofday(&_currTime, NULL);
+  elapsedTimeUsec = (_currTime.tv_sec-_startTime.tv_sec)*1000000 +
+                    (_currTime.tv_usec-_startTime.tv_usec);
+  _elapsedTime.tv_sec = elapsedTimeUsec/1000000;
+  _elapsedTime.tv_usec = elapsedTimeUsec%1000000;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+static void dispatchCommand(char *command_)
+{
+  gettimeofday(&_startTime, NULL);
+  _foundCommand->function(_argc, _argv);
+  if (_showElapsedTime)
+  {
+    getElapsedTime();
+    pshell_printf("PSHELL_INFO: Command: '%s', elapsed time: %02d:%02d:%02d.%06ld\n",
+                  &command_[3],
+                  _elapsedTime.tv_sec/3600,
+                  (_elapsedTime.tv_sec%3600)/60,
+                  _elapsedTime.tv_sec%60,
+                  (long)_elapsedTime.tv_usec);
+  }
+}
+
+/******************************************************************************/
+/******************************************************************************/
 static void processCommand(char *command_)
 {
   unsigned numMatches = 1;
@@ -3378,9 +3432,7 @@ static void processCommand(char *command_)
          * function pointer because the validation in the addCommand
          * function will catch that and not add the command
          */
-        time(&_startTime);
-        _foundCommand->function(_argc, _argv);
-        time(&_currTime);
+        dispatchCommand(command_);
       }
       else
       {
@@ -3419,7 +3471,7 @@ static void processCommand(char *command_)
          * function pointer because the validation in the addCommand
          * function will catch that and not add the command
          */
-        _foundCommand->function(_argc, _argv);
+        dispatchCommand(command_);
       }
       else
       {

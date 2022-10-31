@@ -169,6 +169,7 @@ import thread
 import fcntl
 import fnmatch
 import commands
+import datetime
 from collections import OrderedDict
 from collections import namedtuple
 import PshellReadline
@@ -883,7 +884,8 @@ _MAX_BIND_ATTEMPTS = 1000
 _gBatchFiles = {"maxFilenameLength":8, "maxDirectoryLength":9, "files":[]}
 
 _gStartTime = None
-_gCurrTime = None
+_gElapsedTime = None
+_gShowElapsedTime = False
 
 #################################################################################
 #
@@ -1579,8 +1581,32 @@ def _receiveTCP():
 
 #################################################################################
 #################################################################################
+def _getElapsedTime():
+  global _gStartTime
+  global _gElapsedTime
+  _gElapsedTime = datetime.datetime.now() - _gStartTime
+
+#################################################################################
+#################################################################################
+def _dispatchCommand(command_):
+  global _gStartTime
+  global _gElapsedTime
+  global _gFoundCommand
+  global _gShowElapsedTime
+  global _gArgs
+  _gStartTime = datetime.datetime.now()
+  _gFoundCommand["function"](_gArgs)
+  if _gShowElapsedTime:
+    _getElapsedTime()
+    printf("PSHELL_INFO: Command: '%s', elapsed time: %02d:%02d:%02d.%06d" % (command_,
+                                                                              _gElapsedTime.seconds/3600,
+                                                                              (_gElapsedTime.seconds%3600)/60,
+                                                                              _gElapsedTime.seconds,
+                                                                              _gElapsedTime.microseconds))
+
+#################################################################################
+#################################################################################
 def _processCommand(command_):
-  global _gCurrTime
   global _gStartTime
   global _gCommandList
   global _gMaxLength
@@ -1596,6 +1622,7 @@ def _processCommand(command_):
   global _gPshellClient
   global _gClientTimeoutOverride
   global _gPshellClientTimeout
+  global _gShowElapsedTime
 
   _gPshellMsg["payload"] = ""
   if (_gPshellMsg["msgType"] == _gMsgTypes["queryVersion"]):
@@ -1617,9 +1644,12 @@ def _processCommand(command_):
   else:
     _gCommandDispatched = True
     _gClientTimeoutOverride = None
-    if _gPshellClient and "-t" in command_.split()[0]:
+    _gShowElapsedTime = False
+    origCommand = command_
+    if "-t" in command_.split()[0]:
       _gClientTimeoutOverride = command_.split()[0]
       command_ = ' '.join(command_.split()[1:])
+      origCommand = command_
       if len(command_) == 0:
         if len(_gClientTimeoutOverride) > 2:
           _gPshellClientTimeout = int(_gClientTimeoutOverride[2:])
@@ -1627,6 +1657,9 @@ def _processCommand(command_):
         else:
           printf("PSHELL_INFO: Current server response timeout: %d seconds" % _gPshellClientTimeout)
         return
+      elif _gClientTimeoutOverride == "-t":
+        # print elapsed time for the command
+        _gShowElapsedTime = True
     _gArgs = command_.split()[_gFirstArgPos:]
     command_ = command_.split()[0]
     numMatches = 0
@@ -1655,16 +1688,12 @@ def _processCommand(command_):
           showUsage()
         else:
           # dispatch command
-          _gStartTime = time.time()
-          _gFoundCommand["function"](_gArgs)
-          _gCurrTime = time.time()
+          _dispatchCommand(origCommand)
       elif (not _isValidArgCount()):
         showUsage()
       else:
         # dispatch command
-        _gStartTime = time.time()
-        _gFoundCommand["function"](_gArgs)
-        _gCurrTime = time.time()
+        _dispatchCommand(origCommand)
   _gCommandDispatched = False
   _gPshellMsg["msgType"] = _gMsgTypes["commandComplete"]
   _reply()
@@ -2158,14 +2187,20 @@ def _wheel(string_):
 #################################################################################
 #################################################################################
 def _clock(string_):
-  global _gStartTime
-  global _gCurrTime
-  timeDiff = time.time() - _gStartTime
+  global _elapsedTime
+  _getElapsedTime()
   # format the elapsed time in hh:mm:ss format
   if (string_ != None and string_ != ""):
-    _printf("\r%s%02d:%02d:%02d" % (string_, timeDiff/3600, (timeDiff%3600)/60, timeDiff%60), newline_=False)
+    _printf("\r%s%02d:%02d:%02d" % (string_,
+                                    _gElapsedTime.total_seconds()/3600,
+                                    (_gElapsedTime.total_seconds()%3600)/60,
+                                    _gElapsedTime.total_seconds()%60),
+                                    newline_=False)
   else:
-    _printf("\r%02d:%02d:%02d" % (timeDiff/3600, (timeDiff%3600)/60, timeDiff%60), newline_=False)
+    _printf("\r%02d:%02d:%02d" % (_gElapsedTime.total_seconds()/3600,
+                                  (_gElapsedTime.total_seconds()%3600)/60,
+                                  _gElapsedTime.total_seconds()%60),
+                                  newline_=False)
   _flush()
 
 #################################################################################
