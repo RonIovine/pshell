@@ -172,6 +172,14 @@ def wheel(string = None):
 
 #################################################################################
 #################################################################################
+def clock(string = None):
+  """
+  Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality
+  """
+  None
+
+#################################################################################
+#################################################################################
 def march(string):
   """
   Stub function, set PshellServer.py softlink to PshellServer-full.py for full functionality

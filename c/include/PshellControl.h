@@ -70,6 +70,7 @@ extern "C" {
  * Helpful items used for the server response timeout values
  *
  *   PSHELL_NO_WAIT
+ *   PSHELL_WAIT_FOREVER
  *   PSHELL_ONE_MSEC
  *   PSHELL_ONE_SEC
  *   PSHELL_ONE_MINUTE
@@ -194,6 +195,7 @@ const char *pshell_getResponseString(int results_);
  */
 #define PSHELL_UNIX_CONTROL 0
 #define PSHELL_NO_WAIT      0
+#define PSHELL_WAIT_FOREVER -1
 #define PSHELL_ONE_MSEC     1
 #define PSHELL_ONE_SEC      PSHELL_ONE_MSEC*1000
 #define PSHELL_ONE_MINUTE   PSHELL_ONE_SEC*60

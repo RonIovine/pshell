@@ -67,6 +67,7 @@ Integer constants:
 Helpful items used for the server response timeout values
 
   NO_WAIT
+  WAIT_FOREVER
   ONE_MSEC
   ONE_SEC
   ONE_MINUTE
@@ -143,6 +144,7 @@ from collections import namedtuple
 
 # helpful items used for the timeout values
 NO_WAIT = 0
+WAIT_FOREVER = -1
 ONE_MSEC = 1
 ONE_SEC = ONE_MSEC*1000
 ONE_MINUTE = ONE_SEC*60
@@ -934,7 +936,10 @@ def _sendUserCommand(controlName_, timeoutOverride_, command_):
 def _receiveUserCommand(controlName_, timeout_):
   control_ = _getControl(controlName_)
   try:
-    inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
+    if (timeout_ == WAIT_FOREVER):
+      inputready, outputready, exceptready = select.select([control_["socket"]], [], [])
+    else:
+      inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
   except:
     inputready = []
   if (len(inputready) > 0):
@@ -959,7 +964,7 @@ def _sendCommand(control_, commandType_, command_, timeout_, receive_ = True):
       # because we do not request or expecet a response
       timeout_ = NO_WAIT
     control_["pshellMsg"]["msgType"] = commandType_
-    control_["pshellMsg"]["respNeeded"] = (timeout_ > NO_WAIT)
+    control_["pshellMsg"]["respNeeded"] = (timeout_ != NO_WAIT)
     control_["pshellMsg"]["seqNum"] += 1
     seqNum = control_["pshellMsg"]["seqNum"]
     control_["pshellMsg"]["payload"] = str(command_)
@@ -971,10 +976,13 @@ def _sendCommand(control_, commandType_, command_, timeout_, receive_ = True):
       sentSize = 0
     if (sentSize == 0):
       retCode = SOCKET_SEND_FAILURE
-    elif (timeout_ > NO_WAIT and receive_):
+    elif (timeout_ != NO_WAIT and receive_):
       while (True):
         try:
-          inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
+          if (timeout_ == WAIT_FOREVER):
+            inputready, outputready, exceptready = select.select([control_["socket"]], [], [])
+          else:
+            inputready, outputready, exceptready = select.select([control_["socket"]], [], [], float(timeout_)/float(1000.0))
         except:
           inputready = []
         if (len(inputready) > 0):

@@ -94,7 +94,7 @@ enum ServerType
 struct PshellControl
 {
   int socketFd;
-  unsigned defaultTimeout;
+  int defaultTimeout;
   ServerType serverType;
   PshellMsg pshellMsg;
   struct sockaddr_in sourceIpAddress;
@@ -141,7 +141,7 @@ static PshellControl *getControl(const char *controlName_);
 static int getSid(const char *controlName_);
 static void addMulticast(const char *command_, int sid_);
 static PshellControl *createControl(void);
-static int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, unsigned timeoutOverride_);
+static int sendPshellCommand(PshellControl *control_, int commandType_, const char *command_, int timeoutOverride_);
 static bool sendPshellMsg(PshellControl *control_);
 static int extractResults(PshellControl *control_, char *results_, int size_);
 static bool connectServer(PshellControl *control_, const char *remoteServer_ , unsigned port_, unsigned defaultMsecTimeout_);
@@ -452,7 +452,7 @@ int pshell_sendCommand1(const char *controlName_, const char *command_, ...)
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_sendCommand2(const char *controlName_, unsigned timeoutOverride_, const char *command_, ...)
+int pshell_sendCommand2(const char *controlName_, int timeoutOverride_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int retCode = PSHELL_SOCKET_NOT_CONNECTED;
@@ -521,7 +521,7 @@ int pshell_sendCommand3(const char *controlName_, char *results_, int size_, con
 
 /******************************************************************************/
 /******************************************************************************/
-int pshell_sendCommand4(const char *controlName_, char *results_, int size_, unsigned timeoutOverride_, const char *command_, ...)
+int pshell_sendCommand4(const char *controlName_, char *results_, int size_, int timeoutOverride_, const char *command_, ...)
 {
   pthread_mutex_lock(&_mutex);
   int retCode = PSHELL_SOCKET_NOT_CONNECTED;
@@ -753,10 +753,11 @@ static bool connectServer(PshellControl *control_,
 static int sendPshellCommand(PshellControl *control_,
                              int commandType_,
                              const char *command_,
-                             unsigned timeoutOverride_)
+                             int timeoutOverride_)
 {
   fd_set readFd;
   struct timeval timeout;
+  struct timeval *waitTime = NULL;
   int bytesRead = 0;
   uint32_t seqNum;
   int retCode = PSHELL_COMMAND_SUCCESS;
@@ -782,14 +783,18 @@ static int sendPshellCommand(PshellControl *control_,
     {
       /* they want a response from the remote pshell */
       /* timeout value is in milliSeconds */
-      memset(&timeout, 0, sizeof(timeout));
-      timeout.tv_sec = timeoutOverride_/1000;
-      timeout.tv_usec = (timeoutOverride_%1000)*1000;
+      if (timeoutOverride_ > PSHELL_NO_WAIT)
+      {
+        memset(&timeout, 0, sizeof(timeout));
+        timeout.tv_sec = timeoutOverride_/1000;
+        timeout.tv_usec = (timeoutOverride_%1000)*1000;
+        waitTime = &timeout;
+      }
 
       /* loop in case we have any stale responses we need to flush from the socket */
       while (true)
       {
-        if ((select(control_->socketFd+1, &readFd, NULL, NULL, &timeout)) < 0)
+        if ((select(control_->socketFd+1, &readFd, NULL, NULL, waitTime)) < 0)
         {
           retCode = PSHELL_SOCKET_SELECT_FAILURE;
           break;

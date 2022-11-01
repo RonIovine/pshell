@@ -107,7 +107,7 @@ def _controlServer(argv):
         (argv[1] == "?")):
       # user asked for help, display all the registered commands of the remote server
       PshellServer.printf(PshellControl.extractCommands(server["controlName"]), newline=False)
-    elif timeout == 0:
+    elif timeout == PshellControl.NO_WAIT:
       print("PSHELL_INFO: Command sent fire-and-forget, no response requested")
       PshellControl.sendCommand2(server["controlName"], PshellControl.NO_WAIT, ' '.join(argv[1:]))
     else:
@@ -115,7 +115,10 @@ def _controlServer(argv):
       retCode = PshellControl._sendUserCommand(server["controlName"], PshellControl.ONE_SEC*timeout, ' '.join(argv[1:]))
       # good return, display results back to user
       while retCode != PshellControl._COMMAND_COMPLETE and retCode != PshellControl.SOCKET_TIMEOUT:
-        results, retCode = PshellControl._receiveUserCommand(server["controlName"], PshellControl.ONE_SEC*timeout)
+        if (timeout > PshellControl.NO_WAIT):
+          results, retCode = PshellControl._receiveUserCommand(server["controlName"], PshellControl.ONE_SEC*timeout)
+        else:
+          results, retCode = PshellControl._receiveUserCommand(server["controlName"], PshellControl.WAIT_FOREVER)
         if results != None:
           PshellServer.printf(results, newline=False)
       if retCode == PshellControl.SOCKET_TIMEOUT:

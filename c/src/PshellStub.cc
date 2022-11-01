@@ -71,6 +71,7 @@ void pshell_runCommand(const char *command_, ...){}
 void pshell_printf(const char *format_, ...){}
 void pshell_flush(void){}
 void pshell_wheel(const char *string_){}
+void pshell_clock(const char *string_){}
 void pshell_march(const char *string_){}
 bool pshell_isHelp(void){return (true);}
 void pshell_showUsage(void){}

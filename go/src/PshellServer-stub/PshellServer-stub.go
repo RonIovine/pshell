@@ -171,6 +171,12 @@ func Wheel(message string) {
 //
 // Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
 //
+func Clock(message string) {
+}
+
+//
+// Stub function, set PshellServer.a softlink to PshellServer-full.a for full functionality
+//
 func March(message string) {
 }
 

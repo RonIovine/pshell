@@ -157,7 +157,7 @@ static int _defaultIdleTimeout = 10;
  */
 
 #ifndef PSHELL_PAYLOAD_CHUNK
-#define PSHELL_PAYLOAD_CHUNK 4000   /* bytes */
+#define PSHELL_PAYLOAD_CHUNK 1024*64   /* 64k UDP/Unix max datagram size in bytes */
 #endif
 
 /*
@@ -171,7 +171,7 @@ static int _defaultIdleTimeout = 10;
 
 #ifndef PSHELL_VSNPRINTF
 #ifndef PSHELL_PAYLOAD_GUARDBAND
-#define PSHELL_PAYLOAD_GUARDBAND 1024*64   /* 64k UDP/Unix max datagram size in bytes */
+#define PSHELL_PAYLOAD_GUARDBAND 4096  /* bytes */
 #endif
 #endif
 
@@ -427,7 +427,7 @@ static bool allocateTokens(void);
 static void cleanupTokens(void);
 static void *serverThread(void*);
 static void runServer(void);
-static void dispatchCommand(char command_);
+static void dispatchCommand(char *command_);
 static void getElapsedTime(void);
 
 /* command that is run in no-server mode to setup busybox like
@@ -3372,6 +3372,10 @@ static void getElapsedTime(void)
 static void dispatchCommand(char *command_)
 {
   gettimeofday(&_startTime, NULL);
+  if (_showElapsedTime)
+  {
+    pshell_printf("PSHELL_INFO: Measuring elapsed time for command: '%s'...\n", &command_[3]);
+  }
   _foundCommand->function(_argc, _argv);
   if (_showElapsedTime)
   {

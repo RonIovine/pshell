@@ -2726,6 +2726,9 @@ func processQueryCommands2() {
 ////////////////////////////////////////////////////////////////////////////////
 func dispatchCommand(command_ string) {
   _gStartTime = time.Now()
+  if (_gShowElapsedTime) {
+    printf("PSHELL_INFO: Measuring elapsed time for command: '%s'...\n", command_)
+  }
   _gFoundCommand.function(_gArgs)
   if (_gShowElapsedTime) {
     //elapsedTime := int(time.Now().Sub(_gStartTime).Seconds())

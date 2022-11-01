@@ -209,7 +209,7 @@ def _comandDispatcher(args_):
   command = ' '.join(args_)
   if args_[0] in _gHelp:
     results = PshellControl.extractCommands(_gControlName, includeName=False)
-  elif timeout == 0:
+  elif timeout == PshellControl.NO_WAIT:
     # if they asked for command help, go ahead and dispatch the command and
     # extract the results, otherwise, just send command with no extraction
     # or display
@@ -223,7 +223,10 @@ def _comandDispatcher(args_):
     # normal user command
     retCode = PshellControl._sendUserCommand(_gControlName, PshellControl.ONE_SEC*timeout, command)
   while retCode != PshellControl._COMMAND_COMPLETE and retCode != PshellControl.SOCKET_TIMEOUT:
-    results, retCode = PshellControl._receiveUserCommand(_gControlName, PshellControl.ONE_SEC*timeout)
+    if (timeout > PshellControl.NO_WAIT):
+      results, retCode = PshellControl._receiveUserCommand(_gControlName, PshellControl.ONE_SEC*timeout)
+    else:
+      results, retCode = PshellControl._receiveUserCommand(_gControlName, PshellControl.WAIT_FOREVER)
     if results != None:
       if _gInteractive == True:
         PshellServer.printf(results, newline=False)
@@ -838,7 +841,7 @@ if (__name__ == '__main__'):
 
   for index, arg in enumerate(sys.argv[2:]):
     if "-t" in arg:
-      if len(arg) > 2 and arg[2:].isdigit():
+      if len(arg) > 2 and (arg[2:].isdigit() or arg[2:] == "-1"):
         _gTimeout = int(arg[2:])
       else:
         _showUsage()

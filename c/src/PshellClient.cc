@@ -342,9 +342,11 @@ void showWelcome(void)
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  The default response timeout can be changed on a\n", PSHELL_WELCOME_BORDER);
     printf("%s  per-command basis by preceeding the command with\n", PSHELL_WELCOME_BORDER);
-    printf("%s  option -t<timeout> (use -t0 for no response)\n", PSHELL_WELCOME_BORDER);
+    printf("%s  option -t<timeout>\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  e.g. -t10 <command>\n", PSHELL_WELCOME_BORDER);
+    printf("%s\n", PSHELL_WELCOME_BORDER);
+    printf("%s  Use -t0 for no response, -t-1 to wait forever\n", PSHELL_WELCOME_BORDER);
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  The default timeout for all commands can be changed\n", PSHELL_WELCOME_BORDER);
     printf("%s  by using the -t<timeout> option with no command, to\n", PSHELL_WELCOME_BORDER);
@@ -387,6 +389,10 @@ bool isNumeric(const char *string_)
   unsigned i;
   if (string_ != NULL)
   {
+    if (string_[0] == '-')
+    {
+      string_ = &string_[1];
+    }
     for (i = 0; i < strlen(string_); i++)
     {
       if (!isdigit(string_[i]))
@@ -799,21 +805,26 @@ bool receive(int serverResponseTimeout)
   int receivedSize = 0;
   fd_set readFd;
   struct timeval timeout;
+  struct timeval *waitTime = NULL;
 
-  if (serverResponseTimeout > 0)
+  if (serverResponseTimeout != 0)
   {
 
     FD_ZERO (&readFd);
     FD_SET(_socketFd,&readFd);
 
-    memset(&timeout, 0, sizeof(timeout));
-    timeout.tv_sec = serverResponseTimeout;
-    timeout.tv_usec = 0;
+    if (serverResponseTimeout > 0)
+    {
+      memset(&timeout, 0, sizeof(timeout));
+      timeout.tv_sec = serverResponseTimeout;
+      timeout.tv_usec = 0;
+      waitTime = &timeout;
+    }
 
     do
     {
       bufferOverflow = false;
-      if ((select(_socketFd+1, &readFd, NULL, NULL, &timeout)) < 0)
+      if ((select(_socketFd+1, &readFd, NULL, NULL, waitTime)) < 0)
       {
         printf("PSHELL_ERROR: Error on socket select\n");
         return (false);
@@ -975,11 +986,33 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
          if (strlen(tokens[0]) > 2)
          {
            _serverResponseTimeout = atoi(&tokens[0][2]);
-           printf("PSHELL_INFO: Setting server response timeout to: %d seconds\n", _serverResponseTimeout);
+           if (_serverResponseTimeout > 0)
+           {
+             printf("PSHELL_INFO: Setting server response timeout to: %d seconds\n", _serverResponseTimeout);
+           }
+           else if (_serverResponseTimeout == 0)
+           {
+             printf("PSHELL_INFO: Setting server response timeout to: FIRE_AND_FORGET\n");
+           }
+           else
+           {
+             printf("PSHELL_INFO: Setting server response timeout to: WAIT_FOREVER\n");
+           }
          }
          else
          {
-           printf("PSHELL_INFO: Current server response timeout: %d seconds\n", _serverResponseTimeout);
+           if (_serverResponseTimeout > 0)
+           {
+             printf("PSHELL_INFO: Current server response timeout: %d seconds\n", _serverResponseTimeout);
+           }
+           else if (_serverResponseTimeout == 0)
+           {
+             printf("PSHELL_INFO: Current server response timeout to: FIRE_AND_FORGET\n");
+           }
+           else
+           {
+             printf("PSHELL_INFO: Current server response timeout to: WAIT_FOREVER\n");
+           }
          }
          return (true);
       }

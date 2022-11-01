@@ -1586,6 +1586,8 @@ def _dispatchCommand(command_):
   global _gShowElapsedTime
   global _gArgs
   _gStartTime = datetime.datetime.now()
+  if _gShowElapsedTime:
+    printf("PSHELL_INFO: Measuring elapsed time for command: '%s'..." % command_)
   _gFoundCommand["function"](_gArgs)
   if _gShowElapsedTime:
     elapsedTime = datetime.datetime.now() - _gStartTime
@@ -1949,9 +1951,11 @@ def _showWelcome():
     printf("#")
     printf("#  The default response timeout can be changed on a")
     printf("#  per-command basis by preceeding the command with")
-    printf("#  option -t<timeout> (use -t0 for no response)")
+    printf("#  option -t<timeout>")
     printf("#")
     printf("#  e.g. -t10 <command>")
+    printf("#")
+    printf("#  Use -t0 for no response, -t-1 to wait forever")
     printf("#")
     printf("#  The default timeout for all commands can be changed")
     printf("#  by using the -t<timeout> option with no command, to")
