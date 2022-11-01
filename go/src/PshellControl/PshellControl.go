@@ -61,6 +61,7 @@
 // Helpful items used for the server response timeout values
 //
 //   NO_WAIT
+//   WAIT_FOREVER
 //   ONE_MSEC
 //   ONE_SEC
 //   ONE_MINUTE
@@ -152,6 +153,7 @@ const (
 
 // helpful items used for the timeout values
 const NO_WAIT = 0
+const WAIT_FOREVER = -1
 const ONE_MSEC = 1
 const ONE_SEC = ONE_MSEC*1000
 const ONE_MINUTE = ONE_SEC*60
@@ -902,9 +904,11 @@ func sendCommand(control_ *pshellControl, command_ string, timeout_ int, dataNee
   }
   _, err := control_.socket.Write(control_.sendMsg)
   if (err == nil) {
-    if (timeout_ > NO_WAIT) {
+    if (timeout_ != NO_WAIT) {
       for {
-        control_.socket.SetReadDeadline(time.Now().Add(time.Millisecond*time.Duration(timeout_)))
+        if (timeout_ > NO_WAIT) {
+          control_.socket.SetReadDeadline(time.Now().Add(time.Millisecond*time.Duration(timeout_)))
+        }
         var err error
         control_.recvSize, err = control_.socket.Read(control_.recvMsg)
         if (err == nil) {
