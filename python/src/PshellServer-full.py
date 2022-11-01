@@ -1646,9 +1646,19 @@ def _processCommand(command_):
       if len(command_) == 0:
         if len(_gClientTimeoutOverride) > 2:
           _gPshellClientTimeout = int(_gClientTimeoutOverride[2:])
-          printf("PSHELL_INFO: Setting server response timeout to: %d seconds" % _gPshellClientTimeout)
+          if (_gPshellClientTimeout > 0):
+            printf("PSHELL_INFO: Setting server response timeout to: %d seconds" % _gPshellClientTimeout)
+          elif (_gPshellClientTimeout == 0):
+            printf("PSHELL_INFO: Setting server response timeout to: NONE")
+          else:
+            printf("PSHELL_INFO: Setting server response timeout to: FOREVER")
         else:
-          printf("PSHELL_INFO: Current server response timeout: %d seconds" % _gPshellClientTimeout)
+          if (_gPshellClientTimeout > 0):
+            printf("PSHELL_INFO: Current server response timeout: %d seconds" % _gPshellClientTimeout)
+          elif (_gPshellClientTimeout == 0):
+            printf("PSHELL_INFO: Current server response timeout: NONE")
+          else:
+            printf("PSHELL_INFO: Current server response timeout: FOREVER")
         return
       elif _gClientTimeoutOverride == "-t":
         # print elapsed time for the command
@@ -1941,13 +1951,15 @@ def _showWelcome():
   if (_gPshellClient == True):
     if _gPshellClientTimeout > 0:
       printf("#  Command response timeout: {} seconds".format(_gPshellClientTimeout))
-    else:
+    elif _gPshellClientTimeout == 0:
       printf("#  Command response timeout: NONE")
       printf("#")
       printf("#  WARNING: Interactive client started with no command")
       printf("#           response timeout.  All commands will be")
       printf("#           sent as 'fire-and-forget', no results will")
       printf("#           be extracted or displayed")
+    else:
+      printf("#  Command response timeout: FOREVER")
     printf("#")
     printf("#  The default response timeout can be changed on a")
     printf("#  per-command basis by preceeding the command with")

@@ -330,7 +330,7 @@ void showWelcome(void)
     {
       printf("%s  Command response timeout: %d seconds\n", PSHELL_WELCOME_BORDER, _serverResponseTimeout);
     }
-    else
+    else if (_serverResponseTimeout == 0)
     {
       printf("%s  Command response timeout: NONE\n", PSHELL_WELCOME_BORDER);
       printf("%s\n", PSHELL_WELCOME_BORDER);
@@ -338,6 +338,10 @@ void showWelcome(void)
       printf("%s           response timeout.  All commands will be\n", PSHELL_WELCOME_BORDER);
       printf("%s           sent as 'fire-and-forget', no results will\n", PSHELL_WELCOME_BORDER);
       printf("%s           be extracted or displayed\n", PSHELL_WELCOME_BORDER);
+    }
+    else
+    {
+      printf("%s  Command response timeout: FOREVER\n", PSHELL_WELCOME_BORDER);
     }
     printf("%s\n", PSHELL_WELCOME_BORDER);
     printf("%s  The default response timeout can be changed on a\n", PSHELL_WELCOME_BORDER);
@@ -992,11 +996,11 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
            }
            else if (_serverResponseTimeout == 0)
            {
-             printf("PSHELL_INFO: Setting server response timeout to: FIRE_AND_FORGET\n");
+             printf("PSHELL_INFO: Setting server response timeout to: NONE\n");
            }
            else
            {
-             printf("PSHELL_INFO: Setting server response timeout to: WAIT_FOREVER\n");
+             printf("PSHELL_INFO: Setting server response timeout to: FOREVER\n");
            }
          }
          else
@@ -1007,11 +1011,11 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
            }
            else if (_serverResponseTimeout == 0)
            {
-             printf("PSHELL_INFO: Current server response timeout to: FIRE_AND_FORGET\n");
+             printf("PSHELL_INFO: Current server response timeout to: NONE\n");
            }
            else
            {
-             printf("PSHELL_INFO: Current server response timeout to: WAIT_FOREVER\n");
+             printf("PSHELL_INFO: Current server response timeout to: FOREVER\n");
            }
          }
          return (true);
