@@ -148,8 +148,6 @@ def _showWelcome():
   print("#")
   print("#  Command response timeout: NONE")
   print("#")
-  print("#  To show command elapsed execution time, use -t <command>")
-  print("#")
   print("#  Type '?' or 'help' at prompt for command summary")
   print("#  Type '?' or '-h' after command for command usage")
   print("#")

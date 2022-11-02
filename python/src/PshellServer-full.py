@@ -1584,9 +1584,11 @@ def _dispatchCommand(command_):
   global _gStartTime
   global _gFoundCommand
   global _gShowElapsedTime
+  global _gClientTimeoutOverride
   global _gArgs
   _gStartTime = datetime.datetime.now()
   if _gShowElapsedTime:
+    _gClientTimeoutOverride = "-t-1"
     printf("PSHELL_INFO: Measuring elapsed time for command: '%s'..." % command_)
   _gFoundCommand["function"](_gArgs)
   if _gShowElapsedTime:
@@ -1975,6 +1977,9 @@ def _showWelcome():
     printf("#  no command")
     printf("#")
   printf("#  To show command elapsed execution time, use -t <command>")
+  if (_gPshellClient == True):
+    printf("#  Note, this will execute the command with a WAIT_FOREVER")
+    printf("#  command response timeout")
   printf("#")
   printf("#  Type '?' or 'help' at prompt for command summary")
   printf("#  Type '?' or '-h' after command for command usage")
