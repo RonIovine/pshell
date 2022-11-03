@@ -1032,6 +1032,7 @@ bool processCommand(char msgType_, char *command_, int rate_, unsigned repeat_, 
       }
       else if (isEqual("-t", tokens[0]))
       {
+        /* this will enabled the elapsed execution timing of the dispatched function */
         serverResponseTimeout = -1;
       }
 

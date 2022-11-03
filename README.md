@@ -457,6 +457,8 @@ Escape character is '^]'.
 #
 #  Idle session timeout: 10 minutes
 #
+#  To show command elapsed execution time, use -t <command>
+#
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage
 #
@@ -483,13 +485,20 @@ $ pshell localhost 6001
 #
 #  The default response timeout can be changed on a
 #  per-command basis by preceeding the command with
-#  option -t<timeout> (use -t0 for no response)
+#  option -t<timeout>
 #
-#  e.g. -t10 command
+#  e.g. -t10 <command>
+#
+#  Use -t0 for no response, -t-1 to wait forever
 #
 #  The default timeout for all commands can be changed
 #  by using the -t<timeout> option with no command, to
-#  display the current default timeout, just use -t
+#  display the current default timeout, just use -t with
+#  no command
+#
+#  To show command elapsed execution time, use -t <command>
+#  Note, this will execute the command with a WAIT_FOREVER
+#  command response timeout
 #
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage
@@ -511,19 +520,24 @@ $ pshell pshellServerDemo
 #
 #  Multi-session UNIX server: pshellServerDemo[unix]
 #
-#  Idle session timeout: NONE
-#
 #  Command response timeout: 5 seconds
 #
 #  The default response timeout can be changed on a
 #  per-command basis by preceeding the command with
-#  option -t<timeout> (use -t0 for no response)
+#  option -t<timeout>
 #
-#  e.g. -t10 command
+#  e.g. -t10 <command>
+#
+#  Use -t0 for no response, -t-1 to wait forever
 #
 #  The default timeout for all commands can be changed
 #  by using the -t<timeout> option with no command, to
-#  display the current default timeout, just use -t
+#  display the current default timeout, just use -t with
+#  no command
+#
+#  To show command elapsed execution time, use -t <command>
+#  Note, this will execute the command with a WAIT_FOREVER
+#  command response timeout
 #
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage
@@ -547,6 +561,8 @@ $ pshellServerDemo -local
 #  Single session LOCAL server: pshellServerDemo[local]
 #
 #  Idle session timeout: NONE
+#
+#  To show command elapsed execution time, use -t <command>
 #
 #  Type '?' or 'help' at prompt for command summary
 #  Type '?' or '-h' after command for command usage

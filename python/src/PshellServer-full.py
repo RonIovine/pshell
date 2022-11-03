@@ -1586,13 +1586,17 @@ def _dispatchCommand(command_):
   global _gShowElapsedTime
   global _gClientTimeoutOverride
   global _gArgs
-  _gStartTime = datetime.datetime.now()
   if _gShowElapsedTime:
+    # force our command response wait timeout to WAIT_FOREVER
     _gClientTimeoutOverride = "-t-1"
     printf("PSHELL_INFO: Measuring elapsed time for command: '%s'..." % command_)
+  # save our start time for the the progress clock and elapsed time calculation
+  _gStartTime = datetime.datetime.now()
+  # dispatch callback function
   _gFoundCommand["function"](_gArgs)
+  # calculate our elapsed execution time
+  elapsedTime = datetime.datetime.now() - _gStartTime
   if _gShowElapsedTime:
-    elapsedTime = datetime.datetime.now() - _gStartTime
     printf("PSHELL_INFO: Command: '%s', elapsed time: %02d:%02d:%02d.%06d" % (command_,
                                                                               elapsedTime.seconds/3600,
                                                                               (elapsedTime.seconds%3600)/60,

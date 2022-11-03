@@ -3371,15 +3371,18 @@ static void getElapsedTime(void)
 /******************************************************************************/
 static void dispatchCommand(char *command_)
 {
-  gettimeofday(&_startTime, NULL);
   if (_showElapsedTime)
   {
     pshell_printf("PSHELL_INFO: Measuring elapsed time for command: '%s'...\n", &command_[3]);
   }
+  /* save our start time for the the progress clock and elapsed time calculation */
+  gettimeofday(&_startTime, NULL);
+  /* dispatch callback function */
   _foundCommand->function(_argc, _argv);
+  /* calculate our elapsed execution time */
+  getElapsedTime();
   if (_showElapsedTime)
   {
-    getElapsedTime();
     pshell_printf("PSHELL_INFO: Command: '%s', elapsed time: %02d:%02d:%02d.%06ld\n",
                   &command_[3],
                   _elapsedTime.tv_sec/3600,

@@ -2725,14 +2725,16 @@ func processQueryCommands2() {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 func dispatchCommand(command_ string) {
-  _gStartTime = time.Now()
   if (_gShowElapsedTime) {
     printf("PSHELL_INFO: Measuring elapsed time for command: '%s'...\n", command_)
   }
+  // save our start time for the the progress clock and elapsed time calculation
+  _gStartTime = time.Now()
+  // dispatch callback function
   _gFoundCommand.function(_gArgs)
+  // calculate our elapsed execution time
+  elapsedTime := time.Now().Sub(_gStartTime)
   if (_gShowElapsedTime) {
-    //elapsedTime := int(time.Now().Sub(_gStartTime).Seconds())
-    elapsedTime := time.Now().Sub(_gStartTime)
     printf("PSHELL_INFO: Command: '%s', elapsed time: %02d:%02d:%02d.%06d\n",
            command_,
            int(elapsedTime.Seconds())/3600,
