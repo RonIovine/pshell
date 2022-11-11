@@ -384,21 +384,6 @@ def _processBatchFile():
   global _gDefaultBatchDir
   global _gTimeout
   PshellServer._gPshellClientTimeout = _gTimeout
-  #batchFile1 = _gFilename
-  #batchFile2 = ""
-  #batchPath = os.getenv('PSHELL_BATCH_DIR')
-  #if (batchPath != None):
-  #  batchFile2 = batchPath+"/"+_gFilename
-  #batchFile3 = _gDefaultBatchDir+"/"+_gFilename
-  #if (os.path.isfile(batchFile1)):
-  #  file = open(batchFile1, 'r')
-  #elif (os.path.isfile(batchFile2)):
-  #  file = open(batchFile2, 'r')
-  #elif (os.path.isfile(batchFile3)):
-  #  file = open(batchFile3, 'r')
-  #else:
-  #  print("PSHELL_ERROR: Could not open file: '%s'" % _gFilename)
-  #  return
   batchFile = getBatchFile(_gFilename)
   if (batchFile != None and os.path.isfile(batchFile)):
     # we found a batch file, process it
