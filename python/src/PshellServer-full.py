@@ -881,7 +881,7 @@ _gLogFunction = None
 
 _MAX_BIND_ATTEMPTS = 1000
 
-_gBatchFiles = {"maxFilenameLength":8, "maxDirectoryLength":9, "files":[]}
+_gBatchFiles = {"maxFilenameLength":8, "maxDirectoryLength":9, "directories":[], "files":[]}
 
 _gStartTime = None
 _gShowElapsedTime = False
@@ -1771,9 +1771,10 @@ def _processQueryCommands2():
 
 #################################################################################
 #################################################################################
-def findBatchFiles(directory_):
+def _findBatchFiles(directory_):
   global _gBatchFiles
-  if directory_ != None and os.path.isdir(directory_):
+  if directory_ != None and os.path.isdir(directory_) and directory_ not in _gBatchFiles["directories"]:
+    _gBatchFiles["directories"].append(directory_)
     fileList = commands.getoutput("ls {}".format(directory_)).split()
     for filename in fileList:
       if ".psh" in filename or ".batch" in filename:
@@ -1783,7 +1784,7 @@ def findBatchFiles(directory_):
 
 #################################################################################
 #################################################################################
-def showBatchFiles():
+def _showBatchFiles():
   global _gBatchFiles
   printf("")
   printf("***********************************************")
@@ -1798,18 +1799,19 @@ def showBatchFiles():
 
 #################################################################################
 #################################################################################
-def getBatchFile(filename_):
+def _getBatchFile(filename_):
   global _gBatchFiles
 
   batchFile = None
 
   _gBatchFiles["files"] = []
+  _gBatchFiles["directories"] = []
   _gBatchFiles["maxDirectoryLength"] = 9
   _gBatchFiles["maxFilenameLength"] = 8
 
-  findBatchFiles(os.getcwd())
-  findBatchFiles(os.getenv('PSHELL_BATCH_DIR'))
-  findBatchFiles(_PSHELL_BATCH_DIR)
+  _findBatchFiles(os.getcwd())
+  _findBatchFiles(os.getenv('PSHELL_BATCH_DIR'))
+  _findBatchFiles(_PSHELL_BATCH_DIR)
 
   if filename_ == "?" or filename_ == "-h":
     printf("")
@@ -1831,7 +1833,7 @@ def getBatchFile(filename_):
   elif ((_gFirstArgPos == 0) and (filename_ in "batch")):
     _showUsage()
   elif (isSubString(filename_, "-list", 2)):
-    showBatchFiles()
+    _showBatchFiles()
   elif (isDec(filename_)):
     if (int(filename_) > 0 and int(filename_) <= len(_gBatchFiles["files"])):
       batchFile = _gBatchFiles["files"][int(filename_)-1]["directory"] + "/" + _gBatchFiles["files"][int(filename_)-1]["filename"]
@@ -1865,7 +1867,7 @@ def _batch(command_):
     showOnly = True
   else:
     showOnly = False
-  batchFile = getBatchFile(batchFile)
+  batchFile = _getBatchFile(batchFile)
   if (batchFile != None and os.path.isfile(batchFile)):
     file = open(batchFile, 'r')
     for line in file:

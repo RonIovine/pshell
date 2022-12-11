@@ -235,14 +235,22 @@ struct File
   char filename[256];
 };
 
+struct Directory
+{
+  char directory[256];
+};
+
 #define MAX_BATCH_FILES 256
+#define MAX_BATCH_DIRECTORIES 5
 char _currentDir[PATH_MAX];
 
 struct FileList
 {
   int numFiles;
+  int numDirectories;
   int maxDirectoryLength;
   int maxFilenameLength;
+  Directory directories[MAX_BATCH_DIRECTORIES];
   File files[MAX_BATCH_FILES];
 };
 
@@ -289,6 +297,7 @@ bool isFile(const char *directory_, const char *file_);
 void findBatchFiles(const char *directory_);
 void showBatchFiles(void);
 bool isDec(const char *string_);
+bool isBatchDirLoaded(const char *directory_);
 
 /*
  * we access this funciton via a 'backdoor' linking via the PshellReadline
@@ -1313,14 +1322,33 @@ bool isFile(const char *directory_, const char *file_)
 
 /******************************************************************************/
 /******************************************************************************/
+bool isBatchDirLoaded(const char *directory_)
+{
+  for (int i = 0; i < _batchFiles.numDirectories; i++)
+  {
+    if (strcmp(directory_, _batchFiles.directories[i].directory) == 0)
+    {
+      return (true);
+    }
+  }
+  return (false);
+}
+
+/******************************************************************************/
+/******************************************************************************/
 void findBatchFiles(const char *directory_)
 {
   FILE *fp;
   char file[256];
   char command[256];
 
-  if (directory_ != NULL)
+  if ((directory_ != NULL) &&
+      !isBatchDirLoaded(directory_) &&
+      (_batchFiles.numDirectories < MAX_BATCH_DIRECTORIES))
   {
+
+    strcpy(_batchFiles.directories[_batchFiles.numDirectories++].directory, directory_);
+
     sprintf(command, "/bin/ls %s", directory_);
 
     /* Open the command for reading. */
@@ -1387,6 +1415,7 @@ static bool getBatchFile(const char *filename_, char *batchFile_)
   getcwd(_currentDir, sizeof(_currentDir));
 
   _batchFiles.numFiles = 0;
+  _batchFiles.numDirectories = 0;
   _batchFiles.maxDirectoryLength = 9;
   _batchFiles.maxFilenameLength = 8;
 

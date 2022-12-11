@@ -986,6 +986,7 @@ type file struct {
 type fileList struct {
   maxDirectoryLength int
   maxFilenameLength int
+  directories []string
   files []file
 }
 
@@ -1720,12 +1721,24 @@ func loadStartupFile() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+func isBatchDirLoaded(directory_ string) bool {
+  for _, directory := range _gBatchFiles.directories {
+    if (directory_ == directory) {
+      return true
+    }
+  }
+  return false
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 func findBatchFiles(directory_ string) {
-  if (directory_ != "") {
+  if ((directory_ != "") && !isBatchDirLoaded(directory_)) {
     batchDir, err := os.Open(directory_)
     if (err == nil) {
       files, err := batchDir.Readdir(0)
       if (err == nil) {
+        _gBatchFiles.directories = append(_gBatchFiles.directories, directory_)
         for index := range(files) {
           if (strings.Contains(files[index].Name(), ".psh") || strings.Contains(files[index].Name(), ".batch")) {
             _gBatchFiles.files = append(_gBatchFiles.files, file{directory_, files[index].Name()})
@@ -1773,6 +1786,7 @@ func getBatchFile(filename_ string) string {
   var currentDir, _ = os.Getwd()
 
   _gBatchFiles.files = []file{}
+  _gBatchFiles.directories = []string{}
   _gBatchFiles.maxDirectoryLength = 9
   _gBatchFiles.maxFilenameLength = 8
 
