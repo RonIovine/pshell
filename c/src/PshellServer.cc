@@ -184,7 +184,7 @@ static int _defaultIdleTimeout = 10;
  */
 
 #ifndef PSHELL_TOKEN_LIST_CHUNK
-#define PSHELL_TOKEN_LIST_CHUNK 10
+#define PSHELL_TOKEN_LIST_CHUNK 64
 #endif
 
 /*
@@ -194,7 +194,7 @@ static int _defaultIdleTimeout = 10;
  */
 
 #ifndef PSHELL_TOKEN_CHUNK
-#define PSHELL_TOKEN_CHUNK 10
+#define PSHELL_TOKEN_CHUNK 64
 #endif
 
 /*
@@ -203,7 +203,7 @@ static int _defaultIdleTimeout = 10;
  */
 
 #ifndef PSHELL_COMMAND_CHUNK
-#define PSHELL_COMMAND_CHUNK 50
+#define PSHELL_COMMAND_CHUNK 100
 #endif
 
 /*
@@ -364,9 +364,12 @@ static PshellCmd _setupCmd;
 static FileList _batchFiles;
 static char _currentDir[PATH_MAX];
 
+/* command line processing variables */
+static char _savedCommand[PSHELL_RL_MAX_COMMAND_SIZE];
+static char _fullCommand[PSHELL_RL_MAX_COMMAND_SIZE];
+static char _inputLine[PSHELL_RL_MAX_COMMAND_SIZE];
+
 /* to time elapsed time for pshell_clock keep-alive function */
-//static time_t _startTime;
-//static time_t _currTime;
 static bool _showElapsedTime;
 static struct timeval _startTime;
 static struct timeval _currTime;
@@ -732,7 +735,6 @@ void pshell_addCommand(PshellFunction function_,
 void pshell_runCommand(const char *command_, ...)
 {
   char *commandName;
-  char fullCommand[256];
   char command[256];
   /*
    * only dispatch command if we are not already in the middle of
@@ -750,9 +752,9 @@ void pshell_runCommand(const char *command_, ...)
     va_start(args, command_);
     vsprintf(command, command_, args);
     va_end(args);
-    strcpy(fullCommand, command);
+    strcpy(_fullCommand, command);
     /* user command, create the arg list and look for the command */
-    if (((commandName = createArgs(fullCommand)) != NULL) &&
+    if (((commandName = createArgs(_fullCommand)) != NULL) &&
          (findCommand(commandName) == 1) &&
          (_argc >= _foundCommand->minArgs) &&
          (_argc <= _foundCommand->maxArgs))
@@ -1909,7 +1911,6 @@ static void clearScreen(void)
 static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, bool clear_)
 {
   FILE *fp;
-  char inputLine[180];
   char batchFile[180];
   unsigned count = 0;
 
@@ -1929,18 +1930,18 @@ static void processBatchFile(char *filename_, unsigned rate_, unsigned repeat_, 
       {
         clearScreen();
       }
-      while (fgets(inputLine, sizeof(inputLine), fp) != NULL)
+      while (fgets(_inputLine, sizeof(_inputLine), fp) != NULL)
       {
-        if (inputLine[0] != '#')
+        if (_inputLine[0] != '#')
         {
           _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-          if (inputLine[strlen(inputLine)-1] == '\n')
+          if (_inputLine[strlen(_inputLine)-1] == '\n')
           {
-            inputLine[strlen(inputLine)-1] = 0;  /* NULL terminate */
+            _inputLine[strlen(_inputLine)-1] = 0;  /* NULL terminate */
           }
-          if (strlen(inputLine) > 0)
+          if (strlen(_inputLine) > 0)
           {
-            processCommand(inputLine);
+            processCommand(_inputLine);
           }
         }
       }
@@ -2064,20 +2065,19 @@ static void runUNIXServer(void)
 /******************************************************************************/
 static void runLocalServer(void)
 {
-  char inputLine[180] = {0};
   bool idleSession;
   strcpy(_ipAddress, "local");
   sprintf(_interactivePrompt, "%s[%s]:%s", _serverName, _ipAddress, _prompt);
   showWelcome();
   pshell_rl_setIdleTimeout(PSHELL_RL_ONE_MINUTE*_defaultIdleTimeout);
-  while (!_quit && ((idleSession = pshell_rl_getInput(_interactivePrompt, inputLine)) == false))
+  while (!_quit && ((idleSession = pshell_rl_getInput(_interactivePrompt, _inputLine)) == false))
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
     /* if we are currently processing a non-interactive command (via the pshell_runCommand
      * function call), wait a little bit for it to complete before processing an interactive command */
     while (!_isCommandInteractive) sleep(1);
     /* good to go, process an interactive command */
-    processCommand(inputLine);
+    processCommand(_inputLine);
   }
 }
 
@@ -2352,21 +2352,20 @@ static void batch(int argc, char *argv[])
 /******************************************************************************/
 static void receiveTCP(void)
 {
-  char command[PSHELL_RL_MAX_COMMAND_SIZE] = {0};
   bool idleSession;
 
   /* print out our welcome banner */
   showWelcome();
 
   _quit = false;
-  while (!_quit && ((idleSession = pshell_rl_getInput(_interactivePrompt, command)) == false))
+  while (!_quit && ((idleSession = pshell_rl_getInput(_interactivePrompt, _inputLine)) == false))
   {
     _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
     /* if we are currently processing a non-interactive command (via the pshell_runCommand
      * function call), wait a little bit for it to complete before processing an interactive command */
     while (!_isCommandInteractive) sleep(1);
     /* good to go, process an interactive command */
-    processCommand(command);
+    processCommand(_inputLine);
   }
 }
 
@@ -2404,34 +2403,33 @@ static void *serverThread(void*)
 /******************************************************************************/
 static bool loadCommandFile(const char *filename_, bool inteactive_, bool showOnly_)
 {
-  char line[180];
   FILE *fp;
   bool retCode = false;
   if ((fp = fopen(filename_, "r")) != NULL)
   {
-    while (fgets(line, sizeof(line), fp) != NULL)
+    while (fgets(_inputLine, sizeof(_inputLine), fp) != NULL)
     {
       /* ignore comment or blank lines */
-      if ((line[0] != '#') && (strlen(line) > 0))
+      if ((_inputLine[0] != '#') && (strlen(_inputLine) > 0))
       {
         _pshellMsg->header.msgType = PSHELL_USER_COMMAND;
-        if (line[strlen(line)-1] == '\n')
+        if (_inputLine[strlen(_inputLine)-1] == '\n')
         {
-          line[strlen(line)-1] = 0;  /* NULL terminate */
+          _inputLine[strlen(_inputLine)-1] = 0;  /* NULL terminate */
         }
-        if (strlen(line) > 0)
+        if (strlen(_inputLine) > 0)
         {
           if (showOnly_)
           {
-            pshell_printf("%s\n", line);
+            pshell_printf("%s\n", _inputLine);
           }
           else if (inteactive_)
           {
-            processCommand(line);
+            processCommand(_inputLine);
           }
           else
           {
-            pshell_runCommand(line);
+            pshell_runCommand(_inputLine);
           }
         }
       }
@@ -2786,7 +2784,6 @@ static void loadConfigFile(void)
   char configFile[180];
   char cwd[180];
   char *configPath;
-  char line[180];
   FILE *fp;
 
   configFile[0] = '\0';
@@ -2814,13 +2811,13 @@ static void loadConfigFile(void)
   {
     /* set to true so we can call pshell_tokenize, need to make sure we call cleanupTokens after each call */
     _isCommandDispatched = true;
-    while (fgets(line, sizeof(line), fp) != NULL)
+    while (fgets(_inputLine, sizeof(_inputLine), fp) != NULL)
     {
       /* look for our server name on every non-commented line */
-      if (line[0] != '#')
+      if (_inputLine[0] != '#')
       {
-        line[strlen(line)-1] = '\0';
-        config = pshell_tokenize(line, "=");
+        _inputLine[strlen(_inputLine)-1] = '\0';
+        config = pshell_tokenize(_inputLine, "=");
         if (config->numTokens == 2)
         {
           item = pshell_tokenize(config->tokens[0], ".");
@@ -3425,18 +3422,16 @@ static void dispatchCommand(char *command_)
 static void processCommand(char *command_)
 {
   unsigned numMatches = 1;
-  char savedCommand[180];
-  char fullCommand[180];
   char retCode = PSHELL_COMMAND_COMPLETE;
-  char *commandName = fullCommand;  /* make a non NULL ptr so we don't get "cannot
+  char *commandName = _fullCommand;  /* make a non NULL ptr so we don't get "cannot
                                        create args" error for the non-user commands */
   unsigned payloadSize = _pshellPayloadSize;  /* save off current size in case it changes
                                                  and we need to grab more memory, UDP server only */
   PshellMsg updatePayloadSize;
 
   /* save off our original command */
-  strcpy(savedCommand, command_);
-  strcpy(fullCommand, command_);
+  strcpy(_savedCommand, command_);
+  strcpy(_fullCommand, command_);
 
   /*
    * clear out our message payload so all of our pshell_printf
@@ -3452,7 +3447,7 @@ static void processCommand(char *command_)
     /* set this to true so we can tokenize our command line with pshell_tokenize */
     _isCommandDispatched = true;
     /* user command, create the arg list and look for the command */
-    if (((commandName = createArgs(fullCommand)) != NULL) &&
+    if (((commandName = createArgs(_fullCommand)) != NULL) &&
         ((numMatches = findCommand(commandName)) == 1))
     {
       /* see if they asked for the command usage */
@@ -3469,7 +3464,7 @@ static void processCommand(char *command_)
          * function pointer because the validation in the addCommand
          * function will catch that and not add the command
          */
-        dispatchCommand(savedCommand);
+        dispatchCommand(_savedCommand);
       }
       else
       {
@@ -3491,7 +3486,7 @@ static void processCommand(char *command_)
     /* set the to true so we prevent any intermediate flushes back to the control client */
     _isControlCommand = true;
     /* user command, create the arg list and look for the command */
-    if (((commandName = createArgs(fullCommand)) != NULL) &&
+    if (((commandName = createArgs(_fullCommand)) != NULL) &&
         ((numMatches = findCommand(commandName)) == 1))
     {
       /* see if they asked for the command usage */
@@ -3508,7 +3503,7 @@ static void processCommand(char *command_)
          * function pointer because the validation in the addCommand
          * function will catch that and not add the command
          */
-        dispatchCommand(savedCommand);
+        dispatchCommand(_savedCommand);
       }
       else
       {
@@ -3562,7 +3557,7 @@ static void processCommand(char *command_)
 
   if (commandName == NULL)
   {
-    pshell_printf("PSHELL_ERROR: Could not create args list for command: '%s'\n", savedCommand);
+    pshell_printf("PSHELL_ERROR: Could not create args list for command: '%s'\n", _savedCommand);
   }
   else if (numMatches == 0)
   {

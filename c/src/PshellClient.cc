@@ -152,15 +152,17 @@ struct ActiveServer
 int _numActiveServers = 0;
 ActiveServer _activeServers[MAX_ACTIVE_SERVERS] = {};
 
-char _unixLocalSocketName[256];
 char _interactiveCommand[PSHELL_RL_MAX_COMMAND_SIZE];
-char _interactivePrompt[PSHELL_RL_MAX_COMMAND_SIZE];
-char _serverName[PSHELL_RL_MAX_COMMAND_SIZE];
-char _ipAddress[PSHELL_RL_MAX_COMMAND_SIZE];
-char _title[PSHELL_RL_MAX_COMMAND_SIZE];
-char _banner[PSHELL_RL_MAX_COMMAND_SIZE];
-char _prompt[PSHELL_RL_MAX_COMMAND_SIZE];
-char _serverDisplay[PSHELL_RL_MAX_COMMAND_SIZE];
+
+#define MAX_STRING_SIZE 256
+char _unixLocalSocketName[MAX_STRING_SIZE];
+char _interactivePrompt[MAX_STRING_SIZE];
+char _serverName[MAX_STRING_SIZE];
+char _ipAddress[MAX_STRING_SIZE];
+char _title[MAX_STRING_SIZE];
+char _banner[MAX_STRING_SIZE];
+char _prompt[MAX_STRING_SIZE];
+char _serverDisplay[MAX_STRING_SIZE];
 const char *_host;
 const char *_server;
 unsigned _version;
@@ -1574,7 +1576,7 @@ void tokenize(char *string_,
 /******************************************************************************/
 void processInteractiveMode(void)
 {
-  char command[80];
+  char command[PSHELL_RL_MAX_COMMAND_SIZE];
   char *tokens[MAX_TOKENS];
   unsigned numTokens;
   if (initInteractiveMode())

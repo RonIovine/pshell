@@ -326,7 +326,7 @@ void add(int argc, char *argv[])
                           description,
                           "[<command> | ? | -h]",
                           0,
-                          30,
+                          60,
                           false);
       }
       else
@@ -579,7 +579,7 @@ int main (int argc, char *argv[])
                     "add a new remote server or multicast group entry",
                     "{server <controlName> <remoteServer> [<port>]} |\n           {multicast {<command> | all} {<controlList> | all}}",
                     3,
-                    30,
+                    60,
                     false);
 
   pshell_addCommand(show,
@@ -595,7 +595,7 @@ int main (int argc, char *argv[])
                     "send multicast command to registered server group",
                     "<command>",
                     0,
-                    30,
+                    60,
                     false);
 
   /* start our local pshell server */

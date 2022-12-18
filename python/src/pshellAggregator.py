@@ -196,7 +196,7 @@ def _add(argv):
                               "control the remote " + argv[2] + " process",
                               "[<command> | ? | -h]",
                               0,
-                              30,
+                              60,
                               False)
       PshellServer._addTabCompletions()
   elif (PshellServer.isSubString(argv[1], "multicast")):
@@ -361,7 +361,7 @@ if (__name__ == '__main__'):
                           "add a new remote server or multicast group entry",
                           "{server <controlName> <remoteServer> [<port>]} |\n           {multicast {<command> | all} {<controlList> | all}}",
                           4,
-                          30,
+                          60,
                           False)
 
   PshellServer.addCommand(_show,
@@ -377,7 +377,7 @@ if (__name__ == '__main__'):
                           "send multicast command to registered server group",
                           "<command>",
                           2,
-                          30,
+                          60,
                           False)
 
   # start our local pshell server

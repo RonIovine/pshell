@@ -104,7 +104,7 @@ enum PshellSerialType
 };
 
 /* use this to size the user supplied input string */
-#define PSHELL_RL_MAX_COMMAND_SIZE 256
+#define PSHELL_RL_MAX_COMMAND_SIZE 1024
 
 /* use these to set the idle session timeout values, default=NONE */
 #define PSHELL_RL_IDLE_TIMEOUT_NONE 0

@@ -899,7 +899,7 @@ if (__name__ == '__main__'):
           if (len(splitCommand ) >= 2):
             commandName = splitCommand[0].strip()
             description = splitCommand[1].strip()
-            PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg20>]", 0, 20)
+            PshellServer.addCommand(_comandDispatcher, commandName, description, "[<arg1> ... <arg60>]", 0, 60)
 
         # configure our local server to interact with a remote server, we override the display settings
         # (i.e. prompt, server name, banner, title etc), to make it appear that our local server is really

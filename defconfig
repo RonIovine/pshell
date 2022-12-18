@@ -146,7 +146,7 @@ PSHELL_VSNPRINTF=y
 # in the event of a buffer overflow if we are specified to grow
 # in chunks, see the previous flag.  The default value is 4000.
 #
-#PSHELL_PAYLOAD_CHUNK=4000
+#PSHELL_PAYLOAD_CHUNK=1024*64
 
 #
 # This is the guardband used to detect a transfer buffer overflow
@@ -157,7 +157,7 @@ PSHELL_VSNPRINTF=y
 # (bytes).  If you have a single pshell_printf that is in excess
 # of the configured guardband, memory corruption may occur.
 #
-#PSHELL_PAYLOAD_GUARDBAND=400
+#PSHELL_PAYLOAD_GUARDBAND=4096
 
 #
 # When set, it will grow the payload of the PSHELL transfer buffer
@@ -183,7 +183,7 @@ PSHELL_VSNPRINTF=y
 # for each callback function, this is how command line arguments are
 # parsed.  The default is 10 if no value is specified for this flag.
 #
-#PSHELL_TOKEN_LIST_CHUNK=10
+#PSHELL_TOKEN_LIST_CHUNK=64
 
 #
 # This is the amount we will grow our list of tokens by in the
@@ -191,7 +191,7 @@ PSHELL_VSNPRINTF=y
 # entries are reused for each callback function.  The default is
 # 10 if no value is specified for this flag.
 #
-#PSHELL_TOKEN_CHUNK=10
+#PSHELL_TOKEN_CHUNK=64
 
 #
 # This is the initial size in number of entries for the command
@@ -200,7 +200,7 @@ PSHELL_VSNPRINTF=y
 # on all registered commands.  The default is 50 if no value is
 # specified for this flag.
 #
-#PSHELL_COMMAND_CHUNK=50
+#PSHELL_COMMAND_CHUNK=100
 
 #
 # This flag will tell the pshell_addCommand function to make a copy of
