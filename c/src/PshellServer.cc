@@ -735,7 +735,7 @@ void pshell_addCommand(PshellFunction function_,
 void pshell_runCommand(const char *command_, ...)
 {
   char *commandName;
-  char command[256];
+  char command[PSHELL_RL_MAX_COMMAND_SIZE];
   /*
    * only dispatch command if we are not already in the middle of
    * dispatching an interactive command
@@ -2163,8 +2163,8 @@ static void quit(int argc, char *argv[])
 /******************************************************************************/
 static void setup(int argc, char *argv[])
 {
-  char command[80];
-  char line[80];
+  char command[180];
+  char line[180];
   FILE *fp;
   pshell_printf("\n");
   if (pshell_isHelp())
