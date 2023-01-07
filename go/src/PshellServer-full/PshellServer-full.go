@@ -2129,7 +2129,7 @@ func createSocket() bool {
         _gUdpSocket, err = net.ListenUDP("udp", udpAddr)
         if err == nil {
           _gPort = strconv.Itoa(int(port))
-          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gHostnameOrIpAddr + "-" + _gPort + _LOCK_FILE_EXTENSION
+          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "." + _gServerType + "-" + _gHostnameOrIpAddr + "-" + _gPort + _LOCK_FILE_EXTENSION
           _gLockFd, err = os.Create(_gLockFile)
           if err == nil {
             syscall.Flock(int(_gLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
@@ -2156,7 +2156,7 @@ func createSocket() bool {
         _gTcpSocket, err = net.ListenTCP("tcp", tcpAddr)
         if err == nil {
           _gPort = strconv.Itoa(int(port))
-          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "-" + _gServerType + "-" + _gHostnameOrIpAddr + "-" + _gPort + _LOCK_FILE_EXTENSION
+          _gLockFile = _FILE_SYSTEM_PATH + _gServerName + "." + _gServerType + "-" + _gHostnameOrIpAddr + "-" + _gPort + _LOCK_FILE_EXTENSION
           _gLockFd, err = os.Create(_gLockFile)
           if err == nil {
             syscall.Flock(int(_gLockFd.Fd()), syscall.LOCK_EX | syscall.LOCK_NB)
@@ -2176,7 +2176,7 @@ func createSocket() bool {
     printError("Could not find available port after %d attempts", _MAX_BIND_ATTEMPTS)
   } else if (_gServerType == UNIX) {
     _gUnixSourceAddress = _FILE_SYSTEM_PATH + _gServerName
-    _gLockFile = _gUnixSourceAddress + "-unix" + _LOCK_FILE_EXTENSION
+    _gLockFile = _gUnixSourceAddress + ".unix" + _LOCK_FILE_EXTENSION
     for attempt := 1; attempt < _MAX_BIND_ATTEMPTS+1; attempt++ {
       _gLockFd, err = os.Create(_gLockFile)
       if err == nil {
@@ -2203,7 +2203,7 @@ func createSocket() bool {
           printWarning("Could not bind to UNIX address: %s, looking for first available address", _gServerName);
         }
         _gUnixSourceAddress = _FILE_SYSTEM_PATH + _gServerName + strconv.Itoa(attempt)
-        _gLockFile = _gUnixSourceAddress + "-unix" + _LOCK_FILE_EXTENSION
+        _gLockFile = _gUnixSourceAddress + ".unix" + _LOCK_FILE_EXTENSION
       }
     }
     printError("Could not find available address after %d attempts", _MAX_BIND_ATTEMPTS)

@@ -2273,7 +2273,7 @@ static void batch(int argc, char *argv[])
       pshell_printf("    repeat    - number of times to repeat command or 'forever' (default=1)\n");
       pshell_printf("    clear     - clear the screen between batch file runs\n");
     }
-    else  // TCP or LOCAL server
+    else  /* TCP or LOCAL server */
     {
       pshell_printf("    index     - Index of the batch file to execute (from the -list option)\n");
       pshell_printf("    -list     - List all the available batch files\n");
@@ -2330,7 +2330,7 @@ static void batch(int argc, char *argv[])
     }
     processBatchFile(argv[0], rate, repeat, clear);
   }
-  else  // TCP or LOCAL server
+  else  /* TCP or LOCAL server */
   {
     if (argc == 1)
     {
@@ -2916,7 +2916,7 @@ static void cleanupFileSystemResources(void)
         /* try to open lock file */
         if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
         {
-          *strchr(tempDirEntry, '-') = 0;
+          *strchr(tempDirEntry, '.') = 0;
           *strrchr(dirEntry->d_name, '.') = 0;
           sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, tempDirEntry);
           /* file exists, try to see if another process has it locked */
@@ -2946,7 +2946,7 @@ static bool bindSocket(void)
   {
     _localUnixAddress.sun_family = AF_UNIX;
     sprintf(_localUnixAddress.sun_path, "%s/%s", PSHELL_UNIX_SOCKET_PATH, _serverName);
-    sprintf(_lockFile, "%s-unix%s", _localUnixAddress.sun_path, _lockFileExtension);
+    sprintf(_lockFile, "%s.unix%s", _localUnixAddress.sun_path, _lockFileExtension);
     for (unsigned attempt = 1; attempt <= PSHELL_MAX_BIND_ATTEMPTS+1; attempt++)
     {
       /* try to open lock file */
@@ -2979,7 +2979,7 @@ static bool bindSocket(void)
           PSHELL_WARNING("Could not bind to UNIX address: %s, looking for first available address", _serverName);
         }
         sprintf(_localUnixAddress.sun_path, "%s/%s%d", PSHELL_UNIX_SOCKET_PATH, _serverName, attempt);
-        sprintf(_lockFile, "%s-unix%s", _localUnixAddress.sun_path, _lockFileExtension);
+        sprintf(_lockFile, "%s.unix%s", _localUnixAddress.sun_path, _lockFileExtension);
       }
     }
     PSHELL_ERROR("Could not find available address after %d attempts", PSHELL_MAX_BIND_ATTEMPTS)
@@ -3006,11 +3006,11 @@ static bool bindSocket(void)
         _port = port;
         if (_serverType == PSHELL_UDP_SERVER)
         {
-          sprintf(_lockFile, "%s%s-udp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
+          sprintf(_lockFile, "%s%s.udp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
         }
         else  /* TCP server */
         {
-          sprintf(_lockFile, "%s%s-tcp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
+          sprintf(_lockFile, "%s%s.udp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
         }
         if ((unixLockFd = open(_lockFile, O_RDONLY | O_CREAT, 0600)) > -1)
         {

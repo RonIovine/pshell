@@ -716,7 +716,7 @@ bool init(const char *destination_, const char *server_)
     /* bind to our source socket */
     for (int i = 0; ((i < MAX_UNIX_CLIENTS) && (retCode < 0)); i++)
     {
-      sprintf(_sourceUnixAddress.sun_path, "%s/%s-control%d", PSHELL_UNIX_SOCKET_PATH, server_, (rand()%MAX_UNIX_CLIENTS));
+      sprintf(_sourceUnixAddress.sun_path, "%s/%s.control%d", PSHELL_UNIX_SOCKET_PATH, server_, (rand()%MAX_UNIX_CLIENTS));
       sprintf(unixLockFile, "%s%s", _sourceUnixAddress.sun_path, _lockFileExtension);
       /* try to open lock file */
       if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
@@ -1794,6 +1794,7 @@ void cleanupFileSystemResources(void)
   char tempDirEntry[300];
   struct dirent *dirEntry;
   char *serverInfo[MAX_TOKENS];
+  char *servers[MAX_TOKENS];
   unsigned numTokens;
   _dir = opendir(_unixSocketPath);
   if (!_dir)
@@ -1815,7 +1816,7 @@ void cleanupFileSystemResources(void)
         /* try to open lock file */
         if ((unixLockFd = open(unixLockFile, O_RDONLY | O_CREAT, 0600)) > -1)
         {
-          *strchr(tempDirEntry, '-') = 0;
+          *strchr(tempDirEntry, '.') = 0;
           *strrchr(dirEntry->d_name, '.') = 0;
           sprintf(unixSocketFile, "%s/%s", PSHELL_UNIX_SOCKET_PATH, tempDirEntry);
           /* file exists, try to see if another process has it locked */
@@ -1829,24 +1830,25 @@ void cleanupFileSystemResources(void)
             unlink(unixLockFile);
           }
           else if ((_numActiveServers < MAX_ACTIVE_SERVERS) &&
-                   (strstr(dirEntry->d_name, "-control") == NULL))
+                   (strstr(dirEntry->d_name, ".control") == NULL))
           {
-            tokenize(dirEntry->d_name, "-", serverInfo, MAX_TOKENS, &numTokens);
-            _activeServers[_numActiveServers].name = serverInfo[0];
-            _activeServers[_numActiveServers].type = serverInfo[1];
+            tokenize(dirEntry->d_name, ".", servers, MAX_TOKENS, &numTokens);
+            _activeServers[_numActiveServers].name = servers[0];
+            tokenize(servers[1], "-", serverInfo, MAX_TOKENS, &numTokens);
+            _activeServers[_numActiveServers].type = serverInfo[0];
             if (strlen(_activeServers[_numActiveServers].name) > _maxActiveServerLength)
             {
               _maxActiveServerLength = strlen(_activeServers[_numActiveServers].name);
             }
-            if (numTokens == 2)
+            if (numTokens == 1)
             {
               _activeServers[_numActiveServers].host = "N/A";
               _activeServers[_numActiveServers].port = "N/A";
             }
-            else if (numTokens == 4)
+            else if (numTokens == 3)
             {
-              _activeServers[_numActiveServers].host = serverInfo[2];
-              _activeServers[_numActiveServers].port = serverInfo[3];
+              _activeServers[_numActiveServers].host = serverInfo[1];
+              _activeServers[_numActiveServers].port = serverInfo[2];
               if (strlen(_activeServers[_numActiveServers].host) > _maxHostnameLenth)
               {
                 _maxHostnameLenth = strlen(_activeServers[_numActiveServers].host);

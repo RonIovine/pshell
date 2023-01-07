@@ -610,7 +610,7 @@ def _connectServer(controlName_, remoteServer_, port_, defaultTimeout_):
       # UNIX domain socket
       socketFd = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
       # bind our source socket so we can get replies
-      sourceAddress = _gUnixSocketPath+remoteServer_+"-control"+str(random.randrange(1000))
+      sourceAddress = _gUnixSocketPath+remoteServer_+".control"+str(random.randrange(1000))
       lockFile = sourceAddress+_gLockFileExtension
       bound = False
       while (not bound):

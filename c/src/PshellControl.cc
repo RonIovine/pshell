@@ -666,7 +666,7 @@ static bool connectServer(PshellControl *control_,
     for (int i = 0; ((i < MAX_UNIX_CLIENTS) && (retCode < 0)); i++)
     {
       sprintf(control_->sourceUnixAddress.sun_path,
-              "%s/%s-control%d",
+              "%s/%s.control%d",
               PSHELL_UNIX_SOCKET_PATH,
               remoteServer_,
               (rand()%MAX_UNIX_CLIENTS));

@@ -1236,7 +1236,7 @@ def _bindSocket(address_):
   global _MAX_BIND_ATTEMPTS
   if _gServerType == UNIX:
     # Unix domain socket
-    _gLockFile = _gUnixSourceAddress+"-unix"+_gLockFileExtension
+    _gLockFile = _gUnixSourceAddress+".unix"+_gLockFileExtension
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
         _gLockFd = open((_gLockFile), "w+")
@@ -1250,7 +1250,7 @@ def _bindSocket(address_):
           # only print message on first attemps
           _printWarning("Could not bind to UNIX address: {}, looking for first available address".format(_gServerName))
         _gUnixSourceAddress = address_ + str(attempt)
-        _gLockFile = _gUnixSourceAddress+"-unix"+_gLockFileExtension
+        _gLockFile = _gUnixSourceAddress+".unix"+_gLockFileExtension
     _printError("Could not find available address after {} attempts".format(_MAX_BIND_ATTEMPTS))
   else:
     # IP domain socket
@@ -1258,7 +1258,7 @@ def _bindSocket(address_):
     for attempt in range(1,_MAX_BIND_ATTEMPTS+1):
       try:
         _gSocketFd.bind((address_, port))
-        _gLockFile = _gFileSystemPath + _gServerName + "-" + _gServerType + "-" + _gHostnameOrIpAddr + "-" + str(port) + _gLockFileExtension
+        _gLockFile = _gFileSystemPath + _gServerName + "." + _gServerType + "-" + _gHostnameOrIpAddr + "-" + str(port) + _gLockFileExtension
         _gLockFd = open((_gLockFile), "w+")
         fcntl.flock(_gLockFd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         return
