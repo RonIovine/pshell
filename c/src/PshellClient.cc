@@ -1301,7 +1301,7 @@ bool initInteractiveMode(void)
 /******************************************************************************/
 bool isDec(const char *string_)
 {
-  for (int i = 0; i < strlen(string_); i++)
+  for (unsigned i = 0; i < strlen(string_); i++)
   {
     if (!isdigit(string_[i]))
     {
@@ -1370,8 +1370,8 @@ void findBatchFiles(const char *directory_)
         {
           strcpy(_batchFiles.files[_batchFiles.numFiles].directory, directory_);
           strcpy(_batchFiles.files[_batchFiles.numFiles].filename, file);
-          _batchFiles.maxDirectoryLength = MAX(_batchFiles.maxDirectoryLength, strlen(directory_));
-          _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, strlen(file));
+          _batchFiles.maxDirectoryLength = MAX(_batchFiles.maxDirectoryLength, (int)strlen(directory_));
+          _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, (int)strlen(file));
           _batchFiles.numFiles++;
         }
       }

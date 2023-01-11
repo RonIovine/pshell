@@ -1816,7 +1816,7 @@ unsigned char pshell_getUnsignedChar(const char *string_, PshellRadix radix_, bo
 /******************************************************************************/
 bool isBatchDirLoaded(const char *directory_)
 {
-  for (int i = 0; i < _batchFiles.numDirectories; i++)
+  for (unsigned i = 0; i < _batchFiles.numDirectories; i++)
   {
     if (strcmp(directory_, _batchFiles.directories[i].directory) == 0)
     {

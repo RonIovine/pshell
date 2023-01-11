@@ -291,7 +291,9 @@ static const char *_callbackName = NULL;
 static tf_TraceCallback _callbackFunction = NULL;
 static int _callbackNumHits = 0;
 static tf_TraceControl _callbackControl = TF_ONCE;
+#ifndef TF_INTEGRATED_TRACE_LOG
 static tf_TraceLogFunction _logFunction = NULL;
+#endif
 
 /* breakpoint data */
 static bool _step = false;
