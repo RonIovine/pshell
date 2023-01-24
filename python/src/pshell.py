@@ -582,14 +582,14 @@ def _cleanupFileSystemResources():
       except:
         # file handle is in use and locked by another process, print it
         if ".control" not in file:
-          servers = file.split(".")
-          serverInfo = servers[1].split("-")
-          _gMaxActiveServerLength = max(len(servers[0]), _gMaxActiveServerLength)
-          if len(serverInfo) == 1:
-            _gActiveServers.append({"name":servers[0], "type":serverInfo[0], "host":"N/A", "port":"N/A"})
-          elif len(serverInfo) == 3:
-            _gActiveServers.append({"name":servers[0], "type":serverInfo[0], "host":serverInfo[1], "port":serverInfo[2]})
-            _gMaxHostnameLength = max(len(serverInfo[1]), _gMaxHostnameLength)
+          name = file[0:file.index(".")]
+          info = file[file.index(".")+1:file.rindex(".")].split("-")
+          _gMaxActiveServerLength = max(len(name), _gMaxActiveServerLength)
+          if len(info) == 1:
+            _gActiveServers.append({"name":name, "type":info[0], "host":"N/A", "port":"N/A"})
+          elif len(info) == 3:
+            _gActiveServers.append({"name":name, "type":info[0], "host":info[1], "port":info[2]})
+            _gMaxHostnameLength = max(len(info[1]), _gMaxHostnameLength)
     except:
       None
 

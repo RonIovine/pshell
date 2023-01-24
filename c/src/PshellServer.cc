@@ -3010,7 +3010,7 @@ static bool bindSocket(void)
         }
         else  /* TCP server */
         {
-          sprintf(_lockFile, "%s%s.udp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
+          sprintf(_lockFile, "%s%s.tcp-%s-%d%s", _fileSystemPath, _serverName, _hostnameOrIpAddr, _port, _lockFileExtension);
         }
         if ((unixLockFd = open(_lockFile, O_RDONLY | O_CREAT, 0600)) > -1)
         {

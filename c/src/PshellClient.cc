@@ -1832,9 +1832,10 @@ void cleanupFileSystemResources(void)
           else if ((_numActiveServers < MAX_ACTIVE_SERVERS) &&
                    (strstr(dirEntry->d_name, ".control") == NULL))
           {
-            tokenize(dirEntry->d_name, ".", servers, MAX_TOKENS, &numTokens);
-            _activeServers[_numActiveServers].name = servers[0];
-            tokenize(servers[1], "-", serverInfo, MAX_TOKENS, &numTokens);
+            char *info = strchr(dirEntry->d_name, '.');
+            *info = 0;
+            _activeServers[_numActiveServers].name = dirEntry->d_name;
+            tokenize(&info[1], "-", serverInfo, MAX_TOKENS, &numTokens);
             _activeServers[_numActiveServers].type = serverInfo[0];
             if (strlen(_activeServers[_numActiveServers].name) > _maxActiveServerLength)
             {
