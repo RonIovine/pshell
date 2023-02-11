@@ -31,7 +31,7 @@ C/C++/Python/Go application.  Those functions can be invoked interactively eithe
 a separate remote client program, directly from within the application itself, or
 externally from another process via the control API.
 
-The Python, C, and Go versions are consistent with each other at the API level (i.e.
+The Python, C/C++, and Go versions are consistent with each other at the API level (i.e.
 similar functional API, usage, process interaction etc) and fully interoperable with each
 other at the protocol level and can be mixed and matched in any combination.
 
@@ -43,7 +43,7 @@ into each function just like they would be passed into the `main` from the host'
 command line shell (i.e. bash) for each language as shown below.  See the included
 [demo programs](#demo-programs) for language specific examples.
 
-#### C callback:
+#### C/C++ callback:
 
 `void myFunc(int argc, char *argv[])`
 
@@ -58,7 +58,7 @@ command line shell (i.e. bash) for each language as shown below.  See the includ
 Pshell functions can also display information back to the interactive clients via a
 mechanism similar to the familiar 'printf' as follows:
 
-#### C printf:
+#### C/C++ printf:
 
 `void pshell_printf(const char *format, ...)`
 
@@ -157,9 +157,9 @@ framework.
 
 <a name="building"></a>
 ### Building
-For targets other than Linux x86_64, the C and Go code will need to be built from source.  This
+For targets other than Linux x86_64, the C/C++ and Go code will need to be built from source.  This
 framework has been successfully built and run on Raspbian/Kali ARM Linux, MAC OSX, and Windows Cygwin.
-To build the C and Go source, a makefile is provided along with a default make config file, `defconfig`.
+To build the C/C++ and Go source, a makefile is provided along with a default make config file, `defconfig`.
 
 To see the make options, type:
 
@@ -195,8 +195,8 @@ To do a make and local install, run:
 
 `$ make install local=y`
 
-This will compile all the C and Go code and run the above `install.sh` script for a local install.
-Note, to build the C code, you must have the `g++` compiler installed on your host, to build the Go
+This will compile all the C/C++ and Go code and run the above `install.sh` script for a local install.
+Note, to build the C/C++ code, you must have the `g++` compiler installed on your host, to build the Go
 code, you must have the `go` compiler installed on your host.
 
 <a name="documentation"></a>
@@ -204,7 +204,7 @@ code, you must have the `go` compiler installed on your host.
 See the PPT presentation [PSHELL-Framework.ppt](https://github.com/RonIovine/pshell/blob/master/PSHELL-Framework.ppt) at the top level directory for an overview of the main
 features and capabilities of the framework.
 
-There is also documentation for the C API in the form of manpages in the [c/man](https://github.com/RonIovine/pshell/tree/master/c/man) directory.
+There is also documentation for the C/C++ API in the form of manpages in the [c/man](https://github.com/RonIovine/pshell/tree/master/c/man) directory.
 The following manpages are provided:
 
 [pshell(1)](https://github.com/RonIovine/pshell/tree/master/c/man/man1/pshell.1)<br>
@@ -399,13 +399,13 @@ stub versions of the PshellServer will render the control plane inoperable.
 ### Demo programs
 There are several demo programs that provide examples of using the various aspects of the framework.  Each
 language specific directory has a 'demo' subdirectory.  Look at the language specific examples for your
-language of interest for [C](https://github.com/RonIovine/pshell/tree/master/c/demo), [Python](https://github.com/RonIovine/pshell/tree/master/python/demo), and [Go](https://github.com/RonIovine/pshell/tree/master/go/src).
+language of interest for [C/C++](https://github.com/RonIovine/pshell/tree/master/c/demo), [Python](https://github.com/RonIovine/pshell/tree/master/python/demo), and [Go](https://github.com/RonIovine/pshell/tree/master/go/src).
 
 The following sections describes all the demo programs in order of importance/relevance.  Click on the
 language of interest for each example to see specific implementations.
 
 <a name="pshellServerDemo"></a>
-#### 1. pshellServerDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellServerDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellServerDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellServerDemo/pshellServerDemo.go))
+#### 1. pshellServerDemo ([C/C++](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellServerDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellServerDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellServerDemo/pshellServerDemo.go))
 This is the most important demo program.  It shows how to setup a pshell server to run within any process.
 It has example implementations of pshell callback functions, the registration of those functions within
 the framework, and the starting of the pshell server.  This is all that is needed to add interactive pshell
@@ -576,7 +576,7 @@ pshellServerDemo[local]:PSHELL>
 ```
 
 <a name="traceFilterDemo"></a>
-#### 2. traceFilterDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) only)
+#### 2. traceFilterDemo ([C/C++](https://github.com/RonIovine/pshell/blob/master/c/demo/traceFilterDemo.cc) only)
 This is an application that shows a possible real world use case for the PSHELL framework.  It shows the integration
 of a programmable trace filter mechanism with remote pshell server control.  It can be controlled by any of the [interactive clients](#interactive-clients)
 depending on how it is started.  It uses the following example [trace log](#traceLogDemo) implementation for the log
@@ -595,7 +595,7 @@ Usage: traceFilterDemo -udp [<port>] | -tcp [<port>] | -unix
 
 
 <a name="traceLogDemo"></a>
-#### 3. traceLogDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/traceLogDemo.py))
+#### 3. traceLogDemo ([C/C++](https://github.com/RonIovine/pshell/blob/master/c/demo/traceLogDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/traceLogDemo.py))
 This is an example of the trace logger without the extensive filtering capability as the [traceFilterDemo](#traceFilterDemo) example.  It has simple hierarichical levels that
 can be controlled interactively via an integrated PSHELL server.  The following is the
 usage of this program:
@@ -610,7 +610,7 @@ Usage: traceLogDemo <level> [custom]
 ```
 
 <a name="pshellControlDemo"></a>
-#### 4. pshellControlDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
+#### 4. pshellControlDemo ([C/C++](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellControlDemo.cc), [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellControlDemo.py), and [Go](https://github.com/RonIovine/pshell/blob/master/go/src/pshellControlDemo/pshellControlDemo.go))
 These demo programs show one process invoking pshell functions in another process using the control API.
 This is the RPC-like IPC mechanism.  All 3 implementations take a `-h` to show the usage.  Any of them can
 be used to connect to any of the previous [pshellServerDemo](#pshellServerDemo) or [traceFilterDemo](#traceFilterDemo) programs and invoke their functions.  The control demo programs will prompt the user
@@ -635,7 +635,7 @@ Usage: pshellControlDemo {<hostname> | <ipAddress> | <unixServerName>} {<port> |
 ```
 
 <a name="pshellNoServerDemo"></a>
-#### 5. pshellNoServerDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellNoServerDemo.cc) only)
+#### 5. pshellNoServerDemo ([C/C++](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellNoServerDemo.cc) only)
 This is an implementation that allows the user to use this framework to create a multi-call binary
 similar to [Busybox](https://www.busybox.net).  This is not really used to retro-fit existing applications,
 but would be used when creating a new application by where there are multiple entry points that map
@@ -672,7 +672,7 @@ privlidges depending on the directory settings.
 ```
 
 <a name="pshellAggregatorDemo"></a>
-#### 6. pshellAggregatorDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
+#### 6. pshellAggregatorDemo ([C/C++](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellAggregatorDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellAggregatorDemo.py)) <a name="pshellAggregatorDemo"></a>
 This shows an example UDP/Unix interactive client that can control several remote pshell servers in one
 interactive session.  Note that this is different than the generic [pshellAggregator](#pshellAggregator-client)
 client program described above in that this is a custom aggregator by where the servers being aggregated are
@@ -686,7 +686,7 @@ Usage: pshellAggregatorDemo {<hostname> | <ipAddress>} [<pshellServerDemoPort> <
 ```
 
 <a name="pshellReadlineDemo"></a>
-#### 7. pshellReadlineDemo ([C](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
+#### 7. pshellReadlineDemo ([C/C++](https://github.com/RonIovine/pshell/blob/master/c/demo/pshellReadlineDemo.cc) and [Python](https://github.com/RonIovine/pshell/blob/master/python/demo/pshellReadlineDemo.py))
 This is not really part of the pshell client/server paradigm per-se, but rather is just a handy
 stand-alone readline like implementation that can be used by any application to solicit user input.
 It will work with any raw serial character based I/O from either a TCP socket in telnet mode or over

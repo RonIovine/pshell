@@ -31,7 +31,7 @@ like IGMP, it's more like sender based aggregated unicast)  messaging paradigms.
 supports messaging to broadcast pshell servers (i.e. UDP server running at a subnet
 broadcast address, e.g. x.y.z.255).
 
-The Python, 'C', and 'go' versions are consistent with each other at the API level (i.e.
+The Python, 'C/C++', and 'go' versions are consistent with each other at the API level (i.e.
 similar functional API, usage, process interaction etc) and fully interoperable with each
 other at the protocol level and can be mixed and matched in any combination.
 
@@ -42,7 +42,7 @@ passed into each function just like they would be passed into the 'main' from th
 command line shell (i.e. bash) for each language as shown below.  See the included demo
 programs for language specific examples.
 
-'C' callback:
+'C/C++' callback:
 
 void myFunc(int argc, char *argv[])
 
@@ -57,7 +57,7 @@ func myFunc(argv []string)
 Command line pshell functions can also display information back to the interactive clients
 via a mechanism similar to the familiar 'printf' as follows:
 
-'C' printf:
+'C/C++' printf:
 
 void pshell_printf(const char *format, ...)
 
@@ -148,17 +148,17 @@ the 'expect' package to be installed.
   - setPshellLib             -- Shell script to set the libpshell-server.so softlink to desired library
   - showPshellLib            -- Shell script to show the current libpshell-server.so softlink setting
   - logProfiler              -- Python script to profile logfiles
-  - pshellServerDemo         -- Demo application using the pshell server library features (C and Go)
+  - pshellServerDemo         -- Demo application using the pshell server library features (C/C++ and Go)
   - pshellServerDemo.py      -- Demo application using the pshell server Python module features
-  - pshellNoServerDemo       -- Demo application using non-server option of the pshell library (C only)
-  - pshellControlDemo        -- Demo application using the pshell control library features (C and Go)
+  - pshellNoServerDemo       -- Demo application using non-server option of the pshell library (C/C++ only)
+  - pshellControlDemo        -- Demo application using the pshell control library features (C/C++ and Go)
   - pshellControlDemo.py     -- Demo application using the pshell control Python module features
   - pshellAggregatorlDemo    -- Demo application using the pshell control library to aggregate multiple servers
-  - pshellReadlineDemo       -- Demo application using the PshellReadline C library to solicit user input
+  - pshellReadlineDemo       -- Demo application using the PshellReadline C/C++ library to solicit user input
   - pshellReadlineDemo.py    -- Demo application using the PshellReadline Python module to solicit user input
   - pshellAggregatorlDemo.py -- Demo application using the pshell control Python module to aggregate multiple servers
-  - traceFilterDemo          -- Demo application using the optional trace filter features (C only)
-  - traceLogDemo             -- Demo application using the stand-alone TraceLog module (C only)
+  - traceFilterDemo          -- Demo application using the optional trace filter features (C/C++ only)
+  - traceLogDemo             -- Demo application using the stand-alone TraceLog module (C/C++ only)
 
 INSTALLATION:
 
