@@ -1740,10 +1740,12 @@ func findBatchFiles(directory_ string) {
       if (err == nil) {
         _gBatchFiles.directories = append(_gBatchFiles.directories, directory_)
         for index := range(files) {
-          if (strings.Contains(files[index].Name(), ".psh") || strings.Contains(files[index].Name(), ".batch")) {
+          filename := strings.Split(files[index].Name(), ".")
+          if (((len(filename) == 2) && (filename[1] == "psh" || filename[1] == "batch")) ||
+              ((len(filename) == 3) && (filename[1] == _gServerName) && (filename[2] == "psh" || filename[2] == "batch"))) {
             _gBatchFiles.files = append(_gBatchFiles.files, file{directory_, files[index].Name()})
             _gBatchFiles.maxDirectoryLength = int(math.Max(float64(_gBatchFiles.maxDirectoryLength), float64(len(directory_))))
-            _gBatchFiles.maxFilenameLength = int(math.Max(float64(_gBatchFiles.maxFilenameLength), float64(len(files[index].Name()))))
+            _gBatchFiles.maxFilenameLength = int(math.Max(float64(_gBatchFiles.maxFilenameLength), float64(len(filename[0]))))
           }
         }
       }
@@ -1756,20 +1758,21 @@ func findBatchFiles(directory_ string) {
 func showBatchFiles() {
   printf("\n")
   printf("***********************************************\n")
-  printf("*            AVAILABLE BATCH FILES            *\n")
+  printf("*           AVAILABLE BATCH COMMANDS          *\n")
   printf("***********************************************\n")
   printf("\n")
-  printf("%s   %-*s   %-*s\n", "Index", _gBatchFiles.maxFilenameLength, "Filename", _gBatchFiles.maxDirectoryLength, "Directory")
+  printf("%s   %-*s   %-*s\n", "Index", _gBatchFiles.maxFilenameLength, "Commands", _gBatchFiles.maxDirectoryLength, "Directory")
   printf("%s   ", "=====")
   printf(strings.Repeat("=", _gBatchFiles.maxFilenameLength))
   printf("   ")
   printf(strings.Repeat("=",  _gBatchFiles.maxDirectoryLength))
   printf("\n")
   for index, file := range(_gBatchFiles.files) {
+    command := strings.Split(file.filename, ".")
     printf("%-5d   %-*s   %-*s\n",
            index+1,
            _gBatchFiles.maxFilenameLength,
-           file.filename,
+           command[0],
            _gBatchFiles.maxDirectoryLength,
            file.directory)
   }
@@ -1833,10 +1836,10 @@ func batch(argv_ []string) {
     showUsage()
     printf("\n")
     printf("  where:\n")
-    printf("    filename  - Filename of the batch file to execute\n")
-    printf("    index     - Index of the batch file to execute (from the -list option)\n")
-    printf("    -list     - List all the available batch files\n")
-    printf("    -show     - Show the contents of the batch file without executing\n")
+    printf("    command  - Batch command to execute, abbreviations allowed\n")
+    printf("    index    - Index of the batch command to execute (from the -list option)\n")
+    printf("    -list    - List all the available batch commands\n")
+    printf("    -show    - Show the contents of the batch command without executing\n")
     printf("\n")
     printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch\n")
     printf("        files will be searched in the following directory order:\n")
@@ -1849,6 +1852,12 @@ func batch(argv_ []string) {
       printf("        $PSHELL_BATCH_DIR - %s\n", batchDir)
     }
     printf("        default directory - %s\n", _PSHELL_BATCH_DIR)
+    printf("\n")
+    printf("  NOTE: By default all batch files can be seen by all servers.  To 'lock'\n")
+    printf("        a given batch command/file to only allow visibility/access for a\n")
+    printf("        given server use the batch file naming convention of:\n")
+    printf("\n")
+    printf("        <myCommand>.<myServer>.<extension>\n")
     printf("\n")
   } else {
     if (len(argv_) == 1) {
@@ -1963,7 +1972,7 @@ func addNativeCommands() {
     addCommand(batch,
                "batch",
                "run commands from a batch file",
-               "{{<filename> | <index>} [-show]} | -list",
+               "{{<command> | <index>} [-show]} | -list",
                1,
                2,
                false,

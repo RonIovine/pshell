@@ -1342,7 +1342,10 @@ void findBatchFiles(const char *directory_)
 {
   FILE *fp;
   char file[256];
+  char origFile[256];
   char command[256];
+  char *filename[MAX_TOKENS];
+  unsigned numTokens;
 
   if ((directory_ != NULL) &&
       !isBatchDirLoaded(directory_) &&
@@ -1363,15 +1366,16 @@ void findBatchFiles(const char *directory_)
         {
           file[strlen(file)-1] = '\0';
         }
-        /* check for the correct batch file extensions */
-        if (((strstr(file, ".psh") != NULL) ||
-            ((strstr(file, ".batch") != NULL))) &&
+        strcpy(origFile, file);
+        tokenize(file, ".", filename, MAX_TOKENS, &numTokens);
+        if ((((numTokens == 2) && (isEqual(filename[1], "psh") || isEqual(filename[1], "batch"))) ||
+             ((numTokens == 3) && isEqual(filename[1], _serverName) && (isEqual(filename[2], "psh") || isEqual(filename[2], "batch")))) &&
             (_batchFiles.numFiles < MAX_BATCH_FILES))
         {
           strcpy(_batchFiles.files[_batchFiles.numFiles].directory, directory_);
-          strcpy(_batchFiles.files[_batchFiles.numFiles].filename, file);
+          strcpy(_batchFiles.files[_batchFiles.numFiles].filename, origFile);
           _batchFiles.maxDirectoryLength = MAX(_batchFiles.maxDirectoryLength, (int)strlen(directory_));
-          _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, (int)strlen(file));
+          _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, (int)strlen(filename[0]));
           _batchFiles.numFiles++;
         }
       }
@@ -1385,12 +1389,15 @@ void findBatchFiles(const char *directory_)
 /******************************************************************************/
 void showBatchFiles(void)
 {
+  char origFile[256];
+  char *command[MAX_TOKENS];
+  unsigned numTokens;
   printf("\n");
   printf("***********************************************\n");
-  printf("*            AVAILABLE BATCH FILES            *\n");
+  printf("*           AVAILABLE BATCH COMMANDS          *\n");
   printf("***********************************************\n");
   printf("\n");
-  printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Filename", _batchFiles.maxDirectoryLength, "Directory");
+  printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Commands", _batchFiles.maxDirectoryLength, "Directory");
   printf("%s   ", "=====");
   for (int i = 0; i < _batchFiles.maxFilenameLength; i++) printf("=");
   printf("   ");
@@ -1398,10 +1405,12 @@ void showBatchFiles(void)
   printf("\n");
   for (int i = 0; i < _batchFiles.numFiles; i++)
   {
+    strcpy(origFile, _batchFiles.files[i].filename);
+    tokenize(origFile, ".", command, MAX_TOKENS, &numTokens);
     printf("%-5d   %-*s   %-*s\n",
            i+1,
            _batchFiles.maxFilenameLength,
-           _batchFiles.files[i].filename,
+           command[0],
            _batchFiles.maxDirectoryLength,
            _batchFiles.files[i].directory);
   }
@@ -1635,13 +1644,13 @@ void processInteractiveMode(void)
           {
             getcwd(_currentDir, sizeof(_currentDir));
             printf("\n");
-            printf("Usage: batch {{<filename> | <index>} [-show]} | -list\n");
+            printf("Usage: batch {{<command> | <index>} [-show]} | -list\n");
             printf("\n");
             printf("  where:\n");
-            printf("    filename  - Filename of the batch file to execute\n");
-            printf("    index     - Index of the batch file to execute (from the -list option)\n");
-            printf("    -list     - List all the available batch files\n");
-            printf("    -show     - Show the contents of the batch file without executing\n");
+            printf("    command  - Batch command to execute, abbreviations allowed\n");
+            printf("    index    - Index of the batch command to execute (from the -list option)\n");
+            printf("    -list    - List all the available batch commands\n");
+            printf("    -show    - Show the contents of the batch command without executing\n");
             printf("\n");
             printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch\n");
             printf("        files will be searched in the following directory order:\n");
@@ -1649,6 +1658,12 @@ void processInteractiveMode(void)
             printf("        current directory - %s\n", _currentDir);
             printf("        $PSHELL_BATCH_DIR - %s\n", getenv("PSHELL_BATCH_DIR"));
             printf("        default directory - %s\n", PSHELL_BATCH_DIR);
+            printf("\n");
+            printf("  NOTE: By default all batch files can be seen by all servers.  To 'lock'\n");
+            printf("        a given batch command/file to only allow visibility/access for a\n");
+            printf("        given server use the batch file naming convention of:\n");
+            printf("\n");
+            printf("        <myCommand>.<myServer>.<extension>\n");
             printf("\n");
           }
           else
@@ -1666,7 +1681,7 @@ void processInteractiveMode(void)
         }
         else
         {
-          printf("Usage: batch {{<filename> | <index>} [-show]} | -list\n");
+          printf("Usage: batch {{<command> | <index>} [-show]} | -list\n");
         }
       }
       else if (strstr(_nativeInteractiveCommands[HISTORY_INDEX].name, tokens[0]) ==
@@ -2113,7 +2128,7 @@ void showUsage(void)
   printf("    serverIndex     - index of local UNIX or UDP server (use '-s' option to list servers)\n");
   printf("    timeout         - response wait timeout in sec (default=5)\n");
   printf("    command         - optional command to execute (in double quotes, ex. -c \"myCommand arg1 arg2\")\n");
-  printf("    fileName        - optional batch file to execute\n");
+  printf("    fileName        - optional batch file command to execute\n");
   printf("    rate            - optional rate to repeat command or batch file (in seconds)\n");
   printf("    repeat          - optional repeat count for command or batch file (default=forever)\n");
   printf("    clear           - optional clear screen between commands or batch file passes\n");

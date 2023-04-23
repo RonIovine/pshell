@@ -1459,7 +1459,7 @@ def _addNativeCommands():
     _addCommand(_batch,
                 "batch",
                 "run commands from a batch file",
-                "{{<filename> | <index>} [-show]} | -list",
+                "{{<command> | <index>} [-show]} | -list",
                 1,
                 3,
                 False,
@@ -1773,13 +1773,24 @@ def _processQueryCommands2():
 #################################################################################
 def _findBatchFiles(directory_):
   global _gBatchFiles
+  global _gServerName
+  global _gServerNameOverride
   if directory_ != None and os.path.isdir(directory_) and directory_ not in _gBatchFiles["directories"]:
     _gBatchFiles["directories"].append(directory_)
     fileList = commands.getoutput("ls {}".format(directory_)).split()
     for filename in fileList:
-      if ".psh" in filename or ".batch" in filename:
+      tokens = filename.split(".")
+      if len(tokens) == 2 and (tokens[1] == "psh" or tokens[1] == "batch"):
         _gBatchFiles["files"].append({"filename":filename, "directory":directory_})
-        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(filename))
+        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(tokens[0]))
+        _gBatchFiles["maxDirectoryLength"] = max(_gBatchFiles["maxDirectoryLength"], len(directory_))
+      elif _gServerNameOverride != None and len(tokens) == 3 and tokens[1] in _gServerNameOverride and (tokens[2] == "psh" or tokens[2] == "batch"):
+        _gBatchFiles["files"].append({"filename":filename, "directory":directory_})
+        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(tokens[0]))
+        _gBatchFiles["maxDirectoryLength"] = max(_gBatchFiles["maxDirectoryLength"], len(directory_))
+      elif len(tokens) == 3 and tokens[1] in _gServerName and (tokens[2] == "psh" or tokens[2] == "batch"):
+        _gBatchFiles["files"].append({"filename":filename, "directory":directory_})
+        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(tokens[0]))
         _gBatchFiles["maxDirectoryLength"] = max(_gBatchFiles["maxDirectoryLength"], len(directory_))
 
 #################################################################################
@@ -1788,13 +1799,14 @@ def _showBatchFiles():
   global _gBatchFiles
   printf("")
   printf("***********************************************")
-  printf("*            AVAILABLE BATCH FILES            *")
+  printf("*           AVAILABLE BATCH COMMANDS          *")
   printf("***********************************************")
   printf("")
-  printf("%s   %-*s   %-*s" % ("Index", _gBatchFiles["maxFilenameLength"], "Filename", _gBatchFiles["maxDirectoryLength"], "Directory"))
+  printf("%s   %-*s   %-*s" % ("Index", _gBatchFiles["maxFilenameLength"], "Commands", _gBatchFiles["maxDirectoryLength"], "Directory"))
   printf("%s   %s   %s" % ("=====", "="*_gBatchFiles["maxFilenameLength"], "="*_gBatchFiles["maxDirectoryLength"]))
   for index, entry in enumerate(_gBatchFiles["files"]):
-    printf("%-5d   %-*s   %-*s" % (index+1, _gBatchFiles["maxFilenameLength"], entry["filename"], _gBatchFiles["maxDirectoryLength"], entry["directory"]))
+    command = entry["filename"].split(".")
+    printf("%-5d   %-*s   %-*s" % (index+1, _gBatchFiles["maxFilenameLength"], command[0], _gBatchFiles["maxDirectoryLength"], entry["directory"]))
   printf("")
 
 #################################################################################
@@ -1818,10 +1830,10 @@ def _getBatchFile(filename_):
     _showUsage()
     printf("")
     printf("  where:")
-    printf("    filename  - Filename of the batch file to execute")
-    printf("    index     - Index of the batch file to execute (from the -list option)")
-    printf("    -list     - List all the available batch files")
-    printf("    -show     - Show the contents of the batch file without executing")
+    printf("    command  - Batch command to execute, abbreviations allowed")
+    printf("    index    - Index of the batch command to execute (from the -list option)")
+    printf("    -list    - List all the available batch commands")
+    printf("    -show    - Show the contents of the batch command without executing")
     printf("")
     printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch")
     printf("        files will be searched in the following directory order:")
@@ -1829,6 +1841,12 @@ def _getBatchFile(filename_):
     printf("        current directory - {}".format(os.getcwd()))
     printf("        $PSHELL_BATCH_DIR - {}".format(os.getenv('PSHELL_BATCH_DIR')))
     printf("        default directory - {}".format(_PSHELL_BATCH_DIR))
+    printf("")
+    printf("  NOTE: By default all batch files can be seen by all servers.  To 'lock'")
+    printf("        a given batch command/file to only allow visibility/access for a")
+    printf("        given server use the batch file naming convention of:")
+    printf("")
+    printf("        <myCommand>.<myServer>.<extension>")
     printf("")
   elif ((_gFirstArgPos == 0) and (filename_ in "batch")):
     _showUsage()
@@ -1846,9 +1864,9 @@ def _getBatchFile(filename_):
         batchFile = entry["directory"] + "/" + entry["filename"]
         numMatches += 1
     if (numMatches == 0):
-      printf("PSHELL_ERROR: Could not find batch file: '{}', use -list option to see available files".format(filename_))
+      printf("PSHELL_ERROR: Could not find batch command: '{}', use -list option to see available commands".format(filename_))
     elif (numMatches > 1):
-      printf("PSHELL_ERROR: Ambiguous file: '{}', use -list option to see available files or <index> to select specific file".format(filename_))
+      printf("PSHELL_ERROR: Ambiguous batch command: '{}', use -list option to see available files or <index> to select specific command".format(filename_))
       return (None)
   return (batchFile)
 
@@ -1865,6 +1883,9 @@ def _batch(command_):
     return
   if isSubString(command_[-1], "-show", 2):
     showOnly = True
+  elif len(command_ == 2):
+    showUsage()
+    return
   else:
     showOnly = False
   batchFile = _getBatchFile(batchFile)

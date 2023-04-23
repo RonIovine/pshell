@@ -1832,7 +1832,9 @@ void findBatchFiles(const char *directory_)
 {
   FILE *fp;
   char file[256];
+  char origFile[256];
   char command[256];
+  PshellTokens *filename;
 
   if ((directory_ != NULL) &&
       !isBatchDirLoaded(directory_) &&
@@ -1853,15 +1855,16 @@ void findBatchFiles(const char *directory_)
         {
           file[strlen(file)-1] = '\0';
         }
-        /* check for the correct batch file extensions */
-        if (((strstr(file, ".psh") != NULL) ||
-            ((strstr(file, ".batch") != NULL))) &&
+        strcpy(origFile, file);
+        filename = pshell_tokenize(file, ".");
+        if ((((filename->numTokens == 2) && (pshell_isEqual(filename->tokens[1], "psh") || pshell_isEqual(filename->tokens[1], "batch"))) ||
+             ((filename->numTokens == 3) && pshell_isEqual(filename->tokens[1], _serverName) && (pshell_isEqual(filename->tokens[2], "psh") || pshell_isEqual(filename->tokens[2], "batch")))) &&
             (_batchFiles.numFiles < MAX_BATCH_FILES))
         {
           strcpy(_batchFiles.files[_batchFiles.numFiles].directory, directory_);
-          strcpy(_batchFiles.files[_batchFiles.numFiles].filename, file);
+          strcpy(_batchFiles.files[_batchFiles.numFiles].filename, origFile);
           _batchFiles.maxDirectoryLength = MAX(_batchFiles.maxDirectoryLength, strlen(directory_));
-          _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, strlen(file));
+          _batchFiles.maxFilenameLength = MAX(_batchFiles.maxFilenameLength, strlen(filename->tokens[0]));
           _batchFiles.numFiles++;
         }
       }
@@ -1875,12 +1878,14 @@ void findBatchFiles(const char *directory_)
 /******************************************************************************/
 void showBatchFiles(void)
 {
+  char origFile[256];
+  PshellTokens *command;
   pshell_printf("\n");
   pshell_printf("***********************************************\n");
-  pshell_printf("*            AVAILABLE BATCH FILES            *\n");
+  pshell_printf("*           AVAILABLE BATCH COMMANDS          *\n");
   pshell_printf("***********************************************\n");
   pshell_printf("\n");
-  pshell_printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Filename", _batchFiles.maxDirectoryLength, "Directory");
+  pshell_printf("%s   %-*s   %-*s\n", "Index", _batchFiles.maxFilenameLength, "Commands", _batchFiles.maxDirectoryLength, "Directory");
   pshell_printf("%s   ", "=====");
   for (unsigned i = 0; i < _batchFiles.maxFilenameLength; i++) pshell_printf("=");
   pshell_printf("   ");
@@ -1888,10 +1893,12 @@ void showBatchFiles(void)
   pshell_printf("\n");
   for (unsigned i = 0; i < _batchFiles.numFiles; i++)
   {
+    strcpy(origFile, _batchFiles.files[i].filename);
+    command = pshell_tokenize(origFile, ".");
     pshell_printf("%-5d   %-*s   %-*s\n",
                   i+1,
                   _batchFiles.maxFilenameLength,
-                  _batchFiles.files[i].filename,
+                  command->tokens[0],
                   _batchFiles.maxDirectoryLength,
                   _batchFiles.files[i].directory);
   }
@@ -2266,18 +2273,18 @@ static void batch(int argc, char *argv[])
     pshell_showUsage();
     pshell_printf("\n");
     pshell_printf("  where:\n");
-    pshell_printf("    filename  - name of batch file to run\n");
+    pshell_printf("    command  - Batch command to execute, abbreviations allowed\n");
     if (_serverType == PSHELL_NO_SERVER)
     {
-      pshell_printf("    rate      - rate in seconds to repeat batch file (default=0)\n");
-      pshell_printf("    repeat    - number of times to repeat command or 'forever' (default=1)\n");
-      pshell_printf("    clear     - clear the screen between batch file runs\n");
+      pshell_printf("    rate     - rate in seconds to repeat batch file (default=0)\n");
+      pshell_printf("    repeat   - number of times to repeat command or 'forever' (default=1)\n");
+      pshell_printf("    clear    - clear the screen between batch file runs\n");
     }
     else  /* TCP or LOCAL server */
     {
-      pshell_printf("    index     - Index of the batch file to execute (from the -list option)\n");
-      pshell_printf("    -list     - List all the available batch files\n");
-      pshell_printf("    -show     - Show the contents of batch file without executing\n");
+      pshell_printf("    index    - Index of the batch command to execute (from the -list option)\n");
+      pshell_printf("    -list    - List all the available batch commands\n");
+      pshell_printf("    -show    - Show the contents of batch command without executing\n");
     }
     pshell_printf("\n");
     pshell_printf("  NOTE: Batch files must have a .psh or .batch extension.  Batch\n");
@@ -2286,6 +2293,12 @@ static void batch(int argc, char *argv[])
     pshell_printf("        current directory - %s\n", _currentDir);
     pshell_printf("        $PSHELL_BATCH_DIR - %s\n", getenv("PSHELL_BATCH_DIR"));
     pshell_printf("        default directory - %s\n", PSHELL_BATCH_DIR);
+    pshell_printf("\n");
+    pshell_printf("  NOTE: By default all batch files can be seen by all servers.  To 'lock'\n");
+    pshell_printf("        a given batch command/file to only allow visibility/access for a\n");
+    pshell_printf("        given server use the batch file naming convention of:\n");
+    pshell_printf("\n");
+    pshell_printf("        <myCommand>.<myServer>.<extension>\n");
     pshell_printf("\n");
   }
   else if (_serverType == PSHELL_NO_SERVER)
@@ -2597,7 +2610,7 @@ static void addNativeCommands(void)
       pshell_addCommand(batch,
                         "batch",
                         "run commands from a batch file",
-                        "<filename> [repeat=<count> [rate=<seconds>]] [clear]",
+                        "<command> [repeat=<count> [rate=<seconds>]] [clear]",
                         1,
                         4,
                         false);
@@ -2636,7 +2649,7 @@ static void addNativeCommands(void)
       pshell_addCommand(batch,
                         "batch",
                         "run commands from a batch file",
-                        "{{<filename> | <index>} [-show]} | -list",
+                        "{{<command> | <index>} [-show]} | -list",
                         1,
                         2,
                         false);

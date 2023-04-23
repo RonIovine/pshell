@@ -293,29 +293,36 @@ def _processCommandLine():
 #################################################################################
 def _findBatchFiles(directory_):
   global _gBatchFiles
+  global _gServerName
   if directory_ != None and os.path.isdir(directory_) and directory_ not in _gBatchFiles["directories"]:
     _gBatchFiles["directories"].append(directory_)
     fileList = commands.getoutput("ls {}".format(directory_)).split()
     for filename in fileList:
-      if ".psh" in filename or ".batch" in filename:
+      tokens = filename.split(".")
+      if len(tokens) == 2 and (tokens[1] == "psh" or tokens[1] == "batch"):
         _gBatchFiles["files"].append({"filename":filename, "directory":directory_})
-        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(filename))
+        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(tokens[0]))
+        _gBatchFiles["maxDirectoryLength"] = max(_gBatchFiles["maxDirectoryLength"], len(directory_))
+      elif len(tokens) == 3 and tokens[1] in _gServerName and (tokens[2] == "psh" or tokens[2] == "batch"):
+        _gBatchFiles["files"].append({"filename":filename, "directory":directory_})
+        _gBatchFiles["maxFilenameLength"] = max(_gBatchFiles["maxFilenameLength"], len(tokens[0]))
         _gBatchFiles["maxDirectoryLength"] = max(_gBatchFiles["maxDirectoryLength"], len(directory_))
 
 #################################################################################
 #################################################################################
 def _showBatchFiles():
   global _gBatchFiles
-  print("")
-  print("***********************************************")
-  print("*            AVAILABLE BATCH FILES            *")
-  print("***********************************************")
-  print("")
-  print("%s   %-*s   %-*s" % ("Index", _gBatchFiles["maxFilenameLength"], "Filename", _gBatchFiles["maxDirectoryLength"], "Directory"))
-  print("%s   %s   %s" % ("=====", "="*_gBatchFiles["maxFilenameLength"], "="*_gBatchFiles["maxDirectoryLength"]))
+  printf("")
+  printf("***********************************************")
+  printf("*           AVAILABLE BATCH COMMANDS          *")
+  printf("***********************************************")
+  printf("")
+  printf("%s   %-*s   %-*s" % ("Index", _gBatchFiles["maxFilenameLength"], "Commands", _gBatchFiles["maxDirectoryLength"], "Directory"))
+  printf("%s   %s   %s" % ("=====", "="*_gBatchFiles["maxFilenameLength"], "="*_gBatchFiles["maxDirectoryLength"]))
   for index, entry in enumerate(_gBatchFiles["files"]):
-    print("%-5d   %-*s   %-*s" % (index+1, _gBatchFiles["maxFilenameLength"], entry["filename"], _gBatchFiles["maxDirectoryLength"], entry["directory"]))
-  print("")
+    tokens = entry["filename"].split(".")
+    printf("%-5d   %-*s   %-*s" % (index+1, _gBatchFiles["maxFilenameLength"], tokens[0], _gBatchFiles["maxDirectoryLength"], entry["directory"]))
+  printf("")
 
 #################################################################################
 #################################################################################
@@ -339,10 +346,10 @@ def _getBatchFile(filename_):
     _showUsage()
     print("")
     print("  where:")
-    print("    filename  - Filename of the batch file to execute")
-    print("    index     - Index of the batch file to execute (from the -list option)")
-    print("    -list     - List all the available batch files")
-    print("    -show     - Show the contents of the batch file without executing")
+    print("    command  - Batch command to execute, abbreviations allowed")
+    print("    index    - Index of the batch file to execute (from the -list option)")
+    print("    -list    - List all the available batch files")
+    print("    -show    - Show the contents of the batch file without executing")
     print("")
     print("  NOTE: Batch files must have a .psh or .batch extension.  Batch")
     print("        files will be searched in the following directory order:")
@@ -350,6 +357,12 @@ def _getBatchFile(filename_):
     print("        current directory - {}".format(os.getcwd()))
     print("        $PSHELL_BATCH_DIR - {}".format(os.getenv('PSHELL_BATCH_DIR')))
     print("        default directory - {}".format(_gDefaultBatchDir))
+    print("")
+    print("  NOTE: To 'lock' a given batch command/file to only allow visibility/access")
+    print("        for a given server use the batch file naming convention of:")
+    print("")
+    print("        <myCommand>.<myServer>.<extension>")
+    print("")
     print("")
   elif (filename_ in "batch"):
     _showUsage()
@@ -359,7 +372,7 @@ def _getBatchFile(filename_):
     if (int(filename_) > 0 and int(filename_) <= len(_gBatchFiles["files"])):
       batchFile = _gBatchFiles["files"][int(filename_)-1]["directory"] + "/" + _gBatchFiles["files"][int(filename_)-1]["filename"]
     else:
-      print("ERROR: Invalid batch file index: {}, valid values 1-{}".format(filename_, len(_gBatchFiles["files"])))
+      print("ERROR: Invalid batch command index: {}, valid values 1-{}".format(filename_, len(_gBatchFiles["files"])))
   else:
     numMatches = 0
     for index, entry in enumerate(_gBatchFiles["files"]):
@@ -367,9 +380,9 @@ def _getBatchFile(filename_):
         batchFile = entry["directory"] + "/" + entry["filename"]
         numMatches += 1
     if (numMatches == 0):
-      print("PSHELL_ERROR: Could not find batch file: '{}', use -list option to see available files".format(filename_))
+      print("PSHELL_ERROR: Could not find batch command: '{}', use -list option to see available commands".format(filename_))
     elif (numMatches > 1):
-      print("PSHELL_ERROR: Ambiguous file: '{}', use -list option to see available files or <index> to select specific file".format(filename_))
+      print("PSHELL_ERROR: Ambiguous batch command: '{}', use -list option to see available files or <index> to select specific command".format(filename_))
       return (None)
   return (batchFile)
 
