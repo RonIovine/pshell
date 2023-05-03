@@ -1874,7 +1874,7 @@ def _getBatchFile(filename_):
 #################################################################################
 def _batch(command_):
   global _gFirstArgPos
-  if command_[0] == "batch":
+  if isSubString(command_[0], "batch", len(command_[0])):
     command_ = command_[1:]
   if len(command_) > 0:
     batchFile = command_[0]
@@ -1883,7 +1883,7 @@ def _batch(command_):
     return
   if isSubString(command_[-1], "-show", 2):
     showOnly = True
-  elif len(command_ == 2):
+  elif len(command_) == 2:
     showUsage()
     return
   else:
