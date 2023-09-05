@@ -1,3 +1,11 @@
 This directory contains the Python implementations for the PshellServer,
 PshellControl, PshellReadline modules, and the stand-alone Python
 UDP/UNIX client programs pshell and pshellAggregator.
+
+NOTE: Currently, this implementation is for python2 only, it will not work
+for python3.  Python3 made a fundamental change in the default representation
+of strings from ascii to unicode.  This is a fundamental change, and since
+this package is a text based CLI, it was written with the assumption of ascii
+strings.  To try to convert to a unicode representation of strings is a huge
+undertaking, and would break backward compatibility with python2.  At this
+point I have decided to only support the legacy python2.
