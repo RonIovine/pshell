@@ -483,8 +483,8 @@ func ShowUsage() {
 // string as a list
 //
 //   Args:
-//       string (str)    : string to tokenize
-//       delemiter (str) : the delimiter to parse the string
+//       string (str)    : The string to tokenize
+//       delemiter (str) : The delimiter to parse the string
 //
 //   Returns:
 //       int  : Number of tokens parsed
@@ -498,7 +498,7 @@ func Tokenize(string string, delimiter string) (int, []string) {
 // This will return the length of the passed in string
 //
 //   Args:
-//       string (str) : string to return length on
+//       string (str) : The string to return length on
 //
 //   Returns:
 //       int : the length of the string
@@ -610,7 +610,8 @@ func IsDec(string string) bool {
 // with or without the preceeding 0x
 //
 //   Args:
-//       string (str) : The string to parse
+//       string (str)         : The string to parse
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       bool : True if valid hexidecimal format
@@ -637,7 +638,8 @@ func IsAlpha(string string) bool {
 // hex or decimal
 //
 //   Args:
-//       string (str) : The string to parse
+//       string (str)         : The string to parse
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       bool : True if valid numeric format
@@ -718,7 +720,9 @@ func GetBool(string string) bool {
 // Returns the integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to integer 64
+//       string (str)         : The string to convert to integer 64
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -731,7 +735,9 @@ func GetInt(string string, radix int, needHexPrefix bool) int64 {
 // Returns the integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to integer 64
+//       string (str)         : The string to convert to integer 64
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -744,7 +750,9 @@ func GetInt64(string string, radix int, needHexPrefix bool) int64 {
 // Returns the integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to integer 32
+//       string (str)         : The string to convert to integer 32
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -757,7 +765,9 @@ func GetInt32(string string, radix int, needHexPrefix bool) int32 {
 // Returns the integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to integer 16
+//       string (str)         : The string to convert to integer 16
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -770,7 +780,9 @@ func GetInt16(string string, radix int, needHexPrefix bool) int16 {
 // Returns the integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to integer 8
+//       string (str)         : The string to convert to integer 8
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -783,7 +795,9 @@ func GetInt8(string string, radix int, needHexPrefix bool) int8 {
 // Returns the unsigned integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to unsigned integer 64
+//       string (str)         : The string to convert to unsigned integer 64
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -796,7 +810,9 @@ func GetUint(string string, radix int, needHexPrefix bool) uint64 {
 // Returns the unsigned integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to unsigned integer 64
+//       string (str)         : The string to convert to unsigned integer 64
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -809,7 +825,9 @@ func GetUint64(string string, radix int, needHexPrefix bool) uint64 {
 // Returns the unsigned integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to unsigned integer 32
+//       string (str)         : The string to convert to unsigned integer 32
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -822,7 +840,9 @@ func GetUint32(string string, radix int, needHexPrefix bool) uint32 {
 // Returns the unsigned integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to unsigned integer 16
+//       string (str)         : The string to convert to unsigned integer 16
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -835,7 +855,9 @@ func GetUint16(string string, radix int, needHexPrefix bool) uint16 {
 // Returns the unsigned integer value of the corresponding string
 //
 //   Args:
-//       string : string to convert to unsigned integer 8
+//       string (str)         : The string to convert to unsigned integer 8
+//       radix (int)          : Speficy radix of value to extract
+//       needHexPrefix (bool) : Specify if preceeding 0x is present/required
 //
 //   Returns:
 //       int  : Integer value of corresponding string
@@ -848,7 +870,7 @@ func GetUint8(string string, radix int, needHexPrefix bool) uint8 {
 // Returns the double precision float value of the corresponding string
 //
 //   Args:
-//       string : string to convert to double precision float
+//       string : The string to convert to double precision float
 //
 //   Returns:
 //       int  : Float value of corresponding string
@@ -861,7 +883,7 @@ func GetDouble(string string) float64 {
 // Returns the double precision float value of the corresponding string
 //
 //   Args:
-//       string : string to convert to double precision float
+//       string : The string to convert to double precision float
 //
 //   Returns:
 //       int  : Float value of corresponding string
@@ -887,7 +909,7 @@ func GetFloat(string string) float32 {
 // Returns the single precision float value of the corresponding string
 //
 //   Args:
-//       string : string to convert to single precision float
+//       string : The string to convert to single precision float
 //
 //   Returns:
 //       int  : Float value of corresponding string

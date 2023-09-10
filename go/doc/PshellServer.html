@@ -506,7 +506,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetBool">func <a href="/target/PshellServer.go?s=23096:23128#L703">GetBool</a></h2>
+			<h2 id="GetBool">func <a href="/target/PshellServer.go?s=23274:23306#L705">GetBool</a></h2>
 			<pre>func GetBool(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it &#39;true&#39;, &#39;yes&#39;, or &#39;on&#39;
@@ -522,13 +522,13 @@ Returns:
 		
 			
 			
-			<h2 id="GetDouble">func <a href="/target/PshellServer.go?s=26710:26747#L846">GetDouble</a></h2>
+			<h2 id="GetDouble">func <a href="/target/PshellServer.go?s=28502:28539#L868">GetDouble</a></h2>
 			<pre>func GetDouble(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Returns the double precision float value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to double precision float
+    string : The string to convert to double precision float
 
 Returns:
     int  : Float value of corresponding string
@@ -538,7 +538,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetFloat">func <a href="/target/PshellServer.go?s=27299:27335#L872">GetFloat</a></h2>
+			<h2 id="GetFloat">func <a href="/target/PshellServer.go?s=29095:29131#L894">GetFloat</a></h2>
 			<pre>func GetFloat(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float32">float32</a></pre>
 			<p>
 Returns the single precision float value of the corresponding string
@@ -554,13 +554,13 @@ Returns:
 		
 			
 			
-			<h2 id="GetFloat32">func <a href="/target/PshellServer.go?s=27601:27639#L885">GetFloat32</a></h2>
+			<h2 id="GetFloat32">func <a href="/target/PshellServer.go?s=29401:29439#L907">GetFloat32</a></h2>
 			<pre>func GetFloat32(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float32">float32</a></pre>
 			<p>
 Returns the single precision float value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to single precision float
+    string : The string to convert to single precision float
 
 Returns:
     int  : Float value of corresponding string
@@ -570,13 +570,13 @@ Returns:
 		
 			
 			
-			<h2 id="GetFloat64">func <a href="/target/PshellServer.go?s=27004:27042#L859">GetFloat64</a></h2>
+			<h2 id="GetFloat64">func <a href="/target/PshellServer.go?s=28800:28838#L881">GetFloat64</a></h2>
 			<pre>func GetFloat64(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
 			<p>
 Returns the double precision float value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to double precision float
+    string : The string to convert to double precision float
 
 Returns:
     int  : Float value of corresponding string
@@ -586,13 +586,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt">func <a href="/target/PshellServer.go?s=23359:23422#L716">GetInt</a></h2>
+			<h2 id="GetInt">func <a href="/target/PshellServer.go?s=23698:23761#L720">GetInt</a></h2>
 			<pre>func GetInt(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int64">int64</a></pre>
 			<p>
 Returns the integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to integer 64
+    string (str)         : The string to convert to integer 64
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -602,13 +604,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt16">func <a href="/target/PshellServer.go?s=24322:24387#L755">GetInt16</a></h2>
+			<h2 id="GetInt16">func <a href="/target/PshellServer.go?s=25144:25209#L765">GetInt16</a></h2>
 			<pre>func GetInt16(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int16">int16</a></pre>
 			<p>
 Returns the integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to integer 16
+    string (str)         : The string to convert to integer 16
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -618,13 +622,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt32">func <a href="/target/PshellServer.go?s=23998:24063#L742">GetInt32</a></h2>
+			<h2 id="GetInt32">func <a href="/target/PshellServer.go?s=24659:24724#L750">GetInt32</a></h2>
 			<pre>func GetInt32(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int32">int32</a></pre>
 			<p>
 Returns the integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to integer 32
+    string (str)         : The string to convert to integer 32
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -634,13 +640,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt64">func <a href="/target/PshellServer.go?s=23674:23739#L729">GetInt64</a></h2>
+			<h2 id="GetInt64">func <a href="/target/PshellServer.go?s=24174:24239#L735">GetInt64</a></h2>
 			<pre>func GetInt64(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int64">int64</a></pre>
 			<p>
 Returns the integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to integer 64
+    string (str)         : The string to convert to integer 64
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -650,13 +658,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetInt8">func <a href="/target/PshellServer.go?s=24645:24708#L768">GetInt8</a></h2>
+			<h2 id="GetInt8">func <a href="/target/PshellServer.go?s=25628:25691#L780">GetInt8</a></h2>
 			<pre>func GetInt8(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#int8">int8</a></pre>
 			<p>
 Returns the integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to integer 8
+    string (str)         : The string to convert to integer 8
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -666,13 +676,13 @@ Returns:
 		
 			
 			
-			<h2 id="GetLength">func <a href="/target/PshellServer.go?s=17518:17551#L496">GetLength</a></h2>
+			<h2 id="GetLength">func <a href="/target/PshellServer.go?s=17526:17559#L496">GetLength</a></h2>
 			<pre>func GetLength(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#int">int</a></pre>
 			<p>
 This will return the length of the passed in string
 </p>
 <pre>Args:
-    string (str) : string to return length on
+    string (str) : The string to return length on
 
 Returns:
     int : the length of the string
@@ -682,7 +692,7 @@ Returns:
 		
 			
 			
-			<h2 id="GetOption">func <a href="/target/PshellServer.go?s=28324:28373#L904">GetOption</a></h2>
+			<h2 id="GetOption">func <a href="/target/PshellServer.go?s=30124:30173#L926">GetOption</a></h2>
 			<pre>func GetOption(arg <a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/builtin/#bool">bool</a>, <a href="/pkg/builtin/#string">string</a>, <a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 This function will parse an argument string of the formats -&lt;key&gt;&lt;value&gt; where
@@ -706,13 +716,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint">func <a href="/target/PshellServer.go?s=24984:25049#L781">GetUint</a></h2>
+			<h2 id="GetUint">func <a href="/target/PshellServer.go?s=26128:26193#L795">GetUint</a></h2>
 			<pre>func GetUint(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint64">uint64</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to unsigned integer 64
+    string (str)         : The string to convert to unsigned integer 64
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -722,13 +734,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint16">func <a href="/target/PshellServer.go?s=26017:26084#L820">GetUint16</a></h2>
+			<h2 id="GetUint16">func <a href="/target/PshellServer.go?s=27644:27711#L840">GetUint16</a></h2>
 			<pre>func GetUint16(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint16">uint16</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to unsigned integer 16
+    string (str)         : The string to convert to unsigned integer 16
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -738,13 +752,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint32">func <a href="/target/PshellServer.go?s=25672:25739#L807">GetUint32</a></h2>
+			<h2 id="GetUint32">func <a href="/target/PshellServer.go?s=27138:27205#L825">GetUint32</a></h2>
 			<pre>func GetUint32(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint32">uint32</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to unsigned integer 32
+    string (str)         : The string to convert to unsigned integer 32
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -754,13 +770,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint64">func <a href="/target/PshellServer.go?s=25327:25394#L794">GetUint64</a></h2>
+			<h2 id="GetUint64">func <a href="/target/PshellServer.go?s=26632:26699#L810">GetUint64</a></h2>
 			<pre>func GetUint64(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint64">uint64</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to unsigned integer 64
+    string (str)         : The string to convert to unsigned integer 64
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -770,13 +788,15 @@ Returns:
 		
 			
 			
-			<h2 id="GetUint8">func <a href="/target/PshellServer.go?s=26361:26426#L833">GetUint8</a></h2>
+			<h2 id="GetUint8">func <a href="/target/PshellServer.go?s=28149:28214#L855">GetUint8</a></h2>
 			<pre>func GetUint8(string <a href="/pkg/builtin/#string">string</a>, radix <a href="/pkg/builtin/#int">int</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#uint8">uint8</a></pre>
 			<p>
 Returns the unsigned integer value of the corresponding string
 </p>
 <pre>Args:
-    string : string to convert to unsigned integer 8
+    string (str)         : The string to convert to unsigned integer 8
+    radix (int)          : Speficy radix of value to extract
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     int  : Integer value of corresponding string
@@ -786,7 +806,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsAlpha">func <a href="/target/PshellServer.go?s=21329:21361#L621">IsAlpha</a></h2>
+			<h2 id="IsAlpha">func <a href="/target/PshellServer.go?s=21422:21454#L622">IsAlpha</a></h2>
 			<pre>func IsAlpha(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid alphatebetic format
@@ -802,7 +822,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsAlphaNumeric">func <a href="/target/PshellServer.go?s=21932:21971#L648">IsAlphaNumeric</a></h2>
+			<h2 id="IsAlphaNumeric">func <a href="/target/PshellServer.go?s=22110:22149#L650">IsAlphaNumeric</a></h2>
 			<pre>func IsAlphaNumeric(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid alphanumeric format
@@ -818,7 +838,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsDec">func <a href="/target/PshellServer.go?s=20712:20742#L594">IsDec</a></h2>
+			<h2 id="IsDec">func <a href="/target/PshellServer.go?s=20720:20750#L594">IsDec</a></h2>
 			<pre>func IsDec(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid decimal format
@@ -834,7 +854,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsEqual">func <a href="/target/PshellServer.go?s=17828:17877#L510">IsEqual</a></h2>
+			<h2 id="IsEqual">func <a href="/target/PshellServer.go?s=17836:17885#L510">IsEqual</a></h2>
 			<pre>func IsEqual(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This will do a case sensitive compare for string equality
@@ -851,7 +871,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsEqualNoCase">func <a href="/target/PshellServer.go?s=18164:18219#L524">IsEqualNoCase</a></h2>
+			<h2 id="IsEqualNoCase">func <a href="/target/PshellServer.go?s=18172:18227#L524">IsEqualNoCase</a></h2>
 			<pre>func IsEqualNoCase(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This will do a case insensitive compare for string equality
@@ -868,7 +888,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsFloat">func <a href="/target/PshellServer.go?s=20437:20469#L581">IsFloat</a></h2>
+			<h2 id="IsFloat">func <a href="/target/PshellServer.go?s=20445:20477#L581">IsFloat</a></h2>
 			<pre>func IsFloat(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid floating point format
@@ -901,14 +921,15 @@ Returns:
 		
 			
 			
-			<h2 id="IsHex">func <a href="/target/PshellServer.go?s=21022:21072#L608">IsHex</a></h2>
+			<h2 id="IsHex">func <a href="/target/PshellServer.go?s=21115:21165#L609">IsHex</a></h2>
 			<pre>func IsHex(string <a href="/pkg/builtin/#string">string</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid hexidecimal format,
 with or without the preceeding 0x
 </p>
 <pre>Args:
-    string (str) : The string to parse
+    string (str)         : The string to parse
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     bool : True if valid hexidecimal format
@@ -918,7 +939,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsIpv4Addr">func <a href="/target/PshellServer.go?s=22227:22262#L662">IsIpv4Addr</a></h2>
+			<h2 id="IsIpv4Addr">func <a href="/target/PshellServer.go?s=22405:22440#L664">IsIpv4Addr</a></h2>
 			<pre>func IsIpv4Addr(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid ipv4 address
@@ -935,7 +956,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsIpv4AddrWithNetmask">func <a href="/target/PshellServer.go?s=22522:22568#L676">IsIpv4AddrWithNetmask</a></h2>
+			<h2 id="IsIpv4AddrWithNetmask">func <a href="/target/PshellServer.go?s=22700:22746#L678">IsIpv4AddrWithNetmask</a></h2>
 			<pre>func IsIpv4AddrWithNetmask(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid ipv4
@@ -952,7 +973,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsMacAddr">func <a href="/target/PshellServer.go?s=22829:22863#L690">IsMacAddr</a></h2>
+			<h2 id="IsMacAddr">func <a href="/target/PshellServer.go?s=23007:23041#L692">IsMacAddr</a></h2>
 			<pre>func IsMacAddr(string <a href="/pkg/builtin/#string">string</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid MAC address
@@ -969,14 +990,15 @@ Returns:
 		
 			
 			
-			<h2 id="IsNumeric">func <a href="/target/PshellServer.go?s=21615:21669#L635">IsNumeric</a></h2>
+			<h2 id="IsNumeric">func <a href="/target/PshellServer.go?s=21793:21847#L637">IsNumeric</a></h2>
 			<pre>func IsNumeric(string <a href="/pkg/builtin/#string">string</a>, needHexPrefix <a href="/pkg/builtin/#bool">bool</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will parse a string to see if it is in valid numerc format,
 hex or decimal
 </p>
 <pre>Args:
-    string (str) : The string to parse
+    string (str)         : The string to parse
+    needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
 Returns:
     bool : True if valid numeric format
@@ -986,7 +1008,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsSubString">func <a href="/target/PshellServer.go?s=19100:19173#L546">IsSubString</a></h2>
+			<h2 id="IsSubString">func <a href="/target/PshellServer.go?s=19108:19181#L546">IsSubString</a></h2>
 			<pre>func IsSubString(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>, minMatchLength <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will return True if string1 is a substring of string2 at
@@ -1011,7 +1033,7 @@ Returns:
 		
 			
 			
-			<h2 id="IsSubStringNoCase">func <a href="/target/PshellServer.go?s=20072:20151#L568">IsSubStringNoCase</a></h2>
+			<h2 id="IsSubStringNoCase">func <a href="/target/PshellServer.go?s=20080:20159#L568">IsSubStringNoCase</a></h2>
 			<pre>func IsSubStringNoCase(string1 <a href="/pkg/builtin/#string">string</a>, string2 <a href="/pkg/builtin/#string">string</a>, minMatchLength <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
 			<p>
 This function will return True if string1 is a substring of string2 at
@@ -1169,15 +1191,15 @@ Returns:
 		
 			
 			
-			<h2 id="Tokenize">func <a href="/target/PshellServer.go?s=17228:17290#L483">Tokenize</a></h2>
+			<h2 id="Tokenize">func <a href="/target/PshellServer.go?s=17232:17294#L483">Tokenize</a></h2>
 			<pre>func Tokenize(string <a href="/pkg/builtin/#string">string</a>, delimiter <a href="/pkg/builtin/#string">string</a>) (<a href="/pkg/builtin/#int">int</a>, []<a href="/pkg/builtin/#string">string</a>)</pre>
 			<p>
 This will parse a string based on a delimiter and return the parsed
 string as a list
 </p>
 <pre>Args:
-    string (str)    : string to tokenize
-    delemiter (str) : the delimiter to parse the string
+    string (str)    : The string to tokenize
+    delemiter (str) : The delimiter to parse the string
 
 Returns:
     int  : Number of tokens parsed

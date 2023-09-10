@@ -138,11 +138,11 @@ in the parent host program)
   UNIX
   LOCAL
 
-These three identifiers that can be used for the hostnameOrIpAddr argument
-of the startServer call.  ANYHOST will bind the server socket to all interfaces
+These three identifiers can be used for the hostnameOrIpAddr argument of
+the startServer call.  ANYHOST will bind the server socket to all interfaces
 of a multi-homed host, ANYBCAST will bind to 255.255.255.255, LOCALHOST will
-bind the server socket to the local loopback address (i.e. 127.0.0.1), note that
-subnet broadcast it also supported, e.g. x.y.z.255
+bind the server socket to the local loopback address (i.e. 127.0.0.1), note
+that subnet broadcast it also supported, e.g. x.y.z.255
 
   ANYHOST
   ANYBCAST
@@ -470,8 +470,8 @@ def tokenize(string, delimiter):
   string as a list
 
     Args:
-        string (str)    : string to tokenize
-        delemiter (str) : the delimiter to parse the string
+        string (str)    : The string to tokenize
+        delemiter (str) : The delimiter to parse the string
 
     Returns:
         int  : Number of tokens parsed
@@ -486,10 +486,10 @@ def getLength(string):
   This will return the length of the passed in string
 
     Args:
-        string (str) : string to return length on
+        string (str) : The string to return length on
 
     Returns:
-        int : the length of the string
+        int : The length of the string
   """
   return (_getLength(string))
 
@@ -534,7 +534,7 @@ def isSubString(string1, string2, minMatchLength = 0):
   match length must still match for the remaining charactes, e.g. with a
   minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
   will match, 'quix' will not match.  This function is useful for wildcard
-  matching.
+  matching.  This does a case sensitive match.
 
     Args:
         string1 (str)        : The substring
@@ -557,7 +557,7 @@ def isSubStringNoCase(string1, string2, minMatchLength = 0):
   match length must still match for the remaining charactes, e.g. with a
   minMatchLength of 2, 'q' will not match 'quit', but 'qu', 'qui' or 'quit'
   will match, 'quix' will not match.  This function is useful for wildcard
-  matching.  This does a case insensitive match
+  matching.  This does a case insensitive match.
 
     Args:
         string1 (str)        : The substring
@@ -625,7 +625,8 @@ def isHex(string, needHexPrefix = True):
   with or without the preceeding 0x
 
     Args:
-        string (str) : The string to parse
+        string (str)         : The string to parse
+        needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
     Returns:
         bool : True if valid hexidecimal format
@@ -654,7 +655,8 @@ def isNumeric(string, needHexPrefix = True):
   hex or decimal
 
     Args:
-        string (str) : The string to parse
+        string (str)         : The string to parse
+        needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
     Returns:
         bool : True if valid numeric format
@@ -739,7 +741,9 @@ def getInt(string, radix = RADIX_ANY, needHexPrefix = True):
   Returns the integer value of the corresponding string
 
     Args:
-        string : string to convert to integer
+        string (str)         : The string to convert to integer
+        radix (enum)         : Speficy radix of value to extract
+        needHexPrefix (bool) : Specify if preceeding 0x is present/required
 
     Returns:
         int  : Integer value of corresponding string
@@ -813,7 +817,7 @@ _gServerTypeOverride = None
 _gBannerOverride = None
 
 # these are the valid types we recognize in the msgType field of the pshellMsg
-#  structure,that structure is the message passed between the pshell client and
+# structure, that structure is the message passed between the pshell client and
 # server, these values must match their corresponding #define definitions in
 # the C file PshellCommon.h
 _gMsgTypes = {"commandSuccess": 0,
@@ -1288,7 +1292,6 @@ def _createSocket():
       ipAddrOctets = _gHostnameOrIpAddr.split(".")
       if (_gHostnameOrIpAddr == ANYHOST):
         _bindSocket("")
-        #_gSocketFd.bind(("", _gPort))
       elif (_gHostnameOrIpAddr == LOCALHOST):
         _bindSocket("127.0.0.1")
       elif (_gHostnameOrIpAddr == ANYBCAST):

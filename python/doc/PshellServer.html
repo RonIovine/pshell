@@ -119,11 +119,11 @@ in&nbsp;the&nbsp;parent&nbsp;host&nbsp;program)<br>
 &nbsp;&nbsp;UNIX<br>
 &nbsp;&nbsp;LOCAL<br>
 &nbsp;<br>
-These&nbsp;three&nbsp;identifiers&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;hostnameOrIpAddr&nbsp;argument<br>
-of&nbsp;the&nbsp;startServer&nbsp;call.&nbsp;&nbsp;ANYHOST&nbsp;will&nbsp;bind&nbsp;the&nbsp;server&nbsp;socket&nbsp;to&nbsp;all&nbsp;interfaces<br>
+These&nbsp;three&nbsp;identifiers&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;the&nbsp;hostnameOrIpAddr&nbsp;argument&nbsp;of<br>
+the&nbsp;startServer&nbsp;call.&nbsp;&nbsp;ANYHOST&nbsp;will&nbsp;bind&nbsp;the&nbsp;server&nbsp;socket&nbsp;to&nbsp;all&nbsp;interfaces<br>
 of&nbsp;a&nbsp;multi-homed&nbsp;host,&nbsp;ANYBCAST&nbsp;will&nbsp;bind&nbsp;to&nbsp;255.255.255.255,&nbsp;LOCALHOST&nbsp;will<br>
-bind&nbsp;the&nbsp;server&nbsp;socket&nbsp;to&nbsp;the&nbsp;local&nbsp;loopback&nbsp;address&nbsp;(i.e.&nbsp;127.0.0.1),&nbsp;note&nbsp;that<br>
-subnet&nbsp;broadcast&nbsp;it&nbsp;also&nbsp;supported,&nbsp;e.g.&nbsp;x.y.z.255<br>
+bind&nbsp;the&nbsp;server&nbsp;socket&nbsp;to&nbsp;the&nbsp;local&nbsp;loopback&nbsp;address&nbsp;(i.e.&nbsp;127.0.0.1),&nbsp;note<br>
+that&nbsp;subnet&nbsp;broadcast&nbsp;it&nbsp;also&nbsp;supported,&nbsp;e.g.&nbsp;x.y.z.255<br>
 &nbsp;<br>
 &nbsp;&nbsp;ANYHOST<br>
 &nbsp;&nbsp;ANYBCAST<br>
@@ -221,17 +221,19 @@ results&nbsp;in&nbsp;a&nbsp;program&nbsp;termination.<br>
  <dl><dt><a name="-getInt"><strong>getInt</strong></a>(string, radix<font color="#909090">=2</font>, needHexPrefix<font color="#909090">=True</font>)</dt><dd><tt>Returns&nbsp;the&nbsp;integer&nbsp;value&nbsp;of&nbsp;the&nbsp;corresponding&nbsp;string<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;:&nbsp;string&nbsp;to&nbsp;convert&nbsp;to&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;convert&nbsp;to&nbsp;integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radix&nbsp;(enum)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Speficy&nbsp;radix&nbsp;of&nbsp;value&nbsp;to&nbsp;extract<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;needHexPrefix&nbsp;(bool)&nbsp;:&nbsp;Specify&nbsp;if&nbsp;preceeding&nbsp;0x&nbsp;is&nbsp;present/required<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;&nbsp;:&nbsp;Integer&nbsp;value&nbsp;of&nbsp;corresponding&nbsp;string</tt></dd></dl>
  <dl><dt><a name="-getLength"><strong>getLength</strong></a>(string)</dt><dd><tt>This&nbsp;will&nbsp;return&nbsp;the&nbsp;length&nbsp;of&nbsp;the&nbsp;passed&nbsp;in&nbsp;string<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;string&nbsp;to&nbsp;return&nbsp;length&nbsp;on<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;return&nbsp;length&nbsp;on<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;:&nbsp;the&nbsp;length&nbsp;of&nbsp;the&nbsp;string</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;:&nbsp;The&nbsp;length&nbsp;of&nbsp;the&nbsp;string</tt></dd></dl>
  <dl><dt><a name="-getOption"><strong>getOption</strong></a>(arg)</dt><dd><tt>This&nbsp;function&nbsp;will&nbsp;parse&nbsp;an&nbsp;argument&nbsp;string&nbsp;of&nbsp;the&nbsp;formats&nbsp;-&lt;key&gt;&lt;value&gt;&nbsp;where<br>
 key&nbsp;is&nbsp;one&nbsp;letter&nbsp;only,&nbsp;i.e.&nbsp;'-t',&nbsp;or&nbsp;&lt;key&gt;=&lt;value&gt;&nbsp;where&nbsp;key&nbsp;can&nbsp;be&nbsp;any&nbsp;length<br>
 word,&nbsp;i.e.&nbsp;'timeout',&nbsp;and&nbsp;return&nbsp;a&nbsp;3-tuple&nbsp;indicating&nbsp;if&nbsp;the&nbsp;arg&nbsp;was&nbsp;parsed<br>
@@ -301,7 +303,8 @@ registered&nbsp;with&nbsp;the&nbsp;showUsage&nbsp;=&nbsp;False&nbsp;option.<br>
 with&nbsp;or&nbsp;without&nbsp;the&nbsp;preceeding&nbsp;0x<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;needHexPrefix&nbsp;(bool)&nbsp;:&nbsp;Specify&nbsp;if&nbsp;preceeding&nbsp;0x&nbsp;is&nbsp;present/required<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;hexidecimal&nbsp;format</tt></dd></dl>
@@ -331,7 +334,8 @@ address/netmask&nbsp;format<br>
 hex&nbsp;or&nbsp;decimal<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;parse<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;needHexPrefix&nbsp;(bool)&nbsp;:&nbsp;Specify&nbsp;if&nbsp;preceeding&nbsp;0x&nbsp;is&nbsp;present/required<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bool&nbsp;:&nbsp;True&nbsp;if&nbsp;valid&nbsp;numeric&nbsp;format</tt></dd></dl>
@@ -342,7 +346,7 @@ of&nbsp;that&nbsp;many&nbsp;characters&nbsp;to&nbsp;match.&nbsp;&nbsp;A&nbsp;str
 match&nbsp;length&nbsp;must&nbsp;still&nbsp;match&nbsp;for&nbsp;the&nbsp;remaining&nbsp;charactes,&nbsp;e.g.&nbsp;with&nbsp;a<br>
 minMatchLength&nbsp;of&nbsp;2,&nbsp;'q'&nbsp;will&nbsp;not&nbsp;match&nbsp;'quit',&nbsp;but&nbsp;'qu',&nbsp;'qui'&nbsp;or&nbsp;'quit'<br>
 will&nbsp;match,&nbsp;'quix'&nbsp;will&nbsp;not&nbsp;match.&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;useful&nbsp;for&nbsp;wildcard<br>
-matching.<br>
+matching.&nbsp;&nbsp;This&nbsp;does&nbsp;a&nbsp;case&nbsp;sensitive&nbsp;match.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string1&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;substring<br>
@@ -358,7 +362,7 @@ of&nbsp;that&nbsp;many&nbsp;characters&nbsp;to&nbsp;match.&nbsp;&nbsp;A&nbsp;str
 match&nbsp;length&nbsp;must&nbsp;still&nbsp;match&nbsp;for&nbsp;the&nbsp;remaining&nbsp;charactes,&nbsp;e.g.&nbsp;with&nbsp;a<br>
 minMatchLength&nbsp;of&nbsp;2,&nbsp;'q'&nbsp;will&nbsp;not&nbsp;match&nbsp;'quit',&nbsp;but&nbsp;'qu',&nbsp;'qui'&nbsp;or&nbsp;'quit'<br>
 will&nbsp;match,&nbsp;'quix'&nbsp;will&nbsp;not&nbsp;match.&nbsp;&nbsp;This&nbsp;function&nbsp;is&nbsp;useful&nbsp;for&nbsp;wildcard<br>
-matching.&nbsp;&nbsp;This&nbsp;does&nbsp;a&nbsp;case&nbsp;insensitive&nbsp;match<br>
+matching.&nbsp;&nbsp;This&nbsp;does&nbsp;a&nbsp;case&nbsp;insensitive&nbsp;match.<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string1&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;substring<br>
@@ -441,8 +445,8 @@ startup&nbsp;time.<br>
 string&nbsp;as&nbsp;a&nbsp;list<br>
 &nbsp;<br>
 &nbsp;&nbsp;Args:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;string&nbsp;to&nbsp;tokenize<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delemiter&nbsp;(str)&nbsp;:&nbsp;the&nbsp;delimiter&nbsp;to&nbsp;parse&nbsp;the&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;string&nbsp;(str)&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;The&nbsp;string&nbsp;to&nbsp;tokenize<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delemiter&nbsp;(str)&nbsp;:&nbsp;The&nbsp;delimiter&nbsp;to&nbsp;parse&nbsp;the&nbsp;string<br>
 &nbsp;<br>
 &nbsp;&nbsp;Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;&nbsp;:&nbsp;Number&nbsp;of&nbsp;tokens&nbsp;parsed<br>
