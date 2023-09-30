@@ -236,7 +236,7 @@ def _show(argv):
   global _gServerNameLabel
   global _gControlNameLabel
   global _gCommandLabel
-  if (PshellServer.isSubString(argv[1], "server")):
+  if (PshellServer.isSubString(argv[1], "servers")):
     PshellServer.printf()
     PshellServer.printf("*************************************************")
     PshellServer.printf("*           AGGREGATED REMOTE SERVERS           *")
