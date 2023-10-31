@@ -924,7 +924,7 @@ def _isSubString(string1_, string2_, minMatchLength_):
 #################################################################################
 #################################################################################
 def _isSubStringNoCase(string1_, string2_, minMatchLength_ = 0):
-  return (_isSubString(str(string1_).lower(), str(string2_).lower(), minMatchLength))
+  return (_isSubString(str(string1_).lower(), str(string2_).lower(), minMatchLength_))
 
 #################################################################################
 #################################################################################
